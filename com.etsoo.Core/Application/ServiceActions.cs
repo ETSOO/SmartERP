@@ -42,6 +42,7 @@ namespace com.etsoo.Core.Application
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
         /// <param name="format">Format</param>
+        /// <returns>Operation result</returns>
         protected virtual OperationData GetDeleteData(T[] ids)
         {
             // Create operation data
@@ -61,6 +62,7 @@ namespace com.etsoo.Core.Application
         /// <param name="domain">Domain</param>
         /// <param name="model">Parameters</param>
         /// <param name="format">Format</param>
+        /// <returns>Operation result</returns>
         protected virtual OperationData GetSearchData(string domain, IService<T>.ITiplistDataModel model, DataFormat format)
         {
             // Generate key data
@@ -87,12 +89,37 @@ namespace com.etsoo.Core.Application
         }
 
         /// <summary>
+        /// Get service summary data
+        /// 获取浏览服务汇总操作数
+        /// </summary>
+        /// <param name="id">Field of data</param>
+        /// <param name="format">Format</param>
+        /// <returns>Operation result</returns>
+        protected virtual OperationData GetServiceSummaryData(string id, DataFormat format)
+        {
+            // Generate key data
+            var key = new StringBuilder("service_summary");
+            key.Append(GetField(id));
+            key.Append(GetFormat(format));
+
+            // Create operation data
+            var data = CreateOperationData(key.ToString());
+
+            // Data format
+            data.Format = format;
+
+            // Return
+            return data;
+        }
+
+        /// <summary>
         /// Get view database operation data
         /// 获取浏览的数据库端操作数
         /// </summary>
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
         /// <param name="format">Format</param>
+        /// <returns>Operation result</returns>
         protected virtual OperationData GetViewData(T id, string field, DataFormat format)
         {
             // Generate key data

@@ -1,6 +1,7 @@
 ﻿using com.etsoo.Core.Services;
 using com.etsoo.SmartERP.Applications;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace com.etsoo.SmartERP.Login
@@ -9,7 +10,7 @@ namespace com.etsoo.SmartERP.Login
     /// Login service for user, customer and supplier
     /// 登录服务，适用用户，客户和供应商
     /// </summary>
-    public abstract class LoginService : MainService<int>
+    public abstract class LoginService : MainService<int>, ILoginService<int>
     {
         private OperationData GetChangePasswordData(ChangePasswordModel model)
         {
@@ -140,6 +141,17 @@ namespace com.etsoo.SmartERP.Login
 
             // Access database to valid
             return LoginAction(await ExecuteAsync(GetLoginTokenData(model), false));
+        }
+
+        /// <summary>
+        /// Async view service summary data
+        /// 异步浏览服务汇总数据
+        /// </summary>
+        /// <param name="stream">Stream to write</param>
+        /// <param name="id">Field of data</param>
+        public async Task ServiceSummaryAsync(Stream stream, string id)
+        {
+            await ExecuteAsync(stream, GetServiceSummaryData(id, DataFormat.Json));
         }
 
         private OperationData GetSignoutData(LoginMethod method, bool clearToken)
