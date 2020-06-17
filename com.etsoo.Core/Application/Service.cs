@@ -162,6 +162,7 @@ namespace com.etsoo.Core.Application
         /// Async execute database operation result to stream
         /// 异步执行数据库操作结果到流
         /// </summary>
+        /// <param name="stream">Stream</param>
         /// <param name="data">Database operation data</param>
         /// <param name="checkPermission">Whether to check permission</param>
         /// <returns>Result data</returns>

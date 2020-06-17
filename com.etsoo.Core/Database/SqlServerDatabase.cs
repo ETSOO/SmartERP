@@ -465,8 +465,8 @@ namespace com.etsoo.Core.Database
                         // Get the TextReader
                         using (var textReader = reader.GetTextReader(0))
                         {
-                            var buffer = new char[2048];
-                            int read;
+                            var buffer = new char[4096];
+                            int read = 0;
                             while ((read = await textReader.ReadBlockAsync(buffer, 0, buffer.Length)) > 0)
                             {
                                 var bytes = Encoding.UTF8.GetBytes(buffer, 0, read);
