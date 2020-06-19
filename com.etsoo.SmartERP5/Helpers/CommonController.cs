@@ -78,6 +78,20 @@ namespace com.etsoo.Api.Helpers
         }
 
         /// <summary>
+        /// Data report
+        /// 数据报表
+        /// </summary>
+        /// <param name="id">Field of data</param>
+        /// <param name="parameters">Parameters(JSON? depends on SP logic)</param>
+        /// <returns>JSON data</returns>
+        [HttpGet("Report/{id}")]
+        public async Task Report(string id, [FromQuery(Name = "p")] string parameters = null)
+        {
+            Response.ContentType = "application/json";
+            await Service.ReportAsync(Response.Body, id, parameters);
+        }
+
+        /// <summary>
         /// Async set operation result content
         /// 异步设置操作结果内容
         /// </summary>

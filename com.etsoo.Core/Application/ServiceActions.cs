@@ -18,7 +18,7 @@ namespace com.etsoo.Core.Application
         /// 删除实体
         /// </summary>
         /// <param name="ids">Ids</param>
-        /// <returns>Operation result</returns>
+        /// <returns>Operation data</returns>
         public OperationResult DeleteEntity(T[] ids)
         {
             return Execute(GetDeleteData(ids));
@@ -29,7 +29,7 @@ namespace com.etsoo.Core.Application
         /// 异步删除实体
         /// </summary>
         /// <param name="ids">Ids</param>
-        /// <returns>Operation result</returns>
+        /// <returns>Operation data</returns>
         public async Task<OperationResult> DeleteEntityAsync(T[] ids)
         {
             return await ExecuteAsync(GetDeleteData(ids));
@@ -42,7 +42,7 @@ namespace com.etsoo.Core.Application
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
         /// <param name="format">Format</param>
-        /// <returns>Operation result</returns>
+        /// <returns>Operation data</returns>
         protected virtual OperationData GetDeleteData(T[] ids)
         {
             // Create operation data
@@ -56,13 +56,42 @@ namespace com.etsoo.Core.Application
         }
 
         /// <summary>
+        /// Get data report operation data
+        /// 获取数据报表操作数
+        /// </summary>
+        /// <param name="id">Field of data</param>
+        /// <param name="parameters">Parameters data</param>
+        /// <param name="format">Format</param>
+        /// <returns>Operation data</returns>
+        protected virtual OperationData GetReportData(string id, string parameters, DataFormat format)
+        {
+            // Generate key data
+            var key = new StringBuilder("report");
+            key.Append(GetField(id));
+            key.Append(GetFormat(format));
+
+            // Create operation data
+            var data = CreateOperationData(key.ToString());
+
+            // Add parameters
+            if (!string.IsNullOrEmpty(parameters))
+                data.Parameters.Add("parameters", parameters);
+
+            // Data format
+            data.Format = format;
+
+            // Return
+            return data;
+        }
+
+        /// <summary>
         /// Get search database operation data
         /// 获取查询的数据库端操作数
         /// </summary>
         /// <param name="domain">Domain</param>
         /// <param name="model">Parameters</param>
         /// <param name="format">Format</param>
-        /// <returns>Operation result</returns>
+        /// <returns>Operation data</returns>
         protected virtual OperationData GetSearchData(string domain, IService<T>.ITiplistDataModel model, DataFormat format)
         {
             // Generate key data
@@ -94,7 +123,7 @@ namespace com.etsoo.Core.Application
         /// </summary>
         /// <param name="id">Field of data</param>
         /// <param name="format">Format</param>
-        /// <returns>Operation result</returns>
+        /// <returns>Operation data</returns>
         protected virtual OperationData GetServiceSummaryData(string id, DataFormat format)
         {
             // Generate key data
@@ -119,7 +148,7 @@ namespace com.etsoo.Core.Application
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
         /// <param name="format">Format</param>
-        /// <returns>Operation result</returns>
+        /// <returns>Operation data</returns>
         protected virtual OperationData GetViewData(T id, string field, DataFormat format)
         {
             // Generate key data
@@ -138,6 +167,30 @@ namespace com.etsoo.Core.Application
 
             // Return
             return data;
+        }
+
+        /// <summary>
+        /// Data report
+        /// 数据报表
+        /// </summary>
+        /// <param name="stream">Stream to write</param>
+        /// <param name="id">Field of data</param>
+        /// <param name="parameters">Parameters</param>
+        public void Report(Stream stream, string id, string parameters = null)
+        {
+            Execute(stream, GetReportData(id, parameters, DataFormat.Json));
+        }
+
+        /// <summary>
+        /// Async data report
+        /// 异步数据报表
+        /// </summary>
+        /// <param name="stream">Stream to write</param>
+        /// <param name="id">Field of data</param>
+        /// <param name="parameters">Parameters</param>
+        public async Task ReportAsync(Stream stream, string id, string parameters = null)
+        {
+            await ExecuteAsync(stream, GetReportData(id, parameters, DataFormat.Json));
         }
 
         /// <summary>

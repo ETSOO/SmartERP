@@ -77,30 +77,30 @@ namespace com.etsoo.Core.Database
         /// <returns>Rows affacted</returns>
         public override int Execute(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
-            {
-                // Add parameters
-                AddParameters(command, paras);
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
 
-                // Command type
-                if (isStoredProcedure == null)
-                    command.Prepare();
-                else if (isStoredProcedure.Value)
-                    command.CommandType = CommandType.StoredProcedure;
+            // Add parameters
+            AddParameters(command, paras);
 
-                // Open connection
-                connection.Open();
+            // Command type
+            if (isStoredProcedure == null)
+                command.Prepare();
+            else if (isStoredProcedure.Value)
+                command.CommandType = CommandType.StoredProcedure;
 
-                // Execute
-                var result = command.ExecuteNonQuery();
+            // Open connection
+            connection.Open();
 
-                // Close
-                connection.Close();
+            // Execute
+            var result = command.ExecuteNonQuery();
 
-                // Return
-                return result;
-            }
+            // Close
+            connection.Close();
+
+            // Return
+            return result;
         }
 
         /// <summary>
@@ -113,30 +113,30 @@ namespace com.etsoo.Core.Database
         /// <returns>Rows affacted</returns>
         public override async Task<int> ExecuteAsync(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
-            {
-                // Add parameters
-                AddParameters(command, paras);
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
 
-                // Command type
-                if (isStoredProcedure == null)
-                    await command.PrepareAsync();
-                else if (isStoredProcedure.Value)
-                    command.CommandType = CommandType.StoredProcedure;
+            // Add parameters
+            AddParameters(command, paras);
 
-                // Open connection
-                await connection.OpenAsync();
+            // Command type
+            if (isStoredProcedure == null)
+                await command.PrepareAsync();
+            else if (isStoredProcedure.Value)
+                command.CommandType = CommandType.StoredProcedure;
 
-                // Execute
-                var result = await command.ExecuteNonQueryAsync();
+            // Open connection
+            await connection.OpenAsync();
 
-                // Close
-                await connection.CloseAsync();
+            // Execute
+            var result = await command.ExecuteNonQueryAsync();
 
-                // Return
-                return result;
-            }
+            // Close
+            await connection.CloseAsync();
+
+            // Return
+            return result;
         }
 
         /// <summary>
@@ -149,30 +149,30 @@ namespace com.etsoo.Core.Database
         /// <returns>First row first column's value</returns>
         public override object ExecuteScalar(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
-            {
-                // Add parameters
-                AddParameters(command, paras);
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
 
-                // Command type
-                if (isStoredProcedure == null)
-                    command.Prepare();
-                else if (isStoredProcedure.Value)
-                    command.CommandType = CommandType.StoredProcedure;
+            // Add parameters
+            AddParameters(command, paras);
 
-                // Open connection
-                connection.Open();
+            // Command type
+            if (isStoredProcedure == null)
+                command.Prepare();
+            else if (isStoredProcedure.Value)
+                command.CommandType = CommandType.StoredProcedure;
 
-                // Execute
-                var result = command.ExecuteScalar();
+            // Open connection
+            connection.Open();
 
-                // Close
-                connection.Close();
+            // Execute
+            var result = command.ExecuteScalar();
 
-                // Return
-                return result;
-            }
+            // Close
+            connection.Close();
+
+            // Return
+            return result;
         }
 
         /// <summary>
@@ -185,30 +185,30 @@ namespace com.etsoo.Core.Database
         /// <returns>First row first column's value</returns>
         public override async Task<object> ExecuteScalarAsync(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
-            {
-                // Add parameters
-                AddParameters(command, paras);
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
 
-                // Command type
-                if (isStoredProcedure == null)
-                    await command.PrepareAsync();
-                else if (isStoredProcedure.Value)
-                    command.CommandType = CommandType.StoredProcedure;
+            // Add parameters
+            AddParameters(command, paras);
 
-                // Open connection
-                await connection.OpenAsync();
+            // Command type
+            if (isStoredProcedure == null)
+                await command.PrepareAsync();
+            else if (isStoredProcedure.Value)
+                command.CommandType = CommandType.StoredProcedure;
 
-                // Execute
-                var result = await command.ExecuteScalarAsync();
+            // Open connection
+            await connection.OpenAsync();
 
-                // Close
-                await connection.CloseAsync();
+            // Execute
+            var result = await command.ExecuteScalarAsync();
 
-                // Return
-                return result;
-            }
+            // Close
+            await connection.CloseAsync();
+
+            // Return
+            return result;
         }
 
         /// <summary>
@@ -220,74 +220,74 @@ namespace com.etsoo.Core.Database
         /// <param name="isStoredProcedure">Is stored procedure</param>
         public override OperationResult ExecuteResult(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
+
             // Setup result
             var result = new OperationResult();
 
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
+            // Add parameters
+            AddParameters(command, paras);
+
+            try
             {
-                // Add parameters
-                AddParameters(command, paras);
+                // Command type
+                if (isStoredProcedure == null)
+                    command.Prepare();
+                else if (isStoredProcedure.Value)
+                    command.CommandType = CommandType.StoredProcedure;
 
-                try
+                // Open connection
+                connection.Open();
+
+                // Read one line
+                using (var reader = command.ExecuteReader(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
                 {
-                    // Command type
-                    if (isStoredProcedure == null)
-                        command.Prepare();
-                    else if (isStoredProcedure.Value)
-                        command.CommandType = CommandType.StoredProcedure;
-
-                    // Open connection
-                    connection.Open();
-
-                    // Read one line
-                    using (var reader = command.ExecuteReader(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
+                    if (reader.Read())
                     {
-                        if (reader.Read())
+                        for (var f = 0; f < reader.FieldCount; f++)
                         {
-                            for (var f = 0; f < reader.FieldCount; f++)
+                            var name = reader.GetName(f);
+                            switch (name)
                             {
-                                var name = reader.GetName(f);
-                                switch (name)
-                                {
-                                    case "error_code":
-                                        result.ErrorCode = reader.GetFieldValue<int>(f);
-                                        break;
-                                    case "field":
-                                        result.Field = reader.GetFieldValue<string>(f);
-                                        break;
-                                    case "message_id":
-                                        result.MessageId = reader.GetFieldValue<string>(f);
-                                        break;
-                                    case "mid":
-                                        goto case "message_id";
-                                    case "m_id":
-                                        goto case "message_id";
-                                    case "message":
-                                        result.Message = reader.GetFieldValue<string>(f);
-                                        break;
-                                    default:
-                                        if (!reader.IsDBNull(f))
-                                        {
-                                            result.Data[name] = reader.GetFieldValue<dynamic>(f);
-                                        }
-                                        break;
-                                }
+                                case "error_code":
+                                    result.ErrorCode = reader.GetFieldValue<int>(f);
+                                    break;
+                                case "field":
+                                    result.Field = reader.GetFieldValue<string>(f);
+                                    break;
+                                case "message_id":
+                                    result.MessageId = reader.GetFieldValue<string>(f);
+                                    break;
+                                case "mid":
+                                    goto case "message_id";
+                                case "m_id":
+                                    goto case "message_id";
+                                case "message":
+                                    result.Message = reader.GetFieldValue<string>(f);
+                                    break;
+                                default:
+                                    if (!reader.IsDBNull(f))
+                                    {
+                                        result.Data[name] = reader.GetFieldValue<dynamic>(f);
+                                    }
+                                    break;
                             }
                         }
-
-                        reader.Close();
-                        reader.Dispose();
                     }
 
-                    // Close
-                    connection.Close();
+                    reader.Close();
+                    reader.Dispose();
                 }
-                catch (Exception ex)
-                {
-                    // Exception error
-                    result.SetError(-1, "exception", ex.Message);
-                }
+
+                // Close
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                // Exception error
+                result.SetError(-1, "exception", ex.Message);
             }
 
             // Return
@@ -303,74 +303,74 @@ namespace com.etsoo.Core.Database
         /// <param name="isStoredProcedure">Is stored procedure</param>
         public override async Task<OperationResult> ExecuteResultAsync(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
+
             // Setup result
             var result = new OperationResult();
 
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
+            // Add parameters
+            AddParameters(command, paras);
+
+            try
             {
-                // Add parameters
-                AddParameters(command, paras);
+                // Command type
+                if (isStoredProcedure == null)
+                    await command.PrepareAsync();
+                else if (isStoredProcedure.Value)
+                    command.CommandType = CommandType.StoredProcedure;
 
-                try
+                // Open connection
+                await connection.OpenAsync();
+
+                // Read one line
+                using (var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
                 {
-                    // Command type
-                    if (isStoredProcedure == null)
-                        await command.PrepareAsync();
-                    else if (isStoredProcedure.Value)
-                        command.CommandType = CommandType.StoredProcedure;
-
-                    // Open connection
-                    await connection.OpenAsync();
-
-                    // Read one line
-                    using (var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
+                    if (await reader.ReadAsync())
                     {
-                        if (await reader.ReadAsync())
+                        for (var f = 0; f < reader.FieldCount; f++)
                         {
-                            for (var f = 0; f < reader.FieldCount; f++)
+                            var name = reader.GetName(f);
+                            switch (name)
                             {
-                                var name = reader.GetName(f);
-                                switch (name)
-                                {
-                                    case "error_code":
-                                        result.ErrorCode = await reader.GetFieldValueAsync<int>(f);
-                                        break;
-                                    case "field":
-                                        result.Field = await reader.GetFieldValueAsync<string>(f);
-                                        break;
-                                    case "message_id":
-                                        result.MessageId = await reader.GetFieldValueAsync<string>(f);
-                                        break;
-                                    case "mid":
-                                        goto case "message_id";
-                                    case "m_id":
-                                        goto case "message_id";
-                                    case "message":
-                                        result.Message = await reader.GetFieldValueAsync<string>(f);
-                                        break;
-                                    default:
-                                        if (!await reader.IsDBNullAsync(f))
-                                        {
-                                            result.Data[name] = await reader.GetFieldValueAsync<dynamic>(f);
-                                        }
-                                        break;
-                                }
+                                case "error_code":
+                                    result.ErrorCode = await reader.GetFieldValueAsync<int>(f);
+                                    break;
+                                case "field":
+                                    result.Field = await reader.GetFieldValueAsync<string>(f);
+                                    break;
+                                case "message_id":
+                                    result.MessageId = await reader.GetFieldValueAsync<string>(f);
+                                    break;
+                                case "mid":
+                                    goto case "message_id";
+                                case "m_id":
+                                    goto case "message_id";
+                                case "message":
+                                    result.Message = await reader.GetFieldValueAsync<string>(f);
+                                    break;
+                                default:
+                                    if (!await reader.IsDBNullAsync(f))
+                                    {
+                                        result.Data[name] = await reader.GetFieldValueAsync<dynamic>(f);
+                                    }
+                                    break;
                             }
                         }
-
-                        await reader.CloseAsync();
-                        await reader.DisposeAsync();
                     }
 
-                    // Close
-                    await connection.CloseAsync();
+                    await reader.CloseAsync();
+                    await reader.DisposeAsync();
                 }
-                catch (Exception ex)
-                {
-                    // Exception error
-                    result.SetError(-1, "exception", ex.Message);
-                }
+
+                // Close
+                await connection.CloseAsync();
+            }
+            catch (Exception ex)
+            {
+                // Exception error
+                result.SetError(-1, "exception", ex.Message);
             }
 
             // Return
@@ -387,50 +387,51 @@ namespace com.etsoo.Core.Database
         /// <param name="isStoredProcedure">Is stored procedure</param>
         public override void ExecuteToStream(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
+
+            // Add parameters
+            AddParameters(command, paras);
+
+            // Command type
+            if (isStoredProcedure == null)
+                command.Prepare();
+            else if (isStoredProcedure.Value)
+                command.CommandType = CommandType.StoredProcedure;
+
+            // Open connection
+            connection.Open();
+
+            // Execute
+            // Without CommandBehavior.SingleRow, supports multiple rows
+            // https://stackoverflow.com/questions/51087037/sql-server-json-truncated-even-when-using-nvarcharmax
+            using (var reader = command.ExecuteReader(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
             {
-                // Add parameters
-                AddParameters(command, paras);
-
-                // Command type
-                if (isStoredProcedure == null)
-                    command.Prepare();
-                else if (isStoredProcedure.Value)
-                    command.CommandType = CommandType.StoredProcedure;
-
-                // Open connection
-                connection.Open();
-
-                // Execute
-                using (var reader = command.ExecuteReader(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
+                while (reader.Read())
                 {
-                    if (reader.Read())
-                    {
-                        // Get the TextReader
-                        using (var textReader = reader.GetTextReader(0))
-                        {
-                            var buffer = new char[2048];
-                            int read;
-                            while ((read = textReader.ReadBlock(buffer, 0, buffer.Length)) > 0)
-                            {
-                                var bytes = Encoding.UTF8.GetBytes(buffer, 0, read);
-                                stream.Write(bytes, 0, bytes.Length);
-                                stream.Flush();
-                            }
+                    // Get the TextReader
+                    using var textReader = reader.GetTextReader(0);
 
-                            textReader.Close();
-                            textReader.Dispose();
-                        }
+                    var buffer = new char[2048];
+                    int read;
+                    while ((read = textReader.ReadBlock(buffer, 0, buffer.Length)) > 0)
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(buffer, 0, read);
+                        stream.Write(bytes, 0, bytes.Length);
+                        stream.Flush();
                     }
 
-                    reader.Close();
-                    reader.Dispose();
+                    textReader.Close();
+                    textReader.Dispose();
                 }
 
-                // Close
-                connection.Close();
+                reader.Close();
+                reader.Dispose();
             }
+
+            // Close
+            connection.Close();
         }
 
         /// <summary>
@@ -443,50 +444,51 @@ namespace com.etsoo.Core.Database
         /// <param name="isStoredProcedure">Is stored procedure</param>
         public override async Task ExecuteToStreamAsync(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
-            using (var connection = NewConnection)
-            using (var command = new SqliteCommand(sql, connection))
+            // Usings
+            using var connection = NewConnection;
+            using var command = new SqliteCommand(sql, connection);
+
+            // Add parameters
+            AddParameters(command, paras);
+
+            // Command type
+            if (isStoredProcedure == null)
+                await command.PrepareAsync();
+            else if (isStoredProcedure.Value)
+                command.CommandType = CommandType.StoredProcedure;
+
+            // Open connection
+            await connection.OpenAsync();
+
+            // Execute
+            // Without CommandBehavior.SingleRow, supports multiple rows
+            // https://stackoverflow.com/questions/51087037/sql-server-json-truncated-even-when-using-nvarcharmax
+            using (var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
             {
-                // Add parameters
-                AddParameters(command, paras);
-
-                // Command type
-                if (isStoredProcedure == null)
-                    await command.PrepareAsync();
-                else if (isStoredProcedure.Value)
-                    command.CommandType = CommandType.StoredProcedure;
-
-                // Open connection
-                await connection.OpenAsync();
-
-                // Execute
-                using (var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleResult & CommandBehavior.SingleRow))
+                while (await reader.ReadAsync())
                 {
-                    if (await reader.ReadAsync())
-                    {
-                        // Get the TextReader
-                        using (var textReader = reader.GetTextReader(0))
-                        {
-                            var buffer = new char[2048];
-                            int read;
-                            while ((read = await textReader.ReadBlockAsync(buffer, 0, buffer.Length)) > 0)
-                            {
-                                var bytes = Encoding.UTF8.GetBytes(buffer, 0, read);
-                                await stream.WriteAsync(bytes, 0, bytes.Length);
-                                await stream.FlushAsync();
-                            }
+                    // Get the TextReader
+                    using var textReader = reader.GetTextReader(0);
 
-                            textReader.Close();
-                            textReader.Dispose();
-                        }
+                    var buffer = new char[2048];
+                    int read;
+                    while ((read = await textReader.ReadBlockAsync(buffer, 0, buffer.Length)) > 0)
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(buffer, 0, read);
+                        await stream.WriteAsync(bytes, 0, bytes.Length);
+                        await stream.FlushAsync();
                     }
 
-                    await reader.CloseAsync();
-                    await reader.DisposeAsync();
+                    textReader.Close();
+                    textReader.Dispose();
                 }
 
-                // Close
-                await connection.CloseAsync();
+                await reader.CloseAsync();
+                await reader.DisposeAsync();
             }
+
+            // Close
+            await connection.CloseAsync();
         }
     }
 }

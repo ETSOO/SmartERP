@@ -59,6 +59,24 @@ namespace com.etsoo.Core.Application
         Task<OperationResult> DeleteEntityAsync(T[] ids);
 
         /// <summary>
+        /// Data report
+        /// 数据报表
+        /// </summary>
+        /// <param name="stream">Stream to write</param>
+        /// <param name="id">Field of data</param>
+        /// <param name="parameters">Parameters</param>
+        void Report(Stream stream, string id, string parameters = null);
+
+        /// <summary>
+        /// Async data report
+        /// 异步数据报表
+        /// </summary>
+        /// <param name="stream">Stream to write</param>
+        /// <param name="id">Field of data</param>
+        /// <param name="parameters">Parameters</param>
+        Task ReportAsync(Stream stream, string id, string parameters = null);
+
+        /// <summary>
         /// Search JSON data to stream
         /// 查询JSON数据到流
         /// </summary>
