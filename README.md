@@ -1,5 +1,5 @@
 # SmartERP
-SmartERP 5 open source (GEN5)
+SmartERP 5 open source (GEN5), based on the previous SaaS service GEN2.
 
 ## com.etsoo.Core
 C# application architecture. Using stored procedures to provide an applicationâ€™s business-logic layer.
@@ -7,5 +7,5 @@ C# application architecture. Using stored procedures to provide an applicationâ€
 ## com.etsoo.SmartERP
 C# SmartERP services and models.
 
-## com.etsoo.SmartERP5
+## com.etsoo.Api
 .Net core web API 3.1 for SmartERP

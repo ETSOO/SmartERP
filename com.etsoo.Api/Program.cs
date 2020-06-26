@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace com.etsoo.SmartERP5
+namespace com.etsoo.Api
 {
     public class Program
     {

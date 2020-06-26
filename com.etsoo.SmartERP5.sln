@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "com.etsoo.Api", "com.etsoo.SmartERP5\com.etsoo.Api.csproj", "{56728BDD-1013-4757-BB7D-490C14CA196B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "com.etsoo.Api", "com.etsoo.Api\com.etsoo.Api.csproj", "{56728BDD-1013-4757-BB7D-490C14CA196B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "com.etsoo.SmartERP", "com.etsoo.SmartERP\com.etsoo.SmartERP.csproj", "{568869F4-479A-487D-AE03-6E4DA03D55A7}"
 EndProject

@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IO.Compression;
 using System.Text;
 
-namespace com.etsoo.SmartERP5
+namespace com.etsoo.Api
 {
     public class Startup
     {
