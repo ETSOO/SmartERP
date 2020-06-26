@@ -45,7 +45,7 @@ namespace com.etsoo.Core.Application
         /// Support multiple modules
         /// 是否支持多模块
         /// </summary>
-        public abstract bool MultipleModule { get; }
+        public bool MultipleModule { get; protected set; }
 
         /// <summary>
         /// Current user
@@ -70,6 +70,10 @@ namespace com.etsoo.Core.Application
             p.Append(this.Identity);
             p.Append("_");
             p.Append(key);
+
+            // Multiple module supports
+            if (MultipleModule)
+                p.Append(ModuleId);
 
             // Set procedure name
             data.Procedure = p.ToString();

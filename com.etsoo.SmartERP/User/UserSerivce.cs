@@ -70,14 +70,5 @@ namespace com.etsoo.SmartERP.User
                 return (byte)AppModule.User;
             }
         }
-
-        /// <summary>
-        /// Support multiple modules
-        /// 是否支持多模块
-        /// </summary>
-        public override bool MultipleModule
-        {
-            get { return false; }
-        }
     }
 }
