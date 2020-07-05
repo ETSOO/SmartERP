@@ -1,4 +1,5 @@
 ﻿using com.etsoo.Core.Services;
+using com.etsoo.SmartERP.Address;
 using com.etsoo.SmartERP.Login;
 using System;
 using System.IO;
@@ -11,7 +12,7 @@ namespace com.etsoo.SmartERP.Applications
     /// 主服务登录接口
     /// </summary>
     /// <typeparam name="T">Id type generic</typeparam>
-    public interface ILoginService<T> : IMainService<T> where T : struct, IComparable
+    public interface ILoginService<T> : IAddressServiceHost, IMainService<T> where T : struct, IComparable
     {
         /// <summary>
         /// Change password

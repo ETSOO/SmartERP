@@ -55,8 +55,8 @@ namespace com.etsoo.SmartERP.Applications
         }
 
         /// <summary>
-        /// System check for database operation data
-        /// 对数据库操作数的系统检查
+        /// System check before database operation
+        /// 对数据库操作前的系统检查
         /// </summary>
         /// <param name="data">Operation data</param>
         /// <returns>Result</returns>
@@ -65,8 +65,31 @@ namespace com.etsoo.SmartERP.Applications
             // Action result
             var result = new OperationResult();
 
-            // Add system parameters
-            data.Parameters.Add("user_validation_cached", Cached);
+            // User logined?
+            if (User.IsAuthenticated)
+            {
+                // Add system parameters
+                SystemUserParameters(data);
+                data.Parameters.Add("user_validation_cached", Cached);
+                data.Parameters.Add("application_access_token", DBNull.Value);
+            }
+            else
+            {
+                // Login required
+                result.SetError(-1, "id", "user_login_invalid");
+            }
+
+            // Return
+            return result;
+        }
+
+        /// <summary>
+        /// Add system user parameters
+        /// 添加系统用户参数
+        /// </summary>
+        /// <param name="data">Operation data</param>
+        override protected void SystemUserParameters(OperationData data)
+        {
             data.Parameters.Add("application_role", User.ModuleId);
 
             if (User.ModuleId == 3)
@@ -80,11 +103,7 @@ namespace com.etsoo.SmartERP.Applications
                 data.Parameters.Add("application_target", User.Id);
             }
 
-            data.Parameters.Add("application_access_token", DBNull.Value);
             data.Parameters.Add("application_language_cid", User.LanguageCid);
-
-            // Return
-            return result;
         }
     }
 }

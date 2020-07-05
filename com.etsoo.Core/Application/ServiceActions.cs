@@ -14,6 +14,28 @@ namespace com.etsoo.Core.Application
     public abstract partial class Service<T> : IService<T> where T : struct, IComparable
     {
         /// <summary>
+        /// Add an entity
+        /// 添加实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        public OperationResult AddEntity(IService<T>.IDataModel model)
+        {
+            return Execute(GetAddEntityData(model));
+        }
+
+        /// <summary>
+        /// Async add an entity
+        /// 异步添加实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        public async Task<OperationResult> AddEntityAsync(IService<T>.IDataModel model)
+        {
+            return await ExecuteAsync(GetAddEntityData(model));
+        }
+
+        /// <summary>
         /// Delete entity
         /// 删除实体
         /// </summary>
@@ -33,6 +55,55 @@ namespace com.etsoo.Core.Application
         public async Task<OperationResult> DeleteEntityAsync(T[] ids)
         {
             return await ExecuteAsync(GetDeleteData(ids));
+        }
+
+        /// <summary>
+        /// Edit an entity
+        /// 修改实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        public OperationResult EditEntity(IService<T>.IIdDataModel model)
+        {
+            return Execute(GetEditEntityData(model));
+        }
+
+        /// <summary>
+        /// Async edit an entity
+        /// 异步修改实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        public async Task<OperationResult> EditEntityAsync(IService<T>.IIdDataModel model)
+        {
+            return await ExecuteAsync(GetEditEntityData(model));
+        }
+
+        /// <summary>
+        /// Get add entity database operation data
+        /// 获取添加实体的数据库端操作数
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation data</returns>
+        protected virtual OperationData GetAddEntityData(IService<T>.IDataModel model)
+        {
+            // Create operation data
+            var data = CreateOperationData("add");
+
+            // Validate model
+            if (model == null)
+            {
+                // No entity model
+                data.TestResult.SetError(-1, "model", "No entity data", "no_data");
+            }
+            else if (data.TestResult.Update(ValidateModel(model)))
+            {
+                // add parameters
+                model.Parameterize(data, this);
+            }
+
+            // Return
+            return data;
         }
 
         /// <summary>
@@ -56,6 +127,33 @@ namespace com.etsoo.Core.Application
         }
 
         /// <summary>
+        /// Get edit entity database operation data
+        /// 获取修改实体的数据库端操作数
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation data</returns>
+        protected virtual OperationData GetEditEntityData(IService<T>.IIdDataModel model)
+        {
+            // Create operation data
+            var data = CreateOperationData("edit");
+
+            // Validate model
+            if (model == null)
+            {
+                // No entity model
+                data.TestResult.SetError(-1, "model", "No entity data", "no_data");
+            }
+            else if (data.TestResult.Update(ValidateModel(model)))
+            {
+                // add parameters
+                model.Parameterize(data, this);
+            }
+
+            // Return
+            return data;
+        }
+
+        /// <summary>
         /// Get data report operation data
         /// 获取数据报表操作数
         /// </summary>
@@ -65,20 +163,12 @@ namespace com.etsoo.Core.Application
         /// <returns>Operation data</returns>
         protected virtual OperationData GetReportData(string id, string parameters, DataFormat format)
         {
-            // Generate key data
-            var key = new StringBuilder("report");
-            key.Append(GetField(id));
-            key.Append(GetFormat(format));
-
             // Create operation data
-            var data = CreateOperationData(key.ToString());
+            var data = CreateFormatOperationData("report", id, format);
 
             // Add parameters
             if (!string.IsNullOrEmpty(parameters))
                 data.Parameters.Add("parameters", parameters);
-
-            // Data format
-            data.Format = format;
 
             // Return
             return data;
@@ -94,17 +184,8 @@ namespace com.etsoo.Core.Application
         /// <returns>Operation data</returns>
         protected virtual OperationData GetSearchData(string domain, IService<T>.ITiplistDataModel model, DataFormat format)
         {
-            // Generate key data
-            // Something like search_json_common
-            var key = new StringBuilder("search");
-            key.Append(GetField(domain));
-            key.Append(GetFormat(format));
-
             // Create operation data
-            var data = CreateOperationData(key.ToString());
-
-            // Data format
-            data.Format = format;
+            var data = CreateFormatOperationData("search", domain, format);
 
             // Validate model
             if (model != null && data.TestResult.Update(ValidateModel(model)))
@@ -126,19 +207,8 @@ namespace com.etsoo.Core.Application
         /// <returns>Operation data</returns>
         protected virtual OperationData GetServiceSummaryData(string id, DataFormat format)
         {
-            // Generate key data
-            var key = new StringBuilder("service_summary");
-            key.Append(GetField(id));
-            key.Append(GetFormat(format));
-
             // Create operation data
-            var data = CreateOperationData(key.ToString());
-
-            // Data format
-            data.Format = format;
-
-            // Return
-            return data;
+            return CreateFormatOperationData("service_summary", id, format);
         }
 
         /// <summary>
@@ -151,16 +221,8 @@ namespace com.etsoo.Core.Application
         /// <returns>Operation data</returns>
         protected virtual OperationData GetViewData(T id, string field, DataFormat format)
         {
-            // Generate key data
-            var key = new StringBuilder("view");
-            key.Append(GetField(field));
-            key.Append(GetFormat(format));
-
             // Create operation data
-            var data = CreateOperationData(key.ToString());
-
-            // Data format
-            data.Format = format;
+            var data = CreateFormatOperationData("view", field, format);
 
             // Add id parameter
             data.Parameters.Add("id", id);

@@ -32,7 +32,7 @@ namespace com.etsoo.Api
         /// ¹¹Ôìº¯Êý
         /// </summary>
         /// <param name="configuration">Configuration</param>
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
 
@@ -46,7 +46,7 @@ namespace com.etsoo.Api
             // Dependency Injection for the MainApp
             // https://stackoverflow.com/questions/38138100/addtransient-addscoped-and-addsingleton-services-differences
             // Add as singleton to enhance performance
-            services.AddSingleton(new MainApp(
+            services.AddSingleton<IMainApp>(new MainApp(
                 // Configurations
                 (configuration) =>
                 {

@@ -22,7 +22,7 @@ namespace com.etsoo.Api.Controllers
         /// <param name="app">Application</param>
         /// <param name="distributedCache">Distributed cache</param>
         /// <param name="httpContextAccessor">Http context accessor</param>
-        public UserController(MainApp app, IDistributedCache distributedCache, IHttpContextAccessor httpContextAccessor)
+        public UserController(IMainApp app, IDistributedCache distributedCache, IHttpContextAccessor httpContextAccessor)
             : base(UserSerivce.Create(app, IdentifyUser.Create(httpContextAccessor.HttpContext.User, httpContextAccessor.HttpContext.Connection.RemoteIpAddress)), distributedCache)
         {
         }

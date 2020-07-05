@@ -83,18 +83,47 @@ namespace com.etsoo.Core.Application
         }
 
         /// <summary>
+        /// Create database specific format operation data
+        /// 创建数据库特定格式数据的操作数
+        /// </summary>
+        /// <param name="name">Main name</param>
+        /// <param name="field">Specific field</param>
+        /// <param name="format">Data form</param>
+        /// <returns>Operation data</returns>
+        protected virtual OperationData CreateFormatOperationData(string name, string field, DataFormat format)
+        {
+            // Generate key data
+            var key = new StringBuilder(name);
+            key.Append(GetField(field));
+            key.Append(GetFormat(format));
+
+            // Operation data
+            var data = CreateOperationData(key.ToString());
+
+            // Keep the format
+            data.Format = format;
+
+            // Return
+            return data;
+        }
+
+        /// <summary>
         /// Execute database operation result
         /// 执行数据库操作结果
         /// </summary>
         /// <param name="data">Database operation data</param>
         /// <param name="checkPermission">Whether to check permission</param>
         /// <returns>Result</returns>
-        protected OperationResult Execute(OperationData data, bool checkPermission = true)
+        protected OperationResult Execute(OperationData data, bool? checkPermission = true)
         {
             if (!data.TestResult.OK)
                 return data.TestResult;
 
-            if (checkPermission)
+            if (checkPermission == null)
+            {
+                SystemUserParameters(data);
+            }
+            else if (checkPermission.Value)
             {
                 var result = SystemCheck(data);
                 if (!result.OK)
@@ -113,7 +142,7 @@ namespace com.etsoo.Core.Application
         /// <param name="data">Database operation data</param>
         /// <param name="checkPermission">Whether to check permission</param>
         /// <returns>Result data</returns>
-        protected void Execute(Stream stream, OperationData data, bool checkPermission = true)
+        protected void Execute(Stream stream, OperationData data, bool? checkPermission = true)
         {
             if (!data.TestResult.OK)
             {
@@ -121,7 +150,11 @@ namespace com.etsoo.Core.Application
                 return;
             }
 
-            if (checkPermission)
+            if (checkPermission == null)
+            {
+                SystemUserParameters(data);
+            }
+            else if (checkPermission.Value)
             {
                 var result = SystemCheck(data);
                 if (!result.OK)
@@ -145,12 +178,16 @@ namespace com.etsoo.Core.Application
         /// <param name="data">Database operation data</param>
         /// <param name="checkPermission">Whether to check permission</param>
         /// <returns>Result</returns>
-        protected async Task<OperationResult> ExecuteAsync(OperationData data, bool checkPermission = true)
+        protected async Task<OperationResult> ExecuteAsync(OperationData data, bool? checkPermission = true)
         {
             if (!data.TestResult.OK)
                 return data.TestResult;
 
-            if (checkPermission)
+            if (checkPermission == null)
+            {
+                SystemUserParameters(data);
+            }
+            else if (checkPermission.Value)
             {
                 var result = SystemCheck(data);
                 if (!result.OK)
@@ -168,9 +205,9 @@ namespace com.etsoo.Core.Application
         /// </summary>
         /// <param name="stream">Stream</param>
         /// <param name="data">Database operation data</param>
-        /// <param name="checkPermission">Whether to check permission</param>
+        /// <param name="checkPermission">Whether to check permission, null means determination</param>
         /// <returns>Result data</returns>
-        protected async Task ExecuteAsync(Stream stream, OperationData data, bool checkPermission = true)
+        protected async Task ExecuteAsync(Stream stream, OperationData data, bool? checkPermission = true)
         {
             if (!data.TestResult.OK)
             {
@@ -178,7 +215,11 @@ namespace com.etsoo.Core.Application
                 return;
             }
 
-            if (checkPermission)
+            if (checkPermission == null)
+            {
+                SystemUserParameters(data);
+            }
+            else if (checkPermission.Value)
             {
                 var result = SystemCheck(data);
                 if (!result.OK)
@@ -233,6 +274,13 @@ namespace com.etsoo.Core.Application
         /// <param name="data">Operation data</param>
         /// <returns>Result</returns>
         protected abstract OperationResult SystemCheck(OperationData data);
+
+        /// <summary>
+        /// Add system user parameters
+        /// 添加系统用户参数
+        /// </summary>
+        /// <param name="data">Operation data</param>
+        protected abstract void SystemUserParameters(OperationData data);
 
         /// <summary>
         /// Validate model

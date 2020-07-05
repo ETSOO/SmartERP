@@ -46,6 +46,17 @@ namespace com.etsoo.Api.Helpers
             await ResultContentAsync(result);
         }
 
+        /// <summary>
+        /// Country list
+        /// 国家列表
+        /// </summary>
+        /// <param name="organizationId">Limited organization id</param>
+        [HttpGet("CountryList/{organizationId?}")]
+        public async Task CountryList(int? organizationId)
+        {
+            await Service.Address.CountryListAsync(Response.Body, organizationId, DataFormat.Json);
+        }
+
         private string CreateToken()
         {
             // Token handler

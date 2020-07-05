@@ -7,7 +7,10 @@
     <Authors>Zan Xiao (Garry)</Authors>
     <Copyright>©2020 ETSOO</Copyright>
     <Product>ETSOO Management System Framework &amp; Utilities</Product>
-    <Description>Accelerate the development of management systems to achieve rapid creation of program objects, login and data management capabilities.</Description>
+    <Description>SmartERP 5 based. Accelerate the development of management systems to achieve rapid creation of services, login and data management capabilities with different database support</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>ETSOO, SmartERP, Rapid</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

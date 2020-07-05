@@ -1,5 +1,4 @@
 ﻿using com.etsoo.Core.Services;
-using com.etsoo.SmartERP.Address;
 using com.etsoo.SmartERP.Applications;
 using com.etsoo.SmartERP.Login;
 using System;
@@ -10,7 +9,7 @@ namespace com.etsoo.SmartERP.Customer
     /// Customer service
     /// 客户服务
     /// </summary>
-    public sealed class CustomerSerivce : LoginService, IAddressServiceHost
+    public sealed class CustomerSerivce : LoginService
     {
         /// <summary>
         /// Create customer service
@@ -60,24 +59,6 @@ namespace com.etsoo.SmartERP.Customer
             get
             {
                 return (byte)AppModule.Customer;
-            }
-        }
-
-        IAddressService address;
-        /// <summary>
-        /// Address service interface
-        /// 地址服务接口
-        /// </summary>
-        public IAddressService Address
-        {
-            get
-            {
-                if (address == null)
-                {
-                    address = AddressService.Create<int, CustomerSerivce>(this);
-                }
-
-                return address;
             }
         }
 

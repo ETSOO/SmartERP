@@ -14,7 +14,7 @@ namespace com.etsoo.Api.Controllers
     /// </summary>
     [Route("[controller]")]
     [ApiController]
-    public class CustomerController : CommonController<CustomerSerivce, int>
+    public class CustomerController : LoginController<CustomerSerivce, int>
     {
         /// <summary>
         /// Constructor
@@ -23,7 +23,7 @@ namespace com.etsoo.Api.Controllers
         /// <param name="app">Application</param>
         /// <param name="distributedCache">Distributed cache</param>
         /// <param name="httpContextAccessor">Http context accessor</param>
-        public CustomerController(MainApp app, IDistributedCache distributedCache, IHttpContextAccessor httpContextAccessor)
+        public CustomerController(IMainApp app, IDistributedCache distributedCache, IHttpContextAccessor httpContextAccessor)
             : base(CustomerSerivce.Create(app, IdentifyUser.Create(httpContextAccessor.HttpContext.User, httpContextAccessor.HttpContext.Connection.RemoteIpAddress)), distributedCache)
         {
             
@@ -33,8 +33,7 @@ namespace com.etsoo.Api.Controllers
         /// Search customer
         /// 查询客户
         /// </summary>
-        /// <param name="field">Field</param>
-        /// <returns>Json search result</returns>
+        /// <param name="model">Search model</param>
         [HttpGet]
         public async Task Get([FromQuery]SearchModel model)
         {
@@ -45,7 +44,7 @@ namespace com.etsoo.Api.Controllers
         /// Search customer tip list
         /// 查询客户列表
         /// </summary>
-        /// <returns>Json search result</returns>
+        /// <param name="model">Search model</param>
         [HttpGet("Tiplist")]
         public async Task Tiplist([FromQuery]TiplistModel model)
         {

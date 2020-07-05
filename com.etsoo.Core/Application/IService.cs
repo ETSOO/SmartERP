@@ -43,6 +43,22 @@ namespace com.etsoo.Core.Application
         ICurrentUser User { get; }
 
         /// <summary>
+        /// Add an entity
+        /// 添加实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        OperationResult AddEntity(IService<T>.IDataModel model);
+
+        /// <summary>
+        /// Async add an entity
+        /// 异步添加实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        Task<OperationResult> AddEntityAsync(IService<T>.IDataModel model);
+
+        /// <summary>
         /// Delete entity
         /// 删除实体
         /// </summary>
@@ -57,6 +73,22 @@ namespace com.etsoo.Core.Application
         /// <param name="ids">Ids</param>
         /// <returns>Operation result</returns>
         Task<OperationResult> DeleteEntityAsync(T[] ids);
+
+        /// <summary>
+        /// Edit an entity
+        /// 修改实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        OperationResult EditEntity(IService<T>.IIdDataModel model);
+
+        /// <summary>
+        /// Async edit an entity
+        /// 异步修改实体
+        /// </summary>
+        /// <param name="model">Entity model</param>
+        /// <returns>Operation result</returns>
+        Task<OperationResult> EditEntityAsync(IService<T>.IIdDataModel model);
 
         /// <summary>
         /// Data report

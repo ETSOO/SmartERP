@@ -1,4 +1,5 @@
 ﻿using com.etsoo.Core.Services;
+using com.etsoo.SmartERP.Address;
 using com.etsoo.SmartERP.Applications;
 using System;
 using System.IO;
@@ -12,6 +13,24 @@ namespace com.etsoo.SmartERP.Login
     /// </summary>
     public abstract class LoginService : MainService<int>, ILoginService<int>
     {
+        IAddressService address;
+        /// <summary>
+        /// Address service interface
+        /// 地址服务接口
+        /// </summary>
+        public IAddressService Address
+        {
+            get
+            {
+                if (address == null)
+                {
+                    address = AddressService.Create<int, LoginService>(this);
+                }
+
+                return address;
+            }
+        }
+
         private OperationData GetChangePasswordData(ChangePasswordModel model)
         {
             // Create operation data
