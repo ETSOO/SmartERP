@@ -51,6 +51,7 @@ namespace com.etsoo.Api.Helpers
         /// 国家列表
         /// </summary>
         /// <param name="organizationId">Limited organization id</param>
+        [AllowAnonymous]
         [HttpGet("CountryList/{organizationId?}")]
         public async Task CountryList(int? organizationId)
         {
