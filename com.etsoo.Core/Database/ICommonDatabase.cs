@@ -124,6 +124,7 @@ namespace com.etsoo.Core.Database
         /// </summary>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         OperationResult ExecuteResult(string sql, bool? isStoredProcedure = false);
 
         /// <summary>
@@ -132,6 +133,7 @@ namespace com.etsoo.Core.Database
         /// </summary>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         Task<OperationResult> ExecuteResultAsync(string sql, bool? isStoredProcedure = false);
 
         /// <summary>
@@ -141,6 +143,7 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         OperationResult ExecuteResult(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
 
         /// <summary>
@@ -150,6 +153,7 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         Task<OperationResult> ExecuteResultAsync(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
 
         /// <summary>
@@ -159,7 +163,8 @@ namespace com.etsoo.Core.Database
         /// <param name="stream">Stream to write</param>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        void ExecuteToStream(Stream stream, string sql, bool? isStoredProcedure = false);
+        /// <returns>Is content wrote</returns>
+        bool ExecuteToStream(Stream stream, string sql, bool? isStoredProcedure = false);
 
         /// <summary>
         /// Async Execute SQL Command, write to stream of the first row first column value, used to read huge text data like json/xml
@@ -168,7 +173,8 @@ namespace com.etsoo.Core.Database
         /// <param name="stream">Stream to write</param>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        Task ExecuteToStreamAsync(Stream stream, string sql, bool? isStoredProcedure = false);
+        /// <returns>Is content wrote</returns>
+        Task<bool> ExecuteToStreamAsync(Stream stream, string sql, bool? isStoredProcedure = false);
 
         /// <summary>
         /// Execute SQL Command, write to stream of the first row first column value, used to read huge text data like json/xml
@@ -178,7 +184,8 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        void ExecuteToStream(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
+        /// <returns>Is content wrote</returns>
+        bool ExecuteToStream(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
 
         /// <summary>
         /// Async Execute SQL Command, write to stream of the first row first column value, used to read huge text data like json/xml
@@ -188,6 +195,7 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        Task ExecuteToStreamAsync(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
+        /// <returns>Is content wrote</returns>
+        Task<bool> ExecuteToStreamAsync(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
     }
 }

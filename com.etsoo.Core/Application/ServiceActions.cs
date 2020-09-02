@@ -238,9 +238,10 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Field of data</param>
         /// <param name="parameters">Parameters</param>
-        public void Report(Stream stream, string id, string parameters = null)
+        /// <returns>Is content wrote</returns>
+        public bool Report(Stream stream, string id, string parameters = null)
         {
-            Execute(stream, GetReportData(id, parameters, DataFormat.Json));
+            return Execute(stream, GetReportData(id, parameters, DataFormat.Json));
         }
 
         /// <summary>
@@ -250,9 +251,10 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Field of data</param>
         /// <param name="parameters">Parameters</param>
-        public async Task ReportAsync(Stream stream, string id, string parameters = null)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> ReportAsync(Stream stream, string id, string parameters = null)
         {
-            await ExecuteAsync(stream, GetReportData(id, parameters, DataFormat.Json));
+            return await ExecuteAsync(stream, GetReportData(id, parameters, DataFormat.Json));
         }
 
         /// <summary>
@@ -262,9 +264,10 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="domain">Domain, identify as a new saved procedure</param>
         /// <param name="model">Parameters</param>
-        public void SearchJson<M>(Stream stream, string domain, M model) where M : IService<T>.ITiplistDataModel
+        /// <returns>Is content wrote</returns>
+        public bool SearchJson<M>(Stream stream, string domain, M model) where M : IService<T>.ITiplistDataModel
         {
-            Execute(stream, GetSearchData(domain, model, DataFormat.Json));
+            return Execute(stream, GetSearchData(domain, model, DataFormat.Json));
         }
 
         /// <summary>
@@ -274,9 +277,10 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="domain">Domain, identify as a new saved procedure</param>
         /// <param name="model">Parameters</param>
-        public async Task SearchJsonAsync<M>(Stream stream, string domain, M model) where M : IService<T>.ITiplistDataModel
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> SearchJsonAsync<M>(Stream stream, string domain, M model) where M : IService<T>.ITiplistDataModel
         {
-            await ExecuteAsync(stream, GetSearchData(domain, model, DataFormat.Json));
+            return await ExecuteAsync(stream, GetSearchData(domain, model, DataFormat.Json));
         }
 
         /// <summary>
@@ -286,9 +290,9 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
-        public void ViewJson(Stream stream, T id, string field = null)
+        public bool ViewJson(Stream stream, T id, string field = null)
         {
-            Execute(stream, GetViewData(id, field, DataFormat.Json));
+            return Execute(stream, GetViewData(id, field, DataFormat.Json));
         }
 
         /// <summary>
@@ -298,9 +302,10 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
-        public async Task ViewJsonAsync(Stream stream, T id, string field = null)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> ViewJsonAsync(Stream stream, T id, string field = null)
         {
-            await ExecuteAsync(stream, GetViewData(id, field, DataFormat.Json));
+            return await ExecuteAsync(stream, GetViewData(id, field, DataFormat.Json));
         }
     }
 }

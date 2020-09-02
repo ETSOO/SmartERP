@@ -187,23 +187,28 @@ namespace com.etsoo.Core.Application
             {
                 base.Parameterize(data, service);
 
-                // Contains layout for the first page as default
-                if (HasLayout == null && Page == 1)
-                    HasLayout = true;
-
-                // Validate page
-                if (Page < 1)
-                    Page = 1;
-
                 // Add parameters
                 var paras = data.Parameters;
 
                 if (!string.IsNullOrEmpty(Field) && Field.Length <= 30)
                     paras.Add("e_field", Field);
-                paras.Add("e_current_page", Page);
-                paras.Add("e_has_layout", HasLayout);
                 paras.Add("e_order_index", OrderIndex);
-                paras.Add("e_count_total", CountTotal);
+
+                // Under tiplist domain, prevent unnecessary parameters to pass
+                if(!data.Procedure.Contains("_search_tiplist_"))
+                {
+                    // Contains layout for the first page as default
+                    if (HasLayout == null && Page == 1)
+                        HasLayout = true;
+
+                    // Validate page
+                    if (Page < 1)
+                        Page = 1;
+
+                    paras.Add("e_current_page", Page);
+                    paras.Add("e_has_layout", HasLayout);
+                    paras.Add("e_count_total", CountTotal);
+                }
             }
         }
 

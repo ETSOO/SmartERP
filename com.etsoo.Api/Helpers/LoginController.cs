@@ -55,7 +55,7 @@ namespace com.etsoo.Api.Helpers
         [HttpGet("CountryList/{organizationId?}")]
         public async Task CountryList(int? organizationId)
         {
-            await Service.Address.CountryListAsync(Response.Body, organizationId, DataFormat.Json);
+            StreamContent(await Service.Address.CountryListAsync(Response.Body, organizationId, DataFormat.Json));
         }
 
         private string CreateToken()
@@ -171,8 +171,7 @@ namespace com.etsoo.Api.Helpers
         [HttpGet("ServiceSummary/{id}")]
         public async Task ServiceSummary(string id)
         {
-            Response.ContentType = "application/json";
-            await Service.ServiceSummaryAsync(Response.Body, id);
+            StreamContent(await Service.ServiceSummaryAsync(Response.Body, id));
         }
 
         /// <summary>

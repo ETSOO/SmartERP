@@ -69,9 +69,10 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="region">Region</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        public async Task CityListAsync(Stream stream, string region, int? organizationId, DataFormat format)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> CityListAsync(Stream stream, string region, int? organizationId, DataFormat format)
         {
-            await ExecuteAsync(stream, GetCityListData(region, organizationId, format), null);
+            return await ExecuteAsync(stream, GetCityListData(region, organizationId, format), null);
         }
 
         /// <summary>
@@ -81,9 +82,10 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="stream">Stream to write</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        public async Task CountryListAsync(Stream stream, int? organizationId, DataFormat format)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> CountryListAsync(Stream stream, int? organizationId, DataFormat format)
         {
-            await ExecuteAsync(stream, GetCountryListData(organizationId, format), null);
+            return await ExecuteAsync(stream, GetCountryListData(organizationId, format), null);
         }
 
         /// <summary>
@@ -94,9 +96,10 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="city">City</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        public async Task DistrictListAsync(Stream stream, string city, int? organizationId, DataFormat format)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> DistrictListAsync(Stream stream, string city, int? organizationId, DataFormat format)
         {
-            await ExecuteAsync(stream, GetDistrictListData(city, organizationId, format), null);
+            return await ExecuteAsync(stream, GetDistrictListData(city, organizationId, format), null);
         }
 
         // Get city list operation data
@@ -187,9 +190,10 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="country">Country</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        public async Task RegionListAsync(Stream stream, string country, int? organizationId, DataFormat format)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> RegionListAsync(Stream stream, string country, int? organizationId, DataFormat format)
         {
-            await ExecuteAsync(stream, GetRegionListData(country, organizationId, format), null);
+            return await ExecuteAsync(stream, GetRegionListData(country, organizationId, format), null);
         }
     }
 }

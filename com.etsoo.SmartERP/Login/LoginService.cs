@@ -168,9 +168,10 @@ namespace com.etsoo.SmartERP.Login
         /// </summary>
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Field of data</param>
-        public async Task ServiceSummaryAsync(Stream stream, string id)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> ServiceSummaryAsync(Stream stream, string id)
         {
-            await ExecuteAsync(stream, GetServiceSummaryData(id, DataFormat.Json));
+            return await ExecuteAsync(stream, GetServiceSummaryData(id, DataFormat.Json));
         }
 
         private OperationData GetSignoutData(LoginMethod method, bool clearToken)

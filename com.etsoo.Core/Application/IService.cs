@@ -97,7 +97,8 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Field of data</param>
         /// <param name="parameters">Parameters</param>
-        void Report(Stream stream, string id, string parameters = null);
+        /// <returns>Is content wrote</returns>
+        bool Report(Stream stream, string id, string parameters = null);
 
         /// <summary>
         /// Async data report
@@ -106,7 +107,8 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Field of data</param>
         /// <param name="parameters">Parameters</param>
-        Task ReportAsync(Stream stream, string id, string parameters = null);
+        /// <returns>Is content wrote</returns>
+        Task<bool> ReportAsync(Stream stream, string id, string parameters = null);
 
         /// <summary>
         /// Search JSON data to stream
@@ -115,7 +117,8 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="domain">Domain, identify as a new saved procedure</param>
         /// <param name="model">Parameters</param>
-        void SearchJson<M>(Stream stream, string domain, M model) where M : ITiplistDataModel;
+        /// <returns>Is content wrote</returns>
+        bool SearchJson<M>(Stream stream, string domain, M model) where M : ITiplistDataModel;
 
         /// <summary>
         /// Async search JSON data
@@ -124,7 +127,8 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="domain">Domain, identify as a new saved procedure</param>
         /// <param name="model">Parameters</param>
-        Task SearchJsonAsync<M>(Stream stream, string domain, M model) where M : ITiplistDataModel;
+        /// <returns>Is content wrote</returns>
+        Task<bool> SearchJsonAsync<M>(Stream stream, string domain, M model) where M : ITiplistDataModel;
 
         /// <summary>
         /// View JSON data to stream
@@ -133,7 +137,8 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
-        void ViewJson(Stream stream, T id, string field = null);
+        /// <returns>Is content wrote</returns>
+        bool ViewJson(Stream stream, T id, string field = null);
 
         /// <summary>
         /// Async view JSON data to stream
@@ -142,6 +147,7 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Id</param>
         /// <param name="field">Field</param>
-        Task ViewJsonAsync(Stream stream, T id, string field = null);
+        /// <returns>Is content wrote</returns>
+        Task<bool> ViewJsonAsync(Stream stream, T id, string field = null);
     }
 }

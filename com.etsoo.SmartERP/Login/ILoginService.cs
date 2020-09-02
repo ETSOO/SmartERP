@@ -44,7 +44,8 @@ namespace com.etsoo.SmartERP.Applications
         /// </summary>
         /// <param name="stream">Stream to write</param>
         /// <param name="id">Field of data</param>
-        Task ServiceSummaryAsync(Stream stream, string id);
+        /// <returns>Is content wrote</returns>
+        Task<bool> ServiceSummaryAsync(Stream stream, string id);
 
         /// <summary>
         /// Async signout

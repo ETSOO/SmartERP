@@ -73,8 +73,7 @@ namespace com.etsoo.Api.Helpers
         [HttpGet("{id}/{field?}")]
         public async Task Get(T id, string field = null)
         {
-            Response.ContentType = "application/json";
-            await Service.ViewJsonAsync(Response.Body, id, field);
+            StreamContent(await Service.ViewJsonAsync(Response.Body, id, field));
         }
 
         /// <summary>
@@ -87,8 +86,7 @@ namespace com.etsoo.Api.Helpers
         [HttpGet("Report/{id}")]
         public async Task Report(string id, [FromQuery(Name = "p")] string parameters = null)
         {
-            Response.ContentType = "application/json";
-            await Service.ReportAsync(Response.Body, id, parameters);
+            StreamContent(await Service.ReportAsync(Response.Body, id, parameters));
         }
 
         /// <summary>
@@ -103,6 +101,15 @@ namespace com.etsoo.Api.Helpers
             await result.SerializeAsync(Response.Body, DataFormat.Json);
         }
 
+        protected void StreamContent(bool hasContent)
+        {
+            Response.ContentType = "application/json";
+
+            // Indicate NoContent
+            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204
+            if (!hasContent) Response.StatusCode = 204;
+        }
+
         /// <summary>
         /// Async search entities
         /// 异步查询对象
@@ -111,8 +118,7 @@ namespace com.etsoo.Api.Helpers
         /// <returns>Search result</returns>
         protected async Task SearchEntityAsync<M>(M model) where M : IMainService<T>.ISearchDataModel
         {
-            Response.ContentType = "application/json";
-            await Service.SearchJsonAsync(Response.Body, model.Domain, model);
+            StreamContent(await Service.SearchJsonAsync(Response.Body, model.Domain, model));
         }
 
         /// <summary>
@@ -123,8 +129,7 @@ namespace com.etsoo.Api.Helpers
         /// <returns>Task</returns>
         protected async Task TiplistAsync<M>(M model) where M : IMainService<T>.ITiplistDataModel
         {
-            Response.ContentType = "application/json";
-            await Service.SearchJsonAsync(Response.Body, "tiplist", model);
+            StreamContent(await Service.SearchJsonAsync(Response.Body, "tiplist", model));
         }
     }
 }

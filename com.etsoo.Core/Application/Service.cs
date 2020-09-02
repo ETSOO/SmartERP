@@ -142,12 +142,12 @@ namespace com.etsoo.Core.Application
         /// <param name="data">Database operation data</param>
         /// <param name="checkPermission">Whether to check permission</param>
         /// <returns>Result data</returns>
-        protected void Execute(Stream stream, OperationData data, bool? checkPermission = true)
+        protected bool Execute(Stream stream, OperationData data, bool? checkPermission = true)
         {
             if (!data.TestResult.OK)
             {
                 data.TestResult.Serialize(stream, data.Format);
-                return;
+                return true;
             }
 
             if (checkPermission == null)
@@ -164,11 +164,11 @@ namespace com.etsoo.Core.Application
                     result.Serialize(stream, data.Format);
 
                     // Return anyway
-                    return;
+                    return true;
                 }
             }
 
-            Application.Database.ExecuteToStream(stream, data.Procedure, data.Parameters, true);
+            return Application.Database.ExecuteToStream(stream, data.Procedure, data.Parameters, true);
         }
 
         /// <summary>
@@ -206,13 +206,13 @@ namespace com.etsoo.Core.Application
         /// <param name="stream">Stream</param>
         /// <param name="data">Database operation data</param>
         /// <param name="checkPermission">Whether to check permission, null means determination</param>
-        /// <returns>Result data</returns>
-        protected async Task ExecuteAsync(Stream stream, OperationData data, bool? checkPermission = true)
+        /// <returns>Is content wrote</returns>
+        protected async Task<bool> ExecuteAsync(Stream stream, OperationData data, bool? checkPermission = true)
         {
             if (!data.TestResult.OK)
             {
                 await data.TestResult.SerializeAsync(stream, data.Format);
-                return;
+                return true;
             }
 
             if (checkPermission == null)
@@ -229,11 +229,11 @@ namespace com.etsoo.Core.Application
                     await result.SerializeAsync(stream, data.Format);
 
                     // Return anyway
-                    return;
+                    return true;
                 }
             }
 
-            await Application.Database.ExecuteToStreamAsync(stream, data.Procedure, data.Parameters, true);
+            return await Application.Database.ExecuteToStreamAsync(stream, data.Procedure, data.Parameters, true);
         }
 
         // 格式化字段

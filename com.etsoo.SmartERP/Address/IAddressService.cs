@@ -18,7 +18,8 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="region">Region</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        Task CityListAsync(Stream stream, string region, int? organizationId, DataFormat format);
+        /// <returns>Is content wrote</returns>
+        Task<bool> CityListAsync(Stream stream, string region, int? organizationId, DataFormat format);
 
         /// <summary>
         /// Async get country list JSON data
@@ -27,7 +28,8 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="stream">Stream to write</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        Task CountryListAsync(Stream stream, int? organizationId, DataFormat format);
+        /// <returns>Is content wrote</returns>
+        Task<bool> CountryListAsync(Stream stream, int? organizationId, DataFormat format);
 
         /// <summary>
         /// Async get district list JSON data
@@ -37,7 +39,8 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="city">City</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        Task DistrictListAsync(Stream stream, string city, int? organizationId, DataFormat format);
+        /// <returns>Is content wrote</returns>
+        Task<bool> DistrictListAsync(Stream stream, string city, int? organizationId, DataFormat format);
 
         /// <summary>
         /// Async get region list JSON data
@@ -47,6 +50,7 @@ namespace com.etsoo.SmartERP.Address
         /// <param name="country">Country</param>
         /// <param name="organizationId">Organization id</param>
         /// <param name="format">Data format</param>
-        Task RegionListAsync(Stream stream, string country, int? organizationId, DataFormat format);
+        /// <returns>Is content wrote</returns>
+        Task<bool> RegionListAsync(Stream stream, string country, int? organizationId, DataFormat format);
     }
 }

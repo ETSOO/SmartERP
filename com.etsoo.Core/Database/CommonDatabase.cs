@@ -170,6 +170,7 @@ namespace com.etsoo.Core.Database
         /// </summary>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         public OperationResult ExecuteResult(string sql, bool? isStoredProcedure = false)
         {
             return ExecuteResult(sql, null, isStoredProcedure);
@@ -181,6 +182,7 @@ namespace com.etsoo.Core.Database
         /// </summary>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         public async Task<OperationResult> ExecuteResultAsync(string sql, bool? isStoredProcedure = false)
         {
             return await ExecuteResultAsync(sql, null, isStoredProcedure);
@@ -193,6 +195,7 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         public abstract OperationResult ExecuteResult(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
 
         /// <summary>
@@ -202,6 +205,7 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
+        /// <returns>Operation result</returns>
         public abstract Task<OperationResult> ExecuteResultAsync(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
 
         /// <summary>
@@ -211,9 +215,10 @@ namespace com.etsoo.Core.Database
         /// <param name="stream">Stream to write</param>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        public void ExecuteToStream(Stream stream, string sql, bool? isStoredProcedure = false)
+        /// <returns>Is content wrote</returns>
+        public bool ExecuteToStream(Stream stream, string sql, bool? isStoredProcedure = false)
         {
-            ExecuteToStream(stream, sql, null, isStoredProcedure);
+            return ExecuteToStream(stream, sql, null, isStoredProcedure);
         }
 
         /// <summary>
@@ -223,9 +228,10 @@ namespace com.etsoo.Core.Database
         /// <param name="stream">Stream to write</param>
         /// <param name="sql">SQL Command</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        public async Task ExecuteToStreamAsync(Stream stream, string sql, bool? isStoredProcedure = false)
+        /// <returns>Is content wrote</returns>
+        public async Task<bool> ExecuteToStreamAsync(Stream stream, string sql, bool? isStoredProcedure = false)
         {
-            await ExecuteToStreamAsync(stream, sql, null, isStoredProcedure);
+            return await ExecuteToStreamAsync(stream, sql, null, isStoredProcedure);
         }
 
         /// <summary>
@@ -236,7 +242,8 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        public abstract void ExecuteToStream(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
+        /// <returns>Is content wrote</returns>
+        public abstract bool ExecuteToStream(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
 
         /// <summary>
         /// Async ESQL Command, write to stream of the first row first column value, used to read huge text data like json/xml
@@ -246,6 +253,7 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        public abstract Task ExecuteToStreamAsync(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
+        /// <returns>Is content wrote</returns>
+        public abstract Task<bool> ExecuteToStreamAsync(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false);
     }
 }

@@ -303,6 +303,9 @@ namespace com.etsoo.Core.Database
         /// <param name="isStoredProcedure">Is stored procedure</param>
         public override async Task<OperationResult> ExecuteResultAsync(string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
+            // Has content
+            var hasContent = false;
+
             // Usings
             using var connection = NewConnection;
             using var command = new SqliteCommand(sql, connection);
@@ -385,8 +388,12 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        public override void ExecuteToStream(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
+        /// <returns>Is content wrote</returns>
+        public override bool ExecuteToStream(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
+            // Has content
+            var hasContent = false;
+
             // Usings
             using var connection = NewConnection;
             using var command = new SqliteCommand(sql, connection);
@@ -424,6 +431,8 @@ namespace com.etsoo.Core.Database
 
                     textReader.Close();
                     textReader.Dispose();
+
+                    hasContent = true;
                 }
 
                 reader.Close();
@@ -432,6 +441,8 @@ namespace com.etsoo.Core.Database
 
             // Close
             connection.Close();
+
+            return hasContent;
         }
 
         /// <summary>
@@ -442,8 +453,12 @@ namespace com.etsoo.Core.Database
         /// <param name="sql">SQL Command</param>
         /// <param name="paras">Parameters</param>
         /// <param name="isStoredProcedure">Is stored procedure</param>
-        public override async Task ExecuteToStreamAsync(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
+        /// <returns>Is content wrote</returns>
+        public override async Task<bool> ExecuteToStreamAsync(Stream stream, string sql, IDictionary<string, dynamic> paras, bool? isStoredProcedure = false)
         {
+            // Has content
+            var hasContent = false;
+
             // Usings
             using var connection = NewConnection;
             using var command = new SqliteCommand(sql, connection);
@@ -481,6 +496,8 @@ namespace com.etsoo.Core.Database
 
                     textReader.Close();
                     textReader.Dispose();
+
+                    hasContent = true;
                 }
 
                 await reader.CloseAsync();
@@ -489,6 +506,8 @@ namespace com.etsoo.Core.Database
 
             // Close
             await connection.CloseAsync();
+
+            return hasContent;
         }
     }
 }
