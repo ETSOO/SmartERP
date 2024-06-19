@@ -1,0 +1,17 @@
+# Base image, alpine is a lightweight linux distribution while scratch is an empty image
+FROM ubuntu:latest
+
+# Copy your source file directory into /app
+# COPY path/to/source /app/
+
+# Install mkcert
+RUN apt update
+RUN apt install -y libnss3-tools
+RUN apt install -y mkcert
+
+# Change to /app
+# WORKDIR /app
+
+# Run mkcert
+RUN CAROOT=/var/etsoo/certs \
+    mkcert -key-file /var/etsoo/certs/key.pem -cert-file /var/etsoo/certs/cert.pem app.local *.app.local

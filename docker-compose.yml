@@ -1,0 +1,68 @@
+# Docker Compose file for SmartERP
+# SmartERP 的 Docker Compose 文件
+
+services:
+    # Postgres database for SmartERP
+    # name: 'etsoo', db: 'smarterp', user: 'smarterp'
+    # 司友云ERP(SmartERP)的 Postgres 数据库
+    postgres:
+        image: postgres:16.3-alpine
+        container_name: postgres
+        environment:
+            POSTGRES_USER: smarterp
+            POSTGRES_PASSWORD: smarterp
+            POSTGRES_DB: smarterp
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./data/postgres:/var/lib/postgresql/data
+
+    # PgAdmin4 for Postgres management
+    # 用于 Postgres 管理的 PgAdmin4
+    pgadmin:
+        depends_on:
+            - postgres
+        image: dpage/pgadmin4
+        container_name: pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@etsoo.com
+            PGADMIN_DEFAULT_PASSWORD: admin
+        ports:
+            - "5501:80"
+        volumes:
+            - ./data/pgadmin:/var/lib/pgadmin
+
+    # Etsoo Local setup
+    # 亿速思维本地设置
+    localsetup:
+        image: localsetup
+        # tty: true # For infinite running
+        build:
+            context: .
+            dockerfile: LocalSetupDocker
+        container_name: localsetup
+        volumes:
+            - certs:/var/etsoo/certs
+
+    # Nginx for reverse proxy
+    # Change the nginx.conf under root for your needs, make sure the ports (80, 443) are not used by other services (like IIS)
+    # Nginx 用于反向代理
+    # 修改根目录下的 nginx.conf 文件以适应你的需求，确保(80, 443)端口没有被其他服务占用（如 IIS）
+    nginx:
+        depends_on:
+            - localsetup
+        image: nginx:1.27-alpine
+        container_name: nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf
+            - ./data/nginx/logs:/etc/nginx/logs
+            - ./data/nginx/cache:/var/cache/nginx
+            - certs:/etc/nginx/ssl
+
+# Volumes for persistance
+volumes:
+  certs:
+    name: "dev-certs"
