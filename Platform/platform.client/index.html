@@ -1,13 +1,43 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="ETSOO SmartERP core system, 青岛亿速 / 上海亿商 司友云ERP核心系统"
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' data: 'unsafe-inline' %VITE_APP_UNSAFE_INLINES%; worker-src 'self' blob: ;"
+    />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <script src="/settings.%MODE%.js?v=%VITE_APP_VERSION%"></script>
+    <script>
+      if (!document.__defineGetter__) {
+        Object.defineProperty(document, "cookie", {
+          get: function () {
+            return "";
+          },
+          set: function () {
+            return true;
+          }
+        });
+      } else {
+        document.__defineGetter__("cookie", function () {
+          return "";
+        });
+        document.__defineSetter__("cookie", function () {});
+      }
+    </script>
+    <title>SmartERP</title>
   </head>
   <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

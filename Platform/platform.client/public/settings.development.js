@@ -1,0 +1,16 @@
+window.settings = {
+  /**
+   * Endpoint of the API service
+   */
+  endpoint: "https://{hostname}:9001/api/",
+
+  /**
+   * App root url
+   */
+  homepage: "",
+
+  /**
+   * Web url of the cloud
+   */
+  webUrl: "https://platform.app.local"
+};
