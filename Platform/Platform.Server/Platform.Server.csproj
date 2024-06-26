@@ -16,13 +16,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.Web" Version="1.1.85" />
+    <PackageReference Include="com.etsoo.DI" Version="1.0.14" />
+    <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.53" />
+    <PackageReference Include="com.etsoo.Web" Version="1.1.91" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.31" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>8.*-*</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
@@ -30,10 +38,6 @@
     <ProjectReference Include="..\platform.client\platform.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

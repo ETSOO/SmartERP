@@ -1,34 +1,34 @@
-import React from 'react';
+import React from "react";
 import {
   HBox,
   ItemList,
   TextFieldEx,
   TextFieldExMethods
-} from '@etsoo/materialui';
-import { DataTypes, DomUtils, Utils } from '@etsoo/shared';
-import { Box, Button } from '@mui/material';
-import { SharedLayout } from './login/SharedLayout';
-import { AccountCircle, Language } from '@mui/icons-material';
+} from "@etsoo/materialui";
+import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
+import { Box, Button } from "@mui/material";
+import { SharedLayout } from "./login/SharedLayout";
+import { AccountCircle, Language } from "@mui/icons-material";
 import {
   BridgeUtils,
   PublicProductDto,
   RefreshTokenRQ
-} from '@etsoo/appscript';
-import { Constants } from './app/Constants';
-import { app } from './app/SmartApp';
-import DownloadIcon from '@mui/icons-material/Download';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { CoreConstants } from '@etsoo/react';
+} from "@etsoo/appscript";
+import { Constants } from "./app/Constants";
+import { app } from "./app/SmartApp";
+import DownloadIcon from "@mui/icons-material/Download";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { CoreConstants } from "@etsoo/react";
 
 function App() {
   // Navigate
   const navigate = useNavigate();
   const [search] = useSearchParams();
   const params = DomUtils.dataAs(search, {
-    serviceId: 'string',
-    loginid: 'string',
-    url: 'string',
-    tryLogin: 'string'
+    serviceId: "string",
+    loginid: "string",
+    url: "string",
+    tryLogin: "string"
   });
 
   // Cache URL
@@ -51,9 +51,9 @@ function App() {
   );
 
   const userIdSaved =
-    userIdEncrypted === '' || userIdEncrypted == null
-      ? ''
-      : app.decrypt(userIdEncrypted) ?? '';
+    userIdEncrypted === "" || userIdEncrypted == null
+      ? ""
+      : app.decrypt(userIdEncrypted) ?? "";
 
   let passedLoginId = params.loginid ?? null;
   if (
@@ -68,7 +68,7 @@ function App() {
   const id = passedLoginId ?? userIdSaved;
 
   // Register id
-  const [registerId, updateRegisterId] = React.useState('');
+  const [registerId, updateRegisterId] = React.useState("");
 
   // Device validataion
   const deviceValidated = React.useRef(false);
@@ -104,7 +104,7 @@ function App() {
   const nextClick = async () => {
     // Input check
     const inputId = loginRef.current?.value.trim();
-    if (inputId == null || inputId === '') {
+    if (inputId == null || inputId === "") {
       loginRef.current?.focus();
       return;
     }
@@ -134,7 +134,7 @@ function App() {
       }
     } else {
       // Without password verification, no user id returned
-      navigate('./login/password/' + encodeURIComponent(idEncrypted));
+      navigate("./login/password/" + encodeURIComponent(idEncrypted));
     }
   };
 
@@ -143,8 +143,8 @@ function App() {
 
   // Save login
   const trySaveLogin =
-    params.tryLogin !== 'false' &&
-    (id === '' || id === userIdSaved) &&
+    params.tryLogin !== "false" &&
+    (id === "" || id === userIdSaved) &&
     refreshToken != null;
 
   // Visible
@@ -159,7 +159,7 @@ function App() {
     // Load service data
     const loadServiceData = (serviceToken?: string) => {
       if (serviceId == null) {
-        if (serviceToken === '') app.toHome(navigate, './home');
+        if (serviceToken === "") app.toHome(navigate, "./home");
         else setVisible(true);
         return;
       }
@@ -170,7 +170,7 @@ function App() {
         // Hold the query id
         result.queryId = serviceId;
 
-        if (serviceToken === '') app.toHome(navigate, './home');
+        if (serviceToken === "") app.toHome(navigate, "./home");
         else if (serviceToken) {
           app.toServiceUrl(result.id, result.webUrl, serviceToken);
         } else {
@@ -188,7 +188,7 @@ function App() {
 
     const sdata: Partial<RefreshTokenRQ> = {};
     if (serviceId) {
-      if (typeof serviceId === 'number') sdata.serviceId = serviceId;
+      if (typeof serviceId === "number") sdata.serviceId = serviceId;
       else if (Utils.isDigits(serviceId)) sdata.serviceId = parseInt(serviceId);
       else sdata.serviceUid = serviceId;
     }
@@ -199,7 +199,7 @@ function App() {
         if (!isMounted.current) return;
         if (result === true) {
           // Navigate to service
-          loadServiceData(app.userData?.serviceToken ?? '');
+          loadServiceData(app.userData?.serviceToken ?? "");
         } else {
           loadServiceData();
         }
@@ -239,16 +239,16 @@ function App() {
             <Box
               gap={0.5}
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 right: 0,
-                display: { xs: 'none', sm: 'none', md: 'flex' }
+                display: { xs: "none", sm: "none", md: "flex" }
               }}
             >
               <img
                 alt="Mobile QRCode"
                 src={mobileQRCode}
-                title={value.get('scanQRCodeTip')}
+                title={value.get("scanQRCodeTip")}
               />
             </Box>
           )}
@@ -260,7 +260,7 @@ function App() {
                   items={app.settings.cultures}
                   idField="name"
                   size="small"
-                  title={value.get('languages')}
+                  title={value.get("languages")}
                   onClose={closeCultureChoose}
                   selectedValue={app.culture}
                   className="noneTransformButton"
@@ -269,30 +269,30 @@ function App() {
                 />
               </HBox>
             }
-            title={value.get('login')!}
+            title={value.get("login")!}
             subTitle={app.settings.currentRegion.label}
             buttons={[
               <Button variant="contained" key="next" onClick={nextClick}>
-                {value.get('nextStep')}
+                {value.get("nextStep")}
               </Button>
             ]}
             bottom={
               service == null && [
                 <Link to="./login/about" key="about">
-                  {value.get('about')}
+                  {value.get("about")}
                 </Link>,
                 <Link to="./login/terms" key="terms">
-                  {value.get('terms')}
+                  {value.get("terms")}
                 </Link>,
-                <div key="version">{process.env.REACT_APP_VERSION}</div>
+                <div key="version">{import.meta.env.VITE_APP_VERSION}</div>
               ]
             }
             bottomAdd={
               BridgeUtils.host == null && (
                 <Box
                   sx={{
-                    textAlign: 'center',
-                    display: { xs: 'none', sm: 'none', md: 'inherit' }
+                    textAlign: "center",
+                    display: { xs: "none", sm: "none", md: "inherit" }
                   }}
                 >
                   <Button
@@ -302,7 +302,7 @@ function App() {
                     href={`${window.location.origin}/apps/SmartERP.zip`}
                     target="_blank"
                   >
-                    {value.get('downloadWinApp')}
+                    {value.get("downloadWinApp")}
                   </Button>
                 </Box>
               )
@@ -313,14 +313,14 @@ function App() {
                 <AccountCircle color="primary" />
               </Box>
               <TextFieldEx
-                label={value.get('loginId')}
+                label={value.get("loginId")}
                 ref={mRef}
                 inputRef={loginRef}
                 defaultValue={id?.hideEmail()}
                 autoFocus
                 autoCorrect="off"
                 autoCapitalize="none"
-                inputProps={{ inputMode: 'email', spellCheck: false }}
+                inputProps={{ inputMode: "email", spellCheck: false }}
                 showClear
                 autoComplete="username"
                 onEnter={(e) => {
@@ -330,9 +330,9 @@ function App() {
               />
             </HBox>
             <div>
-              {value.get('noAccountTip')}&nbsp;
-              <Link to={'./login/register/' + registerId}>
-                {value.get('noAccountCreate')}
+              {value.get("noAccountTip")}&nbsp;
+              <Link to={"./login/register/" + registerId}>
+                {value.get("noAccountCreate")}
               </Link>
             </div>
           </SharedLayout>

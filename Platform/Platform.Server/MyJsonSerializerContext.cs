@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Platform.Server.Endpoints.Public.RQ;
+using System.Text.Json.Serialization;
 
 namespace Platform.Server
 {
@@ -9,9 +10,10 @@ namespace Platform.Server
     [JsonSourceGenerationOptions(
         PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonKnownNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
-    [JsonSerializable(typeof(bool))]
+    [JsonSerializable(typeof(MobileQRCodeRQ))]
     public partial class MyJsonSerializerContext : JsonSerializerContext
     {
     }

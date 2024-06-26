@@ -1,0 +1,15 @@
+# Base image, alpine is a lightweight linux distribution while scratch is an empty image
+FROM ubuntu:latest
+
+# Copy your source file directory into /app
+# Why the path is "Resources/LocalSetup.sh", not "LocalSetup.sh", is because the path is relative to the "context" of the build
+COPY Resources/LocalSetup.sh /app/LocalSetup.sh
+
+# Change to /app
+WORKDIR /app
+
+# Container will run this command when it starts
+# CMD ./LocalSetup.sh
+
+# While RUN is executed during the build
+RUN ./LocalSetup.sh
