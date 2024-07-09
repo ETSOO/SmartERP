@@ -1,11 +1,14 @@
 ﻿using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using Platform.Server.Application;
+using Platform.Server.Database;
 
 namespace Platform.Server.Services
 {
     public class AuthService : CommonService, IAuthService
     {
+        private readonly MyDbContext _db;
+
         /// <summary>
         /// Constructor
         /// 构造函数
@@ -13,10 +16,10 @@ namespace Platform.Server.Services
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
-        public AuthService(IMyApp app, IMyUserAccessor userAccessor, ILogger<AuthService> logger)
+        public AuthService(MyDbContext db, IMyApp app, IMyUserAccessor userAccessor, ILogger<AuthService> logger)
             : base(app, userAccessor.User, "auth", logger)
         {
-
+            _db = db;
         }
 
         /// <summary>

@@ -3,15 +3,29 @@ import {
   ResultPayload,
   AuthApi as AuthApiBase,
   LoginRQ
-} from '@etsoo/appscript';
-import { SmartERPLoginResult } from '@etsoo/materialui';
-import { InviteDto } from './dto/auth/InviteDto';
-import { RegisterRQ } from './rq/auth/RegisterRQ';
+} from "@etsoo/appscript";
+import { SmartERPLoginResult } from "@etsoo/materialui";
+import { InviteDto } from "./dto/auth/InviteDto";
+import { RegisterRQ } from "./rq/auth/RegisterRQ";
 
 /**
  * Authentication API
  */
 export class AuthApi extends AuthApiBase {
+  /**
+   * Get auth url
+   * @param ac Auth client
+   * @param payload Payload
+   * @returns Result
+   */
+  getAuthUrl(ac: string, payload?: IApiPayload<string>) {
+    return this.api.get(
+      `OAuth2/${ac}/GetServerAuthUrl?device=${this.app.deviceId}`,
+      undefined,
+      payload
+    );
+  }
+
   /**
    * Invite
    * @param id Id
@@ -39,6 +53,6 @@ export class AuthApi extends AuthApiBase {
    * @returns Result
    */
   register(rq: RegisterRQ, payload?: ResultPayload) {
-    return this.api.post('Auth/Register', rq, payload);
+    return this.api.post("Auth/Register", rq, payload);
   }
 }

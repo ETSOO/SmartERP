@@ -1,16 +1,21 @@
+using com.etsoo.AlipayApi;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
+using com.etsoo.Database;
 using com.etsoo.DI;
 using com.etsoo.GarnetClient;
+using com.etsoo.GoogleApi;
+using com.etsoo.MicrosoftApi;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Web;
 using com.etsoo.WeiXin;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Platform.Server;
 using Platform.Server.Application;
+using Platform.Server.Database;
 using Platform.Server.Endpoints.Auth;
 using Platform.Server.Endpoints.Public;
 using Platform.Server.OAuth2;
@@ -61,10 +66,49 @@ otBuilder
     );
 */
 
-services.AddAuthentication().AddJwtBearer();
+// Entity framework
+var connectonString = configuration.GetConnectionString("SmartERP");
+if (string.IsNullOrEmpty(connectonString))
+{
+    throw new Exception("SmartERP connection string not found");
+}
+
+// No need to use AddDbContextPool currently
+services.AddDbContext<MyDbContext>((provider, options) =>
+{
+    options.UseNpgsql(configuration.GetConnectionString(connectonString))
+        .UseSnakeCaseNamingConvention(); // Use snake case naming convention
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
+
+// SmartERP
+var erpSection = configuration.GetSection("SmartERP");
+var erpSettings = erpSection.GetSection("Configuration").Get<MyAppConfiguration>();
+var erpJwt = erpSection.GetSection("Jwt").Get<com.etsoo.CoreFramework.Authentication.JwtSettings>();
+if (erpSettings == null || erpJwt == null)
+{
+    throw new Exception("SmartERP configuration not found");
+}
+if (erpSettings.Cultures.Length == 0)
+{
+    throw new Exception("SmartERP cultures not found");
+}
+
+var erp = new MyApp(services, erpSettings, new PostgreDatabase(connectonString), erpJwt);
+services.AddSingleton<IMyApp>(erp);
+
+// It's done by JwtService of MyApp
+// services.AddAuthentication().AddJwtBearer();
+
 services.AddAuthorization();
 
 // Add services to the container.
+services.AddAntiforgery();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 services.AddHttpClient();
@@ -134,31 +178,30 @@ services.AddCors(options =>
     }
 });
 
-// Entity framework
-
-// SmartERP
-var erpSection = configuration.GetSection("SmartERP");
-var erpSettings = erpSection.GetSection("Configuration").Get<MyAppConfiguration>();
-
-if (erpSettings == null)
+// Auth2 clients
+var wechatOptions = configuration.GetSection("WechatAuth");
+if (wechatOptions.Exists())
 {
-    throw new NullReferenceException(nameof(erpSettings));
+    services.AddWechatAuthClient(wechatOptions);
 }
 
-var erpJwt = erpSection.GetSection("Jwt").Get<com.etsoo.CoreFramework.Authentication.JwtSettings>();
-
-services.AddSingleton<IMyApp>((provider) =>
+var alipayOptions = configuration.GetSection("AlipayAuth");
+if (alipayOptions.Exists())
 {
-    var factory = provider.GetRequiredService<ILoggerFactory>();
-    return new MyApp(services, erpSettings, null, erpJwt, new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
-        {
-            factory.CreateLogger("OnAuthenticationFailed").LogError(context.Exception, "JWT OnAuthentication Failed");
-            return Task.CompletedTask;
-        }
-    });
-});
+    services.AddAlipayClient(alipayOptions);
+}
+
+var googleOptions = configuration.GetSection("GoogleAuth");
+if (googleOptions != null)
+{
+    services.AddGoogleAuthClient(googleOptions);
+}
+
+var microsoftOptions = configuration.GetSection("MicrosoftAuth");
+if (microsoftOptions != null)
+{
+    services.AddMicrosoftAuthClient(microsoftOptions);
+}
 
 // Local services
 services.Configure<WXClientOptions>(configuration.GetSection("WeiXin"));
@@ -184,6 +227,8 @@ if (corsOptions.Required)
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseAntiforgery();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -201,11 +246,30 @@ else
 var api = app.MapGroup("/api").WithOpenApi();
 
 // OAuth2 integration
-api.MapGroup("OAuth2").AllowAnonymous()
-    .MapGoogle()
-    .MapWechat()
-    .MapAlipay()
-;
+var oauth = api.MapGroup("OAuth2").AllowAnonymous();
+
+if (wechatOptions.Exists())
+{
+    oauth.MapWechat();
+}
+
+// Alipay
+if (alipayOptions.Exists())
+{
+    oauth.MapAlipay();
+}
+
+// Google
+if (googleOptions.Exists())
+{
+    oauth.MapGoogle();
+}
+
+// Microsoft
+if (microsoftOptions.Exists())
+{
+    oauth.MapMicrosoft();
+}
 
 api.MapAuth()
     .MapPublic()
@@ -213,4 +277,11 @@ api.MapAuth()
 
 app.MapFallbackToFile("/index.html");
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "Error occurred during application ran");
+}

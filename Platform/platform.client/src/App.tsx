@@ -6,7 +6,7 @@ import {
   TextFieldExMethods
 } from "@etsoo/materialui";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Grid, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./login/SharedLayout";
 import { AccountCircle, Language } from "@mui/icons-material";
 import {
@@ -19,6 +19,25 @@ import { app } from "./app/SmartApp";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
+import {
+  AlipayIcon,
+  GoogleIcon,
+  MicrosoftIcon,
+  WechatIcon
+} from "./images/SVGIcons";
+
+function getBrandIcon(ac: string) {
+  switch (ac) {
+    case "Alipay":
+      return AlipayIcon;
+    case "Google":
+      return GoogleIcon;
+    case "Microsoft":
+      return MicrosoftIcon;
+    default:
+      return WechatIcon;
+  }
+}
 
 function App() {
   // Navigate
@@ -210,6 +229,23 @@ function App() {
     });
   }, [regionId, trySaveLogin, culture, serviceId, refreshToken, navigate]);
 
+  // Do auth
+  const doAuth = React.useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>, ac: string) => {
+      event.currentTarget.disabled = true;
+      const url = await app.authApi.getAuthUrl(ac);
+
+      if (url) {
+        globalThis.location.href = url;
+      }
+
+      event.currentTarget.disabled = false;
+
+      app.notifier.showLoading();
+    },
+    []
+  );
+
   React.useEffect(() => {
     if (!visible) return;
 
@@ -228,6 +264,7 @@ function App() {
   React.useEffect(() => {
     return () => {
       isMounted.current = false;
+      app.notifier.hideLoading();
     };
   }, []);
 
@@ -329,6 +366,25 @@ function App() {
                 }}
               />
             </HBox>
+            <Typography variant="caption">{value.get("signInWith")}</Typography>
+            {app.settings.authClients.length > 0 && (
+              <Grid container>
+                {app.settings.authClients.map((ac) => (
+                  <Grid item padding={0.5} xs={6} key={ac}>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      startIcon={
+                        <SvgIcon component={getBrandIcon(ac)} inheritViewBox />
+                      }
+                      onClick={(event) => doAuth(event, ac)}
+                    >
+                      {value.get(`brand${ac}`)}
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
             <div>
               {value.get("noAccountTip")}&nbsp;
               <Link to={"./login/register/" + registerId}>

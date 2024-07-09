@@ -1,10 +1,10 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
-import { HBox, MUGlobal, VBox } from '@etsoo/materialui';
-import logo from './../images/etsoo.png';
-import { app } from '../app/SmartApp';
-import { Constants } from '../app/Constants';
-import { PublicProductDto } from '@etsoo/appscript';
+import React from "react";
+import { Box, Typography } from "@mui/material";
+import { HBox, MUGlobal, VBox } from "@etsoo/materialui";
+import logo from "./../images/etsoo.png";
+import { app } from "../app/SmartApp";
+import { Constants } from "../app/Constants";
+import { PublicProductDto } from "@etsoo/appscript";
 
 /**
  * Shared layout props
@@ -87,12 +87,12 @@ export function SharedLayout(props: SharedLayoutProps) {
     <React.Fragment>
       <Box
         sx={{
-          position: 'relative',
+          position: "relative",
           padding: MUGlobal.pagePaddings,
-          width: { xs: '100%', sm: 450 },
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          visibility: visible ? 'visible' : 'hidden'
+          width: { xs: "100%", sm: 450 },
+          marginLeft: "auto",
+          marginRight: "auto",
+          visibility: visible ? "visible" : "hidden"
         }}
       >
         <HBox
@@ -104,14 +104,14 @@ export function SharedLayout(props: SharedLayoutProps) {
             component="img"
             src={service?.logo ?? logo}
             sx={{
-              height: { xs: '36px', sm: '48px' },
-              userSelect: 'none'
+              height: { xs: "36px", sm: "48px" },
+              userSelect: "none"
             }}
           />
           {headerRight}
           <Typography variant="subtitle1">
             <Context.Consumer>
-              {(value) => service?.name ?? value.get<string>('appName')}
+              {(value) => service?.name ?? value.get<string>("appName")}
             </Context.Consumer>
           </Typography>
         </HBox>
@@ -121,7 +121,7 @@ export function SharedLayout(props: SharedLayoutProps) {
           textAlign="center"
           paddingBottom="4px"
         >
-          {app.get('slogan')}
+          {app.get("slogan")}
         </Typography>
         <VBox
           borderRadius={0.5}
@@ -129,7 +129,7 @@ export function SharedLayout(props: SharedLayoutProps) {
           spacing={2}
           boxShadow={1}
           alignItems="flex-start"
-          sx={{ backgroundColor: '#fff' }}
+          sx={{ backgroundColor: "#fff" }}
         >
           <VBox width="100%">
             <HBox justifyContent="space-between" alignItems="center">
@@ -137,7 +137,7 @@ export function SharedLayout(props: SharedLayoutProps) {
               {pageRight}
             </HBox>
             {subTitle &&
-              (typeof subTitle === 'string' ? (
+              (typeof subTitle === "string" ? (
                 <Typography
                   variant="body2"
                   color={(theme) => theme.palette.grey[600]}
@@ -152,15 +152,20 @@ export function SharedLayout(props: SharedLayoutProps) {
           <HBox
             justifyContent={
               Array.isArray(buttons) && buttons.length > 1
-                ? 'space-between'
-                : 'flex-end'
+                ? "space-between"
+                : "flex-end"
             }
             spacing={2}
           >
             {buttons}
           </HBox>
         </VBox>
-        <HBox padding="8px 24px" spacing={2} fontSize="smaller">
+        <HBox
+          padding="8px 24px"
+          spacing={2}
+          fontSize="smaller"
+          justifyContent="center"
+        >
           {bottom}
         </HBox>
         {bottomAdd}
