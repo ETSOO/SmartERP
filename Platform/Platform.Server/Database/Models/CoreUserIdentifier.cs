@@ -58,12 +58,12 @@ namespace Platform.Server.Database.Models
         /// Creation
         /// 创建时间
         /// </summary>
-        public DateTimeOffset Creation { get; init; } = DateTimeOffset.Now;
+        public DateTimeOffset Creation { get; init; } = DateTimeOffset.UtcNow;
 
         /// <summary>
         /// Core user
         /// 核心用户
         /// </summary>
-        public required virtual CoreUser CoreUser { get; set; }
+        public virtual CoreUser CoreUser { get; init; } = default!;
     }
 }

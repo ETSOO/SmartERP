@@ -10,7 +10,7 @@
     <SpaRoot>..\platform.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:9002</SpaProxyServerUrl>
-    <PublishAot>true</PublishAot>
+    <PublishAot>false</PublishAot>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
@@ -20,21 +20,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.3" />
+    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.8" />
     <PackageReference Include="com.etsoo.DI" Version="1.0.14" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.30" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.55" />
-    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.4" />
-    <PackageReference Include="com.etsoo.Web" Version="1.1.94" />
-    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.34" />
+    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.35" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.59" />
+    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.10" />
+    <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.28" />
+    <PackageReference Include="com.etsoo.SMTP" Version="1.0.57" />
+    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.1" />
+    <PackageReference Include="com.etsoo.Web" Version="1.2.0" />
+    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.39" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>8.*-*</Version>
+      <Version>8.0.7</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
@@ -47,6 +50,33 @@
     <ProjectReference Include="..\platform.client\platform.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.zh-Hans.resx">
+      <DependentUpon>Properties\Resources.resx</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.zh-Hant.resx">
+      <DependentUpon>Properties\Resources.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

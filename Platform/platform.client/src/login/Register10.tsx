@@ -1,19 +1,14 @@
 import React from "react";
-import { HBox, LoadingButton } from "@etsoo/materialui";
+import { LoadingButton, TextFieldEx } from "@etsoo/materialui";
 import { Button, Grid, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppUtils } from "../app/AppUtils";
-import { useSearchParamsEx } from "@etsoo/react";
 
-function Register() {
+function Register10() {
   // Navigate
   const navigate = useNavigate();
-
-  const { auth: authType } = useSearchParamsEx({
-    auth: "string"
-  });
 
   let { username } = useParams<{ username: string }>();
   if (username) username = app.decrypt(decodeURIComponent(username));
@@ -71,12 +66,6 @@ function Register() {
     }
   }, []);
 
-  React.useEffect(() => {
-    if (authType) {
-      doAuth(authType);
-    }
-  }, [authType]);
-
   return (
     <SharedLayout
       title={labels.register}
@@ -89,9 +78,20 @@ function Register() {
         </Button>
       ]}
     >
-      <HBox>
-        <Button></Button>
-      </HBox>
+      <TextFieldEx
+        label={labels.loginId}
+        inputRef={loginRef}
+        autoFocus
+        autoCorrect="off"
+        autoCapitalize="none"
+        inputProps={{ inputMode: "email" }}
+        showClear
+        defaultValue={username}
+        onEnter={(e) => {
+          nextClick();
+          e.preventDefault();
+        }}
+      />
       <Typography variant="caption">{labels.signUpWith}</Typography>
       {app.settings.authClients.length > 0 && (
         <Grid container>
@@ -118,4 +118,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default Register10;

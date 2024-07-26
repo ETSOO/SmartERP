@@ -1,5 +1,5 @@
 ﻿using com.etsoo.AlipayApi;
-using Microsoft.AspNetCore.Mvc;
+using Platform.Server.Database.Models;
 using Platform.Server.Services;
 
 namespace Platform.Server.OAuth2
@@ -14,22 +14,21 @@ namespace Platform.Server.OAuth2
         {
             var g = builder.MapGroup("Alipay");
 
-            g.MapGet("GetServerAuthUrl", (IAuthService service, IAlipayClient client, HttpContext context, [FromQuery(Name = "device")] string device) =>
-            {
+            g.MapGet("GetLogInUrl", (IAuthService service, IAlipayClient client, HttpRequest request, string device)
+                => service.GetLogInUrl(client, request.Headers.UserAgent, device)
+                ).WithDescription("Alipay OAuth2 get log in URL / 支付宝 OAuth2 获取登录地址");
 
+            g.MapGet("GetSignUpUrl", (IAuthService service, IAlipayClient client, HttpRequest request, string device)
+                => service.GetSignUpUrl(client, request.Headers.UserAgent, device)
+                ).WithDescription("Alipay OAuth2 get sign up URL / 支付宝 OAuth2 获取注册地址");
 
-                return client.GetServerAuthUrl("abc", "auth_user");
-            });
+            g.MapGet("LogIn", (IAuthService service, IAlipayClient client, HttpContext context, CancellationToken cancellation)
+                => service.LogInAsync(client, CoreUserIdentifierType.Alipay, context, cancellation)
+                ).WithDescription("Alipay OAuth2 log in / 支付宝 OAuth2 登录");
 
-            g.MapGet("SignIn", async (IAuthService service, IAlipayClient client, HttpContext context, HttpRequest request) =>
-            {
-
-                var (result, userInfo) = await client.GetUserInfoAsync(request, "abc");
-                if (result.Ok && userInfo != null)
-                {
-                    context.Response.Redirect("https://localhost:9002/login/register/");
-                }
-            }).WithDescription("Alipay OAuth2 sign in / 支付宝 OAuth2 登录");
+            g.MapGet("SignUp", (IAuthService service, IAlipayClient client, HttpContext context, CancellationToken cancellation)
+                => service.SignUpAsync(client, CoreUserIdentifierType.Alipay, context, cancellation)
+                ).WithDescription("Alipay OAuth2 sign up / 支付宝 OAuth2 注册");
 
             return builder;
         }

@@ -13,14 +13,32 @@ import { RegisterRQ } from "./rq/auth/RegisterRQ";
  */
 export class AuthApi extends AuthApiBase {
   /**
-   * Get auth url
+   * Get log in URL
    * @param ac Auth client
    * @param payload Payload
    * @returns Result
    */
-  getAuthUrl(ac: string, payload?: IApiPayload<string>) {
+  getLogInUrl(ac: string, payload?: IApiPayload<string>) {
     return this.api.get(
-      `OAuth2/${ac}/GetServerAuthUrl?device=${this.app.deviceId}`,
+      `OAuth2/${ac}/GetLogInUrl?device=${encodeURIComponent(
+        this.app.deviceId
+      )}`,
+      undefined,
+      payload
+    );
+  }
+
+  /**
+   * Get sign up URL
+   * @param ac Auth client
+   * @param payload Payload
+   * @returns Result
+   */
+  getSignUpUrl(ac: string, payload?: IApiPayload<string>) {
+    return this.api.get(
+      `OAuth2/${ac}/GetSignUpUrl?device=${encodeURIComponent(
+        this.app.deviceId
+      )}`,
       undefined,
       payload
     );

@@ -6,7 +6,11 @@ using com.etsoo.DI;
 using com.etsoo.GarnetClient;
 using com.etsoo.GoogleApi;
 using com.etsoo.MicrosoftApi;
+using com.etsoo.SendCloudSDK;
+using com.etsoo.SMTP;
+using com.etsoo.ThirdPartyExtentions.Minio;
 using com.etsoo.Utils.Serialization;
+using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
 using com.etsoo.WeiXin;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +21,7 @@ using Platform.Server;
 using Platform.Server.Application;
 using Platform.Server.Database;
 using Platform.Server.Endpoints.Auth;
+using Platform.Server.Endpoints.AuthCode;
 using Platform.Server.Endpoints.Public;
 using Platform.Server.OAuth2;
 using Platform.Server.Services;
@@ -76,7 +81,7 @@ if (string.IsNullOrEmpty(connectonString))
 // No need to use AddDbContextPool currently
 services.AddDbContext<MyDbContext>((provider, options) =>
 {
-    options.UseNpgsql(configuration.GetConnectionString(connectonString))
+    options.UseNpgsql(connectonString)
         .UseSnakeCaseNamingConvention(); // Use snake case naming convention
 
     if (builder.Environment.IsDevelopment())
@@ -104,6 +109,32 @@ services.AddSingleton<IMyApp>(erp);
 
 // It's done by JwtService of MyApp
 // services.AddAuthentication().AddJwtBearer();
+
+// SMS client
+var smsClientSection = erpSection.GetSection("SMS");
+if (!smsClientSection.Exists())
+{
+    throw new Exception("SMS configuration not found");
+}
+services.AddSendCloudClient(smsClientSection);
+
+// SMTP client
+var smtpOptions = erpSection.GetSection("SMTP").Get<SMTPClientOptions>() ?? throw new Exception("SMTP configuration not found");
+var smtpClient = new SMTPClient(smtpOptions);
+services.AddSingleton<ISMTPClient>(smtpClient);
+
+// Storage
+var storageS3Section = erpSection.GetSection("StorageS3");
+if (storageS3Section.Exists())
+{
+    services.AddS3StorageClient(storageS3Section);
+}
+else
+{
+    var storageOptions = erpSection.GetSection("Storage").Get<StorageOptions>() ?? throw new Exception("Storage configuration not found");
+    var storage = new LocalStorage(storageOptions);
+    services.AddSingleton<IStorage>(storage);
+}
 
 services.AddAuthorization();
 
@@ -271,7 +302,9 @@ if (microsoftOptions.Exists())
     oauth.MapMicrosoft();
 }
 
+// Endpoints
 api.MapAuth()
+    .MapAuthCode()
     .MapPublic()
 ;
 

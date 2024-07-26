@@ -1,19 +1,16 @@
-import React from 'react';
-import { Button, FormControlLabel, Switch, Box } from '@mui/material';
-import { SharedLayout } from './SharedLayout';
-import {
-  DynamicActionResult,
-  LoginRQ,
-  PublicProductDto
-} from '@etsoo/appscript';
-import { HBox, TextFieldEx, TextFieldExMethods } from '@etsoo/materialui';
-import { Lock } from '@mui/icons-material';
-import { Constants } from '../app/Constants';
-import { app } from '../app/SmartApp';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { CoreConstants, NotificationMessageType } from '@etsoo/react';
+import React from "react";
+import { Button, FormControlLabel, Switch, Box } from "@mui/material";
+import { SharedLayout } from "./SharedLayout";
+import { LoginRQ, PublicProductDto } from "@etsoo/appscript";
+import { HBox, TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
+import { Lock } from "@mui/icons-material";
+import { Constants } from "../app/Constants";
+import { app } from "../app/SmartApp";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { CoreConstants, NotificationMessageType } from "@etsoo/react";
+import { DynamicActionResult } from "@etsoo/shared";
 
-const homeUrl = './../../../';
+const homeUrl = "./../../../";
 function NavigateHome() {
   return <Navigate to={homeUrl} replace />;
 }
@@ -25,13 +22,13 @@ function Password() {
 
   // Labels
   const labels = app.getLabels(
-    'unknownError',
-    'submit',
-    'yourPassword',
-    'keepLogged',
-    'forgotPasswordTip',
-    'serviceUnpurchased',
-    'environmentChanged'
+    "unknownError",
+    "submit",
+    "yourPassword",
+    "keepLogged",
+    "forgotPasswordTip",
+    "serviceUnpurchased",
+    "environmentChanged"
   );
 
   // Password ref
@@ -54,7 +51,7 @@ function Password() {
   const usernameDecoded = decodeURIComponent(username);
   const id = app.decrypt(usernameDecoded);
 
-  if (id == null || id === '') {
+  if (id == null || id === "") {
     return <NavigateHome />;
   }
 
@@ -64,28 +61,28 @@ function Password() {
   // Format title
   const formatTitle = (result: DynamicActionResult) => {
     let disabled: boolean = false;
-    let title: string = result.title ?? 'Unknown';
+    let title: string = result.title ?? "Unknown";
 
     switch (result.type) {
-      case 'UserFrozen':
-      case 'DeviceFrozen':
+      case "UserFrozen":
+      case "DeviceFrozen":
         const frozenTime = new Date(result.data?.frozenTime);
         title = title.format(frozenTime.toLocaleString(app.culture));
         disabled = true;
         break;
-      case 'AccountExpired':
+      case "AccountExpired":
         const expiry = new Date(result.data?.expiry);
         title = title.format(expiry.toLocaleString(app.culture));
         disabled = true;
         break;
-      case 'OrgExpired':
+      case "OrgExpired":
         const orgExpiry = new Date(result.data?.orgExpiry);
         title = title.format(orgExpiry.toLocaleString(app.culture));
         disabled = true;
         break;
-      case 'DeviceDisabled':
-      case 'AccountDisabled':
-      case 'OrgDisabled':
+      case "DeviceDisabled":
+      case "AccountDisabled":
+      case "OrgDisabled":
         disabled = true;
         break;
     }
@@ -133,7 +130,7 @@ function Password() {
         const serviceToken = userData.serviceToken;
 
         // Clear the token
-        if (serviceToken) Reflect.set(userData, 'serviceToken', undefined);
+        if (serviceToken) Reflect.set(userData, "serviceToken", undefined);
 
         // User login
         app.userLogin(userData, refreshToken, keep);
@@ -151,7 +148,7 @@ function Password() {
         app.notifier.alert(labels.environmentChanged, () => {
           navigate(homeUrl);
         });
-      } else if (service != null && result.type === 'ServiceUnpurchased') {
+      } else if (service != null && result.type === "ServiceUnpurchased") {
         app.notifier.alert(
           labels.serviceUnpurchased.format(service.name),
           () => {

@@ -43,7 +43,7 @@ export type SharedLayoutProps = {
   /**
    * Title
    */
-  title: string;
+  title: React.ReactNode;
 
   /**
    * Subtitle

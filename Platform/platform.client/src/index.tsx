@@ -22,7 +22,10 @@ const root = document.getElementById("root")!;
 
 // Lazy load components
 const About = React.lazy(() => import("./login/About"));
+const AuthFail = React.lazy(() => import("./login/AuthFail"));
 const Register = React.lazy(() => import("./login/Register"));
+const Register10 = React.lazy(() => import("./login/Register10"));
+const Register20 = React.lazy(() => import("./login/Register20"));
 const RegisterPassword = React.lazy(() => import("./login/RegisterPassword"));
 const RegisterVerify = React.lazy(() => import("./login/RegisterVerify"));
 const RegisterComplete = React.lazy(() => import("./login/RegisterComplete"));
@@ -136,8 +139,11 @@ function MyRouter() {
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/login/about" element={<About />} />
+          <Route path="/login/authfail" element={<AuthFail />} />
           <Route path="/login/terms" element={<Terms />} />
           <Route path="/login/register" element={<Register />} />
+          <Route path="/login/register10" element={<Register10 />} />
+          <Route path="/login/register20" element={<Register20 />} />
           <Route
             path="/login/registerpassword/:username"
             element={<RegisterPassword />}

@@ -1,4 +1,6 @@
 ﻿using com.etsoo.WeiXin.Auth;
+using Platform.Server.Database.Models;
+using Platform.Server.Services;
 
 namespace Platform.Server.OAuth2
 {
@@ -12,16 +14,21 @@ namespace Platform.Server.OAuth2
         {
             var g = builder.MapGroup("Wechat");
 
-            g.MapGet("GetServerAuthUrl", (IWechatAuthClient client, HttpContext context) =>
-            {
-                return client.GetServerAuthUrl("abc", "snsapi_login");
-            });
+            g.MapGet("GetLogInUrl", (IAuthService service, IWechatAuthClient client, HttpRequest request, string device)
+                => service.GetLogInUrl(client, request.Headers.UserAgent, device)
+                ).WithDescription("Wechat OAuth2 get log in URL / 微信 OAuth2 获取登录地址");
 
-            g.MapGet("SignIn", async (IWechatAuthClient client, HttpContext context, HttpRequest request) =>
-            {
-                var (result, userInfo) = await client.GetUserInfoAsync(request, "abc");
-                return result;
-            }).WithDescription("Wechat OAuth2 sign in / 微信 OAuth2 登录");
+            g.MapGet("GetSignUpUrl", (IAuthService service, IWechatAuthClient client, HttpRequest request, string device)
+                => service.GetSignUpUrl(client, request.Headers.UserAgent, device)
+                ).WithDescription("Wechat OAuth2 get sign up URL / 微信 OAuth2 获取注册地址");
+
+            g.MapGet("LogIn", (IAuthService service, IWechatAuthClient client, HttpContext context, CancellationToken cancellation)
+                => service.LogInAsync(client, CoreUserIdentifierType.Wechat, context, cancellation)
+                ).WithDescription("Wechat OAuth2 log in / 微信 OAuth2 登录");
+
+            g.MapGet("SignUp", (IAuthService service, IWechatAuthClient client, HttpContext context, CancellationToken cancellation)
+                => service.SignUpAsync(client, CoreUserIdentifierType.Wechat, context, cancellation)
+                ).WithDescription("Wechat OAuth2 sign up / 微信 OAuth2 注册");
 
             return builder;
         }

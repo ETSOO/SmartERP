@@ -1,17 +1,17 @@
-import React from 'react';
-import { Button, Typography } from '@mui/material';
-import { SharedLayout } from './SharedLayout';
+import React from "react";
+import { Button, Typography } from "@mui/material";
+import { SharedLayout } from "./SharedLayout";
 import {
   CountdownButton,
   TextFieldEx,
   TextFieldExMethods
-} from '@etsoo/materialui';
-import { IdActionResult } from '@etsoo/appscript';
-import { Constants } from '../app/Constants';
-import { app } from '../app/SmartApp';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+} from "@etsoo/materialui";
+import { Constants } from "../app/Constants";
+import { app } from "../app/SmartApp";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { IdActionResult } from "@etsoo/shared";
 
-const homeUrl = './../../../';
+const homeUrl = "./../../../";
 function NavigateHome() {
   return <Navigate to={homeUrl} replace />;
 }
@@ -23,11 +23,11 @@ function RegisterVerify() {
 
   // Labels
   const labels = app.getLabels(
-    'enterCodeTip',
-    'verification',
-    'resending',
-    'enterCode',
-    'submit'
+    "enterCodeTip",
+    "verification",
+    "resending",
+    "enterCode",
+    "submit"
   );
 
   // Refs
@@ -42,7 +42,7 @@ function RegisterVerify() {
   const usernameDecoded = decodeURIComponent(username);
   const id = app.decrypt(usernameDecoded);
 
-  if (id == null || id === '') {
+  if (id == null || id === "") {
     return <NavigateHome />;
   }
 
@@ -55,7 +55,7 @@ function RegisterVerify() {
   // Resending
   const resending = async () => {
     let result: IdActionResult<string> | undefined;
-    if (id.indexOf('@') === -1) {
+    if (id.indexOf("@") === -1) {
       result = await app.authCodeApi.sendSMS({
         deviceId: app.deviceId,
         region: app.region,
@@ -85,7 +85,7 @@ function RegisterVerify() {
 
     mRef.current?.setError(undefined);
     if (inputRef.current) {
-      inputRef.current.value = '';
+      inputRef.current.value = "";
       inputRef.current.focus();
     }
 
@@ -95,7 +95,7 @@ function RegisterVerify() {
   // Submit
   const submit = async () => {
     const input = inputRef.current!;
-    if (input.value === '' || codeId == null) {
+    if (input.value === "" || codeId == null) {
       input.focus();
       return;
     }
@@ -125,7 +125,7 @@ function RegisterVerify() {
           variant="outlined"
           key="resending"
           ref={(instance: HTMLButtonElement | null) => {
-            if (codeId == null || codeId === '') instance?.click();
+            if (codeId == null || codeId === "") instance?.click();
           }}
           onAction={resending}
         >
@@ -140,7 +140,7 @@ function RegisterVerify() {
         label={labels.enterCode}
         autoCorrect="off"
         autoCapitalize="none"
-        inputProps={{ inputMode: 'numeric' }}
+        inputProps={{ inputMode: "numeric" }}
         ref={mRef}
         inputRef={inputRef}
         showClear

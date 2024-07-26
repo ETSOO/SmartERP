@@ -2,6 +2,7 @@ import React from "react";
 import {
   HBox,
   ItemList,
+  LoadingButton,
   TextFieldEx,
   TextFieldExMethods
 } from "@etsoo/materialui";
@@ -19,25 +20,7 @@ import { app } from "./app/SmartApp";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
-import {
-  AlipayIcon,
-  GoogleIcon,
-  MicrosoftIcon,
-  WechatIcon
-} from "./images/SVGIcons";
-
-function getBrandIcon(ac: string) {
-  switch (ac) {
-    case "Alipay":
-      return AlipayIcon;
-    case "Google":
-      return GoogleIcon;
-    case "Microsoft":
-      return MicrosoftIcon;
-    default:
-      return WechatIcon;
-  }
-}
+import { AppUtils } from "./app/AppUtils";
 
 function App() {
   // Navigate
@@ -230,21 +213,12 @@ function App() {
   }, [regionId, trySaveLogin, culture, serviceId, refreshToken, navigate]);
 
   // Do auth
-  const doAuth = React.useCallback(
-    async (event: React.MouseEvent<HTMLButtonElement>, ac: string) => {
-      event.currentTarget.disabled = true;
-      const url = await app.authApi.getAuthUrl(ac);
-
-      if (url) {
-        globalThis.location.href = url;
-      }
-
-      event.currentTarget.disabled = false;
-
-      app.notifier.showLoading();
-    },
-    []
-  );
+  const doAuth = React.useCallback(async (ac: string) => {
+    const url = await app.authApi.getLogInUrl(ac);
+    if (url) {
+      globalThis.location.href = url;
+    }
+  }, []);
 
   React.useEffect(() => {
     if (!visible) return;
@@ -371,16 +345,19 @@ function App() {
               <Grid container>
                 {app.settings.authClients.map((ac) => (
                   <Grid item padding={0.5} xs={6} key={ac}>
-                    <Button
+                    <LoadingButton
                       variant="outlined"
                       fullWidth
                       startIcon={
-                        <SvgIcon component={getBrandIcon(ac)} inheritViewBox />
+                        <SvgIcon
+                          component={AppUtils.getBrandIcon(ac)}
+                          inheritViewBox
+                        />
                       }
-                      onClick={(event) => doAuth(event, ac)}
+                      onClick={() => doAuth(ac)}
                     >
                       {value.get(`brand${ac}`)}
-                    </Button>
+                    </LoadingButton>
                   </Grid>
                 ))}
               </Grid>
