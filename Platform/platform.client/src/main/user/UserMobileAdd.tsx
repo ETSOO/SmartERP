@@ -1,16 +1,16 @@
-import { CountdownButton, HBox, TextFieldEx } from '@etsoo/materialui';
-import React from 'react';
-import { SendSMSRQ } from '../../api/rq/authcode/SendSMSRQ';
-import { app } from '../../app/SmartApp';
+import { CountdownButton, HBox, TextFieldEx } from "@etsoo/materialui";
+import React from "react";
+import { SendSMSRQ } from "../../api/rq/auth/SendSMSRQ";
+import { app } from "../../app/SmartApp";
 
 export function UserMobileAdd() {
   // Labels
   const labels = app.getLabels(
-    'mobile',
-    'enterCode',
-    'resending',
-    'send',
-    'itemExists'
+    "mobile",
+    "enterCode",
+    "resending",
+    "send",
+    "itemExists"
   );
 
   // Ref
@@ -38,7 +38,7 @@ export function UserMobileAdd() {
       action: 5
     };
 
-    const result = await app.authCodeApi.sendSMS(data, { showLoading: false });
+    const result = await app.authApi.sendSMS(data, { showLoading: false });
 
     // Error, back to normal
     if (result == null) return 0;
@@ -59,13 +59,13 @@ export function UserMobileAdd() {
 
   return (
     <React.Fragment>
-      <input type="hidden" name="codeId" value={codeId ?? ''} />
+      <input type="hidden" name="codeId" value={codeId ?? ""} />
       <TextFieldEx
         name="mobile"
         label={labels.mobile}
         autoCorrect="off"
         autoCapitalize="none"
-        inputProps={{ inputMode: 'tel' }}
+        inputProps={{ inputMode: "tel" }}
         inputRef={inputRef}
         showClear
         required
@@ -83,7 +83,7 @@ export function UserMobileAdd() {
             setExists(false);
           }
         }}
-        helperText={exists ? labels.itemExists.format(labels.mobile) : ''}
+        helperText={exists ? labels.itemExists.format(labels.mobile) : ""}
       />
       <HBox gap={1} marginTop={1}>
         <TextFieldEx
@@ -91,7 +91,7 @@ export function UserMobileAdd() {
           label={labels.enterCode}
           autoCorrect="off"
           autoCapitalize="none"
-          inputProps={{ inputMode: 'numeric' }}
+          inputProps={{ inputMode: "numeric" }}
           inputRef={codeRef}
           showClear
           required

@@ -26,9 +26,7 @@ const AuthFail = React.lazy(() => import("./login/AuthFail"));
 const Register = React.lazy(() => import("./login/Register"));
 const Register10 = React.lazy(() => import("./login/Register10"));
 const Register20 = React.lazy(() => import("./login/Register20"));
-const RegisterPassword = React.lazy(() => import("./login/RegisterPassword"));
-const RegisterVerify = React.lazy(() => import("./login/RegisterVerify"));
-const RegisterComplete = React.lazy(() => import("./login/RegisterComplete"));
+const Register30 = React.lazy(() => import("./login/Register30"));
 const CallbackVerify = React.lazy(() => import("./login/CallbackVerify"));
 const CallbackComplete = React.lazy(() => import("./login/CallbackComplete"));
 const Terms = React.lazy(() => import("./login/Terms"));
@@ -144,18 +142,7 @@ function MyRouter() {
           <Route path="/login/register" element={<Register />} />
           <Route path="/login/register10" element={<Register10 />} />
           <Route path="/login/register20" element={<Register20 />} />
-          <Route
-            path="/login/registerpassword/:username"
-            element={<RegisterPassword />}
-          />
-          <Route
-            path="/login/registerverify/:username"
-            element={<RegisterVerify />}
-          />
-          <Route
-            path="/login/registercomplete/:username"
-            element={<RegisterComplete />}
-          />
+          <Route path="/login/register30" element={<Register30 />} />
           <Route
             path="/login/callbackverify/:username"
             element={<CallbackVerify />}

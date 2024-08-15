@@ -1,4 +1,7 @@
-﻿using Platform.Server.Endpoints.Public.RQ;
+﻿using com.etsoo.SMS;
+using Platform.Server.Dto.Auth;
+using Platform.Server.Endpoints.Auth.RQ;
+using Platform.Server.Endpoints.Public.RQ;
 using System.Text.Json.Serialization;
 
 namespace Platform.Server
@@ -13,7 +16,23 @@ namespace Platform.Server
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
+
+    // Auth
+    [JsonSerializable(typeof(CodeValidateRQ))]
+    [JsonSerializable(typeof(CompleteRegisterRQ))]
+    [JsonSerializable(typeof(EmailCodeRQ))]
+    [JsonSerializable(typeof(SMSCodeRQ))]
+
+    [JsonSerializable(typeof(AuthCodeAction))]
+    [JsonSerializable(typeof(RegisterUserData))]
+    [JsonSerializable(typeof(SendEmailData))]
+    [JsonSerializable(typeof(SendSMSData))]
+
+    // Public
     [JsonSerializable(typeof(MobileQRCodeRQ))]
+
+    // Others
+    [JsonSerializable(typeof(TemplateItem))]
     public partial class MyJsonSerializerContext : JsonSerializerContext
     {
     }

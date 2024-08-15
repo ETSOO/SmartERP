@@ -1,13 +1,13 @@
 ﻿using com.etsoo.WebUtils.Attributes;
 using System.ComponentModel.DataAnnotations;
 
-namespace Platform.Server.Endpoints.AuthCode.RQ
+namespace Platform.Server.Endpoints.Auth.RQ
 {
     /// <summary>
-    /// Email code request data
-    /// 邮件验证码请求数据
+    /// SMS code request data
+    /// 短信验证码请求数据
     /// </summary>
-    public record EmailCodeRQ
+    public record SMSCodeRQ
     {
         /// <summary>
         /// Device id
@@ -20,14 +20,14 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
         /// Action
         /// 操作
         /// </summary>
-        public required short Action { get; set; }
+        public required short Action { get; init; }
 
         /// <summary>
-        /// User's email
-        /// 用户邮箱
+        /// User's mobile
+        /// 用户手机号码
         /// </summary>
         [StringLength(512, MinimumLength = 64)]
-        public required string Email { get; init; }
+        public required string Mobile { get; init; }
 
         /// <summary>
         /// Country or region code, like CN = China
@@ -35,12 +35,5 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
         /// </summary>
         [RegionId]
         public string? Region { get; init; }
-
-        /// <summary>
-        /// Current's time zone
-        /// 所在时区
-        /// </summary>
-        public string? TimeZone { get; init; }
     }
-
 }

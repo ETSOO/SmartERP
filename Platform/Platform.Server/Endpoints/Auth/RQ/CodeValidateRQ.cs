@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Platform.Server.Endpoints.AuthCode.RQ
+namespace Platform.Server.Endpoints.Auth.RQ
 {
     /// <summary>
     /// Code validate request data
@@ -26,6 +26,6 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
         /// 验证码
         /// </summary>
         [StringLength(256, MinimumLength = 32)]
-        public required string Code { get; set; }
+        public required string Code { get; init; }
     }
 }

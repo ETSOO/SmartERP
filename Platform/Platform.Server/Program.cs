@@ -21,7 +21,6 @@ using Platform.Server;
 using Platform.Server.Application;
 using Platform.Server.Database;
 using Platform.Server.Endpoints.Auth;
-using Platform.Server.Endpoints.AuthCode;
 using Platform.Server.Endpoints.Public;
 using Platform.Server.OAuth2;
 using Platform.Server.Services;
@@ -136,10 +135,12 @@ else
     services.AddSingleton<IStorage>(storage);
 }
 
+// Authentication is the process of determining a user's identity.
+// Authorization is the process of determining whether a user has access to a resource.
 services.AddAuthorization();
 
 // Add services to the container.
-services.AddAntiforgery();
+// services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 services.AddHttpClient();
@@ -258,7 +259,7 @@ if (corsOptions.Required)
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseAntiforgery();
+// app.UseAntiforgery();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -304,7 +305,6 @@ if (microsoftOptions.Exists())
 
 // Endpoints
 api.MapAuth()
-    .MapAuthCode()
     .MapPublic()
 ;
 

@@ -20,48 +20,11 @@ function Register() {
 
   // Labels
   const labels = app.getLabels(
-    "userFound",
     "register",
     "back",
-    "nextStep",
-    "loginId",
-    "signUpWith"
+    "signUpWith",
+    "directRegistration"
   );
-
-  // Login id field
-  const loginRef = React.useRef<HTMLInputElement>();
-
-  // Next button click
-  const nextClick = async () => {
-    // Input check
-    const input = loginRef.current!;
-    const id = input.value.trim();
-    if (id == null || id === "") {
-      input.focus();
-      return;
-    }
-
-    // Encrypted id
-    const idEncrypted = app.encrypt(id);
-
-    const result = await app.authApi.loginId(id);
-
-    if (result != null) {
-      if (result.ok) {
-        // Account registered
-        app.notifier.confirm(labels.userFound, undefined, (value) => {
-          if (value) {
-            navigate("./../password/" + encodeURIComponent(idEncrypted));
-          } else {
-            input.focus();
-          }
-        });
-      } else {
-        // Continue
-        navigate("./../registerpassword/" + encodeURIComponent(idEncrypted));
-      }
-    }
-  };
 
   // Do auth
   const doAuth = React.useCallback(async (ac: string) => {
@@ -83,14 +46,17 @@ function Register() {
       buttons={[
         <Button variant="outlined" component={Link} key="back" to={"./../../"}>
           {labels.back}
-        </Button>,
-        <Button variant="contained" key="next" onClick={nextClick}>
-          {labels.nextStep}
         </Button>
       ]}
     >
       <HBox>
-        <Button></Button>
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={() => navigate("./../register10")}
+        >
+          {labels.directRegistration}
+        </Button>
       </HBox>
       <Typography variant="caption">{labels.signUpWith}</Typography>
       {app.settings.authClients.length > 0 && (

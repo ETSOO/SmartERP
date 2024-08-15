@@ -15,7 +15,35 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "public.core_app",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.core_auth_code",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.core_organization",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.core_organization_app",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.core_organization_channel",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.core_organization_user",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.core_user",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.core_user_device",
          "ObjectType": 0
       },
       {

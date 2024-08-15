@@ -1,5 +1,4 @@
 ﻿using com.etsoo.CoreFramework.Business;
-using System.ComponentModel.DataAnnotations;
 
 namespace Platform.Server.Database.Models
 {
@@ -38,12 +37,6 @@ namespace Platform.Server.Database.Models
         /// 设置密码
         /// </summary>
         public const short Password = 40;
-
-        /// <summary>
-        /// Name
-        /// 设置姓名
-        /// </summary>
-        public const short Name = 60;
     }
 
     /// <summary>
@@ -62,51 +55,37 @@ namespace Platform.Server.Database.Models
         /// Password
         /// 密码
         /// </summary>
-        [StringLength(128)]
         public string? Password { get; set; }
 
         /// <summary>
         /// Display name
         /// 显示名称
         /// </summary>
-        [Required]
-        [StringLength(128)]
         public required string Name { get; set; }
 
         /// <summary>
         /// Given name
         /// 名
         /// </summary>
-        [StringLength(50)]
         public string? GivenName { get; set; }
 
         /// <summary>
         /// Family name
         /// 姓
         /// </summary>
-        [StringLength(50)]
         public string? FamilyName { get; set; }
 
         /// <summary>
         /// Foreign name
         /// 外文名称
         /// </summary>
-        [StringLength(128)]
         public string? ForeignName { get; set; }
 
         /// <summary>
         /// Avatar
         /// 头像
         /// </summary>
-        [StringLength(256)]
         public string? Avatar { get; set; }
-
-        /// <summary>
-        /// Assigned id
-        /// 分配的编号
-        /// </summary>
-        [StringLength(20)]
-        public string? AssignedId { get; set; }
 
         /// <summary>
         /// Creation
@@ -133,9 +112,51 @@ namespace Platform.Server.Database.Models
         public short Step { get; set; }
 
         /// <summary>
+        /// Region
+        /// 国家或地区
+        /// </summary>
+        public string? Region { get; set; }
+
+        /// <summary>
+        /// PIN
+        /// 个人身份证号
+        /// </summary>
+        public string? Pin { get; set; }
+
+        /// <summary>
+        /// Latest visited organization id
+        /// 最近访问的机构编号
+        /// </summary>
+        public int? LatestOrganizationId { get; set; }
+
+        /// <summary>
+        /// Core user authentication codes
+        /// 核心用户认证验证码
+        /// </summary>
+        public ICollection<CoreAuthCode> CoreUserAuthCodes { get; set; } = [];
+
+        /// <summary>
+        /// Core organizations
+        /// 核心机构
+        /// </summary>
+        public ICollection<CoreOrganization> CoreOrganizations { get; set; } = [];
+
+        /// <summary>
+        /// Core organization users
+        /// 核心机构用户
+        /// </summary>
+        public ICollection<CoreOrganizationUser> CoreOrganizationUsers { get; set; } = [];
+
+        /// <summary>
+        /// Core user devices
+        /// 核心用户设备
+        /// </summary>
+        public ICollection<CoreUserDevice> CoreUserDevices { get; set; } = [];
+
+        /// <summary>
         /// Core user identifiers
         /// 核心用户登录编号
         /// </summary>
-        public virtual ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = [];
+        public ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = [];
     }
 }

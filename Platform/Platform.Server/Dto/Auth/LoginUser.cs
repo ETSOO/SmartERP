@@ -8,8 +8,18 @@ namespace Platform.Server.Dto.Auth
     /// </summary>
     public record LoginUser
     {
+        public required int Id { get; init; }
         public EntityStatus Status { get; init; }
         public DateTime? FrozenTime { get; init; }
         public short Step { get; init; }
+    }
+
+    /// <summary>
+    /// Login user with password
+    /// 带密码的登录用户
+    /// </summary>
+    public record LoginUserWithPassword : LoginUser
+    {
+        public string? Password { get; init; }
     }
 }

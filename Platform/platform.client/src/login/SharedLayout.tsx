@@ -54,6 +54,11 @@ export type SharedLayoutProps = {
    * Visibility
    */
   visible?: boolean;
+
+  /**
+   * Live minutes
+   */
+  liveMinutes?: number;
 };
 
 /**
@@ -72,7 +77,8 @@ export function SharedLayout(props: SharedLayoutProps) {
     bottomAdd,
     title,
     subTitle,
-    visible = true
+    visible = true,
+    liveMinutes = 0
   } = props;
 
   // Culture context
@@ -82,6 +88,18 @@ export function SharedLayout(props: SharedLayoutProps) {
   const service = app.storage.getObject<PublicProductDto>(
     Constants.CurentService
   );
+
+  React.useEffect(() => {
+    if (liveMinutes > 0) {
+      const timer = setTimeout(() => {
+        app.navigate("./../");
+      }, liveMinutes * 60000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [liveMinutes]);
 
   return (
     <React.Fragment>

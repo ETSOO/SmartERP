@@ -25,5 +25,11 @@ namespace Platform.Server.Application
         /// 成功认证URL
         /// </summary>
         public required string AuthSuccessUrl { get; set; }
+
+        /// <summary>
+        /// Super admin organization ID
+        /// 超级管理员机构编号
+        /// </summary>
+        public required int SuperAdminOrganizationId { get; set; }
     }
 }

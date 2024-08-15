@@ -1,121 +1,197 @@
 import React from "react";
-import { LoadingButton, TextFieldEx } from "@etsoo/materialui";
-import { Button, Grid, SvgIcon, Typography } from "@mui/material";
+import {
+  CountdownButton,
+  HBox,
+  LoadingButton,
+  TextFieldEx
+} from "@etsoo/materialui";
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { AppUtils } from "../app/AppUtils";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@mui/material";
+import { useSearchParamsEx } from "@etsoo/react";
 
-function Register10() {
+function Register20() {
   // Navigate
   const navigate = useNavigate();
 
-  let { username } = useParams<{ username: string }>();
-  if (username) username = app.decrypt(decodeURIComponent(username));
+  // Token
+  const { token } = useSearchParamsEx({
+    token: "string"
+  });
+  app.setLoginToken(token);
 
   // Labels
   const labels = app.getLabels(
-    "userFound",
-    "register",
     "back",
     "nextStep",
-    "loginId",
-    "signUpWith"
+    "email",
+    "verifyEmail",
+    "resending",
+    "oneTimePin",
+    "oneTimePinEmailTip",
+    "noCodeId",
+    "confirmClear"
   );
 
-  // Login id field
-  const loginRef = React.useRef<HTMLInputElement>();
+  // States
+  const [isReady, setReady] = React.useState(false);
+
+  // Refs
+  const inputRef = React.useRef<HTMLInputElement>();
+  const codeRef = React.useRef<HTMLInputElement>();
+  const codeIdRef = React.useRef<string>();
+
+  // Send verification code
+  const sendCode = React.useCallback(async () => {
+    // Input check
+    const input = inputRef.current;
+    if (input == null) return 0;
+
+    if (!input.checkValidity()) {
+      input.focus();
+      return 0;
+    }
+
+    const email = input.value.trim();
+
+    // Send verification code
+    const result = await app.authApi.sendEmail({
+      deviceId: app.deviceId,
+      action: 2,
+      email: app.encrypt(email),
+      region: app.region,
+      timezone: app.getTimeZone()
+    });
+
+    if (result == null) return 0;
+
+    if (!result.ok) {
+      app.alertResult(result);
+      return 0;
+    }
+
+    codeIdRef.current = result.data?.id;
+
+    return 120;
+  }, []);
 
   // Next button click
   const nextClick = async () => {
-    // Input check
-    const input = loginRef.current!;
-    const id = input.value.trim();
-    if (id == null || id === "") {
-      input.focus();
-      return;
-    }
+    if (isReady && codeRef.current) {
+      // Verify code
+      const code = codeRef.current.value.trim();
+      if (code == null || code === "") {
+        codeRef.current.focus();
+        return;
+      }
 
-    // Encrypted id
-    const idEncrypted = app.encrypt(id);
+      if (!codeIdRef.current) {
+        app.notifier.alert(labels.noCodeId);
+        return;
+      }
 
-    const result = await app.authApi.loginId(id);
+      // Verify
+      const result = await app.authApi.validateEmailRegistration({
+        deviceId: app.deviceId,
+        id: codeIdRef.current,
+        code: app.encrypt(code)
+      });
 
-    if (result != null) {
+      if (result == null) return;
+
       if (result.ok) {
-        // Account registered
-        app.notifier.confirm(labels.userFound, undefined, (value) => {
-          if (value) {
-            navigate("./../password/" + encodeURIComponent(idEncrypted));
-          } else {
-            input.focus();
-          }
-        });
+        app.setLoginToken(result.data?.token);
+        navigate("./../register20");
       } else {
-        // Continue
-        navigate("./../registerpassword/" + encodeURIComponent(idEncrypted));
+        app.alertResult(result);
+      }
+    } else {
+      const result = await sendCode();
+      if (result > 0) {
+        setReady(true);
       }
     }
   };
 
-  // Do auth
-  const doAuth = React.useCallback(async (ac: string) => {
-    const url = await app.authApi.getSignUpUrl(ac);
-    if (url) {
-      globalThis.location.href = url;
-    }
-  }, []);
+  React.useEffect(() => {
+    // Focus
+    if (codeRef.current) codeRef.current.focus();
+    else inputRef.current?.focus();
+  }, [isReady]);
 
   return (
     <SharedLayout
-      title={labels.register}
+      title={labels.verifyEmail}
       buttons={[
         <Button variant="outlined" component={Link} key="back" to={"./../../"}>
           {labels.back}
         </Button>,
-        <Button variant="contained" key="next" onClick={nextClick}>
+        <LoadingButton variant="contained" key="next" onClick={nextClick}>
           {labels.nextStep}
-        </Button>
+        </LoadingButton>
       ]}
+      liveMinutes={60}
     >
       <TextFieldEx
-        label={labels.loginId}
-        inputRef={loginRef}
+        label={labels.email}
+        inputRef={inputRef}
         autoFocus
         autoCorrect="off"
         autoCapitalize="none"
+        autoComplete="email"
+        type="email"
         inputProps={{ inputMode: "email" }}
+        required
         showClear
-        defaultValue={username}
+        onChange={() => setReady(false)}
         onEnter={(e) => {
           nextClick();
           e.preventDefault();
         }}
-      />
-      <Typography variant="caption">{labels.signUpWith}</Typography>
-      {app.settings.authClients.length > 0 && (
-        <Grid container>
-          {app.settings.authClients.map((ac) => (
-            <Grid item padding={0.5} xs={6} key={ac}>
-              <LoadingButton
-                variant="outlined"
-                fullWidth
-                startIcon={
-                  <SvgIcon
-                    component={AppUtils.getBrandIcon(ac)}
-                    inheritViewBox
-                  />
+        readOnly={isReady}
+        onClear={(doClear) => {
+          if (isReady) {
+            app.notifier.confirm(
+              labels.confirmClear.format(labels.email),
+              undefined,
+              (result) => {
+                if (result) {
+                  doClear();
                 }
-                onClick={() => doAuth(ac)}
-              >
-                {app.get(`brand${ac}`)}
-              </LoadingButton>
-            </Grid>
-          ))}
-        </Grid>
+              }
+            );
+          } else {
+            doClear();
+          }
+        }}
+      />
+      {isReady && (
+        <HBox gap={0.5} alignItems="flex-start">
+          <TextFieldEx
+            label={labels.oneTimePin}
+            inputRef={codeRef}
+            autoCorrect="off"
+            autoCapitalize="none"
+            showClear
+            helperText={labels.oneTimePinEmailTip}
+            onEnter={(e) => {
+              nextClick();
+              e.preventDefault();
+            }}
+          />
+          <CountdownButton
+            variant="outlined"
+            sx={{ flexShrink: 0 }}
+            initState={120}
+            onAction={() => sendCode()}
+          >
+            {labels.resending}
+          </CountdownButton>
+        </HBox>
       )}
     </SharedLayout>
   );
 }
 
-export default Register10;
+export default Register20;

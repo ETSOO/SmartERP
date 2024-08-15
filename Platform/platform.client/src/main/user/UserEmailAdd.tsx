@@ -1,16 +1,16 @@
-import { CountdownButton, HBox, TextFieldEx } from '@etsoo/materialui';
-import React from 'react';
-import { SendEmailRQ } from '../../api/rq/authcode/SendEmailRQ';
-import { app } from '../../app/SmartApp';
+import { CountdownButton, HBox, TextFieldEx } from "@etsoo/materialui";
+import React from "react";
+import { SendEmailRQ } from "../../api/rq/auth/SendEmailRQ";
+import { app } from "../../app/SmartApp";
 
 export function UserEmailAdd() {
   // Labels
   const labels = app.getLabels(
-    'email',
-    'enterCode',
-    'resending',
-    'send',
-    'itemExists'
+    "email",
+    "enterCode",
+    "resending",
+    "send",
+    "itemExists"
   );
 
   // Ref
@@ -39,7 +39,7 @@ export function UserEmailAdd() {
       timezone: app.getTimeZone()
     };
 
-    var result = await app.authCodeApi.sendEmail(data, { showLoading: false });
+    var result = await app.authApi.sendEmail(data, { showLoading: false });
 
     // Error, back to normal
     if (result == null) return 0;
@@ -60,13 +60,13 @@ export function UserEmailAdd() {
 
   return (
     <React.Fragment>
-      <input type="hidden" name="codeId" value={codeId ?? ''} />
+      <input type="hidden" name="codeId" value={codeId ?? ""} />
       <TextFieldEx
         name="email"
         label={labels.email}
         autoCorrect="off"
         autoCapitalize="none"
-        inputProps={{ inputMode: 'email' }}
+        inputProps={{ inputMode: "email" }}
         inputRef={inputRef}
         showClear
         required
@@ -84,7 +84,7 @@ export function UserEmailAdd() {
             setExists(false);
           }
         }}
-        helperText={exists ? labels.itemExists.format(labels.email) : ''}
+        helperText={exists ? labels.itemExists.format(labels.email) : ""}
       />
       <HBox gap={1} marginTop={1}>
         <TextFieldEx
@@ -92,7 +92,7 @@ export function UserEmailAdd() {
           label={labels.enterCode}
           autoCorrect="off"
           autoCapitalize="none"
-          inputProps={{ inputMode: 'numeric' }}
+          inputProps={{ inputMode: "numeric" }}
           inputRef={codeRef}
           showClear
           required

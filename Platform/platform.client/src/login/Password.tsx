@@ -123,20 +123,7 @@ function Password() {
           return;
         }
 
-        // User data
-        const userData = result.data;
-
-        // Service token
-        const serviceToken = userData.serviceToken;
-
-        // Clear the token
-        if (serviceToken) Reflect.set(userData, "serviceToken", undefined);
-
-        // User login
-        app.userLogin(userData, refreshToken, keep);
-
-        // Keep
-        app.storage.setData(CoreConstants.FieldLoginKeep, keep);
+        const serviceToken = app.doLogin(result.data, refreshToken, keep);
 
         if (service && serviceToken) {
           app.toServiceUrl(service.id, service.webUrl, serviceToken);

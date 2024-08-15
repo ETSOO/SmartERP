@@ -7,24 +7,24 @@ import {
   ExternalSettings,
   BridgeUtils,
   ApiService
-} from '@etsoo/appscript';
-import { ISmartSettings } from './SmartSettings';
-import { DataTypes, DomUtils, Utils } from '@etsoo/shared';
-import { Constants } from './Constants';
-import { ISmartPageData } from './SmartPageData';
-import { CommonApp, ISmartERPUser, MUGlobal } from '@etsoo/materialui';
-import { PublicApi } from '../api/PublicApi';
-import { AuthApi } from '../api/AuthApi';
-import { AuthCodeApi } from '../api/AuthCodeApi';
-import { MemberApi } from '../api/MemberApi';
-import { StorageApi } from '../api/StorageApi';
-import { SystemApi } from '../api/SystemApi';
-import { UserApi } from '../api/UserApi';
-import { MemberIdentity } from '../api/dto/member/MemberIdentity';
-import { ProductApi } from '../api/ProductApi';
-import { OrgApi } from '../api/OrgApi';
-import { ApiServiceApi } from '../api/ApiServiceApi';
-import { NavigateFunction } from 'react-router-dom';
+} from "@etsoo/appscript";
+import { ISmartSettings } from "./SmartSettings";
+import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
+import { Constants } from "./Constants";
+import { ISmartPageData } from "./SmartPageData";
+import { CommonApp, ISmartERPUser, MUGlobal } from "@etsoo/materialui";
+import { PublicApi } from "../api/PublicApi";
+import { AuthApi } from "../api/AuthApi";
+import { MemberApi } from "../api/MemberApi";
+import { StorageApi } from "../api/StorageApi";
+import { SystemApi } from "../api/SystemApi";
+import { UserApi } from "../api/UserApi";
+import { MemberIdentity } from "../api/dto/member/MemberIdentity";
+import { ProductApi } from "../api/ProductApi";
+import { OrgApi } from "../api/OrgApi";
+import { ApiServiceApi } from "../api/ApiServiceApi";
+import { NavigateFunction } from "react-router-dom";
+import { CoreConstants } from "@etsoo/react";
 
 /**
  * SmartERP App
@@ -55,11 +55,6 @@ class SmartApp extends CommonApp<
   readonly authApi = new AuthApi(this);
 
   /**
-   * Authorization code API
-   */
-  readonly authCodeApi = new AuthCodeApi(this);
-
-  /**
    * Member API
    */
   readonly memberApi = new MemberApi(this);
@@ -85,11 +80,37 @@ class SmartApp extends CommonApp<
   readonly userApi = new UserApi(this);
 
   /**
+   * Do login
+   * @param userData User data
+   * @param refreshToken Refresh token
+   * @param keep Keep login
+   */
+  doLogin(
+    userData: ISmartERPUser,
+    refreshToken: string,
+    keep: boolean = false
+  ) {
+    // Service token
+    const serviceToken = userData.serviceToken;
+
+    // Clear the token
+    if (serviceToken) Reflect.set(userData, "serviceToken", undefined);
+
+    // User login
+    app.userLogin(userData, refreshToken, keep);
+
+    // Keep
+    app.storage.setData(CoreConstants.FieldLoginKeep, keep);
+
+    return serviceToken;
+  }
+
+  /**
    * Get Api services
    * @returns List
    */
   getApiServices() {
-    return this.getEnumList(ApiService, 'apiService');
+    return this.getEnumList(ApiService, "apiService");
   }
 
   /**
@@ -97,7 +118,7 @@ class SmartApp extends CommonApp<
    * @returns List
    */
   getIdentities() {
-    return this.getEnumList(MemberIdentity, 'id');
+    return this.getEnumList(MemberIdentity, "id");
   }
 
   /**
@@ -108,7 +129,7 @@ class SmartApp extends CommonApp<
   getCachedUrl(baseUrl?: string) {
     const url = this.storage.getData<string>(Constants.RedirectUrlCache);
     if (url) {
-      if (!url.includes('://')) return url;
+      if (!url.includes("://")) return url;
 
       baseUrl ??= `${globalThis.location.protocol}//${globalThis.location.host}`;
       if (url.startsWith(baseUrl)) return url.substring(baseUrl.length);
@@ -133,9 +154,19 @@ class SmartApp extends CommonApp<
       `/api/?provider=SmartERP&culture=${
         this.culture
       }&token=${encodeURIComponent(serviceToken)}&url=${
-        redirectUrl ? encodeURIComponent(redirectUrl) : ''
+        redirectUrl ? encodeURIComponent(redirectUrl) : ""
       }`
     );
+  }
+
+  /**
+   * Set login token
+   * @param token Login token
+   */
+  setLoginToken(token?: string) {
+    if (token) {
+      app.api.authorize(Constants.RegistrationTokenScheme, token);
+    }
   }
 
   /**
@@ -169,7 +200,7 @@ class SmartApp extends CommonApp<
     const host = BridgeUtils.host;
     if (host) {
       // Get service Url
-      const url = app.getServiceUrl('', serviceToken, redirectUrl);
+      const url = app.getServiceUrl("", serviceToken, redirectUrl);
 
       host.loadApp(`s${appId}`, url);
     } else {
@@ -217,22 +248,22 @@ const { detectedCountry } = DomUtils;
 const { detectedCulture } = DomUtils;
 
 // Global settings
-MUGlobal.textFieldVariant = 'standard';
+MUGlobal.textFieldVariant = "standard";
 
 // Supported cultures
 const supportedCultures: DataTypes.CultureDefinition[] = [
-  zhHans(() => import('../i18n/zh-Hans.json')),
-  zhHant(() => import('../i18n/zh-Hant.json')),
-  en(() => import('../i18n/en.json'))
+  zhHans(() => import("../i18n/zh-Hans.json")),
+  zhHant(() => import("../i18n/zh-Hant.json")),
+  en(() => import("../i18n/en.json"))
 ];
 
 // Supported regions
-const supportedRegions = ['CN'];
+const supportedRegions = ["CN"];
 
 // External settings
-const externalSettings = ExternalSettings.create();
+const externalSettings = ExternalSettings.create<ISmartSettings>();
 if (externalSettings == null) {
-  throw new Error('No external settings');
+  throw new Error("No external settings");
 }
 
 // Settings
@@ -269,7 +300,7 @@ const settings: ISmartSettings = {
 /**
  * Application
  */
-export const app = new SmartApp(settings, 'smartERP');
+export const app = new SmartApp(settings, "smartERP", import.meta.env.DEV);
 
 /**
  * Notifier provider

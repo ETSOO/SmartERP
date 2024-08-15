@@ -6,7 +6,7 @@ import {
   TextFieldEx,
   TextFieldExMethods
 } from "@etsoo/materialui";
-import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
+import { DataTypes, DomUtils, NumberUtils, Utils } from "@etsoo/shared";
 import { Box, Button, Grid, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./login/SharedLayout";
 import { AccountCircle, Language } from "@mui/icons-material";
@@ -135,6 +135,18 @@ function App() {
         updateRegisterId(encodeURIComponent(idEncrypted));
       }
     } else {
+      // Make sure the registration is done
+      if (
+        result.data != null &&
+        "step" in result.data &&
+        NumberUtils.parse(result.data.step, 0) > 0
+      ) {
+        app.notifier.alert(app.get("continueRegistrationDetail"), () =>
+          navigate("./login/register/")
+        );
+        return;
+      }
+
       // Without password verification, no user id returned
       navigate("./login/password/" + encodeURIComponent(idEncrypted));
     }

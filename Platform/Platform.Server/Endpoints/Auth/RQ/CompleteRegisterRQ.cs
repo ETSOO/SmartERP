@@ -1,13 +1,13 @@
 ﻿using com.etsoo.WebUtils.Attributes;
 using System.ComponentModel.DataAnnotations;
 
-namespace Platform.Server.Endpoints.AuthCode.RQ
+namespace Platform.Server.Endpoints.Auth.RQ
 {
     /// <summary>
-    /// SMS code request data
-    /// 短信验证码请求数据
+    /// Complete register request data
+    /// 完成注册请求数据
     /// </summary>
-    public record SMSCodeRQ
+    public record CompleteRegisterRQ
     {
         /// <summary>
         /// Device id
@@ -17,23 +17,23 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
         public required string DeviceId { get; init; }
 
         /// <summary>
-        /// Action
-        /// 操作
-        /// </summary>
-        public required short Action { get; set; }
-
-        /// <summary>
-        /// User's mobile
-        /// 用户手机号码
+        /// Login password
+        /// 登录密码
         /// </summary>
         [StringLength(512, MinimumLength = 64)]
-        public required string Mobile { get; init; }
+        public required string Password { get; init; }
+
+        /// <summary>
+        /// Full name
+        /// 姓名
+        /// </summary>
+        public required string Name { get; init; }
 
         /// <summary>
         /// Country or region code, like CN = China
         /// 国家或地区编号，如 CN = 中国
         /// </summary>
         [RegionId]
-        public string? Region { get; init; }
+        public required string Region { get; init; }
     }
 }

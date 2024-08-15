@@ -1,6 +1,6 @@
 ﻿using com.etsoo.Utils.Crypto;
 
-namespace Platform.Server.Dto.AuthCode
+namespace Platform.Server.Dto.Auth
 {
     /// <summary>
     /// Authentication code action

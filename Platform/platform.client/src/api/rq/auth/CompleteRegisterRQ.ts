@@ -1,21 +1,11 @@
 /**
- * Register request data
+ * Complete register request data
  */
-export type RegisterRQ = {
+export type CompleteRegisterRQ = {
   /**
    * Device id
    */
   deviceId: string;
-
-  /**
-   * Email or mobile
-   */
-  id: string;
-
-  /**
-   * Verification code id
-   */
-  codeId: string;
 
   /**
    * Password

@@ -21,13 +21,29 @@ public partial class CoreUser
 
     public string Avatar { get; set; }
 
-    public string AssignedId { get; set; }
-
     public DateTime Creation { get; set; }
 
     public short Status { get; set; }
 
     public DateTime? FrozenTime { get; set; }
 
+    public short? Step { get; set; }
+
+    public string Region { get; set; }
+
+    public string Pin { get; set; }
+
+    public int? LatestOrganizationId { get; set; }
+
+    public virtual ICollection<CoreAuthCode> CoreAuthCodes { get; set; } = new List<CoreAuthCode>();
+
+    public virtual ICollection<CoreOrganizationUser> CoreOrganizationUsers { get; set; } = new List<CoreOrganizationUser>();
+
+    public virtual ICollection<CoreOrganization> CoreOrganizations { get; set; } = new List<CoreOrganization>();
+
+    public virtual ICollection<CoreUserDevice> CoreUserDevices { get; set; } = new List<CoreUserDevice>();
+
     public virtual ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = new List<CoreUserIdentifier>();
+
+    public virtual CoreOrganization LatestOrganization { get; set; }
 }

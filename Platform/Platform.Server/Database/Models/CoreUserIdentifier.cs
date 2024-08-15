@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Platform.Server.Database.Models
+﻿namespace Platform.Server.Database.Models
 {
     /// <summary>
     /// Core user identifier type
@@ -44,8 +42,6 @@ namespace Platform.Server.Database.Models
         /// Identifier value
         /// 编号值
         /// </summary>
-        [Required]
-        [StringLength(256)]
         public required string Value { get; init; }
 
         /// <summary>
@@ -64,6 +60,6 @@ namespace Platform.Server.Database.Models
         /// Core user
         /// 核心用户
         /// </summary>
-        public virtual CoreUser CoreUser { get; init; } = default!;
+        public CoreUser CoreUser { get; init; } = default!;
     }
 }
