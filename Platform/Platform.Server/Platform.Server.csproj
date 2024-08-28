@@ -20,18 +20,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.8" />
+    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.9" />
     <PackageReference Include="com.etsoo.DI" Version="1.0.14" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.35" />
+    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.38" />
     <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.62" />
     <PackageReference Include="com.etsoo.Localization" Version="1.0.17" />
-    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.10" />
+    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.28" />
     <PackageReference Include="com.etsoo.SMTP" Version="1.0.59" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.1" />
-    <PackageReference Include="com.etsoo.Web" Version="1.2.10" />
-    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.39" />
+    <PackageReference Include="com.etsoo.Web" Version="1.2.19" />
+    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
@@ -44,7 +44,7 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
   </ItemGroup>
 
   <ItemGroup>

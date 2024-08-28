@@ -14,12 +14,12 @@ namespace Platform.Server.OAuth2
         {
             var g = builder.MapGroup("Wechat");
 
-            g.MapGet("GetLogInUrl", (IAuthService service, IWechatAuthClient client, HttpRequest request, string device)
-                => service.GetLogInUrl(client, request.Headers.UserAgent, device)
+            g.MapGet("GetLogInUrl", (IAuthService service, IWechatAuthClient client, HttpRequest request, string region, string device)
+                => service.GetLogInUrl(client, request.Headers.UserAgent, region + device)
                 ).WithDescription("Wechat OAuth2 get log in URL / 微信 OAuth2 获取登录地址");
 
-            g.MapGet("GetSignUpUrl", (IAuthService service, IWechatAuthClient client, HttpRequest request, string device)
-                => service.GetSignUpUrl(client, request.Headers.UserAgent, device)
+            g.MapGet("GetSignUpUrl", (IAuthService service, IWechatAuthClient client, HttpRequest request, string region, string device)
+                => service.GetSignUpUrl(client, request.Headers.UserAgent, region + device)
                 ).WithDescription("Wechat OAuth2 get sign up URL / 微信 OAuth2 获取注册地址");
 
             g.MapGet("LogIn", (IAuthService service, IWechatAuthClient client, HttpContext context, CancellationToken cancellation)

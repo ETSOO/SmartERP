@@ -12,6 +12,7 @@ namespace Platform.Server.Dto.Auth
         public EntityStatus Status { get; init; }
         public DateTime? FrozenTime { get; init; }
         public short Step { get; init; }
+        public int? IdentifierId { get; init; }
     }
 
     /// <summary>

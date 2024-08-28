@@ -10,12 +10,12 @@ namespace Platform.Server.OAuth2
         {
             var g = builder.MapGroup("Microsoft");
 
-            g.MapGet("GetLogInUrl", (IAuthService service, IMicrosoftAuthClient client, HttpRequest request, string device)
-                => service.GetLogInUrl(client, request.Headers.UserAgent, device)
+            g.MapGet("GetLogInUrl", (IAuthService service, IMicrosoftAuthClient client, HttpRequest request, string region, string device)
+                => service.GetLogInUrl(client, request.Headers.UserAgent, region + device)
                 ).WithDescription("Microsoft OAuth2 get log in URL / 微软 OAuth2 获取登录地址");
 
-            g.MapGet("GetSignUpUrl", (IAuthService service, IMicrosoftAuthClient client, HttpRequest request, string device)
-                => service.GetSignUpUrl(client, request.Headers.UserAgent, device)
+            g.MapGet("GetSignUpUrl", (IAuthService service, IMicrosoftAuthClient client, HttpRequest request, string region, string device)
+                => service.GetSignUpUrl(client, request.Headers.UserAgent, region + device)
                 ).WithDescription("Microsoft OAuth2 get sign up URL / 微软 OAuth2 获取注册地址");
 
             g.MapGet("LogIn", (IAuthService service, IMicrosoftAuthClient client, HttpContext context, CancellationToken cancellation)

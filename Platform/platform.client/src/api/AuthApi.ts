@@ -44,9 +44,9 @@ export class AuthApi extends AuthApiBase {
    */
   getLogInUrl(ac: string, payload?: IApiPayload<string>) {
     return this.api.get(
-      `OAuth2/${ac}/GetLogInUrl?device=${encodeURIComponent(
-        this.app.deviceId
-      )}`,
+      `OAuth2/${ac}/GetLogInUrl?region=${
+        this.app.region
+      }&device=${encodeURIComponent(this.app.deviceId)}`,
       undefined,
       payload
     );
@@ -60,9 +60,9 @@ export class AuthApi extends AuthApiBase {
    */
   getSignUpUrl(ac: string, payload?: IApiPayload<string>) {
     return this.api.get(
-      `OAuth2/${ac}/GetSignUpUrl?device=${encodeURIComponent(
-        this.app.deviceId
-      )}`,
+      `OAuth2/${ac}/GetSignUpUrl?region=${
+        this.app.region
+      }&device=${encodeURIComponent(this.app.deviceId)}`,
       undefined,
       payload
     );

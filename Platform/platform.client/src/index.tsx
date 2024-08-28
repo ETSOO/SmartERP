@@ -16,6 +16,7 @@ import { Route, Routes } from "react-router-dom";
 import Dashboard from "./main/Dashboard";
 import { DynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
+import AuthSuccess from "./login/AuthSuccess";
 
 // Root
 const root = document.getElementById("root")!;
@@ -138,6 +139,7 @@ function MyRouter() {
           <Route path="/" element={<App />} />
           <Route path="/login/about" element={<About />} />
           <Route path="/login/authfail" element={<AuthFail />} />
+          <Route path="/login/authsuccess" element={<AuthSuccess />} />
           <Route path="/login/terms" element={<Terms />} />
           <Route path="/login/register" element={<Register />} />
           <Route path="/login/register10" element={<Register10 />} />

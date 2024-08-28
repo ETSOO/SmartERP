@@ -7,6 +7,18 @@
     public record CompleteRegisterData
     {
         /// <summary>
+        /// User agent
+        /// 用户代理
+        /// </summary>
+        public string? UserAgent { get; init; }
+
+        /// <summary>
+        /// Device id
+        /// 设备编号
+        /// </summary>
+        public required string DeviceId { get; init; }
+
+        /// <summary>
         /// Password
         /// 密码
         /// </summary>
@@ -23,11 +35,5 @@
         /// 国家或地区编号，如 CN = 中国
         /// </summary>
         public required string Region { get; init; }
-
-        /// <summary>
-        /// Device name
-        /// 设备名称
-        /// </summary>
-        public required string DeviceName { get; init; }
     }
 }

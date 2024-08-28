@@ -8,12 +8,13 @@ namespace Platform.Server.Services
 {
     public interface IAuthService : ICommonService
     {
-        ValueTask<IActionResult> CompleteRegisterAsync(CompleteRegisterData data, CancellationToken cancellationToken = default);
+        ValueTask<(IActionResult result, string? refreshToken)> CompleteRegisterAsync(CompleteRegisterData data, CancellationToken cancellationToken = default);
         IResult GetLogInUrl(IAuthClient client, string? userAgent, string deviceId);
         IResult GetSignUpUrl(IAuthClient client, string? userAgent, string deviceId);
         ValueTask LogInAsync(IAuthClient client, CoreUserIdentifierType type, HttpContext context, CancellationToken cancellationToken = default);
-        ValueTask<IActionResult> LoginWithPwdAsync(LoginData data, CancellationToken cancellationToken = default);
+        ValueTask<(IActionResult result, string? refreshToken)> LoginWithPwdAsync(LoginData data, CancellationToken cancellationToken = default);
         ValueTask<(IActionResult, LoginUserWithPassword?)> LoginIdAsync(string id, string region, CancellationToken cancellationToken = default);
+        ValueTask<(IActionResult result, string? newRefreshToken)> RefreshTokenAsync(RefreshTokenData data, string refreshToken, CancellationToken cancellationToken = default);
         ValueTask SignUpAsync(IAuthClient client, CoreUserIdentifierType type, HttpContext context, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> WebInitCallAsync(InitCallRQ rq, string identifier);
         ValueTask<IActionResult> SendEmailAsync(SendEmailData data, CancellationToken cancellationToken = default);

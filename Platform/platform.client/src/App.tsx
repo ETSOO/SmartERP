@@ -10,11 +10,7 @@ import { DataTypes, DomUtils, NumberUtils, Utils } from "@etsoo/shared";
 import { Box, Button, Grid, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./login/SharedLayout";
 import { AccountCircle, Language } from "@mui/icons-material";
-import {
-  BridgeUtils,
-  PublicProductDto,
-  RefreshTokenRQ
-} from "@etsoo/appscript";
+import { BridgeUtils, PublicProductDto } from "@etsoo/appscript";
 import { Constants } from "./app/Constants";
 import { app } from "./app/SmartApp";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -68,9 +64,6 @@ function App() {
 
   // Query id or saved
   const id = passedLoginId ?? userIdSaved;
-
-  // Register id
-  const [registerId, updateRegisterId] = React.useState("");
 
   // Device validataion
   const deviceValidated = React.useRef(false);
@@ -130,9 +123,6 @@ function App() {
       } else {
         mRef.current?.setError(result.title);
         loginRef.current?.focus();
-
-        // Put last avoid skipping next updates
-        updateRegisterId(encodeURIComponent(idEncrypted));
       }
     } else {
       // Make sure the registration is done
@@ -200,13 +190,6 @@ function App() {
       return;
     }
 
-    const sdata: Partial<RefreshTokenRQ> = {};
-    if (serviceId) {
-      if (typeof serviceId === "number") sdata.serviceId = serviceId;
-      else if (Utils.isDigits(serviceId)) sdata.serviceId = parseInt(serviceId);
-      else sdata.serviceUid = serviceId;
-    }
-
     // Refresh token
     app.refreshToken({
       callback: (result) => {
@@ -218,7 +201,7 @@ function App() {
           loadServiceData();
         }
       },
-      data: sdata,
+      data: {},
       showLoading: true,
       relogin: false
     });
@@ -376,9 +359,7 @@ function App() {
             )}
             <div>
               {value.get("noAccountTip")}&nbsp;
-              <Link to={"./login/register/" + registerId}>
-                {value.get("noAccountCreate")}
-              </Link>
+              <Link to="./login/register/">{value.get("noAccountCreate")}</Link>
             </div>
           </SharedLayout>
         </React.Fragment>

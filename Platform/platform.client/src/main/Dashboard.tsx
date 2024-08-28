@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Button,
   Card,
@@ -13,17 +13,17 @@ import {
   Theme,
   Typography,
   useMediaQuery
-} from '@mui/material';
-import { ButtonLink, CommonPage, HBox, MUGlobal } from '@etsoo/materialui';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import AddIcon from '@mui/icons-material/Add';
-import { MemberDialogs } from './member/MemberDialogs';
-import { app } from '../app/SmartApp';
-import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
-import { useNavigate } from 'react-router-dom';
-import { RefreshTokenRQ } from '@etsoo/appscript';
-import { DashboardView } from '../api/dto/system/DashboardView';
-import { SystemServiceDto } from '../api/dto/system/SystemServiceDto';
+} from "@mui/material";
+import { ButtonLink, CommonPage, HBox, MUGlobal } from "@etsoo/materialui";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import AddIcon from "@mui/icons-material/Add";
+import { MemberDialogs } from "./member/MemberDialogs";
+import { app } from "../app/SmartApp";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
+import { useNavigate } from "react-router-dom";
+import { RefreshTokenRQ } from "@etsoo/appscript";
+import { DashboardView } from "../api/dto/system/DashboardView";
+import { SystemServiceDto } from "../api/dto/system/SystemServiceDto";
 
 function Dashboard() {
   // Route
@@ -31,14 +31,14 @@ function Dashboard() {
 
   // Labels
   const labels = app.getLabels(
-    'menuLoginHistory',
-    'welcome',
-    'organization',
-    'newOrganization',
-    'device',
-    'underDevelopment',
-    'tools',
-    'exchangeRate'
+    "menuLoginHistory",
+    "welcome",
+    "organization",
+    "newOrganization",
+    "device",
+    "underDevelopment",
+    "tools",
+    "exchangeRate"
   );
 
   // User context
@@ -53,7 +53,7 @@ function Dashboard() {
   } = React.useContext(app.pageState.context);
 
   // Screen size detection
-  const smDown = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'));
+  const smDown = useMediaQuery<Theme>((theme) => theme.breakpoints.down("sm"));
 
   // View
   const [view, setView] = React.useState<DashboardView>();
@@ -67,6 +67,7 @@ function Dashboard() {
   ) => {
     if (authorized === false) return;
 
+    /*
     const view = await app.systemApi.dashboard();
     if (view == null || !isMounted.current) return;
 
@@ -76,6 +77,7 @@ function Dashboard() {
     if (inviteId) {
       MemberDialogs.accept(inviteId, navigate);
     }
+      */
   };
 
   // Visit service
@@ -85,7 +87,7 @@ function Dashboard() {
     // Reqest data
     const data: RefreshTokenRQ = {
       deviceId: app.deviceId,
-      serviceUid: service.id
+      region: app.region
     };
 
     // Reqest result
@@ -111,19 +113,19 @@ function Dashboard() {
 
   // Load more history
   const loadMoreHistory = () => {
-    navigate('./user/loginhistory');
+    navigate("./user/loginhistory");
   };
 
   // New organization
   const newOrganization = () => {
-    navigate('./service/all', {
+    navigate("./service/all", {
       state: { kind: 2 }
     });
   };
 
   React.useEffect(() => {
     // Page title
-    app.setPageKey('menuHome');
+    //app.setPageKey("menuHome");
 
     return () => {
       isMounted.current = false;
@@ -132,7 +134,7 @@ function Dashboard() {
 
   return (
     <CommonPage
-      targetFields={['organization']}
+      targetFields={["organization"]}
       onUpdateAll={reloadData}
       paddings={paddings}
     >
@@ -166,14 +168,14 @@ function Dashboard() {
         {view?.services.map((service) => (
           <Grid item xs={6} md={4} xl={2} key={service.id}>
             <Paper
-              sx={{ padding: paddings, cursor: 'pointer' }}
+              sx={{ padding: paddings, cursor: "pointer" }}
               onClick={async () => await visitService(service)}
             >
               <Typography variant="subtitle1" height="56px" overflow="hidden">
                 {service.name}
                 {service.entityStatus === 199 && (
                   <Typography variant="caption" color="red">
-                    {' - ' + labels.underDevelopment + '...'}
+                    {" - " + labels.underDevelopment + "..."}
                   </Typography>
                 )}
               </Typography>
@@ -193,7 +195,7 @@ function Dashboard() {
       <Card sx={{ marginTop: paddings }}>
         <CardHeader
           title={labels.device}
-          titleTypographyProps={{ variant: 'h6' }}
+          titleTypographyProps={{ variant: "h6" }}
           action={
             <IconButton
               title={labels.menuLoginHistory}
@@ -222,7 +224,7 @@ function Dashboard() {
               <ListItem key={device.id} disableGutters disablePadding>
                 <ListItemText
                   primary={device.name}
-                  secondary={app.formatDate(device.lastLogin, 'ds')}
+                  secondary={app.formatDate(device.lastLogin, "ds")}
                 />
               </ListItem>
             ))}

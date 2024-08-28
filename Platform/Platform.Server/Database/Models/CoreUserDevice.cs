@@ -62,6 +62,24 @@
         public required string Culture { get; set; }
 
         /// <summary>
+        /// Refresh token
+        /// 刷新令牌
+        /// </summary>
+        public string? RefreshToken { get; set; }
+
+        /// <summary>
+        /// Refresh token expiry
+        /// 刷新令牌过期时间
+        /// </summary>
+        public DateTimeOffset? RefreshTokenExpiry { get; set; }
+
+        /// <summary>
+        /// Client id
+        /// 客户端编号
+        /// </summary>
+        public required string ClientId { get; set; }
+
+        /// <summary>
         /// Core user
         /// 核心用户
         /// </summary>

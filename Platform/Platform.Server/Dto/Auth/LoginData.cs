@@ -19,10 +19,16 @@
         public required string Password { get; init; }
 
         /// <summary>
-        /// Device name
-        /// 设备名称
+        /// User agent
+        /// 用户代理
         /// </summary>
-        public required string DeviceName { get; init; }
+        public string? UserAgent { get; init; }
+
+        /// <summary>
+        /// Device id
+        /// 设备编号
+        /// </summary>
+        public required string DeviceId { get; init; }
 
         /// <summary>
         /// Region

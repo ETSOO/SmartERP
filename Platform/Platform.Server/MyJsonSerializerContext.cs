@@ -21,6 +21,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(CodeValidateRQ))]
     [JsonSerializable(typeof(CompleteRegisterRQ))]
     [JsonSerializable(typeof(EmailCodeRQ))]
+    [JsonSerializable(typeof(RefreshTokenRQ))]
     [JsonSerializable(typeof(SMSCodeRQ))]
 
     [JsonSerializable(typeof(AuthCodeAction))]

@@ -318,6 +318,15 @@ namespace Platform.Server.Database
                     .IsRequired()
                     .HasMaxLength(128)
                     .HasColumnName("name");
+                entity.Property(e => e.RefreshToken)
+                    .HasMaxLength(128)
+                    .HasColumnName("refresh_token");
+                entity.Property(e => e.RefreshTokenExpiry)
+                    .HasColumnName("refresh_token_expiry");
+                entity.Property(e => e.ClientId)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("client_id");
 
                 entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserDevices)
                     .HasForeignKey(d => d.CoreUserId)

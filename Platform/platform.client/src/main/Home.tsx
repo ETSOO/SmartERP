@@ -6,14 +6,14 @@ import {
   Toolbar,
   Typography,
   useMediaQuery
-} from '@mui/material';
-import React from 'react';
-import MenuIcon from '@mui/icons-material/Menu';
-import { app } from '../app/SmartApp';
-import { Outlet } from 'react-router-dom';
-import { DrawerHeader } from '@etsoo/materialui';
-import { LeftDrawerLocal } from '../app/LeftDrawerLocal';
-import { UserMenuLocal } from '../app/UserMenuLocal';
+} from "@mui/material";
+import React from "react";
+import MenuIcon from "@mui/icons-material/Menu";
+import { app } from "../app/SmartApp";
+import { Outlet } from "react-router-dom";
+import { DrawerHeader } from "@etsoo/materialui";
+import { LeftDrawerLocal } from "../app/LeftDrawerLocal";
+import { UserMenuLocal } from "../app/UserMenuLocal";
 
 // Size
 const width = 220;
@@ -26,10 +26,10 @@ function Home() {
   const { state } = React.useContext(app.userState.context);
 
   // Small than sm
-  const smDown = useMediaQuery<Theme>((theme) => theme.breakpoints.down('sm'));
+  const smDown = useMediaQuery<Theme>((theme) => theme.breakpoints.down("sm"));
   app.smDown = smDown;
 
-  const mdUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('md'));
+  const mdUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up("md"));
   app.mdUp = mdUp;
 
   const { authorized } = state;
@@ -54,7 +54,7 @@ function Home() {
   return (
     <React.Fragment>
       <AppBar
-        position="fixed"
+        position="sticky"
         sx={{ ...(mdUp && open && { paddingLeft: `${width}px` }) }}
       >
         <Toolbar>
@@ -62,7 +62,7 @@ function Home() {
             edge="start"
             color="inherit"
             onClick={() => setOpen(true)}
-            sx={{ ...(open && { display: 'none' }) }}
+            sx={{ ...(open && { display: "none" }) }}
           >
             <MenuIcon />
           </IconButton>
@@ -80,19 +80,15 @@ function Home() {
           />
         </Toolbar>
       </AppBar>
-      <Box sx={{ display: 'flex' }}>
-        <LeftDrawerLocal
-          mdUp={mdUp}
-          organization={state.organization}
-          width={width}
-          onMinimize={() => setOpen(false)}
-          open={open}
-        />
-        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <DrawerHeader />
-          <Outlet />
-        </Box>
-      </Box>
+      <iframe
+        style={{
+          position: "fixed",
+          border: 0,
+          width: "100vw",
+          height: "100vh"
+        }}
+        src="https://etsoo.nz"
+      ></iframe>
     </React.Fragment>
   );
 }

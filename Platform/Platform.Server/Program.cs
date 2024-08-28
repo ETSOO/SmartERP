@@ -1,4 +1,5 @@
 using com.etsoo.AlipayApi;
+using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -188,11 +189,11 @@ var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray
 var publicCors = configuration.GetSection("PublicCors").Get<IEnumerable<string>?>()?.ToArray();
 var corsOptions = new CorsPolicySetupOptions(cors, builder.Environment.IsDevelopment())
 {
-    ExposedHeaders = [""]
+    ExposedHeaders = [Constants.RefreshTokenHeader]
 };
 var publicCorsOptions = new CorsPolicySetupOptions(publicCors, false)
 {
-    ExposedHeaders = [""]
+    ExposedHeaders = [Constants.RefreshTokenHeader]
 };
 
 services.AddCors(options =>

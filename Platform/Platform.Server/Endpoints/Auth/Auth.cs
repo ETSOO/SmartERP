@@ -14,36 +14,34 @@ namespace Platform.Server.Endpoints.Auth
     /// </summary>
     public static class Auth
     {
+        private static void OutputRefreshToken(IHttpContextAccessor accessor, string refreshToken)
+        {
+            accessor.HttpContext?.Response.Headers.Append(Constants.RefreshTokenHeader, refreshToken);
+        }
+
         public static RouteGroupBuilder MapAuth(this RouteGroupBuilder builder)
         {
             var g = builder.MapGroup("Auth").AllowAnonymous();
 
             g.MapPut("CompleteRegister", async (IAuthService service, IHttpContextAccessor accessor, CompleteRegisterRQ rq, CancellationToken cancellationToken) =>
             {
-                // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
-                {
-                    return checkResult;
-                }
-
-                var deviceCore = cd.Value.DeviceCore;
-                var deviceName = cd.Value.Parser.ToShortName();
-
-                var pasword = service.DecryptDeviceData(rq.Password, deviceCore);
-                if (pasword == null)
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Password");
-                }
-
                 var data = new CompleteRegisterData
                 {
-                    Password = pasword,
+                    UserAgent = accessor.UserAgent(),
+                    DeviceId = rq.DeviceId,
+                    Password = rq.Password,
                     Name = rq.Name,
-                    Region = rq.Region,
-                    DeviceName = deviceName
+                    Region = rq.Region
                 };
 
-                return await service.CompleteRegisterAsync(data, cancellationToken);
+                var (result, refreshToken) = await service.CompleteRegisterAsync(data, cancellationToken);
+
+                if (result.Ok && refreshToken != null)
+                {
+                    OutputRefreshToken(accessor, refreshToken);
+                }
+
+                return result;
             });
 
             g.MapPut("WebInitCall", async (IAuthService service, IHttpContextAccessor accessor, InitCallRQ rq) =>
@@ -62,36 +60,22 @@ namespace Platform.Server.Endpoints.Auth
 
             g.MapPost("Login", async (IAuthService service, IHttpContextAccessor accessor, LoginRQ rq, CancellationToken cancellationToken) =>
             {
-                // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
-                {
-                    return checkResult;
-                }
-
-                var deviceCore = cd.Value.DeviceCore;
-                var deviceName = cd.Value.Parser.ToShortName();
-
-                var id = service.DecryptDeviceData(rq.Id, deviceCore);
-                if (string.IsNullOrEmpty(id) || id.Length < 6)
-                {
-                    return ApplicationErrors.NoValidData.AsResult();
-                }
-
-                var password = service.DecryptDeviceData(rq.Pwd, deviceCore);
-                if (string.IsNullOrEmpty(password))
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Password");
-                }
-
                 var data = new LoginData
                 {
-                    Id = id,
-                    Password = password,
-                    DeviceName = deviceName,
+                    Id = rq.Id,
+                    Password = rq.Pwd,
+                    DeviceId = rq.DeviceId,
+                    UserAgent = accessor.UserAgent(),
                     Region = rq.Region,
                     Timezone = rq.Timezone
                 };
-                var result = await service.LoginWithPwdAsync(data, cancellationToken);
+
+                var (result, refreshToken) = await service.LoginWithPwdAsync(data, cancellationToken);
+
+                if (result.Ok && refreshToken != null)
+                {
+                    OutputRefreshToken(accessor, refreshToken);
+                }
 
                 return result;
             }).WithDescription("Check user login id / 检查用户登录编号");
@@ -116,6 +100,43 @@ namespace Platform.Server.Endpoints.Auth
 
                 return result;
             }).WithDescription("Check user login id / 检查用户登录编号");
+
+            g.MapPut("RefreshToken", async (IAuthService service, IHttpContextAccessor accessor, RefreshTokenRQ rq, CancellationToken cancellationToken) =>
+            {
+                // Token
+                string? token;
+                if (accessor.HttpContext?.Request.Headers.TryGetValue(Constants.RefreshTokenHeader, out var value) is true)
+                {
+                    token = value.ToString();
+                }
+                else
+                {
+                    return ApplicationErrors.NoValidData.AsResult("Token");
+                }
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    return ApplicationErrors.NoValidData.AsResult("Token");
+                }
+
+                var data = new RefreshTokenData
+                {
+                    Region = rq.Region,
+                    DeviceId = rq.DeviceId,
+                    UserAgent = accessor.UserAgent(),
+                    Token = token,
+                    Password = rq.Pwd
+                };
+
+                var (result, newRefeshToken) = await service.RefreshTokenAsync(data, token, cancellationToken);
+
+                if (result.Ok && newRefeshToken != null)
+                {
+                    OutputRefreshToken(accessor, newRefeshToken);
+                }
+
+                return result;
+            }).WithDescription("Refresh token / 刷新令牌");
 
             g.MapPut("SendEmail", async (IAuthService service, IHttpContextAccessor accessor, EmailCodeRQ rq, CancellationToken cancellationToken) =>
             {

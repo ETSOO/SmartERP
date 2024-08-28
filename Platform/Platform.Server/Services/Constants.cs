@@ -17,5 +17,11 @@
         /// 注册令牌方案
         /// </summary>
         public const string RegistrationTokenScheme = "registration";
+
+        /// <summary>
+        /// Refresh token header
+        /// 刷新令牌头
+        /// </summary>
+        public const string RefreshTokenHeader = "Smarterp-Refresh-Token";
     }
 }
