@@ -1,56 +1,53 @@
-import { useEffect, useState } from 'react';
-import './App.css';
-
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
-}
+import { DomUtils } from "@etsoo/shared";
+import React from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { app } from "./app/MyApp";
 
 function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+  // Route
+  const navigate = useNavigate();
+  const [search] = useSearchParams();
 
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
+  // Queries
+  const params = DomUtils.dataAs(search, {
+    tryLogin: "string",
+    token: "string"
+  });
 
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
+  const tryLogin = params.tryLogin;
 
-    return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
+  // Token
+  const token = params.token;
+  if (token) {
+    // Cache the service token to local refresh token
+    app.storage.setData(app.fields.headerToken, app.encrypt(token));
+  }
 
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        const data = await response.json();
-        setForecasts(data);
-    }
+  React.useEffect(() => {
+    // Try login
+    if (tryLogin === "false") return;
+
+    app.serviceApi
+      .get<string>("Auth/GetLogInUrl", {
+        region: app.region,
+        device: app.deviceId
+      })
+      .then((url) => {
+        if (!url) return;
+        window.location.replace(url);
+      });
+
+    /*
+    app.tryLogin(undefined, true).then((result) => {
+      if (result) {
+        navigate("/home/");
+        return;
+      }
+    });
+    */
+  }, [navigate, tryLogin]);
+
+  return <React.Fragment></React.Fragment>;
 }
 
 export default App;

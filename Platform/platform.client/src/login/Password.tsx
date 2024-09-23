@@ -1,14 +1,15 @@
 import React from "react";
 import { Button, FormControlLabel, Switch, Box } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
-import { LoginRQ, PublicProductDto } from "@etsoo/appscript";
+import { AuthRequest, LoginRQ } from "@etsoo/appscript";
 import { HBox, TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
 import { Lock } from "@mui/icons-material";
 import { Constants } from "../app/Constants";
 import { app } from "../app/SmartApp";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { CoreConstants, NotificationMessageType } from "@etsoo/react";
+import { CoreConstants } from "@etsoo/react";
 import { DynamicActionResult } from "@etsoo/shared";
+import { OrgRequest } from "../app/OrgRequest";
 
 const homeUrl = "./../../../";
 function NavigateHome() {
@@ -99,63 +100,58 @@ function Password() {
       return;
     }
 
-    // Current service
-    const service = app.storage.getObject<PublicProductDto>(
-      Constants.CurentService
-    );
+    // Auth request
+    const org = app.storage.getData<OrgRequest>(Constants.OrgRequestField);
+    const auth = app.storage.getData<AuthRequest>(Constants.AuthRequestField);
 
     // Model
     const data: LoginRQ = {
       id: usernameDecoded,
       deviceId: app.deviceId,
       pwd: app.encrypt(app.hash(password)),
+      org: org?.orgId,
       region: app.region,
       timezone: app.getTimeZone(),
-      serviceId: service?.queryId
+      auth
     };
 
     const [result, refreshToken] = await app.authApi.login(data);
 
-    if (result != null) {
-      if (result.ok) {
-        if (refreshToken == null || result.data == null) {
-          app.notifier.alert(labels.unknownError);
-          return;
-        }
+    if (result == null) return;
 
+    if (result.ok) {
+      if (refreshToken == null || result.data == null) {
+        app.notifier.alert(labels.unknownError);
+        return;
+      }
+
+      if (auth) {
+        // Authorization request
+        window.location.replace(refreshToken);
+      } else {
         const serviceToken = app.doLogin(result.data, refreshToken, keep);
 
+        var service = null;
+
         if (service && serviceToken) {
-          app.toServiceUrl(service.id, service.webUrl, serviceToken);
+          //app.toServiceUrl(service.id, service.webUrl, serviceToken);
         } else {
           // Navigate to home
           app.toHome(navigate, `${homeUrl}home`);
         }
-      } else if (app.checkDeviceResult(result)) {
-        app.notifier.alert(labels.environmentChanged, () => {
-          navigate(homeUrl);
-        });
-      } else if (service != null && result.type === "ServiceUnpurchased") {
-        app.notifier.alert(
-          labels.serviceUnpurchased.format(service.name),
-          () => {
-            // Clear service cache
-            app.storage.setData(Constants.CurentService, undefined);
+      }
+    } else if (app.checkDeviceResult(result)) {
+      app.notifier.alert(labels.environmentChanged, () => {
+        navigate(homeUrl);
+      });
+    } else {
+      const [disabled, title] = formatTitle(result);
+      mRef.current?.setError(title);
 
-            // Goto home page
-            app.toLoginPage();
-          },
-          NotificationMessageType.Info
-        );
+      if (disabled) {
+        updateButtonDisabled(true);
       } else {
-        const [disabled, title] = formatTitle(result);
-        mRef.current?.setError(title);
-
-        if (disabled) {
-          updateButtonDisabled(true);
-        } else {
-          passwordRef.current?.focus();
-        }
+        passwordRef.current?.focus();
       }
     }
   };

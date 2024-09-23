@@ -56,24 +56,6 @@
         public DateTimeOffset LastLogin { get; set; }
 
         /// <summary>
-        /// Culture
-        /// 文化
-        /// </summary>
-        public required string Culture { get; set; }
-
-        /// <summary>
-        /// Refresh token
-        /// 刷新令牌
-        /// </summary>
-        public string? RefreshToken { get; set; }
-
-        /// <summary>
-        /// Refresh token expiry
-        /// 刷新令牌过期时间
-        /// </summary>
-        public DateTimeOffset? RefreshTokenExpiry { get; set; }
-
-        /// <summary>
         /// Client id
         /// 客户端编号
         /// </summary>
@@ -84,5 +66,11 @@
         /// 核心用户
         /// </summary>
         public CoreUser CoreUser { get; set; } = default!;
+
+        /// <summary>
+        /// Core user device tokens
+        /// 核心用户设备令牌
+        /// </summary>
+        public ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; } = [];
     }
 }

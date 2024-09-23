@@ -3,8 +3,6 @@ import { Box, Typography } from "@mui/material";
 import { HBox, MUGlobal, VBox } from "@etsoo/materialui";
 import logo from "./../images/etsoo.png";
 import { app } from "../app/SmartApp";
-import { Constants } from "../app/Constants";
-import { PublicProductDto } from "@etsoo/appscript";
 
 /**
  * Shared layout props
@@ -84,11 +82,6 @@ export function SharedLayout(props: SharedLayoutProps) {
   // Culture context
   const Context = app.cultureState.context;
 
-  // Current service
-  const service = app.storage.getObject<PublicProductDto>(
-    Constants.CurentService
-  );
-
   React.useEffect(() => {
     if (liveMinutes > 0) {
       const timer = setTimeout(() => {
@@ -120,7 +113,7 @@ export function SharedLayout(props: SharedLayoutProps) {
         >
           <Box
             component="img"
-            src={service?.logo ?? logo}
+            src={logo}
             sx={{
               height: { xs: "36px", sm: "48px" },
               userSelect: "none"
@@ -129,7 +122,7 @@ export function SharedLayout(props: SharedLayoutProps) {
           {headerRight}
           <Typography variant="subtitle1">
             <Context.Consumer>
-              {(value) => service?.name ?? value.get<string>("appName")}
+              {(value) => value.get<string>("appName")}
             </Context.Consumer>
           </Typography>
         </HBox>
@@ -158,7 +151,7 @@ export function SharedLayout(props: SharedLayoutProps) {
               (typeof subTitle === "string" ? (
                 <Typography
                   variant="body2"
-                  color={(theme) => theme.palette.grey[600]}
+                  sx={{ color: (theme) => theme.palette.grey[600] }}
                 >
                   {subTitle}
                 </Typography>

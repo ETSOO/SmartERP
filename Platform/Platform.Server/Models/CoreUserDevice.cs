@@ -19,7 +19,9 @@ public partial class CoreUserDevice
 
     public DateTime LastLogin { get; set; }
 
-    public string Culture { get; set; }
+    public string ClientId { get; set; }
 
     public virtual CoreUser CoreUser { get; set; }
+
+    public virtual ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; } = new List<CoreUserDeviceToken>();
 }

@@ -25,6 +25,8 @@ public partial class CoreOrganization
 
     public int? ParentId { get; set; }
 
+    public Guid? Uid { get; set; }
+
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
     public virtual ICollection<CoreOrganizationChannel> CoreOrganizationChannelOwners { get; set; } = new List<CoreOrganizationChannel>();

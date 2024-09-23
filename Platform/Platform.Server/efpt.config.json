@@ -31,6 +31,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.core_organization_app_key",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.core_organization_channel",
          "ObjectType": 0
       },
@@ -44,6 +48,10 @@
       },
       {
          "Name": "public.core_user_device",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.core_user_device_token",
          "ObjectType": 0
       },
       {

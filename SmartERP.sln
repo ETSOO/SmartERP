@@ -21,7 +21,7 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "admin.client", "Admin\admin
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{1DBB1A55-5BEA-4079-A5E4-874E360250E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreApp.Server", "CoreApp\CoreApp.Server\CoreApp.Server.csproj", "{320F6D3D-9DED-44B0-BE76-DE401D1B466C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreApp.Server", "CoreApp\CoreApp.Server\CoreApp.Server.csproj", "{320F6D3D-9DED-44B0-BE76-DE401D1B466C}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "coreapp.client", "CoreApp\coreapp.client\coreapp.client.esproj", "{9C1511D0-E170-4505-A498-75A337D18B27}"
 EndProject

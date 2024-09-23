@@ -3,7 +3,6 @@ import {
   zhHant,
   zhHans,
   en,
-  ApiAuthorizationScheme,
   ExternalSettings,
   BridgeUtils,
   ApiService
@@ -127,6 +126,7 @@ class SmartApp extends CommonApp<
    * @returns Result
    */
   getCachedUrl(baseUrl?: string) {
+    /*
     const url = this.storage.getData<string>(Constants.RedirectUrlCache);
     if (url) {
       if (!url.includes("://")) return url;
@@ -135,6 +135,8 @@ class SmartApp extends CommonApp<
       if (url.startsWith(baseUrl)) return url.substring(baseUrl.length);
     }
     this.storage.setData(Constants.RedirectUrlCache, null);
+    */
+    return baseUrl;
   }
 
   /**
@@ -270,9 +272,6 @@ if (externalSettings == null) {
 const settings: ISmartSettings = {
   // Merge external configs first
   ...externalSettings,
-
-  // Authorization scheme
-  authScheme: ApiAuthorizationScheme.Bearer,
 
   // Detected culture
   detectedCulture,

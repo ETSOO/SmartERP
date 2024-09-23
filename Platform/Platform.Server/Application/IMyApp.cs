@@ -10,6 +10,6 @@ namespace Platform.Server.Application
         /// Authentication service
         /// 验证服务
         /// </summary>
-        IAuthService? AuthService { get; init; }
+        IAuthService AuthService { get; }
     }
 }

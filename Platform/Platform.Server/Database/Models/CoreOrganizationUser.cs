@@ -43,7 +43,7 @@ namespace Platform.Server.Database.Models
         /// Identity type
         /// 标识类型
         /// </summary>
-        public IdentityType IdentityType { get; set; }
+        public IdentityTypeFlags IdentityType { get; set; }
 
         /// <summary>
         /// Local name

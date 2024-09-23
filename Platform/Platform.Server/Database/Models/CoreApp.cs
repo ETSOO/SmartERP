@@ -1,31 +1,7 @@
-﻿namespace Platform.Server.Database.Models
+﻿using com.etsoo.CoreFramework.Business;
+
+namespace Platform.Server.Database.Models
 {
-    /// <summary>
-    /// Identity type
-    /// 标识类型
-    /// </summary>
-    [Flags]
-    public enum IdentityType : byte
-    {
-        /// <summary>
-        /// User
-        /// 用户
-        /// </summary>
-        User = 1,
-
-        /// <summary>
-        /// Customer
-        /// 客户
-        /// </summary>
-        Customer = 2,
-
-        /// <summary>
-        /// Supplier
-        /// 供应商
-        /// </summary>
-        Supplier = 4,
-    }
-
     /// <summary>
     /// Core application
     /// 核心应用
@@ -36,7 +12,7 @@
         /// Id
         /// 编号
         /// </summary>
-        public short Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Name
@@ -55,6 +31,12 @@
         /// 网址
         /// </summary>
         public required string WebUrl { get; set; }
+
+        /// <summary>
+        /// API URL
+        /// 接口网址
+        /// </summary>
+        public required string ApiUrl { get; set; }
 
         /// <summary>
         /// Help URL
@@ -93,9 +75,21 @@
         public bool? RequireLocalUrl { get; set; }
 
         /// <summary>
+        /// Application secret
+        /// 程序密钥
+        /// </summary>
+        public required string AppSecret { get; set; }
+
+        /// <summary>
         /// Core organization apps
         /// 核心机构应用
         /// </summary>
         public ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = [];
+
+        /// <summary>
+        /// Core user device tokens
+        /// 核心用户设备令牌
+        /// </summary>
+        public ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; } = [];
     }
 }

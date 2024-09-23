@@ -16,14 +16,11 @@ namespace Platform.Server.Application
         /// Authentication service
         /// 验证服务
         /// </summary>
-        public IAuthService? AuthService { get; init; }
+        public IAuthService AuthService { get; }
 
-        public MyApp(IServiceCollection services, MyAppConfiguration configuration, IDatabase<NpgsqlConnection> db, JwtSettings? jwtSettings, JwtBearerEvents? events = null, bool modelValidated = false) : base(configuration, db, modelValidated)
+        public MyApp(IServiceCollection services, MyAppConfiguration configuration, IDatabase<NpgsqlConnection> db, JwtSettings jwtSettings, JwtBearerEvents? events = null, bool modelValidated = false) : base(configuration, db, modelValidated)
         {
-            if (jwtSettings != null)
-            {
-                AuthService = new JwtService(services, jwtSettings, events);
-            }
+            AuthService = new JwtService(services, jwtSettings, events);
         }
     }
 }

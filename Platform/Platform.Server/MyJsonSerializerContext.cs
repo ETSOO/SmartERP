@@ -1,5 +1,6 @@
 ﻿using com.etsoo.SMS;
 using Platform.Server.Dto.Auth;
+using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Auth.RQ;
 using Platform.Server.Endpoints.Public.RQ;
 using System.Text.Json.Serialization;
@@ -23,6 +24,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(EmailCodeRQ))]
     [JsonSerializable(typeof(RefreshTokenRQ))]
     [JsonSerializable(typeof(SMSCodeRQ))]
+    [JsonSerializable(typeof(SwitchOrgRQ))]
 
     [JsonSerializable(typeof(AuthCodeAction))]
     [JsonSerializable(typeof(RegisterUserData))]
@@ -31,6 +33,9 @@ namespace Platform.Server
 
     // Public
     [JsonSerializable(typeof(MobileQRCodeRQ))]
+    [JsonSerializable(typeof(OrgInfoRQ))]
+
+    [JsonSerializable(typeof(OrgPublicInfo))]
 
     // Others
     [JsonSerializable(typeof(TemplateItem))]

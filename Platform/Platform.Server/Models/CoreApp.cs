@@ -7,7 +7,7 @@ namespace Platform.Server.Models;
 
 public partial class CoreApp
 {
-    public short Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; }
 
@@ -27,5 +27,11 @@ public partial class CoreApp
 
     public bool? RequireLocalUrl { get; set; }
 
+    public string AppSecret { get; set; }
+
+    public string ApiUrl { get; set; }
+
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
+
+    public virtual ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; } = new List<CoreUserDeviceToken>();
 }

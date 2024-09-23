@@ -9,17 +9,9 @@ public partial class CoreOrganizationApp
 {
     public int Id { get; set; }
 
-    public short CoreAppId { get; set; }
+    public int CoreAppId { get; set; }
 
     public int CoreOrganizationId { get; set; }
-
-    public string AppKey { get; set; }
-
-    public string AppSecret { get; set; }
-
-    public string LocalName { get; set; }
-
-    public string LocalUrl { get; set; }
 
     public DateTime? Expiry { get; set; }
 
@@ -30,4 +22,6 @@ public partial class CoreOrganizationApp
     public virtual CoreApp CoreApp { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; }
+
+    public virtual ICollection<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; } = new List<CoreOrganizationAppKey>();
 }

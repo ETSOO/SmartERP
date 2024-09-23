@@ -7,53 +7,103 @@ import {
   TextFieldExMethods
 } from "@etsoo/materialui";
 import { DataTypes, DomUtils, NumberUtils, Utils } from "@etsoo/shared";
-import { Box, Button, Grid, SvgIcon, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./login/SharedLayout";
 import { AccountCircle, Language } from "@mui/icons-material";
-import { BridgeUtils, PublicProductDto } from "@etsoo/appscript";
+import { AuthRequest, BridgeUtils } from "@etsoo/appscript";
 import { Constants } from "./app/Constants";
 import { app } from "./app/SmartApp";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
 import { AppUtils } from "./app/AppUtils";
+import { OrgInfo } from "./api/dto/org/OrgInfo";
+import { OrgRequest } from "./app/OrgRequest";
+
+function formatLoginTip(
+  appId: number,
+  appName: string,
+  scope: string,
+  redirectUri: string
+) {
+  const tip = app.get("loginTip")!;
+  appName = app.get(`app${appId}`) ?? appName;
+  const scopes = scope
+    .split(" ")
+    .map((s) => app.get(`scope${s.formatInitial(true)}`) ?? s);
+
+  // Replace the tip
+  const items: [string, boolean][] = [];
+  let tips = tip.split("{0}");
+  items.push([tips[0], false]);
+  items.push([appName, true]);
+
+  tips = tips[1].split("{1}");
+  items.push([tips[0], false]);
+  items.push([scopes.join(", "), true]);
+
+  tips = tips[1].split("{2}");
+  items.push([tips[0], false]);
+  items.push([new URL(redirectUri).hostname, true]);
+
+  return items.map((i, index) => (
+    <Typography
+      component="span"
+      key={index}
+      fontWeight={i[1] ? "bold" : undefined}
+    >
+      {i[0]}
+    </Typography>
+  ));
+}
+
+function checkAppUri(redirectUri: string) {
+  const uri = new URL(redirectUri);
+  return uri.hostname !== window.location.hostname;
+}
 
 function App() {
   // Navigate
   const navigate = useNavigate();
   const [search] = useSearchParams();
   const params = DomUtils.dataAs(search, {
-    serviceId: "string",
+    auth: "string",
     loginid: "string",
-    url: "string",
+    org: "string",
     tryLogin: "string"
   });
 
-  // Cache URL
-  if (params.url) {
-    const url = decodeURIComponent(params.url);
-    app.storage.setData(Constants.RedirectUrlCache, url);
-  }
-
-  // Cached service data
-  const service = app.storage.getObject<PublicProductDto>(
-    Constants.CurentService
-  );
-
-  // Service id or service uid (service id + organization)
-  const serviceId = params.serviceId ?? service?.queryId;
+  // Cached auth request
+  const auth = params.auth
+    ? React.useMemo(() => {
+        try {
+          const auth: AuthRequest = JSON.parse(
+            decodeURIComponent(params.auth!)
+          );
+          app.storage.setData(Constants.AuthRequestField, auth);
+          return auth;
+        } catch (error) {
+          console.error("Authorization request parse failed", error);
+        }
+      }, [params.auth])
+    : app.storage.getData<AuthRequest>(Constants.AuthRequestField);
 
   // User login id, email or mobile, saved
   const userIdEncrypted = app.storage.getData<string>(
     CoreConstants.FieldUserIdSaved
   );
 
+  // Cached organization data
+  const org = params.org
+    ? { org: params.org }
+    : app.storage.getData<OrgRequest>(Constants.OrgRequestField);
+
   const userIdSaved =
     userIdEncrypted === "" || userIdEncrypted == null
       ? ""
       : app.decrypt(userIdEncrypted) ?? "";
 
-  let passedLoginId = params.loginid ?? null;
+  let passedLoginId = params.loginid ?? auth?.loginHint ?? null;
   if (
     passedLoginId != null &&
     !Utils.isEmail(passedLoginId) &&
@@ -67,9 +117,6 @@ function App() {
 
   // Device validataion
   const deviceValidated = React.useRef(false);
-
-  // Country or region
-  const regionId = app.region;
 
   // Culture context
   const Context = app.cultureState.context;
@@ -149,44 +196,49 @@ function App() {
   const trySaveLogin =
     params.tryLogin !== "false" &&
     (id === "" || id === userIdSaved) &&
-    refreshToken != null;
+    refreshToken;
 
   // Visible
   const [visible, setVisible] = React.useState(false);
 
+  // App data
+  const [appData, setAppData] = React.useState<OrgInfo>();
+
   // QRCode
   const [mobileQRCode, setMobileQRCode] = React.useState<string>();
 
-  const culture = app.culture;
+  // Load application data
+  const loadAppData = React.useCallback(() => {
+    // No data to load
+    if (!org?.org && !auth?.appId) {
+      setAppData(undefined);
+      setVisible(true);
+      return;
+    }
+
+    app.publicApi
+      .orgInfo({
+        appId: auth?.appId,
+        appKey: auth?.appKey,
+        orgUid: org?.org
+      })
+      .then((data) => {
+        if (data == null) return;
+
+        if (org != null) {
+          org.orgId = data.orgId;
+        }
+
+        app.storage.setData(Constants.OrgRequestField, org);
+
+        setAppData(data);
+        setVisible(true);
+      });
+  }, [org?.org, auth?.appId, auth?.appKey]);
 
   React.useEffect(() => {
-    // Load service data
-    const loadServiceData = (serviceToken?: string) => {
-      if (serviceId == null) {
-        if (serviceToken === "") app.toHome(navigate, "./home");
-        else setVisible(true);
-        return;
-      }
-
-      // Load service data
-      app.publicApi.product(serviceId, culture).then((result) => {
-        if (result == null || !isMounted.current) return;
-        // Hold the query id
-        result.queryId = serviceId;
-
-        if (serviceToken === "") app.toHome(navigate, "./home");
-        else if (serviceToken) {
-          app.toServiceUrl(result.id, result.webUrl, serviceToken);
-        } else {
-          // Cache data
-          app.storage.setData(Constants.CurentService, result);
-          setVisible(true);
-        }
-      });
-    };
-
     if (!trySaveLogin) {
-      loadServiceData();
+      loadAppData();
       return;
     }
 
@@ -195,17 +247,16 @@ function App() {
       callback: (result) => {
         if (!isMounted.current) return;
         if (result === true) {
-          // Navigate to service
-          loadServiceData(app.userData?.serviceToken ?? "");
+          loadAppData();
         } else {
-          loadServiceData();
+          loadAppData();
         }
       },
       data: {},
       showLoading: true,
       relogin: false
     });
-  }, [regionId, trySaveLogin, culture, serviceId, refreshToken, navigate]);
+  }, [trySaveLogin, loadAppData]);
 
   // Do auth
   const doAuth = React.useCallback(async (ac: string) => {
@@ -276,14 +327,14 @@ function App() {
               </HBox>
             }
             title={value.get("login")!}
-            subTitle={app.settings.currentRegion.label}
+            subTitle={appData?.orgName ?? app.settings.currentRegion.label}
             buttons={[
               <Button variant="contained" key="next" onClick={nextClick}>
                 {value.get("nextStep")}
               </Button>
             ]}
             bottom={
-              service == null && [
+              appData?.orgId == null && [
                 <Link to="./login/about" key="about">
                   {value.get("about")}
                 </Link>,
@@ -314,6 +365,16 @@ function App() {
               )
             }
           >
+            {auth && appData?.appName && checkAppUri(auth.redirectUri) && (
+              <Alert severity="warning" sx={{ width: "100%" }}>
+                {formatLoginTip(
+                  auth.appId,
+                  appData.appName,
+                  auth.scope,
+                  auth.redirectUri
+                )}
+              </Alert>
+            )}
             <HBox spacing={1} alignItems="flex-start">
               <Box sx={{ paddingTop: 3 }}>
                 <AccountCircle color="primary" />

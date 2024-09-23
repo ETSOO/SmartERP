@@ -25,16 +25,7 @@ namespace Platform.Server.Endpoints.Auth
 
             g.MapPut("CompleteRegister", async (IAuthService service, IHttpContextAccessor accessor, CompleteRegisterRQ rq, CancellationToken cancellationToken) =>
             {
-                var data = new CompleteRegisterData
-                {
-                    UserAgent = accessor.UserAgent(),
-                    DeviceId = rq.DeviceId,
-                    Password = rq.Password,
-                    Name = rq.Name,
-                    Region = rq.Region
-                };
-
-                var (result, refreshToken) = await service.CompleteRegisterAsync(data, cancellationToken);
+                var (result, refreshToken) = await service.CompleteRegisterAsync(rq, accessor.UserAgent(), cancellationToken);
 
                 if (result.Ok && refreshToken != null)
                 {
@@ -60,17 +51,7 @@ namespace Platform.Server.Endpoints.Auth
 
             g.MapPost("Login", async (IAuthService service, IHttpContextAccessor accessor, LoginRQ rq, CancellationToken cancellationToken) =>
             {
-                var data = new LoginData
-                {
-                    Id = rq.Id,
-                    Password = rq.Pwd,
-                    DeviceId = rq.DeviceId,
-                    UserAgent = accessor.UserAgent(),
-                    Region = rq.Region,
-                    Timezone = rq.Timezone
-                };
-
-                var (result, refreshToken) = await service.LoginWithPwdAsync(data, cancellationToken);
+                var (result, refreshToken) = await service.LoginWithPwdAsync(rq, accessor.UserAgent(), cancellationToken);
 
                 if (result.Ok && refreshToken != null)
                 {
@@ -78,7 +59,7 @@ namespace Platform.Server.Endpoints.Auth
                 }
 
                 return result;
-            }).WithDescription("Check user login id / 检查用户登录编号");
+            }).WithDescription("User login with password / 用户使用密码登录");
 
             g.MapPost("LoginId", async (IAuthService service, IHttpContextAccessor accessor, LoginIdRQ rq, CancellationToken cancellationToken) =>
             {
@@ -241,10 +222,34 @@ namespace Platform.Server.Endpoints.Auth
                 return await service.ValidateMobileRegistrationAsync(data, cancellationToken);
             }).WithDescription("Validate mobile registration code / 验证手机注册验证码");
 
-            g.MapGet("ViewRegisterData", (IAuthService service, CancellationToken cancellationToken) =>
+            g.MapGet("ViewRegisterData", (IAuthService service, CancellationToken cancellationToken) => service.ViewRegisterDataAsync(cancellationToken))
+                .WithDescription("View register data / 查看注册数据");
+
+            g.MapPost("OAuthCreateToken", (IAuthService service, AuthCreateTokenRQ rq, CancellationToken cancellationToken) => service.OAuthCreateTokenAsync(rq, cancellationToken))
+                .WithDescription("OAuth create token / OAuth 创建令牌");
+
+            g.MapPost("OAuthRefreshToken", (IAuthService service, AuthRefreshTokenRQ rq, CancellationToken cancellationToken) => service.OAuthRefreshTokenAsync(rq, cancellationToken))
+                .WithDescription("OAuth refresh token / OAuth 刷新令牌");
+
+            g.MapGet("OAuthUserInfo", (IAuthService service, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.OAuthUserInfoAsync(accessor.HttpContext?.Response, cancellationToken))
+                .WithDescription("OAuth get user information / OAuth 获取用户信息").RequireAuthorization();
+
+            g.MapPost("AuthRequest", (IAuthService service, AuthRequest rq, CancellationToken cancellationToken) =>
             {
-                return service.ViewRegisterDataAsync(cancellationToken);
-            }).WithDescription("View register data / 查看注册数据");
+                return service.AuthRequestAsync(rq, cancellationToken);
+            }).WithDescription("User authorization request / 用户授权请求").RequireAuthorization();
+
+            g.MapPut("SwitchOrg", async (IAuthService service, SwitchOrgRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
+            {
+                var (result, newRefeshToken) = await service.SwitchOrgAsync(rq, cancellationToken);
+
+                if (result.Ok && newRefeshToken != null)
+                {
+                    OutputRefreshToken(accessor, newRefeshToken);
+                }
+
+                return result;
+            }).WithDescription("User switch organization / 用户切换机构").RequireAuthorization();
 
             return builder;
         }

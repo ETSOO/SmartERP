@@ -1,4 +1,5 @@
-﻿using com.etsoo.WebUtils.Attributes;
+﻿using com.etsoo.CoreFramework.Models;
+using com.etsoo.WebUtils.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace Platform.Server.Endpoints.Auth.RQ
@@ -35,5 +36,11 @@ namespace Platform.Server.Endpoints.Auth.RQ
         /// </summary>
         [RegionId]
         public required string Region { get; init; }
+
+        /// <summary>
+        /// Authentication request
+        /// 授权请求
+        /// </summary>
+        public AuthRequest? Auth { get; init; }
     }
 }

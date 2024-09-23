@@ -10,7 +10,7 @@
         /// User id
         /// 用户编号
         /// </summary>
-        public string? Id { get; set; }
+        public string? Id { get; init; }
 
         /// <summary>
         /// Host address

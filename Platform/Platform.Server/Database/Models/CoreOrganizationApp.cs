@@ -18,37 +18,13 @@ namespace Platform.Server.Database.Models
         /// Core application id
         /// 核心应用编号
         /// </summary>
-        public short CoreAppId { get; set; }
+        public int CoreAppId { get; set; }
 
         /// <summary>
         /// Core organization id
         /// 核心机构编号
         /// </summary>
         public int CoreOrganizationId { get; set; }
-
-        /// <summary>
-        /// App key
-        /// 应用键
-        /// </summary>
-        public required string AppKey { get; set; }
-
-        /// <summary>
-        /// App secret
-        /// 应用密钥
-        /// </summary>
-        public required string AppSecret { get; set; }
-
-        /// <summary>
-        /// Local name
-        /// 本地名称
-        /// </summary>
-        public string? LocalName { get; set; }
-
-        /// <summary>
-        /// Local URL
-        /// 本地网址
-        /// </summary>
-        public string? LocalUrl { get; set; }
 
         /// <summary>
         /// Expiry
@@ -79,5 +55,11 @@ namespace Platform.Server.Database.Models
         /// 核心机构
         /// </summary>
         public CoreOrganization CoreOrganization { get; set; } = default!;
+
+        /// <summary>
+        /// Core organization application keys
+        /// 核心机构应用密钥
+        /// </summary>
+        public ICollection<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; } = [];
     }
 }

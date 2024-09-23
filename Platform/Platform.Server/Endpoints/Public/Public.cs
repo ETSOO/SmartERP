@@ -18,6 +18,11 @@ namespace Platform.Server.Endpoints.Public
                 return service.MobileQRCodeAsync(rq, cancellationToken);
             }).WithDescription("Get mobile QRCode image Base64 string / 获取移动端QRCode图片的Base64字符串");
 
+            g.MapPost("OrgInfo", (IPublicService service, OrgInfoRQ rq, CancellationToken cancellationToken) =>
+            {
+                return service.OrgInfoAsync(rq, cancellationToken);
+            }).WithDescription("Get organization public information / 获取机构公开信息");
+
             return builder;
         }
     }

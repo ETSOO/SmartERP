@@ -39,6 +39,12 @@ namespace Platform.Server.Database
         public DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
 
         /// <summary>
+        /// Core organization application keys
+        /// 核心机构应用密钥
+        /// </summary>
+        public DbSet<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; }
+
+        /// <summary>
         /// Core organization channels
         /// 核心机构渠道
         /// </summary>
@@ -63,6 +69,12 @@ namespace Platform.Server.Database
         public DbSet<CoreUserDevice> CoreUserDevices { get; set; }
 
         /// <summary>
+        /// Core user device tokens
+        /// 核心用户设备令牌
+        /// </summary>
+        public DbSet<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; }
+
+        /// <summary>
         /// Core user identifiers for login
         /// 核心用户登录编号
         /// </summary>
@@ -75,6 +87,44 @@ namespace Platform.Server.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CoreApp>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("core_app_pkey");
+
+                entity.ToTable("core_app");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedNever()
+                    .HasColumnName("id");
+                entity.Property(e => e.AppSecret)
+                    .HasMaxLength(256)
+                    .HasColumnName("app_secret");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+                entity.Property(e => e.Enabled).HasColumnName("enabled");
+                entity.Property(e => e.WebUrl)
+                    .HasMaxLength(256)
+                    .HasColumnName("web_url");
+                entity.Property(e => e.ApiUrl)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("api_url");
+                entity.Property(e => e.HelpUrl)
+                    .HasMaxLength(256)
+                    .HasColumnName("help_url");
+                entity.Property(e => e.IdentityType).HasColumnName("identity_type");
+                entity.Property(e => e.IsPublic).HasColumnName("is_public");
+                entity.Property(e => e.Logo)
+                    .HasMaxLength(256)
+                    .HasColumnName("logo");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnName("name");
+                entity.Property(e => e.RequireLocalUrl).HasColumnName("require_local_url");
+            });
+
             modelBuilder.Entity<CoreAuthCode>(entity =>
             {
                 entity.HasKey(e => e.Id).HasName("core_auth_code_pkey");
@@ -137,6 +187,7 @@ namespace Platform.Server.Database
                     .HasConversion<byte>()
                     .HasDefaultValue(EntityStatus.Normal)
                     .HasColumnName("status");
+                entity.Property(e => e.Uid).HasColumnName("uid");
 
                 entity.HasOne(d => d.Owner).WithMany(p => p.CoreOrganizations)
                     .HasForeignKey(d => d.OwnerId)
@@ -146,6 +197,78 @@ namespace Platform.Server.Database
                 entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
                     .HasForeignKey(d => d.ParentId)
                     .HasConstraintName("core_organization_parent_id_fkey");
+            });
+
+            modelBuilder.Entity<CoreOrganizationApp>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("core_organization_app_pkey");
+
+                entity.ToTable("core_organization_app");
+
+                entity.Property(e => e.Id)
+                    .UseIdentityAlwaysColumn()
+                    .HasColumnName("id");
+                entity.Property(e => e.CoreAppId).HasColumnName("core_app_id");
+                entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+                entity.Property(e => e.Expiry).HasColumnName("expiry");
+                entity.Property(e => e.Status)
+                    .HasConversion<byte>()
+                    .HasDefaultValue(EntityStatus.Normal)
+                    .HasColumnName("status");
+
+                entity.HasOne(d => d.CoreApp).WithMany(p => p.CoreOrganizationApps)
+                    .HasForeignKey(d => d.CoreAppId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("core_organization_app_core_app_id_fkey");
+
+                entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreOrganizationApps)
+                    .HasForeignKey(d => d.CoreOrganizationId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("core_organization_app_core_organization_id_fkey");
+            });
+
+            modelBuilder.Entity<CoreOrganizationAppKey>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("core_organization_app_key_pkey");
+
+                entity.ToTable("core_organization_app_key");
+
+                entity.HasIndex(e => new { e.CoreOrganizationAppId, e.AppKey }, "core_organization_app_key_core_organization_app_id_app_key_idx")
+                    .IsUnique()
+                    .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "true");
+
+                entity.Property(e => e.Id)
+                    .UseIdentityAlwaysColumn()
+                    .HasColumnName("id");
+                entity.Property(e => e.CoreOrganizationAppId).HasColumnName("core_organization_app_id");
+                entity.Property(e => e.AppKey)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnName("app_key");
+                entity.Property(e => e.AppSecret)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("app_secret");
+                entity.Property(e => e.LocalApi)
+                    .HasMaxLength(256)
+                    .HasColumnName("local_api");
+                entity.Property(e => e.LocalName)
+                    .HasMaxLength(128)
+                    .HasColumnName("local_name");
+                entity.Property(e => e.LocalUrl)
+                    .HasMaxLength(256)
+                    .HasColumnName("local_url");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+
+                entity.HasOne(d => d.CoreOrganizationApp).WithMany(p => p.CoreOrganizationAppKeys)
+                    .HasForeignKey(d => d.CoreOrganizationAppId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("core_organization_app_key_core_organization_app_id_fkey");
             });
 
             modelBuilder.Entity<CoreOrganizationChannel>(entity =>
@@ -304,10 +427,6 @@ namespace Platform.Server.Database
                 entity.Property(e => e.Creation)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("creation");
-                entity.Property(e => e.Culture)
-                    .IsRequired()
-                    .HasMaxLength(10)
-                    .HasColumnName("culture");
                 entity.Property(e => e.DeviceType)
                     .HasConversion<byte>()
                     .HasColumnName("device_type");
@@ -318,11 +437,6 @@ namespace Platform.Server.Database
                     .IsRequired()
                     .HasMaxLength(128)
                     .HasColumnName("name");
-                entity.Property(e => e.RefreshToken)
-                    .HasMaxLength(128)
-                    .HasColumnName("refresh_token");
-                entity.Property(e => e.RefreshTokenExpiry)
-                    .HasColumnName("refresh_token_expiry");
                 entity.Property(e => e.ClientId)
                     .IsRequired()
                     .HasMaxLength(256)
@@ -332,6 +446,50 @@ namespace Platform.Server.Database
                     .HasForeignKey(d => d.CoreUserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("core_user_device_core_user_id_fkey");
+            });
+
+            modelBuilder.Entity<CoreUserDeviceToken>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("core_user_device_token_pkey");
+
+                entity.ToTable("core_user_device_token");
+
+                entity.HasIndex(e => new { e.DeviceId, e.AppId, e.Token }, "core_user_device_token_device_id_app_id_token_idx")
+                    .IsUnique()
+                    .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "true");
+
+                entity.Property(e => e.Id)
+                    .UseIdentityAlwaysColumn()
+                    .HasColumnName("id");
+                entity.Property(e => e.ResponseType)
+                    .HasConversion<byte>()
+                    .HasColumnName("response_type");
+                entity.Property(e => e.AppId).HasColumnName("app_id");
+                entity.Property(e => e.AppKeyId).HasColumnName("app_key_id");
+                entity.Property(e => e.Culture)
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasColumnName("culture");
+                entity.Property(e => e.Data)
+                    .IsRequired()
+                    .HasColumnType("jsonb")
+                    .HasColumnName("data");
+                entity.Property(e => e.DeviceId).HasColumnName("device_id");
+                entity.Property(e => e.Expiry).HasColumnName("expiry");
+                entity.Property(e => e.Token)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("token");
+
+                entity.HasOne(d => d.App).WithMany(p => p.CoreUserDeviceTokens)
+                    .HasForeignKey(d => d.AppId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("core_user_device_token_app_id_fkey");
+
+                entity.HasOne(d => d.Device).WithMany(p => p.CoreUserDeviceTokens)
+                    .HasForeignKey(d => d.DeviceId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("core_user_device_token_device_id_fkey");
             });
 
             modelBuilder.Entity<CoreUserIdentifier>(entity =>

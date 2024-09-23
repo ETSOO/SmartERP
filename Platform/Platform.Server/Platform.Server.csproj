@@ -29,8 +29,8 @@
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.28" />
     <PackageReference Include="com.etsoo.SMTP" Version="1.0.59" />
-    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.1" />
-    <PackageReference Include="com.etsoo.Web" Version="1.2.19" />
+    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.2" />
+    <PackageReference Include="com.etsoo.Web" Version="1.2.32" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.0.4" />

@@ -94,7 +94,7 @@ services:
         volumes:
             - ./data/minio:/data
 
-    # seq
+    # seq, port 80 for web, 5341 for API, 45341 for ingestion
     seq:
         image: datalust/seq:latest
         container_name: seq.app.local

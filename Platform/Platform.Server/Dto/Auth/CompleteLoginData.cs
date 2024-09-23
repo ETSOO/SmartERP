@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
 
 namespace Platform.Server.Dto.Auth
 {
@@ -9,10 +10,10 @@ namespace Platform.Server.Dto.Auth
     public record CompleteLoginData
     {
         /// <summary>
-        /// Test organization id
-        /// 测试机构编号
+        /// Verified organization id
+        /// 认证的机构编号
         /// </summary>
-        public int? TestOrganizationId { get; init; }
+        public int? OrganizationId { get; init; }
 
         /// <summary>
         /// Organization name
@@ -49,6 +50,18 @@ namespace Platform.Server.Dto.Auth
         /// 用户全局唯一标识符
         /// </summary>
         public Guid? Uid { get; init; }
+
+        /// <summary>
+        /// Organization entity status
+        /// 机构实体状态
+        /// </summary>
+        public EntityStatus? OrgStatus { get; init; }
+
+        /// <summary>
+        /// Organization entity expiry
+        /// 机构实体到期
+        /// </summary>
+        public DateTimeOffset? OrgExpiry { get; init; }
 
         /// <summary>
         /// User role

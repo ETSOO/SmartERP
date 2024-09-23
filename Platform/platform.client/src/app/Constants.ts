@@ -3,6 +3,16 @@
  */
 export namespace Constants {
   /**
+   * Auth request field
+   */
+  export const AuthRequestField = "AuthRequest";
+
+  /**
+   * Organization request field
+   */
+  export const OrgRequestField = "OrgRequest";
+
+  /**
    * Password callback code id
    */
   export const CodeFieldCallback = "CallbackCodeId";
@@ -16,11 +26,6 @@ export namespace Constants {
    * Current service session data cache name
    */
   export const CurentService = "CurrentService";
-
-  /**
-   * Redirect url cache name
-   */
-  export const RedirectUrlCache = "RedirectUrl";
 
   /**
    * Registration token scheme

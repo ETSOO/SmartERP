@@ -63,6 +63,18 @@ namespace Platform.Server.Database.Models
         public int? ParentId { get; set; }
 
         /// <summary>
+        /// Global unique identifier, activated manually
+        /// 全局唯一标识符，手动激活
+        /// </summary>
+        public Guid? Uid { get; set; }
+
+        /// <summary>
+        /// Core organization apps
+        /// 核心机构应用
+        /// </summary>
+        public ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = [];
+
+        /// <summary>
         /// Core organization channel owners
         /// 核心机构渠道所有者
         /// </summary>
