@@ -1,6 +1,6 @@
 import React from "react";
 import { HBox, LoadingButton } from "@etsoo/materialui";
-import { Button, Grid, SvgIcon, Typography } from "@mui/material";
+import { Button, Grid2, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -28,7 +28,7 @@ function Register() {
 
   // Do auth
   const doAuth = React.useCallback(async (ac: string) => {
-    const url = await app.authApi.getSignUpUrl(ac);
+    const url = await app.authApi.getAuthSignUpUrl(ac);
     if (url) {
       globalThis.location.href = url;
     }
@@ -60,9 +60,9 @@ function Register() {
       </HBox>
       <Typography variant="caption">{labels.signUpWith}</Typography>
       {app.settings.authClients.length > 0 && (
-        <Grid container>
+        <Grid2 container spacing={0.5}>
           {app.settings.authClients.map((ac) => (
-            <Grid item padding={0.5} xs={6} key={ac}>
+            <Grid2 size={{ xs: 6 }} key={ac}>
               <LoadingButton
                 variant="outlined"
                 fullWidth
@@ -76,9 +76,9 @@ function Register() {
               >
                 {app.get(`brand${ac}`)}
               </LoadingButton>
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       )}
     </SharedLayout>
   );

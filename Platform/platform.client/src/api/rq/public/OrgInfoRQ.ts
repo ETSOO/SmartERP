@@ -4,6 +4,12 @@
  */
 export type OrgInfoRQ = {
   /**
+   * Device unique identifier
+   * 设备唯一标识
+   */
+  deviceId: string;
+
+  /**
    * Application ID
    * 程序编号
    */

@@ -1,4 +1,6 @@
-﻿namespace Platform.Server.Endpoints.Public.RQ
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Platform.Server.Endpoints.Public.RQ
 {
     /// <summary>
     /// Organization query public information request
@@ -6,6 +8,13 @@
     /// </summary>
     public record OrgInfoRQ
     {
+        /// <summary>
+        /// Device id
+        /// 设备编号
+        /// </summary>
+        [StringLength(512, MinimumLength = 32)]
+        public required string DeviceId { get; init; }
+
         /// <summary>
         /// Application ID
         /// 程序编号

@@ -32,10 +32,22 @@
         public int CoreUserId { get; set; }
 
         /// <summary>
+        /// Device type
+        /// 设备类型
+        /// </summary>
+        public DeviceType DeviceType { get; set; }
+
+        /// <summary>
         /// Name
         /// 名称
         /// </summary>
         public required string Name { get; set; }
+
+        /// <summary>
+        /// Client id
+        /// 客户端编号
+        /// </summary>
+        public required string ClientId { get; set; }
 
         /// <summary>
         /// Creation
@@ -44,22 +56,10 @@
         public DateTimeOffset Creation { get; set; }
 
         /// <summary>
-        /// Device type
-        /// 设备类型
-        /// </summary>
-        public DeviceType DeviceType { get; set; }
-
-        /// <summary>
         /// Last login time
         /// 上次登录时间
         /// </summary>
         public DateTimeOffset LastLogin { get; set; }
-
-        /// <summary>
-        /// Client id
-        /// 客户端编号
-        /// </summary>
-        public required string ClientId { get; set; }
 
         /// <summary>
         /// Core user

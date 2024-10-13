@@ -13,6 +13,7 @@ import { Route, Routes } from "react-router-dom";
 import { DynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
 import AuthSuccess from "./login/AuthSuccess";
+import Home from "./main/Home";
 
 // Lazy load components
 const AuthFail = React.lazy(() => import("./login/AuthFail"));
@@ -62,9 +63,29 @@ const theme = createTheme({
 
 function MyRouter() {
   // Init state
-  const [init, setInit] = React.useState(false);
+  const [init, setInit] = React.useState(app.isReady);
+
+  const messageHandler = React.useCallback((event: MessageEvent<any>) => {
+    if (app.coreOrigin !== event.origin || !Array.isArray(event.data)) return;
+
+    const [type, data] = event.data;
+
+    switch (type) {
+      case "login":
+        globalThis.location.replace(data);
+        break;
+    }
+  }, []);
 
   // Ready
+  React.useEffect(() => {
+    if (app.isReady) {
+      setInit(true);
+    } else {
+      app.pendings.push(() => setInit(true));
+    }
+  }, [app.isReady]);
+
   React.useEffect(() => {
     // Persist app data
     const cleanup = () => {
@@ -73,18 +94,14 @@ function MyRouter() {
 
     window.addEventListener("unload", cleanup);
     window.addEventListener("beforeunload", cleanup);
+    window.addEventListener("message", messageHandler);
 
-    // Init call
-    const init = () => {
-      app.initCall((result) => {
-        setInit(result);
-      });
+    return () => {
+      cleanup();
+      window.removeEventListener("unload", cleanup);
+      window.removeEventListener("beforeunload", cleanup);
+      window.removeEventListener("message", messageHandler);
     };
-    if (app.isReady) {
-      init();
-    } else {
-      app.pendings.push(init);
-    }
   }, []);
 
   return init ? (
@@ -95,6 +112,7 @@ function MyRouter() {
           <Route path="/" element={<App />} />
           <Route path="/login/authfail" element={<AuthFail />} />
           <Route path="/login/authsuccess" element={<AuthSuccess />} />
+          <Route path="/home" element={<Home />}></Route>
         </Routes>
       </DynamicRouter>
     </React.Suspense>

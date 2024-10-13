@@ -21,6 +21,7 @@ using OpenTelemetry.Resources;
 using Platform.Server;
 using Platform.Server.Application;
 using Platform.Server.Database;
+using Platform.Server.Endpoints.App;
 using Platform.Server.Endpoints.Auth;
 using Platform.Server.Endpoints.Public;
 using Platform.Server.OAuth2;
@@ -242,6 +243,7 @@ services.AddScoped<IWXClient, WXClient>();
 
 // API services
 services.AddScoped<IMyUserAccessor, UserAccessor<CurrentUser>>();
+services.AddScoped<IAppService, AppService>();
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IPublicService, PublicService>();
 
@@ -307,6 +309,8 @@ if (microsoftOptions.Exists())
 // Endpoints
 api.MapAuth()
     .MapPublic()
+    .MapApp()
+    .RequireAuthorization()
 ;
 
 app.MapFallbackToFile("/index.html");

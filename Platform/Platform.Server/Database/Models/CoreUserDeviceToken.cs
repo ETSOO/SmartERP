@@ -32,10 +32,10 @@
         public required string Region { get; init; }
 
         /// <summary>
-        /// Scopes
+        /// Scopes, in EF JSON format, IList works while IEnumerable does not
         /// 权限范围
         /// </summary>
-        public required IEnumerable<string> Scopes { get; init; }
+        public required IList<string> Scopes { get; init; }
 
         /// <summary>
         /// Organization id
@@ -105,6 +105,18 @@
         public int? AppKeyId { get; set; }
 
         /// <summary>
+        /// Response type
+        /// 响应类型
+        /// </summary>
+        public TokenResponseType ResponseType { get; set; }
+
+        /// <summary>
+        /// Culture
+        /// 文化
+        /// </summary>
+        public required string Culture { get; set; }
+
+        /// <summary>
         /// Token
         /// 令牌
         /// </summary>
@@ -123,22 +135,16 @@
         public required DeviceTokenData Data { get; set; }
 
         /// <summary>
-        /// Culture
-        /// 文化
-        /// </summary>
-        public required string Culture { get; set; }
-
-        /// <summary>
-        /// Response type
-        /// 响应类型
-        /// </summary>
-        public TokenResponseType ResponseType { get; set; }
-
-        /// <summary>
         /// Related app
         /// 相关程序
         /// </summary>
-        public CoreApp App { get; set; } = default!;
+        public CoreApp? App { get; set; }
+
+        /// <summary>
+        /// Organization application key
+        /// 机构应用键名
+        /// </summary>
+        public CoreOrganizationAppKey? AppKey { get; set; }
 
         /// <summary>
         /// Related device

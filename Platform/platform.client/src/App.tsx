@@ -7,7 +7,7 @@ import {
   TextFieldExMethods
 } from "@etsoo/materialui";
 import { DataTypes, DomUtils, NumberUtils, Utils } from "@etsoo/shared";
-import { Alert, Box, Button, Grid, SvgIcon, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid2, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./login/SharedLayout";
 import { AccountCircle, Language } from "@mui/icons-material";
 import { AuthRequest, BridgeUtils } from "@etsoo/appscript";
@@ -220,7 +220,8 @@ function App() {
       .orgInfo({
         appId: auth?.appId,
         appKey: auth?.appKey,
-        orgUid: org?.org
+        orgUid: org?.org,
+        deviceId: app.deviceId
       })
       .then((data) => {
         if (data == null) return;
@@ -252,15 +253,13 @@ function App() {
           loadAppData();
         }
       },
-      data: {},
-      showLoading: true,
-      relogin: false
+      showLoading: true
     });
   }, [trySaveLogin, loadAppData]);
 
   // Do auth
   const doAuth = React.useCallback(async (ac: string) => {
-    const url = await app.authApi.getLogInUrl(ac);
+    const url = await app.authApi.getAuthLogInUrl(ac);
     if (url) {
       globalThis.location.href = url;
     }
@@ -398,9 +397,9 @@ function App() {
             </HBox>
             <Typography variant="caption">{value.get("signInWith")}</Typography>
             {app.settings.authClients.length > 0 && (
-              <Grid container>
+              <Grid2 container spacing={0.5}>
                 {app.settings.authClients.map((ac) => (
-                  <Grid item padding={0.5} xs={6} key={ac}>
+                  <Grid2 size={{ xs: 6 }} key={ac}>
                     <LoadingButton
                       variant="outlined"
                       fullWidth
@@ -414,9 +413,9 @@ function App() {
                     >
                       {value.get(`brand${ac}`)}
                     </LoadingButton>
-                  </Grid>
+                  </Grid2>
                 ))}
-              </Grid>
+              </Grid2>
             )}
             <div>
               {value.get("noAccountTip")}&nbsp;

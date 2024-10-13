@@ -99,10 +99,9 @@ namespace Platform.Server.Services
                 }
                 else
                 {
-                    appName = await _db.CoreOrganizationApps
-                        .Include(oa => oa.CoreApp)
-                        .Where(oa => oa.CoreAppId == rq.AppId && oa.AppKey == rq.AppKey)
-                        .Select(oa => oa.LocalName ?? oa.CoreApp.Name)
+                    appName = await _db.CoreOrganizationAppKeys
+                        .Where(oa => oa.CoreOrganizationAppId == rq.AppId && oa.AppKey == rq.AppKey)
+                        .Select(oa => oa.LocalName ?? oa.CoreOrganizationApp.CoreApp.Name)
                         .FirstOrDefaultAsync(cancellationToken);
                 }
             }

@@ -87,7 +87,7 @@ function Home() {
           width: "100vw",
           height: "100vh"
         }}
-        src="https://etsoo.nz"
+        src="https://localhost:9004?embedded=true"
       ></iframe>
     </React.Fragment>
   );

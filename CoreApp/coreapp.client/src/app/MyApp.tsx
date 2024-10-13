@@ -3,12 +3,14 @@ import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import {
   AddressUtils,
-  ApiAuthorizationScheme,
   en,
   ExternalSettings,
   zhHans,
   zhHant
 } from "@etsoo/appscript";
+import enSys from "../../../../Platform/platform.client/src/i18n/en.sys.json";
+import zhHansSys from "../../../../Platform/platform.client/src/i18n/zh-Hans.sys.json";
+import zhHantSys from "../../../../Platform/platform.client/src/i18n/zh-Hant.sys.json";
 
 class MyApp extends ServiceApp<MyUser> {}
 
@@ -22,9 +24,9 @@ const { detectedCulture } = DomUtils;
 MUGlobal.textFieldVariant = "standard";
 
 const supportedCultures: DataTypes.CultureDefinition[] = [
-  zhHans(() => import("../i18n/zh-Hans.json")),
-  zhHant(() => import("../i18n/zh-Hant.json")),
-  en(() => import("../i18n/en.json"))
+  zhHans(zhHansSys, () => import("../i18n/zh-Hans.json")),
+  zhHant(zhHantSys, () => import("../i18n/zh-Hant.json")),
+  en(enSys, () => import("../i18n/en.json"))
 ];
 const supportedRegions = ["CN"];
 
@@ -38,9 +40,6 @@ if (externalSettings == null) {
 const settings: IServiceAppSettings = {
   // Merge external configs first
   ...externalSettings,
-
-  // Authorization scheme
-  authScheme: ApiAuthorizationScheme.Bearer,
 
   // Detected culture
   detectedCulture,
@@ -57,7 +56,7 @@ const settings: IServiceAppSettings = {
   /**
    * Current service id
    */
-  serviceId: 1,
+  appId: 1,
 
   // Current country or region
   currentRegion: AddressUtils.getRegion(

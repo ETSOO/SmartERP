@@ -76,28 +76,22 @@ namespace Platform.Server.Database.Models
         public string? FamilyName { get; set; }
 
         /// <summary>
-        /// Foreign name
-        /// 外文名称
+        /// Preferred name
+        /// 首选姓名
         /// </summary>
-        public string? ForeignName { get; set; }
+        public string? PreferredName { get; set; }
+
+        /// <summary>
+        /// Official English name
+        /// 官方英文姓名
+        /// </summary>
+        public string? OfficialEnglishName { get; set; }
 
         /// <summary>
         /// Avatar
         /// 头像
         /// </summary>
         public string? Avatar { get; set; }
-
-        /// <summary>
-        /// Creation
-        /// 创建时间
-        /// </summary>
-        public DateTimeOffset Creation { get; set; } = DateTimeOffset.UtcNow;
-
-        /// <summary>
-        /// Status
-        /// 状态
-        /// </summary>
-        public EntityStatus Status { get; set; } = EntityStatus.Normal;
 
         /// <summary>
         /// Frozen expiry time
@@ -128,6 +122,18 @@ namespace Platform.Server.Database.Models
         /// 最近访问的机构编号
         /// </summary>
         public int? LatestOrganizationId { get; set; }
+
+        /// <summary>
+        /// Creation
+        /// 创建时间
+        /// </summary>
+        public DateTimeOffset Creation { get; set; } = DateTimeOffset.UtcNow;
+
+        /// <summary>
+        /// Status
+        /// 状态
+        /// </summary>
+        public EntityStatus Status { get; set; } = EntityStatus.Normal;
 
         /// <summary>
         /// Core user authentication codes

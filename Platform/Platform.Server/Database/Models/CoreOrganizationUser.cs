@@ -76,6 +76,12 @@ namespace Platform.Server.Database.Models
         public string? AssignedId { get; set; }
 
         /// <summary>
+        /// Extended data
+        /// 扩展数据
+        /// </summary>
+        public string? Data { get; set; }
+
+        /// <summary>
         /// Creation
         /// 创建时间
         /// </summary>
@@ -98,12 +104,6 @@ namespace Platform.Server.Database.Models
         /// 状态
         /// </summary>
         public EntityStatus Status { get; set; } = EntityStatus.Normal;
-
-        /// <summary>
-        /// Extended data
-        /// 扩展数据
-        /// </summary>
-        public string? Data { get; set; }
 
         /// <summary>
         /// Core organization

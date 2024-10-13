@@ -3,6 +3,7 @@ import { useSearchParamsEx } from "@etsoo/react";
 import { IActionResult } from "@etsoo/shared";
 import { Navigate } from "react-router-dom";
 import { app } from "../app/SmartApp";
+import { Constants } from "../app/Constants";
 
 function AuthSuccess() {
   // Query params
@@ -19,6 +20,9 @@ function AuthSuccess() {
     if (r.ok && r.data && token) {
       // User login
       app.userLogin(r.data, token, true);
+
+      // Remove the auth request cache
+      app.storage.setData(Constants.AuthRequestField, null);
 
       return <Navigate to="./../../../home" replace />;
     } else {

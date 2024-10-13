@@ -1,36 +1,59 @@
-import { ISmartERPUser } from "@etsoo/materialui";
 import { useSearchParamsEx } from "@etsoo/react";
+import { app } from "../app/MyApp";
+import { IServiceUser, ServiceUserToken } from "@etsoo/materialui";
+import { ApiRefreshTokenDto } from "@etsoo/appscript";
 import { IActionResult } from "@etsoo/shared";
 import { Navigate } from "react-router-dom";
-import { app } from "../app/MyApp";
 
 function AuthSuccess() {
   // Query params
-  const { result, token } = useSearchParamsEx({
-    result: "string",
-    token: "string"
+  const { core, result } = useSearchParamsEx({
+    core: "string",
+    result: "string"
   });
 
+  let pageResult: IActionResult;
   if (result) {
-    // Parse result
-    const r: IActionResult<ISmartERPUser> = JSON.parse(
-      result
-    ) as IActionResult<ISmartERPUser>;
-    if (r.ok && r.data && token) {
-      // User login
-      app.userLogin(r.data, token, true);
+    try {
+      const resultObj: IActionResult<IServiceUser & ServiceUserToken> =
+        JSON.parse(result);
 
-      return <Navigate to="./../../../home" replace />;
-    } else {
-      app.alertResult(r, () => {
-        app.tryLogin();
-      });
+      if (resultObj.ok && resultObj.data) {
+        let coreObj: ApiRefreshTokenDto | undefined = core
+          ? JSON.parse(core)
+          : undefined;
 
-      return <></>;
+        app.userLoginEx(resultObj.data, coreObj, false, false);
+
+        return <Navigate to="./../../home/" replace />;
+      } else {
+        pageResult = {
+          ok: false,
+          title: "No Valid Auth Result"
+        };
+      }
+    } catch (error) {
+      pageResult = {
+        ok: false,
+        title: `Auth Exception ${error}`
+      };
+      console.error("AuthSuccess", error);
     }
+  } else {
+    pageResult = {
+      ok: false,
+      title: "No Auth Result"
+    };
   }
 
-  return <Navigate to="./../../../" replace />;
+  return (
+    <Navigate
+      to={`./../authfail?error=${encodeURIComponent(
+        JSON.stringify(pageResult)
+      )}`}
+      replace
+    />
+  );
 }
 
 export default AuthSuccess;

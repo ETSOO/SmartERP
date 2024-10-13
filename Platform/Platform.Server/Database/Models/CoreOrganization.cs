@@ -39,18 +39,6 @@ namespace Platform.Server.Database.Models
         public string? Logo { get; set; }
 
         /// <summary>
-        /// Status
-        /// 状态
-        /// </summary>
-        public EntityStatus Status { get; set; } = EntityStatus.Normal;
-
-        /// <summary>
-        /// Creation
-        /// 创建时间
-        /// </summary>
-        public DateTimeOffset Creation { get; set; } = DateTimeOffset.UtcNow;
-
-        /// <summary>
         /// PIN
         /// 唯一标识
         /// </summary>
@@ -67,6 +55,18 @@ namespace Platform.Server.Database.Models
         /// 全局唯一标识符，手动激活
         /// </summary>
         public Guid? Uid { get; set; }
+
+        /// <summary>
+        /// Status
+        /// 状态
+        /// </summary>
+        public EntityStatus Status { get; set; } = EntityStatus.Normal;
+
+        /// <summary>
+        /// Creation
+        /// 创建时间
+        /// </summary>
+        public DateTimeOffset Creation { get; set; } = DateTimeOffset.UtcNow;
 
         /// <summary>
         /// Core organization apps

@@ -13,7 +13,11 @@ public partial class CoreApp
 
     public short IdentityType { get; set; }
 
+    public string AppSecret { get; set; }
+
     public string WebUrl { get; set; }
+
+    public string ApiUrl { get; set; }
 
     public string HelpUrl { get; set; }
 
@@ -27,9 +31,6 @@ public partial class CoreApp
 
     public bool? RequireLocalUrl { get; set; }
 
-    public string AppSecret { get; set; }
-
-    public string ApiUrl { get; set; }
 
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 

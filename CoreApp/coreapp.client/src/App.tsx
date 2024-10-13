@@ -1,51 +1,21 @@
-import { DomUtils } from "@etsoo/shared";
 import React from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { app } from "./app/MyApp";
+import { useSearchParamsEx } from "@etsoo/react";
 
 function App() {
-  // Route
-  const navigate = useNavigate();
-  const [search] = useSearchParams();
-
   // Queries
-  const params = DomUtils.dataAs(search, {
-    tryLogin: "string",
-    token: "string"
+  const { embedded, tryLogin } = useSearchParamsEx({
+    embedded: "boolean",
+    tryLogin: "boolean"
   });
 
-  const tryLogin = params.tryLogin;
-
-  // Token
-  const token = params.token;
-  if (token) {
-    // Cache the service token to local refresh token
-    app.storage.setData(app.fields.headerToken, app.encrypt(token));
-  }
+  React.useEffect(() => {
+    app.updateEmbedded(embedded, true);
+  }, [embedded]);
 
   React.useEffect(() => {
-    // Try login
-    if (tryLogin === "false") return;
-
-    app.serviceApi
-      .get<string>("Auth/GetLogInUrl", {
-        region: app.region,
-        device: app.deviceId
-      })
-      .then((url) => {
-        if (!url) return;
-        window.location.replace(url);
-      });
-
-    /*
-    app.tryLogin(undefined, true).then((result) => {
-      if (result) {
-        navigate("/home/");
-        return;
-      }
-    });
-    */
-  }, [navigate, tryLogin]);
+    app.toLoginPage(tryLogin);
+  }, [tryLogin]);
 
   return <React.Fragment></React.Fragment>;
 }

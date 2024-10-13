@@ -50,6 +50,10 @@ export default defineConfig({
     }
   },
   server: {
+    headers: {
+      "x-frame-options": "deny",
+      "frame-ancestors": "none"
+    },
     proxy: {
       "^/api": {
         target: "https://localhost:9001",

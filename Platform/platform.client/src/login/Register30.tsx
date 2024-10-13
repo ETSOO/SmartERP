@@ -3,7 +3,7 @@ import { Button, Typography } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import { TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
 import { app } from "../app/SmartApp";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { CompleteRegisterRQ } from "../api/rq/auth/CompleteRegisterRQ";
 
 function RegisterPassword() {
@@ -91,7 +91,7 @@ function RegisterPassword() {
       }
 
       // User login
-      app.doLogin(result.data, refreshToken, true);
+      app.userLogin(result.data, refreshToken, true);
       navigate("./../../home/");
     } else {
       app.alertResult(result, () => {

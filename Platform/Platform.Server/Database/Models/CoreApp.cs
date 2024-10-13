@@ -27,6 +27,12 @@ namespace Platform.Server.Database.Models
         public IdentityType IdentityType { get; set; }
 
         /// <summary>
+        /// Application secret
+        /// 程序密钥
+        /// </summary>
+        public required string AppSecret { get; set; }
+
+        /// <summary>
         /// Web URL
         /// 网址
         /// </summary>
@@ -43,6 +49,12 @@ namespace Platform.Server.Database.Models
         /// 帮助网址
         /// </summary>
         public string? HelpUrl { get; set; }
+
+        /// <summary>
+        /// Require local URL
+        /// 是否需要本地网址
+        /// </summary>
+        public bool? RequireLocalUrl { get; set; }
 
         /// <summary>
         /// Logo
@@ -67,18 +79,6 @@ namespace Platform.Server.Database.Models
         /// 是否启用
         /// </summary>
         public bool Enabled { get; set; }
-
-        /// <summary>
-        /// Require local URL
-        /// 是否需要本地网址
-        /// </summary>
-        public bool? RequireLocalUrl { get; set; }
-
-        /// <summary>
-        /// Application secret
-        /// 程序密钥
-        /// </summary>
-        public required string AppSecret { get; set; }
 
         /// <summary>
         /// Core organization apps

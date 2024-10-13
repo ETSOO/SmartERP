@@ -1,11 +1,11 @@
 import {
   AddressUtils,
   zhHant,
-  zhHans,
   en,
   ExternalSettings,
   BridgeUtils,
-  ApiService
+  ApiService,
+  zhHans
 } from "@etsoo/appscript";
 import { ISmartSettings } from "./SmartSettings";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
@@ -23,7 +23,11 @@ import { ProductApi } from "../api/ProductApi";
 import { OrgApi } from "../api/OrgApi";
 import { ApiServiceApi } from "../api/ApiServiceApi";
 import { NavigateFunction } from "react-router-dom";
-import { CoreConstants } from "@etsoo/react";
+import { AppApi } from "../api/AppApi";
+import { AppData } from "./AppData";
+import enSys from "../i18n/en.sys.json";
+import zhHansSys from "../i18n/zh-Hans.sys.json";
+import zhHantSys from "../i18n/zh-Hant.sys.json";
 
 /**
  * SmartERP App
@@ -37,6 +41,11 @@ class SmartApp extends CommonApp<
    * Api service API
    */
   readonly apiServiceApi = new ApiServiceApi(this);
+
+  /**
+   * App API
+   */
+  readonly appApi = new AppApi(this);
 
   /**
    * Public API
@@ -78,30 +87,24 @@ class SmartApp extends CommonApp<
    */
   readonly userApi = new UserApi(this);
 
+  private _apps: AppData[] = [];
   /**
-   * Do login
-   * @param userData User data
-   * @param refreshToken Refresh token
-   * @param keep Keep login
+   * User applications
    */
-  doLogin(
-    userData: ISmartERPUser,
-    refreshToken: string,
-    keep: boolean = false
-  ) {
-    // Service token
-    const serviceToken = userData.serviceToken;
+  public get apps() {
+    return this._apps;
+  }
+  protected set apps(value) {
+    this._apps = value;
+    this._origins = value.map((app) => new URL(app.webUrl).origin);
+  }
 
-    // Clear the token
-    if (serviceToken) Reflect.set(userData, "serviceToken", undefined);
-
-    // User login
-    app.userLogin(userData, refreshToken, keep);
-
-    // Keep
-    app.storage.setData(CoreConstants.FieldLoginKeep, keep);
-
-    return serviceToken;
+  private _origins: string[] = [];
+  /**
+   * Origins
+   */
+  public get origins() {
+    return this._origins;
   }
 
   /**
@@ -221,25 +224,22 @@ class SmartApp extends CommonApp<
   }
 
   /**
-   * Override doing user login
-   * @param data User data
-   * @param refreshToken Refresh token
-   * @param keep Keep login
-   * @returns Success data
+   * On authorized or not callback
+   * @param success Success or not
    */
-  protected override doUserLogin(
-    data: ISmartERPUser,
-    refreshToken: string,
-    keep: boolean
-  ): string | undefined {
-    // Service token
-    const serviceToken = data.serviceToken;
+  protected override onAuthorized(success: boolean) {
+    // Call parent
+    super.onAuthorized(success);
 
-    // User login
-    // Service login, token will be null and should not trigger user state change
-    this.userLogin(data, refreshToken, keep, serviceToken == null);
-
-    return serviceToken;
+    // Get user apps
+    if (success) {
+      this.appApi.getApps({ showLoading: false }).then((apps) => {
+        if (apps == null) return;
+        this.apps = apps;
+      });
+    } else {
+      this.apps = [];
+    }
   }
 }
 
@@ -254,9 +254,9 @@ MUGlobal.textFieldVariant = "standard";
 
 // Supported cultures
 const supportedCultures: DataTypes.CultureDefinition[] = [
-  zhHans(() => import("../i18n/zh-Hans.json")),
-  zhHant(() => import("../i18n/zh-Hant.json")),
-  en(() => import("../i18n/en.json"))
+  zhHans(zhHansSys, () => import("./../i18n/zh-Hans.json")),
+  zhHant(zhHantSys, () => import("./../i18n/zh-Hant.json")),
+  en(enSys, () => import("./../i18n/en.json"))
 ];
 
 // Supported regions

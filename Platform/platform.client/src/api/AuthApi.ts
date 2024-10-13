@@ -1,9 +1,9 @@
 import {
   IApiPayload,
-  ResultPayload,
   AuthApi as AuthApiBase,
   LoginRQ,
-  StringIdResultPayload
+  StringIdResultPayload,
+  AuthRequest
 } from "@etsoo/appscript";
 import { SmartERPLoginResult } from "@etsoo/materialui";
 import { InviteDto } from "./dto/auth/InviteDto";
@@ -18,6 +18,15 @@ import { CompleteRegisterRQ } from "./rq/auth/CompleteRegisterRQ";
  * Authentication API
  */
 export class AuthApi extends AuthApiBase {
+  /**
+   * Authorization request
+   * @param auth Authorization request data
+   * @param payload Payload
+   */
+  authRequest(auth: AuthRequest, payload?: IApiPayload<string>) {
+    return this.api.post("Auth/AuthRequest", auth, payload);
+  }
+
   /**
    * Complete register
    * @param rq Request data
@@ -42,7 +51,7 @@ export class AuthApi extends AuthApiBase {
    * @param payload Payload
    * @returns Result
    */
-  getLogInUrl(ac: string, payload?: IApiPayload<string>) {
+  getAuthLogInUrl(ac: string, payload?: IApiPayload<string>) {
     return this.api.get(
       `OAuth2/${ac}/GetLogInUrl?region=${
         this.app.region
@@ -58,7 +67,7 @@ export class AuthApi extends AuthApiBase {
    * @param payload Payload
    * @returns Result
    */
-  getSignUpUrl(ac: string, payload?: IApiPayload<string>) {
+  getAuthSignUpUrl(ac: string, payload?: IApiPayload<string>) {
     return this.api.get(
       `OAuth2/${ac}/GetSignUpUrl?region=${
         this.app.region

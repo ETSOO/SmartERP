@@ -149,11 +149,11 @@ namespace Platform.Server.Services
 
             if (string.IsNullOrEmpty(appKey))
             {
-                data = await _db.CoreApps.Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, WebUrl = a.WebUrl, ApiUrl = a.ApiUrl }).FirstOrDefaultAsync(cancellationToken);
+                data = await _db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, WebUrl = a.WebUrl, ApiUrl = a.ApiUrl }).FirstOrDefaultAsync(cancellationToken);
             }
             else
             {
-                data = await _db.CoreOrganizationAppKeys.Where(ak => ak.CoreOrganizationAppId == appId && ak.AppKey == appKey).Select(a => new AppData { AppSecret = a.AppSecret, AppKeyId = a.Id, WebUrl = a.LocalUrl ?? a.CoreOrganizationApp.CoreApp.WebUrl, ApiUrl = a.LocalApi ?? a.CoreOrganizationApp.CoreApp.ApiUrl }).FirstOrDefaultAsync(cancellationToken);
+                data = await _db.CoreOrganizationAppKeys.AsNoTracking().Where(ak => ak.CoreOrganizationAppId == appId && ak.AppKey == appKey).Select(a => new AppData { AppSecret = a.AppSecret, AppKeyId = a.Id, WebUrl = a.LocalUrl ?? a.CoreOrganizationApp.CoreApp.WebUrl, ApiUrl = a.LocalApi ?? a.CoreOrganizationApp.CoreApp.ApiUrl }).FirstOrDefaultAsync(cancellationToken);
             }
 
             if (data != null)
@@ -212,7 +212,7 @@ namespace Platform.Server.Services
 
         private async Task<TokenQueryData?> CreateTokenQueryDataAsync(CurrentUser user, CancellationToken cancellationToken)
         {
-            var data = await _db.CoreUserDeviceTokens.Where(t => t.DeviceId == user.DeviceIdInt && t.ResponseType == TokenResponseType.Token && t.AppId == null && t.Expiry >= DateTime.UtcNow)
+            var data = await _db.CoreUserDeviceTokens.AsNoTracking().Where(t => t.DeviceId == user.DeviceIdInt && t.ResponseType == TokenResponseType.Token && t.AppId == null && t.Expiry >= DateTime.UtcNow)
                 .OrderByDescending(t => t.Id)
                 .Select(t => new TokenQueryData
                 {
@@ -406,7 +406,7 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.NoPasswordMatch.AsResult(), null);
             }
 
-            var user = await _db.CoreUsers.FirstOrDefaultAsync(u => u.Id == login.Id, cancellationToken);
+            var user = await _db.CoreUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == login.Id, cancellationToken);
             if (user == null)
             {
                 return (ApplicationErrors.NoValidData.AsResult("User"), null);
@@ -424,18 +424,23 @@ namespace Platform.Server.Services
         // Sign up from OAuth2 client - 从OAuth2客户端注册
         private async Task<(ActionResult result, string? refreshToken)> CompleteLoginAsync(CoreUser user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, AuthRequest? auth, CancellationToken cancellationToken)
         {
+            // Default values
             var culture = CultureInfo.CurrentCulture.Name;
 
+            // Token user may pass 0 for organization id
+            if (organizationId < 1) organizationId = null;
+            if (fromOrganizationId < 1) fromOrganizationId = null;
+
             // Complete login with the SP
-            var userIdSP = new NpgsqlParameter<int>("user_id", user.Id);
-            var latestOrganizationIdSP = new NpgsqlParameter<int?>("latest_organization_id", user.LatestOrganizationId);
-            var organizationIdSP = new NpgsqlParameter<int?>("target_organization_id", organizationId);
-            var fromOrganizationIdSP = new NpgsqlParameter<int?>("from_organization_id", fromOrganizationId);
-            var deviceNameSP = new NpgsqlParameter<string>("device_name", deviceName);
-            var deviceTypeSP = new NpgsqlParameter<short>("device_type", (byte)deviceType);
-            var clientIdSP = new NpgsqlParameter<string>("client_id", clientId);
-            var ipSP = new NpgsqlParameter<string>("ip", _ip.ToString());
-            var cultureSP = new NpgsqlParameter<string>("culture", culture);
+            var userIdSP = new NpgsqlParameter<int>("p_user_id", user.Id);
+            var latestOrganizationIdSP = new NpgsqlParameter<int?>("p_latest_organization_id", user.LatestOrganizationId);
+            var organizationIdSP = new NpgsqlParameter<int?>("p_target_organization_id", organizationId);
+            var fromOrganizationIdSP = new NpgsqlParameter<int?>("p_from_organization_id", fromOrganizationId);
+            var deviceNameSP = new NpgsqlParameter<string>("p_device_name", deviceName);
+            var deviceTypeSP = new NpgsqlParameter<short>("p_device_type", (byte)deviceType);
+            var clientIdSP = new NpgsqlParameter<string>("p_client_id", clientId);
+            var ipSP = new NpgsqlParameter<string>("p_ip", _ip.ToString());
+            var cultureSP = new NpgsqlParameter<string>("p_culture", culture);
 
             // IQuerable<T>.FirstOrDefault() adds SQL that filters by the first row number
             // Here we use the stored procedure to get the first row, not the filter
@@ -473,7 +478,7 @@ namespace Platform.Server.Services
                 scopes.Add("super");
             }
 
-            // App scopes
+            // App paid scopes
             scopes.AddRange(data.Scopes.Select(s => $"app{s}"));
 
             // Limit scopes with auth request
@@ -524,18 +529,26 @@ namespace Platform.Server.Services
                 // Refresh token
                 var refreshToken = await CreateRefreshTokenAsync(user.Id, data.DeviceId, culture, TokenResponseType.Token, tokenData, null, null, cancellationToken);
 
-                result.Data["Name"] = user.Name;
-                result.Data["Avatar"] = user.Avatar;
-                result.Data["Organization"] = data.OrganizationId;
-                result.Data["IsChannel"] = data.ChannelOrganizationId.HasValue;
-                result.Data["IsParent"] = data.ParentOrganizationId.HasValue;
-                result.Data["Role"] = (short)data.UserRole;
-                result.Data["Token"] = accessToken;
-                result.Data["Seconds"] = 60 * minutes;
-                result.Data["Uid"] = data.Uid;
-
+                // Serverside device id
                 // Encrypt DeviceId for client identifier
-                result.Data["DeviceId"] = await HashEncryptAsync(data.DeviceId.ToString(), App.Configuration.InitCallEncryptionIdentifier);
+                var deviceId = await HashEncryptAsync(data.DeviceId.ToString(), App.Configuration.InitCallEncryptionIdentifier);
+
+                var publicData = new PublicUserData
+                {
+                    Name = user.Name,
+                    Avatar = user.Avatar,
+                    Organization = data.OrganizationId,
+                    IsChannel = data.ChannelOrganizationId.HasValue,
+                    IsParent = data.ParentOrganizationId.HasValue,
+                    Role = (short)data.UserRole,
+                    TokenScheme = "Bearer",
+                    Token = accessToken,
+                    Seconds = 60 * minutes,
+                    DeviceId = deviceId
+                };
+
+                // Save
+                publicData.SaveTo(result);
 
                 return (result, refreshToken);
             }
@@ -639,6 +652,7 @@ namespace Platform.Server.Services
 
             // Login with id check
             var data = await _db.CoreUserIdentifiers
+                .AsNoTracking()
                 .Where(i => i.Type == type && i.Value == id)
                 .Select(i => new LoginUserWithPassword { Id = i.CoreUser.Id, Password = i.CoreUser.Password, Status = i.CoreUser.Status, FrozenTime = i.CoreUser.FrozenTime, Step = i.CoreUser.Step })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -664,7 +678,7 @@ namespace Platform.Server.Services
 
         private async Task<LoginUser?> ReadUserAsync(CoreUserIdentifierType type, string openId)
         {
-            return await _db.CoreUserIdentifiers.Where(i => i.Type == type && i.Value == openId)
+            return await _db.CoreUserIdentifiers.AsNoTracking().Where(i => i.Type == type && i.Value == openId)
                 .Select(i => new LoginUser { Id = i.CoreUser.Id, Status = i.CoreUser.Status, FrozenTime = i.CoreUser.FrozenTime, Step = i.CoreUser.Step, IdentifierId = i.Id })
                 .FirstOrDefaultAsync();
         }
@@ -686,28 +700,75 @@ namespace Platform.Server.Services
             return App.AuthService.CreateAccessToken(user, Constants.RegistrationTokenAudience, 60);
         }
 
+        private bool TokenDataEquals(DeviceTokenData source, DeviceTokenData data)
+        {
+            return source.Scopes.Count == data.Scopes.Count && source.Scopes.Order().Equals(data.Scopes.Order())
+                && source.Region == data.Region
+                && source.OrganizationId == data.OrganizationId
+                && source.ParentOrganizationId == data.ParentOrganizationId
+                && source.ChannelOrganizationId == data.ChannelOrganizationId
+            ;
+        }
+
         private async Task<string> CreateRefreshTokenAsync(int userId, int deviceId, string culture, TokenResponseType responseType, DeviceTokenData data, int? appId, int? appKeyId, CancellationToken cancellationToken)
         {
-            // Random token hashed
-            var token = await App.HashPasswordAsync($"{userId}-{deviceId}-{Guid.NewGuid()}-{CryptographyUtils.CreateRandString(RandStringKind.All, 6)}");
+            // Use the latest token to avoid huge creation of new one
+            var tokenData = await _db.CoreUserDeviceTokens
+                .AsNoTracking()
+                .Where(t => t.DeviceId == deviceId && t.ResponseType == responseType && t.AppId == appId && t.AppKeyId == appKeyId)
+                .OrderByDescending(t => t.Expiry)
+                .Select(t => new { t.Id, t.Token, t.Expiry, t.Data })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            // Remove the latest expiry one
+            if (tokenData != null)
+            {
+                if (tokenData.Expiry < DateTime.UtcNow)
+                {
+                    await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
+                    tokenData = null;
+                }
+                else if (!TokenDataEquals(tokenData.Data, data))
+                {
+                    // New refresh token is required
+                    tokenData = null;
+                }
+            }
 
             // Refresh token / code expiry
             var expiry = responseType == TokenResponseType.Token
                 ? DateTime.UtcNow.AddDays(App.Configuration.RefreshTokenDays).ToSqlDateTime()
                 : DateTime.UtcNow.AddMinutes(3).ToSqlDateTime();
 
-            // Create token
-            await _db.CoreUserDeviceTokens.AddAsync(new CoreUserDeviceToken
+            string token;
+            if (tokenData == null)
             {
-                DeviceId = deviceId,
-                AppId = appId,
-                AppKeyId = appKeyId,
-                Token = token,
-                Expiry = expiry,
-                Data = data,
-                Culture = culture,
-                ResponseType = responseType
-            }, cancellationToken);
+                // Random token hashed
+                token = await App.HashPasswordAsync($"{userId}-{deviceId}-{Guid.NewGuid()}-{CryptographyUtils.CreateRandString(RandStringKind.All, 6)}");
+
+                // Create token
+                await _db.CoreUserDeviceTokens.AddAsync(new CoreUserDeviceToken
+                {
+                    DeviceId = deviceId,
+                    AppId = appId,
+                    AppKeyId = appKeyId,
+                    Token = token,
+                    Expiry = expiry,
+                    Data = data,
+                    Culture = culture,
+                    ResponseType = responseType
+                }, cancellationToken);
+
+                // Save it
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                token = tokenData.Token;
+
+                // Update the expiry
+                await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteUpdateAsync(t => t.SetProperty(t => t.Expiry, expiry), cancellationToken);
+            }
 
             // Return the token
             return token;
@@ -718,10 +779,9 @@ namespace Platform.Server.Services
         /// 刷新令牌
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="refreshToken">Refresh token</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async ValueTask<(IActionResult result, string? newRefreshToken)> RefreshTokenAsync(RefreshTokenData data, string refreshToken, CancellationToken cancellationToken = default)
+        public async ValueTask<(IActionResult result, string? newRefreshToken)> RefreshTokenAsync(RefreshTokenData data, CancellationToken cancellationToken = default)
         {
             // Check device
             if (!this.CheckDevice(data.UserAgent, data.DeviceId, out var checkResult, out var cd))
@@ -737,21 +797,25 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.NoValidData.AsResult("Token"), null);
             }
 
-            string? password = null;
-            if (!string.IsNullOrEmpty(data.Password))
-            {
-                password = DecryptDeviceData(data.Password, deviceCore);
-                if (string.IsNullOrEmpty(password))
-                {
-                    return (ApplicationErrors.NoValidData.AsResult("Token"), null);
-                }
-            }
-
             var deviceName = cd.Value.Parser.ToShortName();
 
             var tokenData = await _db.CoreUserDeviceTokens
+                .AsNoTracking()
                 .Where(t => t.ResponseType == TokenResponseType.Token && t.AppId == null && t.Token == token)
-                .Select(t => new { t.Id, t.Expiry, t.Device.CoreUser })
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Expiry,
+                    t.Device.CoreUser,
+                    t.Device.DeviceType,
+                    Data = new TokenQueryData
+                    {
+                        DeviceId = t.DeviceId,
+                        UserId = t.Device.CoreUser.Id,
+                        Culture = t.Culture,
+                        Data = t.Data
+                    }
+                })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (tokenData == null)
@@ -760,25 +824,16 @@ namespace Platform.Server.Services
             }
             else if (tokenData.Expiry < DateTime.UtcNow)
             {
+                // Remove the token
+                await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
+
                 return (ApplicationErrors.TokenExpired.AsResult(), null);
             }
 
-            // Remove the token
-            await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
-
             var user = tokenData.CoreUser;
+            var td = tokenData.Data.Data;
 
-            if (!string.IsNullOrEmpty(password))
-            {
-                // Hash password
-                var hashedPassword = await App.HashPasswordAsync(user.Id + password);
-                if (string.IsNullOrEmpty(hashedPassword) || !hashedPassword.Equals(user.Password))
-                {
-                    return (ApplicationErrors.NoPasswordMatch.AsResult(), null);
-                }
-            }
-
-            return await CompleteLoginAsync(user, data.DeviceId, deviceName, DeviceType.Web, data.Region, null, null, null, cancellationToken);
+            return await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
         }
 
         private ActionResult ValidateUser(LoginUser user)
@@ -1076,6 +1131,7 @@ namespace Platform.Server.Services
             // Check frequency
             var lastMinutes = DateTime.UtcNow.AddMinutes(-2);
             var lastExists = await _db.CoreAuthCodes
+                .AsNoTracking()
                 .AnyAsync(c => c.Action == action.Id && c.Openid == openid && c.Creation > lastMinutes, cancellationToken);
 
             if (lastExists)
@@ -1085,6 +1141,7 @@ namespace Platform.Server.Services
 
             var lasthours = DateTime.UtcNow.AddHours(-1);
             var lastHoursCount = await _db.CoreAuthCodes
+                .AsNoTracking()
                 .CountAsync(c => c.Action == action.Id && c.Openid == openid && c.Creation > lasthours, cancellationToken);
 
             if (lastHoursCount > 10)
@@ -1093,6 +1150,7 @@ namespace Platform.Server.Services
             }
 
             var lastIpCount = await _db.CoreAuthCodes
+                .AsNoTracking()
                 .CountAsync(c => c.Ip.Equals(_ip) && c.Creation > lasthours, cancellationToken);
 
             if (lastIpCount > 1000)
@@ -1444,6 +1502,7 @@ namespace Platform.Server.Services
             if (_regUser == null) return null;
 
             var user = await _db.CoreUsers
+                .AsNoTracking()
                 .Where(u => u.Id == _regUser.IdInt)
                 .Select(u => new RegisterUserData { Name = u.Name })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -1480,6 +1539,7 @@ namespace Platform.Server.Services
             }
 
             var data = await _db.CoreUserDeviceTokens
+                .AsNoTracking()
                 .Where(d => d.ResponseType == TokenResponseType.Code && d.AppId == rq.AppId && d.Token == rq.Code && d.Expiry >= DateTime.UtcNow)
                 .Select(d => new TokenQueryData
                 {
@@ -1517,6 +1577,7 @@ namespace Platform.Server.Services
         private async Task<(ActionResult, CurrentUser?)> CreateUserFromQueryDataAsync(TokenQueryData data, CancellationToken cancellationToken)
         {
             var userData = await _db.CoreUsers
+                .AsNoTracking()
                 .Where(u => u.Id == data.UserId)
                 .GroupJoin(_db.CoreOrganizationUsers, u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
                 .SelectMany(d => d.ou.Where(ou => ou.CoreOrganizationId == data.Data.OrganizationId).DefaultIfEmpty(), (d, ou) => new TokenQueryUser
@@ -1603,6 +1664,7 @@ namespace Platform.Server.Services
             }
 
             var tokenData = await _db.CoreUserDeviceTokens
+                .AsNoTracking()
                 .Where(d => d.ResponseType == TokenResponseType.Token && d.AppId == rq.AppId && d.Token == rq.RefreshToken)
                 .Select(d => new
                 {
@@ -1625,24 +1687,90 @@ namespace Platform.Server.Services
             }
             else if (tokenData.Expiry < DateTime.UtcNow)
             {
+                // Remove the token
+                await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
+
                 Logger.LogWarning("Token expired: {Expiry}", tokenData.Expiry);
                 return null;
             }
-
-            // Remove the token
-            await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
 
             var data = tokenData.Data;
 
             // User
             var (result, user) = await CreateUserFromQueryDataAsync(data, cancellationToken);
-            if (user == null)
+            if (user == null || !result.Ok)
             {
                 Logger.LogWarning("User not found with @{data}, @{result}", data, result);
                 return null;
             }
 
             return await CreateAppTokenDataAsync(user, rq.AppId, appData.AppKeyId, appData.AppSecret, true, data, cancellationToken);
+        }
+
+        /// <summary>
+        /// OAuth refresh token result
+        /// OAuth刷新令牌结果
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<(IActionResult result, string? newRefreshToken)> OAuthRefreshTokenResultAsync(AuthRefreshTokenRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Check app secret
+            var appData = await AuthGetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
+
+            if (appData == null)
+            {
+                Logger.LogWarning("App secret not found: {AppId}, {AppKey}", rq.AppId, rq.AppKey);
+                return (ApplicationErrors.NoValidData.AsResult("AppId"), null);
+            }
+
+            // Check signature
+            var expectedSignature = rq.SignWith(appData.AppSecret);
+            if (rq.Sign != expectedSignature)
+            {
+                Logger.LogWarning("Signature not match: {Sign}, {ExpectedSignature}", rq.Sign, expectedSignature);
+                return (ApplicationErrors.NoValidData.AsResult("Sign"), null);
+            }
+
+            var tokenData = await _db.CoreUserDeviceTokens
+                .Where(d => d.ResponseType == TokenResponseType.Token && d.AppId == rq.AppId && d.Token == rq.RefreshToken)
+                .Select(d => new
+                {
+                    d.Id,
+                    d.Expiry,
+                    d.Device.CoreUser,
+                    d.Device.DeviceType,
+                    d.Device.Name,
+                    d.Device.ClientId,
+                    Data = new TokenQueryData
+                    {
+                        DeviceId = d.DeviceId,
+                        UserId = d.Device.CoreUserId,
+                        Culture = d.Culture,
+                        Data = d.Data
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (tokenData == null)
+            {
+                Logger.LogWarning("Token query data not found");
+                return (ApplicationErrors.NoValidData.AsResult("Token"), null);
+            }
+            else if (tokenData.Expiry < DateTime.UtcNow)
+            {
+                // Remove the token
+                await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
+
+                Logger.LogWarning("Token expired: {Expiry}", tokenData.Expiry);
+                return (ApplicationErrors.TokenExpired.AsResult(), null);
+            }
+
+            var data = tokenData.Data;
+            var td = data.Data;
+
+            return await CompleteLoginAsync(tokenData.CoreUser, tokenData.ClientId, tokenData.Name, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
         }
 
         /// <summary>
@@ -1672,7 +1800,7 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.AccessDenied.AsResult(), null);
             }
 
-            var data = await _db.CoreUserDevices.Where(d => d.Id == User.DeviceIdInt && d.CoreUserId == User.IdInt)
+            var data = await _db.CoreUserDevices.AsNoTracking().Where(d => d.Id == User.DeviceIdInt && d.CoreUserId == User.IdInt)
                 .Select(d => new { d.Name, d.DeviceType, d.ClientId, d.CoreUser })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -1682,6 +1810,31 @@ namespace Platform.Server.Services
             }
 
             return await CompleteLoginAsync(data.CoreUser, data.ClientId, data.Name, data.DeviceType, User.Region, rq.OrganizationId, rq.FromOrganizationId, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sign out
+        /// 退出
+        /// </summary>
+        /// <param name="token">Refresh token</param>
+        /// <returns>Task</returns>
+        public async ValueTask<IActionResult> SignoutAsync(string token)
+        {
+            if (User == null)
+            {
+                return ApplicationErrors.NoUserFound.AsResult();
+            }
+
+            var result = await _db.CoreUserDeviceTokens.Where(t => t.DeviceId == User.DeviceIdInt && t.Token == token).ExecuteDeleteAsync();
+
+            if (result == 0)
+            {
+                return ApplicationErrors.NoValidData.AsResult("Token");
+            }
+            else
+            {
+                return ActionResult.Success;
+            }
         }
     }
 }

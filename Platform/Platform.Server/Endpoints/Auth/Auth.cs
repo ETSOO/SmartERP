@@ -44,9 +44,7 @@ namespace Platform.Server.Endpoints.Auth
                 }
 
                 // Result
-                var initResult = await service.WebInitCallAsync(rq, parser.ToShortName());
-
-                return initResult;
+                return await service.WebInitCallAsync(rq, parser.ToShortName());
             }).WithDescription("Init call / 初始化调用");
 
             g.MapPost("Login", async (IAuthService service, IHttpContextAccessor accessor, LoginRQ rq, CancellationToken cancellationToken) =>
@@ -102,14 +100,12 @@ namespace Platform.Server.Endpoints.Auth
 
                 var data = new RefreshTokenData
                 {
-                    Region = rq.Region,
                     DeviceId = rq.DeviceId,
                     UserAgent = accessor.UserAgent(),
-                    Token = token,
-                    Password = rq.Pwd
+                    Token = token
                 };
 
-                var (result, newRefeshToken) = await service.RefreshTokenAsync(data, token, cancellationToken);
+                var (result, newRefeshToken) = await service.RefreshTokenAsync(data, cancellationToken);
 
                 if (result.Ok && newRefeshToken != null)
                 {
@@ -231,6 +227,18 @@ namespace Platform.Server.Endpoints.Auth
             g.MapPost("OAuthRefreshToken", (IAuthService service, AuthRefreshTokenRQ rq, CancellationToken cancellationToken) => service.OAuthRefreshTokenAsync(rq, cancellationToken))
                 .WithDescription("OAuth refresh token / OAuth 刷新令牌");
 
+            g.MapPost("OAuthRefreshTokenResult", async (IAuthService service, AuthRefreshTokenRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
+            {
+                var (result, newRefeshToken) = await service.OAuthRefreshTokenResultAsync(rq, cancellationToken);
+
+                if (result.Ok && newRefeshToken != null)
+                {
+                    OutputRefreshToken(accessor, newRefeshToken);
+                }
+
+                return result;
+            }).WithDescription("OAuth refresh token result / OAuth 刷新令牌结果");
+
             g.MapGet("OAuthUserInfo", (IAuthService service, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.OAuthUserInfoAsync(accessor.HttpContext?.Response, cancellationToken))
                 .WithDescription("OAuth get user information / OAuth 获取用户信息").RequireAuthorization();
 
@@ -250,6 +258,25 @@ namespace Platform.Server.Endpoints.Auth
 
                 return result;
             }).WithDescription("User switch organization / 用户切换机构").RequireAuthorization();
+
+            g.MapPut("Signout", async (IAuthService service, SignoutRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
+            {
+                // Check device
+                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
+                {
+                    return checkResult;
+                }
+
+                var deviceCore = cd.Value.DeviceCore;
+
+                var token = service.DecryptDeviceData(rq.Token, deviceCore);
+                if (token == null)
+                {
+                    return ApplicationErrors.NoValidData.AsResult("Token");
+                }
+
+                return await service.SignoutAsync(token);
+            }).WithDescription("User signout / 用户退出");
 
             return builder;
         }

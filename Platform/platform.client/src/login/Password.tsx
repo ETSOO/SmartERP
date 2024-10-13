@@ -126,19 +126,17 @@ function Password() {
       }
 
       if (auth) {
+        // Remove the auth request cache
+        app.storage.setData(Constants.AuthRequestField, null);
+
         // Authorization request
         window.location.replace(refreshToken);
       } else {
-        const serviceToken = app.doLogin(result.data, refreshToken, keep);
+        // User login
+        app.userLogin(result.data, refreshToken, keep);
 
-        var service = null;
-
-        if (service && serviceToken) {
-          //app.toServiceUrl(service.id, service.webUrl, serviceToken);
-        } else {
-          // Navigate to home
-          app.toHome(navigate, `${homeUrl}home`);
-        }
+        // Navigate to home
+        app.toHome(navigate, `${homeUrl}home`);
       }
     } else if (app.checkDeviceResult(result)) {
       app.notifier.alert(labels.environmentChanged, () => {

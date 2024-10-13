@@ -1,4 +1,5 @@
 ﻿using com.etsoo.SMS;
+using Platform.Server.Dto.App;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Auth.RQ;
@@ -18,11 +19,13 @@ namespace Platform.Server
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
 
+    // App
+    [JsonSerializable(typeof(IEnumerable<AppData>))]
+
     // Auth
     [JsonSerializable(typeof(CodeValidateRQ))]
     [JsonSerializable(typeof(CompleteRegisterRQ))]
     [JsonSerializable(typeof(EmailCodeRQ))]
-    [JsonSerializable(typeof(RefreshTokenRQ))]
     [JsonSerializable(typeof(SMSCodeRQ))]
     [JsonSerializable(typeof(SwitchOrgRQ))]
 

@@ -21,30 +21,30 @@
 
   <ItemGroup>
     <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.9" />
-    <PackageReference Include="com.etsoo.DI" Version="1.0.14" />
+    <PackageReference Include="com.etsoo.DI" Version="1.0.15" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
     <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.38" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.62" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.63" />
     <PackageReference Include="com.etsoo.Localization" Version="1.0.17" />
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.28" />
-    <PackageReference Include="com.etsoo.SMTP" Version="1.0.59" />
+    <PackageReference Include="com.etsoo.SMTP" Version="1.0.61" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.Web" Version="1.2.32" />
+    <PackageReference Include="com.etsoo.Web" Version="1.2.45" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>8.0.8</Version>
+      <Version>8.0.10</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
   </ItemGroup>
 
   <ItemGroup>

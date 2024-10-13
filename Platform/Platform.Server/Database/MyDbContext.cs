@@ -96,13 +96,16 @@ namespace Platform.Server.Database
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("id");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnName("name");
+                entity.Property(e => e.IdentityType)
+                    .HasConversion<byte>()
+                    .HasColumnName("identity_type");
                 entity.Property(e => e.AppSecret)
                     .HasMaxLength(256)
                     .HasColumnName("app_secret");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Enabled).HasColumnName("enabled");
                 entity.Property(e => e.WebUrl)
                     .HasMaxLength(256)
                     .HasColumnName("web_url");
@@ -113,16 +116,15 @@ namespace Platform.Server.Database
                 entity.Property(e => e.HelpUrl)
                     .HasMaxLength(256)
                     .HasColumnName("help_url");
-                entity.Property(e => e.IdentityType).HasColumnName("identity_type");
-                entity.Property(e => e.IsPublic).HasColumnName("is_public");
+                entity.Property(e => e.RequireLocalUrl).HasColumnName("require_local_url");
                 entity.Property(e => e.Logo)
                     .HasMaxLength(256)
                     .HasColumnName("logo");
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnName("name");
-                entity.Property(e => e.RequireLocalUrl).HasColumnName("require_local_url");
+                entity.Property(e => e.IsPublic).HasColumnName("is_public");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+                entity.Property(e => e.Enabled).HasColumnName("enabled");
             });
 
             modelBuilder.Entity<CoreAuthCode>(entity =>
@@ -134,18 +136,22 @@ namespace Platform.Server.Database
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("id");
-                entity.Property(e => e.Action).HasColumnName("action");
                 entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
+                entity.Property(e => e.Action).HasColumnName("action");
+                entity.Property(e => e.Openid)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("openid");
+                entity.Property(e => e.Code)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("code");
                 entity.Property(e => e.Expiry).HasColumnName("expiry");
                 entity.Property(e => e.Ip)
                     .IsRequired()
                     .HasMaxLength(45)
                     .HasConversion<IPAddressToStringConverter>()
                     .HasColumnName("ip");
-                entity.Property(e => e.Openid)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("openid");
                 entity.Property(e => e.Times)
                     .HasDefaultValue((short)0)
                     .HasColumnName("times");
@@ -165,29 +171,29 @@ namespace Platform.Server.Database
                     .UseIdentityAlwaysColumn()
                     .HasIdentityOptions(1001L)
                     .HasColumnName("id");
-                entity.Property(e => e.Brand)
-                    .HasMaxLength(30)
-                    .HasColumnName("brand");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Logo)
-                    .HasMaxLength(256)
-                    .HasColumnName("logo");
+                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(128)
                     .HasColumnName("name");
-                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-                entity.Property(e => e.ParentId).HasColumnName("parent_id");
+                entity.Property(e => e.Brand)
+                    .HasMaxLength(30)
+                    .HasColumnName("brand");
+                entity.Property(e => e.Logo)
+                    .HasMaxLength(256)
+                    .HasColumnName("logo");
                 entity.Property(e => e.Pin)
                     .HasMaxLength(20)
                     .HasColumnName("pin");
+                entity.Property(e => e.ParentId).HasColumnName("parent_id");
+                entity.Property(e => e.Uid).HasColumnName("uid");
                 entity.Property(e => e.Status)
                     .HasConversion<byte>()
                     .HasDefaultValue(EntityStatus.Normal)
                     .HasColumnName("status");
-                entity.Property(e => e.Uid).HasColumnName("uid");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
 
                 entity.HasOne(d => d.Owner).WithMany(p => p.CoreOrganizations)
                     .HasForeignKey(d => d.OwnerId)
@@ -210,14 +216,14 @@ namespace Platform.Server.Database
                     .HasColumnName("id");
                 entity.Property(e => e.CoreAppId).HasColumnName("core_app_id");
                 entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
                 entity.Property(e => e.Expiry).HasColumnName("expiry");
                 entity.Property(e => e.Status)
                     .HasConversion<byte>()
                     .HasDefaultValue(EntityStatus.Normal)
                     .HasColumnName("status");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
 
                 entity.HasOne(d => d.CoreApp).WithMany(p => p.CoreOrganizationApps)
                     .HasForeignKey(d => d.CoreAppId)
@@ -252,15 +258,15 @@ namespace Platform.Server.Database
                     .IsRequired()
                     .HasMaxLength(256)
                     .HasColumnName("app_secret");
-                entity.Property(e => e.LocalApi)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_api");
                 entity.Property(e => e.LocalName)
                     .HasMaxLength(128)
                     .HasColumnName("local_name");
                 entity.Property(e => e.LocalUrl)
                     .HasMaxLength(256)
                     .HasColumnName("local_url");
+                entity.Property(e => e.LocalApi)
+                    .HasMaxLength(256)
+                    .HasColumnName("local_api");
                 entity.Property(e => e.Creation)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("creation");
@@ -277,12 +283,12 @@ namespace Platform.Server.Database
 
                 entity.ToTable("core_organization_channel");
 
-                entity.Property(e => e.PartnerId).HasColumnName("partner_id");
                 entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+                entity.Property(e => e.PartnerId).HasColumnName("partner_id");
+                entity.Property(e => e.Enabled).HasColumnName("enabled");
                 entity.Property(e => e.Creation)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("creation");
-                entity.Property(e => e.Enabled).HasColumnName("enabled");
                 entity.Property(e => e.RefreshTime)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("refresh_time");
@@ -312,31 +318,37 @@ namespace Platform.Server.Database
                     .UseIdentityAlwaysColumn()
                     .HasIdentityOptions(1001L)
                     .HasColumnName("id");
-                entity.Property(e => e.AssignedId)
-                    .HasMaxLength(20)
-                    .HasColumnName("assigned_id");
+                entity.Property(e => e.Uid)
+                    .HasDefaultValueSql("gen_random_uuid()")
+                    .HasColumnName("uid");
                 entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
                 entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Data)
-                    .HasColumnType("jsonb")
-                    .HasColumnName("data");
-                entity.Property(e => e.Expiry).HasColumnName("expiry");
+                entity.Property(e => e.UserRole)
+                    .HasConversion<short>()
+                    .HasColumnName("user_role");
                 entity.Property(e => e.IdentityType)
                     .HasConversion<byte>()
                     .HasColumnName("identity_type");
-                entity.Property(e => e.LocalAvatar)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_avatar");
                 entity.Property(e => e.LocalName)
                     .HasMaxLength(128)
                     .HasColumnName("local_name");
+                entity.Property(e => e.LocalAvatar)
+                    .HasMaxLength(256)
+                    .HasColumnName("local_avatar");
                 entity.Property(e => e.Permission).HasColumnName("permission");
                 entity.Property(e => e.Pinyin)
                     .HasMaxLength(20)
                     .HasColumnName("pinyin");
+                entity.Property(e => e.AssignedId)
+                    .HasMaxLength(20)
+                    .HasColumnName("assigned_id");
+                entity.Property(e => e.Data)
+                    .HasColumnType("jsonb")
+                    .HasColumnName("data");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+                entity.Property(e => e.Expiry).HasColumnName("expiry");
                 entity.Property(e => e.RefreshTime)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("refresh_time");
@@ -344,12 +356,6 @@ namespace Platform.Server.Database
                     .HasConversion<byte>()
                     .HasDefaultValue(EntityStatus.Normal)
                     .HasColumnName("status");
-                entity.Property(e => e.Uid)
-                    .HasDefaultValueSql("gen_random_uuid()")
-                    .HasColumnName("uid");
-                entity.Property(e => e.UserRole)
-                    .HasConversion<short>()
-                    .HasColumnName("user_role");
 
                 entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreOrganizationUsers)
                     .HasForeignKey(d => d.CoreOrganizationId)
@@ -372,35 +378,31 @@ namespace Platform.Server.Database
                     .UseIdentityAlwaysColumn()
                     .HasIdentityOptions(1001L)
                     .HasColumnName("id");
-                entity.Property(e => e.Avatar)
-                    .HasMaxLength(256)
-                    .HasColumnName("avatar");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.FamilyName)
-                    .HasMaxLength(50)
-                    .HasColumnName("family_name");
-                entity.Property(e => e.ForeignName)
+                entity.Property(e => e.Password)
                     .HasMaxLength(128)
-                    .HasColumnName("foreign_name");
-                entity.Property(e => e.FrozenTime)
-                    .HasColumnType("timestamp without time zone")
-                    .HasColumnName("frozen_time");
-                entity.Property(e => e.GivenName)
-                    .HasMaxLength(50)
-                    .HasColumnName("given_name");
+                    .HasColumnName("password");
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(128)
                     .HasColumnName("name");
-                entity.Property(e => e.Password)
+                entity.Property(e => e.GivenName)
+                    .HasMaxLength(50)
+                    .HasColumnName("given_name");
+                entity.Property(e => e.FamilyName)
+                    .HasMaxLength(50)
+                    .HasColumnName("family_name");
+                entity.Property(e => e.PreferredName)
                     .HasMaxLength(128)
-                    .HasColumnName("password");
-                entity.Property(e => e.Status)
-                    .HasConversion<byte>()
-                    .HasDefaultValue(EntityStatus.Normal)
-                    .HasColumnName("status");
+                    .HasColumnName("preferred_name");
+                entity.Property(e => e.OfficialEnglishName)
+                    .HasMaxLength(128)
+                    .HasColumnName("official_english_name");
+                entity.Property(e => e.Avatar)
+                    .HasMaxLength(256)
+                    .HasColumnName("avatar");
+                entity.Property(e => e.FrozenTime)
+                    .HasColumnType("timestamp without time zone")
+                    .HasColumnName("frozen_time");
                 entity.Property(e => e.Step)
                     .HasColumnName("step");
                 entity.Property(e => e.Region)
@@ -411,6 +413,13 @@ namespace Platform.Server.Database
                     .HasColumnName("pin");
                 entity.Property(e => e.LatestOrganizationId)
                     .HasColumnName("latest_organization_id");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+                entity.Property(e => e.Status)
+                    .HasConversion<byte>()
+                    .HasDefaultValue(EntityStatus.Normal)
+                    .HasColumnName("status");
             });
 
             modelBuilder.Entity<CoreUserDevice>(entity =>
@@ -424,15 +433,9 @@ namespace Platform.Server.Database
                     .HasIdentityOptions(1001L)
                     .HasColumnName("id");
                 entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
                 entity.Property(e => e.DeviceType)
                     .HasConversion<byte>()
                     .HasColumnName("device_type");
-                entity.Property(e => e.LastLogin)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("last_login");
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(128)
@@ -441,6 +444,12 @@ namespace Platform.Server.Database
                     .IsRequired()
                     .HasMaxLength(256)
                     .HasColumnName("client_id");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+                entity.Property(e => e.LastLogin)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("last_login");
 
                 entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserDevices)
                     .HasForeignKey(d => d.CoreUserId)
@@ -461,30 +470,33 @@ namespace Platform.Server.Database
                 entity.Property(e => e.Id)
                     .UseIdentityAlwaysColumn()
                     .HasColumnName("id");
+                entity.Property(e => e.DeviceId).HasColumnName("device_id");
+                entity.Property(e => e.AppId).HasColumnName("app_id");
+                entity.Property(e => e.AppKeyId).HasColumnName("app_key_id");
                 entity.Property(e => e.ResponseType)
                     .HasConversion<byte>()
                     .HasColumnName("response_type");
-                entity.Property(e => e.AppId).HasColumnName("app_id");
-                entity.Property(e => e.AppKeyId).HasColumnName("app_key_id");
                 entity.Property(e => e.Culture)
                     .IsRequired()
                     .HasMaxLength(10)
                     .HasColumnName("culture");
-                entity.Property(e => e.Data)
-                    .IsRequired()
-                    .HasColumnType("jsonb")
-                    .HasColumnName("data");
-                entity.Property(e => e.DeviceId).HasColumnName("device_id");
-                entity.Property(e => e.Expiry).HasColumnName("expiry");
                 entity.Property(e => e.Token)
                     .IsRequired()
                     .HasMaxLength(256)
                     .HasColumnName("token");
+                entity.Property(e => e.Expiry).HasColumnName("expiry");
+                entity.OwnsOne(c => c.Data, d =>
+                {
+                    d.ToJson();
+                });
 
                 entity.HasOne(d => d.App).WithMany(p => p.CoreUserDeviceTokens)
                     .HasForeignKey(d => d.AppId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("core_user_device_token_app_id_fkey");
+
+                entity.HasOne(d => d.AppKey).WithMany(p => p.CoreUserDeviceTokens)
+                    .HasForeignKey(d => d.AppKeyId)
+                    .HasConstraintName("core_user_device_token_app_key_id_fkey");
 
                 entity.HasOne(d => d.Device).WithMany(p => p.CoreUserDeviceTokens)
                     .HasForeignKey(d => d.DeviceId)
@@ -506,15 +518,15 @@ namespace Platform.Server.Database
                     .UseIdentityAlwaysColumn()
                     .HasColumnName("id");
                 entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.RefType).HasColumnName("ref_type");
                 entity.Property(e => e.Type).HasColumnName("type");
                 entity.Property(e => e.Value)
                     .IsRequired()
                     .HasMaxLength(256)
                     .HasColumnName("value");
+                entity.Property(e => e.RefType).HasColumnName("ref_type");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
 
                 entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserIdentifiers)
                     .HasForeignKey(d => d.CoreUserId)

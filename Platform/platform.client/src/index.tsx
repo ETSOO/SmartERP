@@ -17,6 +17,7 @@ import Dashboard from "./main/Dashboard";
 import { DynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
 import AuthSuccess from "./login/AuthSuccess";
+import { AuthRequest } from "@etsoo/appscript";
 
 // Root
 const root = document.getElementById("root")!;
@@ -24,7 +25,8 @@ const root = document.getElementById("root")!;
 // Lazy load components
 const About = React.lazy(() => import("./login/About"));
 const AuthFail = React.lazy(() => import("./login/AuthFail"));
-const Register = React.lazy(() => import("./login/Register"));
+// No direct registration
+// const Register = React.lazy(() => import("./login/Register"));
 const Register10 = React.lazy(() => import("./login/Register10"));
 const Register20 = React.lazy(() => import("./login/Register20"));
 const Register30 = React.lazy(() => import("./login/Register30"));
@@ -106,9 +108,49 @@ const theme = createTheme({
 // Router
 function MyRouter() {
   // Init state
-  const [init, setInit] = React.useState(false);
+  const [init, setInit] = React.useState(app.isReady);
 
   // Ready
+  React.useEffect(() => {
+    if (app.isReady) {
+      setInit(true);
+    } else {
+      app.pendings.push(() => {
+        app.initCall((result) => {
+          setInit(result);
+        });
+      });
+    }
+  }, [app.isReady]);
+
+  const messageHandler = React.useCallback((event: MessageEvent<any>) => {
+    if (!app.origins.includes(event.origin) || !Array.isArray(event.data))
+      return;
+
+    const [type, data] = event.data;
+
+    switch (type) {
+      case "login":
+        try {
+          const login = new URL(data);
+          const authQuery = login.searchParams.get("auth");
+          if (authQuery) {
+            const auth: AuthRequest = JSON.parse(decodeURIComponent(authQuery));
+            app.authApi.authRequest(auth).then((url) => {
+              if (url) {
+                event.source?.postMessage(["login", url], {
+                  targetOrigin: event.origin
+                });
+              }
+            });
+          }
+        } catch (e) {
+          console.error("message.login", e);
+        }
+        break;
+    }
+  }, []);
+
   React.useEffect(() => {
     // Persist app data
     const cleanup = () => {
@@ -117,18 +159,14 @@ function MyRouter() {
 
     window.addEventListener("unload", cleanup);
     window.addEventListener("beforeunload", cleanup);
+    window.addEventListener("message", messageHandler);
 
-    // Init call
-    const init = () => {
-      app.initCall((result) => {
-        setInit(result);
-      });
+    return () => {
+      cleanup();
+      window.removeEventListener("unload", cleanup);
+      window.removeEventListener("beforeunload", cleanup);
+      window.removeEventListener("message", messageHandler);
     };
-    if (app.isReady) {
-      init();
-    } else {
-      app.pendings.push(init);
-    }
   }, []);
 
   return init ? (
@@ -141,7 +179,7 @@ function MyRouter() {
           <Route path="/login/authfail" element={<AuthFail />} />
           <Route path="/login/authsuccess" element={<AuthSuccess />} />
           <Route path="/login/terms" element={<Terms />} />
-          <Route path="/login/register" element={<Register />} />
+          <Route path="/login/register" element={<Register10 />} />
           <Route path="/login/register10" element={<Register10 />} />
           <Route path="/login/register20" element={<Register20 />} />
           <Route path="/login/register30" element={<Register30 />} />
