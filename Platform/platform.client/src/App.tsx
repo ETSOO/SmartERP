@@ -179,7 +179,7 @@ function App() {
         NumberUtils.parse(result.data.step, 0) > 0
       ) {
         app.notifier.alert(app.get("continueRegistrationDetail"), () =>
-          navigate("./login/register/")
+          navigate(`./login/register/`)
         );
         return;
       }
@@ -195,6 +195,7 @@ function App() {
   // Save login
   const trySaveLogin =
     params.tryLogin !== "false" &&
+    app.keepLogin &&
     (id === "" || id === userIdSaved) &&
     refreshToken;
 
@@ -244,16 +245,23 @@ function App() {
     }
 
     // Refresh token
-    app.refreshToken({
-      callback: (result) => {
-        if (!isMounted.current) return;
-        if (result === true) {
-          loadAppData();
+    app.refreshToken({ showLoading: true }, (result) => {
+      if (!isMounted.current) return;
+      if (result === true) {
+        // Login success
+        if (auth) {
+          app.authApi.authRequest(auth).then((url) => {
+            if (!url) return;
+            app.authLogin(url);
+          });
         } else {
-          loadAppData();
+          // Navigate to home
+          app.toHome(navigate, "./home");
         }
-      },
-      showLoading: true
+      } else {
+        // Load app data and the login UI
+        loadAppData();
+      }
     });
   }, [trySaveLogin, loadAppData]);
 
@@ -309,6 +317,7 @@ function App() {
             </Box>
           )}
           <SharedLayout
+            appName="管理中心"
             visible={visible}
             pageRight={
               <HBox width={200} spacing={0.5} justifyContent="flex-end">

@@ -1,10 +1,12 @@
 import React from "react";
 import { Button, Typography } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
-import { TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
+import { HBox, TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
 import { app } from "../app/SmartApp";
 import { useNavigate } from "react-router-dom";
 import { CompleteRegisterRQ } from "../api/rq/auth/CompleteRegisterRQ";
+import { AuthRequest } from "@etsoo/appscript";
+import { Constants } from "../app/Constants";
 
 function RegisterPassword() {
   // Router
@@ -19,11 +21,15 @@ function RegisterPassword() {
     "yourPassword",
     "repeatPassword",
     "yourname",
+    "familyName",
+    "givenName",
     "unknownError"
   );
 
   // Refs
   const nameRef = React.useRef<HTMLInputElement>();
+  const familyNameRef = React.useRef<HTMLInputElement>();
+  const givenNameRef = React.useRef<HTMLInputElement>();
 
   const passwordRef = React.useRef<HTMLInputElement>();
   const passwordMethodRef = React.createRef<TextFieldExMethods>();
@@ -73,12 +79,17 @@ function RegisterPassword() {
       return;
     }
 
+    const auth = app.storage.getData<AuthRequest>(Constants.AuthRequestField);
+
     // Complete the registration
     const rq: CompleteRegisterRQ = {
       deviceId: app.deviceId,
       name: name.value,
+      familyName: familyNameRef.current?.value,
+      givenName: givenNameRef.current?.value,
       password: app.encrypt(app.hash(repeat.value)),
-      region: app.region
+      region: app.region,
+      auth
     };
 
     const [result, refreshToken] = await app.authApi.completeRegister(rq);
@@ -90,9 +101,15 @@ function RegisterPassword() {
         return;
       }
 
-      // User login
-      app.userLogin(result.data, refreshToken, true);
-      navigate("./../../home/");
+      if (auth) {
+        app.authLogin(refreshToken);
+      } else {
+        // User login
+        app.userLogin(result.data, refreshToken);
+
+        // Navigate to home
+        app.toHome(navigate, "./../../home/");
+      }
     } else {
       app.alertResult(result, () => {
         // Back to home
@@ -117,9 +134,45 @@ function RegisterPassword() {
         autoCorrect="off"
         autoCapitalize="none"
         autoComplete="name"
+        onChange={(event) => {
+          const value = event.target.value.trim();
+          if (value) {
+            const parts = value.split(" ");
+            if (parts.length > 1) {
+              familyNameRef.current!.value = parts.pop()!;
+              givenNameRef.current!.value = parts.join(" ");
+            } else {
+              familyNameRef.current!.value = value[0];
+              givenNameRef.current!.value = value.substring(1);
+            }
+          } else {
+            familyNameRef.current!.value = "";
+            givenNameRef.current!.value = "";
+          }
+        }}
         required
         showClear
       />
+      <HBox gap={1}>
+        <TextFieldEx
+          label={labels.familyName}
+          inputRef={familyNameRef}
+          autoFocus
+          autoCorrect="off"
+          autoCapitalize="none"
+          autoComplete="familyName"
+          showClear
+        />
+        <TextFieldEx
+          label={labels.givenName}
+          inputRef={givenNameRef}
+          autoFocus
+          autoCorrect="off"
+          autoCapitalize="none"
+          autoComplete="givenName"
+          showClear
+        />
+      </HBox>
       <TextFieldEx
         label={labels.yourPassword}
         showPassword

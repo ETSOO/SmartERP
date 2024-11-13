@@ -1,20 +1,36 @@
-﻿using com.etsoo.ImageUtils.Barcode;
+﻿using com.etsoo.ApiModel.Dto.Maps;
+using com.etsoo.ApiModel.RQ.Maps;
+using com.etsoo.ApiProxy.Defs;
+using com.etsoo.BaiduApi.Maps;
+using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
+using com.etsoo.CoreFramework.User;
+using com.etsoo.ImageUtils.Barcode;
+using com.etsoo.Localization;
+using com.etsoo.Localization.Country;
 using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Platform.Server.Application;
-using Platform.Server.Database;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Public.RQ;
+using PlatformShared.Database;
+using System.Globalization;
 using System.Web;
 
 namespace Platform.Server.Services
 {
+    /// <summary>
+    /// Public service
+    /// 公共服务
+    /// </summary>
     public class PublicService : CommonService, IPublicService
     {
         readonly MyDbContext _db;
         readonly IDistributedCache _cache;
         readonly IHttpContextAccessor _accessor;
+        readonly IMapPlaceService _baidu;
+        readonly IBridgeProxy _proxy;
 
         /// <summary>
         /// Constructor
@@ -26,12 +42,111 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="cache">Cache</param>
         /// <param name="accessor">HttpContext accessor</param>
-        public PublicService(MyDbContext db, IMyApp app, IMyUserAccessor userAccessor, ILogger<PublicService> logger, IDistributedCache cache, IHttpContextAccessor accessor)
+        /// <param name="baidu">Baidu Map API</param>
+        /// <param name="proxy">Proxy API</param>
+        public PublicService(MyDbContext db,
+            IMyApp app,
+            CurrentUserAccessor userAccessor,
+            ILogger<PublicService> logger,
+            IDistributedCache cache,
+            IHttpContextAccessor accessor,
+            IMapPlaceService baidu,
+            IBridgeProxy proxy)
             : base(app, userAccessor.User, "public", logger)
         {
             _db = db;
             _cache = cache;
             _accessor = accessor;
+            _baidu = baidu;
+            _proxy = proxy;
+        }
+
+        /// <summary>
+        /// Create barcode image Base64 string
+        /// 创建条形码图片的Base64字符串
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <returns>Base64 string</returns>
+        public Task<string> CreateBarcodeAsync(BarcodeOptions rq, CancellationToken cancellationToken = default)
+        {
+            return Task.Run(() => BarcodeUtils.Create(rq), cancellationToken);
+        }
+
+        /// <summary>
+        /// Get Chinese Pinyin
+        /// 获取汉字拼音
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <returns>Result</returns>
+        public string GetPinyin(PinyinRQ rq)
+        {
+            var py = ChineseUtils.GetPinyin(rq.Input, rq.IsName.GetValueOrDefault());
+            return rq.Format switch
+            {
+                PinyinFormatType.Tone => py.ToPinyin(true),
+                PinyinFormatType.Initial => py.ToInitials(),
+                _ => py.ToPinyin(false)
+            };
+        }
+
+        /// <summary>
+        /// Get currencies
+        /// 获取货币定义
+        /// </summary>
+        /// <param name="ids">Ids to include and sort by</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<CurrencyItem>> GetCurrenciesAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default)
+        {
+            var currencies = await CacheFactory.DoAsync(
+                _cache,
+                App.Configuration.CacheHours,
+                () => $"{nameof(PublicService)}.{nameof(GetCurrenciesAsync)}.{CultureInfo.CurrentCulture.LCID}",
+                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions().GetCurrencies()),
+                MyJsonSerializerContext.Default.IEnumerableCurrencyItem,
+                null, cancellationToken);
+
+            if (ids != null)
+            {
+                var sortIds = ids.ToList();
+                currencies = currencies.Where(c => sortIds.Contains(c.Id)).OrderBy(c => sortIds.IndexOf(c.Id));
+            }
+
+            return currencies;
+        }
+
+        /// <summary>
+        /// Get regions
+        /// 获取地区
+        /// </summary>
+        /// <param name="ids">Ids to include and sort by</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<RegionData>> GetRegionsAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default)
+        {
+            var regions = await CacheFactory.DoAsync(
+                _cache,
+                App.Configuration.CacheHours,
+                () => $"{nameof(PublicService)}.{nameof(GetRegionsAsync)}.{CultureInfo.CurrentCulture.LCID}",
+                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions().Values.Select(r => new RegionData
+                {
+                    Id = r.Id,
+                    Id3 = r.Id3,
+                    Name = r.Name,
+                    EnglishName = r.EnglishName,
+                    Currency = r.Currency.Id,
+                    Cultures = r.Cultures.Select(c => c.Id)
+                })),
+                MyJsonSerializerContext.Default.IEnumerableRegionData,
+                null, cancellationToken);
+
+            if (ids != null)
+            {
+                var sortIds = ids.ToList();
+                regions = regions.Where(r => sortIds.Contains(r.Id)).OrderBy(r => sortIds.IndexOf(r.Id));
+            }
+
+            return regions;
         }
 
         /// <summary>
@@ -64,7 +179,7 @@ namespace Platform.Server.Services
                 Height = 180
             };
 
-            return await QRCodeAsync(options, cancellationToken);
+            return await CreateBarcodeAsync(options, cancellationToken);
         }
 
         /// <summary>
@@ -115,19 +230,22 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
-        /// Get QRCode image Base64 string
-        /// 获取QRCode图片的Base64字符串
+        /// Query place
+        /// 查询地点
         /// </summary>
         /// <param name="rq">Request data</param>
-        /// <returns>Base64 string</returns>
-        public async Task<string> QRCodeAsync(BarcodeOptions rq, CancellationToken cancellationToken = default)
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<PlaceCommon>?> QueryPlaceAsync(PlaceQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            return await CacheFactory.DoStringAsync(
-                _cache,
-                App.Configuration.CacheHours,
-                () => $"{nameof(PublicService)}.{nameof(QRCodeAsync)}.{rq}",
-                () => Task.Run(() => BarcodeUtils.Create(rq)),
-                cancellationToken: cancellationToken);
+            if (rq.Provider == ApiProvider.Baidu || (rq.Provider == null && rq.Region?.Equals("CN") is true))
+            {
+                // Baidu
+                return await _baidu.SearchCommonPlaceAsync(com.etsoo.BaiduApi.Maps.Place.RQ.SearchPlaceRQ.CreateFrom(rq), cancellationToken);
+            }
+            else
+            {
+                return await _proxy.SearchCommonPlaceAsync(com.etsoo.GoogleApi.Maps.Place.RQ.SearchPlaceRQ.CreateFrom(rq), cancellationToken);
+            }
         }
     }
 }

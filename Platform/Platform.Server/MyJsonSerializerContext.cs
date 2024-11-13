@@ -1,8 +1,14 @@
-﻿using com.etsoo.SMS;
+﻿using com.etsoo.ApiModel.Dto.Maps;
+using com.etsoo.ApiModel.RQ.Maps;
+using com.etsoo.ImageUtils.Barcode;
+using com.etsoo.Localization.Country;
+using com.etsoo.SMS;
 using Platform.Server.Dto.App;
 using Platform.Server.Dto.Auth;
+using Platform.Server.Dto.Org;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Auth.RQ;
+using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Endpoints.Public.RQ;
 using System.Text.Json.Serialization;
 
@@ -34,14 +40,30 @@ namespace Platform.Server
     [JsonSerializable(typeof(SendEmailData))]
     [JsonSerializable(typeof(SendSMSData))]
 
+    // Org
+    [JsonSerializable(typeof(OrgCreateRQ))]
+    [JsonSerializable(typeof(OrgUpdateRQ))]
+    [JsonSerializable(typeof(OrgQueryRQ))]
+
+    [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]
+
     // Public
     [JsonSerializable(typeof(MobileQRCodeRQ))]
     [JsonSerializable(typeof(OrgInfoRQ))]
+    [JsonSerializable(typeof(PlaceQueryRQ))]
 
+    [JsonSerializable(typeof(BarcodeOptions))]
     [JsonSerializable(typeof(OrgPublicInfo))]
+    [JsonSerializable(typeof(IEnumerable<CurrencyItem>))]
+    [JsonSerializable(typeof(IEnumerable<RegionData>))]
+    [JsonSerializable(typeof(IEnumerable<PlaceCommon>))]
 
     // Others
     [JsonSerializable(typeof(TemplateItem))]
+
+    // Results.ValidationProblem
+    [JsonSerializable(typeof(HttpValidationProblemDetails))]
+
     public partial class MyJsonSerializerContext : JsonSerializerContext
     {
     }

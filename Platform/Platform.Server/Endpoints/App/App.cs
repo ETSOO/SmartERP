@@ -12,8 +12,8 @@ namespace Platform.Server.Endpoints.App
         {
             var g = builder.MapGroup("App");
 
-            g.MapGet("GetApps", (IAppService service, CancellationToken cancellationToken) => service.GetAppsAsync(cancellationToken))
-                .WithDescription("Get user applications / 获取用户所有程序");
+            g.MapGet("GetUserApps", (IAppService service, CancellationToken cancellationToken) => service.GetUserAppsAsync(cancellationToken))
+                .WithDescription("Get user applications / 获取用户所有程序").WithTags("App");
 
             return builder;
         }

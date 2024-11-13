@@ -39,11 +39,6 @@ function Password() {
   // Button
   const [buttonDisabled, updateButtonDisabled] = React.useState<boolean>(false);
 
-  // Keep or not
-  const [keep, updateKeep] = React.useState<boolean>(
-    app.storage.getData(CoreConstants.FieldLoginKeep, true)
-  );
-
   if (username == null) {
     return <NavigateHome />;
   }
@@ -126,14 +121,10 @@ function Password() {
       }
 
       if (auth) {
-        // Remove the auth request cache
-        app.storage.setData(Constants.AuthRequestField, null);
-
-        // Authorization request
-        window.location.replace(refreshToken);
+        app.authLogin(refreshToken);
       } else {
         // User login
-        app.userLogin(result.data, refreshToken, keep);
+        app.userLogin(result.data, refreshToken);
 
         // Navigate to home
         app.toHome(navigate, `${homeUrl}home`);
@@ -185,8 +176,8 @@ function Password() {
       <FormControlLabel
         control={
           <Switch
-            checked={keep}
-            onChange={(e) => updateKeep(e.target.checked)}
+            defaultChecked={app.keepLogin}
+            onChange={(e) => (app.keepLogin = e.target.checked)}
           />
         }
         label={labels.keepLogged}

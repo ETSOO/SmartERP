@@ -71,7 +71,7 @@
   "inviter": "Inviter",
   "inviteResult": "Invitation email(s) has been sent to {0}. Please wait for the other party to accept the invitation",
   "itemExists": "The {0} already exists under a user",
-  "keepLogged": "Keep me logged in",
+  "keepLogged": "Stay logged in, use only on your own device",
   "language": "Language",
   "languages": "Languages",
   "loginId": "Email or mobile",

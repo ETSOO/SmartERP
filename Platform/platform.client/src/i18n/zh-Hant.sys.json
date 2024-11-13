@@ -1,4 +1,5 @@
 {
-  "appCore": "管理中心",
-  "smarterp": "司友®雲ERP"
+  "app1": "管理中心",
+  "smarterp": "司友®雲ERP",
+  "signoutSuccess": "登出成功，請關閉目前視窗"
 }

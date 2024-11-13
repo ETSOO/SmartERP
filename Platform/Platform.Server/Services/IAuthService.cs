@@ -1,15 +1,17 @@
 ﻿using com.etsoo.ApiModel.Auth;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
-using Platform.Server.Database.Models;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Endpoints.Auth.RQ;
+using PlatformShared.Database.Models;
 
 namespace Platform.Server.Services
 {
     public interface IAuthService : ICommonService
     {
+        ValueTask<ApiTokenData?> ApiRefreshTokenAsync(ApiRefreshTokenRQ rq, CancellationToken cancellationToken = default);
         ValueTask<string> AuthRequestAsync(AuthRequest rq, CancellationToken cancellationToken = default);
+        ValueTask<IActionResult> ChangePasswordAsync(ChangePasswordDto data, CancellationToken cancellationToken = default);
         ValueTask<(IActionResult result, string? refreshToken)> CompleteRegisterAsync(CompleteRegisterRQ rq, string? userAgent, CancellationToken cancellationToken = default);
         IResult GetLogInUrl(IAuthClient client, string? userAgent, string deviceId);
         IResult GetSignUpUrl(IAuthClient client, string? userAgent, string deviceId);

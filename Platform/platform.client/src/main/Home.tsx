@@ -81,6 +81,7 @@ function Home() {
         </Toolbar>
       </AppBar>
       <iframe
+        name="app"
         style={{
           position: "fixed",
           border: 0,

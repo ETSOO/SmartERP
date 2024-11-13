@@ -9,6 +9,11 @@ import { app } from "../app/SmartApp";
  */
 export type SharedLayoutProps = {
   /**
+   * App name
+   */
+  appName?: string;
+
+  /**
    * Header right part component
    */
   headerRight?: React.ReactNode;
@@ -67,6 +72,7 @@ export type SharedLayoutProps = {
 export function SharedLayout(props: SharedLayoutProps) {
   // Destructure
   const {
+    appName,
     headerRight,
     pageRight,
     buttons,
@@ -120,11 +126,20 @@ export function SharedLayout(props: SharedLayoutProps) {
             }}
           />
           {headerRight}
-          <Typography variant="subtitle1">
-            <Context.Consumer>
-              {(value) => value.get<string>("appName")}
-            </Context.Consumer>
-          </Typography>
+          <Context.Consumer>
+            {(value) => (
+              <VBox alignItems="flex-end">
+                <Typography variant="subtitle1">
+                  {value.get<string>("appName")}
+                </Typography>
+                {appName && (
+                  <Typography variant="subtitle2" fontWeight="bold">
+                    {value.get<string>(appName) ?? appName}
+                  </Typography>
+                )}
+              </VBox>
+            )}
+          </Context.Consumer>
         </HBox>
         <Typography
           variant="caption"

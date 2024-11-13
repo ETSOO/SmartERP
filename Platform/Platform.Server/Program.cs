@@ -1,4 +1,9 @@
 using com.etsoo.AlipayApi;
+using com.etsoo.ApiProxy.Configs;
+using com.etsoo.ApiProxy.Defs;
+using com.etsoo.ApiProxy.Proxy;
+using com.etsoo.BaiduApi.Maps;
+using com.etsoo.BaiduApi.Options;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
@@ -20,12 +25,13 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Platform.Server;
 using Platform.Server.Application;
-using Platform.Server.Database;
 using Platform.Server.Endpoints.App;
 using Platform.Server.Endpoints.Auth;
+using Platform.Server.Endpoints.Org;
 using Platform.Server.Endpoints.Public;
 using Platform.Server.OAuth2;
 using Platform.Server.Services;
+using PlatformShared.Database;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -82,8 +88,8 @@ if (string.IsNullOrEmpty(connectonString))
 // No need to use AddDbContextPool currently
 services.AddDbContext<MyDbContext>((provider, options) =>
 {
-    options.UseNpgsql(connectonString)
-        .UseSnakeCaseNamingConvention(); // Use snake case naming convention
+    options.UseNpgsql(connectonString);
+    //    .UseSnakeCaseNamingConvention(); // Use snake case naming convention
 
     if (builder.Environment.IsDevelopment())
     {
@@ -137,16 +143,19 @@ else
     services.AddSingleton<IStorage>(storage);
 }
 
+// Bridge Proxy APIs
+services.Configure<BridgeOptions>(configuration.GetSection(BridgeOptions.SectionName));
+services.AddHttpClient<IBridgeProxy, BridgeProxy>();
+
+// Baidu APIs
+services.Configure<MapsOptions>(configuration.GetSection("BaiduMaps"));
+services.AddHttpClient<IMapPlaceService, MapPlaceService>();
+
 // Authentication is the process of determining a user's identity.
 // Authorization is the process of determining whether a user has access to a resource.
 services.AddAuthorization();
 
-// Add services to the container.
-// services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
-services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
-services.AddHttpClient();
-services.AddHttpContextAccessor();
+// Configure Json serialization
 services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
@@ -156,12 +165,19 @@ services.ConfigureHttpJsonOptions(options =>
 
     // Use source generation
     options.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
-        ModelJsonSerializerContext.Default,
         CommonJsonSerializerContext.Default,
+        ModelJsonSerializerContext.Default,
         WeiXinJsonSerializerContext.Default,
         MyJsonSerializerContext.Default
     );
 });
+
+// Add services to the container.
+// services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
+services.AddHttpClient();
+services.AddHttpContextAccessor();
 
 // Rate limiter
 // https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-8.0
@@ -190,11 +206,11 @@ var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray
 var publicCors = configuration.GetSection("PublicCors").Get<IEnumerable<string>?>()?.ToArray();
 var corsOptions = new CorsPolicySetupOptions(cors, builder.Environment.IsDevelopment())
 {
-    ExposedHeaders = [Constants.RefreshTokenHeader]
+    ExposedHeaders = [Constants.RefreshTokenHeaderName, Constants.ContentDispositionHeaderName]
 };
 var publicCorsOptions = new CorsPolicySetupOptions(publicCors, false)
 {
-    ExposedHeaders = [Constants.RefreshTokenHeader]
+    ExposedHeaders = [Constants.RefreshTokenHeaderName]
 };
 
 services.AddCors(options =>
@@ -242,9 +258,10 @@ services.Configure<WXClientOptions>(configuration.GetSection("WeiXin"));
 services.AddScoped<IWXClient, WXClient>();
 
 // API services
-services.AddScoped<IMyUserAccessor, UserAccessor<CurrentUser>>();
+services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<IAppService, AppService>();
 services.AddScoped<IAuthService, AuthService>();
+services.AddScoped<IOrgService, OrgService>();
 services.AddScoped<IPublicService, PublicService>();
 
 var app = builder.Build();
@@ -308,8 +325,10 @@ if (microsoftOptions.Exists())
 
 // Endpoints
 api.MapAuth()
-    .MapPublic()
     .MapApp()
+    .MapOrg()
+    .MapPublic()
+    .AddModelValidators()
     .RequireAuthorization()
 ;
 

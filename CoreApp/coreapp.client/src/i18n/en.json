@@ -1,1 +1,4 @@
-{ "smarterpCore": "SmartERP Main Console" }
+{
+  "joinOrganization": "Join a new organization",
+  "smarterpCore": "SmartERP Main Console"
+}

@@ -73,6 +73,6 @@ namespace Platform.Server.Dto.Auth
         /// Permission scopes
         /// 权限范围
         /// </summary>
-        public short[] Scopes { get; init; } = [];
+        public int[] Scopes { get; init; } = [];
     }
 }

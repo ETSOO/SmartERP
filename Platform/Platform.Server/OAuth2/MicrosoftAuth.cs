@@ -1,6 +1,6 @@
 ﻿using com.etsoo.MicrosoftApi.Auth;
-using Platform.Server.Database.Models;
 using Platform.Server.Services;
+using PlatformShared.Database.Models;
 
 namespace Platform.Server.OAuth2
 {
@@ -12,19 +12,19 @@ namespace Platform.Server.OAuth2
 
             g.MapGet("GetLogInUrl", (IAuthService service, IMicrosoftAuthClient client, HttpRequest request, string region, string device)
                 => service.GetLogInUrl(client, request.Headers.UserAgent, region + device)
-                ).WithDescription("Microsoft OAuth2 get log in URL / 微软 OAuth2 获取登录地址");
+                ).WithDescription("Microsoft OAuth2 get log in URL / 微软 OAuth2 获取登录地址").WithTags("OAuth2");
 
             g.MapGet("GetSignUpUrl", (IAuthService service, IMicrosoftAuthClient client, HttpRequest request, string region, string device)
                 => service.GetSignUpUrl(client, request.Headers.UserAgent, region + device)
-                ).WithDescription("Microsoft OAuth2 get sign up URL / 微软 OAuth2 获取注册地址");
+                ).WithDescription("Microsoft OAuth2 get sign up URL / 微软 OAuth2 获取注册地址").WithTags("OAuth2");
 
             g.MapGet("LogIn", (IAuthService service, IMicrosoftAuthClient client, HttpContext context, CancellationToken cancellation)
                 => service.LogInAsync(client, CoreUserIdentifierType.Microsoft, context, cancellation)
-                ).WithDescription("Microsoft OAuth2 log in / 微软 OAuth2 登录");
+                ).WithDescription("Microsoft OAuth2 log in / 微软 OAuth2 登录").WithTags("OAuth2");
 
             g.MapGet("SignUp", (IAuthService service, IMicrosoftAuthClient client, HttpContext context, CancellationToken cancellation)
                 => service.SignUpAsync(client, CoreUserIdentifierType.Microsoft, context, cancellation)
-                ).WithDescription("Microsoft OAuth2 sign up / 微软 OAuth2 注册");
+                ).WithDescription("Microsoft OAuth2 sign up / 微软 OAuth2 注册").WithTags("OAuth2");
 
             return builder;
         }

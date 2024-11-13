@@ -2,8 +2,7 @@ import {
   IApiPayload,
   AuthApi as AuthApiBase,
   LoginRQ,
-  StringIdResultPayload,
-  AuthRequest
+  StringIdResultPayload
 } from "@etsoo/appscript";
 import { SmartERPLoginResult } from "@etsoo/materialui";
 import { InviteDto } from "./dto/auth/InviteDto";
@@ -19,15 +18,6 @@ import { CompleteRegisterRQ } from "./rq/auth/CompleteRegisterRQ";
  */
 export class AuthApi extends AuthApiBase {
   /**
-   * Authorization request
-   * @param auth Authorization request data
-   * @param payload Payload
-   */
-  authRequest(auth: AuthRequest, payload?: IApiPayload<string>) {
-    return this.api.post("Auth/AuthRequest", auth, payload);
-  }
-
-  /**
    * Complete register
    * @param rq Request data
    * @param payload Payload
@@ -40,7 +30,10 @@ export class AuthApi extends AuthApiBase {
     payload ??= {};
     const result = await this.api.put("Auth/CompleteRegister", rq, payload);
     const refreshToken = result?.ok
-      ? this.app.getResponseToken(payload.response)
+      ? this.app.getResponseToken(
+          payload.response,
+          AuthApiBase.HeaderTokenField
+        )
       : null;
     return [result, refreshToken];
   }

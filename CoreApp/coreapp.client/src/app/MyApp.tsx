@@ -11,8 +11,14 @@ import {
 import enSys from "../../../../Platform/platform.client/src/i18n/en.sys.json";
 import zhHansSys from "../../../../Platform/platform.client/src/i18n/zh-Hans.sys.json";
 import zhHantSys from "../../../../Platform/platform.client/src/i18n/zh-Hant.sys.json";
+import { UserApi } from "../api/UserApi";
 
-class MyApp extends ServiceApp<MyUser> {}
+class MyApp extends ServiceApp<MyUser> {
+  /**
+   * User APIs
+   */
+  readonly userApi = new UserApi(this);
+}
 
 // Detected country or region
 const { detectedCountry } = DomUtils;

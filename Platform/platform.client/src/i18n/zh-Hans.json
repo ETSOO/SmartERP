@@ -71,7 +71,7 @@
   "inviter": "邀请人",
   "inviteResult": "已发送邀请邮件给 {0}，请等待对方接受邀请",
   "itemExists": "该{0}已经存在于某个用户名下",
-  "keepLogged": "保持登录状态",
+  "keepLogged": "保持登录状态，请仅在本人设备上使用",
   "language": "语言",
   "languages": "语言",
   "loginId": "电子邮箱或手机号码",

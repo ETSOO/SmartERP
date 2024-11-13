@@ -10,11 +10,11 @@ using com.etsoo.ThirdPartyExtentions.Minio;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
-using CoreApp.Server.Database;
 using CoreApp.Server.Endpoints.Auth;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
+using PlatformShared.Database;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -55,8 +55,7 @@ if (string.IsNullOrEmpty(connectonString))
 // No need to use AddDbContextPool currently
 services.AddDbContext<MyDbContext>((provider, options) =>
 {
-    options.UseNpgsql(connectonString)
-        .UseSnakeCaseNamingConvention(); // Use snake case naming convention
+    options.UseNpgsql(connectonString);
 
     if (builder.Environment.IsDevelopment())
     {
@@ -156,7 +155,7 @@ if (corsOptions.Required)
 }
 
 // API services
-services.AddScoped<IUserAccessor<CurrentUser>, UserAccessor<CurrentUser>>();
+services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<ISEAuthService, SEAuthService>();
 
 var app = builder.Build();

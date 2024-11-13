@@ -20,11 +20,11 @@ using MimeKit;
 using MimeKit.Text;
 using Npgsql;
 using Platform.Server.Application;
-using Platform.Server.Database;
-using Platform.Server.Database.Models;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Endpoints.Auth.RQ;
 using Platform.Server.Templates;
+using PlatformShared.Database;
+using PlatformShared.Database.Models;
 using System.Globalization;
 using System.Net;
 using System.Text;
@@ -53,15 +53,22 @@ namespace Platform.Server.Services
 
         private const string EncryptDeviceIdKey = "device-id";
 
+        private const short UserRegistrationSMSCode = 1;
+        private const short UserRegistrationEmailCode = 2;
+        private const short UserCallbackSMSCode = 3;
+        private const short UserCallbackEmailCode = 4;
+        private const short UserVerificationSMSCode = 5;
+        private const short UserVerificationEmailCode = 6;
+
         // Code actions
         static List<AuthCodeAction> Actions =>
         [
-            new(1, Properties.Resources.UserRegistrationSMSCode, 10, RandStringKind.Digit, 6),
-            new(2, Properties.Resources.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailRegistration.cshtml"),
-            new(3, Properties.Resources.UserCallbackSMSCode, 10, RandStringKind.Digit, 6),
-            new(4, Properties.Resources.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailCallback.cshtml"),
-            new(5, Properties.Resources.UserRegistrationSMSCode, 10, RandStringKind.Digit, 6),
-            new(6, Properties.Resources.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailVerification.cshtml"),
+            new(UserRegistrationSMSCode, Properties.Resources.UserRegistrationSMSCode, 10, RandStringKind.Digit, 6),
+            new(UserRegistrationEmailCode, Properties.Resources.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailRegistration.cshtml"),
+            new(UserCallbackSMSCode, Properties.Resources.UserCallbackSMSCode, 10, RandStringKind.Digit, 6),
+            new(UserCallbackEmailCode, Properties.Resources.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailCallback.cshtml"),
+            new(UserVerificationSMSCode, Properties.Resources.UserVerificationSMSCode, 10, RandStringKind.Digit, 6),
+            new(UserVerificationEmailCode, Properties.Resources.UserVerificationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailVerification.cshtml"),
         ];
 
         // 检查用户登录编号
@@ -113,6 +120,7 @@ namespace Platform.Server.Services
         readonly string _root;
         readonly IPAddress _ip;
         readonly IMinUserToken? _regUser;
+        readonly IPublicService _publicService;
 
         /// <summary>
         /// Constructor
@@ -127,9 +135,11 @@ namespace Platform.Server.Services
         /// <param name="smsClient">SMS client</param>
         /// <param name="smtpClient">SMTP client</param>
         /// <param name="host">Host environment</param>
-        public AuthService(MyDbContext db, IMyApp app, IMyUserAccessor userAccessor, ILogger<AuthService> logger,
+        /// <param name="publicService">Public service</param>
+        public AuthService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthService> logger,
             IStorage storage, IHttpClientFactory httpClientFactory,
-            ISMSClient smsClient, ISMTPClient smtpClient, IWebHostEnvironment host)
+            ISMSClient smsClient, ISMTPClient smtpClient, IWebHostEnvironment host,
+            IPublicService publicService)
             : base(app, userAccessor.User, "auth", logger)
         {
             _db = db;
@@ -140,7 +150,8 @@ namespace Platform.Server.Services
             _smtpClient = smtpClient;
             _root = host.ContentRootPath;
             _ip = userAccessor.Ip;
-            _regUser = userAccessor.User == null ? userAccessor.CreateUserFromAuthorization<MinUserToken>(app.AuthService, Constants.RegistrationTokenAudience, Constants.RegistrationTokenScheme) : null;
+            _regUser = userAccessor.User == null ? userAccessor.CreateUserFromAuthorization<MinUserToken>(app.AuthService, MyAppConstants.RegistrationTokenAudience, MyAppConstants.RegistrationTokenScheme) : null;
+            _publicService = publicService;
         }
 
         private async Task<AppData?> AuthGetAppSecretAsync(int appId, string appKey, CancellationToken cancellationToken)
@@ -164,7 +175,60 @@ namespace Platform.Server.Services
             return data;
         }
 
-        private async Task<AppTokenData> CreateAppTokenDataAsync(CurrentUser user, int appId, int? appKeyId, string appSecret, bool isOffline, TokenQueryData data, CancellationToken cancellationToken)
+        private async Task<AppTokenData?> CreateAppTokenDataAsync(int appId, string refreshToken, int? appKeyId, string? appSecret, CancellationToken cancellationToken)
+        {
+            var tokenData = await _db.CoreUserDeviceTokens
+                .AsNoTracking()
+                .Where(d => d.ResponseType == TokenResponseType.Token && d.AppId == appId && d.Token == refreshToken)
+                .Select(d => new
+                {
+                    d.Id,
+                    d.Expiry,
+                    Data = new TokenQueryData
+                    {
+                        DeviceId = d.DeviceId,
+                        UserId = d.Device.CoreUserId,
+                        Culture = d.Culture,
+                        Data = d.Data
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (tokenData == null)
+            {
+                Logger.LogWarning("Token query data not found");
+                return null;
+            }
+            else if (tokenData.Expiry < DateTime.UtcNow)
+            {
+                // Remove the token
+                await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
+
+                Logger.LogWarning("Token expired: {Expiry}", tokenData.Expiry);
+                return null;
+            }
+
+            var data = tokenData.Data;
+
+            // User
+            var (result, user) = await CreateUserFromQueryDataAsync(data, cancellationToken);
+            if (user == null || !result.Ok)
+            {
+                Logger.LogWarning("User not found with @{data}, @{result}", data, result);
+                return null;
+            }
+
+            var scope = CurrentUser.AppIdToScope(appId);
+            if (user.Scopes?.Contains(scope) is not true)
+            {
+                Logger.LogWarning("User not in scope {scope}", scope);
+                return null;
+            }
+
+            return await CreateAppTokenDataAsync(user, appId, appKeyId, appSecret, true, data, cancellationToken);
+        }
+
+        private async Task<AppTokenData> CreateAppTokenDataAsync(CurrentUser user, int appId, int? appKeyId, string? appSecret, bool isOffline, TokenQueryData data, CancellationToken cancellationToken)
         {
             var accessToken = App.AuthService.CreateAccessToken(user, null, App.AuthService.AccessTokenMinutes);
 
@@ -174,6 +238,8 @@ namespace Platform.Server.Services
                 refreshToken = await CreateRefreshTokenAsync(user.IdInt, data.DeviceId, data.Culture, TokenResponseType.Token, data.Data, appId, appKeyId, cancellationToken);
             }
 
+            var idToken = string.IsNullOrEmpty(appSecret) ? null : App.AuthService.CreateIdToken(user.CreateIdentity(), appSecret);
+
             var token = new AppTokenData
             {
                 AccessToken = accessToken,
@@ -181,7 +247,7 @@ namespace Platform.Server.Services
                 ExpiresIn = App.AuthService.AccessTokenMinutes * 60,
                 RefreshToken = refreshToken,
                 Scope = string.Join(' ', user.Scopes!),
-                IdToken = App.AuthService.CreateIdToken(user.CreateIdentity(), appSecret)
+                IdToken = idToken
             };
 
             return token;
@@ -191,6 +257,27 @@ namespace Platform.Server.Services
         {
             var code = await CreateRefreshTokenAsync(user.IdInt, data.DeviceId, data.Culture, TokenResponseType.Code, data.Data, appId, appKeyId, cancellationToken);
             return code;
+        }
+
+        /// <summary>
+        /// Refresh API token
+        /// 刷新API令牌
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<ApiTokenData?> ApiRefreshTokenAsync(ApiRefreshTokenRQ rq, CancellationToken cancellationToken = default)
+        {
+            var data = await CreateAppTokenDataAsync(rq.AppId, rq.Token, null, null, cancellationToken);
+            if (data == null || string.IsNullOrEmpty(data.RefreshToken)) return null;
+
+            return new ApiTokenData
+            {
+                AccessToken = data.AccessToken,
+                TokenType = data.TokenType,
+                ExpiresIn = data.ExpiresIn,
+                RefreshToken = data.RefreshToken
+            };
         }
 
         /// <summary>
@@ -354,6 +441,20 @@ namespace Platform.Server.Services
 
             user.Password = password;
             user.Name = rq.Name;
+            user.QueryKeyword = _publicService.GetPinyin(new PinyinRQ { Input = rq.Name, Format = PinyinFormatType.Initial });
+
+            user.FamilyName = rq.FamilyName;
+            if (!string.IsNullOrEmpty(rq.FamilyName))
+            {
+                user.LatinFamilyName = _publicService.GetPinyin(new PinyinRQ { Input = rq.FamilyName, Format = PinyinFormatType.Full });
+            }
+
+            user.GivenName = rq.GivenName;
+            if (!string.IsNullOrEmpty(rq.GivenName))
+            {
+                user.LatinGivenName = _publicService.GetPinyin(new PinyinRQ { Input = rq.GivenName, Format = PinyinFormatType.Full });
+            }
+
             user.Region = rq.Region;
             user.Step = 0;
 
@@ -361,6 +462,51 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             return await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, cancellationToken);
+        }
+
+        /// <summary>
+        /// Change password
+        /// 修改密码
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<IActionResult> ChangePasswordAsync(ChangePasswordDto data, CancellationToken cancellationToken = default)
+        {
+            if (User == null)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var user = await _db.CoreUsers
+                .AsNoTracking()
+                .Where(u => u.Id == User.IdInt)
+                .Select(u => new LoginUserWithPassword { Id = u.Id, Password = u.Password, Status = u.Status, FrozenTime = u.FrozenTime, Step = u.Step })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (user == null)
+            {
+                return ApplicationErrors.NoUserFound.AsResult();
+            }
+
+            var result = user.ValidateUser();
+            if (!result.Ok)
+            {
+                return result;
+            }
+
+            // Hash password
+            var hashedPassword = await App.HashPasswordAsync(user.Id + data.OldPassword);
+            if (string.IsNullOrEmpty(hashedPassword) || !hashedPassword.Equals(user.Password))
+            {
+                return ApplicationErrors.NoPasswordMatch.AsResult();
+            }
+
+            // Update password
+            var newPassword = await App.HashPasswordAsync(user.Id + data.Password);
+            await _db.CoreUsers.AsNoTracking().Where(u => u.Id == user.Id).ExecuteUpdateAsync(u => u.SetProperty(u => u.Password, newPassword), cancellationToken);
+
+            return ActionResult.Success;
         }
 
         /// <summary>
@@ -479,7 +625,7 @@ namespace Platform.Server.Services
             }
 
             // App paid scopes
-            scopes.AddRange(data.Scopes.Select(s => $"app{s}"));
+            scopes.AddRange(data.Scopes.Select(s => CurrentUser.AppIdToScope(s)));
 
             // Limit scopes with auth request
             if (auth != null)
@@ -536,6 +682,10 @@ namespace Platform.Server.Services
                 var publicData = new PublicUserData
                 {
                     Name = user.Name,
+                    GivenName = user.GivenName,
+                    FamilyName = user.FamilyName,
+                    LatinGivenName = user.LatinGivenName,
+                    LatinFamilyName = user.LatinFamilyName,
                     Avatar = user.Avatar,
                     Organization = data.OrganizationId,
                     IsChannel = data.ChannelOrganizationId.HasValue,
@@ -662,7 +812,7 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.NoUserFound.AsResult(), null);
             }
 
-            result = ValidateUser(data);
+            result = data.ValidateUser();
             if (!result.Ok)
             {
                 return (result, null);
@@ -697,7 +847,7 @@ namespace Platform.Server.Services
                 Scopes = ["core"]
             };
 
-            return App.AuthService.CreateAccessToken(user, Constants.RegistrationTokenAudience, 60);
+            return App.AuthService.CreateAccessToken(user, MyAppConstants.RegistrationTokenAudience, 60);
         }
 
         private bool TokenDataEquals(DeviceTokenData source, DeviceTokenData data)
@@ -836,36 +986,9 @@ namespace Platform.Server.Services
             return await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
         }
 
-        private ActionResult ValidateUser(LoginUser user)
-        {
-            if (user.FrozenTime.HasValue)
-            {
-                var result = ApplicationErrors.UserFrozen.AsResult();
-                if (result.Title != null)
-                    result.Title = string.Format(result.Title, user.FrozenTime.ToString());
-                return result;
-            }
-            else if (user.Status > EntityStatus.Approved)
-            {
-                return ApplicationErrors.AccountDisabled.AsResult("Status");
-            }
-            else if (user.OrgStatus != null && user.OrgStatus > EntityStatus.Approved)
-            {
-                return ApplicationErrors.AccountDisabled.AsResult("OrgStatus");
-            }
-            else if (user.OrgExpiry != null && user.OrgExpiry < DateTime.UtcNow)
-            {
-                return ApplicationErrors.AccountDisabled.AsResult("OrgExpiry");
-            }
-            else
-            {
-                return ActionResult.Success;
-            }
-        }
-
         private async Task ValidateUserAsync(HttpContext context, CoreUserIdentifierType type, LoginUser user, AuthLoginValidateData loginData, CancellationToken cancellationToken)
         {
-            var result = ValidateUser(user);
+            var result = user.ValidateUser();
             if (result.Ok)
             {
                 if (user.Step > 0)
@@ -929,7 +1052,7 @@ namespace Platform.Server.Services
                         loginUser = await ReadUserAsync(CoreUserIdentifierType.Email, userInfo.Email);
                         if (loginUser != null)
                         {
-                            result = ValidateUser(loginUser);
+                            result = loginUser.ValidateUser();
                             if (result.Ok)
                             {
                                 // Current user
@@ -1450,7 +1573,7 @@ namespace Platform.Server.Services
         /// <returns>Task</returns>
         public async Task<ActionResult> ValidateEmailRegistrationAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
         {
-            var (result, email, _) = await ValidateAsync(2, data, cancellationToken);
+            var (result, email, _) = await ValidateAsync(UserRegistrationEmailCode, data, cancellationToken);
             if (!result.Ok || email == null)
             {
                 return result;
@@ -1474,7 +1597,7 @@ namespace Platform.Server.Services
         /// <returns>Task</returns>
         public async Task<ActionResult> ValidateMobileRegistrationAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
         {
-            var (result, mobile, _) = await ValidateAsync(1, data, cancellationToken);
+            var (result, mobile, _) = await ValidateAsync(UserRegistrationSMSCode, data, cancellationToken);
             if (!result.Ok || mobile == null)
             {
                 return result;
@@ -1605,7 +1728,7 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.NoUserFound.AsResult(), null);
             }
 
-            var result = ValidateUser(userData);
+            var result = userData.ValidateUser();
             if (!result.Ok)
             {
                 return (result, null);
@@ -1663,48 +1786,7 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            var tokenData = await _db.CoreUserDeviceTokens
-                .AsNoTracking()
-                .Where(d => d.ResponseType == TokenResponseType.Token && d.AppId == rq.AppId && d.Token == rq.RefreshToken)
-                .Select(d => new
-                {
-                    d.Id,
-                    d.Expiry,
-                    Data = new TokenQueryData
-                    {
-                        DeviceId = d.DeviceId,
-                        UserId = d.Device.CoreUserId,
-                        Culture = d.Culture,
-                        Data = d.Data
-                    }
-                })
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (tokenData == null)
-            {
-                Logger.LogWarning("Token query data not found");
-                return null;
-            }
-            else if (tokenData.Expiry < DateTime.UtcNow)
-            {
-                // Remove the token
-                await _db.CoreUserDeviceTokens.Where(t => t.Id == tokenData.Id).ExecuteDeleteAsync(cancellationToken);
-
-                Logger.LogWarning("Token expired: {Expiry}", tokenData.Expiry);
-                return null;
-            }
-
-            var data = tokenData.Data;
-
-            // User
-            var (result, user) = await CreateUserFromQueryDataAsync(data, cancellationToken);
-            if (user == null || !result.Ok)
-            {
-                Logger.LogWarning("User not found with @{data}, @{result}", data, result);
-                return null;
-            }
-
-            return await CreateAppTokenDataAsync(user, rq.AppId, appData.AppKeyId, appData.AppSecret, true, data, cancellationToken);
+            return await CreateAppTokenDataAsync(rq.AppId, rq.RefreshToken, appData.AppKeyId, appData.AppSecret, cancellationToken);
         }
 
         /// <summary>

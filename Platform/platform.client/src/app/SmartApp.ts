@@ -108,6 +108,18 @@ class SmartApp extends CommonApp<
   }
 
   /**
+   * Authorization login
+   * @param url Authorization URL
+   */
+  authLogin(url: string) {
+    // Remove the auth request cache
+    this.storage.setData(Constants.AuthRequestField, null);
+
+    // Redirect to authorization request
+    window.location.replace(url);
+  }
+
+  /**
    * Get Api services
    * @returns List
    */

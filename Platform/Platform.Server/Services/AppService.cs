@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using com.etsoo.CoreFramework.User;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Platform.Server.Application;
-using Platform.Server.Database;
 using Platform.Server.Dto.App;
+using PlatformShared.Database;
 
 namespace Platform.Server.Services
 {
@@ -26,7 +27,7 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="cache">Cache</param>
         /// <param name="accessor">HttpContext accessor</param>
-        public AppService(MyDbContext db, IMyApp app, IMyUserAccessor userAccessor, ILogger<PublicService> logger, IDistributedCache cache, IHttpContextAccessor accessor)
+        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger, IDistributedCache cache, IHttpContextAccessor accessor)
             : base(app, userAccessor.UserSafe, "app", logger)
         {
             _db = db;
@@ -40,7 +41,7 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns>Result</returns>
-        public async Task<IEnumerable<AppData>> GetAppsAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<AppData>> GetUserAppsAsync(CancellationToken cancellationToken = default)
         {
             // User apps
             var ids = new List<int>

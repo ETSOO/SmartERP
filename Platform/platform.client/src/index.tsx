@@ -14,7 +14,7 @@ import Home from "./main/Home";
 import { app, NotifierProvider } from "./app/SmartApp";
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "./main/Dashboard";
-import { DynamicRouter } from "@etsoo/react";
+import { CoreConstants, DynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
 import AuthSuccess from "./login/AuthSuccess";
 import { AuthRequest } from "@etsoo/appscript";
@@ -154,7 +154,7 @@ function MyRouter() {
   React.useEffect(() => {
     // Persist app data
     const cleanup = () => {
-      app.persist();
+      app.dispose();
     };
 
     window.addEventListener("unload", cleanup);
