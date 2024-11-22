@@ -20,6 +20,7 @@ using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
 using com.etsoo.WeiXin;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -85,11 +86,10 @@ if (string.IsNullOrEmpty(connectonString))
     throw new Exception("SmartERP connection string not found");
 }
 
-// No need to use AddDbContextPool currently
-services.AddDbContext<MyDbContext>((provider, options) =>
+services.AddDbContextPool<MyDbContext>((provider, options) =>
 {
-    options.UseNpgsql(connectonString);
-    //    .UseSnakeCaseNamingConvention(); // Use snake case naming convention
+    options.UseNpgsql(connectonString)
+        .UseSnakeCaseNamingConvention();
 
     if (builder.Environment.IsDevelopment())
     {
@@ -173,9 +173,34 @@ services.ConfigureHttpJsonOptions(options =>
 });
 
 // Add services to the container.
-// services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
+services.AddAntiforgery();
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            []
+        }
+    });
+});
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 
@@ -279,7 +304,7 @@ if (corsOptions.Required)
 app.UseAuthentication();
 app.UseAuthorization();
 
-// app.UseAntiforgery();
+app.UseAntiforgery();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

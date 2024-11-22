@@ -17,8 +17,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
 import { AppUtils } from "./app/AppUtils";
-import { OrgInfo } from "./api/dto/org/OrgInfo";
-import { OrgRequest } from "./app/OrgRequest";
+import { PublicOrgInfo } from "./api/dto/public/PublicOrgInfo";
 
 function formatLoginTip(
   appId: number,
@@ -203,7 +202,7 @@ function App() {
   const [visible, setVisible] = React.useState(false);
 
   // App data
-  const [appData, setAppData] = React.useState<OrgInfo>();
+  const [appData, setAppData] = React.useState<PublicOrgInfo>();
 
   // QRCode
   const [mobileQRCode, setMobileQRCode] = React.useState<string>();

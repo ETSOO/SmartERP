@@ -1,33 +1,13 @@
-import {
-  AddressUtils,
-  zhHant,
-  en,
-  ExternalSettings,
-  BridgeUtils,
-  ApiService,
-  zhHans
-} from "@etsoo/appscript";
+import { AddressUtils, ExternalSettings, BridgeUtils } from "@etsoo/appscript";
 import { ISmartSettings } from "./SmartSettings";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { Constants } from "./Constants";
 import { ISmartPageData } from "./SmartPageData";
 import { CommonApp, ISmartERPUser, MUGlobal } from "@etsoo/materialui";
-import { PublicApi } from "../api/PublicApi";
-import { AuthApi } from "../api/AuthApi";
-import { MemberApi } from "../api/MemberApi";
-import { StorageApi } from "../api/StorageApi";
-import { SystemApi } from "../api/SystemApi";
-import { UserApi } from "../api/UserApi";
-import { MemberIdentity } from "../api/dto/member/MemberIdentity";
-import { ProductApi } from "../api/ProductApi";
-import { OrgApi } from "../api/OrgApi";
-import { ApiServiceApi } from "../api/ApiServiceApi";
 import { NavigateFunction } from "react-router-dom";
-import { AppApi } from "../api/AppApi";
-import { AppData } from "./AppData";
-import enSys from "../i18n/en.sys.json";
-import zhHansSys from "../i18n/zh-Hans.sys.json";
-import zhHantSys from "../i18n/zh-Hant.sys.json";
+import { CoreCulture } from "@etsoo/smarterp-core";
+import { AuthApi } from "../api/AuthApi";
+import { PublicApi } from "../api/PublicApi";
 
 /**
  * SmartERP App
@@ -38,74 +18,14 @@ class SmartApp extends CommonApp<
   ISmartSettings
 > {
   /**
-   * Api service API
-   */
-  readonly apiServiceApi = new ApiServiceApi(this);
-
-  /**
-   * App API
-   */
-  readonly appApi = new AppApi(this);
-
-  /**
-   * Public API
-   */
-  readonly publicApi = new PublicApi(this);
-
-  /**
-   * Organization API
-   */
-  readonly orgApi = new OrgApi(this);
-
-  /**
    * Authorization API
    */
   readonly authApi = new AuthApi(this);
 
   /**
-   * Member API
+   * Public API
    */
-  readonly memberApi = new MemberApi(this);
-
-  /**
-   * Product API
-   */
-  readonly productApi = new ProductApi(this);
-
-  /**
-   * Storage API
-   */
-  readonly storageApi = new StorageApi(this);
-
-  /**
-   * System API
-   */
-  readonly systemApi = new SystemApi(this);
-
-  /**
-   * System API
-   */
-  readonly userApi = new UserApi(this);
-
-  private _apps: AppData[] = [];
-  /**
-   * User applications
-   */
-  public get apps() {
-    return this._apps;
-  }
-  protected set apps(value) {
-    this._apps = value;
-    this._origins = value.map((app) => new URL(app.webUrl).origin);
-  }
-
-  private _origins: string[] = [];
-  /**
-   * Origins
-   */
-  public get origins() {
-    return this._origins;
-  }
+  readonly publicApi = new PublicApi(this);
 
   /**
    * Authorization login
@@ -117,22 +37,6 @@ class SmartApp extends CommonApp<
 
     // Redirect to authorization request
     window.location.replace(url);
-  }
-
-  /**
-   * Get Api services
-   * @returns List
-   */
-  getApiServices() {
-    return this.getEnumList(ApiService, "apiService");
-  }
-
-  /**
-   * Get identities
-   * @returns List
-   */
-  getIdentities() {
-    return this.getEnumList(MemberIdentity, "id");
   }
 
   /**
@@ -234,25 +138,6 @@ class SmartApp extends CommonApp<
       else window.location.replace(url);
     }
   }
-
-  /**
-   * On authorized or not callback
-   * @param success Success or not
-   */
-  protected override onAuthorized(success: boolean) {
-    // Call parent
-    super.onAuthorized(success);
-
-    // Get user apps
-    if (success) {
-      this.appApi.getApps({ showLoading: false }).then((apps) => {
-        if (apps == null) return;
-        this.apps = apps;
-      });
-    } else {
-      this.apps = [];
-    }
-  }
 }
 
 // Detected country or region
@@ -266,9 +151,9 @@ MUGlobal.textFieldVariant = "standard";
 
 // Supported cultures
 const supportedCultures: DataTypes.CultureDefinition[] = [
-  zhHans(zhHansSys, () => import("./../i18n/zh-Hans.json")),
-  zhHant(zhHantSys, () => import("./../i18n/zh-Hant.json")),
-  en(enSys, () => import("./../i18n/en.json"))
+  CoreCulture.zhHans(() => import("./../i18n/zh-Hans.json")),
+  CoreCulture.zhHant(() => import("./../i18n/zh-Hant.json")),
+  CoreCulture.en(() => import("./../i18n/en.json"))
 ];
 
 // Supported regions

@@ -4,7 +4,9 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.HTTP;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Storage;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.Org;
@@ -23,6 +25,7 @@ namespace Platform.Server.Services
     {
         readonly MyDbContext _db;
         readonly IPublicService _publicService;
+        readonly IStorage _storage;
 
         /// <summary>
         /// Constructor
@@ -33,11 +36,13 @@ namespace Platform.Server.Services
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="publicService">Public service</param>
-        public OrgService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger, IPublicService publicService)
+        /// <param name="storage">Storage</param>
+        public OrgService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger, IPublicService publicService, IStorage storage)
             : base(app, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
             _publicService=publicService;
+            _storage=storage;
         }
 
         /// <summary>
@@ -88,9 +93,7 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Return
-            var result = ActionResult.Success;
-            result.Data["Id"] = org.Id;
-            return result;
+            return ActionResult.Succeed(org.Id);
         }
 
         /// <summary>
@@ -123,7 +126,41 @@ namespace Platform.Server.Services
             await _db.CoreOrganizationUsers.Where(ou => ou.CoreOrganizationId == id && ou.CoreUserId == User.IdInt).ExecuteDeleteAsync(cancellationToken);
             await _db.CoreOrganizations.Where(o => o.Id == id).ExecuteDeleteAsync(cancellationToken);
 
-            return ActionResult.Success;
+            return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// List organization JSON data
+        /// 机构列表JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task ListAsync(OrgListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = CreateQuery(rq.Keyword);
+
+            await query.QueryEtsoo(rq, (o) => o.Id, (o) => o.Status)
+                .Select(o => new
+                {
+                    o.Id,
+                    o.Name
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        private IQueryable<CoreOrganization> CreateQuery(string? keyword)
+        {
+            var query = _db.CoreOrganizations
+                .AsNoTracking()
+                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt));
+
+            if (!string.IsNullOrEmpty(keyword) && keyword.Length > 1)
+            {
+                query = query.Where(o => o.Brand == keyword || o.Name.Contains(keyword) || (o.QueryKeyword != null && o.QueryKeyword.Contains(keyword)));
+            }
+
+            return query;
         }
 
         /// <summary>
@@ -135,15 +172,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<OrgQueryData>> QueryAsync(OrgQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            var query = _db.CoreOrganizations
-                .AsNoTracking()
-                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt));
-
-            var keyword = rq.Keyword;
-            if (!string.IsNullOrEmpty(keyword) && keyword.Length > 1)
-            {
-                query = query.Where(o => o.Brand == keyword || o.Name.Contains(keyword) || (o.QueryKeyword != null && o.QueryKeyword.Contains(keyword)));
-            }
+            var query = CreateQuery(rq.Keyword);
 
             if (!string.IsNullOrEmpty(rq.Pin))
             {
@@ -155,6 +184,7 @@ namespace Platform.Server.Services
                 {
                     Id = o.Id,
                     Name = o.Name,
+                    IsOwner = o.OwnerId == User.IdInt,
                     Brand = o.Brand,
                     Pin = o.Pin,
                     ParentId = o.ParentId,
@@ -169,36 +199,71 @@ namespace Platform.Server.Services
         /// 查询机构JSON数据
         /// </summary>
         /// <param name="rq">Request data</param>
-        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="response">Http response to write</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task QueryJsonAsync(OrgQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public async Task QueryAsync(OrgQueryRQ rq, HttpResponse response, CancellationToken cancellationToken = default)
         {
-            var query = _db.CoreOrganizations
-                .AsNoTracking()
-                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt));
-
-            var keyword = rq.Keyword;
-            if (!string.IsNullOrEmpty(keyword) && keyword.Length > 1)
-            {
-                query = query.Where(o => o.Brand == keyword || o.Name.Contains(keyword) || (o.QueryKeyword != null && o.QueryKeyword.Contains(keyword)));
-            }
+            var query = CreateQuery(rq.Keyword);
 
             if (!string.IsNullOrEmpty(rq.Pin))
             {
                 query = query.Where(o => o.Pin != null && o.Pin.Contains(rq.Pin));
             }
 
-            await query.QueryEtsoo(rq, (o) => o.Id, (o) => o.Status)
+            var hasContent = await query.QueryEtsoo(rq, (o) => o.Id, (o) => o.Status)
                 .Select(o => new OrgQueryData
                 {
                     Id = o.Id,
                     Name = o.Name,
+                    IsOwner = o.OwnerId == User.IdInt,
                     Brand = o.Brand,
                     Pin = o.Pin,
                     ParentId = o.ParentId,
                     Status = o.Status
-                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+                }).ToJsonAsync(response.BodyWriter, cancellationToken: cancellationToken);
+
+            if (!hasContent)
+            {
+                response.StatusCode = StatusCodes.Status204NoContent;
+            }
+        }
+
+
+        /// <summary>
+        /// Read organization data for view
+        /// 读取用于浏览的机构数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="response">Http response to write</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task ReadAsync(int id, HttpResponse response, CancellationToken cancellationToken = default)
+        {
+            var query = _db.CoreOrganizations
+                .AsNoTracking()
+                .Where(o => o.Id == id && o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt));
+
+            var hasContent = await query.Select(o => new
+            {
+                o.Id,
+                OwnerName = o.Owner.Name,
+                o.Name,
+                o.Brand,
+                o.Logo,
+                o.Pin,
+                ParentName = (o.Parent == null ? null : o.Parent.Name),
+                o.ParentId,
+                o.Uid,
+                o.Creation,
+                o.Status,
+                o.QueryKeyword
+            }).ToJsonObjectAsync(response.BodyWriter, cancellationToken: cancellationToken);
+
+            if (!hasContent)
+            {
+                response.StatusCode = StatusCodes.Status204NoContent;
+            }
         }
 
         /// <summary>
@@ -258,7 +323,95 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Return
-            return ActionResult.Success;
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Update avatar
+        /// 更新头像
+        /// </summary>
+        /// <param name="id">Organization id</param>
+        /// <param name="avatarStream">Avatar stream</param>
+        /// <param name="contentType">Cotent type</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>New URL</returns>
+        public async Task<IActionResult> UploadAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
+        {
+            // Check the stream
+            if (avatarStream.Length is not > 10240 and < 102400000)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(avatarStream));
+            }
+
+            // Check the organization id
+            var org = await _db.CoreOrganizations.AsNoTracking()
+                .Where(o => o.Id == id && o.OwnerId == User.IdInt)
+                .Select(o => new { o.Logo })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (org == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var extension = MimeTypeMap.TryGetExtension(contentType);
+            if (string.IsNullOrEmpty(extension))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(contentType));
+            }
+
+            // File path
+            var path = "/OrgAvatar/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
+
+            // Save the stream to file directly
+            var saveResult = await _storage.WriteAsync(path, avatarStream, WriteCase.CreateNew, cancellationToken: cancellationToken);
+
+            if (saveResult)
+            {
+                // New avatar URL
+                var url = _storage.GetUrl(path);
+
+                // Update
+                await _db.CoreOrganizations.Where(o => o.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Logo, url), cancellationToken);
+
+                // Remove current avatar
+                if (!string.IsNullOrEmpty(org.Logo))
+                    await _storage.DeleteUrlAsync(org.Logo, cancellationToken);
+
+                // Return
+                return ActionResult.Succeed(url);
+            }
+            else
+            {
+                Logger.LogError("Avatar write path is {path}", path);
+                return ApplicationErrors.DataProcessingFailed.AsResult();
+            }
+        }
+
+        /// <summary>
+        /// Read organization data for update
+        /// 读取用于更新的机构数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = _db.CoreOrganizations
+                .AsNoTracking()
+                .Where(o => o.Id == id && o.OwnerId == User.IdInt);
+
+            await query.Select(o => new
+            {
+                o.Id,
+                o.Name,
+                o.Brand,
+                o.Logo,
+                o.Pin,
+                o.ParentId,
+                o.Status,
+                o.QueryKeyword
+            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
     }
 }

@@ -1,7 +1,7 @@
-import { Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { app } from './app/SmartApp';
-import { SharedLayout } from './login/SharedLayout';
+import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { app } from "./app/SmartApp";
+import { SharedLayout } from "./login/SharedLayout";
 
 /**
  * Not found case component
@@ -11,7 +11,7 @@ export function NotFound() {
   const navigate = useNavigate();
 
   // Labels
-  const labels = app.getLabels('pageNotFound', 'back');
+  const labels = app.getLabels("pageNotFound", "back");
 
   // Currently, navigate from props always failed with step number -1
   const goBack = () => {
@@ -27,7 +27,7 @@ export function NotFound() {
         </Button>
       }
     >
-      <p style={{ wordBreak: 'break-all' }}>
+      <p style={{ wordBreak: "break-all" }}>
         <b>Origin</b>: {window.location?.origin}
         <br />
         <b>URL</b>: {window.location?.href}

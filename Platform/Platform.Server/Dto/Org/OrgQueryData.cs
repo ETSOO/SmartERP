@@ -10,6 +10,7 @@ namespace Platform.Server.Dto.Org
     {
         public required int Id { get; init; }
         public required string Name { get; init; }
+        public required bool IsOwner { get; init; }
         public string? Brand { get; init; }
         public string? Pin { get; init; }
         public int? ParentId { get; init; }

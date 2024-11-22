@@ -2,7 +2,7 @@
  * Organization query public information request
  * 获取机构公开信息请求
  */
-export type OrgInfoRQ = {
+export type PublicOrgInfoRQ = {
   /**
    * Device unique identifier
    * 设备唯一标识

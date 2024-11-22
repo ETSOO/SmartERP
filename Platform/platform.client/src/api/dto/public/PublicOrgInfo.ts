@@ -2,7 +2,7 @@
  * Organization public information
  * 机构公开信息
  */
-export type OrgInfo = {
+export type PublicOrgInfo = {
   /**
    * Organization ID
    * 机构编号

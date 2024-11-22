@@ -9,8 +9,12 @@ namespace Platform.Server.Services
     {
         Task<IActionResult> CreateAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task ListAsync(OrgListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IEnumerable<OrgQueryData>> QueryAsync(OrgQueryRQ rq, CancellationToken cancellationToken = default);
-        Task QueryJsonAsync(OrgQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
+        Task QueryAsync(OrgQueryRQ rq, HttpResponse response, CancellationToken cancellationToken = default);
+        Task ReadAsync(int id, HttpResponse response, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(OrgUpdateRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> UploadAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default);
+        Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
     }
 }

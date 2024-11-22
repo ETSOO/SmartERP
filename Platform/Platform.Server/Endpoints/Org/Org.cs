@@ -1,4 +1,7 @@
-﻿using com.etsoo.CoreFramework.DB;
+﻿using com.etsoo.CoreFramework.Models;
+using com.etsoo.WebUtils;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Mvc;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Services;
 
@@ -20,22 +23,32 @@ namespace Platform.Server.Endpoints.Org
             g.MapDelete("Delete/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete organization / 删除机构").WithTags("Org");
 
-            g.MapPost("Query", (IOrgService service, OrgQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
-                .WithDescription("Query organizations / 查询机构").WithTags("Org");
+            g.MapPost("List", (IOrgService service, OrgListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("List organizations JSON data / 列出机构JSON数据").WithTags("Org");
 
-            g.MapPost("QueryJson", async (IOrgService service, OrgQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
+            g.MapPost("Query", (IOrgService service, OrgQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.HttpContext!.Response, cancellationToken))
+                .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
+
+            g.MapGet("Read/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.HttpContext!.Response, cancellationToken))
+                .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
+
+            g.MapGet("RequestToken", (IAntiforgery forgeryService, IHttpContextAccessor accessor) =>
             {
-                var response = accessor.HttpContext?.Response;
-                if (response == null)
-                {
-                    return;
-                }
-                response.JsonContentType();
-                await service.QueryJsonAsync(rq, response.BodyWriter, cancellationToken);
-            }).WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
+                // Create the token
+                var token = forgeryService.GetAndStoreTokens(accessor.HttpContext!);
+
+                // Return the token
+                return new AntiforgeryRequestToken { Name = token.FormFieldName, HeaderName = token.HeaderName, Value = token.RequestToken };
+            }).WithDescription("Get Antiforgery request token / 获取反伪造请求令牌").WithTags("Org");
 
             g.MapPut("Update", (IOrgService service, OrgUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update organization / 更新机构").WithTags("Org");
+
+            g.MapPut("UploadAvatar/{id:int}", (IOrgService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UploadAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
+                .WithDescription("Update organization avatar / 更新机构头像").WithTags("Org");
+
+            g.MapGet("UpdateRead/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Read JSON data for upate / 浏览JSON数据用于更新").WithTags("Org");
 
             return builder;
         }

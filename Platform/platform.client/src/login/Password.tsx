@@ -9,7 +9,7 @@ import { app } from "../app/SmartApp";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
 import { DynamicActionResult } from "@etsoo/shared";
-import { OrgRequest } from "../app/OrgRequest";
+import { OrgRequest } from "../api/rq/public/PublicOrgRequest";
 
 const homeUrl = "./../../../";
 function NavigateHome() {

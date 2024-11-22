@@ -18,67 +18,67 @@ namespace PlatformShared.Database
         /// Core applications
         /// 核心应用
         /// </summary>
-        public DbSet<CoreApp> CoreApps { get; set; }
+        public required DbSet<CoreApp> CoreApps { get; set; }
 
         /// <summary>
         /// Authorization codes
         /// 授权码
         /// </summary>
-        public DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
+        public required DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
 
         /// <summary>
         /// Core organizations
         /// 核心机构
         /// </summary>
-        public DbSet<CoreOrganization> CoreOrganizations { get; set; }
+        public required DbSet<CoreOrganization> CoreOrganizations { get; set; }
 
         /// <summary>
         /// Core organization applications
         /// 核心机构应用
         /// </summary>
-        public DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
+        public required DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
 
         /// <summary>
         /// Core organization application keys
         /// 核心机构应用密钥
         /// </summary>
-        public DbSet<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; }
+        public required DbSet<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; }
 
         /// <summary>
         /// Core organization channels
         /// 核心机构渠道
         /// </summary>
-        public DbSet<CoreOrganizationChannel> CoreOrganizationChannels { get; set; }
+        public required DbSet<CoreOrganizationChannel> CoreOrganizationChannels { get; set; }
 
         /// <summary>
         /// Core organization users
         /// 核心机构用户
         /// </summary>
-        public DbSet<CoreOrganizationUser> CoreOrganizationUsers { get; set; }
+        public required DbSet<CoreOrganizationUser> CoreOrganizationUsers { get; set; }
 
         /// <summary>
         /// Core users
         /// 核心用户
         /// </summary>
-        public DbSet<CoreUser> CoreUsers { get; set; }
+        public required DbSet<CoreUser> CoreUsers { get; set; }
 
         /// <summary>
         /// Core user devices
         /// 核心用户设备
         /// </summary>
-        public DbSet<CoreUserDevice> CoreUserDevices { get; set; }
+        public required DbSet<CoreUserDevice> CoreUserDevices { get; set; }
 
         /// <summary>
         /// Core user device tokens
         /// 核心用户设备令牌
         /// </summary>
-        public DbSet<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; }
+        public required DbSet<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; }
 
         /// <summary>
         /// Core user identifiers for login
         /// 核心用户登录编号
         /// </summary>
-        public DbSet<CoreUserIdentifier> CoreUserIdentifiers { get; set; }
+        public required DbSet<CoreUserIdentifier> CoreUserIdentifiers { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options)
             : base(options)

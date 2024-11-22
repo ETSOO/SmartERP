@@ -52,10 +52,10 @@ if (string.IsNullOrEmpty(connectonString))
     throw new Exception("SmartERP connection string not found");
 }
 
-// No need to use AddDbContextPool currently
-services.AddDbContext<MyDbContext>((provider, options) =>
+services.AddDbContextPool<MyDbContext>((provider, options) =>
 {
-    options.UseNpgsql(connectonString);
+    options.UseNpgsql(connectonString)
+        .UseSnakeCaseNamingConvention();
 
     if (builder.Environment.IsDevelopment())
     {

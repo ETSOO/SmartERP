@@ -3,6 +3,7 @@ using com.etsoo.ApiModel.RQ.Maps;
 using com.etsoo.ImageUtils.Barcode;
 using com.etsoo.Localization.Country;
 using com.etsoo.SMS;
+using Microsoft.AspNetCore.Mvc;
 using Platform.Server.Dto.App;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Dto.Org;
@@ -42,6 +43,7 @@ namespace Platform.Server
 
     // Org
     [JsonSerializable(typeof(OrgCreateRQ))]
+    [JsonSerializable(typeof(OrgListRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
     [JsonSerializable(typeof(OrgQueryRQ))]
 
@@ -63,6 +65,8 @@ namespace Platform.Server
 
     // Results.ValidationProblem
     [JsonSerializable(typeof(HttpValidationProblemDetails))]
+    [JsonSerializable(typeof(IFormFile))]
+    [JsonSerializable(typeof(ProblemDetails))]
 
     public partial class MyJsonSerializerContext : JsonSerializerContext
     {

@@ -1,6 +1,7 @@
-import { IApiPayload, PublicApi as PublicApiBase } from "@etsoo/appscript";
-import { OrgInfo } from "./dto/org/OrgInfo";
-import { OrgInfoRQ } from "./rq/public/OrgInfoRQ";
+import { IApiPayload } from "@etsoo/appscript";
+import { PublicApi as PublicApiBase } from "@etsoo/smarterp-core";
+import { PublicOrgInfoRQ } from "./rq/public/PublicOrgInfoRQ";
+import { PublicOrgInfo } from "./dto/public/PublicOrgInfo";
 
 /**
  * Public API
@@ -13,7 +14,7 @@ export class PublicApi extends PublicApiBase {
    * @param payload Payload
    * @returns Result
    */
-  orgInfo(rq: OrgInfoRQ, payload?: IApiPayload<OrgInfo>) {
+  orgInfo(rq: PublicOrgInfoRQ, payload?: IApiPayload<PublicOrgInfo>) {
     return this.api.post("Public/OrgInfo", rq, payload);
   }
 }

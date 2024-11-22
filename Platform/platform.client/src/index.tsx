@@ -10,14 +10,11 @@ import {
   LinearProgress,
   ThemeProvider
 } from "@mui/material";
-import Home from "./main/Home";
 import { app, NotifierProvider } from "./app/SmartApp";
 import { Route, Routes } from "react-router-dom";
-import Dashboard from "./main/Dashboard";
-import { CoreConstants, DynamicRouter } from "@etsoo/react";
+import { DynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
 import AuthSuccess from "./login/AuthSuccess";
-import { AuthRequest } from "@etsoo/appscript";
 
 // Root
 const root = document.getElementById("root")!;
@@ -34,33 +31,6 @@ const CallbackVerify = React.lazy(() => import("./login/CallbackVerify"));
 const CallbackComplete = React.lazy(() => import("./login/CallbackComplete"));
 const Terms = React.lazy(() => import("./login/Terms"));
 const Invite = React.lazy(() => import("./login/Invite"));
-
-const LoginHistory = React.lazy(() => import("./main/user/LoginHistory"));
-const UpdateAvatar = React.lazy(() => import("./main/user/UpdateAvatar"));
-const PrivateData = React.lazy(() => import("./main/user/PrivateData"));
-const ChangePassword = React.lazy(() => import("./main/user/ChangePassword"));
-
-const AllOrganizations = React.lazy(
-  () => import("./main/organization/AllOrganizations")
-);
-const EditOrganization = React.lazy(
-  () => import("./main/organization/EditOrganization")
-);
-const ViewOrganization = React.lazy(
-  () => import("./main/organization/ViewOrganizaion")
-);
-const UpdateOrgAvatar = React.lazy(
-  () => import("./main/organization/UpdateOrgAvatar")
-);
-const AddApi = React.lazy(() => import("./main/organization/AddApi"));
-
-const AllMembers = React.lazy(() => import("./main/member/AllMembers"));
-const EditMember = React.lazy(() => import("./main/member/EditMember"));
-
-const AllServices = React.lazy(() => import("./main/service/AllServices"));
-const MyServices = React.lazy(() => import("./main/service/MyServices"));
-
-const ExchangeRate = React.lazy(() => import("./main/tools/ExchangeRate"));
 
 // Culture provider
 const CultureStateProvider = app.cultureState.provider;
@@ -123,34 +93,6 @@ function MyRouter() {
     }
   }, [app.isReady]);
 
-  const messageHandler = React.useCallback((event: MessageEvent<any>) => {
-    if (!app.origins.includes(event.origin) || !Array.isArray(event.data))
-      return;
-
-    const [type, data] = event.data;
-
-    switch (type) {
-      case "login":
-        try {
-          const login = new URL(data);
-          const authQuery = login.searchParams.get("auth");
-          if (authQuery) {
-            const auth: AuthRequest = JSON.parse(decodeURIComponent(authQuery));
-            app.authApi.authRequest(auth).then((url) => {
-              if (url) {
-                event.source?.postMessage(["login", url], {
-                  targetOrigin: event.origin
-                });
-              }
-            });
-          }
-        } catch (e) {
-          console.error("message.login", e);
-        }
-        break;
-    }
-  }, []);
-
   React.useEffect(() => {
     // Persist app data
     const cleanup = () => {
@@ -159,13 +101,11 @@ function MyRouter() {
 
     window.addEventListener("unload", cleanup);
     window.addEventListener("beforeunload", cleanup);
-    window.addEventListener("message", messageHandler);
 
     return () => {
       cleanup();
       window.removeEventListener("unload", cleanup);
       window.removeEventListener("beforeunload", cleanup);
-      window.removeEventListener("message", messageHandler);
     };
   }, []);
 
@@ -193,38 +133,6 @@ function MyRouter() {
           />
           <Route path="/login/password/:username" element={<Password />} />
           <Route path="/invite/:id" element={<Invite />} />
-          <Route path="/home" element={<Home />}>
-            <Route index element={<Dashboard />} />
-
-            <Route path="user/loginhistory" element={<LoginHistory />} />
-            <Route path="user/updateavatar" element={<UpdateAvatar />} />
-            <Route path="user/changepassword" element={<ChangePassword />} />
-            <Route path="user/privatedata" element={<PrivateData />} />
-
-            <Route path="organization/all" element={<AllOrganizations />} />
-            <Route
-              path="organization/edit/:id"
-              element={<EditOrganization />}
-            />
-            <Route
-              path="organization/view/:id"
-              element={<ViewOrganization />}
-            />
-            <Route
-              path="organization/avatar/:id"
-              element={<UpdateOrgAvatar />}
-            />
-            <Route path="organization/addapi" element={<AddApi />} />
-            <Route path="organization/editapi/:id" element={<AddApi />} />
-
-            <Route path="member/all" element={<AllMembers />} />
-            <Route path="member/edit/:id" element={<EditMember />} />
-
-            <Route path="service/all" element={<AllServices />} />
-            <Route path="service/my" element={<MyServices />} />
-
-            <Route path="tools/exchangerate" element={<ExchangeRate />} />
-          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </DynamicRouter>

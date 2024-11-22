@@ -46,7 +46,7 @@ namespace Platform.Server.Endpoints.Public.RQ
                 return ApplicationErrors.NoValidData.AsResult(nameof(DeviceId));
             }
 
-            if (AppKey != null && AppKey.Length is not (>= 16 and <= 256))
+            if (AppKey != null && AppKey.Length is not <= 256)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(AppKey));
             }
