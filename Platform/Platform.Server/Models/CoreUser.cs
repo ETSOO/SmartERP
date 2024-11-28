@@ -17,13 +17,9 @@ public partial class CoreUser
 
     public string FamilyName { get; set; }
 
-    public string ForeignName { get; set; }
+    public string PreferredName { get; set; }
 
     public string Avatar { get; set; }
-
-    public DateTime Creation { get; set; }
-
-    public short Status { get; set; }
 
     public DateTime? FrozenTime { get; set; }
 
@@ -33,7 +29,19 @@ public partial class CoreUser
 
     public string Pin { get; set; }
 
-    public int? LatestOrganizationId { get; set; }
+    public DateTime Creation { get; set; }
+
+    public short Status { get; set; }
+
+    public string LatinGivenName { get; set; }
+
+    public string LatinFamilyName { get; set; }
+
+    public string QueryKeyword { get; set; }
+
+    public List<int> LatestOrganizationIds { get; set; }
+
+    public List<int> LatestAppIds { get; set; }
 
     public virtual ICollection<CoreAuthCode> CoreAuthCodes { get; set; } = new List<CoreAuthCode>();
 
@@ -44,6 +52,4 @@ public partial class CoreUser
     public virtual ICollection<CoreUserDevice> CoreUserDevices { get; set; } = new List<CoreUserDevice>();
 
     public virtual ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = new List<CoreUserIdentifier>();
-
-    public virtual CoreOrganization LatestOrganization { get; set; }
 }

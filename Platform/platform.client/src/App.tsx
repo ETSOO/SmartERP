@@ -18,6 +18,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
 import { AppUtils } from "./app/AppUtils";
 import { PublicOrgInfo } from "./api/dto/public/PublicOrgInfo";
+import { PublicOrgRequest } from "./api/rq/public/PublicOrgRequest";
 
 function formatLoginTip(
   appId: number,
@@ -61,7 +62,7 @@ function checkAppUri(redirectUri: string) {
   return uri.hostname !== window.location.hostname;
 }
 
-function App() {
+export default function App() {
   // Navigate
   const navigate = useNavigate();
   const [search] = useSearchParams();
@@ -95,7 +96,7 @@ function App() {
   // Cached organization data
   const org = params.org
     ? { org: params.org }
-    : app.storage.getData<OrgRequest>(Constants.OrgRequestField);
+    : app.storage.getData<PublicOrgRequest>(Constants.OrgRequestField);
 
   const userIdSaved =
     userIdEncrypted === "" || userIdEncrypted == null
@@ -129,8 +130,12 @@ function App() {
     changed: boolean
   ) => {
     if (changed) {
-      setVisible(false);
-      app.changeCultureEx(dispatch, item);
+      app.initCall((result) => {
+        if (result) {
+          if (loginRef.current) loginRef.current.value = "";
+          app.changeCultureEx(dispatch, item);
+        }
+      }, true);
     }
   };
 
@@ -207,6 +212,13 @@ function App() {
   // QRCode
   const [mobileQRCode, setMobileQRCode] = React.useState<string>();
 
+  // Get app name
+  const getAppName = React.useCallback(() => {
+    return appData?.appId
+      ? app.get(`app${appData.appId}`) ?? appData?.appName
+      : app.get("app1");
+  }, [appData]);
+
   // Load application data
   const loadAppData = React.useCallback(() => {
     // No data to load
@@ -254,8 +266,8 @@ function App() {
             app.authLogin(url);
           });
         } else {
-          // Navigate to home
-          app.toHome(navigate, "./home");
+          // Navigate to main URL
+          app.toMain();
         }
       } else {
         // Load app data and the login UI
@@ -316,7 +328,7 @@ function App() {
             </Box>
           )}
           <SharedLayout
-            appName="管理中心"
+            appName={getAppName()}
             visible={visible}
             pageRight={
               <HBox width={200} spacing={0.5} justifyContent="flex-end">
@@ -394,9 +406,10 @@ function App() {
                 autoFocus
                 autoCorrect="off"
                 autoCapitalize="none"
-                inputProps={{ inputMode: "email", spellCheck: false }}
+                slotProps={{
+                  htmlInput: { inputMode: "email", spellCheck: false }
+                }}
                 showClear
-                autoComplete="username"
                 onEnter={(e) => {
                   nextClick();
                   e.preventDefault();
@@ -435,5 +448,3 @@ function App() {
     </Context.Consumer>
   );
 }
-
-export default App;

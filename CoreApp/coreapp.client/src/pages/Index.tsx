@@ -23,7 +23,7 @@ export default function Index() {
         tryLogin
       },
       onSuccess: () => {
-        navigate("./home/");
+        navigate("./home");
       }
     });
   }, [tryLogin]);

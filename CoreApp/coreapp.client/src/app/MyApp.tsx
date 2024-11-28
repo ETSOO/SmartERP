@@ -1,19 +1,16 @@
 import { IServiceAppSettings, MUGlobal, ServiceApp } from "@etsoo/materialui";
 import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
-import {
-  AddressUtils,
-  en,
-  ExternalSettings,
-  zhHans,
-  zhHant
-} from "@etsoo/appscript";
-import enSys from "../../../../Platform/platform.client/src/i18n/en.sys.json";
-import zhHansSys from "../../../../Platform/platform.client/src/i18n/zh-Hans.sys.json";
-import zhHantSys from "../../../../Platform/platform.client/src/i18n/zh-Hant.sys.json";
+import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
 import { UserApi } from "../api/UserApi";
+import { CoreApp, CoreCulture } from "@etsoo/smarterp-core";
 
 class MyApp extends ServiceApp<MyUser> {
+  /**
+   * Core application
+   */
+  readonly core = new CoreApp(this, this.coreApi);
+
   /**
    * User APIs
    */
@@ -30,9 +27,9 @@ const { detectedCulture } = DomUtils;
 MUGlobal.textFieldVariant = "standard";
 
 const supportedCultures: DataTypes.CultureDefinition[] = [
-  zhHans(zhHansSys, () => import("../i18n/zh-Hans.json")),
-  zhHant(zhHantSys, () => import("../i18n/zh-Hant.json")),
-  en(enSys, () => import("../i18n/en.json"))
+  CoreCulture.zhHans(() => import("../i18n/zh-Hans.json")),
+  CoreCulture.zhHant(() => import("../i18n/zh-Hant.json")),
+  CoreCulture.en(() => import("../i18n/en.json"))
 ];
 const supportedRegions = ["CN"];
 

@@ -31,10 +31,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "public.core_organization_app_key",
-         "ObjectType": 0
-      },
-      {
          "Name": "public.core_organization_channel",
          "ObjectType": 0
       },

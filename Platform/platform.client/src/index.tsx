@@ -99,12 +99,10 @@ function MyRouter() {
       app.dispose();
     };
 
-    window.addEventListener("unload", cleanup);
     window.addEventListener("beforeunload", cleanup);
 
     return () => {
       cleanup();
-      window.removeEventListener("unload", cleanup);
       window.removeEventListener("beforeunload", cleanup);
     };
   }, []);

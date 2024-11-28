@@ -17,6 +17,7 @@ namespace Platform.Server.Services
         IResult GetSignUpUrl(IAuthClient client, string? userAgent, string deviceId);
         ValueTask LogInAsync(IAuthClient client, CoreUserIdentifierType type, HttpContext context, CancellationToken cancellationToken = default);
         ValueTask<(IActionResult result, string? refreshToken)> LoginWithPwdAsync(LoginRQ rq, string? userAgent, CancellationToken cancellationToken = default);
+        ValueTask<IActionResult> LoginIdAsync(LoginIdRQ rq, string? userAgent, CancellationToken cancellationToken = default);
         ValueTask<(IActionResult, LoginUserWithPassword?)> LoginIdAsync(string id, string region, CancellationToken cancellationToken = default);
         ValueTask<(IActionResult result, string? newRefreshToken)> RefreshTokenAsync(RefreshTokenData data, CancellationToken cancellationToken = default);
         ValueTask SignUpAsync(IAuthClient client, CoreUserIdentifierType type, HttpContext context, CancellationToken cancellationToken = default);

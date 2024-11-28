@@ -11,11 +11,11 @@ public partial class CoreUserDeviceToken
 
     public int DeviceId { get; set; }
 
-    public short ResponseType { get; set; }
-
     public int? AppId { get; set; }
 
-    public int? AppKeyId { get; set; }
+    public short ResponseType { get; set; }
+
+    public string Culture { get; set; }
 
     public string Token { get; set; }
 
@@ -23,11 +23,7 @@ public partial class CoreUserDeviceToken
 
     public string Data { get; set; }
 
-    public string Culture { get; set; }
-
     public virtual CoreApp App { get; set; }
-
-    public virtual CoreOrganizationAppKey AppKey { get; set; }
 
     public virtual CoreUserDevice Device { get; set; }
 }

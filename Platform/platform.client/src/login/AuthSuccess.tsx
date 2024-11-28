@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { app } from "../app/SmartApp";
 import { Constants } from "../app/Constants";
 
-function AuthSuccess() {
+export default function AuthSuccess() {
   // Query params
   const { result, token } = useSearchParamsEx({
     result: "string",
@@ -19,12 +19,15 @@ function AuthSuccess() {
     ) as IActionResult<ISmartERPUser>;
     if (r.ok && r.data && token) {
       // User login
-      app.userLogin(r.data, token, true);
+      app.userLogin(r.data, token, false);
 
       // Remove the auth request cache
       app.storage.setData(Constants.AuthRequestField, null);
 
-      return <Navigate to="./../../../home" replace />;
+      // Navigate to main URL
+      app.toMain();
+
+      return;
     } else {
       app.alertResult(r, () => {
         app.tryLogin();
@@ -36,5 +39,3 @@ function AuthSuccess() {
 
   return <Navigate to="./../../../" replace />;
 }
-
-export default AuthSuccess;

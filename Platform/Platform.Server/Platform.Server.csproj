@@ -26,25 +26,23 @@
     <PackageReference Include="com.etsoo.DI" Version="1.0.16" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
     <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.39" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.69" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.70" />
     <PackageReference Include="com.etsoo.Localization" Version="1.0.20" />
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.28" />
     <PackageReference Include="com.etsoo.SMTP" Version="1.0.67" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.2" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
-    <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>8.0.11</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.10.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
   </ItemGroup>
 
   <ItemGroup>

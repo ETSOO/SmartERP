@@ -11,7 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import { useSearchParamsEx } from "@etsoo/react";
 
-function Register20() {
+export default function Register20() {
   // Navigate
   const navigate = useNavigate();
 
@@ -193,5 +193,3 @@ function Register20() {
     </SharedLayout>
   );
 }
-
-export default Register20;

@@ -12,6 +12,9 @@ namespace Platform.Server.Endpoints.App
         {
             var g = builder.MapGroup("App");
 
+            g.MapGet("GetUserLatestApp", (IAppService service, CancellationToken cancellationToken) => service.GetUserLatestAppAsync(cancellationToken))
+                .WithDescription("Get user's latest accessed appliation's Web URL / 获取用户最近访问的程序的Web网址").WithTags("App");
+
             g.MapGet("GetUserApps", (IAppService service, CancellationToken cancellationToken) => service.GetUserAppsAsync(cancellationToken))
                 .WithDescription("Get user applications / 获取用户所有程序").WithTags("App");
 

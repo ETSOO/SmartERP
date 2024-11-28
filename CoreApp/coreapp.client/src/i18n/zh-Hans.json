@@ -1,4 +1,13 @@
 {
+  "allApps": "所有应用",
+  "allMembers": "所有成员",
+  "auditHistory": "操作历史",
+  "changePassword": "修改密码",
+  "joinedOrgs": "加入的机构",
   "joinOrganization": "加入新机构",
-  "smarterpCore": "司友云ERP主控制台"
+  "me": "个人",
+  "personalData": "个人信息",
+  "purchasedApps": "购买的应用",
+  "smarterpCore": "司友云ERP主控制台",
+  "updateAvator": "更新头像"
 }

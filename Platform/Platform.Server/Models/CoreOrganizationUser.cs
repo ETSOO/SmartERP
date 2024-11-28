@@ -25,9 +25,9 @@ public partial class CoreOrganizationUser
 
     public int? Permission { get; set; }
 
-    public string Pinyin { get; set; }
-
     public string AssignedId { get; set; }
+
+    public string Data { get; set; }
 
     public DateTime Creation { get; set; }
 
@@ -36,8 +36,6 @@ public partial class CoreOrganizationUser
     public DateTime RefreshTime { get; set; }
 
     public short Status { get; set; }
-
-    public string Data { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; }
 

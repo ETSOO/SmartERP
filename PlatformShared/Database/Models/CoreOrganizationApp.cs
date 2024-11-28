@@ -27,6 +27,42 @@ namespace PlatformShared.Database.Models
         public int CoreOrganizationId { get; set; }
 
         /// <summary>
+        /// App key
+        /// 程序键名
+        /// </summary>
+        public required string AppKey { get; set; }
+
+        /// <summary>
+        /// App secret
+        /// 程序密钥
+        /// </summary>
+        public required string AppSecret { get; set; }
+
+        /// <summary>
+        /// Local name
+        /// 本地名称
+        /// </summary>
+        public string? LocalName { get; set; }
+
+        /// <summary>
+        /// Local UI URL
+        /// 本地用户界面网址
+        /// </summary>
+        public string? LocalUrl { get; set; }
+
+        /// <summary>
+        /// Local API URLs
+        /// 本地接口网址
+        /// </summary>
+        public string[]? LocalApis { get; set; }
+
+        /// <summary>
+        /// Local help URL
+        /// 本地帮助网址
+        /// </summary>
+        public string? LocalHelpUrl { get; set; }
+
+        /// <summary>
         /// Expiry
         /// 到期时间
         /// </summary>
@@ -55,11 +91,5 @@ namespace PlatformShared.Database.Models
         /// 核心机构
         /// </summary>
         public CoreOrganization CoreOrganization { get; set; } = default!;
-
-        /// <summary>
-        /// Core organization application keys
-        /// 核心机构应用密钥
-        /// </summary>
-        public ICollection<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; } = [];
     }
 }

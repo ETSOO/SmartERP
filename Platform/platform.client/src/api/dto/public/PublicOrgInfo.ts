@@ -16,6 +16,12 @@ export type PublicOrgInfo = {
   orgName?: string;
 
   /**
+   * Application ID
+   * 应用编号
+   */
+  appId?: number;
+
+  /**
    * Application name
    * 应用名称
    */

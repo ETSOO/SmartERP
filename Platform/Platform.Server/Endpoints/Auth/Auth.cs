@@ -73,26 +73,8 @@ namespace Platform.Server.Endpoints.Auth
                 return result;
             }).WithDescription("User login with password / 用户使用密码登录").WithTags("Auth");
 
-            g.MapPost("LoginId", async (IAuthService service, IHttpContextAccessor accessor, LoginIdRQ rq, CancellationToken cancellationToken) =>
-            {
-                // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
-                {
-                    return checkResult;
-                }
-
-                var deviceCore = cd.Value.DeviceCore;
-
-                var id = service.DecryptDeviceData(rq.Id, deviceCore);
-                if (string.IsNullOrEmpty(id) || id.Length < 6)
-                {
-                    return ApplicationErrors.NoValidData.AsResult();
-                }
-
-                var (result, _) = await service.LoginIdAsync(id, rq.Region, cancellationToken);
-
-                return result;
-            }).WithDescription("Check user login id / 检查用户登录编号").WithTags("Auth");
+            g.MapPost("LoginId", (IAuthService service, IHttpContextAccessor accessor, LoginIdRQ rq, CancellationToken cancellationToken) => service.LoginIdAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Check user login id / 检查用户登录编号").WithTags("Auth");
 
             g.MapPut("RefreshToken", async (IAuthService service, IHttpContextAccessor accessor, RefreshTokenRQ rq, CancellationToken cancellationToken) =>
             {

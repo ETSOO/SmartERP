@@ -88,8 +88,7 @@ if (string.IsNullOrEmpty(connectonString))
 
 services.AddDbContextPool<MyDbContext>((provider, options) =>
 {
-    options.UseNpgsql(connectonString)
-        .UseSnakeCaseNamingConvention();
+    options.UseNpgsql(connectonString);
 
     if (builder.Environment.IsDevelopment())
     {

@@ -214,9 +214,9 @@ namespace Platform.Server.Services
                 }
                 else
                 {
-                    appName = await _db.CoreOrganizationAppKeys
-                        .Where(oa => oa.CoreOrganizationAppId == rq.AppId && oa.AppKey == rq.AppKey)
-                        .Select(oa => oa.LocalName ?? oa.CoreOrganizationApp.CoreApp.Name)
+                    appName = await _db.CoreOrganizationApps
+                        .Where(oa => oa.CoreAppId == rq.AppId && oa.AppKey == rq.AppKey)
+                        .Select(oa => oa.LocalName ?? oa.CoreApp.Name)
                         .FirstOrDefaultAsync(cancellationToken);
                 }
             }
@@ -225,6 +225,7 @@ namespace Platform.Server.Services
             {
                 OrgId = orgId,
                 OrgName = orgName,
+                AppId = rq.AppId,
                 AppName = appName
             };
         }

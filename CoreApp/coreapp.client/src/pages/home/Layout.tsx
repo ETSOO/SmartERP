@@ -20,6 +20,7 @@ import {
   SidebarFooterProps
 } from "@etsoo/toolpad";
 import { AppProvider } from "@etsoo/toolpad/react-router-dom";
+import { CoreCulture } from "@etsoo/smarterp-core";
 
 function SidebarFooter({ mini }: SidebarFooterProps) {
   return (
@@ -29,7 +30,7 @@ function SidebarFooter({ mini }: SidebarFooterProps) {
     >
       {mini
         ? ""
-        : `© ${new Date().getFullYear()} Powered by ETSOO (${
+        : `© ${new Date().getFullYear()} ${app.get("etsoor")} (${
             import.meta.env.VITE_APP_VERSION
           })`}
     </Typography>
@@ -40,61 +41,6 @@ const myTheme = extendTheme({
   colorSchemes: { light: true, dark: false }
 });
 
-const NAVIGATION: Navigation = [
-  {
-    segment: "home",
-    title: "首页",
-    icon: <HomeIcon />
-  },
-  {
-    segment: "home/member/all",
-    title: "所有成员",
-    icon: <PeopleIcon />
-  },
-  {
-    segment: "home/organization/my",
-    title: "加入的机构",
-    icon: <AccountTreeIcon />
-  },
-  {
-    segment: "home/app/my",
-    title: "购买的应用",
-    icon: <PaidIcon />
-  },
-  {
-    segment: "home/app/all",
-    title: "所有应用",
-    icon: <AppsIcon />
-  },
-  {
-    kind: "divider"
-  },
-  {
-    kind: "header",
-    title: "个人"
-  },
-  {
-    segment: "home/user/data",
-    title: "个人信息",
-    icon: <PortraitIcon />
-  },
-  {
-    segment: "home/user/updateavatar",
-    title: "更新头像",
-    icon: <AccountCircleIcon />
-  },
-  {
-    segment: "home/user/changepassword",
-    title: "修改密码",
-    icon: <LockIcon />
-  },
-  {
-    segment: "home/user/loginhistory",
-    title: "登录历史",
-    icon: <HistoryIcon />
-  }
-];
-
 export default function Home() {
   // Small than sm
   const smDown = useMediaQuery<Theme>((theme) => theme.breakpoints.down("sm"));
@@ -104,7 +50,20 @@ export default function Home() {
   app.mdUp = mdUp;
 
   // Labels
-  const labels = app.getLabels("app1", "signoutSuccess");
+  const labels = app.getLabels(
+    "allApps",
+    "allMembers",
+    "app1",
+    "auditHistory",
+    "changePassword",
+    "joinedOrgs",
+    "me",
+    "menuHome",
+    "personalData",
+    "purchasedApps",
+    "signoutSuccess",
+    "updateAvator"
+  );
 
   // User context / state
   const { state } = React.useContext(app.userState.context);
@@ -132,6 +91,65 @@ export default function Home() {
     [organizationName]
   );
 
+  // Navigation
+  const NAVIGATION = React.useMemo<Navigation>(
+    () => [
+      {
+        segment: "home",
+        title: labels.menuHome,
+        icon: <HomeIcon />
+      },
+      {
+        segment: "home/member/all",
+        title: labels.allMembers,
+        icon: <PeopleIcon />
+      },
+      {
+        segment: "home/organization/my",
+        title: labels.joinedOrgs,
+        icon: <AccountTreeIcon />
+      },
+      {
+        segment: "home/app/my",
+        title: labels.purchasedApps,
+        icon: <PaidIcon />
+      },
+      {
+        segment: "home/app/all",
+        title: labels.allApps,
+        icon: <AppsIcon />
+      },
+      {
+        kind: "divider"
+      },
+      {
+        kind: "header",
+        title: labels.me
+      },
+      {
+        segment: "home/user/data",
+        title: labels.personalData,
+        icon: <PortraitIcon />
+      },
+      {
+        segment: "home/user/updateavatar",
+        title: labels.updateAvator,
+        icon: <AccountCircleIcon />
+      },
+      {
+        segment: "home/user/changepassword",
+        title: labels.changePassword,
+        icon: <LockIcon />
+      },
+      {
+        segment: "home/user/loginhistory",
+        title: labels.auditHistory,
+        icon: <HistoryIcon />
+      }
+    ],
+    []
+  );
+
   // When unauthorized (by refresh)
   // Return blank and try login
   React.useEffect(() => {
@@ -157,13 +175,13 @@ export default function Home() {
           app
             .signout(() => false)
             .then(() => {
-              app.notifier.alert(labels.signoutSuccess, undefined, undefined, {
-                fullScreen: true,
-                primaryButton: false
-              });
+              app.notifier.alert(labels.signoutSuccess, () =>
+                app.loadCore(false)
+              );
             });
         }
       }}
+      localeText={CoreCulture.getToolpadLocale(app)}
       session={{ user }}
       navigation={NAVIGATION}
       theme={myTheme}
@@ -173,7 +191,7 @@ export default function Home() {
       }}
     >
       <DashboardLayout
-        sidebarExpandedWidth={240}
+        sidebarExpandedWidth={220}
         slots={{ sidebarFooter: SidebarFooter, toolbarActions: org }}
       >
         <PageContainer title="">

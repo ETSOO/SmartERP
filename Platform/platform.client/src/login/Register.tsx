@@ -7,7 +7,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppUtils } from "../app/AppUtils";
 import { useSearchParamsEx } from "@etsoo/react";
 
-function Register() {
+export function Register() {
   // Navigate
   const navigate = useNavigate();
 
@@ -83,5 +83,3 @@ function Register() {
     </SharedLayout>
   );
 }
-
-export default Register;

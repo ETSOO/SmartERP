@@ -9,14 +9,14 @@ import { app } from "../app/SmartApp";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
 import { DynamicActionResult } from "@etsoo/shared";
-import { OrgRequest } from "../api/rq/public/PublicOrgRequest";
+import { PublicOrgRequest } from "../api/rq/public/PublicOrgRequest";
 
 const homeUrl = "./../../../";
 function NavigateHome() {
   return <Navigate to={homeUrl} replace />;
 }
 
-function Password() {
+export default function Password() {
   // Router
   const navigate = useNavigate();
   const { username } = useParams<{ username: string }>();
@@ -96,7 +96,9 @@ function Password() {
     }
 
     // Auth request
-    const org = app.storage.getData<OrgRequest>(Constants.OrgRequestField);
+    const org = app.storage.getData<PublicOrgRequest>(
+      Constants.OrgRequestField
+    );
     const auth = app.storage.getData<AuthRequest>(Constants.AuthRequestField);
 
     // Model
@@ -124,10 +126,10 @@ function Password() {
         app.authLogin(refreshToken);
       } else {
         // User login
-        app.userLogin(result.data, refreshToken);
+        app.userLogin(result.data, refreshToken, false);
 
-        // Navigate to home
-        app.toHome(navigate, `${homeUrl}home`);
+        // Navigate to main URL
+        app.toMain();
       }
     } else if (app.checkDeviceResult(result)) {
       app.notifier.alert(labels.environmentChanged, () => {
@@ -190,5 +192,3 @@ function Password() {
     </SharedLayout>
   );
 }
-
-export default Password;

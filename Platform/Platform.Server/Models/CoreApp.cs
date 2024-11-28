@@ -17,9 +17,11 @@ public partial class CoreApp
 
     public string WebUrl { get; set; }
 
-    public string ApiUrl { get; set; }
+    public List<string> ApiUrls { get; set; }
 
     public string HelpUrl { get; set; }
+
+    public bool? RequireLocalUrl { get; set; }
 
     public string Logo { get; set; }
 
@@ -28,9 +30,6 @@ public partial class CoreApp
     public DateTime Creation { get; set; }
 
     public bool Enabled { get; set; }
-
-    public bool? RequireLocalUrl { get; set; }
-
 
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 

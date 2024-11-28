@@ -2,7 +2,7 @@ window.settings = {
   /**
    * Endpoint of the API service
    */
-  endpoint: "https://{hostname}:9003/api/",
+  endpoint: "https://{hostname}:9004/api/",
 
   /**
    * App root url
@@ -12,7 +12,7 @@ window.settings = {
   /**
    * Web url of the cloud
    */
-  webUrl: "https://localhost:9004/",
+  webUrl: "https://localhost:9005/",
 
   /**
    * Service application id

@@ -54,8 +54,7 @@ if (string.IsNullOrEmpty(connectonString))
 
 services.AddDbContextPool<MyDbContext>((provider, options) =>
 {
-    options.UseNpgsql(connectonString)
-        .UseSnakeCaseNamingConvention();
+    options.UseNpgsql(connectonString);
 
     if (builder.Environment.IsDevelopment())
     {
@@ -188,6 +187,7 @@ var api = app.MapGroup("/api").WithOpenApi();
 
 // Endpoints
 api.MapAuth()
+    .AddModelValidators()
 ;
 
 app.MapFallbackToFile("/index.html");

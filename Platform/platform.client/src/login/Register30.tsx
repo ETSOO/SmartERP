@@ -8,7 +8,7 @@ import { CompleteRegisterRQ } from "../api/rq/auth/CompleteRegisterRQ";
 import { AuthRequest } from "@etsoo/appscript";
 import { Constants } from "../app/Constants";
 
-function RegisterPassword() {
+export default function RegisterPassword() {
   // Router
   const navigate = useNavigate();
 
@@ -200,5 +200,3 @@ function RegisterPassword() {
     </SharedLayout>
   );
 }
-
-export default RegisterPassword;

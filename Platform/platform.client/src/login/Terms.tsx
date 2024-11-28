@@ -1,12 +1,12 @@
-import { PList } from '@etsoo/materialui';
-import { Button } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { app } from '../app/SmartApp';
-import { SharedLayout } from './SharedLayout';
+import { PList } from "@etsoo/materialui";
+import { Button } from "@mui/material";
+import { Link } from "react-router-dom";
+import { app } from "../app/SmartApp";
+import { SharedLayout } from "./SharedLayout";
 
-function Terms() {
+export default function Terms() {
   // Labels
-  const labels = app.getLabels('terms', 'back');
+  const labels = app.getLabels("terms", "back");
 
   return (
     <SharedLayout
@@ -17,9 +17,7 @@ function Terms() {
         </Button>
       }
     >
-      <PList items={app.get<string[]>('termsPage')} />
+      <PList items={app.get<string[]>("termsPage")} />
     </SharedLayout>
   );
 }
-
-export default Terms;

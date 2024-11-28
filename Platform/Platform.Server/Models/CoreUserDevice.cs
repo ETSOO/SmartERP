@@ -11,15 +11,15 @@ public partial class CoreUserDevice
 
     public int CoreUserId { get; set; }
 
+    public short DeviceType { get; set; }
+
     public string Name { get; set; }
+
+    public string ClientId { get; set; }
 
     public DateTime Creation { get; set; }
 
-    public short DeviceType { get; set; }
-
     public DateTime LastLogin { get; set; }
-
-    public string ClientId { get; set; }
 
     public virtual CoreUser CoreUser { get; set; }
 

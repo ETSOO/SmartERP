@@ -17,15 +17,17 @@ public partial class CoreOrganization
 
     public string Logo { get; set; }
 
-    public short Status { get; set; }
-
-    public DateTime Creation { get; set; }
-
     public string Pin { get; set; }
 
     public int? ParentId { get; set; }
 
     public Guid? Uid { get; set; }
+
+    public short Status { get; set; }
+
+    public DateTime Creation { get; set; }
+
+    public string QueryKeyword { get; set; }
 
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
@@ -34,8 +36,6 @@ public partial class CoreOrganization
     public virtual ICollection<CoreOrganizationChannel> CoreOrganizationChannelPartners { get; set; } = new List<CoreOrganizationChannel>();
 
     public virtual ICollection<CoreOrganizationUser> CoreOrganizationUsers { get; set; } = new List<CoreOrganizationUser>();
-
-    public virtual ICollection<CoreUser> CoreUsers { get; set; } = new List<CoreUser>();
 
     public virtual ICollection<CoreOrganization> InverseParent { get; set; } = new List<CoreOrganization>();
 

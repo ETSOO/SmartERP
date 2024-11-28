@@ -39,10 +39,10 @@ namespace PlatformShared.Database.Models
         public required string WebUrl { get; set; }
 
         /// <summary>
-        /// API URL
+        /// API URLs
         /// 接口网址
         /// </summary>
-        public required string ApiUrl { get; set; }
+        public required string[] ApiUrls { get; set; }
 
         /// <summary>
         /// Help URL
@@ -85,6 +85,12 @@ namespace PlatformShared.Database.Models
         /// 核心机构应用
         /// </summary>
         public ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = [];
+
+        /// <summary>
+        /// Core users
+        /// 核心用户
+        /// </summary>
+        public ICollection<CoreUser> CoreUsers { get; set; } = [];
 
         /// <summary>
         /// Core user device tokens

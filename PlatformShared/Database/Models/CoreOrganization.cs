@@ -105,6 +105,12 @@ namespace PlatformShared.Database.Models
         public ICollection<CoreOrganization> InverseParent { get; set; } = [];
 
         /// <summary>
+        /// Core users
+        /// 核心用户
+        /// </summary>
+        public ICollection<CoreUser> CoreUsers { get; set; } = [];
+
+        /// <summary>
         /// Owner
         /// 所有者
         /// </summary>

@@ -9,7 +9,7 @@
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:9003"
+      "applicationUrl": "https://localhost:9004;http://localhost:9003"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",

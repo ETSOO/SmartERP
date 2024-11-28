@@ -46,12 +46,9 @@ namespace Platform.Server.Services
         private record AppData
         {
             public required string AppSecret { get; set; }
-            public int? AppKeyId { get; init; }
             public required string WebUrl { get; init; }
-            public required string ApiUrl { get; init; }
+            public required string[] ApiUrls { get; init; }
         }
-
-        private const string EncryptDeviceIdKey = "device-id";
 
         private const short UserRegistrationSMSCode = 1;
         private const short UserRegistrationEmailCode = 2;
@@ -160,11 +157,11 @@ namespace Platform.Server.Services
 
             if (string.IsNullOrEmpty(appKey))
             {
-                data = await _db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, WebUrl = a.WebUrl, ApiUrl = a.ApiUrl }).FirstOrDefaultAsync(cancellationToken);
+                data = await _db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, WebUrl = a.WebUrl, ApiUrls = a.ApiUrls }).FirstOrDefaultAsync(cancellationToken);
             }
             else
             {
-                data = await _db.CoreOrganizationAppKeys.AsNoTracking().Where(ak => ak.CoreOrganizationAppId == appId && ak.AppKey == appKey).Select(a => new AppData { AppSecret = a.AppSecret, AppKeyId = a.Id, WebUrl = a.LocalUrl ?? a.CoreOrganizationApp.CoreApp.WebUrl, ApiUrl = a.LocalApi ?? a.CoreOrganizationApp.CoreApp.ApiUrl }).FirstOrDefaultAsync(cancellationToken);
+                data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey).Select(oa => new AppData { AppSecret = oa.AppSecret, WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl, ApiUrls = oa.LocalApis ?? oa.CoreApp.ApiUrls }).FirstOrDefaultAsync(cancellationToken);
             }
 
             if (data != null)
@@ -175,7 +172,7 @@ namespace Platform.Server.Services
             return data;
         }
 
-        private async Task<AppTokenData?> CreateAppTokenDataAsync(int appId, string refreshToken, int? appKeyId, string? appSecret, CancellationToken cancellationToken)
+        private async Task<AppTokenData?> CreateAppTokenDataAsync(int appId, string refreshToken, string? appSecret, CancellationToken cancellationToken)
         {
             var tokenData = await _db.CoreUserDeviceTokens
                 .AsNoTracking()
@@ -225,17 +222,17 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            return await CreateAppTokenDataAsync(user, appId, appKeyId, appSecret, true, data, cancellationToken);
+            return await CreateAppTokenDataAsync(user, appId, appSecret, true, data, cancellationToken);
         }
 
-        private async Task<AppTokenData> CreateAppTokenDataAsync(CurrentUser user, int appId, int? appKeyId, string? appSecret, bool isOffline, TokenQueryData data, CancellationToken cancellationToken)
+        private async Task<AppTokenData> CreateAppTokenDataAsync(CurrentUser user, int appId, string? appSecret, bool isOffline, TokenQueryData data, CancellationToken cancellationToken)
         {
             var accessToken = App.AuthService.CreateAccessToken(user, null, App.AuthService.AccessTokenMinutes);
 
             string? refreshToken = null;
             if (isOffline)
             {
-                refreshToken = await CreateRefreshTokenAsync(user.IdInt, data.DeviceId, data.Culture, TokenResponseType.Token, data.Data, appId, appKeyId, cancellationToken);
+                refreshToken = await CreateRefreshTokenAsync(user.IdInt, data.DeviceId, data.Culture, TokenResponseType.Token, data.Data, appId, cancellationToken);
             }
 
             var idToken = string.IsNullOrEmpty(appSecret) ? null : App.AuthService.CreateIdToken(user.CreateIdentity(), appSecret);
@@ -253,9 +250,9 @@ namespace Platform.Server.Services
             return token;
         }
 
-        private async Task<string> CreateAuthCodeAsync(CurrentUser user, int appId, int? appKeyId, TokenQueryData data, CancellationToken cancellationToken)
+        private async Task<string> CreateAuthCodeAsync(CurrentUser user, int appId, TokenQueryData data, CancellationToken cancellationToken)
         {
-            var code = await CreateRefreshTokenAsync(user.IdInt, data.DeviceId, data.Culture, TokenResponseType.Code, data.Data, appId, appKeyId, cancellationToken);
+            var code = await CreateRefreshTokenAsync(user.IdInt, data.DeviceId, data.Culture, TokenResponseType.Code, data.Data, appId, cancellationToken);
             return code;
         }
 
@@ -268,7 +265,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async ValueTask<ApiTokenData?> ApiRefreshTokenAsync(ApiRefreshTokenRQ rq, CancellationToken cancellationToken = default)
         {
-            var data = await CreateAppTokenDataAsync(rq.AppId, rq.Token, null, null, cancellationToken);
+            var data = await CreateAppTokenDataAsync(rq.AppId, rq.Token, null, cancellationToken);
             if (data == null || string.IsNullOrEmpty(data.RefreshToken)) return null;
 
             return new ApiTokenData
@@ -326,7 +323,7 @@ namespace Platform.Server.Services
         {
             // User for authorization, update the scopes
             var scopes = currentUser.Scopes?.Intersect(rq.Scopes);
-            var user = currentUser with { Scopes = scopes };
+            var user = currentUser with { AppId = rq.AppId, Scopes = scopes };
 
             var result = ActionResult.Success;
 
@@ -340,7 +337,7 @@ namespace Platform.Server.Services
             {
                 result = ApplicationErrors.NoValidData.AsResult("AppId");
             }
-            else if (!redirectUri.StartsWith(appData.WebUrl) && !redirectUri.StartsWith(appData.ApiUrl))
+            else if (!redirectUri.StartsWith(appData.WebUrl) && !appData.ApiUrls.Any(redirectUri.StartsWith))
             {
                 result = ApplicationErrors.NoValidData.AsResult("RedirectUri");
             }
@@ -365,13 +362,13 @@ namespace Platform.Server.Services
                     {
                         if (rq.ResponseType.Equals(AuthRequest.TokenResponseType))
                         {
-                            var token = await CreateAppTokenDataAsync(user, rq.AppId, appData.AppKeyId, appData.AppSecret, rq.AccessType == AuthRequest.OfflineAccessType, tokenQueryData, cancellationToken);
+                            var token = await CreateAppTokenDataAsync(user, rq.AppId, appData.AppSecret, rq.AccessType == AuthRequest.OfflineAccessType, tokenQueryData, cancellationToken);
                             var tokenJson = JsonSerializer.Serialize(token, ModelJsonSerializerContext.Default.AppTokenData);
                             url.Append($"token={HttpUtility.UrlEncode(tokenJson)}");
                         }
                         else if (rq.ResponseType.Equals(AuthRequest.CodeResponseType))
                         {
-                            var code = await CreateAuthCodeAsync(user, rq.AppId, appData.AppKeyId, tokenQueryData, cancellationToken);
+                            var code = await CreateAuthCodeAsync(user, rq.AppId, tokenQueryData, cancellationToken);
                             url.Append($"code={HttpUtility.UrlEncode(code)}");
                         }
                         else
@@ -552,7 +549,21 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.NoPasswordMatch.AsResult(), null);
             }
 
-            var user = await _db.CoreUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == login.Id, cancellationToken);
+            var user = await _db.CoreUsers.AsNoTracking()
+                .Select(u => new CoreUserLogin
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    GivenName = u.GivenName,
+                    FamilyName = u.FamilyName,
+                    LatinGivenName = u.LatinGivenName,
+                    LatinFamilyName = u.LatinFamilyName,
+                    Avatar = u.Avatar,
+                    LatestOrganizationIds = u.LatestOrganizationIds,
+                    LatestAppIds = u.LatestAppIds
+                })
+                .FirstOrDefaultAsync(u => u.Id == login.Id, cancellationToken);
+
             if (user == null)
             {
                 return (ApplicationErrors.NoValidData.AsResult("User"), null);
@@ -568,7 +579,7 @@ namespace Platform.Server.Services
         // API Refresh token - 接口刷新令牌
         // Log in from OAuth2 client - 从OAuth2客户端登录
         // Sign up from OAuth2 client - 从OAuth2客户端注册
-        private async Task<(ActionResult result, string? refreshToken)> CompleteLoginAsync(CoreUser user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, AuthRequest? auth, CancellationToken cancellationToken)
+        private async Task<(ActionResult result, string? refreshToken)> CompleteLoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, AuthRequest? auth, CancellationToken cancellationToken)
         {
             // Default values
             var culture = CultureInfo.CurrentCulture.Name;
@@ -579,7 +590,7 @@ namespace Platform.Server.Services
 
             // Complete login with the SP
             var userIdSP = new NpgsqlParameter<int>("p_user_id", user.Id);
-            var latestOrganizationIdSP = new NpgsqlParameter<int?>("p_latest_organization_id", user.LatestOrganizationId);
+            var latestOrganizationIdSP = new NpgsqlParameter<int?>("p_latest_organization_id", user.LatestOrganizationIds?.FirstOrDefault());
             var organizationIdSP = new NpgsqlParameter<int?>("p_target_organization_id", organizationId);
             var fromOrganizationIdSP = new NpgsqlParameter<int?>("p_from_organization_id", fromOrganizationId);
             var deviceNameSP = new NpgsqlParameter<string>("p_device_name", deviceName);
@@ -589,8 +600,9 @@ namespace Platform.Server.Services
             var cultureSP = new NpgsqlParameter<string>("p_culture", culture);
 
             // IQuerable<T>.FirstOrDefault() adds SQL that filters by the first row number
-            // Here we use the stored procedure to get the first row, not the filter
-            // CALL SP_NAME
+            // Here we use the function to get the first row, not the filter
+            // The returned columns naming should be the same as the model, otherwise EFCore.NamingConventions need to be used
+            // CALL SP_NAME (stored procedure)
             var data = (await _db.Database.SqlQuery<CompleteLoginData>($"SELECT * FROM complete_login({userIdSP}, {latestOrganizationIdSP}, {organizationIdSP}, {fromOrganizationIdSP}, {deviceNameSP}, {deviceTypeSP}, {clientIdSP}, {ipSP}, {cultureSP})")
                 .ToListAsync(cancellationToken)).FirstOrDefault();
 
@@ -612,7 +624,7 @@ namespace Platform.Server.Services
             // Permission scopes
             var scopes = new List<string>
             {
-                "core"
+                MyAppConstants.CoreApp
             };
 
             // Is super admin
@@ -621,11 +633,11 @@ namespace Platform.Server.Services
                 && data.ParentOrganizationId == null && data.ChannelOrganizationId == null
                 && data.UserRole >= UserRole.Manager)
             {
-                scopes.Add("super");
+                scopes.Add(MyAppConstants.SuperApp);
             }
 
             // App paid scopes
-            scopes.AddRange(data.Scopes.Select(s => CurrentUser.AppIdToScope(s)));
+            scopes.AddRange(data.Scopes.Select(CurrentUser.AppIdToScope));
 
             // Limit scopes with auth request
             if (auth != null)
@@ -656,7 +668,12 @@ namespace Platform.Server.Services
             {
                 Id = user.Id,
                 Name = user.Name,
+                GivenName = user.GivenName,
+                FamilyName = user.FamilyName,
+                LatinGivenName = user.LatinGivenName,
+                LatinFamilyName = user.LatinFamilyName,
                 Avatar = user.Avatar,
+                LatestAppId = user.LatestAppIds?.FirstOrDefault(),
                 OrganizationName = data.OrganizationName,
                 Oid = data.Oid,
                 Role = data.UserRole
@@ -673,7 +690,7 @@ namespace Platform.Server.Services
                 var accessToken = App.AuthService.CreateAccessToken(tokenUser, null, minutes);
 
                 // Refresh token
-                var refreshToken = await CreateRefreshTokenAsync(user.Id, data.DeviceId, culture, TokenResponseType.Token, tokenData, null, null, cancellationToken);
+                var refreshToken = await CreateRefreshTokenAsync(user.Id, data.DeviceId, culture, TokenResponseType.Token, tokenData, null, cancellationToken);
 
                 // Serverside device id
                 // Encrypt DeviceId for client identifier
@@ -785,6 +802,41 @@ namespace Platform.Server.Services
         /// Login id check
         /// 登录编号检索
         /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent string</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<IActionResult> LoginIdAsync(LoginIdRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            // Check device
+            if (!this.CheckDevice(userAgent, rq.DeviceId, out var checkResult, out var cd))
+            {
+                return checkResult;
+            }
+            var deviceCore = cd.Value.DeviceCore;
+
+            try
+            {
+                var id = DecryptDeviceData(rq.Id, deviceCore);
+                if (string.IsNullOrEmpty(id) || id.Length < 6)
+                {
+                    return ApplicationErrors.NoValidData.AsResult();
+                }
+                var (result, _) = await LoginIdAsync(id, rq.Region, cancellationToken);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "LoginIdAsync failed");
+                return ApplicationErrors.DataProcessingFailed.AsResult();
+            }
+        }
+
+        /// <summary>
+        /// Login id check
+        /// 登录编号检索
+        /// </summary>
         /// <param name="id">Email or mobile</param>
         /// <param name="region">Country or region id</param>
         /// <param name="cancellationToken">Cancellation token</param>
@@ -860,12 +912,12 @@ namespace Platform.Server.Services
             ;
         }
 
-        private async Task<string> CreateRefreshTokenAsync(int userId, int deviceId, string culture, TokenResponseType responseType, DeviceTokenData data, int? appId, int? appKeyId, CancellationToken cancellationToken)
+        private async Task<string> CreateRefreshTokenAsync(int userId, int deviceId, string culture, TokenResponseType responseType, DeviceTokenData data, int? appId, CancellationToken cancellationToken)
         {
             // Use the latest token to avoid huge creation of new one
             var tokenData = await _db.CoreUserDeviceTokens
                 .AsNoTracking()
-                .Where(t => t.DeviceId == deviceId && t.ResponseType == responseType && t.AppId == appId && t.AppKeyId == appKeyId)
+                .Where(t => t.DeviceId == deviceId && t.ResponseType == responseType && t.AppId == appId)
                 .OrderByDescending(t => t.Expiry)
                 .Select(t => new { t.Id, t.Token, t.Expiry, t.Data })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -901,7 +953,6 @@ namespace Platform.Server.Services
                 {
                     DeviceId = deviceId,
                     AppId = appId,
-                    AppKeyId = appKeyId,
                     Token = token,
                     Expiry = expiry,
                     Data = data,
@@ -956,7 +1007,18 @@ namespace Platform.Server.Services
                 {
                     t.Id,
                     t.Expiry,
-                    t.Device.CoreUser,
+                    CoreUser = new CoreUserLogin
+                    {
+                        Id = t.Device.CoreUser.Id,
+                        Name = t.Device.CoreUser.Name,
+                        GivenName = t.Device.CoreUser.GivenName,
+                        FamilyName = t.Device.CoreUser.FamilyName,
+                        LatinGivenName = t.Device.CoreUser.LatinGivenName,
+                        LatinFamilyName = t.Device.CoreUser.LatinFamilyName,
+                        Avatar = t.Device.CoreUser.Avatar,
+                        LatestOrganizationIds = t.Device.CoreUser.LatestOrganizationIds,
+                        LatestAppIds = t.Device.CoreUser.LatestAppIds
+                    },
                     t.Device.DeviceType,
                     Data = new TokenQueryData
                     {
@@ -965,8 +1027,7 @@ namespace Platform.Server.Services
                         Culture = t.Culture,
                         Data = t.Data
                     }
-                })
-                .FirstOrDefaultAsync(cancellationToken);
+                }).FirstOrDefaultAsync(cancellationToken);
 
             if (tokenData == null)
             {
@@ -1010,7 +1071,19 @@ namespace Platform.Server.Services
 
         private async Task ValidateUserToLoginAsync(HttpContext context, CoreUserIdentifierType type, LoginUser loginUser, AuthLoginValidateData loginData, CancellationToken cancellationToken)
         {
-            var user = await _db.CoreUsers.FirstOrDefaultAsync(u => u.Id == loginUser.Id, cancellationToken);
+            var user = await _db.CoreUsers.AsNoTracking().Select(u => new CoreUserLogin
+            {
+                Id = u.Id,
+                Name = u.Name,
+                GivenName = u.GivenName,
+                FamilyName = u.FamilyName,
+                LatinGivenName = u.LatinGivenName,
+                LatinFamilyName = u.LatinFamilyName,
+                Avatar = u.Avatar,
+                LatestOrganizationIds = u.LatestOrganizationIds,
+                LatestAppIds = u.LatestAppIds
+            }).FirstOrDefaultAsync(u => u.Id == loginUser.Id, cancellationToken);
+
             if (user == null)
             {
                 RedirectToFailureUrl(context.Response, type, "No User Found");
@@ -1694,7 +1767,7 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            return await CreateAppTokenDataAsync(user, rq.AppId, appData.AppKeyId, appData.AppSecret, data.Data.AccessType == AuthRequest.OfflineAccessType, data, cancellationToken);
+            return await CreateAppTokenDataAsync(user, rq.AppId, appData.AppSecret, data.Data.AccessType == AuthRequest.OfflineAccessType, data, cancellationToken);
         }
 
         private async Task<(ActionResult, CurrentUser?)> CreateUserFromQueryDataAsync(TokenQueryData data, CancellationToken cancellationToken)
@@ -1706,9 +1779,14 @@ namespace Platform.Server.Services
                 .SelectMany(d => d.ou.Where(ou => ou.CoreOrganizationId == data.Data.OrganizationId).DefaultIfEmpty(), (d, ou) => new TokenQueryUser
                 {
                     Id = d.u.Id,
+                    GivenName = d.u.GivenName,
+                    FamilyName = d.u.FamilyName,
+                    LatinGivenName = d.u.LatinGivenName,
+                    LatinFamilyName = d.u.LatinFamilyName,
                     Status = d.u.Status,
                     FrozenTime = d.u.FrozenTime,
                     Step = d.u.Step,
+                    LatestAppId = d.u.LatestAppIds == null ? null : d.u.LatestAppIds.FirstOrDefault(),
                     OrgStatus = ou == null ? null : ou.Status,
                     OrgExpiry = ou == null ? null : ou.Expiry,
                     Name = ou == null ? d.u.Name : (ou.LocalName ?? d.u.Name),
@@ -1742,6 +1820,10 @@ namespace Platform.Server.Services
             {
                 Id = userData.Id.ToString(),
                 Name = userData.Name,
+                GivenName = userData.GivenName,
+                FamilyName = userData.FamilyName,
+                LatinGivenName = userData.LatinGivenName,
+                LatinFamilyName = userData.LatinFamilyName,
                 Avatar = userData.Avatar,
                 DeviceId = data.DeviceId.ToString(),
                 Organization = data.Data.OrganizationId.ToString(),
@@ -1751,6 +1833,7 @@ namespace Platform.Server.Services
                 Oid = userData.Oid.GetValueOrDefault().ToString(),
                 Uid = data.Data.Uid.ToString(),
                 RoleValue = (short)userData.Role.GetValueOrDefault(UserRole.User),
+                AppId = userData.LatestAppId,
                 Scopes = data.Data.Scopes,
                 ClientIp = _ip,
                 Language = new CultureInfo(data.Culture),
@@ -1786,7 +1869,7 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            return await CreateAppTokenDataAsync(rq.AppId, rq.RefreshToken, appData.AppKeyId, appData.AppSecret, cancellationToken);
+            return await CreateAppTokenDataAsync(rq.AppId, rq.RefreshToken, appData.AppSecret, cancellationToken);
         }
 
         /// <summary>
@@ -1821,7 +1904,18 @@ namespace Platform.Server.Services
                 {
                     d.Id,
                     d.Expiry,
-                    d.Device.CoreUser,
+                    CoreUser = new CoreUserLogin
+                    {
+                        Id = d.Device.CoreUser.Id,
+                        Name = d.Device.CoreUser.Name,
+                        GivenName = d.Device.CoreUser.GivenName,
+                        FamilyName = d.Device.CoreUser.FamilyName,
+                        LatinGivenName = d.Device.CoreUser.LatinGivenName,
+                        LatinFamilyName = d.Device.CoreUser.LatinFamilyName,
+                        Avatar = d.Device.CoreUser.Avatar,
+                        LatestOrganizationIds = d.Device.CoreUser.LatestOrganizationIds,
+                        LatestAppIds = d.Device.CoreUser.LatestAppIds
+                    },
                     d.Device.DeviceType,
                     d.Device.Name,
                     d.Device.ClientId,
@@ -1883,7 +1977,24 @@ namespace Platform.Server.Services
             }
 
             var data = await _db.CoreUserDevices.AsNoTracking().Where(d => d.Id == User.DeviceIdInt && d.CoreUserId == User.IdInt)
-                .Select(d => new { d.Name, d.DeviceType, d.ClientId, d.CoreUser })
+                .Select(d => new
+                {
+                    d.Name,
+                    d.DeviceType,
+                    d.ClientId,
+                    CoreUser = new CoreUserLogin
+                    {
+                        Id = d.CoreUser.Id,
+                        Name = d.CoreUser.Name,
+                        GivenName = d.CoreUser.GivenName,
+                        FamilyName = d.CoreUser.FamilyName,
+                        LatinGivenName = d.CoreUser.LatinGivenName,
+                        LatinFamilyName = d.CoreUser.LatinFamilyName,
+                        Avatar = d.CoreUser.Avatar,
+                        LatestOrganizationIds = d.CoreUser.LatestOrganizationIds,
+                        LatestAppIds = d.CoreUser.LatestAppIds
+                    }
+                })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (data == null)

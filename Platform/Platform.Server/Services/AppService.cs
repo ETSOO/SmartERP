@@ -36,6 +36,34 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Get user's latest accessed appliation's Web URL
+        /// 获取用户最近访问的程序的Web网址
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>Web URL</returns>
+        public async Task<string> GetUserLatestAppAsync(CancellationToken cancellationToken = default)
+        {
+            // Latest accessed app id
+            var appId = User.AppId ?? MyAppConstants.CoreAppId;
+
+            var url = await _db.CoreApps.AsNoTracking()
+                .GroupJoin(_db.CoreOrganizationApps, a => a.Id, oa => oa.CoreAppId, (a, oa) => new { a, oa })
+                .SelectMany(t => t.oa.Where(oa => oa.CoreOrganizationId == User.OrganizationInt).DefaultIfEmpty(), (t, oa) => oa == null ? t.a.WebUrl : oa.LocalUrl ?? t.a.WebUrl)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (string.IsNullOrEmpty(url))
+            {
+                // Extreme case, get the core app url
+                url = await _db.CoreApps.AsNoTracking()
+                    .Where(a => a.Id == MyAppConstants.CoreAppId)
+                    .Select(a => a.WebUrl)
+                    .FirstAsync(cancellationToken);
+            }
+
+            return url;
+        }
+
+        /// <summary>
         /// Get user appliations depends on token, relogin is required for update
         /// 基于令牌获取用户程序，更新需要重新登录
         /// </summary>
@@ -46,18 +74,18 @@ namespace Platform.Server.Services
             // User apps
             var ids = new List<int>
             {
-                1 // Core app id
+                MyAppConstants.CoreAppId
             };
 
             if (User.Scopes != null)
             {
                 // Super user
-                if (User.Scopes.Contains("super")) ids.Add(2);
+                if (User.Scopes.Contains(MyAppConstants.SuperApp)) ids.Add(MyAppConstants.SuperAppId);
 
                 // Other apps
                 foreach (var scope in User.Scopes)
                 {
-                    if (scope.StartsWith("app") && int.TryParse(scope[3..], out var id) && id > 0) ids.Add(id);
+                    ids.Add(CurrentUser.ScopeToAppId(scope));
                 }
             }
 
@@ -75,6 +103,7 @@ namespace Platform.Server.Services
                .ToArrayAsync(cancellationToken);
 
             // User apps
+            /*
             var userApps = await _db.CoreOrganizationAppKeys.AsNoTracking()
                .Where(k => ids.Contains(k.CoreOrganizationApp.CoreAppId))
                .Select(k => new AppData
@@ -86,8 +115,10 @@ namespace Platform.Server.Services
                    Logo = k.CoreOrganizationApp.CoreApp.Logo
                })
                .ToArrayAsync(cancellationToken);
+            */
 
-            return apps.UnionBy(userApps, a => a.Id);
+            return apps;
+            //return apps.UnionBy(userApps, a => a.WebUrl);
         }
     }
 }

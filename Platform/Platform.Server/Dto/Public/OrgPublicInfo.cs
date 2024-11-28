@@ -19,6 +19,12 @@
         public string? OrgName { get; init; }
 
         /// <summary>
+        /// Application ID
+        /// 程序编号
+        /// </summary>
+        public int? AppId { get; init; }
+
+        /// <summary>
         /// Application name
         /// 程序名称
         /// </summary>

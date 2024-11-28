@@ -9,17 +9,17 @@ public partial class CoreAuthCode
 {
     public Guid Id { get; set; }
 
+    public int? CoreUserId { get; set; }
+
     public short Action { get; set; }
 
     public string Openid { get; set; }
 
+    public string Code { get; set; }
+
     public DateTime Expiry { get; set; }
 
     public string Ip { get; set; }
-
-    public int? CoreUserId { get; set; }
-
-    public string Code { get; set; }
 
     public short Times { get; set; }
 

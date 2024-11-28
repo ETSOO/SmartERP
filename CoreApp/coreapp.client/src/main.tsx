@@ -62,6 +62,7 @@ const theme = createTheme({
 // Router
 const router = createDynamicRouter([
   {
+    hydrateFallbackElement: <LinearProgress />,
     children: [
       {
         path: "/",
@@ -140,18 +141,6 @@ function AppRouterProvider(props: RouterProviderProps) {
   // Init state
   const [init, setInit] = React.useState(app.isReady);
 
-  const messageHandler = React.useCallback((event: MessageEvent<any>) => {
-    if (app.coreOrigin !== event.origin || !Array.isArray(event.data)) return;
-
-    const [type, data] = event.data;
-
-    switch (type) {
-      case "login":
-        globalThis.location.replace(data);
-        break;
-    }
-  }, []);
-
   // Ready
   React.useEffect(() => {
     if (app.isReady) {
@@ -167,24 +156,16 @@ function AppRouterProvider(props: RouterProviderProps) {
       app.dispose();
     };
 
-    window.addEventListener("unload", cleanup);
     window.addEventListener("beforeunload", cleanup);
-    window.addEventListener("message", messageHandler);
 
     return () => {
       cleanup();
-      window.removeEventListener("unload", cleanup);
       window.removeEventListener("beforeunload", cleanup);
-      window.removeEventListener("message", messageHandler);
     };
   }, []);
 
   return React.useMemo(() => {
-    return init ? (
-      <RouterProvider fallbackElement={<LinearProgress />} {...props} />
-    ) : (
-      <React.Fragment />
-    );
+    return init ? <RouterProvider {...props} /> : <React.Fragment />;
   }, [init]);
 }
 
@@ -208,10 +189,7 @@ reactRoot.render(
               }}
             >
               <CssBaseline />
-              <AppRouterProvider
-                fallbackElement={<LinearProgress />}
-                router={router}
-              />
+              <AppRouterProvider router={router} />
             </PageStateProvider>
           </UserStateProvider>
         </ThemeProvider>

@@ -6,7 +6,7 @@ import { AppUtils } from "../app/AppUtils";
 import { useSearchParamsEx } from "@etsoo/react";
 import React from "react";
 
-function AuthFail() {
+export default function AuthFail() {
   // Labels
   const labels = app.getLabels(
     "authFail",
@@ -77,5 +77,3 @@ function AuthFail() {
     </SharedLayout>
   );
 }
-
-export default AuthFail;

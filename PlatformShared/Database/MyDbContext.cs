@@ -39,12 +39,6 @@ namespace PlatformShared.Database
         public required DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
 
         /// <summary>
-        /// Core organization application keys
-        /// 核心机构应用密钥
-        /// </summary>
-        public required DbSet<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; }
-
-        /// <summary>
         /// Core organization channels
         /// 核心机构渠道
         /// </summary>
@@ -109,10 +103,10 @@ namespace PlatformShared.Database
                 entity.Property(e => e.WebUrl)
                     .HasMaxLength(256)
                     .HasColumnName("web_url");
-                entity.Property(e => e.ApiUrl)
+                entity.Property(e => e.ApiUrls)
                     .IsRequired()
                     .HasMaxLength(256)
-                    .HasColumnName("api_url");
+                    .HasColumnName("api_urls");
                 entity.Property(e => e.HelpUrl)
                     .HasMaxLength(256)
                     .HasColumnName("help_url");
@@ -219,6 +213,26 @@ namespace PlatformShared.Database
                     .HasColumnName("id");
                 entity.Property(e => e.CoreAppId).HasColumnName("core_app_id");
                 entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+                entity.Property(e => e.AppKey)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnName("app_key");
+                entity.Property(e => e.AppSecret)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("app_secret");
+                entity.Property(e => e.LocalName)
+                    .HasMaxLength(128)
+                    .HasColumnName("local_name");
+                entity.Property(e => e.LocalUrl)
+                    .HasMaxLength(256)
+                    .HasColumnName("local_url");
+                entity.Property(e => e.LocalApis)
+                    .HasMaxLength(256)
+                    .HasColumnName("local_apis");
+                entity.Property(e => e.LocalHelpUrl)
+                    .HasMaxLength(256)
+                    .HasColumnName("local_help_url");
                 entity.Property(e => e.Expiry).HasColumnName("expiry");
                 entity.Property(e => e.Status)
                     .HasConversion<byte>()
@@ -237,47 +251,6 @@ namespace PlatformShared.Database
                     .HasForeignKey(d => d.CoreOrganizationId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("core_organization_app_core_organization_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreOrganizationAppKey>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_organization_app_key_pkey");
-
-                entity.ToTable("core_organization_app_key");
-
-                entity.HasIndex(e => new { e.CoreOrganizationAppId, e.AppKey }, "core_organization_app_key_core_organization_app_id_app_key_idx")
-                    .IsUnique()
-                    .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "true");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasColumnName("id");
-                entity.Property(e => e.CoreOrganizationAppId).HasColumnName("core_organization_app_id");
-                entity.Property(e => e.AppKey)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnName("app_key");
-                entity.Property(e => e.AppSecret)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("app_secret");
-                entity.Property(e => e.LocalName)
-                    .HasMaxLength(128)
-                    .HasColumnName("local_name");
-                entity.Property(e => e.LocalUrl)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_url");
-                entity.Property(e => e.LocalApi)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_api");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-
-                entity.HasOne(d => d.CoreOrganizationApp).WithMany(p => p.CoreOrganizationAppKeys)
-                    .HasForeignKey(d => d.CoreOrganizationAppId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_app_key_core_organization_app_id_fkey");
             });
 
             modelBuilder.Entity<CoreOrganizationChannel>(entity =>
@@ -414,8 +387,6 @@ namespace PlatformShared.Database
                 entity.Property(e => e.Pin)
                     .HasMaxLength(20)
                     .HasColumnName("pin");
-                entity.Property(e => e.LatestOrganizationId)
-                    .HasColumnName("latest_organization_id");
                 entity.Property(e => e.Creation)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("creation");
@@ -426,6 +397,10 @@ namespace PlatformShared.Database
                 entity.Property(e => e.QueryKeyword)
                     .HasMaxLength(30)
                     .HasColumnName("query_keyword");
+                entity.Property(e => e.LatestOrganizationIds)
+                    .HasColumnName("latest_organization_ids");
+                entity.Property(e => e.LatestAppIds)
+                    .HasColumnName("latest_app_ids");
             });
 
             modelBuilder.Entity<CoreUserDevice>(entity =>
@@ -478,7 +453,6 @@ namespace PlatformShared.Database
                     .HasColumnName("id");
                 entity.Property(e => e.DeviceId).HasColumnName("device_id");
                 entity.Property(e => e.AppId).HasColumnName("app_id");
-                entity.Property(e => e.AppKeyId).HasColumnName("app_key_id");
                 entity.Property(e => e.ResponseType)
                     .HasConversion<byte>()
                     .HasColumnName("response_type");
@@ -493,16 +467,12 @@ namespace PlatformShared.Database
                 entity.Property(e => e.Expiry).HasColumnName("expiry");
                 entity.OwnsOne(c => c.Data, d =>
                 {
-                    d.ToJson();
+                    d.ToJson("data");
                 });
 
                 entity.HasOne(d => d.App).WithMany(p => p.CoreUserDeviceTokens)
                     .HasForeignKey(d => d.AppId)
                     .HasConstraintName("core_user_device_token_app_id_fkey");
-
-                entity.HasOne(d => d.AppKey).WithMany(p => p.CoreUserDeviceTokens)
-                    .HasForeignKey(d => d.AppKeyId)
-                    .HasConstraintName("core_user_device_token_app_key_id_fkey");
 
                 entity.HasOne(d => d.Device).WithMany(p => p.CoreUserDeviceTokens)
                     .HasForeignKey(d => d.DeviceId)

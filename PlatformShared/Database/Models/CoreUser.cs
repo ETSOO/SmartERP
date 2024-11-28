@@ -39,11 +39,7 @@ namespace PlatformShared.Database.Models
         public const short Password = 40;
     }
 
-    /// <summary>
-    /// Core user
-    /// 核心用户
-    /// </summary>
-    public class CoreUser
+    public class CoreUserLogin
     {
         /// <summary>
         /// Identifier
@@ -52,16 +48,10 @@ namespace PlatformShared.Database.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// Password
-        /// 密码
-        /// </summary>
-        public string? Password { get; set; }
-
-        /// <summary>
         /// Display name
         /// 显示名称
         /// </summary>
-        public required string Name { get; set; }
+        public string Name { get; set; } = default!;
 
         /// <summary>
         /// Given name
@@ -74,12 +64,6 @@ namespace PlatformShared.Database.Models
         /// 姓
         /// </summary>
         public string? FamilyName { get; set; }
-
-        /// <summary>
-        /// Preferred name
-        /// 首选姓名
-        /// </summary>
-        public string? PreferredName { get; set; }
 
         /// <summary>
         /// Latin given name
@@ -98,6 +82,37 @@ namespace PlatformShared.Database.Models
         /// 头像
         /// </summary>
         public string? Avatar { get; set; }
+
+        /// <summary>
+        /// Latest visited organization id
+        /// 最近访问的机构编号
+        /// </summary>
+        public List<int>? LatestOrganizationIds { get; set; }
+
+        /// <summary>
+        /// Latest visited application id
+        /// 最近访问的程序编号
+        /// </summary>
+        public List<int>? LatestAppIds { get; set; }
+    }
+
+    /// <summary>
+    /// Core user
+    /// 核心用户
+    /// </summary>
+    public class CoreUser : CoreUserLogin
+    {
+        /// <summary>
+        /// Password
+        /// 密码
+        /// </summary>
+        public string? Password { get; set; }
+
+        /// <summary>
+        /// Preferred name
+        /// 首选姓名
+        /// </summary>
+        public string? PreferredName { get; set; }
 
         /// <summary>
         /// Frozen expiry time
@@ -122,12 +137,6 @@ namespace PlatformShared.Database.Models
         /// 个人身份证号
         /// </summary>
         public string? Pin { get; set; }
-
-        /// <summary>
-        /// Latest visited organization id
-        /// 最近访问的机构编号
-        /// </summary>
-        public int? LatestOrganizationId { get; set; }
 
         /// <summary>
         /// Creation

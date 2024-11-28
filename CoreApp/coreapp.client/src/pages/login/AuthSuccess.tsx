@@ -29,7 +29,7 @@ export default function AuthSuccess() {
           app.userLoginEx(userData, coreObj, true);
         }, [userData, coreObj]);
 
-        return <Navigate to="./../../home/" replace />;
+        return <Navigate to="./../../home" replace />;
       } else {
         pageResult = {
           ok: false,

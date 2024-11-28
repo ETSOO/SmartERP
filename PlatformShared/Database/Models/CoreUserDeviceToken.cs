@@ -99,12 +99,6 @@
         public int? AppId { get; set; }
 
         /// <summary>
-        /// App key id
-        /// 程序键名编号
-        /// </summary>
-        public int? AppKeyId { get; set; }
-
-        /// <summary>
         /// Response type
         /// 响应类型
         /// </summary>
@@ -139,12 +133,6 @@
         /// 相关程序
         /// </summary>
         public CoreApp? App { get; set; }
-
-        /// <summary>
-        /// Organization application key
-        /// 机构应用键名
-        /// </summary>
-        public CoreOrganizationAppKey? AppKey { get; set; }
 
         /// <summary>
         /// Related device

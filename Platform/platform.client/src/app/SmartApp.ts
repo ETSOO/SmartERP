@@ -1,13 +1,13 @@
-import { AddressUtils, ExternalSettings, BridgeUtils } from "@etsoo/appscript";
+import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
 import { ISmartSettings } from "./SmartSettings";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { Constants } from "./Constants";
 import { ISmartPageData } from "./SmartPageData";
 import { CommonApp, ISmartERPUser, MUGlobal } from "@etsoo/materialui";
-import { NavigateFunction } from "react-router-dom";
 import { CoreCulture } from "@etsoo/smarterp-core";
 import { AuthApi } from "../api/AuthApi";
 import { PublicApi } from "../api/PublicApi";
+import { AppApi } from "../api/AppApi";
 
 /**
  * SmartERP App
@@ -23,6 +23,11 @@ class SmartApp extends CommonApp<
   readonly authApi = new AuthApi(this);
 
   /**
+   * App API
+   */
+  readonly appApi = new AppApi(this);
+
+  /**
    * Public API
    */
   readonly publicApi = new PublicApi(this);
@@ -36,48 +41,7 @@ class SmartApp extends CommonApp<
     this.storage.setData(Constants.AuthRequestField, null);
 
     // Redirect to authorization request
-    window.location.replace(url);
-  }
-
-  /**
-   * Get cached URL
-   * @param baseUrl Base URL
-   * @returns Result
-   */
-  getCachedUrl(baseUrl?: string) {
-    /*
-    const url = this.storage.getData<string>(Constants.RedirectUrlCache);
-    if (url) {
-      if (!url.includes("://")) return url;
-
-      baseUrl ??= `${globalThis.location.protocol}//${globalThis.location.host}`;
-      if (url.startsWith(baseUrl)) return url.substring(baseUrl.length);
-    }
-    this.storage.setData(Constants.RedirectUrlCache, null);
-    */
-    return baseUrl;
-  }
-
-  /**
-   * Get service Url
-   * @param serviceUrl Service Url
-   * @param serviceToken Service token
-   * @param redirectUrl Redirect URL
-   * @returns Formated URL
-   */
-  getServiceUrl(
-    serviceUrl: string,
-    serviceToken: string,
-    redirectUrl?: string
-  ) {
-    return (
-      serviceUrl +
-      `/api/?provider=SmartERP&culture=${
-        this.culture
-      }&token=${encodeURIComponent(serviceToken)}&url=${
-        redirectUrl ? encodeURIComponent(redirectUrl) : ""
-      }`
-    );
+    window.location.replace(this.addCultureParam(url));
   }
 
   /**
@@ -90,53 +54,26 @@ class SmartApp extends CommonApp<
     }
   }
 
-  /**
-   * To home URL
-   * @param navigate Navigate
-   * @param home Default home URL
-   */
-  toHome(navigate: NavigateFunction, home: string) {
-    navigate(this.getCachedUrl() ?? home);
+  private addCultureParam(url: string) {
+    return url.addUrlParam(DomUtils.CultureField, app.culture);
   }
 
   /**
-   * Navigate to the service Url
-   * @param appId App id
-   * @param serviceUrl Service Url
-   * @param serviceToken Service token
-   * @param newWindow Open new window
+   * To main URL
+   * @param navigate Navigate
+   * @param home Default home URL
    */
-  toServiceUrl(
-    appId: number,
-    serviceUrl: string,
-    serviceToken: string,
-    newWindow: boolean = false
-  ) {
-    // Persist data
-    this.persist();
-
-    const redirectUrl = this.getCachedUrl(serviceUrl);
-
-    // Is bridge service
-    const host = BridgeUtils.host;
-    if (host) {
-      // Get service Url
-      const url = app.getServiceUrl("", serviceToken, redirectUrl);
-
-      host.loadApp(`s${appId}`, url);
-    } else {
-      // Get service Url
-      const url = app.getServiceUrl(serviceUrl, serviceToken, redirectUrl);
-
-      // Clear cached data
-      this.storage.setData(Constants.CurentService, undefined);
-
-      // Replace current loation
-      // window.location.replace(url);
-      // Open new window
-      if (newWindow) window.open(url, `App${appId}`);
-      else window.location.replace(url);
-    }
+  toMain() {
+    // Get user's latest app
+    this.appApi.getUserLatestApp().then((url) => {
+      if (url) {
+        // Go to the app
+        globalThis.location.href = this.addCultureParam(url);
+      } else {
+        // Go to the home page
+        this.navigate("/");
+      }
+    });
   }
 }
 

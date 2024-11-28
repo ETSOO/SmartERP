@@ -21,8 +21,6 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
 
-    public virtual DbSet<CoreOrganizationAppKey> CoreOrganizationAppKeys { get; set; }
-
     public virtual DbSet<CoreOrganizationChannel> CoreOrganizationChannels { get; set; }
 
     public virtual DbSet<CoreOrganizationUser> CoreOrganizationUsers { get; set; }
@@ -46,10 +44,10 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.ApiUrl)
+            entity.Property(e => e.ApiUrls)
                 .IsRequired()
-                .HasMaxLength(256)
-                .HasColumnName("api_url");
+                .HasColumnType("character varying(256)[]")
+                .HasColumnName("api_urls");
             entity.Property(e => e.AppSecret)
                 .IsRequired()
                 .HasMaxLength(256)
@@ -140,6 +138,9 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Pin)
                 .HasMaxLength(20)
                 .HasColumnName("pin");
+            entity.Property(e => e.QueryKeyword)
+                .HasMaxLength(30)
+                .HasColumnName("query_keyword");
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
@@ -164,12 +165,32 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
+            entity.Property(e => e.AppKey)
+                .IsRequired()
+                .HasMaxLength(128)
+                .HasColumnName("app_key");
+            entity.Property(e => e.AppSecret)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnName("app_secret");
             entity.Property(e => e.CoreAppId).HasColumnName("core_app_id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
+            entity.Property(e => e.LocalApis)
+                .HasColumnType("character varying(256)[]")
+                .HasColumnName("local_apis");
+            entity.Property(e => e.LocalHelpUrl)
+                .HasMaxLength(256)
+                .HasColumnName("local_help_url");
+            entity.Property(e => e.LocalName)
+                .HasMaxLength(128)
+                .HasColumnName("local_name");
+            entity.Property(e => e.LocalUrl)
+                .HasMaxLength(256)
+                .HasColumnName("local_url");
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
@@ -183,47 +204,6 @@ public partial class MyDbContext : DbContext
                 .HasForeignKey(d => d.CoreOrganizationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("core_organization_app_core_organization_id_fkey");
-        });
-
-        modelBuilder.Entity<CoreOrganizationAppKey>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("core_organization_app_key_pkey");
-
-            entity.ToTable("core_organization_app_key");
-
-            entity.HasIndex(e => new { e.CoreOrganizationAppId, e.AppKey }, "core_organization_app_key_core_organization_app_id_app_key_idx")
-                .IsUnique()
-                .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "true");
-
-            entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.AppKey)
-                .IsRequired()
-                .HasMaxLength(128)
-                .HasColumnName("app_key");
-            entity.Property(e => e.AppSecret)
-                .IsRequired()
-                .HasMaxLength(256)
-                .HasColumnName("app_secret");
-            entity.Property(e => e.CoreOrganizationAppId).HasColumnName("core_organization_app_id");
-            entity.Property(e => e.Creation)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("creation");
-            entity.Property(e => e.LocalApi)
-                .HasMaxLength(256)
-                .HasColumnName("local_api");
-            entity.Property(e => e.LocalName)
-                .HasMaxLength(128)
-                .HasColumnName("local_name");
-            entity.Property(e => e.LocalUrl)
-                .HasMaxLength(256)
-                .HasColumnName("local_url");
-
-            entity.HasOne(d => d.CoreOrganizationApp).WithMany(p => p.CoreOrganizationAppKeys)
-                .HasForeignKey(d => d.CoreOrganizationAppId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("core_organization_app_key_core_organization_app_id_fkey");
         });
 
         modelBuilder.Entity<CoreOrganizationChannel>(entity =>
@@ -287,9 +267,6 @@ public partial class MyDbContext : DbContext
                 .HasMaxLength(128)
                 .HasColumnName("local_name");
             entity.Property(e => e.Permission).HasColumnName("permission");
-            entity.Property(e => e.Pinyin)
-                .HasMaxLength(20)
-                .HasColumnName("pinyin");
             entity.Property(e => e.RefreshTime)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("refresh_time");
@@ -319,7 +296,6 @@ public partial class MyDbContext : DbContext
             entity.ToTable("core_user");
 
             entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(1001L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.Avatar)
@@ -331,16 +307,20 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.FamilyName)
                 .HasMaxLength(50)
                 .HasColumnName("family_name");
-            entity.Property(e => e.ForeignName)
-                .HasMaxLength(128)
-                .HasColumnName("foreign_name");
             entity.Property(e => e.FrozenTime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("frozen_time");
             entity.Property(e => e.GivenName)
                 .HasMaxLength(50)
                 .HasColumnName("given_name");
-            entity.Property(e => e.LatestOrganizationId).HasColumnName("latest_organization_id");
+            entity.Property(e => e.LatestAppIds).HasColumnName("latest_app_ids");
+            entity.Property(e => e.LatestOrganizationIds).HasColumnName("latest_organization_ids");
+            entity.Property(e => e.LatinFamilyName)
+                .HasMaxLength(50)
+                .HasColumnName("latin_family_name");
+            entity.Property(e => e.LatinGivenName)
+                .HasMaxLength(50)
+                .HasColumnName("latin_given_name");
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(128)
@@ -351,6 +331,12 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Pin)
                 .HasMaxLength(20)
                 .HasColumnName("pin");
+            entity.Property(e => e.PreferredName)
+                .HasMaxLength(128)
+                .HasColumnName("preferred_name");
+            entity.Property(e => e.QueryKeyword)
+                .HasMaxLength(30)
+                .HasColumnName("query_keyword");
             entity.Property(e => e.Region)
                 .HasMaxLength(2)
                 .IsFixedLength()
@@ -359,10 +345,6 @@ public partial class MyDbContext : DbContext
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
             entity.Property(e => e.Step).HasColumnName("step");
-
-            entity.HasOne(d => d.LatestOrganization).WithMany(p => p.CoreUsers)
-                .HasForeignKey(d => d.LatestOrganizationId)
-                .HasConstraintName("core_user_latest_organization_id_fkey");
         });
 
         modelBuilder.Entity<CoreUserDevice>(entity =>
@@ -410,7 +392,6 @@ public partial class MyDbContext : DbContext
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.AppId).HasColumnName("app_id");
-            entity.Property(e => e.AppKeyId).HasColumnName("app_key_id");
             entity.Property(e => e.Culture)
                 .IsRequired()
                 .HasMaxLength(10)
@@ -430,10 +411,6 @@ public partial class MyDbContext : DbContext
             entity.HasOne(d => d.App).WithMany(p => p.CoreUserDeviceTokens)
                 .HasForeignKey(d => d.AppId)
                 .HasConstraintName("core_user_device_token_app_id_fkey");
-
-            entity.HasOne(d => d.AppKey).WithMany(p => p.CoreUserDeviceTokens)
-                .HasForeignKey(d => d.AppKeyId)
-                .HasConstraintName("core_user_device_token_app_key_id_fkey");
 
             entity.HasOne(d => d.Device).WithMany(p => p.CoreUserDeviceTokens)
                 .HasForeignKey(d => d.DeviceId)

@@ -1,25 +1,25 @@
-import { VBox } from '@etsoo/materialui';
-import { Button, CircularProgress, TextField } from '@mui/material';
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { app } from '../app/SmartApp';
-import { InviteDto } from '../api/dto/auth/InviteDto';
-import { SharedLayout } from './SharedLayout';
+import { VBox } from "@etsoo/materialui";
+import { Button, CircularProgress, TextField } from "@mui/material";
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { app } from "../app/SmartApp";
+import { InviteDto } from "../api/dto/auth/InviteDto";
+import { SharedLayout } from "./SharedLayout";
 
-function Invite() {
+export default function Invite() {
   // Router
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   // Labels
   const labels = app.getLabels(
-    'acceptInvitation',
-    'email',
-    'organization',
-    'inviter',
-    'loading',
-    'login',
-    'register'
+    "acceptInvitation",
+    "email",
+    "organization",
+    "inviter",
+    "loading",
+    "login",
+    "register"
   );
 
   // State
@@ -48,8 +48,8 @@ function Invite() {
       : () => {
           const url =
             (status === 1
-              ? './../../login/registerpassword/'
-              : './../../?loginid=') +
+              ? "./../../login/registerpassword/"
+              : "./../../?loginid=") +
             encodeURIComponent(app.encrypt(data.identifier, app.name));
           navigate(url);
         };
@@ -61,9 +61,9 @@ function Invite() {
     // Labels
     const { inviteMemberExpired, inviteMemberDone, inviteMemberExist } =
       app.getLabels(
-        'inviteMemberExpired',
-        'inviteMemberDone',
-        'inviteMemberExist'
+        "inviteMemberExpired",
+        "inviteMemberDone",
+        "inviteMemberExist"
       );
 
     // Query data
@@ -152,5 +152,3 @@ function Invite() {
     </SharedLayout>
   );
 }
-
-export default Invite;

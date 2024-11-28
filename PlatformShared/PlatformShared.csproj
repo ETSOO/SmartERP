@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.Web" Version="1.2.77" />
+    <PackageReference Include="com.etsoo.Web" Version="1.2.81" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
   </ItemGroup>
 
