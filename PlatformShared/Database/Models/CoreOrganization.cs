@@ -75,6 +75,12 @@ namespace PlatformShared.Database.Models
         public string? QueryKeyword { get; set; }
 
         /// <summary>
+        /// Core logs
+        /// 核心日志
+        /// </summary>
+        public ICollection<CoreLog> CoreLogs { get; set; } = [];
+
+        /// <summary>
         /// Core organization apps
         /// 核心机构应用
         /// </summary>

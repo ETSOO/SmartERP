@@ -8,9 +8,12 @@ using Platform.Server.Dto.App;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Dto.Org;
 using Platform.Server.Dto.Public;
+using Platform.Server.Endpoints.App.RQ;
 using Platform.Server.Endpoints.Auth.RQ;
+using Platform.Server.Endpoints.Member.RQ;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Endpoints.Public.RQ;
+using Platform.Server.Endpoints.User.RQ;
 using System.Text.Json.Serialization;
 
 namespace Platform.Server
@@ -28,11 +31,16 @@ namespace Platform.Server
 
     // App
     [JsonSerializable(typeof(IEnumerable<AppData>))]
+    [JsonSerializable(typeof(AppListRQ))]
+    [JsonSerializable(typeof(AppGetMyRQ))]
+    [JsonSerializable(typeof(AppPurchasedQueryRQ))]
+    [JsonSerializable(typeof(AppQueryRQ))]
 
     // Auth
     [JsonSerializable(typeof(CodeValidateRQ))]
     [JsonSerializable(typeof(CompleteRegisterRQ))]
     [JsonSerializable(typeof(EmailCodeRQ))]
+    [JsonSerializable(typeof(ResetPasswordRQ))]
     [JsonSerializable(typeof(SMSCodeRQ))]
     [JsonSerializable(typeof(SwitchOrgRQ))]
 
@@ -41,9 +49,14 @@ namespace Platform.Server
     [JsonSerializable(typeof(SendEmailData))]
     [JsonSerializable(typeof(SendSMSData))]
 
+    // Members
+    [JsonSerializable(typeof(IEnumerable<MemberListRQ>))]
+    [JsonSerializable(typeof(MemberQueryRQ))]
+
     // Org
     [JsonSerializable(typeof(OrgCreateRQ))]
     [JsonSerializable(typeof(OrgListRQ))]
+    [JsonSerializable(typeof(OrgGetMyRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
     [JsonSerializable(typeof(OrgQueryRQ))]
 
@@ -59,6 +72,9 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<CurrencyItem>))]
     [JsonSerializable(typeof(IEnumerable<RegionData>))]
     [JsonSerializable(typeof(IEnumerable<PlaceCommon>))]
+
+    // User
+    [JsonSerializable(typeof(AuditHistoryRQ))]
 
     // Others
     [JsonSerializable(typeof(TemplateItem))]

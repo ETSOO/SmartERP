@@ -9,7 +9,7 @@
   "acceptInvitationMessage": "Are you sure to accept the invitation?",
   "appName": "ETSOO® SmartERP",
   "authFail": "Authentication failed",
-  "authFailContinue": "You have not yet bound {0} login, click the 'Continue Registration' button to register and bind, or return to the home page to log in again.",
+  "authFailContinue": "You have not yet bound {0} login, click the 'Continue Registration' button to register and bind, or return to the home page to log in again. Go to 'Personal data' under 'Admin Center' for management.",
   "authFailTip": "{0} authentication failed, please click the 'Back' button to try again.",
   "avatar": "Avatar",
   "brand": "Brand",

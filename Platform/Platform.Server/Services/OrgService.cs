@@ -37,7 +37,7 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="publicService">Public service</param>
         /// <param name="storage">Storage</param>
-        public OrgService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger, IPublicService publicService, IStorage storage)
+        public OrgService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<UserService> logger, IPublicService publicService, IStorage storage)
             : base(app, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
@@ -130,6 +130,37 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Get user's latest accessed organizations
+        /// 获取用户最近访问的机构
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task GetMyAsync(OrgGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var (hasContent, commandText) = await _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.CoreOrganizationId == User.OrganizationInt
+                    && ou.Status <= EntityStatus.Approved
+                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.Now)
+                    && ou.CoreOrganization.Status <= EntityStatus.Approved)
+                .OrderByDescending(ou => ou.Id)
+                .Take(rq.MaxItems)
+                .Select(ou => new OrgGetMyData
+                {
+                    Id = ou.CoreOrganizationId,
+                    Name = ou.CoreOrganization.Name,
+                    Brand = ou.CoreOrganization.Brand
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("GetMyAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        /// <summary>
         /// List organization JSON data
         /// 机构列表JSON数据
         /// </summary>
@@ -139,26 +170,48 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task ListAsync(OrgListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = CreateQuery(rq.Keyword);
+            var query = CreateQuery(rq);
 
-            await query.QueryEtsoo(rq, (o) => o.Id, (o) => o.Status)
-                .Select(o => new
-                {
-                    o.Id,
-                    o.Name
-                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+            await query.Select(o => new
+            {
+                o.Id,
+                o.Name
+            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
-        private IQueryable<CoreOrganization> CreateQuery(string? keyword)
+        private IQueryable<CoreOrganization> CreateQuery(OrgListRQ rq, Func<IQueryable<CoreOrganization>, IQueryable<CoreOrganization>>? filters = null)
         {
             var query = _db.CoreOrganizations
                 .AsNoTracking()
-                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt));
+                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt))
+                .QueryEtsoo(rq, (o) => o.Id, (o) => o.Status, (q) =>
+                {
+                    if (rq.ParentId.HasValue)
+                    {
+                        q = q.Where(o => o.ParentId == rq.ParentId);
+                    }
 
-            if (!string.IsNullOrEmpty(keyword) && keyword.Length > 1)
-            {
-                query = query.Where(o => o.Brand == keyword || o.Name.Contains(keyword) || (o.QueryKeyword != null && o.QueryKeyword.Contains(keyword)));
-            }
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        if (keyword.IsComplexQueryKeywords())
+                        {
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, o => o.Name);
+                        }
+                        else
+                        {
+                            q = q.Where(o => o.Brand == keyword || EF.Functions.ILike(o.Name, $"%{keyword}%") || (o.QueryKeyword != null && EF.Functions.ILike(o.QueryKeyword, $"%{keyword}%")));
+                        }
+                    }
+
+                    if (filters != null)
+                    {
+                        q = filters(q);
+                    }
+
+                    return q;
+                });
 
             return query;
         }
@@ -172,24 +225,26 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<OrgQueryData>> QueryAsync(OrgQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            var query = CreateQuery(rq.Keyword);
-
-            if (!string.IsNullOrEmpty(rq.Pin))
+            var query = CreateQuery(rq, (q) =>
             {
-                query = query.Where(o => o.Pin != null && o.Pin.Contains(rq.Pin));
-            }
-
-            var data = await query.QueryEtsoo(rq, (o) => o.Id, (o) => o.Status)
-                .Select(o => new OrgQueryData
+                if (rq.Pin?.Length > 1)
                 {
-                    Id = o.Id,
-                    Name = o.Name,
-                    IsOwner = o.OwnerId == User.IdInt,
-                    Brand = o.Brand,
-                    Pin = o.Pin,
-                    ParentId = o.ParentId,
-                    Status = o.Status
-                }).ToListAsync(cancellationToken);
+                    q = q.Where(o => o.Pin != null && EF.Functions.ILike(o.Pin, $"%{rq.Pin}%"));
+                }
+
+                return q;
+            });
+
+            var data = await query.Select(o => new OrgQueryData
+            {
+                Id = o.Id,
+                Name = o.Name,
+                IsOwner = o.OwnerId == User.IdInt,
+                Brand = o.Brand,
+                Pin = o.Pin,
+                ParentId = o.ParentId,
+                Status = o.Status
+            }).ToListAsync(cancellationToken);
 
             return data;
         }
@@ -199,36 +254,38 @@ namespace Platform.Server.Services
         /// 查询机构JSON数据
         /// </summary>
         /// <param name="rq">Request data</param>
-        /// <param name="response">Http response to write</param>
+        /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task QueryAsync(OrgQueryRQ rq, HttpResponse response, CancellationToken cancellationToken = default)
+        public async Task QueryAsync(OrgQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = CreateQuery(rq.Keyword);
-
-            if (!string.IsNullOrEmpty(rq.Pin))
+            var query = CreateQuery(rq, (q) =>
             {
-                query = query.Where(o => o.Pin != null && o.Pin.Contains(rq.Pin));
-            }
-
-            var hasContent = await query.QueryEtsoo(rq, (o) => o.Id, (o) => o.Status)
-                .Select(o => new OrgQueryData
+                if (rq.Pin?.Length > 1)
                 {
-                    Id = o.Id,
-                    Name = o.Name,
-                    IsOwner = o.OwnerId == User.IdInt,
-                    Brand = o.Brand,
-                    Pin = o.Pin,
-                    ParentId = o.ParentId,
-                    Status = o.Status
-                }).ToJsonAsync(response.BodyWriter, cancellationToken: cancellationToken);
+                    q = q.Where(o => o.Pin != null && EF.Functions.ILike(o.Pin, $"%{rq.Pin}%"));
+                }
 
-            if (!hasContent)
+                return q;
+            });
+
+            var (hasContent, commandText) = await query.Select(o => new OrgQueryData
             {
-                response.StatusCode = StatusCodes.Status204NoContent;
+                Id = o.Id,
+                Name = o.Name,
+                IsOwner = o.OwnerId == User.IdInt,
+                Brand = o.Brand,
+                Pin = o.Pin,
+                ParentId = o.ParentId,
+                Status = o.Status,
+                Creation = o.Creation
+            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
         }
-
 
         /// <summary>
         /// Read organization data for view
@@ -238,13 +295,13 @@ namespace Platform.Server.Services
         /// <param name="response">Http response to write</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task ReadAsync(int id, HttpResponse response, CancellationToken cancellationToken = default)
+        public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             var query = _db.CoreOrganizations
                 .AsNoTracking()
                 .Where(o => o.Id == id && o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt));
 
-            var hasContent = await query.Select(o => new
+            var (hasContent, _) = await query.Select(o => new
             {
                 o.Id,
                 OwnerName = o.Owner.Name,
@@ -258,12 +315,7 @@ namespace Platform.Server.Services
                 o.Creation,
                 o.Status,
                 o.QueryKeyword
-            }).ToJsonObjectAsync(response.BodyWriter, cancellationToken: cancellationToken);
-
-            if (!hasContent)
-            {
-                response.StatusCode = StatusCodes.Status204NoContent;
-            }
+            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -335,7 +387,7 @@ namespace Platform.Server.Services
         /// <param name="contentType">Cotent type</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>New URL</returns>
-        public async Task<IActionResult> UploadAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
         {
             // Check the stream
             if (avatarStream.Length is not > 10240 and < 102400000)

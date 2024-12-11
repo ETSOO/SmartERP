@@ -11,16 +11,16 @@ import { app } from "../../../app/MyApp";
 export default function ChangePassword() {
   // Labels
   const labels = app.getLabels(
+    "currentPassword",
     "currentPasswordRequired",
-    "passwordTip",
+    "newPassword",
     "newPasswordRequired",
     "newPasswordTip",
-    "repeatPasswordRequired",
-    "passwordRepeatError",
     "passwordChangeSuccess",
-    "currentPassword",
-    "newPassword",
+    "passwordRepeatError",
+    "passwordTip",
     "repeatPassword",
+    "repeatPasswordRequired",
     "submit"
   );
 
@@ -53,7 +53,7 @@ export default function ChangePassword() {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       // Submit data
-      var result = await app.userApi.changePassword(
+      var result = await app.core.authApi.changePassword(
         values.oldPassword,
         values.password
       );

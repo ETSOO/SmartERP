@@ -185,7 +185,7 @@ export default function Password() {
         label={labels.keepLogged}
       />
       <div>
-        <Link to={`./../../callbackverify/${username}`}>
+        <Link to={`./../../callbackverify/${encodeURIComponent(username)}`}>
           {labels.forgotPasswordTip}
         </Link>
       </div>

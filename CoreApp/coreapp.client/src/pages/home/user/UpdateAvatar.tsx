@@ -1,43 +1,14 @@
-import {
-  CommonPage,
-  UserAvatarEditor,
-  UserAvatarEditorToBlob
-} from "@etsoo/materialui";
+import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
 import { Stack } from "@mui/material";
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 
 export default function UpdateAvatar() {
-  // Route
-  const navigate = useNavigate();
-
   // Labels
-  const labels = app.getLabels("avatar");
+  const labels = app.getLabels("avatar", "imageSizeTooSmall");
 
   // User context
   const Context = app.userState.context;
-
-  const handleDone = async (
-    canvas: HTMLCanvasElement,
-    toBlob: UserAvatarEditorToBlob,
-    type: string
-  ) => {
-    // Photo blob
-    const blob = await toBlob(canvas, type, 1);
-
-    // Form data
-    const form = new FormData();
-    form.append("avatar", blob);
-
-    var result = await app.userApi.uploadAvatar(form);
-    if (result == null) return;
-
-    // Refresh token to get the updated avatar
-    app.refreshToken().then(() => {
-      navigate("./../../");
-    });
-  };
 
   React.useEffect(() => {
     // Page title
@@ -65,7 +36,32 @@ export default function UpdateAvatar() {
             );
           }}
         </Context.Consumer>
-        <UserAvatarEditor onDone={handleDone} maxWidth={600} />
+        <UserAvatarEditor
+          onDone={async (canvas, toBlob, type) => {
+            // Check size
+            if (canvas.width < 100 || canvas.height < 100) {
+              app.notifier.alert(labels.imageSizeTooSmall);
+              return;
+            }
+
+            // Photo blob
+            const blob = await toBlob(canvas, type, 1);
+
+            // Form data
+            const form = new FormData();
+            form.append("avatar", blob);
+
+            var result = await app.core.userApi.updateAvatar(form);
+            if (result == null) return;
+
+            // Refresh token to get the updated avatar
+            app.refreshToken({ showLoading: true });
+
+            // Reset the UI
+            return true;
+          }}
+          maxWidth={600}
+        />
       </Stack>
     </CommonPage>
   );

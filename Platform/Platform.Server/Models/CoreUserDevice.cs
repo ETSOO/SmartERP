@@ -21,6 +21,8 @@ public partial class CoreUserDevice
 
     public DateTime LastLogin { get; set; }
 
+    public virtual ICollection<CoreLog> CoreLogs { get; set; } = new List<CoreLog>();
+
     public virtual CoreUser CoreUser { get; set; }
 
     public virtual ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; } = new List<CoreUserDeviceToken>();

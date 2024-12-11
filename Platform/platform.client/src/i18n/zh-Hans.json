@@ -9,7 +9,7 @@
   "acceptInvitationMessage": "确定接受邀请吗？",
   "appName": "司友®云ERP",
   "authFail": "认证失败",
-  "authFailContinue": "您尚未绑定{0}登录，点击'继续注册'按钮进行注册和绑定，或者后退到首页重新登录。",
+  "authFailContinue": "您尚未绑定{0}登录，点击'继续注册'按钮进行注册和绑定，或者后退到首页重新登录，进入「管理中心」下的「个人信息」进行管理。",
   "authFailTip": "{0}认证失败，请点击'后退'按钮重试。",
   "avatar": "头像",
   "brand": "品牌",

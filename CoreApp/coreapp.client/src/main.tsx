@@ -90,8 +90,24 @@ const router = createDynamicRouter([
           {
             path: "/home/member/all",
             lazy: async () => {
-              const Members = await import("./pages/home/member/All");
-              return { Component: Members.default };
+              const AllMembers = await import("./pages/home/member/AllMembers");
+              return { Component: AllMembers.default };
+            }
+          },
+          {
+            path: "/home/org/my",
+            lazy: async () => {
+              const AllOrgs = await import("./pages/home/org/AllOrgs");
+              return { Component: AllOrgs.default };
+            }
+          },
+          {
+            path: "/home/user/audithistory",
+            lazy: async () => {
+              const LoginHistory = await import(
+                "./pages/home/user/AuditHistory"
+              );
+              return { Component: LoginHistory.default };
             }
           },
           {
@@ -104,12 +120,10 @@ const router = createDynamicRouter([
             }
           },
           {
-            path: "/home/user/loginhistory",
+            path: "/home/user/data",
             lazy: async () => {
-              const LoginHistory = await import(
-                "./pages/home/user/LoginHistory"
-              );
-              return { Component: LoginHistory.default };
+              const UserData = await import("./pages/home/user/UserData");
+              return { Component: UserData.default };
             }
           },
           {

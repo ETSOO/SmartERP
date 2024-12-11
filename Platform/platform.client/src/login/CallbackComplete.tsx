@@ -1,30 +1,30 @@
-import React from 'react';
-import { Button, Typography } from '@mui/material';
-import { SharedLayout } from './SharedLayout';
-import { TextFieldEx, TextFieldExMethods } from '@etsoo/materialui';
-import { Constants } from '../app/Constants';
-import { app } from '../app/SmartApp';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { ResetPasswordRQ } from '@etsoo/appscript';
+import React from "react";
+import { Button, Typography } from "@mui/material";
+import { SharedLayout } from "./SharedLayout";
+import { TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
+import { Constants } from "../app/Constants";
+import { app } from "../app/SmartApp";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { ResetPasswordRQ } from "@etsoo/appscript";
 
-const homeUrl = './../../../';
+const homeUrl = "./../../../";
 function NavigateHome() {
   return <Navigate to={homeUrl} replace />;
 }
 
-function CallbackComplete() {
+export default function CallbackComplete() {
   // Router
   const navigate = useNavigate();
   const { username } = useParams<{ username: string }>();
 
   // Labels
   const labels = app.getLabels(
-    'passwordTip',
-    'passwordRepeatError',
-    'createPassword',
-    'yourPassword',
-    'repeatPassword',
-    'submit'
+    "createPassword",
+    "passwordTip",
+    "passwordRepeatError",
+    "repeatPassword",
+    "submit",
+    "yourPassword"
   );
 
   // Refs
@@ -34,9 +34,7 @@ function CallbackComplete() {
   const repeatRef = React.useRef<HTMLInputElement>();
   const repeatMethodRef = React.createRef<TextFieldExMethods>();
 
-  const codeId = app.storage.getData<string>(Constants.CodeFieldCallback);
-
-  if (username == null || codeId == null || codeId === '') {
+  if (!username) {
     return <NavigateHome />;
   }
 
@@ -44,14 +42,14 @@ function CallbackComplete() {
   const usernameDecoded = decodeURIComponent(username);
   const id = app.decrypt(usernameDecoded);
 
-  if (id == null || id === '') {
+  if (!id) {
     return <NavigateHome />;
   }
 
   // Repeat step
   const repeatStep = (check: boolean = false) => {
     const password = passwordRef.current!;
-    if (password.value === '') {
+    if (password.value === "") {
       password.focus();
       return false;
     }
@@ -74,7 +72,7 @@ function CallbackComplete() {
     }
 
     const repeat = repeatRef.current!;
-    if (repeat.value === '') {
+    if (repeat.value === "") {
       repeat.focus();
       return;
     }
@@ -88,7 +86,6 @@ function CallbackComplete() {
     const data: ResetPasswordRQ = {
       id: usernameDecoded,
       deviceId: app.deviceId,
-      codeId,
       password: app.encrypt(app.hash(repeat.value)),
       region: app.region
     };
@@ -101,7 +98,7 @@ function CallbackComplete() {
       app.storage.setData(Constants.CodeFieldCallback, undefined);
 
       // Back to the login page
-      navigate(`./../../password/${username}`);
+      navigate(`./../../password/${encodeURIComponent(username)}`);
       return;
     }
 
@@ -144,5 +141,3 @@ function CallbackComplete() {
     </SharedLayout>
   );
 }
-
-export default CallbackComplete;

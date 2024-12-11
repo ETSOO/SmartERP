@@ -163,6 +163,12 @@ namespace PlatformShared.Database.Models
         public ICollection<CoreAuthCode> CoreUserAuthCodes { get; set; } = [];
 
         /// <summary>
+        /// Core logs
+        /// 核心日志
+        /// </summary>
+        public ICollection<CoreLog> CoreLogs { get; set; } = [];
+
+        /// <summary>
         /// Core organizations
         /// 核心机构
         /// </summary>

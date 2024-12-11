@@ -15,5 +15,6 @@ namespace Platform.Server.Dto.Org
         public string? Pin { get; init; }
         public int? ParentId { get; init; }
         public EntityStatus Status { get; init; }
+        public DateTimeOffset Creation { get; init; }
     }
 }

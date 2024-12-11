@@ -8,6 +8,7 @@ import {
 } from "@etsoo/materialui";
 import { Constants } from "../app/Constants";
 import { app } from "../app/SmartApp";
+import { ValidateRQ } from "../api/rq/auth/ValidateRQ";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { IdActionResult } from "@etsoo/shared";
 
@@ -16,7 +17,7 @@ function NavigateHome() {
   return <Navigate to={homeUrl} replace />;
 }
 
-function RegisterVerify() {
+export default function RegisterVerify() {
   // Router
   const navigate = useNavigate();
   const { username } = useParams<{ username: string }>();
@@ -34,7 +35,7 @@ function RegisterVerify() {
   const inputRef = React.useRef<HTMLInputElement>();
   const mRef = React.createRef<TextFieldExMethods>();
 
-  if (username == null) {
+  if (!username) {
     return <NavigateHome />;
   }
 
@@ -42,9 +43,12 @@ function RegisterVerify() {
   const usernameDecoded = decodeURIComponent(username);
   const id = app.decrypt(usernameDecoded);
 
-  if (id == null || id === "") {
+  if (!id) {
     return <NavigateHome />;
   }
+
+  // Callback way
+  const isEmail = id.includes("@");
 
   // Code id
   let codeId = app.storage.getData<string>(Constants.CodeFieldCallback);
@@ -55,20 +59,20 @@ function RegisterVerify() {
   // Resending
   const resending = async () => {
     let result: IdActionResult<string> | undefined;
-    if (id.indexOf("@") === -1) {
-      result = await app.authCodeApi.sendSMS({
-        deviceId: app.deviceId,
-        region: app.region,
-        mobile: usernameDecoded,
-        action: 3
-      });
-    } else {
-      result = await app.authCodeApi.sendEmail({
+    if (isEmail) {
+      result = await app.authApi.sendEmail({
         deviceId: app.deviceId,
         region: app.region,
         email: usernameDecoded,
         action: 4,
         timezone: app.getTimeZone()
+      });
+    } else {
+      result = await app.authApi.sendSMS({
+        deviceId: app.deviceId,
+        region: app.region,
+        mobile: usernameDecoded,
+        action: 3
       });
     }
 
@@ -100,20 +104,24 @@ function RegisterVerify() {
       return;
     }
 
-    const result = await app.authCodeApi.validate({
+    const rq: ValidateRQ = {
       deviceId: app.deviceId,
       id: codeId,
       code: app.encrypt(input.value)
-    });
+    };
+
+    const result = isEmail
+      ? await app.authApi.validateEmailCallback(rq)
+      : await app.authApi.validateMobileCallback(rq);
 
     if (result == null) return;
 
-    if (!result.ok) {
-      mRef.current?.setError(result.title);
-      return;
+    if (result.ok) {
+      app.setLoginToken(result.data?.token);
+      navigate(`./../../callbackcomplete/${encodeURIComponent(username)}`);
+    } else {
+      app.alertResult(result);
     }
-
-    navigate(`./../../callbackcomplete/${username}`);
   };
 
   return (
@@ -125,7 +133,7 @@ function RegisterVerify() {
           variant="outlined"
           key="resending"
           ref={(instance: HTMLButtonElement | null) => {
-            if (codeId == null || codeId === "") instance?.click();
+            if (!codeId) instance?.click();
           }}
           onAction={resending}
         >
@@ -152,5 +160,3 @@ function RegisterVerify() {
     </SharedLayout>
   );
 }
-
-export default RegisterVerify;

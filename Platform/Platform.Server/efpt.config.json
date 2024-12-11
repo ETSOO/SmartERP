@@ -23,6 +23,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.core_log",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.core_organization",
          "ObjectType": 0
       },

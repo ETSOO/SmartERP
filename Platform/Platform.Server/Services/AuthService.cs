@@ -462,6 +462,48 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Change user password
+        /// 修改用户密码
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">HTTP user agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<IActionResult> ChangePasswordAsync(ChangePasswordRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            // Check device
+            if (!this.CheckDevice(userAgent, rq.DeviceId, out var checkResult, out var cd))
+            {
+                return checkResult;
+            }
+
+            var deviceCore = cd.Value.DeviceCore;
+
+            try
+            {
+                var oldPassword = DecryptDeviceData(rq.OldPassword, deviceCore);
+                if (string.IsNullOrEmpty(oldPassword))
+                {
+                    return ApplicationErrors.NoValidData.AsResult("OldPassword");
+                }
+
+                var password = DecryptDeviceData(rq.Password, deviceCore);
+                if (string.IsNullOrEmpty(password))
+                {
+                    return ApplicationErrors.NoValidData.AsResult("Password");
+                }
+
+                var dto = new ChangePasswordDto(oldPassword, password);
+
+                return await ChangePasswordAsync(dto, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                return LogException(ex);
+            }
+        }
+
+        /// <summary>
         /// Change password
         /// 修改密码
         /// </summary>
@@ -470,6 +512,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async ValueTask<IActionResult> ChangePasswordAsync(ChangePasswordDto data, CancellationToken cancellationToken = default)
         {
+            // Validate the user
             if (User == null)
             {
                 return ApplicationErrors.AccessDenied.AsResult();
@@ -1559,6 +1602,35 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Validate password callback
+        /// 验证密码找回
+        /// </summary>
+        /// <returns>Task</returns>
+        public async Task<ActionResult> ValidateCallbackAsync(CoreUserIdentifier identifier, CancellationToken cancellationToken = default)
+        {
+            // Find the user
+            var user = await _db.CoreUsers
+                .Where(u => u.CoreUserIdentifiers.Any(i => i.Type == identifier.Type && i.Value == identifier.Value))
+                .Select(u => new { u.Id, u.Step })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (user == null)
+            {
+                return ApplicationErrors.NoUserMatch.AsResult();
+            }
+            else if (user.Step > 0)
+            {
+                return ApplicationErrors.InvalidAction.AsResult("Step");
+            }
+
+            var result = ActionResult.Success;
+
+            result.Data["token"] = CreateRegistrationToken(user.Id);
+
+            return result;
+        }
+
+        /// <summary>
         /// Validate registration
         /// 验证注册
         /// </summary>
@@ -1570,12 +1642,13 @@ namespace Platform.Server.Services
             if (_regUser == null)
             {
                 // Find the user
-                var user = await _db.CoreUsers.FirstOrDefaultAsync(u => u.CoreUserIdentifiers.Any(i => i.Type == identifier.Type && i.Value == identifier.Value), cancellationToken);
+                var data = await _db.CoreUsers.Where(u => u.CoreUserIdentifiers.Any(i => i.Type == identifier.Type && i.Value == identifier.Value))
+                    .Select(u => new { u.Id, u.Step }).FirstOrDefaultAsync(cancellationToken);
 
-                if (user == null)
+                if (data == null)
                 {
                     // New user
-                    user = new CoreUser
+                    var user = new CoreUser
                     {
                         Name = string.Empty,
                         Step = step
@@ -1584,12 +1657,12 @@ namespace Platform.Server.Services
                     user.CoreUserIdentifiers.Add(identifier);
 
                     // AddAsync vs Add
-                    await _db.CoreUsers.AddAsync(user, cancellationToken);
+                    _db.CoreUsers.Add(user);
                     await _db.SaveChangesAsync(cancellationToken);
 
                     userId = user.Id;
                 }
-                else if (user.Step == 0)
+                else if (data.Step == 0)
                 {
                     // Registered
                     // Not secure to return the user with one time code
@@ -1598,13 +1671,22 @@ namespace Platform.Server.Services
                 else
                 {
                     // Continue to register
-                    userId = user.Id;
+                    userId = data.Id;
                 }
             }
             else
             {
                 // Update the user
-                var user = await _db.CoreUsers.Include(u => u.CoreUserIdentifiers.Where(i => i.Type == identifier.Type)).FirstOrDefaultAsync(u => u.Id == _regUser.IdInt, cancellationToken);
+                var user = await _db.CoreUsers.Where(u => u.Id == _regUser.IdInt)
+                    .Include(u => u.CoreUserIdentifiers.Where(i => i.Type == identifier.Type))
+                    .Select(u => new CoreUser
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        Step = u.Step,
+                        CoreUserIdentifiers = u.CoreUserIdentifiers
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
                 if (user == null)
                 {
                     return ApplicationErrors.NoValidData.AsResult("User");
@@ -1640,6 +1722,30 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Validate email callback password code
+        /// 验证电子邮箱找回密码代码
+        /// </summary>
+        /// <returns>Task</returns>
+        public async Task<ActionResult> ValidateEmailCallbackAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
+        {
+            var (result, email, _) = await ValidateAsync(UserCallbackEmailCode, data, cancellationToken);
+            if (!result.Ok || email == null)
+            {
+                return result;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                Type = CoreUserIdentifierType.Email,
+                Value = email
+            };
+
+            // Validate
+            return await ValidateCallbackAsync(identifier, cancellationToken);
+        }
+
+        /// <summary>
         /// Validate email registration code
         /// 验证电子邮箱注册验证码
         /// </summary>
@@ -1661,6 +1767,30 @@ namespace Platform.Server.Services
 
             // Validate
             return await ValidateRegistrationAsync(identifier, CoreUserStep.Email, ApplicationErrors.EmailExists.AsResult(), cancellationToken);
+        }
+
+        /// <summary>
+        /// Validate mobile callback password code
+        /// 验证手机找回密码代码
+        /// </summary>
+        /// <returns>Task</returns>
+        public async Task<ActionResult> ValidateMobileCallbackAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
+        {
+            var (result, mobile, _) = await ValidateAsync(UserCallbackSMSCode, data, cancellationToken);
+            if (!result.Ok || mobile == null)
+            {
+                return result;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                Type = CoreUserIdentifierType.Mobile,
+                Value = mobile
+            };
+
+            // Validate
+            return await ValidateCallbackAsync(identifier, cancellationToken);
         }
 
         /// <summary>
@@ -2003,6 +2133,62 @@ namespace Platform.Server.Services
             }
 
             return await CompleteLoginAsync(data.CoreUser, data.ClientId, data.Name, data.DeviceType, User.Region, rq.OrganizationId, rq.FromOrganizationId, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Reset password
+        /// 重置密码
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<IActionResult> ResetPasswordAsync(ResetPasswordRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            if (_regUser == null)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            // Check device
+            if (!this.CheckDevice(userAgent, rq.DeviceId, out var checkResult, out var cd))
+            {
+                return checkResult;
+            }
+
+            var deviceCore = cd.Value.DeviceCore;
+
+            try
+            {
+                // Decrypt
+                var id = DecryptDeviceData(rq.Id, deviceCore);
+                if (string.IsNullOrEmpty(id))
+                {
+                    return ApplicationErrors.NoValidData.AsResult("Id");
+                }
+
+                var password = DecryptDeviceData(rq.Password, deviceCore);
+                if (string.IsNullOrEmpty(password))
+                {
+                    return ApplicationErrors.NoValidData.AsResult("Password");
+                }
+
+                var (result, _) = await LoginIdAsync(id, rq.Region, cancellationToken);
+                if (!result.Ok)
+                {
+                    return result;
+                }
+
+                // Update password
+                var newPassword = await App.HashPasswordAsync(_regUser.Id + password);
+                await _db.CoreUsers.AsNoTracking().Where(u => u.Id == _regUser.IdInt)
+                    .ExecuteUpdateAsync(u => u.SetProperty(u => u.Password, newPassword), cancellationToken);
+
+                return ActionResult.Success;
+            }
+            catch (Exception ex)
+            {
+                return LogException(ex);
+            }
         }
 
         /// <summary>

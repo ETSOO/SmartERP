@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
+using com.etsoo.Utils.Actions;
 using com.etsoo.Web;
 using com.etsoo.WebUtils;
 using Platform.Server.Dto.Auth;
@@ -14,6 +15,29 @@ namespace Platform.Server.Endpoints.Auth
     /// </summary>
     public static class Auth
     {
+        static (IActionResult result, ValidateCodeData? data) CreateValidateCodeData(this IAuthService service, CodeValidateRQ rq, string? userAgent)
+        {
+            // Check device
+            if (!service.CheckDevice(userAgent, rq.DeviceId, out var checkResult, out var cd))
+            {
+                return (checkResult, null);
+            }
+
+            var deviceCore = cd.Value.DeviceCore;
+
+            var code = service.DecryptDeviceData(rq.Code, deviceCore);
+            if (code == null)
+            {
+                return (ApplicationErrors.NoValidData.AsResult("Code"), null);
+            }
+
+            return (ActionResult.Success, new ValidateCodeData
+            {
+                Code = code,
+                Id = rq.Id
+            });
+        }
+
         public static RouteGroupBuilder MapAuth(this RouteGroupBuilder builder)
         {
             var g = builder.MapGroup("Auth").AllowAnonymous();
@@ -46,20 +70,8 @@ namespace Platform.Server.Endpoints.Auth
                 return await service.WebInitCallAsync(rq, parser.ToShortName());
             }).WithDescription("Init call / 初始化调用").WithTags("Auth");
 
-            g.MapPut("ChangePassword", async (IAuthService service, IHttpContextAccessor accessor, ChangePasswordRQ rq, CancellationToken cancellationToken) =>
-            {
-                // Device check
-                if (!MinimalApiUtils.CheckDevice(accessor.UserAgent(), out var checkResult, out var parser))
-                {
-                    return checkResult;
-                }
-
-                // Data
-                var data = new ChangePasswordDto("", "");
-
-                // Result
-                return await service.ChangePasswordAsync(data, cancellationToken);
-            }).WithDescription("Change password / 修改密码").RequireAuthorization().WithTags("Auth");
+            g.MapPut("ChangePassword", (IAuthService service, IHttpContextAccessor accessor, ChangePasswordRQ rq, CancellationToken cancellationToken) => service.ChangePasswordAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Change password / 修改密码").RequireAuthorization().WithTags("Auth");
 
             g.MapPost("Login", async (IAuthService service, IHttpContextAccessor accessor, LoginRQ rq, CancellationToken cancellationToken) =>
             {
@@ -164,53 +176,43 @@ namespace Platform.Server.Endpoints.Auth
                 return await service.SendSMSAsync(data, cancellationToken);
             }).WithDescription("Send SMS code / 发送短信验证码").WithTags("Auth");
 
+            g.MapPut("ValidateEmailCallback", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
+            {
+                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
+                if (!result.Ok || data == null)
+                {
+                    return result;
+                }
+                return await service.ValidateEmailCallbackAsync(data, cancellationToken);
+            }).WithDescription("Validate email callback password code / 验证电子邮箱找回密码验证码").WithTags("Auth");
+
             g.MapPut("ValidateEmailRegistration", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
             {
-                // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
+                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
+                if (!result.Ok || data == null)
                 {
-                    return checkResult;
+                    return result;
                 }
-
-                var deviceCore = cd.Value.DeviceCore;
-
-                var code = service.DecryptDeviceData(rq.Code, deviceCore);
-                if (code == null)
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Code");
-                }
-
-                var data = new ValidateCodeData
-                {
-                    Code = code,
-                    Id = rq.Id
-                };
-
                 return await service.ValidateEmailRegistrationAsync(data, cancellationToken);
             }).WithDescription("Validate email registration code / 验证电子邮箱注册验证码").WithTags("Auth");
 
+            g.MapPut("ValidateMobileCallback", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
+            {
+                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
+                if (!result.Ok || data == null)
+                {
+                    return result;
+                }
+                return await service.ValidateMobileCallbackAsync(data, cancellationToken);
+            }).WithDescription("Validate mobile callback password code / 验证手机找回密码验证码").WithTags("Auth");
+
             g.MapPut("ValidateMobileRegistration", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
             {
-                // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
+                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
+                if (!result.Ok || data == null)
                 {
-                    return checkResult;
+                    return result;
                 }
-
-                var deviceCore = cd.Value.DeviceCore;
-
-                var code = service.DecryptDeviceData(rq.Code, deviceCore);
-                if (code == null)
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Code");
-                }
-
-                var data = new ValidateCodeData
-                {
-                    Code = code,
-                    Id = rq.Id
-                };
-
                 return await service.ValidateMobileRegistrationAsync(data, cancellationToken);
             }).WithDescription("Validate mobile registration code / 验证手机注册验证码").WithTags("Auth");
 
@@ -254,6 +256,9 @@ namespace Platform.Server.Endpoints.Auth
 
                 return result;
             }).WithDescription("User switch organization / 用户切换机构").RequireAuthorization().WithTags("Auth");
+
+            g.MapPut("ResetPassword", (IAuthService service, IHttpContextAccessor accessor, ResetPasswordRQ rq, CancellationToken cancellationToken) => service.ResetPasswordAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Reset password / 重置密码").WithTags("Auth");
 
             g.MapPut("Signout", async (IAuthService service, SignoutRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
             {

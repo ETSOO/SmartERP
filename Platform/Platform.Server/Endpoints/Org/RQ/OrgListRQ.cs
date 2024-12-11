@@ -6,5 +6,10 @@
     /// </summary>
     public record OrgListRQ : QueryIntRQ
     {
+        /// <summary>
+        /// Parent org. ID
+        /// 父机构编号
+        /// </summary>
+        public int? ParentId { get; init; }
     }
 }

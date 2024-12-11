@@ -2,8 +2,8 @@ import { IServiceAppSettings, MUGlobal, ServiceApp } from "@etsoo/materialui";
 import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
-import { UserApi } from "../api/UserApi";
 import { CoreApp, CoreCulture } from "@etsoo/smarterp-core";
+import { AuthApi } from "../api/AuthApi";
 
 class MyApp extends ServiceApp<MyUser> {
   /**
@@ -12,9 +12,9 @@ class MyApp extends ServiceApp<MyUser> {
   readonly core = new CoreApp(this, this.coreApi);
 
   /**
-   * User APIs
+   * Auth APIs
    */
-  readonly userApi = new UserApi(this);
+  readonly authApi = new AuthApi(this);
 }
 
 // Detected country or region

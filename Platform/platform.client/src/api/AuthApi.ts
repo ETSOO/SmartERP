@@ -111,6 +111,16 @@ export class AuthApi extends AuthApiBase {
   }
 
   /**
+   * Validate email callback password code
+   * @param rq Request data
+   * @param payload Payload
+   * @returns Result
+   */
+  validateEmailCallback(rq: ValidateRQ, payload?: TokenResultPayload) {
+    return this.api.put("Auth/ValidateEmailCallback", rq, payload);
+  }
+
+  /**
    * Validate email registration code
    * @param rq Request data
    * @param payload Payload
@@ -118,6 +128,16 @@ export class AuthApi extends AuthApiBase {
    */
   validateEmailRegistration(rq: ValidateRQ, payload?: TokenResultPayload) {
     return this.api.put("Auth/ValidateEmailRegistration", rq, payload);
+  }
+
+  /**
+   * Validate mobile callback password code
+   * @param rq Request data
+   * @param payload Payload
+   * @returns Result
+   */
+  validateMobileCallback(rq: ValidateRQ, payload?: TokenResultPayload) {
+    return this.api.put("Auth/ValidateMobileCallback", rq, payload);
   }
 
   /**

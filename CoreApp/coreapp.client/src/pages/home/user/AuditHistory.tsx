@@ -2,12 +2,12 @@ import {
   DialogButton,
   MUGlobal,
   SearchField,
-  ResponsivePage,
   MobileListItemRenderer,
-  SelectBool,
-  Tiplist
+  Tiplist,
+  MUUtils,
+  ResponsivePage
 } from "@etsoo/materialui";
-import { DateUtils, NumberUtils } from "@etsoo/shared";
+import { DataTypes, DateUtils } from "@etsoo/shared";
 import { BoxProps, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import React from "react";
@@ -17,26 +17,28 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { LoginHistoryDto } from "../../../api/dto/user/LoginHistoryDto";
+import { AuditHistoryDto, DeviceListDto } from "@etsoo/smarterp-core";
+
+const template = {
+  keyword: "string",
+  deviceId: "number",
+  creationStart: "date",
+  creationEnd: "date"
+} as const satisfies DataTypes.BasicTemplate;
 
 export default function LoginHistory() {
   // Labels
   const labels = app.getLabels(
-    "device",
-    "successLogin",
-    "no",
-    "yes",
+    "actions",
     "creation",
-    "startDate",
+    "device",
     "endDate",
-    "language",
-    "success",
-    "description",
-    "actions"
+    "startDate",
+    "title"
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<LoginHistoryDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<AuditHistoryDto>>();
 
   // Load data
   const reloadData = () => ref.current?.reset();
@@ -50,43 +52,32 @@ export default function LoginHistory() {
   }, []);
 
   return (
-    <ResponsivePage<
-      LoginHistoryDto,
-      {
-        deviceId: "number";
-        success: "boolean";
-        creationStart: "string" | "date";
-        creationEnd: "string" | "date";
-      }
-    >
+    <ResponsivePage<AuditHistoryDto, typeof template>
+      adjustHeight={24}
       mRef={ref}
-      defaultOrderBy="creation"
-      defaultOrderByAsc={false}
+      defaultOrderBy={[{ field: "creation", desc: true }]}
       cacheKey="search-history-cache"
-      pageProps={{ onRefresh: reloadData }}
-      fieldTemplate={{
-        deviceId: "number",
-        success: "boolean",
-        creationStart: "date",
-        creationEnd: "date"
-      }}
+      pageProps={{ onRefresh: reloadData, paddings: 0 }}
+      fieldTemplate={template}
       fields={(data) => [
-        <Tiplist
+        <SearchField
+          label={labels.title}
+          name="keyword"
+          minChars={2}
+          defaultValue={data.keyword}
+        />,
+        <Tiplist<DeviceListDto>
           label={labels.device}
           name="deviceId"
+          minChars={2}
           search
           loadData={(keyword, id) =>
-            app.userApi.deviceList(
-              { id: NumberUtils.parse(id), keyword },
+            app.core.userApi.deviceList(
+              { id, keyword },
               { defaultValue: [], showLoading: false }
             )
           }
           idValue={data.deviceId}
-        />,
-        <SelectBool
-          label={labels.successLogin}
-          name="success"
-          value={`${data.success}`}
         />,
         <SearchField
           label={labels.startDate}
@@ -99,7 +90,9 @@ export default function LoginHistory() {
             );
             if (date) creationEndRef.current.min = date;
           }}
-          inputProps={{ max: DateUtils.formatForInput(new Date()) }}
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
+          }}
           defaultValue={DateUtils.formatForInput(data.creationStart)}
         />,
         <SearchField
@@ -107,14 +100,20 @@ export default function LoginHistory() {
           name="creationEnd"
           type="date"
           inputRef={creationEndRef}
-          inputProps={{
-            max: DateUtils.formatForInput(new Date())
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
           }}
           defaultValue={DateUtils.formatForInput(data.creationEnd)}
         />
       ]}
-      loadData={async (data) =>
-        app.userApi.loginHistory(data, { defaultValue: [], showLoading: false })
+      loadData={async (data, lastItem) =>
+        app.core.userApi.auditHistory(
+          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        )
       }
       columns={[
         {
@@ -126,25 +125,8 @@ export default function LoginHistory() {
           sortAsc: false,
           renderProps: app.getDateFormatProps()
         },
-        { field: "deviceName", header: labels.device },
-        {
-          field: "language",
-          width: 90,
-          header: labels.language,
-          sortable: false
-        },
-        {
-          field: "success",
-          width: 90,
-          type: GridDataType.Boolean,
-          header: labels.success,
-          sortable: false
-        },
-        {
-          field: "reason",
-          width: 150,
-          header: labels.description
-        },
+        { field: "title", header: labels.title },
+        { field: "deviceName", header: labels.device, width: 200 },
         {
           width: 80,
           header: labels.actions,
@@ -152,7 +134,7 @@ export default function LoginHistory() {
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<LoginHistoryDto, BoxProps>) => {
+          }: GridCellRendererProps<AuditHistoryDto, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -175,11 +157,11 @@ export default function LoginHistory() {
           }
         }
       ]}
-      itemSize={[134, margin]}
+      itemSize={[112, margin]}
       innerItemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.deviceName,
+            data.title,
             app.formatDate(data.creation, "ds"),
             <DialogButton
               content={JSON.stringify(data, undefined, 2)}
@@ -192,16 +174,7 @@ export default function LoginHistory() {
               JSON data
             </DialogButton>,
             <React.Fragment>
-              <Typography variant="caption" noWrap>
-                {[data.region, data.language, data.timezone].join(", ")}
-              </Typography>
-              <Typography
-                variant="body2"
-                noWrap
-                color={data.success ? "green" : "red"}
-              >
-                {data.success ? "Success" : "Failed: " + data.reason}
-              </Typography>
+              <Typography variant="caption">{data.deviceName}</Typography>
             </React.Fragment>
           ];
         })

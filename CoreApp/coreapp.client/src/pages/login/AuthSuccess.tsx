@@ -25,9 +25,7 @@ export default function AuthSuccess() {
           ? JSON.parse(core)
           : undefined;
 
-        React.useEffect(() => {
-          app.userLoginEx(userData, coreObj, true);
-        }, [userData, coreObj]);
+        app.userLoginEx(userData, coreObj, false);
 
         return <Navigate to="./../../home" replace />;
       } else {

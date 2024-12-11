@@ -7,7 +7,7 @@ namespace Platform.Server.Endpoints.Org.RQ
     /// Organization query request data
     /// 机构查询请求数据
     /// </summary>
-    public record OrgQueryRQ : QueryIntRQ
+    public record OrgQueryRQ : OrgListRQ
     {
         public string? Pin { get; init; }
 

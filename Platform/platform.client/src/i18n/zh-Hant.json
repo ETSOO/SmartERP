@@ -9,7 +9,7 @@
   "acceptInvitationMessage": "確定接受邀請嗎？",
   "appName": "司友®雲ERP",
   "authFail": "認證失敗",
-  "authFailContinue": "您尚未綁定{0}登錄，點擊'繼續註冊'按鈕進行註冊和綁定，或後退到首頁重新登入。",
+  "authFailContinue": "您尚未綁定{0}登錄，點擊'繼續註冊'按鈕進行註冊和綁定，或後退到首頁重新登入，進入「管理中心」下的「個人資訊」進行管理。",
   "authFailTip": "{0}認證失敗，請點選'後退'按鈕重試。",
   "avatar": "頭像",
   "brand": "品牌",

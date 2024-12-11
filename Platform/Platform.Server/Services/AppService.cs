@@ -1,9 +1,14 @@
-﻿using com.etsoo.CoreFramework.User;
+﻿using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
+using com.etsoo.CoreFramework.User;
+using com.etsoo.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Platform.Server.Application;
 using Platform.Server.Dto.App;
+using Platform.Server.Endpoints.App.RQ;
 using PlatformShared.Database;
+using PlatformShared.Database.Models;
+using System.Buffers;
 
 namespace Platform.Server.Services
 {
@@ -14,8 +19,6 @@ namespace Platform.Server.Services
     public class AppService : CommonUserService, IAppService
     {
         readonly MyDbContext _db;
-        readonly IDistributedCache _cache;
-        readonly IHttpContextAccessor _accessor;
 
         /// <summary>
         /// Constructor
@@ -27,98 +30,194 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="cache">Cache</param>
         /// <param name="accessor">HttpContext accessor</param>
-        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger, IDistributedCache cache, IHttpContextAccessor accessor)
+        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger)
             : base(app, userAccessor.UserSafe, "app", logger)
         {
             _db = db;
-            _cache = cache;
-            _accessor = accessor;
         }
 
         /// <summary>
-        /// Get user's latest accessed appliation's Web URL
-        /// 获取用户最近访问的程序的Web网址
+        /// Get user's latest accessed applications
+        /// 获取用户最近访问的应用
         /// </summary>
-        /// <param name="cancellationToken">Cancellation Token</param>
-        /// <returns>Web URL</returns>
-        public async Task<string> GetUserLatestAppAsync(CancellationToken cancellationToken = default)
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task GetMyAsync(AppGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            // Latest accessed app id
-            var appId = User.AppId ?? MyAppConstants.CoreAppId;
-
-            var url = await _db.CoreApps.AsNoTracking()
-                .GroupJoin(_db.CoreOrganizationApps, a => a.Id, oa => oa.CoreAppId, (a, oa) => new { a, oa })
-                .SelectMany(t => t.oa.Where(oa => oa.CoreOrganizationId == User.OrganizationInt).DefaultIfEmpty(), (t, oa) => oa == null ? t.a.WebUrl : oa.LocalUrl ?? t.a.WebUrl)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (string.IsNullOrEmpty(url))
-            {
-                // Extreme case, get the core app url
-                url = await _db.CoreApps.AsNoTracking()
-                    .Where(a => a.Id == MyAppConstants.CoreAppId)
-                    .Select(a => a.WebUrl)
-                    .FirstAsync(cancellationToken);
-            }
-
-            return url;
-        }
-
-        /// <summary>
-        /// Get user appliations depends on token, relogin is required for update
-        /// 基于令牌获取用户程序，更新需要重新登录
-        /// </summary>
-        /// <param name="cancellationToken">Cancellation Token</param>
-        /// <returns>Result</returns>
-        public async Task<IEnumerable<AppData>> GetUserAppsAsync(CancellationToken cancellationToken = default)
-        {
-            // User apps
-            var ids = new List<int>
-            {
-                MyAppConstants.CoreAppId
-            };
-
-            if (User.Scopes != null)
-            {
-                // Super user
-                if (User.Scopes.Contains(MyAppConstants.SuperApp)) ids.Add(MyAppConstants.SuperAppId);
-
-                // Other apps
-                foreach (var scope in User.Scopes)
+            var (hasContent, commandText) = await _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.CoreOrganizationId == User.OrganizationInt
+                    && oa.Status <= EntityStatus.Approved
+                    && (oa.Expiry == null || oa.Expiry >= DateTimeOffset.Now)
+                    && oa.CoreApp.IdentityType == rq.IdentityType)
+                .OrderByDescending(oa => oa.Id)
+                .Take(rq.MaxItems)
+                .Select(oa => new AppQueryData
                 {
-                    ids.Add(CurrentUser.ScopeToAppId(scope));
-                }
+                    Id = oa.Id,
+                    Name = oa.LocalName ?? oa.CoreApp.Name,
+                    IdentityType = oa.CoreApp.IdentityType,
+                    RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
+                    WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
+                    HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
+                    Logo = oa.CoreApp.Logo
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("GetMyAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
+        }
 
-            // Private apps
-            var apps = await _db.CoreApps.AsNoTracking()
-               .Where(a => ids.Contains(a.Id))
-               .Select(a => new AppData
-               {
-                   Id = a.Id,
-                   Name = a.Name,
-                   WebUrl = a.WebUrl,
-                   HelpUrl = a.HelpUrl,
-                   Logo = a.Logo
-               })
-               .ToArrayAsync(cancellationToken);
+        private IQueryable<CoreApp> CreateQuery(AppListRQ rq, Func<IQueryable<CoreApp>, IQueryable<CoreApp>>? filters = null)
+        {
+            var query = _db.CoreApps
+                .AsNoTracking()
+                .Where(a => a.IsPublic && a.Enabled)
+                .QueryEtsoo(rq, (a) => a.Id, null, (q) =>
+                {
+                    if (rq.IdentityType.HasValue)
+                    {
+                        q = q.Where(a => a.IdentityType == rq.IdentityType);
+                    }
 
-            // User apps
-            /*
-            var userApps = await _db.CoreOrganizationAppKeys.AsNoTracking()
-               .Where(k => ids.Contains(k.CoreOrganizationApp.CoreAppId))
-               .Select(k => new AppData
-               {
-                   Id = k.CoreOrganizationApp.CoreAppId,
-                   Name = k.LocalName ?? k.CoreOrganizationApp.CoreApp.Name,
-                   WebUrl = k.LocalUrl ?? k.CoreOrganizationApp.CoreApp.WebUrl,
-                   HelpUrl = k.CoreOrganizationApp.CoreApp.HelpUrl,
-                   Logo = k.CoreOrganizationApp.CoreApp.Logo
-               })
-               .ToArrayAsync(cancellationToken);
-            */
+                    if (rq.RequireLocalUrl.HasValue)
+                    {
+                        q = q.Where(a => a.RequireLocalUrl == rq.RequireLocalUrl.Value);
+                    }
 
-            return apps;
-            //return apps.UnionBy(userApps, a => a.WebUrl);
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, a => a.Name);
+                    }
+
+                    if (filters != null)
+                    {
+                        q = filters(q);
+                    }
+
+                    return q;
+                });
+            ;
+
+            return query;
+        }
+
+        /// <summary>
+        /// List applications JSON data
+        /// 应用列表JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task ListAsync(AppListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = CreateQuery(rq);
+
+            await query.Select(a => new
+            {
+                a.Id,
+                a.Name
+            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Query application JSON data
+        /// 查询应用JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task QueryAsync(AppQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = CreateQuery(rq);
+
+            var (hasContent, commandText) = await query.Select(a => new AppQueryData
+            {
+                Id = a.Id,
+                Name = a.Name,
+                IdentityType = a.IdentityType,
+                RequireLocalUrl = a.RequireLocalUrl,
+                WebUrl = a.WebUrl,
+                HelpUrl = a.HelpUrl,
+                Logo = a.Logo
+            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        /// <summary>
+        /// Query purchased applications JSON data
+        /// 查询已购应用JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task QueryPurchasedAsync(AppPurchasedQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var (hasContent, commandText) =  await _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.CoreOrganizationId == User.OrganizationInt)
+                .QueryEtsoo(rq, oa => oa.Id, null, (q) =>
+                {
+                    if (rq.IdentityType.HasValue)
+                    {
+                        q = q.Where(oa => oa.CoreApp.IdentityType == rq.IdentityType);
+                    }
+
+                    if (rq.RequireLocalUrl.HasValue)
+                    {
+                        q = q.Where(oa => oa.CoreApp.RequireLocalUrl == rq.RequireLocalUrl.Value);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.CoreApp.Name, oa => oa.LocalName);
+                    }
+
+                    if (rq.Expiry.HasValue)
+                    {
+                        q = q.Where(oa => oa.Expiry >= rq.Expiry);
+                    }
+
+                    if (rq.ExpiryDays.HasValue)
+                    {
+                        var expiryDays = rq.ExpiryDays.Value;
+                        q = q.Where(oa => oa.Expiry >= DateTimeOffset.Now.AddDays(expiryDays));
+                    }
+
+                    return q;
+                }).Select(oa => new AppPurchasedQueryData
+                {
+                    Id = oa.Id,
+                    Name = oa.LocalName ?? oa.CoreApp.Name,
+                    IdentityType = oa.CoreApp.IdentityType,
+                    RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
+                    WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
+                    HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
+                    Logo = oa.CoreApp.Logo,
+                    Expiry = oa.Expiry,
+                    ExpiryDays = oa.Expiry == null || oa.Expiry <= DateTimeOffset.Now.AddDays(-90) ? null : (int)(oa.Expiry.Value - DateTimeOffset.Now).TotalDays,
+                    Status = oa.Status,
+                    Creation = oa.Creation
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("GetPurchasedAppsAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
         }
     }
 }

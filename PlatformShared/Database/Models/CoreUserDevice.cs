@@ -68,6 +68,12 @@
         public CoreUser CoreUser { get; set; } = default!;
 
         /// <summary>
+        /// Core logs
+        /// 核心日志
+        /// </summary>
+        public ICollection<CoreLog> CoreLogs { get; set; } = [];
+
+        /// <summary>
         /// Core user device tokens
         /// 核心用户设备令牌
         /// </summary>

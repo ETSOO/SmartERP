@@ -28,8 +28,11 @@ using Platform.Server;
 using Platform.Server.Application;
 using Platform.Server.Endpoints.App;
 using Platform.Server.Endpoints.Auth;
+using Platform.Server.Endpoints.Member;
 using Platform.Server.Endpoints.Org;
 using Platform.Server.Endpoints.Public;
+using Platform.Server.Endpoints.Storage;
+using Platform.Server.Endpoints.User;
 using Platform.Server.OAuth2;
 using Platform.Server.Services;
 using PlatformShared.Database;
@@ -86,7 +89,8 @@ if (string.IsNullOrEmpty(connectonString))
     throw new Exception("SmartERP connection string not found");
 }
 
-services.AddDbContextPool<MyDbContext>((provider, options) =>
+// services.AddDbContextPool
+services.AddDbContext<MyDbContext>((provider, options) =>
 {
     options.UseNpgsql(connectonString);
 
@@ -285,10 +289,14 @@ services.AddScoped<IWXClient, WXClient>();
 services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<IAppService, AppService>();
 services.AddScoped<IAuthService, AuthService>();
+services.AddScoped<IMemberService, MemberService>();
 services.AddScoped<IOrgService, OrgService>();
 services.AddScoped<IPublicService, PublicService>();
+services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -350,8 +358,11 @@ if (microsoftOptions.Exists())
 // Endpoints
 api.MapAuth()
     .MapApp()
+    .MapMember()
     .MapOrg()
     .MapPublic()
+    .MapStorage()
+    .MapUser()
     .AddModelValidators()
     .RequireAuthorization()
 ;

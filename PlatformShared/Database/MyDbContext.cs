@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlatformShared.Database.Models;
 
@@ -25,6 +26,12 @@ namespace PlatformShared.Database
         /// 授权码
         /// </summary>
         public required DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
+
+        /// <summary>
+        /// Core logs
+        /// 核心日志
+        /// </summary>
+        public required DbSet<CoreLog> CoreLogs { get; set; }
 
         /// <summary>
         /// Core organizations
@@ -74,9 +81,16 @@ namespace PlatformShared.Database
         /// </summary>
         public required DbSet<CoreUserIdentifier> CoreUserIdentifiers { get; set; }
 
+        /// <summary>
+        /// Is sensitive data logging enabled
+        /// 敏感数据日志是否启用
+        /// </summary>
+        public readonly bool IsSensitiveDataLoggingEnabled;
+
         public MyDbContext(DbContextOptions<MyDbContext> options)
             : base(options)
         {
+            IsSensitiveDataLoggingEnabled =  options.GetExtension<CoreOptionsExtension>().IsSensitiveDataLoggingEnabled;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -149,10 +163,64 @@ namespace PlatformShared.Database
                 entity.Property(e => e.Times)
                     .HasDefaultValue((short)0)
                     .HasColumnName("times");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
 
                 entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserAuthCodes)
                     .HasForeignKey(d => d.CoreUserId)
                     .HasConstraintName("core_auth_code_core_user_id_fkey");
+            });
+
+            modelBuilder.Entity<CoreLog>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("core_log_pkey");
+
+                entity.ToTable("core_log");
+
+                entity.Property(e => e.Id)
+                    .UseIdentityAlwaysColumn()
+                    .HasColumnName("id");
+                entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+                entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
+                entity.Property(e => e.Creation)
+                    .HasDefaultValueSql("now()")
+                    .HasColumnName("creation");
+                entity.Property(e => e.Culture)
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasColumnName("culture");
+                entity.Property(e => e.Data)
+                    .HasColumnType("jsonb")
+                    .HasColumnName("data");
+                entity.Property(e => e.DeviceId).HasColumnName("device_id");
+                entity.Property(e => e.DeviceName)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnName("device_name");
+                entity.Property(e => e.Ip)
+                    .IsRequired()
+                    .HasMaxLength(45)
+                    .HasConversion<IPAddressToStringConverter>()
+                    .HasColumnName("ip");
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnName("title");
+
+                entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreLogs)
+                    .HasForeignKey(d => d.CoreOrganizationId)
+                    .HasConstraintName("core_log_core_organization_id_fkey");
+
+                entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreLogs)
+                    .HasForeignKey(d => d.CoreUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("core_log_core_user_id_fkey");
+
+                entity.HasOne(d => d.Device).WithMany(p => p.CoreLogs)
+                    .HasForeignKey(d => d.DeviceId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("core_log_device_id_fkey");
             });
 
             modelBuilder.Entity<CoreOrganization>(entity =>

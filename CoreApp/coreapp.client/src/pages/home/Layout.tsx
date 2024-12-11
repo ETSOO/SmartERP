@@ -56,12 +56,14 @@ export default function Home() {
     "app1",
     "auditHistory",
     "changePassword",
+    "currentOrg",
     "joinedOrgs",
     "me",
     "menuHome",
     "personalData",
     "purchasedApps",
     "signoutSuccess",
+    "switchOrg",
     "updateAvator"
   );
 
@@ -73,19 +75,17 @@ export default function Home() {
   const org = React.useCallback(
     () => (
       <React.Fragment>
-        {organizationName && (
-          <ButtonGroup variant="text">
-            <Button
-              sx={{ display: { xs: "none", md: "block" } }}
-              title="当前机构"
-            >
-              {organizationName}
-            </Button>
-            <Button title="点击切换到其他机构">
-              <AccountTreeIcon />
-            </Button>
-          </ButtonGroup>
-        )}
+        <ButtonGroup variant="text">
+          <Button
+            sx={{ display: { xs: "none", md: "block" } }}
+            title={labels.currentOrg}
+          >
+            {organizationName ?? labels.switchOrg}
+          </Button>
+          <Button title={labels.switchOrg}>
+            <AccountTreeIcon />
+          </Button>
+        </ButtonGroup>
       </React.Fragment>
     ),
     [organizationName]
@@ -105,7 +105,7 @@ export default function Home() {
         icon: <PeopleIcon />
       },
       {
-        segment: "home/organization/my",
+        segment: "home/org/my",
         title: labels.joinedOrgs,
         icon: <AccountTreeIcon />
       },
@@ -142,7 +142,7 @@ export default function Home() {
         icon: <LockIcon />
       },
       {
-        segment: "home/user/loginhistory",
+        segment: "home/user/audithistory",
         title: labels.auditHistory,
         icon: <HistoryIcon />
       }

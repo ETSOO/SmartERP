@@ -23,13 +23,16 @@ namespace Platform.Server.Endpoints.Org
             g.MapDelete("Delete/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete organization / 删除机构").WithTags("Org");
 
+            g.MapPost("GetMy", (IOrgService service, OrgGetMyRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.GetMyAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Get my organizations JSON data / 获取我的机构JSON数据").WithTags("Org");
+
             g.MapPost("List", (IOrgService service, OrgListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("List organizations JSON data / 列出机构JSON数据").WithTags("Org");
 
-            g.MapPost("Query", (IOrgService service, OrgQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.HttpContext!.Response, cancellationToken))
+            g.MapPost("Query", (IOrgService service, OrgQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
 
-            g.MapGet("Read/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.HttpContext!.Response, cancellationToken))
+            g.MapGet("Read/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
 
             g.MapGet("RequestToken", (IAntiforgery forgeryService, IHttpContextAccessor accessor) =>
@@ -44,7 +47,8 @@ namespace Platform.Server.Endpoints.Org
             g.MapPut("Update", (IOrgService service, OrgUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update organization / 更新机构").WithTags("Org");
 
-            g.MapPut("UploadAvatar/{id:int}", (IOrgService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UploadAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
+            g.MapPut("UpdateAvatar/{id:int}", (IOrgService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
+                .DisableAntiforgery()
                 .WithDescription("Update organization avatar / 更新机构头像").WithTags("Org");
 
             g.MapGet("UpdateRead/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
