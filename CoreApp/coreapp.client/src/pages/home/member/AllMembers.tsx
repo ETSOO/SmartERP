@@ -144,7 +144,7 @@ export default function AllMembers() {
         <Switch
           label={labels.statusNormal}
           name="enabled"
-          checked={data.enabled}
+          checked={data.enabled ?? true}
         />
       ]}
       loadData={async (data) => {

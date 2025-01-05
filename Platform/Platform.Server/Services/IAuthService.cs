@@ -34,7 +34,7 @@ namespace Platform.Server.Services
         ValueTask<AppTokenData?> OAuthRefreshTokenAsync(AuthRefreshTokenRQ rq, CancellationToken cancellationToken = default);
         ValueTask<(IActionResult result, string? newRefreshToken)> OAuthRefreshTokenResultAsync(AuthRefreshTokenRQ rq, CancellationToken cancellationToken = default);
         Task OAuthUserInfoAsync(HttpResponse? response, CancellationToken cancellationToken = default);
-        ValueTask<(IActionResult result, string? refreshToken)> SwitchOrgAsync(SwitchOrgRQ rq, CancellationToken cancellationToken = default);
+        ValueTask<AppTokenData?> SwitchOrgAsync(SwitchOrgProxyRQ rq, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> ResetPasswordAsync(ResetPasswordRQ rq, string? userAgent, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> SignoutAsync(string token);
     }

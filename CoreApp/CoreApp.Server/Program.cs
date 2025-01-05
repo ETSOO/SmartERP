@@ -10,6 +10,7 @@ using com.etsoo.ThirdPartyExtentions.Minio;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
+using CoreApp.Server;
 using CoreApp.Server.Endpoints.Auth;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
@@ -113,7 +114,8 @@ services.ConfigureHttpJsonOptions(options =>
     // Use source generation
     options.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
         ModelJsonSerializerContext.Default,
-        CommonJsonSerializerContext.Default
+        CommonJsonSerializerContext.Default,
+        MyJsonSerializerContext.Default
     );
 });
 

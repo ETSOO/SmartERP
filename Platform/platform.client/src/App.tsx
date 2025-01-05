@@ -236,15 +236,17 @@ export default function App() {
         deviceId: app.deviceId
       })
       .then((data) => {
-        if (data == null) return;
+        if (data) {
+          // Device data maybe expired and causing the org data return null
+          if (org != null) {
+            org.orgId = data.orgId;
+          }
 
-        if (org != null) {
-          org.orgId = data.orgId;
+          app.storage.setData(Constants.OrgRequestField, org);
+
+          setAppData(data);
         }
 
-        app.storage.setData(Constants.OrgRequestField, org);
-
-        setAppData(data);
         setVisible(true);
       });
   }, [org?.org, auth?.appId, auth?.appKey]);

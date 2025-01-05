@@ -44,7 +44,7 @@ namespace Platform.Server.Endpoints.Public
                 return service.MobileQRCodeAsync(rq, cancellationToken);
             }).WithDescription("Get mobile QRCode image Base64 string / 获取移动端QRCode图片的Base64字符串").WithTags("Public");
 
-            g.MapPost("OrgInfo", (IPublicService service, IHttpContextAccessor accessor, OrgInfoRQ rq, CancellationToken cancellationToken) =>
+            g.MapPost("OrgInfo", async (IPublicService service, IHttpContextAccessor accessor, OrgInfoRQ rq, CancellationToken cancellationToken) =>
             {
                 // Check device
                 if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out _))
@@ -52,7 +52,7 @@ namespace Platform.Server.Endpoints.Public
                     return null;
                 }
 
-                return service.OrgInfoAsync(rq, cancellationToken);
+                return await service.OrgInfoAsync(rq, cancellationToken);
             }).WithDescription("Get organization public information / 获取机构公开信息").WithTags("Public");
 
             g.MapPost("QueryPlace", (IPublicService service, PlaceQueryRQ rq, CancellationToken cancellationToken) =>

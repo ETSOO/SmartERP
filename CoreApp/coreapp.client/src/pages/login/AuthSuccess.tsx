@@ -2,9 +2,10 @@ import { useSearchParamsEx } from "@etsoo/react";
 import { IServiceUser, ServiceUserToken } from "@etsoo/materialui";
 import { ApiRefreshTokenDto } from "@etsoo/appscript";
 import { IActionResult } from "@etsoo/shared";
-import { Navigate } from "react-router-dom";
-import React from "react";
+import { useNavigate } from "react-router-dom";
 import { app } from "../../app/MyApp";
+import React from "react";
+import { Box, LinearProgress } from "@mui/material";
 
 export default function AuthSuccess() {
   // Query params
@@ -13,47 +14,55 @@ export default function AuthSuccess() {
     result: "string"
   });
 
-  let pageResult: IActionResult;
-  if (result) {
-    try {
-      const resultObj: IActionResult<IServiceUser & ServiceUserToken> =
-        JSON.parse(result);
+  // Route
+  const navigate = useNavigate();
 
-      if (resultObj.ok && resultObj.data) {
-        const userData = resultObj.data;
-        const coreObj: ApiRefreshTokenDto | undefined = core
-          ? JSON.parse(core)
-          : undefined;
+  React.useEffect(() => {
+    let pageResult: IActionResult;
+    if (result) {
+      try {
+        const resultObj: IActionResult<IServiceUser & ServiceUserToken> =
+          JSON.parse(decodeURIComponent(result));
 
-        app.userLoginEx(userData, coreObj, false);
+        if (resultObj.ok && resultObj.data) {
+          const userData = resultObj.data;
 
-        return <Navigate to="./../../home" replace />;
-      } else {
+          const coreObj: ApiRefreshTokenDto | undefined = core
+            ? JSON.parse(decodeURIComponent(core))
+            : undefined;
+
+          app.userLoginEx(userData, coreObj);
+
+          navigate("./../../home");
+          return;
+        } else {
+          pageResult = {
+            ok: false,
+            title: "No Valid Auth Result"
+          };
+        }
+      } catch (error) {
         pageResult = {
           ok: false,
-          title: "No Valid Auth Result"
+          title: `Auth Exception ${error}`
         };
+        console.error("AuthSuccess", error);
       }
-    } catch (error) {
+    } else {
       pageResult = {
         ok: false,
-        title: `Auth Exception ${error}`
+        title: "No Auth Result"
       };
-      console.error("AuthSuccess", error);
     }
-  } else {
-    pageResult = {
-      ok: false,
-      title: "No Auth Result"
-    };
-  }
+
+    navigate(
+      `./../authfail?error=${encodeURIComponent(JSON.stringify(pageResult))}`
+    );
+  }, []);
 
   return (
-    <Navigate
-      to={`./../authfail?error=${encodeURIComponent(
-        JSON.stringify(pageResult)
-      )}`}
-      replace
-    />
+    <Box sx={{ width: "100%" }}>
+      <LinearProgress />
+    </Box>
   );
 }

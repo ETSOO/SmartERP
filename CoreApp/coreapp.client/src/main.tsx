@@ -88,6 +88,20 @@ const router = createDynamicRouter([
             Component: Home
           },
           {
+            path: "/home/app/all",
+            lazy: async () => {
+              const AllApps = await import("./pages/home/app/AllApps");
+              return { Component: AllApps.default };
+            }
+          },
+          {
+            path: "/home/app/my",
+            lazy: async () => {
+              const MyApps = await import("./pages/home/app/MyApps");
+              return { Component: MyApps.default };
+            }
+          },
+          {
             path: "/home/member/all",
             lazy: async () => {
               const AllMembers = await import("./pages/home/member/AllMembers");

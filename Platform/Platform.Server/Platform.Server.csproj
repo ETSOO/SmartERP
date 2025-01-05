@@ -30,7 +30,7 @@
     <PackageReference Include="com.etsoo.Localization" Version="1.0.20" />
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.28" />
-    <PackageReference Include="com.etsoo.SMTP" Version="1.0.67" />
+    <PackageReference Include="com.etsoo.SMTP" Version="1.0.68" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.3" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.2.0" />
@@ -42,7 +42,7 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.10.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>

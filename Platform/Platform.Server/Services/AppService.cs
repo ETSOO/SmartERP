@@ -1,11 +1,15 @@
-﻿using com.etsoo.CoreFramework.Business;
+﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.Utils.Actions;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.App;
 using Platform.Server.Endpoints.App.RQ;
+using Platform.Server.Endpoints.Org.RQ;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using System.Buffers;
@@ -19,6 +23,7 @@ namespace Platform.Server.Services
     public class AppService : CommonUserService, IAppService
     {
         readonly MyDbContext _db;
+        readonly IOrgService _orgService;
 
         /// <summary>
         /// Constructor
@@ -28,12 +33,89 @@ namespace Platform.Server.Services
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
-        /// <param name="cache">Cache</param>
-        /// <param name="accessor">HttpContext accessor</param>
-        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger)
+        /// <param name="orgService">Organization service</param>
+        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger,
+            IOrgService orgService)
             : base(app, userAccessor.UserSafe, "app", logger)
         {
             _db = db;
+            _orgService = orgService;
+        }
+
+        /// <summary>
+        /// Buy application
+        /// 购买应用
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> BuyAsync(AppBuyRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Check the application
+            if (rq.Id < 3)
+            {
+                return ApplicationErrors.NoValidData.AsResult();
+            }
+
+            // No duplicate purchase
+            if (await _db.CoreOrganizationApps.AnyAsync(oa => oa.CoreAppId == rq.Id && oa.CoreOrganizationId == User.OrganizationInt, cancellationToken: cancellationToken))
+            {
+                return ApplicationErrors.ItemExists.AsResult();
+            }
+
+            // Check the organization
+            if (!await _orgService.OwnsAsync(rq.OrganizationId, UserRole.User, cancellationToken))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.OrganizationId));
+            }
+
+            // Repository
+            await _db.CoreOrganizationApps.AddAsync(new CoreOrganizationApp
+            {
+                CoreAppId = rq.Id,
+                CoreOrganizationId = rq.OrganizationId,
+                Expiry = DateTimeOffset.UtcNow.AddYears(1)
+            }, cancellationToken);
+
+            return ActionResult.Success;
+        }
+
+        /// <summary>
+        /// Buy application and create new organization
+        /// 购买应用并创建新机构
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> BuyNewAsync(AppBuyNewRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Create the organization
+            var orgRq = new OrgCreateRQ
+            {
+                Name = rq.OrgName,
+                Pin = rq.OrgPin
+            };
+
+            var (result, id) = await _orgService.CreateWithIdAsync(orgRq, cancellationToken);
+            if (!result.Ok || id == null)
+            {
+                return result;
+            }
+
+            // Buy the application
+            var buyRq = new AppBuyRQ
+            {
+                Id = rq.Id,
+                OrganizationId = id.Value
+            };
+
+            result = await BuyAsync(buyRq, cancellationToken);
+
+            if (result.Ok && id.HasValue)
+            {
+                result.Data[nameof(id)] = id.Value;
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -50,7 +132,7 @@ namespace Platform.Server.Services
                 .AsNoTracking()
                 .Where(oa => oa.CoreOrganizationId == User.OrganizationInt
                     && oa.Status <= EntityStatus.Approved
-                    && (oa.Expiry == null || oa.Expiry >= DateTimeOffset.Now)
+                    && (oa.Expiry == null || oa.Expiry >= DateTimeOffset.UtcNow)
                     && oa.CoreApp.IdentityType == rq.IdentityType)
                 .OrderByDescending(oa => oa.Id)
                 .Take(rq.MaxItems)
@@ -165,59 +247,88 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task QueryPurchasedAsync(AppPurchasedQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var (hasContent, commandText) =  await _db.CoreOrganizationApps
-                .AsNoTracking()
-                .Where(oa => oa.CoreOrganizationId == User.OrganizationInt)
-                .QueryEtsoo(rq, oa => oa.Id, null, (q) =>
-                {
-                    if (rq.IdentityType.HasValue)
-                    {
-                        q = q.Where(oa => oa.CoreApp.IdentityType == rq.IdentityType);
-                    }
-
-                    if (rq.RequireLocalUrl.HasValue)
-                    {
-                        q = q.Where(oa => oa.CoreApp.RequireLocalUrl == rq.RequireLocalUrl.Value);
-                    }
-
-                    if (rq.Keyword?.Length > 1)
-                    {
-                        var keyword = rq.Keyword;
-
-                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.CoreApp.Name, oa => oa.LocalName);
-                    }
-
-                    if (rq.Expiry.HasValue)
-                    {
-                        q = q.Where(oa => oa.Expiry >= rq.Expiry);
-                    }
-
-                    if (rq.ExpiryDays.HasValue)
-                    {
-                        var expiryDays = rq.ExpiryDays.Value;
-                        q = q.Where(oa => oa.Expiry >= DateTimeOffset.Now.AddDays(expiryDays));
-                    }
-
-                    return q;
-                }).Select(oa => new AppPurchasedQueryData
-                {
-                    Id = oa.Id,
-                    Name = oa.LocalName ?? oa.CoreApp.Name,
-                    IdentityType = oa.CoreApp.IdentityType,
-                    RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
-                    WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
-                    HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
-                    Logo = oa.CoreApp.Logo,
-                    Expiry = oa.Expiry,
-                    ExpiryDays = oa.Expiry == null || oa.Expiry <= DateTimeOffset.Now.AddDays(-90) ? null : (int)(oa.Expiry.Value - DateTimeOffset.Now).TotalDays,
-                    Status = oa.Status,
-                    Creation = oa.Creation
-                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
-
-            if (_db.IsSensitiveDataLoggingEnabled)
+            try
             {
-                Logger.LogInformation("GetPurchasedAppsAsync is {hasContent} with {commandText}", hasContent, commandText);
+                var (hasContent, commandText) =  await _db.CoreOrganizationApps
+                    .AsNoTracking()
+                    .Where(oa => oa.CoreOrganizationId == User.OrganizationInt)
+                    .QueryEtsoo(rq, oa => oa.Id, null, (q) =>
+                    {
+                        if (rq.IdentityType.HasValue)
+                        {
+                            q = q.Where(oa => oa.CoreApp.IdentityType == rq.IdentityType);
+                        }
+
+                        if (rq.RequireLocalUrl.HasValue)
+                        {
+                            q = q.Where(oa => oa.CoreApp.RequireLocalUrl == rq.RequireLocalUrl.Value);
+                        }
+
+                        if (rq.Keyword?.Length > 1)
+                        {
+                            var keyword = rq.Keyword;
+
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.CoreApp.Name, oa => oa.LocalName);
+                        }
+
+                        if (rq.Expiry.HasValue)
+                        {
+                            q = q.Where(oa => oa.Expiry >= rq.Expiry);
+                        }
+
+                        if (rq.ExpiryDays.HasValue)
+                        {
+                            var expiryDays = rq.ExpiryDays.Value;
+                            q = q.Where(oa => oa.Expiry >= DateTimeOffset.UtcNow.AddDays(expiryDays));
+                        }
+
+                        return q;
+                    }).Select(oa => new AppPurchasedQueryData
+                    {
+                        Id = oa.Id,
+                        Name = oa.LocalName ?? oa.CoreApp.Name,
+                        IdentityType = oa.CoreApp.IdentityType,
+                        RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
+                        WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
+                        HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
+                        Logo = oa.CoreApp.Logo,
+                        Expiry = oa.Expiry,
+                        ExpiryDays = oa.Expiry == null || oa.Expiry <= DateTimeOffset.UtcNow.AddDays(-90) ? null : (int)(oa.Expiry.Value - DateTimeOffset.UtcNow).TotalDays,
+                        Status = oa.Status,
+                        Creation = oa.Creation
+                    }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+                if (_db.IsSensitiveDataLoggingEnabled)
+                {
+                    Logger.LogInformation("GetPurchasedAppsAsync is {hasContent} with {commandText}", hasContent, commandText);
+                }
             }
+            catch (Exception ex)
+            {
+                LogException(ex);
+            }
+        }
+
+        /// <summary>
+        /// Renew application
+        /// 应用续费
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> RenewAsync(AppRenewRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Validate the organization app
+            if (!await _db.CoreOrganizationApps.AnyAsync(oa => oa.Id == rq.Id && oa.CoreOrganizationId == User.OrganizationInt, cancellationToken: cancellationToken))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Id));
+            }
+
+            // Update the expiry
+            await _db.CoreOrganizationApps.Where(oa => oa.Id == rq.Id)
+                .ExecuteUpdateAsync(oa => oa.SetProperty(a => a.Expiry, a => a.Expiry == null ? DateTimeOffset.UtcNow.AddMonths(rq.Months) : a.Expiry.Value.AddMonths(rq.Months)), cancellationToken);
+
+            return ActionResult.Success;
         }
     }
 }

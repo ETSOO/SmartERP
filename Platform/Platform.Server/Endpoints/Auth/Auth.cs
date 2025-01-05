@@ -245,17 +245,8 @@ namespace Platform.Server.Endpoints.Auth
                 return service.AuthRequestAsync(rq, cancellationToken);
             }).WithDescription("User authorization request / 用户授权请求").RequireAuthorization().WithTags("Auth");
 
-            g.MapPut("SwitchOrg", async (IAuthService service, SwitchOrgRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
-            {
-                var (result, newRefeshToken) = await service.SwitchOrgAsync(rq, cancellationToken);
-
-                if (result.Ok && newRefeshToken != null)
-                {
-                    MinimalApiUtils.OutputRefreshToken(accessor, newRefeshToken);
-                }
-
-                return result;
-            }).WithDescription("User switch organization / 用户切换机构").RequireAuthorization().WithTags("Auth");
+            g.MapPut("SwitchOrg", (IAuthService service, SwitchOrgProxyRQ rq, CancellationToken cancellationToken) => service.SwitchOrgAsync(rq, cancellationToken))
+                .WithDescription("User switch organization / 用户切换机构").RequireAuthorization().WithTags("Auth");
 
             g.MapPut("ResetPassword", (IAuthService service, IHttpContextAccessor accessor, ResetPasswordRQ rq, CancellationToken cancellationToken) => service.ResetPasswordAsync(rq, accessor.UserAgent(), cancellationToken))
                 .WithDescription("Reset password / 重置密码").WithTags("Auth");

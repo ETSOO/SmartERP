@@ -31,10 +31,13 @@ namespace Platform.Server
 
     // App
     [JsonSerializable(typeof(IEnumerable<AppData>))]
+    [JsonSerializable(typeof(AppBuyNewRQ))]
+    [JsonSerializable(typeof(AppBuyRQ))]
     [JsonSerializable(typeof(AppListRQ))]
     [JsonSerializable(typeof(AppGetMyRQ))]
     [JsonSerializable(typeof(AppPurchasedQueryRQ))]
     [JsonSerializable(typeof(AppQueryRQ))]
+    [JsonSerializable(typeof(AppRenewRQ))]
 
     // Auth
     [JsonSerializable(typeof(CodeValidateRQ))]
@@ -42,7 +45,6 @@ namespace Platform.Server
     [JsonSerializable(typeof(EmailCodeRQ))]
     [JsonSerializable(typeof(ResetPasswordRQ))]
     [JsonSerializable(typeof(SMSCodeRQ))]
-    [JsonSerializable(typeof(SwitchOrgRQ))]
 
     [JsonSerializable(typeof(AuthCodeAction))]
     [JsonSerializable(typeof(RegisterUserData))]

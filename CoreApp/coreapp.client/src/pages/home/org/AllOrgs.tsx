@@ -1,16 +1,15 @@
 import {
   MUGlobal,
-  Tiplist,
   ResponsivePage,
   SearchField,
   IconButtonLink,
-  MobileListItemRenderer
+  MobileListItemRenderer,
+  MUUtils
 } from "@etsoo/materialui";
 import { BoxProps, Fab, IconButton, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import DeckIcon from "@mui/icons-material/Deck";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import EditIcon from "@mui/icons-material/Edit";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PageviewIcon from "@mui/icons-material/Pageview";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,8 +19,10 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { OrgListDto, OrgQueryDto } from "@etsoo/smarterp-core";
+import { OrgQueryDto } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
+import { AppUtils } from "../app/components/AppUtils";
+import { OrgTiplist } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
@@ -36,24 +37,20 @@ export default function AllOrgs() {
   // Permissions
   const editPermission = app.isAdminUser();
 
-  const invitePermission = app.isHRUser();
-
   // Labels
   const labels = app.getLabels(
+    "actions",
+    "brand",
     "companyNo",
     "createNewOrganization",
-    "organizations",
-    "orgName",
-    "parentOrg",
-    "edit",
-    "inviteMember",
-    "switchOrganization",
-    "id",
-    "memberCount",
-    "brand",
     "creation",
-    "actions",
-    "confirmAction",
+    "edit",
+    "id",
+    "orgName",
+    "orgPin",
+    "orgs",
+    "parentOrg",
+    "switchOrg",
     "view"
   );
 
@@ -67,7 +64,7 @@ export default function AllOrgs() {
 
   React.useEffect(() => {
     // Page title
-    app.setPageKey("organizations");
+    app.setPageKey("orgs");
   }, []);
 
   return (
@@ -101,20 +98,11 @@ export default function AllOrgs() {
           name="keyword"
           defaultValue={data.keyword}
         />,
-        <Tiplist<OrgListDto>
-          label={labels.parentOrg}
+        <OrgTiplist
+          api={app.core}
           name="parentId"
           search
           idValue={data.parentId}
-          loadData={(keyword, id, maxItems) =>
-            app.core.orgApi.list(
-              { id, keyword, queryPaging: { batchSize: maxItems } },
-              {
-                defaultValue: [],
-                showLoading: false
-              }
-            )
-          }
         />,
         <SearchField
           label={labels.companyNo}
@@ -123,11 +111,14 @@ export default function AllOrgs() {
           defaultValue={data.pin}
         />
       ]}
-      loadData={(data) =>
-        app.core.orgApi.query(data, {
-          defaultValue: [],
-          showLoading: false
-        })
+      loadData={(data, lastItem) =>
+        app.core.orgApi.query(
+          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        )
       }
       columns={[
         {
@@ -136,8 +127,14 @@ export default function AllOrgs() {
           sortable: true
         },
         {
-          field: "brand",
+          field: "pin",
           width: 120,
+          header: labels.orgPin,
+          sortable: false
+        },
+        {
+          field: "brand",
+          width: 100,
           header: labels.brand,
           sortable: false
         },
@@ -173,25 +170,12 @@ export default function AllOrgs() {
                     <EditIcon />
                   </IconButtonLink>
                 )}
-                {invitePermission && (
-                  <IconButton title={labels.inviteMember}>
-                    <PersonAddIcon />
-                  </IconButton>
-                )}
                 {data.id !== app.userData?.organization && (
                   <IconButton
-                    title={labels.switchOrganization}
-                    onClick={() =>
-                      app.notifier.confirm(
-                        labels.confirmAction.format(labels.switchOrganization),
-                        undefined,
-                        (confirmed) => {
-                          //if (confirmed) app.core.orgApi.switch(data.id);
-                        }
-                      )
-                    }
+                    title={labels.switchOrg}
+                    onClick={() => AppUtils.switchOrg(data)}
                   >
-                    <DeckIcon />
+                    <AccountTreeIcon />
                   </IconButton>
                 )}
                 <IconButtonLink
@@ -205,7 +189,7 @@ export default function AllOrgs() {
           }
         }
       ]}
-      itemSize={[100, margin]}
+      itemSize={[116, margin]}
       innerItemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
@@ -217,27 +201,20 @@ export default function AllOrgs() {
                 icon: <EditIcon />,
                 action: `./../edit/${data.id}`
               },
-              invitePermission && {
-                label: labels.inviteMember,
-                icon: <PersonAddIcon />,
-                action: () => {}
-              },
               data.id !== app.userData?.organization && {
-                label: labels.switchOrganization,
-                icon: <DeckIcon />,
-                action: () =>
-                  app.notifier.confirm(
-                    labels.confirmAction.format(labels.switchOrganization),
-                    undefined,
-                    (confirmed) => {
-                      //if (confirmed) app.core.orgApi.switch(data.id);
-                    }
-                  )
+                label: labels.switchOrg,
+                icon: <AccountTreeIcon />,
+                action: () => AppUtils.switchOrg(data)
               }
             ],
             <React.Fragment>
+              {data.pin && (
+                <Typography variant="body2" noWrap>
+                  {data.pin}
+                </Typography>
+              )}
               {data.brand && (
-                <Typography variant="caption" noWrap>
+                <Typography variant="body2" noWrap>
                   {labels.brand + ": " + data.brand}
                 </Typography>
               )}

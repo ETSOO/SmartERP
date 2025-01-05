@@ -95,6 +95,9 @@ namespace PlatformShared.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Register custom functions
+            MyDbFunctions.Register(modelBuilder);
+
             modelBuilder.Entity<CoreApp>(entity =>
             {
                 entity.HasKey(e => e.Id).HasName("core_app_pkey");
@@ -282,11 +285,9 @@ namespace PlatformShared.Database
                 entity.Property(e => e.CoreAppId).HasColumnName("core_app_id");
                 entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
                 entity.Property(e => e.AppKey)
-                    .IsRequired()
                     .HasMaxLength(128)
                     .HasColumnName("app_key");
                 entity.Property(e => e.AppSecret)
-                    .IsRequired()
                     .HasMaxLength(256)
                     .HasColumnName("app_secret");
                 entity.Property(e => e.LocalName)

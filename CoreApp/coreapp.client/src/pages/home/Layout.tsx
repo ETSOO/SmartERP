@@ -69,7 +69,7 @@ export default function Home() {
 
   // User context / state
   const { state } = React.useContext(app.userState.context);
-  const { authorized, organizationName } = state;
+  const { authorized, organization, organizationName } = state;
 
   // Organization data
   const org = React.useCallback(
@@ -92,27 +92,17 @@ export default function Home() {
   );
 
   // Navigation
-  const NAVIGATION = React.useMemo<Navigation>(
-    () => [
+  const NAVIGATION = React.useMemo(() => {
+    const items: Navigation = [
       {
         segment: "home",
         title: labels.menuHome,
         icon: <HomeIcon />
       },
       {
-        segment: "home/member/all",
-        title: labels.allMembers,
-        icon: <PeopleIcon />
-      },
-      {
         segment: "home/org/my",
         title: labels.joinedOrgs,
         icon: <AccountTreeIcon />
-      },
-      {
-        segment: "home/app/my",
-        title: labels.purchasedApps,
-        icon: <PaidIcon />
       },
       {
         segment: "home/app/all",
@@ -146,9 +136,24 @@ export default function Home() {
         title: labels.auditHistory,
         icon: <HistoryIcon />
       }
-    ],
-    []
-  );
+    ];
+
+    if (organization) {
+      items.splice(1, 0, {
+        segment: "home/member/all",
+        title: labels.allMembers,
+        icon: <PeopleIcon />
+      });
+
+      items.splice(4, 0, {
+        segment: "home/app/my",
+        title: labels.purchasedApps,
+        icon: <PaidIcon />
+      });
+    }
+
+    return items;
+  }, [organization]);
 
   // When unauthorized (by refresh)
   // Return blank and try login

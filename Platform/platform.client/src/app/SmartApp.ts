@@ -4,10 +4,9 @@ import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { Constants } from "./Constants";
 import { ISmartPageData } from "./SmartPageData";
 import { CommonApp, ISmartERPUser, MUGlobal } from "@etsoo/materialui";
-import { CoreCulture } from "@etsoo/smarterp-core";
+import { AppApi, CoreCulture, UserApi } from "@etsoo/smarterp-core";
 import { AuthApi } from "../api/AuthApi";
 import { PublicApi } from "../api/PublicApi";
-import { AppApi } from "../api/AppApi";
 
 /**
  * SmartERP App
@@ -31,6 +30,11 @@ class SmartApp extends CommonApp<
    * Public API
    */
   readonly publicApi = new PublicApi(this);
+
+  /**
+   * User API
+   */
+  readonly userApi = new UserApi(this);
 
   /**
    * Authorization login
@@ -65,7 +69,7 @@ class SmartApp extends CommonApp<
    */
   toMain() {
     // Get user's latest app
-    this.appApi.getUserLatestApp().then((url) => {
+    this.userApi.getLatestApp().then((url) => {
       if (url) {
         // Go to the app
         globalThis.location.href = this.addCultureParam(url);

@@ -54,11 +54,25 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> CreateAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default)
         {
+            var (result, id) = await CreateWithIdAsync(rq, cancellationToken);
+            if (id.HasValue) return ActionResult.Succeed(id.Value);
+            return result;
+        }
+
+        /// <summary>
+        /// Create organization with returning id
+        /// 创建机构并返回编号
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<(IActionResult result, int? id)> CreateWithIdAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default)
+        {
             // Check exists
             var exists = await _db.CoreOrganizations.AnyAsync(o => o.Name == rq.Name && o.Pin == rq.Pin, cancellationToken);
             if (exists)
             {
-                return ApplicationErrors.OrgExists.AsResult("Name");
+                return (ApplicationErrors.OrgExists.AsResult("Name"), null);
             }
 
             // Default QueryKeyword
@@ -93,7 +107,7 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Return
-            return ActionResult.Succeed(org.Id);
+            return (ActionResult.Success, org.Id);
         }
 
         /// <summary>
@@ -172,10 +186,11 @@ namespace Platform.Server.Services
         {
             var query = CreateQuery(rq);
 
-            await query.Select(o => new
+            await query.Select(o => new OrgListData
             {
-                o.Id,
-                o.Name
+                Id = o.Id,
+                Name = o.Name,
+                Pin = MyDbFunctions.HideData(o.Pin, default)
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -201,7 +216,7 @@ namespace Platform.Server.Services
                         }
                         else
                         {
-                            q = q.Where(o => o.Brand == keyword || EF.Functions.ILike(o.Name, $"%{keyword}%") || (o.QueryKeyword != null && EF.Functions.ILike(o.QueryKeyword, $"%{keyword}%")));
+                            q = q.Where(o => o.Brand == keyword || EF.Functions.ILike(o.Name, $"%{keyword}%") || (o.Pin != null && EF.Functions.ILike(o.Pin, $"%{keyword}%")) || (o.QueryKeyword != null && EF.Functions.ILike(o.QueryKeyword, $"%{keyword}%")));
                         }
                     }
 
@@ -214,6 +229,24 @@ namespace Platform.Server.Services
                 });
 
             return query;
+        }
+
+        /// <summary>
+        /// Check if the user owns the organization
+        /// 检查用户是否拥有机构
+        /// </summary>
+        /// <param name="id">Org id</param>
+        /// <param name="userRole">Minimum user role</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<bool> OwnsAsync(int id, UserRole userRole = UserRole.Guest, CancellationToken cancellationToken = default)
+        {
+            return await _db.CoreOrganizationUsers.AsNoTracking()
+                .AnyAsync(ou => ou.CoreOrganizationId == id
+                    && ou.CoreUserId == User.IdInt
+                    && ou.Status <= EntityStatus.Approved
+                    && ou.UserRole >= userRole
+                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow), cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -275,7 +308,7 @@ namespace Platform.Server.Services
                 Name = o.Name,
                 IsOwner = o.OwnerId == User.IdInt,
                 Brand = o.Brand,
-                Pin = o.Pin,
+                Pin = MyDbFunctions.HideData(o.Pin, default),
                 ParentId = o.ParentId,
                 Status = o.Status,
                 Creation = o.Creation

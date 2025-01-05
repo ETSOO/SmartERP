@@ -30,13 +30,13 @@ namespace PlatformShared.Database.Models
         /// App key
         /// 程序键名
         /// </summary>
-        public required string AppKey { get; set; }
+        public string? AppKey { get; set; }
 
         /// <summary>
         /// App secret
         /// 程序密钥
         /// </summary>
-        public required string AppSecret { get; set; }
+        public string? AppSecret { get; set; }
 
         /// <summary>
         /// Local name

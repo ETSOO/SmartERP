@@ -32,40 +32,9 @@ namespace CoreApp.Server.Endpoints.Auth
                 => service.ExchangeTokenAsync(rq.Token, cancellation)
                 ).WithDescription("API exchange token with core system / 接口和核心系统交换令牌");
 
-            g.MapPut("RefreshToken", async (ISEAuthService service, IHttpContextAccessor accessor, RefreshTokenRQ rq, CancellationToken cancellationToken) =>
-            {
-                // Token
-                string? token;
-                if (accessor.HttpContext?.Request.Headers.TryGetValue(Constants.RefreshTokenHeaderName, out var value) is true)
-                {
-                    token = value.ToString();
-                }
-                else
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Token");
-                }
-
-                if (string.IsNullOrEmpty(token))
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Token");
-                }
-
-                var data = new RefreshTokenData
-                {
-                    DeviceId = rq.DeviceId,
-                    UserAgent = accessor.UserAgent(),
-                    Token = token
-                };
-
-                var (result, newRefeshToken) = await service.RefreshTokenAsync(data, cancellationToken);
-
-                if (result.Ok && newRefeshToken != null)
-                {
-                    MinimalApiUtils.OutputRefreshToken(accessor, newRefeshToken);
-                }
-
-                return result;
-            }).WithDescription("Refresh token / 刷新令牌");
+            g.MapPut("RefreshToken", (ISEAuthService service, IHttpContextAccessor accessor, RefreshTokenRQ rq, CancellationToken cancellationToken)
+                => service.RefreshTokenAsync(accessor, rq, cancellationToken))
+                .WithDescription("Refresh token / 刷新令牌");
 
             g.MapPut("Signout", async (ISEAuthService service, SignoutRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
             {
@@ -83,8 +52,12 @@ namespace CoreApp.Server.Endpoints.Auth
                     return ApplicationErrors.NoValidData.AsResult("Token");
                 }
 
-                return await service.SignoutAsync(token);
+                return await service.SignoutAsync(token, cancellationToken);
             }).WithDescription("User signout / 用户退出");
+
+            g.MapPut("SwitchOrg", (ISEAuthService service, IHttpContextAccessor accessor, SwitchOrgRQ rq, CancellationToken cancellationToken)
+                => service.SwitchOrgAsync(accessor, rq, cancellationToken))
+                .RequireAuthorization().WithDescription("Switch organization / 切换机构");
 
             return builder;
         }
