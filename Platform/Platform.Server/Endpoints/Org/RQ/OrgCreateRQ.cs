@@ -48,6 +48,12 @@ namespace Platform.Server.Endpoints.Org.RQ
         public string? QueryKeyword { get; init; }
 
         /// <summary>
+        /// Region
+        /// 所在地区
+        /// </summary>
+        public required string Region { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -72,6 +78,11 @@ namespace Platform.Server.Endpoints.Org.RQ
             if (QueryKeyword != null && QueryKeyword.Length is not (>= 2 and <= 30))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(QueryKeyword));
+            }
+
+            if (Region.Length is not 2)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Region));
             }
 
             return null;

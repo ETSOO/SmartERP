@@ -3,7 +3,8 @@ import {
   ResponsivePage,
   SearchField,
   SelectEx,
-  MobileListItemRenderer
+  MobileListItemRenderer,
+  MUUtils
 } from "@etsoo/materialui";
 import { BoxProps, Button, IconButton, Typography } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -19,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { BuyKind } from "./components/BuyApp";
 
 const template = {
-  name: "string",
+  keyword: "string",
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -55,11 +56,6 @@ export default function AllApps() {
 
   const margin = MUGlobal.pagePaddings;
 
-  React.useEffect(() => {
-    // Page title
-    app.setPageKey("servicesAll");
-  }, []);
-
   return (
     <ResponsivePage<AppQueryData, typeof template>
       adjustHeight={24}
@@ -70,8 +66,8 @@ export default function AllApps() {
       fields={(data) => [
         <SearchField
           label={labels.appName}
-          name="name"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
         />,
         <SelectEx
           label={labels.identityType}
@@ -81,11 +77,14 @@ export default function AllApps() {
           value={data.identityType}
         />
       ]}
-      loadData={(data) =>
-        app.core.appApi.query(data, {
-          defaultValue: [],
-          showLoading: false
-        })
+      loadData={(data, lastItem) =>
+        app.core.appApi.query(
+          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        )
       }
       columns={[
         {

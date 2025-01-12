@@ -262,6 +262,11 @@ namespace PlatformShared.Database
                 entity.Property(e => e.QueryKeyword)
                     .HasMaxLength(30)
                     .HasColumnName("query_keyword");
+                entity.Property(e => e.Region)
+                    .IsRequired()
+                    .HasMaxLength(2)
+                    .IsFixedLength(true)
+                    .HasColumnName("region");
 
                 entity.HasOne(d => d.Owner).WithMany(p => p.CoreOrganizations)
                     .HasForeignKey(d => d.OwnerId)

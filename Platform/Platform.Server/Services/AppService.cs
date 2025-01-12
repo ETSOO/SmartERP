@@ -5,6 +5,7 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.App;
@@ -56,25 +57,28 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoValidData.AsResult();
             }
 
-            // No duplicate purchase
-            if (await _db.CoreOrganizationApps.AnyAsync(oa => oa.CoreAppId == rq.Id && oa.CoreOrganizationId == User.OrganizationInt, cancellationToken: cancellationToken))
-            {
-                return ApplicationErrors.ItemExists.AsResult();
-            }
-
             // Check the organization
             if (!await _orgService.OwnsAsync(rq.OrganizationId, UserRole.User, cancellationToken))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.OrganizationId));
             }
 
+            // No duplicate purchase
+            if (await _db.CoreOrganizationApps.AnyAsync(oa => oa.CoreAppId == rq.Id && oa.CoreOrganizationId == rq.OrganizationId, cancellationToken: cancellationToken))
+            {
+                return ApplicationErrors.ItemExists.AsResult();
+            }
+
             // Repository
-            await _db.CoreOrganizationApps.AddAsync(new CoreOrganizationApp
+            _db.CoreOrganizationApps.Add(new CoreOrganizationApp
             {
                 CoreAppId = rq.Id,
                 CoreOrganizationId = rq.OrganizationId,
                 Expiry = DateTimeOffset.UtcNow.AddYears(1)
-            }, cancellationToken);
+            });
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
 
             return ActionResult.Success;
         }
@@ -92,7 +96,8 @@ namespace Platform.Server.Services
             var orgRq = new OrgCreateRQ
             {
                 Name = rq.OrgName,
-                Pin = rq.OrgPin
+                Pin = rq.OrgPin,
+                Region = rq.Region
             };
 
             var (result, id) = await _orgService.CreateWithIdAsync(orgRq, cancellationToken);
@@ -123,11 +128,63 @@ namespace Platform.Server.Services
         /// 获取用户最近访问的应用
         /// </summary>
         /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IEnumerable<AppQueryData>> GetMyAsync(AppGetMyRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Current user's latest applications
+            var ids = await _db.CoreUsers.AsNoTracking()
+                .Where(u => u.Id == User.IdInt)
+                .Select(u => u.LatestAppIds).FirstOrDefaultAsync(cancellationToken) ?? [];
+
+            var query = _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.CoreOrganizationId == User.OrganizationInt
+                    && oa.Status <= EntityStatus.Approved
+                    && (oa.Expiry == null || oa.Expiry >= DateTimeOffset.UtcNow)
+                    && oa.CoreApp.IdentityType == rq.IdentityType)
+                .Select(oa => new AppQueryData
+                {
+                    Id = oa.Id,
+                    Name = oa.LocalName ?? oa.CoreApp.Name,
+                    IdentityType = oa.CoreApp.IdentityType,
+                    RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
+                    WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
+                    HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
+                    Logo = oa.CoreApp.Logo
+                });
+
+            List<AppQueryData> apps = [];
+
+            if (ids.Count > 0)
+            {
+                apps.AddRange(await query.Where(ou => ids.Contains(ou.Id)).Take(rq.MaxItems).ToListAsync(cancellationToken));
+                apps = [.. apps.OrderBy(ou => ids.IndexOf(ou.Id))];
+            }
+
+            var left = rq.MaxItems - apps.Count;
+            if (left > 0)
+            {
+                apps.AddRange(await query.Where(ou => !ids.Contains(ou.Id)).OrderByDescending(ou => ou.Id).Take(left).ToListAsync(cancellationToken));
+            }
+
+            return apps;
+        }
+
+        /// <summary>
+        /// Get user's latest accessed applications
+        /// 获取用户最近访问的应用
+        /// </summary>
+        /// <param name="rq">Request data</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
         public async Task GetMyAsync(AppGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            var apps = await GetMyAsync(rq, cancellationToken);
+            await writer.SerializeAsync(apps, MyJsonSerializerContext.Default.IEnumerableAppQueryData);
+
+            /*
             var (hasContent, commandText) = await _db.CoreOrganizationApps
                 .AsNoTracking()
                 .Where(oa => oa.CoreOrganizationId == User.OrganizationInt
@@ -151,6 +208,7 @@ namespace Platform.Server.Services
             {
                 Logger.LogInformation("GetMyAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
+            */
         }
 
         private IQueryable<CoreApp> CreateQuery(AppListRQ rq, Func<IQueryable<CoreApp>, IQueryable<CoreApp>>? filters = null)
@@ -329,6 +387,49 @@ namespace Platform.Server.Services
                 .ExecuteUpdateAsync(oa => oa.SetProperty(a => a.Expiry, a => a.Expiry == null ? DateTimeOffset.UtcNow.AddMonths(rq.Months) : a.Expiry.Value.AddMonths(rq.Months)), cancellationToken);
 
             return ActionResult.Success;
+        }
+
+        /// <summary>
+        /// Update
+        /// 更新
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateAsync(AppUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            var app = await _db.CoreOrganizationApps.FirstOrDefaultAsync(oa => oa.Id == rq.Id && oa.CoreOrganizationId == User.OrganizationInt, cancellationToken);
+            if (app == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Update
+            if (rq.IsModified(nameof(rq.LocalName)))
+            {
+                app.LocalName = rq.LocalName;
+            }
+
+            if (rq.IsModified(nameof(rq.LocalUrl)))
+            {
+                app.LocalUrl = rq.LocalUrl;
+            }
+
+            if (rq.IsModified(nameof(rq.LocalHelpUrl)))
+            {
+                app.LocalHelpUrl = rq.LocalHelpUrl;
+            }
+
+            if (rq.IsModified(nameof(rq.LocalApis)))
+            {
+                app.LocalApis = rq.LocalApis?.ToArray();
+            }
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
         }
     }
 }

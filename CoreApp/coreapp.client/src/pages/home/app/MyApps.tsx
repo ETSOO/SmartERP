@@ -5,7 +5,9 @@ import {
   SelectEx,
   DateText,
   MobileListItemRenderer,
-  TooltipClick
+  TooltipClick,
+  MUUtils,
+  IconButtonLink
 } from "@etsoo/materialui";
 import { BoxProps, Button, Fab, IconButton, Typography } from "@mui/material";
 import React from "react";
@@ -25,7 +27,7 @@ import { AppPurchasedQueryData } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 
 const template = {
-  name: "string",
+  keyword: "string",
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -38,6 +40,7 @@ export default function MyApps() {
     "appName",
     "creation",
     "actions",
+    "edit",
     "identityType",
     "productUnit",
     "price",
@@ -68,37 +71,6 @@ export default function MyApps() {
   // Load data
   const reloadData = async () => {
     ref.current?.reset();
-  };
-
-  const setCustomName = (data: AppPurchasedQueryData) => {
-    app.notifier.prompt(
-      `[${data.name}] ${labels.customName}`,
-      async (name) => {
-        if (name == null) return;
-
-        /*
-        const result = await app.productApi.setCustomName(data.id, name, {
-          showLoading: false
-        });
-        if (result == null) return;
-
-        if (result.ok) {
-          reloadData();
-          return;
-        }
-
-        app.alertResult(result);
-        */
-      },
-      undefined,
-      {
-        inputProps: {
-          type: "input",
-          defaultValue: data.name,
-          required: false
-        }
-      }
-    );
   };
 
   const createApiKey = (data: AppPurchasedQueryData) => {};
@@ -137,8 +109,8 @@ export default function MyApps() {
       fields={(data) => [
         <SearchField
           label={labels.appName}
-          name="name"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
         />,
         <SelectEx
           label={labels.identityType}
@@ -148,11 +120,14 @@ export default function MyApps() {
           value={data.identityType}
         />
       ]}
-      loadData={async (data) => {
-        return await app.core.appApi.queryPurchased(data, {
-          defaultValue: [],
-          showLoading: false
-        });
+      loadData={async (data, lastItem) => {
+        return await app.core.appApi.queryPurchased(
+          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        );
       }}
       columns={[
         {
@@ -204,12 +179,12 @@ export default function MyApps() {
                 <IconButton title={labels.renew} onClick={() => {}}>
                   <ShoppingCartIcon />
                 </IconButton>
-                <IconButton
-                  title={labels.customName}
-                  onClick={() => setCustomName(data)}
+                <IconButtonLink
+                  title={labels.edit}
+                  href={`./../edit/${data.id}`}
                 >
                   <EditIcon />
-                </IconButton>
+                </IconButtonLink>
                 {!DateUtils.isExpired(data.expiry) && (
                   <IconButton
                     title={labels.apiKey}
@@ -245,9 +220,9 @@ export default function MyApps() {
                 action: () => {}
               },
               {
-                label: labels.customName,
+                label: labels.edit,
                 icon: <EditIcon />,
-                action: () => setCustomName(data)
+                action: `./../edit/${data.id}`
               },
               !DateUtils.isExpired(data.expiry) && {
                 label: labels.apiKey,

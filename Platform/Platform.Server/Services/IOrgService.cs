@@ -11,6 +11,7 @@ namespace Platform.Server.Services
         Task<IActionResult> CreateAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default);
         Task<(IActionResult result, int? id)> CreateWithIdAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<OrgGetMyData>> GetMyAsync(OrgGetMyRQ rq, CancellationToken cancellationToken = default);
         Task GetMyAsync(OrgGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task ListAsync(OrgListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<bool> OwnsAsync(int id, UserRole userRole = UserRole.Guest, CancellationToken cancellationToken = default);

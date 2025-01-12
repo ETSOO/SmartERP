@@ -2,10 +2,10 @@ import { IServiceAppSettings, MUGlobal, ServiceApp } from "@etsoo/materialui";
 import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
-import { CoreApp, CoreCulture } from "@etsoo/smarterp-core";
+import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
 import { AuthApi } from "../api/AuthApi";
 
-class MyApp extends ServiceApp<MyUser> {
+class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   /**
    * Core application
    */

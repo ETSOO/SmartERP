@@ -9,18 +9,23 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AppsIcon from "@mui/icons-material/Apps";
 import React from "react";
-import { Button, ButtonGroup, Typography, useMediaQuery } from "@mui/material";
+import { Typography, useMediaQuery } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
 import {
   DashboardLayout,
   Navigation,
   PageContainer,
+  PageDataContextProvider,
   Session,
   SidebarFooterProps
 } from "@etsoo/toolpad";
 import { AppProvider } from "@etsoo/toolpad/react-router-dom";
 import { CoreCulture } from "@etsoo/smarterp-core";
+import {
+  AppSwitchPopover,
+  OrgSwitchPopover
+} from "@etsoo/smarterp-core/components";
 
 function SidebarFooter({ mini }: SidebarFooterProps) {
   return (
@@ -73,22 +78,11 @@ export default function Home() {
 
   // Organization data
   const org = React.useCallback(
-    () => (
-      <React.Fragment>
-        <ButtonGroup variant="text">
-          <Button
-            sx={{ display: { xs: "none", md: "block" } }}
-            title={labels.currentOrg}
-          >
-            {organizationName ?? labels.switchOrg}
-          </Button>
-          <Button title={labels.switchOrg}>
-            <AccountTreeIcon />
-          </Button>
-        </ButtonGroup>
-      </React.Fragment>
-    ),
-    [organizationName]
+    () =>
+      authorized ? (
+        <OrgSwitchPopover organizationName={organizationName} />
+      ) : undefined,
+    [authorized, organizationName]
   );
 
   // Navigation
@@ -102,7 +96,8 @@ export default function Home() {
       {
         segment: "home/org/my",
         title: labels.joinedOrgs,
-        icon: <AccountTreeIcon />
+        icon: <AccountTreeIcon />,
+        subs: ["/home/org/.*"]
       },
       {
         segment: "home/app/all",
@@ -192,16 +187,18 @@ export default function Home() {
       theme={myTheme}
       branding={{
         logo: "",
-        title: labels.app1
+        title: <AppSwitchPopover appName={labels.app1} />
       }}
     >
       <DashboardLayout
         sidebarExpandedWidth={220}
         slots={{ sidebarFooter: SidebarFooter, toolbarActions: org }}
       >
-        <PageContainer title="">
-          <Outlet />
-        </PageContainer>
+        <PageDataContextProvider>
+          <PageContainer defaultTitle="">
+            <Outlet />
+          </PageContainer>
+        </PageDataContextProvider>
       </DashboardLayout>
     </AppProvider>
   );

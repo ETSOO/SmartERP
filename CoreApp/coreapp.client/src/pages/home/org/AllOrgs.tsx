@@ -10,7 +10,7 @@ import { BoxProps, Fab, IconButton, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import EditIcon from "@mui/icons-material/Edit";
-import PageviewIcon from "@mui/icons-material/Pageview";
+import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -90,7 +90,7 @@ export default function AllOrgs() {
           </Fab>
         )
       }}
-      quickAction={(data) => navigate(`./../view/${data.id}`)}
+      quickAction={(data) => navigate(`./${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -99,7 +99,7 @@ export default function AllOrgs() {
           defaultValue={data.keyword}
         />,
         <OrgTiplist
-          api={app.core}
+          label={labels.parentOrg}
           name="parentId"
           search
           idValue={data.parentId}
@@ -178,11 +178,8 @@ export default function AllOrgs() {
                     <AccountTreeIcon />
                   </IconButton>
                 )}
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../view/${data.id}`}
-                >
-                  <PageviewIcon />
+                <IconButtonLink title={labels.view} href={`./${data.id}`}>
+                  <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
             );
@@ -205,6 +202,11 @@ export default function AllOrgs() {
                 label: labels.switchOrg,
                 icon: <AccountTreeIcon />,
                 action: () => AppUtils.switchOrg(data)
+              },
+              {
+                label: labels.view,
+                icon: <ArticleIcon />,
+                action: `./${data.id}`
               }
             ],
             <React.Fragment>

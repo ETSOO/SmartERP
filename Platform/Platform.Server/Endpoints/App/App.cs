@@ -35,6 +35,9 @@ namespace Platform.Server.Endpoints.App
             g.MapPut("Renew", (IAppService service, AppRenewRQ rq, CancellationToken cancellationToken) => service.RenewAsync(rq, cancellationToken))
                 .WithDescription("Renew application / 应用续费").WithTags("App");
 
+            g.MapPut("Update", (IAppService service, AppUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+                .WithDescription("Update application / 更新应用").WithTags("App");
+
             return builder;
         }
     }

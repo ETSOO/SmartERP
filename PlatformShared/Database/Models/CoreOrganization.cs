@@ -75,6 +75,12 @@ namespace PlatformShared.Database.Models
         public string? QueryKeyword { get; set; }
 
         /// <summary>
+        /// Region
+        /// 所在地区
+        /// </summary>
+        public required string Region { get; set; }
+
+        /// <summary>
         /// Core logs
         /// 核心日志
         /// </summary>

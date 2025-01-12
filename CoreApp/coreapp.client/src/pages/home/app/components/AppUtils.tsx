@@ -32,7 +32,7 @@ export namespace AppUtils {
         // Form data
         const formData = DomUtils.dataAs(new FormData(form), {
           kind: "number",
-          organization: "number",
+          organizationId: "number",
           name: "string",
           pin: "string"
         });
@@ -41,16 +41,17 @@ export namespace AppUtils {
 
         if (formData.kind === 1) {
           // Check organization
-          if (formData.organization == null) {
-            DomUtils.setFocus("organizationInput", form);
+          if (formData.organizationId == null) {
+            DomUtils.setFocus("organizationIdInput", form);
             return false;
           }
 
-          /*
-          result = await app.productApi.buy(data.id, formData.organization, {
-            showLoading: false
-          });
-          */
+          result = await app.core.appApi.buy(
+            { id: data.id, organizationId: formData.organizationId },
+            {
+              showLoading: false
+            }
+          );
         } else {
           // Check name
           if (formData.name == null) {
@@ -58,18 +59,15 @@ export namespace AppUtils {
             return false;
           }
 
-          /*
-          result = await app.productApi.buyNew(
+          result = await app.core.appApi.buyNew(
             {
               id: data.id,
-              region: app.region,
-              name: formData.name,
-              identifier: formData.identifier,
-              deviceId: app.deviceId
+              orgName: formData.name,
+              orgPin: formData.pin,
+              region: app.region
             },
             { showLoading: false }
           );
-          */
         }
 
         if (result == null) return false;
@@ -81,15 +79,17 @@ export namespace AppUtils {
           // Succeed
           app.notifier.succeed(labels.operationSucceeded, undefined, () => {
             // New organization created
-            const url =
-              formData.kind === 1 ? "./../my" : "./../../organization/all";
+            const url = formData.kind === 1 ? "./../my" : "./../../org/my";
             navigate(url);
           });
 
           return;
+        } else if (result.type === "ItemExists") {
+          result.title = app.get("purchaseExists");
         }
 
         app.alertResult(result);
+
         return false;
       },
       inputs: <BuyApp kind={kind} />,

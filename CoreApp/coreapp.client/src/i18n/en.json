@@ -11,6 +11,7 @@
   "newOrg": "New organization",
   "personalData": "Personal data",
   "purchasedApps": "Purchased apps",
+  "purchaseExists": "The selected organization has already purchased this app",
   "smarterpCore": "SmartERP Main Console",
   "updateAvator": "Update avator"
 }

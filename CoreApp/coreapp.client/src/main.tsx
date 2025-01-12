@@ -15,6 +15,7 @@ import AuthSuccess from "./pages/login/AuthSuccess";
 import Index from "./pages/Index";
 import Home from "./pages/home/Home";
 import Layout from "./pages/home/Layout";
+import { CoreServiceAppContext } from "@etsoo/smarterp-core";
 
 // Culture provider
 const CultureStateProvider = app.cultureState.provider;
@@ -116,6 +117,20 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/org/my/:id",
+            lazy: async () => {
+              const ViewOrg = await import("./pages/home/org/ViewOrg");
+              return { Component: ViewOrg.default };
+            }
+          },
+          {
+            path: "/home/org/edit/:id",
+            lazy: async () => {
+              const EditOrg = await import("./pages/home/org/EditOrg");
+              return { Component: EditOrg.default };
+            }
+          },
+          {
             path: "/home/user/audithistory",
             lazy: async () => {
               const LoginHistory = await import(
@@ -199,29 +214,31 @@ function AppRouterProvider(props: RouterProviderProps) {
 
 const reactRoot = createRoot(document.getElementById("root")!);
 reactRoot.render(
-  <CultureStateProvider>
-    <CultureContext.Consumer>
-      {(culture) => (
-        <ThemeProvider
-          theme={createTheme(theme, getThemeCulture(culture.state.name))}
-        >
-          <NotifierProvider />
-          <UserStateProvider
-            update={(dispatch) => {
-              app.userStateDispatch = dispatch;
-            }}
+  <CoreServiceAppContext.Provider value={{ app }}>
+    <CultureStateProvider>
+      <CultureContext.Consumer>
+        {(culture) => (
+          <ThemeProvider
+            theme={createTheme(theme, getThemeCulture(culture.state.name))}
           >
-            <PageStateProvider
+            <NotifierProvider />
+            <UserStateProvider
               update={(dispatch) => {
-                app.pageStateDispatch = dispatch;
+                app.userStateDispatch = dispatch;
               }}
             >
-              <CssBaseline />
-              <AppRouterProvider router={router} />
-            </PageStateProvider>
-          </UserStateProvider>
-        </ThemeProvider>
-      )}
-    </CultureContext.Consumer>
-  </CultureStateProvider>
+              <PageStateProvider
+                update={(dispatch) => {
+                  app.pageStateDispatch = dispatch;
+                }}
+              >
+                <CssBaseline />
+                <AppRouterProvider router={router} />
+              </PageStateProvider>
+            </UserStateProvider>
+          </ThemeProvider>
+        )}
+      </CultureContext.Consumer>
+    </CultureStateProvider>
+  </CoreServiceAppContext.Provider>
 );

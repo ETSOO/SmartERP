@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.5.84",
-    "@etsoo/materialui": "^1.4.60",
-    "@etsoo/react": "^1.8.17",
-    "@etsoo/shared": "^1.2.55",
+    "@etsoo/appscript": "^1.5.88",
+    "@etsoo/materialui": "^1.4.68",
+    "@etsoo/react": "^1.8.24",
+    "@etsoo/shared": "^1.2.57",
     "@etsoo/smarterp-core": "file:../../../../EtsooUI/SmartERP/core",
-    "@etsoo/toolpad": "^1.0.7",
+    "@etsoo/toolpad": "file:../../../../EtsooUI/toolpad",
     "@mui/material": "^6.3.1",
     "formik": "^2.4.6",
     "react": "^18.3.1",
@@ -27,7 +27,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "^5.7.2",
+    "typescript": "^5.7.3",
     "vite": "^6.0.7"
   }
 }

@@ -38,6 +38,9 @@ namespace Platform.Server
     [JsonSerializable(typeof(AppPurchasedQueryRQ))]
     [JsonSerializable(typeof(AppQueryRQ))]
     [JsonSerializable(typeof(AppRenewRQ))]
+    [JsonSerializable(typeof(AppUpdateRQ))]
+
+    [JsonSerializable(typeof(IEnumerable<AppQueryData>))]
 
     // Auth
     [JsonSerializable(typeof(CodeValidateRQ))]
@@ -62,6 +65,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(OrgUpdateRQ))]
     [JsonSerializable(typeof(OrgQueryRQ))]
 
+    [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]
 
     // Public

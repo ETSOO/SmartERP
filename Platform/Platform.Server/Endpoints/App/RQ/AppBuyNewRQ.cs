@@ -29,6 +29,12 @@ namespace Platform.Server.Endpoints.App.RQ
         public string? OrgPin { get; init; }
 
         /// <summary>
+        /// Region
+        /// 所在地区
+        /// </summary>
+        public required string Region { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -43,6 +49,11 @@ namespace Platform.Server.Endpoints.App.RQ
             if (OrgPin != null && OrgPin.Length is not (>= 6 and <= 20))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(OrgPin));
+            }
+
+            if (Region.Length is not 2)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Region));
             }
 
             return null;

@@ -6,6 +6,7 @@ using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.HTTP;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
@@ -91,6 +92,7 @@ namespace Platform.Server.Services
                 ParentId = rq.ParentId,
                 Status = rq.Status.GetValueOrDefault(),
                 QueryKeyword = queryKeyword,
+                Region = rq.Region,
                 CoreOrganizationUsers = [
                     new CoreOrganizationUser
                     {
@@ -148,16 +150,65 @@ namespace Platform.Server.Services
         /// 获取用户最近访问的机构
         /// </summary>
         /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<OrgGetMyData>> GetMyAsync(OrgGetMyRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Current user's latest organizations
+            var ids = await _db.CoreUsers.AsNoTracking()
+                .Where(u => u.Id == User.IdInt)
+                .Select(u => u.LatestOrganizationIds).FirstOrDefaultAsync(cancellationToken) ?? [];
+
+            var query = _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.CoreUserId == User.IdInt
+                    && ou.Status <= EntityStatus.Approved
+                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow)
+                    && ou.CoreOrganization.Status <= EntityStatus.Approved)
+                .Select(ou => new OrgGetMyData
+                {
+                    Id = ou.CoreOrganizationId,
+                    Name = ou.CoreOrganization.Name,
+                    Brand = ou.CoreOrganization.Brand
+                })
+            ;
+
+            List<OrgGetMyData> orgs = [];
+
+            if (ids.Count > 0)
+            {
+                orgs.AddRange(await query.Where(ou => ids.Contains(ou.Id)).Take(rq.MaxItems).ToListAsync(cancellationToken));
+                orgs = [.. orgs.OrderBy(ou => ids.IndexOf(ou.Id))];
+            }
+
+            var left = rq.MaxItems - orgs.Count;
+            if (left > 0)
+            {
+                orgs.AddRange(await query.Where(ou => !ids.Contains(ou.Id)).OrderByDescending(ou => ou.Id).Take(left).ToListAsync(cancellationToken));
+            }
+
+            return orgs;
+        }
+
+        /// <summary>
+        /// Get user's latest accessed organizations
+        /// 获取用户最近访问的机构
+        /// </summary>
+        /// <param name="rq">Request data</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
         public async Task GetMyAsync(OrgGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            var orgs = await GetMyAsync(rq, cancellationToken);
+            await writer.SerializeAsync(orgs, MyJsonSerializerContext.Default.IEnumerableOrgGetMyData);
+
+            /*
             var (hasContent, commandText) = await _db.CoreOrganizationUsers
                 .AsNoTracking()
-                .Where(ou => ou.CoreOrganizationId == User.OrganizationInt
+                .Where(ou => ou.CoreUserId == User.IdInt
                     && ou.Status <= EntityStatus.Approved
-                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.Now)
+                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow)
                     && ou.CoreOrganization.Status <= EntityStatus.Approved)
                 .OrderByDescending(ou => ou.Id)
                 .Take(rq.MaxItems)
@@ -172,6 +223,7 @@ namespace Platform.Server.Services
             {
                 Logger.LogInformation("GetMyAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
+            */
         }
 
         /// <summary>
