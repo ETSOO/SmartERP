@@ -11,8 +11,9 @@ export default function UpdateAvatar() {
   const Context = app.userState.context;
 
   React.useEffect(() => {
-    // Page title
-    app.setPageKey("updateAvatar");
+    return () => {
+      app.pageExit();
+    };
   }, []);
 
   return (

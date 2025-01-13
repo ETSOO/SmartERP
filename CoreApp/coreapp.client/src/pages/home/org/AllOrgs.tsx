@@ -4,7 +4,8 @@ import {
   SearchField,
   IconButtonLink,
   MobileListItemRenderer,
-  MUUtils
+  MUUtils,
+  Switch
 } from "@etsoo/materialui";
 import { BoxProps, Fab, IconButton, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -16,26 +17,25 @@ import { useNavigate } from "react-router-dom";
 import {
   GridCellRendererProps,
   GridDataType,
+  GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
 import { OrgQueryDto } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { AppUtils } from "../app/components/AppUtils";
-import { OrgTiplist } from "@etsoo/smarterp-core/components";
+import { DefaultUI, OrgTiplist } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
   pin: "string",
-  parentId: "number"
+  parentId: "number",
+  enabled: "boolean"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllOrgs() {
   // Route
   const navigate = useNavigate();
-
-  // Permissions
-  const editPermission = app.isAdminUser();
 
   // Labels
   const labels = app.getLabels(
@@ -50,6 +50,7 @@ export default function AllOrgs() {
     "orgPin",
     "orgs",
     "parentOrg",
+    "statusNormal",
     "switchOrg",
     "view"
   );
@@ -63,25 +64,22 @@ export default function AllOrgs() {
   const margin = MUGlobal.pagePaddings;
 
   React.useEffect(() => {
-    // Page title
-    app.setPageKey("orgs");
+    return () => {
+      app.pageExit();
+    };
   }, []);
 
   return (
     <ResponsivePage<OrgQueryDto, typeof template>
-      adjustHeight={24}
-      mRef={ref}
-      defaultOrderBy={[{ field: "creation", desc: true }]}
-      pageProps={{
+      {...DefaultUI.createProps({
         onRefresh: reloadData,
-        paddings: 0,
         fabButtons: (
           <Fab
             title={labels.createNewOrganization}
             size="medium"
             color="primary"
             onClick={() =>
-              navigate("./../../service/all", {
+              navigate("./../../app/all", {
                 state: { kind: 2 }
               })
             }
@@ -89,7 +87,9 @@ export default function AllOrgs() {
             <AddIcon />
           </Fab>
         )
-      }}
+      })}
+      mRef={ref}
+      defaultOrderBy={[{ field: "creation", desc: true }]}
       quickAction={(data) => navigate(`./${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
@@ -109,6 +109,11 @@ export default function AllOrgs() {
           name="pin"
           minChars={3}
           defaultValue={data.pin}
+        />,
+        <Switch
+          label={labels.statusNormal}
+          name="enabled"
+          checked={data.enabled ?? true}
         />
       ]}
       loadData={(data, lastItem) =>
@@ -124,7 +129,8 @@ export default function AllOrgs() {
         {
           field: "name",
           header: labels.orgName,
-          sortable: true
+          sortable: true,
+          cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
           field: "pin",
@@ -162,7 +168,7 @@ export default function AllOrgs() {
 
             return (
               <React.Fragment>
-                {editPermission && (
+                {data.isOwner && (
                   <IconButtonLink
                     title={labels.edit}
                     href={`./../edit/${data.id}`}
@@ -193,7 +199,7 @@ export default function AllOrgs() {
             data.name,
             app.formatDate(data.creation, "d"),
             [
-              editPermission && {
+              data.isOwner && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./../edit/${data.id}`

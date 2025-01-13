@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { MemberQueryDto } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
   name: "string",
@@ -104,12 +105,8 @@ export default function AllMembers() {
 
   return (
     <ResponsivePage<MemberQueryDto, typeof template>
-      adjustHeight={24}
-      mRef={ref}
-      defaultOrderBy={[{ field: "creation", desc: true }]}
-      pageProps={{
+      {...DefaultUI.createProps({
         onRefresh: reloadData,
-        paddings: 0,
         fabButtons: (
           <React.Fragment>
             {editPermission && (
@@ -119,7 +116,9 @@ export default function AllMembers() {
             )}
           </React.Fragment>
         )
-      }}
+      })}
+      mRef={ref}
+      defaultOrderBy={[{ field: "creation", desc: true }]}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField

@@ -7,7 +7,8 @@ import {
   MobileListItemRenderer,
   TooltipClick,
   MUUtils,
-  IconButtonLink
+  IconButtonLink,
+  Switch
 } from "@etsoo/materialui";
 import { BoxProps, Button, Fab, IconButton, Typography } from "@mui/material";
 import React from "react";
@@ -25,10 +26,13 @@ import {
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { AppPurchasedQueryData } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
-  identityType: "number"
+  identityType: "number",
+  enabled: "boolean",
+  expiryDays: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function MyApps() {
@@ -52,7 +56,8 @@ export default function MyApps() {
     "apiKey",
     "apiKeyTip",
     "copy",
-    "completeTip"
+    "completeTip",
+    "statusNormal"
   );
 
   // Refs
@@ -84,12 +89,8 @@ export default function MyApps() {
 
   return (
     <ResponsivePage<AppPurchasedQueryData, typeof template>
-      adjustHeight={24}
-      mRef={ref}
-      defaultOrderBy={[{ field: "creation", desc: true }]}
-      pageProps={{
+      {...DefaultUI.createProps({
         onRefresh: reloadData,
-        paddings: 0,
         fabButtons: (
           <Fab
             title={labels.purchase}
@@ -104,7 +105,9 @@ export default function MyApps() {
             <AddIcon />
           </Fab>
         )
-      }}
+      })}
+      mRef={ref}
+      defaultOrderBy={[{ field: "creation", desc: true }]}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -118,6 +121,11 @@ export default function MyApps() {
           search
           options={identities}
           value={data.identityType}
+        />,
+        <Switch
+          label={labels.statusNormal}
+          name="enabled"
+          checked={data.enabled ?? false}
         />
       ]}
       loadData={async (data, lastItem) => {

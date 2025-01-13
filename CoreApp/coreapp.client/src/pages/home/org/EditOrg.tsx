@@ -1,14 +1,14 @@
-import { EditPage, InputField, MaskInput } from "@etsoo/materialui";
+import { ComboBox, EditPage, InputField, MaskInput } from "@etsoo/materialui";
 import { Grid2 } from "@mui/material";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { DataTypes, Utils } from "@etsoo/shared";
-import { BusinessTax } from "@etsoo/appscript";
+import { Utils } from "@etsoo/shared";
+import { BusinessTax, EntityStatus } from "@etsoo/appscript";
 import { useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { OrgUpdateReadDto, OrgUpdateRQ } from "@etsoo/smarterp-core";
+import { OrgUpdateRQ } from "@etsoo/smarterp-core";
 import { OrgTiplist } from "@etsoo/smarterp-core/components";
 import { PageDataContext } from "@etsoo/toolpad";
 
@@ -16,6 +16,9 @@ export default function EditOrg() {
   // Route
   const navigate = useNavigate();
   const { id } = useParamsEx({ id: "number" });
+
+  // Permissions
+  const deletePermission = app.isAdminUser();
 
   // Page data
   const { dispatch } = React.useContext(PageDataContext);
@@ -25,12 +28,13 @@ export default function EditOrg() {
 
   // Labels
   const labels = app.getLabels(
+    "brand",
+    "deleteConfirm",
     "edit",
     "noChanges",
-    "organizationName",
-    "tradeAs",
-    "brand",
-    "parentOrg"
+    "orgName",
+    "parentOrg",
+    "status"
   );
 
   // Form validation schema
@@ -64,15 +68,14 @@ export default function EditOrg() {
         app.warning(labels.noChanges);
         return;
       }
-      //rq.changedFields = fields;
-      rq.changedFields = [];
+      rq.changedFields = fields;
 
       // Submit
-      const result = await app.core.orgApi.update({ id: 1 });
+      const result = await app.core.orgApi.update(rq);
       if (result == null) return;
 
       if (result.ok) {
-        navigate("./../../all", {
+        navigate("./../../my", {
           state: { id }
         });
         return;
@@ -83,12 +86,12 @@ export default function EditOrg() {
   });
 
   // Load data
-  const reloadData = async () => {
+  const reloadData = React.useCallback(async () => {
     if (id == null) return;
     const data = await app.core.orgApi.updateRead(id);
     if (data == null) return;
     setData(data);
-  };
+  }, [id]);
 
   // Tax
   const tax = BusinessTax.getById(app.region);
@@ -104,22 +107,59 @@ export default function EditOrg() {
 
   return (
     <EditPage
+      isEditing
       onSubmit={(event) => {
         formik.handleSubmit(event);
       }}
       onUpdate={reloadData}
+      onDelete={
+        data.status === EntityStatus.Deleted && deletePermission
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(` [${data.name}] `),
+                undefined,
+                async (ok) => {
+                  const id = formik.values.id;
+                  if (!ok || id == null) return;
+
+                  const result = await app.core.orgApi.delete(id, {
+                    showLoading: false
+                  });
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate("./../../my");
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
     >
       <Grid2 size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
           required
           name="name"
-          inputProps={{ maxLength: 128 }}
-          label={labels.organizationName}
+          slotProps={{ htmlInput: { maxLength: 128 } }}
+          label={labels.orgName}
           value={formik.values.name ?? ""}
           onChange={formik.handleChange}
           error={formik.touched.name && Boolean(formik.errors.name)}
           helperText={formik.touched.name && formik.errors.name}
+        />
+      </Grid2>
+      <Grid2 size={{ xs: 12, sm: 6 }}>
+        <InputField
+          fullWidth
+          name="brand"
+          slotProps={{ htmlInput: { maxLength: 30 } }}
+          label={labels.brand}
+          value={formik.values.brand ?? ""}
+          onChange={formik.handleChange}
         />
       </Grid2>
       <Grid2 size={{ xs: 12, sm: 6 }}>
@@ -128,24 +168,13 @@ export default function EditOrg() {
           name="pin"
           label={app.get(tax?.labelKey ?? "taxId")}
           fullWidth
-          inputProps={{
-            maxLength: 20,
-            style: { textTransform: "uppercase" }
+          slotProps={{
+            htmlInput: { maxLength: 20, style: { textTransform: "uppercase" } }
           }}
           value={formik.values.pin ?? ""}
           onChange={formik.handleChange}
           error={formik.touched.pin && Boolean(formik.errors.pin)}
           helperText={formik.touched.pin && formik.errors.pin}
-        />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 6 }}>
-        <InputField
-          fullWidth
-          name="brand"
-          inputProps={{ maxLength: 30 }}
-          label={labels.brand}
-          value={formik.values.brand ?? ""}
-          onChange={formik.handleChange}
         />
       </Grid2>
       <Grid2 size={{ xs: 12, sm: 6 }}>
@@ -158,6 +187,16 @@ export default function EditOrg() {
             formik.touched.parentId && Boolean(formik.errors.parentId)
           }
           inputHelperText={formik.touched.parentId && formik.errors.parentId}
+        />
+      </Grid2>
+      <Grid2 size={{ xs: 6, sm: 3 }}>
+        <ComboBox
+          name="status"
+          label={labels.status}
+          inputRequired
+          idValue={formik.values.status}
+          inputOnChange={formik.handleChange}
+          options={app.getStatusList()}
         />
       </Grid2>
     </EditPage>

@@ -121,7 +121,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            var orgExists = await _db.CoreOrganizations.AsNoTracking().AnyAsync(o => o.Id == id && o.OwnerId == User.IdInt, cancellationToken);
+            var orgExists = await _db.CoreOrganizations.AsNoTracking().AnyAsync(o => o.Id == id && o.OwnerId == User.IdInt && o.Status == EntityStatus.Deleted, cancellationToken);
             if (!orgExists)
             {
                 return ApplicationErrors.NoId.AsResult();
@@ -250,7 +250,7 @@ namespace Platform.Server.Services
         {
             var query = _db.CoreOrganizations
                 .AsNoTracking()
-                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt))
+                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreOrganizationId == o.Id && ou.CoreUserId == User.IdInt))
                 .QueryEtsoo(rq, (o) => o.Id, (o) => o.Status, (q) =>
                 {
                     if (rq.ParentId.HasValue)
@@ -389,17 +389,18 @@ namespace Platform.Server.Services
             var (hasContent, _) = await query.Select(o => new
             {
                 o.Id,
-                OwnerName = o.Owner.Name,
+                IsOwner = o.OwnerId == User.IdInt,
+                OwnerName = MyDbFunctions.HideData(o.Owner.Name, default),
                 o.Name,
                 o.Brand,
                 o.Logo,
                 o.Pin,
                 ParentName = (o.Parent == null ? null : o.Parent.Name),
                 o.ParentId,
-                o.Uid,
                 o.Creation,
                 o.Status,
-                o.QueryKeyword
+                o.QueryKeyword,
+
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -543,7 +544,6 @@ namespace Platform.Server.Services
                 o.Id,
                 o.Name,
                 o.Brand,
-                o.Logo,
                 o.Pin,
                 o.ParentId,
                 o.Status,

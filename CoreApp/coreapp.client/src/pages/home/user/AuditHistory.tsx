@@ -18,6 +18,7 @@ import {
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
 import { AuditHistoryDto, DeviceListDto } from "@etsoo/smarterp-core";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
@@ -53,11 +54,12 @@ export default function LoginHistory() {
 
   return (
     <ResponsivePage<AuditHistoryDto, typeof template>
-      adjustHeight={24}
+      {...DefaultUI.createProps({
+        onRefresh: reloadData
+      })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
       cacheKey="search-history-cache"
-      pageProps={{ onRefresh: reloadData, paddings: 0 }}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField

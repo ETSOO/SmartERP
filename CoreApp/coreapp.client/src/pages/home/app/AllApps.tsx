@@ -11,13 +11,14 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
 import React from "react";
-import { DataTypes } from "@etsoo/shared";
+import { DataTypes, DomUtils } from "@etsoo/shared";
 import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
 import { AppQueryData } from "@etsoo/smarterp-core";
 import { AppUtils } from "./components/AppUtils";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BuyKind } from "./components/BuyApp";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
@@ -27,6 +28,9 @@ const template = {
 export default function AllApps() {
   // Route
   const navigate = useNavigate();
+  const location = useLocation();
+  const { kind = 1 } = DomUtils.dataAs(location.state, { kind: "number" });
+  const kindEnum = kind as BuyKind;
 
   // Labels
   const labels = app.getLabels(
@@ -35,7 +39,8 @@ export default function AllApps() {
     "appName",
     "appWebUrl",
     "buy",
-    "identityType"
+    "identityType",
+    "statusNormal"
   );
 
   // Refs
@@ -56,12 +61,19 @@ export default function AllApps() {
 
   const margin = MUGlobal.pagePaddings;
 
+  React.useEffect(() => {
+    return () => {
+      app.pageExit();
+    };
+  }, []);
+
   return (
     <ResponsivePage<AppQueryData, typeof template>
-      adjustHeight={24}
+      {...DefaultUI.createProps({
+        onRefresh: reloadData
+      })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      pageProps={{ onRefresh: reloadData, paddings: 0 }}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -125,9 +137,7 @@ export default function AllApps() {
                   variant="outlined"
                   size="small"
                   startIcon={<ShoppingCartIcon />}
-                  onClick={() =>
-                    AppUtils.buyApp(data, BuyKind.ExistingOrg, navigate)
-                  }
+                  onClick={() => AppUtils.buyApp(data, kindEnum, navigate)}
                 >
                   {labels.buy}
                 </Button>
@@ -178,9 +188,7 @@ export default function AllApps() {
                 variant="outlined"
                 fullWidth
                 startIcon={<ShoppingCartIcon />}
-                onClick={() =>
-                  AppUtils.buyApp(data, BuyKind.ExistingOrg, navigate)
-                }
+                onClick={() => AppUtils.buyApp(data, kindEnum, navigate)}
               >
                 {labels.buy}
               </Button>

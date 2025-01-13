@@ -12,14 +12,16 @@ export default function ViewOrg() {
   // Page data
   const { dispatch } = React.useContext(PageDataContext);
 
-  // Permissions
-  const editPermission = app.isAdminUser();
-
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
+  // Load data
+  const loadData = React.useCallback(() => {
+    return app.core.orgApi.read(id);
+  }, [id]);
+
   // Labels
-  const labels = app.getLabels("edit", "logo", "view");
+  const labels = app.getLabels("edit", "editLogo", "logo", "view");
 
   // Tax
   const tax = BusinessTax.getById(app.region);
@@ -31,7 +33,7 @@ export default function ViewOrg() {
     return () => {
       app.pageExit();
     };
-  }, []);
+  }, [loadData]);
 
   return (
     <ViewPage<OrgReadDto>
@@ -46,7 +48,7 @@ export default function ViewOrg() {
               >
                 {item.name}
               </Typography>
-              {editPermission && (
+              {item.isOwner && (
                 <IconButtonLink
                   href={`./../../edit/${item.id}`}
                   title={labels.edit}
@@ -71,14 +73,16 @@ export default function ViewOrg() {
                   border: "1px solid #666"
                 }}
               />
-              <IconButtonLink
-                href={`./../../avatar/${item.id}`}
-                state={item.logo}
-                title={labels.edit}
-                size="small"
-              >
-                <EditIcon />
-              </IconButtonLink>
+              {item.isOwner && (
+                <IconButtonLink
+                  href={`./../../avatar/${item.id}`}
+                  state={item.logo}
+                  title={labels.editLogo}
+                  size="small"
+                >
+                  <EditIcon />
+                </IconButtonLink>
+              )}
             </HBox>
           ),
           singleRow: false
@@ -107,12 +111,16 @@ export default function ViewOrg() {
           label: "parentOrg"
         },
         {
+          data: "ownerName",
+          label: "owner"
+        },
+        {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"
         },
         ["creation", GridDataType.DateTime]
       ]}
-      loadData={() => app.core.orgApi.read(id)}
+      loadData={loadData}
     ></ViewPage>
   );
 }

@@ -131,6 +131,15 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/org/avatar/:id",
+            lazy: async () => {
+              const OrgUpdateAvatar = await import(
+                "./pages/home/org/UpdateAvatar"
+              );
+              return { Component: OrgUpdateAvatar.default };
+            }
+          },
+          {
             path: "/home/user/audithistory",
             lazy: async () => {
               const LoginHistory = await import(
