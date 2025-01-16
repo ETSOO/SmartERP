@@ -377,7 +377,7 @@ namespace Platform.Server.Services
         /// 读取用于浏览的机构数据
         /// </summary>
         /// <param name="id">Id</param>
-        /// <param name="response">Http response to write</param>
+        /// <param name="writer">Writer</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
         public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
@@ -529,7 +529,7 @@ namespace Platform.Server.Services
         /// Read organization data for update
         /// 读取用于更新的机构数据
         /// </summary>
-        /// <param name="rq">Request data</param>
+        /// <param name="id">Organization id</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>

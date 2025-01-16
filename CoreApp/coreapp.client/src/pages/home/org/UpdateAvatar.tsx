@@ -2,14 +2,11 @@ import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
 import { Stack } from "@mui/material";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { PageDataContext } from "@etsoo/toolpad";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
+import { usePageData } from "@etsoo/smarterp-core";
 
 export default function UpdateAvatar() {
-  // Page data
-  const { dispatch } = React.useContext(PageDataContext);
-
   // Route
   const navigate = useNavigate();
   const { id = 0 } = useParamsEx({ id: "number" });
@@ -25,14 +22,8 @@ export default function UpdateAvatar() {
     "logo"
   );
 
-  React.useEffect(() => {
-    // Page title
-    dispatch({ page: labels.editLogo });
-
-    return () => {
-      app.pageExit();
-    };
-  }, []);
+  // Page data hook
+  usePageData(app, labels.editLogo, []);
 
   return (
     <CommonPage sx={{ width: "fit-content" }}>

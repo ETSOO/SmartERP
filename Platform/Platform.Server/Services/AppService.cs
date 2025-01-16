@@ -5,6 +5,7 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Crypto;
 using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
@@ -119,6 +120,35 @@ namespace Platform.Server.Services
             {
                 result.Data[nameof(id)] = id.Value;
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Create API key
+        /// 创建API密钥
+        /// </summary>
+        /// <param name="id">App id</param>
+        /// <param name="passphase">Passphase</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateApiKeyAsync(int id, string passphase, CancellationToken cancellationToken = default)
+        {
+            var appKey = Guid.NewGuid().ToString("N");
+            var appSecret = await App.HashPasswordAsync(id + CryptographyUtils.CreateRandString(RandStringKind.All, 32).ToString());
+            var appSecretDB = App.EncriptData(appSecret, id.ToString(), 0);
+
+            var affected = await _db.CoreOrganizationApps.Where(oa => oa.Id == id && oa.CoreOrganizationId == User.OrganizationInt)
+                .ExecuteUpdateAsync(oa => oa.SetProperty(oa => oa.AppKey, appKey).SetProperty(oa => oa.AppSecret, appSecretDB), cancellationToken);
+
+            if (affected == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var result = ActionResult.Success;
+            result.Data[nameof(appKey)] = appKey;
+            result.Data[nameof(appSecret)] = EncryptWeb(appSecret, passphase);
 
             return result;
         }
@@ -331,20 +361,21 @@ namespace Platform.Server.Services
 
                         if (rq.Expiry.HasValue)
                         {
-                            q = q.Where(oa => oa.Expiry >= rq.Expiry);
+                            q = q.Where(oa => oa.Expiry < rq.Expiry);
                         }
 
                         if (rq.ExpiryDays.HasValue)
                         {
                             var expiryDays = rq.ExpiryDays.Value;
-                            q = q.Where(oa => oa.Expiry >= DateTimeOffset.UtcNow.AddDays(expiryDays));
+                            q = q.Where(oa => oa.Expiry < DateTimeOffset.UtcNow.AddDays(expiryDays));
                         }
 
                         return q;
                     }).Select(oa => new AppPurchasedQueryData
                     {
                         Id = oa.Id,
-                        Name = oa.LocalName ?? oa.CoreApp.Name,
+                        Name = oa.LocalName ?? "app" + oa.CoreAppId,
+                        FullName = oa.CoreApp.Name,
                         IdentityType = oa.CoreApp.IdentityType,
                         RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
                         WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
@@ -365,6 +396,38 @@ namespace Platform.Server.Services
             {
                 LogException(ex);
             }
+        }
+
+        /// <summary>
+        /// Read app data for view
+        /// 读取用于浏览的应用数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.Id == id && oa.CoreOrganizationId == User.OrganizationInt);
+
+            await query.Select(oa => new
+            {
+                oa.Id,
+                oa.AppKey,
+                oa.LocalName,
+                oa.LocalUrl,
+                oa.LocalApis,
+                oa.LocalHelpUrl,
+                oa.Expiry,
+                ExpiryDays = oa.Expiry == null || oa.Expiry <= DateTimeOffset.UtcNow.AddDays(-90) ? (int?)null : (int)(oa.Expiry.Value - DateTimeOffset.UtcNow).TotalDays,
+                oa.Status,
+                oa.Creation,
+
+                AppId = oa.CoreAppId,
+                oa.CoreApp.Name
+            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -425,11 +488,42 @@ namespace Platform.Server.Services
                 app.LocalApis = rq.LocalApis?.ToArray();
             }
 
+            if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
+            {
+                app.Status = rq.Status.Value;
+            }
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Read data for update
+        /// 读取用于更新的数据
+        /// </summary>
+        /// <param name="id">App id</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.Id == id && oa.CoreOrganizationId == User.OrganizationInt);
+
+            await query.Select(oa => new
+            {
+                oa.Id,
+                oa.LocalName,
+                oa.LocalUrl,
+                oa.LocalApis,
+                oa.LocalHelpUrl,
+                oa.Status,
+                oa.CoreApp.Name
+            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
     }
 }

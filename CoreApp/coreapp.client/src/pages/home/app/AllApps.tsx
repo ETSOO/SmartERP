@@ -14,10 +14,10 @@ import React from "react";
 import { DataTypes, DomUtils } from "@etsoo/shared";
 import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { AppQueryData } from "@etsoo/smarterp-core";
-import { AppUtils } from "./components/AppUtils";
+import { AppQueryData, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { AppUtils } from "../components/AppUtils";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BuyKind } from "./components/BuyApp";
+import { BuyKind } from "../components/BuyApp";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
@@ -61,11 +61,8 @@ export default function AllApps() {
 
   const margin = MUGlobal.pagePaddings;
 
-  React.useEffect(() => {
-    return () => {
-      app.pageExit();
-    };
-  }, []);
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <ResponsivePage<AppQueryData, typeof template>
@@ -117,7 +114,7 @@ export default function AllApps() {
           sortable: false
         },
         {
-          width: 190,
+          width: DefaultUI.Widths.icon4,
           header: labels.actions,
           align: "center",
           cellRenderer: ({

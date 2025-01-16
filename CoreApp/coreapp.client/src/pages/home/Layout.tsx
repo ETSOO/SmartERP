@@ -143,7 +143,8 @@ export default function Home() {
       items.splice(4, 0, {
         segment: "home/app/my",
         title: labels.purchasedApps,
-        icon: <PaidIcon />
+        icon: <PaidIcon />,
+        subs: ["/home/app/.*"]
       });
     }
 

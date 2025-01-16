@@ -33,7 +33,7 @@ namespace Platform.Server.Endpoints.Org
                 .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
 
             g.MapGet("Read/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
-                .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
+                .WithDescription("Read organizations JSON data / 浏览机构JSON数据").WithTags("Org");
 
             g.MapGet("RequestToken", (IAntiforgery forgeryService, IHttpContextAccessor accessor) =>
             {

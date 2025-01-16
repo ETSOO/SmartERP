@@ -21,7 +21,7 @@ import {
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
-import { MemberQueryDto } from "@etsoo/smarterp-core";
+import { MemberQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 
@@ -98,10 +98,8 @@ export default function AllMembers() {
 
   const margin = MUGlobal.pagePaddings;
 
-  React.useEffect(() => {
-    // Page title
-    app.setPageKey("members");
-  }, []);
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <ResponsivePage<MemberQueryDto, typeof template>
@@ -181,7 +179,7 @@ export default function AllMembers() {
           sortAsc: false
         },
         {
-          width: 120,
+          width: DefaultUI.Widths.icon2,
           header: labels.actions,
           cellRenderer: ({
             data,

@@ -2,6 +2,7 @@ import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
 import { Stack } from "@mui/material";
 import React from "react";
 import { app } from "../../../app/MyApp";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 
 export default function UpdateAvatar() {
   // Labels
@@ -10,11 +11,8 @@ export default function UpdateAvatar() {
   // User context
   const Context = app.userState.context;
 
-  React.useEffect(() => {
-    return () => {
-      app.pageExit();
-    };
-  }, []);
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <CommonPage sx={{ width: "fit-content" }}>

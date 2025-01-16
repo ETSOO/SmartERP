@@ -8,23 +8,20 @@ import { BusinessTax, EntityStatus } from "@etsoo/appscript";
 import { useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { OrgUpdateRQ } from "@etsoo/smarterp-core";
+import {
+  OrgUpdateReadDto,
+  OrgUpdateRQ,
+  usePageData
+} from "@etsoo/smarterp-core";
 import { OrgTiplist } from "@etsoo/smarterp-core/components";
-import { PageDataContext } from "@etsoo/toolpad";
 
 export default function EditOrg() {
   // Route
   const navigate = useNavigate();
-  const { id } = useParamsEx({ id: "number" });
+  const { id = 0 } = useParamsEx({ id: "number" });
 
   // Permissions
   const deletePermission = app.isAdminUser();
-
-  // Page data
-  const { dispatch } = React.useContext(PageDataContext);
-
-  // Data type
-  type DataType = OrgUpdateRQ;
 
   // Labels
   const labels = app.getLabels(
@@ -43,19 +40,20 @@ export default function EditOrg() {
   });
 
   // Edit data
-  const [data, setData] = React.useState<DataType>({ id: 0 });
+  const [data, setData] = React.useState<OrgUpdateReadDto>({
+    id,
+    name: "",
+    status: EntityStatus.Normal
+  });
 
   // Formik
   // https://formik.org/docs/examples/with-material-ui
   // https://firxworx.com/blog/coding/react/integrating-formik-with-react-material-ui-and-typescript/
-  const formik = useFormik<DataType>({
+  const formik = useFormik<OrgUpdateRQ>({
     initialValues: data,
     enableReinitialize: true,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      // Edit only
-      if (values.id == null) return;
-
       // Request data
       const rq = { ...values };
 
@@ -75,9 +73,7 @@ export default function EditOrg() {
       if (result == null) return;
 
       if (result.ok) {
-        navigate("./../../my", {
-          state: { id }
-        });
+        navigate(`./../../my/${id}`);
         return;
       }
 
@@ -87,7 +83,6 @@ export default function EditOrg() {
 
   // Load data
   const reloadData = React.useCallback(async () => {
-    if (id == null) return;
     const data = await app.core.orgApi.updateRead(id);
     if (data == null) return;
     setData(data);
@@ -96,14 +91,8 @@ export default function EditOrg() {
   // Tax
   const tax = BusinessTax.getById(app.region);
 
-  React.useEffect(() => {
-    // Page title
-    dispatch({ page: labels.edit });
-
-    return () => {
-      app.pageExit();
-    };
-  }, []);
+  // Page data hook
+  usePageData(app, labels.edit, []);
 
   return (
     <EditPage

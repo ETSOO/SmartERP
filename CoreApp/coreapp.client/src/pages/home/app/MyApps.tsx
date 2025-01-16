@@ -5,28 +5,27 @@ import {
   SelectEx,
   DateText,
   MobileListItemRenderer,
-  TooltipClick,
   MUUtils,
   IconButtonLink,
   Switch
 } from "@etsoo/materialui";
-import { BoxProps, Button, Fab, IconButton, Typography } from "@mui/material";
+import { BoxProps, Fab, IconButton, Typography } from "@mui/material";
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import HelpIcon from "@mui/icons-material/Help";
+import ArticleIcon from "@mui/icons-material/Article";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import KeyIcon from "@mui/icons-material/Key";
 import { useNavigate } from "react-router-dom";
 import {
   GridCellRendererProps,
   GridDataType,
   ScrollerListForwardRef
 } from "@etsoo/react";
-import { DataTypes, DateUtils } from "@etsoo/shared";
-import { AppPurchasedQueryData } from "@etsoo/smarterp-core";
+import { DataTypes } from "@etsoo/shared";
+import { AppPurchasedQueryData, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { AppUtils } from "../components/AppUtils";
 
 const template = {
   keyword: "string",
@@ -41,24 +40,21 @@ export default function MyApps() {
 
   // Labels
   const labels = app.getLabels(
+    "actions",
     "appName",
     "creation",
-    "actions",
+    "days",
     "edit",
-    "identityType",
-    "productUnit",
-    "price",
-    "purchase",
     "expiry",
+    "identityType",
+    "purchase",
     "renew",
-    "customName",
-    "serviceHelp",
-    "apiKey",
-    "apiKeyTip",
-    "copy",
-    "completeTip",
-    "statusNormal"
+    "statusNormal",
+    "view"
   );
+
+  // Permissions
+  const editPermission = app.isAdminUser();
 
   // Refs
   const ref = React.useRef<ScrollerListForwardRef<AppPurchasedQueryData>>();
@@ -78,14 +74,10 @@ export default function MyApps() {
     ref.current?.reset();
   };
 
-  const createApiKey = (data: AppPurchasedQueryData) => {};
-
   const margin = MUGlobal.pagePaddings;
 
-  React.useEffect(() => {
-    // Page title
-    app.setPageKey("servicesPurchased");
-  }, []);
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <ResponsivePage<AppPurchasedQueryData, typeof template>
@@ -108,6 +100,7 @@ export default function MyApps() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
+      quickAction={(data) => navigate(`./${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -149,7 +142,8 @@ export default function MyApps() {
           field: "name",
           header: labels.appName,
           sortable: false,
-          valueFormatter: ({ data }) => data?.name
+          valueFormatter: ({ data }) =>
+            data?.name ? app.get(data.name) ?? data.name : undefined
         },
         {
           field: "expiry",
@@ -161,6 +155,13 @@ export default function MyApps() {
           renderProps: { nearDays: 30 }
         },
         {
+          field: "expiryDays",
+          type: GridDataType.Int,
+          header: labels.days,
+          width: 72,
+          sortable: false
+        },
+        {
           field: "creation",
           type: GridDataType.Date,
           width: 116,
@@ -169,7 +170,7 @@ export default function MyApps() {
           sortAsc: false
         },
         {
-          width: 192,
+          width: DefaultUI.Widths.icon3,
           header: labels.actions,
           cellRenderer: ({
             data,
@@ -184,32 +185,23 @@ export default function MyApps() {
 
             return (
               <React.Fragment>
-                <IconButton title={labels.renew} onClick={() => {}}>
+                <IconButton
+                  title={labels.renew}
+                  onClick={() => AppUtils.renewApp(data, reloadData)}
+                >
                   <ShoppingCartIcon />
                 </IconButton>
-                <IconButtonLink
-                  title={labels.edit}
-                  href={`./../edit/${data.id}`}
-                >
-                  <EditIcon />
+                {editPermission && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./../edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
+                <IconButtonLink title={labels.view} href={`./${data.id}`}>
+                  <ArticleIcon />
                 </IconButtonLink>
-                {!DateUtils.isExpired(data.expiry) && (
-                  <IconButton
-                    title={labels.apiKey}
-                    onClick={() => createApiKey(data)}
-                  >
-                    <KeyIcon />
-                  </IconButton>
-                )}
-                {data.helpUrl && (
-                  <IconButton
-                    title={labels.serviceHelp}
-                    href={data.helpUrl}
-                    target="_blank"
-                  >
-                    <HelpIcon />
-                  </IconButton>
-                )}
               </React.Fragment>
             );
           }
@@ -225,22 +217,17 @@ export default function MyApps() {
               {
                 label: labels.renew,
                 icon: <ShoppingCartIcon />,
-                action: () => {}
+                action: () => AppUtils.renewApp(data, reloadData)
               },
               {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./../edit/${data.id}`
               },
-              !DateUtils.isExpired(data.expiry) && {
-                label: labels.apiKey,
-                icon: <KeyIcon />,
-                action: () => createApiKey(data)
-              },
-              data.helpUrl != null && {
-                label: labels.serviceHelp,
-                icon: <HelpIcon />,
-                action: data.helpUrl
+              {
+                label: labels.view,
+                icon: <ArticleIcon />,
+                action: `./${data.id}`
               }
             ],
             <React.Fragment>

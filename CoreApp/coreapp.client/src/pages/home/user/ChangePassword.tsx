@@ -2,9 +2,9 @@ import { CommonPage, TextFieldEx, VBox } from "@etsoo/materialui";
 import { DomUtils } from "@etsoo/shared";
 import { Button } from "@mui/material";
 import { useFormik } from "formik";
-import React from "react";
 import * as Yup from "yup";
 import { app } from "../../../app/MyApp";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 
 // Change password
 // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
@@ -76,10 +76,8 @@ export default function ChangePassword() {
     }
   });
 
-  React.useEffect(() => {
-    // Page title
-    app.setPageKey("changePassword");
-  }, []);
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <CommonPage maxWidth="xs">

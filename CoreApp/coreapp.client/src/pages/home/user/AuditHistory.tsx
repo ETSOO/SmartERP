@@ -17,7 +17,11 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { AuditHistoryDto, DeviceListDto } from "@etsoo/smarterp-core";
+import {
+  AuditHistoryDto,
+  DeviceListDto,
+  usePageDataEmpty
+} from "@etsoo/smarterp-core";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
@@ -47,10 +51,8 @@ export default function LoginHistory() {
   const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>();
 
-  React.useEffect(() => {
-    // Page title
-    app.setPageKey("menuLoginHistory");
-  }, []);
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <ResponsivePage<AuditHistoryDto, typeof template>
@@ -130,7 +132,7 @@ export default function LoginHistory() {
         { field: "title", header: labels.title },
         { field: "deviceName", header: labels.device, width: 200 },
         {
-          width: 80,
+          width: DefaultUI.Widths.icon1,
           header: labels.actions,
           align: "center",
           cellRenderer: ({

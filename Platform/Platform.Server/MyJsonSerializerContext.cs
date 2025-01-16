@@ -33,6 +33,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<AppData>))]
     [JsonSerializable(typeof(AppBuyNewRQ))]
     [JsonSerializable(typeof(AppBuyRQ))]
+    [JsonSerializable(typeof(AppCreateApiKeyRQ))]
     [JsonSerializable(typeof(AppListRQ))]
     [JsonSerializable(typeof(AppGetMyRQ))]
     [JsonSerializable(typeof(AppPurchasedQueryRQ))]

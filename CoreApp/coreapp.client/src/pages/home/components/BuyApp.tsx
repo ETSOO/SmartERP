@@ -1,5 +1,5 @@
 import { ListType } from "@etsoo/shared";
-import { app } from "../../../../app/MyApp";
+import { app } from "../../../app/MyApp";
 import React from "react";
 import { InputField, MaskInput, OptionGroup, VBox } from "@etsoo/materialui";
 import { BusinessTax } from "@etsoo/appscript";

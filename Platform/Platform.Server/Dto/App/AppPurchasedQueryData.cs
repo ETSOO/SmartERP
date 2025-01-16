@@ -9,6 +9,12 @@ namespace Platform.Server.Dto.App
     public record AppPurchasedQueryData : AppQueryData
     {
         /// <summary>
+        /// Full name
+        /// 全名
+        /// </summary>
+        public required string FullName { get; init; }
+
+        /// <summary>
         /// Expiry
         /// 到期时间
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
@@ -34,6 +35,12 @@ namespace Platform.Server.Endpoints.App.RQ
         /// 本地接口
         /// </summary>
         public IEnumerable<string>? LocalApis { get; init; }
+
+        /// <summary>
+        /// Status
+        /// 状况
+        /// </summary>
+        public EntityStatus? Status { get; init; }
 
         /// <summary>
         /// Validate the model

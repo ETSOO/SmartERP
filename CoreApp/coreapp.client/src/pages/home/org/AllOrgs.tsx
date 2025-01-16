@@ -21,9 +21,9 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { OrgQueryDto } from "@etsoo/smarterp-core";
+import { OrgQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
-import { AppUtils } from "../app/components/AppUtils";
+import { AppUtils } from "../components/AppUtils";
 import { DefaultUI, OrgTiplist } from "@etsoo/smarterp-core/components";
 
 const template = {
@@ -63,11 +63,8 @@ export default function AllOrgs() {
 
   const margin = MUGlobal.pagePaddings;
 
-  React.useEffect(() => {
-    return () => {
-      app.pageExit();
-    };
-  }, []);
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <ResponsivePage<OrgQueryDto, typeof template>
@@ -153,7 +150,7 @@ export default function AllOrgs() {
           sortAsc: false
         },
         {
-          width: 192,
+          width: DefaultUI.Widths.icon3,
           header: labels.actions,
           cellRenderer: ({
             data,

@@ -15,7 +15,7 @@ import AuthSuccess from "./pages/login/AuthSuccess";
 import Index from "./pages/Index";
 import Home from "./pages/home/Home";
 import Layout from "./pages/home/Layout";
-import { CoreServiceAppContext } from "@etsoo/smarterp-core";
+import { ReactAppContext } from "@etsoo/materialui";
 
 // Culture provider
 const CultureStateProvider = app.cultureState.provider;
@@ -23,9 +23,6 @@ const CultureContext = app.cultureState.context;
 
 // User state
 const UserStateProvider = app.userState.provider;
-
-// Page state
-const PageStateProvider = app.pageState.provider;
 
 // Theme
 // https://mui.com/customization/theming/
@@ -96,10 +93,24 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/app/my/:id",
+            lazy: async () => {
+              const ViewApp = await import("./pages/home/app/ViewApp");
+              return { Component: ViewApp.default };
+            }
+          },
+          {
             path: "/home/app/my",
             lazy: async () => {
               const MyApps = await import("./pages/home/app/MyApps");
               return { Component: MyApps.default };
+            }
+          },
+          {
+            path: "/home/app/edit/:id",
+            lazy: async () => {
+              const EditApp = await import("./pages/home/app/EditApp");
+              return { Component: EditApp.default };
             }
           },
           {
@@ -223,7 +234,7 @@ function AppRouterProvider(props: RouterProviderProps) {
 
 const reactRoot = createRoot(document.getElementById("root")!);
 reactRoot.render(
-  <CoreServiceAppContext.Provider value={{ app }}>
+  <ReactAppContext.Provider value={app}>
     <CultureStateProvider>
       <CultureContext.Consumer>
         {(culture) => (
@@ -236,18 +247,12 @@ reactRoot.render(
                 app.userStateDispatch = dispatch;
               }}
             >
-              <PageStateProvider
-                update={(dispatch) => {
-                  app.pageStateDispatch = dispatch;
-                }}
-              >
-                <CssBaseline />
-                <AppRouterProvider router={router} />
-              </PageStateProvider>
+              <CssBaseline />
+              <AppRouterProvider router={router} />
             </UserStateProvider>
           </ThemeProvider>
         )}
       </CultureContext.Consumer>
     </CultureStateProvider>
-  </CoreServiceAppContext.Provider>
+  </ReactAppContext.Provider>
 );

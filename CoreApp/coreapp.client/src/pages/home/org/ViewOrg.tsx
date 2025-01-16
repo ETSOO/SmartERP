@@ -4,14 +4,10 @@ import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
 import { Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { app } from "../../../app/MyApp";
-import { OrgReadDto } from "@etsoo/smarterp-core";
+import { OrgReadDto, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
-import { PageDataContext } from "@etsoo/toolpad";
 
 export default function ViewOrg() {
-  // Page data
-  const { dispatch } = React.useContext(PageDataContext);
-
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
@@ -26,14 +22,8 @@ export default function ViewOrg() {
   // Tax
   const tax = BusinessTax.getById(app.region);
 
-  React.useEffect(() => {
-    // Page title
-    dispatch({ page: labels.view });
-
-    return () => {
-      app.pageExit();
-    };
-  }, [loadData]);
+  // Page data hook
+  usePageData(app, labels.view, [loadData]);
 
   return (
     <ViewPage<OrgReadDto>

@@ -15,6 +15,7 @@ import { Route, Routes } from "react-router-dom";
 import { DynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
 import AuthSuccess from "./login/AuthSuccess";
+import { ReactAppContext } from "@etsoo/materialui";
 
 // Root
 const root = document.getElementById("root")!;
@@ -38,9 +39,6 @@ const CultureContext = app.cultureState.context;
 
 // User state
 const UserStateProvider = app.userState.provider;
-
-// Page state
-const PageStateProvider = app.pageState.provider;
 
 // Theme
 // https://mui.com/customization/theming/
@@ -152,29 +150,25 @@ const getThemeCulture = (name: string) => {
 
 const reactRoot = createRoot(root);
 reactRoot.render(
-  <CultureStateProvider>
-    <CultureContext.Consumer>
-      {(culture) => (
-        <ThemeProvider
-          theme={createTheme(theme, getThemeCulture(culture.state.name))}
-        >
-          <NotifierProvider />
-          <UserStateProvider
-            update={(dispatch) => {
-              app.userStateDispatch = dispatch;
-            }}
+  <ReactAppContext.Provider value={app}>
+    <CultureStateProvider>
+      <CultureContext.Consumer>
+        {(culture) => (
+          <ThemeProvider
+            theme={createTheme(theme, getThemeCulture(culture.state.name))}
           >
-            <PageStateProvider
+            <NotifierProvider />
+            <UserStateProvider
               update={(dispatch) => {
-                app.pageStateDispatch = dispatch;
+                app.userStateDispatch = dispatch;
               }}
             >
               <CssBaseline />
               <MyRouter />
-            </PageStateProvider>
-          </UserStateProvider>
-        </ThemeProvider>
-      )}
-    </CultureContext.Consumer>
-  </CultureStateProvider>
+            </UserStateProvider>
+          </ThemeProvider>
+        )}
+      </CultureContext.Consumer>
+    </CultureStateProvider>
+  </ReactAppContext.Provider>
 );

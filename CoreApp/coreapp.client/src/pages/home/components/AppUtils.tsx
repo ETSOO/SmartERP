@@ -1,8 +1,11 @@
 import { AppQueryData, OrgQueryDto } from "@etsoo/smarterp-core";
-import { app } from "../../../../app/MyApp";
+import { app } from "../../../app/MyApp";
 import { DomUtils, IActionResult } from "@etsoo/shared";
 import { NavigateFunction } from "react-router-dom";
 import { BuyApp, BuyKind } from "./BuyApp";
+import { VBox } from "@etsoo/materialui";
+import { Button, InputAdornment, TextField } from "@mui/material";
+import React from "react";
 
 /**
  * App utilities
@@ -93,6 +96,85 @@ export namespace AppUtils {
         return false;
       },
       inputs: <BuyApp kind={kind} />,
+      fullScreen: app.smDown
+    });
+  }
+
+  export function renewApp(
+    data: { id: number; name: string },
+    callback: () => void
+  ) {
+    // Labels
+    const labels = app.getLabels("monthsUnit", "renew", "renewLength", "qty");
+    const years = app.get<string[]>("years5");
+    const inputRef = React.createRef<HTMLInputElement>();
+    const setMonths = (index: number) => {
+      if (inputRef.current == null) return;
+      inputRef.current.value = `${(index + 1) * 12}`;
+    };
+
+    app.showInputDialog({
+      title: labels.renew,
+      message: data.name,
+      callback: async (form) => {
+        // Cancelled
+        if (form == null) {
+          return;
+        }
+
+        // Form data
+        const { months } = DomUtils.dataAs(new FormData(form), {
+          months: "number"
+        });
+        if (months == null || months < 1) {
+          DomUtils.setFocus("months", form);
+          return false;
+        }
+
+        const result = await app.core.appApi.renew(
+          { id: data.id, months },
+          { showLoading: false }
+        );
+
+        if (result == null) return;
+
+        if (result.ok) {
+          callback();
+          return;
+        }
+
+        app.alertResult(result);
+        return false;
+      },
+      inputs: (
+        <VBox gap={1} width="100%" paddingTop={1}>
+          <TextField
+            name="months"
+            margin="dense"
+            variant="standard"
+            label={labels.renewLength}
+            defaultValue={12}
+            required
+            type="number"
+            inputRef={inputRef}
+            helperText={years?.map((y, index) => (
+              <Button key={index} onClick={() => setMonths(index)}>
+                {y}
+              </Button>
+            ))}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {labels.monthsUnit}
+                  </InputAdornment>
+                )
+              },
+              htmlInput: { max: 120, min: 1, step: 1, inputMode: "numeric" }
+            }}
+          />
+        </VBox>
+      ),
       fullScreen: app.smDown
     });
   }
