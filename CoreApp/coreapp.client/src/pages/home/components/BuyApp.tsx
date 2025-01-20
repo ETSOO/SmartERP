@@ -78,7 +78,7 @@ export function BuyApp(props: BuyAppProps) {
           <MaskInput
             mask={{ mask: tax?.mask ?? "" }}
             margin="dense"
-            name="identifier"
+            name="pin"
             label={app.get(tax?.labelKey ?? "taxId")}
             fullWidth
             variant="standard"

@@ -102,7 +102,7 @@ export default function EditApp() {
       if (item.name === "localApis" && Array.isArray(value)) {
         item.value = value.join("\n");
       } else {
-        item.value = `${value}`;
+        item.value = value == null ? "" : `${value}`;
       }
     });
     setData(data);

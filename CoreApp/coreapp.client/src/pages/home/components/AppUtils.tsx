@@ -6,6 +6,7 @@ import { BuyApp, BuyKind } from "./BuyApp";
 import { VBox } from "@etsoo/materialui";
 import { Button, InputAdornment, TextField } from "@mui/material";
 import React from "react";
+import { InviteMember } from "./InviteMember";
 
 /**
  * App utilities
@@ -179,6 +180,81 @@ export namespace AppUtils {
     });
   }
 
+  export function inviteMember(callback: () => void) {
+    // Labels
+    const labels = app.getLabels("inviteMember", "inviteResult");
+
+    // Show input dialog
+    app.showInputDialog({
+      title: labels.inviteMember,
+      message: "",
+      fullScreen: app.smDown,
+      callback: async (form) => {
+        // Cancelled
+        if (form == null) {
+          return;
+        }
+
+        // Validate form
+        if (!form.reportValidity()) {
+          return false;
+        }
+
+        // Form data
+        const { userRole, emails, message } = DomUtils.dataAs(
+          new FormData(form),
+          {
+            userRole: "number",
+            emails: "string[]",
+            message: "string"
+          }
+        );
+
+        if (userRole == null) {
+          // No role selected
+          DomUtils.setFocus("userRole", form);
+          return false;
+        }
+
+        if (emails == null || emails.length === 0) {
+          // No valid email provided
+          DomUtils.setFocus("emails", form);
+          return false;
+        }
+
+        // Submit
+        const result = await app.core.memberApi.invite(
+          {
+            userRole,
+            emails: emails.toUnique(),
+            message,
+            region: app.region,
+            timeZone: app.getTimeZone()
+          },
+          { showLoading: false }
+        );
+        if (result == null) return;
+
+        if (result.ok) {
+          app.notifier.succeed(
+            labels.inviteResult.format(result.data?.msg ?? ""),
+            undefined,
+            () => callback()
+          );
+          return;
+        }
+
+        app.alertResult(result);
+        return false;
+      },
+      inputs: <InviteMember />
+    });
+  }
+
+  /**
+   * Switch organization
+   * @param data Data
+   */
   export function switchOrg(data: OrgQueryDto) {
     // Labels
     const labels = app.getLabels("confirmAction", "switchOrg", "unknownError");

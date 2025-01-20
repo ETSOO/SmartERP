@@ -118,6 +118,10 @@ export default function ViewApp() {
         ["expiry", GridDataType.DateTime],
         { data: "expiryDays", label: "days" },
         {
+          data: (item) => app.core.getIdentityLabel(item.identityType),
+          label: "identityType"
+        },
+        {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"
         },

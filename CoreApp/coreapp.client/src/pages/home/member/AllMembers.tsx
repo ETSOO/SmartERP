@@ -1,4 +1,4 @@
-import { EntityStatus, UserRole } from "@etsoo/appscript";
+import { EntityStatus } from "@etsoo/appscript";
 import {
   MUGlobal,
   ResponsivePage,
@@ -8,10 +8,10 @@ import {
   MobileListItemRenderer,
   Switch
 } from "@etsoo/materialui";
-import { BoxProps, Fab, IconButton, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { BoxProps, Fab, Typography } from "@mui/material";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import EditIcon from "@mui/icons-material/Edit";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -24,6 +24,7 @@ import { app } from "../../../app/MyApp";
 import { MemberQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { AppUtils } from "../components/AppUtils";
 
 const template = {
   name: "string",
@@ -37,58 +38,25 @@ export default function AllMembers() {
   const navigate = useNavigate();
 
   // Roles
-  const roles = app.getRoles(UserRole.Founder * 2 - 1);
-
-  const getRoleLabel = (data?: MemberQueryDto) => {
-    if (data == null) return "";
-    return app
-      .getRoles(data.userRole)
-      .map((item) => item.label)
-      .join(", ");
-  };
-
-  const deleteMember = (id: number) => {
-    app.notifier.confirm(
-      labels.confirmAction.format(labels.remove),
-      undefined,
-      async (confirmed) => {
-        if (!confirmed) return;
-        const result = await app.core.memberApi.delete(id);
-        if (result == null) return;
-
-        if (result.ok) {
-          reloadData();
-          return;
-        }
-
-        app.alertResult(result);
-      }
-    );
-  };
+  const roles = app.getRoles();
 
   // Edit permission
   const editPermission = app.isHRUser();
 
   // Labels
   const labels = app.getLabels(
-    "id",
-    "name",
-    "organization",
-    "creation",
     "actions",
-    "role",
     "assignedId",
-    "inviteMember",
-    "edit",
-    "remove",
-    "inactivated",
-    "entityStatus",
     "confirmAction",
-    "statusNormal"
+    "creation",
+    "edit",
+    "entityStatus",
+    "inviteMember",
+    "name",
+    "role",
+    "statusNormal",
+    "view"
   );
-
-  // Current organization
-  const organization = app.userData?.organization;
 
   // Refs
   const ref = React.useRef<ScrollerListForwardRef<MemberQueryDto>>();
@@ -108,8 +76,13 @@ export default function AllMembers() {
         fabButtons: (
           <React.Fragment>
             {editPermission && (
-              <Fab title={labels.inviteMember} size="medium" color="primary">
-                <AddIcon />
+              <Fab
+                title={labels.inviteMember}
+                size="medium"
+                color="primary"
+                onClick={() => AppUtils.inviteMember(() => reloadData())}
+              >
+                <PersonAddAlt1Icon />
               </Fab>
             )}
           </React.Fragment>
@@ -117,6 +90,7 @@ export default function AllMembers() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
+      quickAction={(data) => navigate(`./../view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -161,7 +135,7 @@ export default function AllMembers() {
           field: "userRole",
           width: 180,
           header: labels.role,
-          valueFormatter: ({ data }) => getRoleLabel(data),
+          valueFormatter: ({ data }) => app.getRoleLabel(data?.userRole),
           sortable: false
         },
         {
@@ -195,25 +169,19 @@ export default function AllMembers() {
             return (
               <React.Fragment>
                 {editPermission && (
-                  <React.Fragment>
-                    <IconButtonLink
-                      title={labels.edit}
-                      href={`./../edit/${data.id}`}
-                    >
-                      <EditIcon />
-                    </IconButtonLink>
-                    {!data.isSelf &&
-                      data.userRole < UserRole.Founder &&
-                      data.status < EntityStatus.Inactivated && (
-                        <IconButton
-                          title={labels.remove}
-                          onClick={() => deleteMember(data.id)}
-                        >
-                          <PersonRemoveIcon />
-                        </IconButton>
-                      )}
-                  </React.Fragment>
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./../edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
                 )}
+                <IconButtonLink
+                  title={labels.view}
+                  href={`./../view/${data.id}`}
+                >
+                  <ArticleIcon />
+                </IconButtonLink>
               </React.Fragment>
             );
           }
@@ -231,16 +199,15 @@ export default function AllMembers() {
                 icon: <EditIcon />,
                 action: `./../edit/${data.id}`
               },
-              !data.isSelf &&
-                data.userRole < UserRole.Founder && {
-                  label: labels.remove,
-                  icon: <PersonRemoveIcon />,
-                  action: () => deleteMember(data.id)
-                }
+              {
+                label: labels.view,
+                icon: <ArticleIcon />,
+                action: `./../view/${data.id}`
+              }
             ],
             <React.Fragment>
               <Typography variant="body2" noWrap>
-                {getRoleLabel(data) +
+                {app.getRoleLabel(data.userRole) +
                   (data.assignedId ? ", " + data.assignedId : "")}
               </Typography>
               {data.status >= EntityStatus.Inactivated && (

@@ -28,6 +28,7 @@ using Platform.Server;
 using Platform.Server.Application;
 using Platform.Server.Endpoints.App;
 using Platform.Server.Endpoints.Auth;
+using Platform.Server.Endpoints.AuthCode;
 using Platform.Server.Endpoints.Member;
 using Platform.Server.Endpoints.Org;
 using Platform.Server.Endpoints.Public;
@@ -289,6 +290,7 @@ services.AddScoped<IWXClient, WXClient>();
 services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<IAppService, AppService>();
 services.AddScoped<IAuthService, AuthService>();
+services.AddScoped<IAuthCodeService, AuthCodeService>();
 services.AddScoped<IMemberService, MemberService>();
 services.AddScoped<IOrgService, OrgService>();
 services.AddScoped<IPublicService, PublicService>();
@@ -357,6 +359,7 @@ if (microsoftOptions.Exists())
 
 // Endpoints
 api.MapAuth()
+    .MapAuthCode()
     .MapApp()
     .MapMember()
     .MapOrg()

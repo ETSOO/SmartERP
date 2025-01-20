@@ -59,7 +59,7 @@ export default function UpdateAvatar() {
             // Reset the UI
             return true;
           }}
-          maxWidth={600}
+          maxWidth={640}
         />
       </Stack>
     </CommonPage>

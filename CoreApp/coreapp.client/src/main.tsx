@@ -121,6 +121,29 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/member/view/:id",
+            lazy: async () => {
+              const ViewMember = await import("./pages/home/member/ViewMember");
+              return { Component: ViewMember.default };
+            }
+          },
+          {
+            path: "/home/member/edit/:id",
+            lazy: async () => {
+              const EditMember = await import("./pages/home/member/EditMember");
+              return { Component: EditMember.default };
+            }
+          },
+          {
+            path: "/home/member/avatar/:id",
+            lazy: async () => {
+              const MemberUpdateAvatar = await import(
+                "./pages/home/member/MemberAvatar"
+              );
+              return { Component: MemberUpdateAvatar.default };
+            }
+          },
+          {
             path: "/home/org/my",
             lazy: async () => {
               const AllOrgs = await import("./pages/home/org/AllOrgs");

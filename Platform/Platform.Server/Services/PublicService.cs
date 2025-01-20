@@ -2,19 +2,24 @@
 using com.etsoo.ApiModel.RQ.Maps;
 using com.etsoo.ApiProxy.Defs;
 using com.etsoo.BaiduApi.Maps;
+using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.ImageUtils.Barcode;
 using com.etsoo.Localization;
 using com.etsoo.Localization.Country;
+using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
+using com.etsoo.Utils.String;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Platform.Server.Application;
+using Platform.Server.Dto.Member;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Public.RQ;
 using PlatformShared.Database;
+using PlatformShared.Database.Models;
 using System.Globalization;
 using System.Web;
 
@@ -31,6 +36,7 @@ namespace Platform.Server.Services
         readonly IHttpContextAccessor _accessor;
         readonly IMapPlaceService _baidu;
         readonly IBridgeProxy _proxy;
+        readonly IAuthCodeService _authCodeService;
 
         /// <summary>
         /// Constructor
@@ -51,7 +57,8 @@ namespace Platform.Server.Services
             IDistributedCache cache,
             IHttpContextAccessor accessor,
             IMapPlaceService baidu,
-            IBridgeProxy proxy)
+            IBridgeProxy proxy,
+            IAuthCodeService authCodeService)
             : base(app, userAccessor.User, "public", logger)
         {
             _db = db;
@@ -59,6 +66,60 @@ namespace Platform.Server.Services
             _accessor = accessor;
             _baidu = baidu;
             _proxy = proxy;
+            _authCodeService = authCodeService;
+        }
+
+        /// <summary>
+        /// Accept member invitation
+        /// 接受成员邀请
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> AcceptInvitationAsync(AcceptInvitationRQ rq, CancellationToken cancellationToken = default)
+        {
+            if (User == null)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var code = await _authCodeService.ReadAsync(rq.Id, AuthCodeAction.MemberInvitationEmailCode, cancellationToken);
+            if (code == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (code.Expiry < DateTime.UtcNow)
+            {
+                return ApplicationErrors.CodeExpired.AsResult();
+            }
+
+            var data = code.DeserializeData(MyJsonSerializerContext.Default.AuthCodeMemberInvitationData);
+            if (data == null)
+            {
+                return ApplicationErrors.NoValidData.AsResult();
+            }
+
+            var orgId = data.UserData.OrganizationId;
+            var userId = User.IdInt;
+            var exists = await _db.CoreOrganizationUsers.AnyAsync(ou => ou.CoreOrganizationId == orgId && ou.CoreUserId == userId, cancellationToken);
+            if (!exists)
+            {
+                _db.CoreOrganizationUsers.Add(new CoreOrganizationUser
+                {
+                    CoreOrganizationId = orgId,
+                    CoreUserId = userId,
+                    UserRole = data.UserRole,
+                    IdentityType = IdentityTypeFlags.User
+                });
+
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+
+            // Delete the code
+            await _db.CoreAuthCodes.Where(c => c.Id == rq.Id).ExecuteDeleteAsync(cancellationToken);
+
+            return ActionResult.Success;
         }
 
         /// <summary>
@@ -247,6 +308,33 @@ namespace Platform.Server.Services
             {
                 return await _proxy.SearchCommonPlaceAsync(com.etsoo.GoogleApi.Maps.Place.RQ.SearchPlaceRQ.CreateFrom(rq), cancellationToken);
             }
+        }
+
+        /// <summary>
+        /// Read invitation data
+        /// 读取邀请数据
+        /// </summary>
+        /// <param name="id">Code id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<MemberInvitationData?> ReadInvitationAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var code = await _authCodeService.ReadAsync(id, AuthCodeAction.MemberInvitationEmailCode, cancellationToken);
+            if (code == null) return null;
+
+            var data = code.DeserializeData(MyJsonSerializerContext.Default.AuthCodeMemberInvitationData);
+            if (data == null) return null;
+
+            var userExists = await _db.CoreUserIdentifiers.AnyAsync(ui => ui.Type == CoreUserIdentifierType.Email && ui.Value == code.OpenId, cancellationToken);
+
+            return new MemberInvitationData
+            {
+                Email = EncryptWeb(code.OpenId, id.ToString()[..4]),
+                Inviter = StringUtils.HideData(data.UserData.Name),
+                OrgName = data.UserData.OrganizationName,
+                IsExpired = code.Expiry < DateTime.UtcNow,
+                UserExists = userExists
+            };
         }
     }
 }

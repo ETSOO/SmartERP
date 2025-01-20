@@ -10,13 +10,15 @@ import { app } from "../app/SmartApp";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import { useSearchParamsEx } from "@etsoo/react";
+import { AuthCodeAction } from "@etsoo/smarterp-core";
 
 export default function Register20() {
   // Navigate
   const navigate = useNavigate();
 
   // Token
-  const { token } = useSearchParamsEx({
+  const { openid, token } = useSearchParamsEx({
+    openid: "string",
     token: "string"
   });
   app.setLoginToken(token);
@@ -56,9 +58,9 @@ export default function Register20() {
     const email = input.value.trim();
 
     // Send verification code
-    const result = await app.authApi.sendEmail({
+    const result = await app.authCodeApi.sendEmail({
       deviceId: app.deviceId,
-      action: 2,
+      action: AuthCodeAction.UserRegistrationEmailCode,
       email: app.encrypt(email),
       region: app.region,
       timezone: app.getTimeZone()
@@ -72,6 +74,11 @@ export default function Register20() {
     }
 
     codeIdRef.current = result.data?.id;
+
+    if (codeRef.current) {
+      codeRef.current.value = "";
+      codeRef.current.focus();
+    }
 
     return 120;
   }, []);
@@ -115,6 +122,12 @@ export default function Register20() {
   };
 
   React.useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.value = openid ?? "";
+    }
+  }, [openid]);
+
+  React.useEffect(() => {
     // Focus
     if (codeRef.current) codeRef.current.focus();
     else inputRef.current?.focus();
@@ -141,7 +154,7 @@ export default function Register20() {
         autoCapitalize="none"
         autoComplete="email"
         type="email"
-        inputProps={{ inputMode: "email" }}
+        slotProps={{ input: { inputMode: "email" } }}
         required
         showClear
         onChange={() => setReady(false)}

@@ -1,10 +1,9 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
-using com.etsoo.Utils.Actions;
 using com.etsoo.Web;
 using com.etsoo.WebUtils;
-using Platform.Server.Dto.Auth;
 using Platform.Server.Endpoints.Auth.RQ;
+using Platform.Server.Endpoints.AuthCode.RQ;
 using Platform.Server.Services;
 
 namespace Platform.Server.Endpoints.Auth
@@ -15,29 +14,6 @@ namespace Platform.Server.Endpoints.Auth
     /// </summary>
     public static class Auth
     {
-        static (IActionResult result, ValidateCodeData? data) CreateValidateCodeData(this IAuthService service, CodeValidateRQ rq, string? userAgent)
-        {
-            // Check device
-            if (!service.CheckDevice(userAgent, rq.DeviceId, out var checkResult, out var cd))
-            {
-                return (checkResult, null);
-            }
-
-            var deviceCore = cd.Value.DeviceCore;
-
-            var code = service.DecryptDeviceData(rq.Code, deviceCore);
-            if (code == null)
-            {
-                return (ApplicationErrors.NoValidData.AsResult("Code"), null);
-            }
-
-            return (ActionResult.Success, new ValidateCodeData
-            {
-                Code = code,
-                Id = rq.Id
-            });
-        }
-
         public static RouteGroupBuilder MapAuth(this RouteGroupBuilder builder)
         {
             var g = builder.MapGroup("Auth").AllowAnonymous();
@@ -123,99 +99,6 @@ namespace Platform.Server.Endpoints.Auth
                 return result;
             }).WithDescription("Refresh token / 刷新令牌").WithTags("Auth");
 
-            g.MapPut("SendEmail", async (IAuthService service, IHttpContextAccessor accessor, EmailCodeRQ rq, CancellationToken cancellationToken) =>
-            {
-                // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
-                {
-                    return checkResult;
-                }
-
-                var deviceCore = cd.Value.DeviceCore;
-
-                var email = service.DecryptDeviceData(rq.Email, deviceCore);
-                if (email == null)
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Email");
-                }
-
-                var data = new SendEmailData
-                {
-                    Action = rq.Action,
-                    Email = email,
-                    Region = rq.Region,
-                    TimeZone = rq.TimeZone
-                };
-
-                return await service.SendEmailAsync(data, cancellationToken);
-            }).WithDescription("Send Email code / 发送电子邮箱验证码").WithTags("Auth");
-
-            g.MapPut("SendSMS", async (IAuthService service, IHttpContextAccessor accessor, SMSCodeRQ rq, CancellationToken cancellationToken) =>
-            {
-                // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
-                {
-                    return checkResult;
-                }
-
-                var deviceCore = cd.Value.DeviceCore;
-
-                var mobile = service.DecryptDeviceData(rq.Mobile, deviceCore);
-                if (mobile == null)
-                {
-                    return ApplicationErrors.NoValidData.AsResult("Mobile");
-                }
-
-                var data = new SendSMSData
-                {
-                    Action = rq.Action,
-                    Mobile = mobile,
-                    Region = rq.Region
-                };
-
-                return await service.SendSMSAsync(data, cancellationToken);
-            }).WithDescription("Send SMS code / 发送短信验证码").WithTags("Auth");
-
-            g.MapPut("ValidateEmailCallback", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
-            {
-                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
-                if (!result.Ok || data == null)
-                {
-                    return result;
-                }
-                return await service.ValidateEmailCallbackAsync(data, cancellationToken);
-            }).WithDescription("Validate email callback password code / 验证电子邮箱找回密码验证码").WithTags("Auth");
-
-            g.MapPut("ValidateEmailRegistration", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
-            {
-                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
-                if (!result.Ok || data == null)
-                {
-                    return result;
-                }
-                return await service.ValidateEmailRegistrationAsync(data, cancellationToken);
-            }).WithDescription("Validate email registration code / 验证电子邮箱注册验证码").WithTags("Auth");
-
-            g.MapPut("ValidateMobileCallback", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
-            {
-                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
-                if (!result.Ok || data == null)
-                {
-                    return result;
-                }
-                return await service.ValidateMobileCallbackAsync(data, cancellationToken);
-            }).WithDescription("Validate mobile callback password code / 验证手机找回密码验证码").WithTags("Auth");
-
-            g.MapPut("ValidateMobileRegistration", async (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) =>
-            {
-                var (result, data) = service.CreateValidateCodeData(rq, accessor.UserAgent());
-                if (!result.Ok || data == null)
-                {
-                    return result;
-                }
-                return await service.ValidateMobileRegistrationAsync(data, cancellationToken);
-            }).WithDescription("Validate mobile registration code / 验证手机注册验证码").WithTags("Auth");
-
             g.MapGet("ViewRegisterData", (IAuthService service, CancellationToken cancellationToken) => service.ViewRegisterDataAsync(cancellationToken))
                 .WithDescription("View register data / 查看注册数据").WithTags("Auth");
 
@@ -269,6 +152,18 @@ namespace Platform.Server.Endpoints.Auth
 
                 return await service.SignoutAsync(token);
             }).WithDescription("User signout / 用户退出").WithTags("Auth");
+
+            g.MapPut("ValidateEmailCallback", (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) => service.ValidateEmailCallbackAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Validate email callback password code / 验证电子邮箱找回密码验证码").WithTags("Auth");
+
+            g.MapPut("ValidateEmailRegistration", (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) => service.ValidateEmailRegistrationAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Validate email registration code / 验证电子邮箱注册验证码").WithTags("Auth");
+
+            g.MapPut("ValidateMobileCallback", (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) => service.ValidateMobileCallbackAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Validate mobile callback password code / 验证手机找回密码验证码").WithTags("Auth");
+
+            g.MapPut("ValidateMobileRegistration", (IAuthService service, IHttpContextAccessor accessor, CodeValidateRQ rq, CancellationToken cancellationToken) => service.ValidateMobileRegistrationAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Validate mobile registration code / 验证手机注册验证码").WithTags("Auth");
 
             return builder;
         }

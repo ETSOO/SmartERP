@@ -25,5 +25,7 @@ public partial class CoreAuthCode
 
     public DateTime? Creation { get; set; }
 
+    public string Data { get; set; }
+
     public virtual CoreUser CoreUser { get; set; }
 }

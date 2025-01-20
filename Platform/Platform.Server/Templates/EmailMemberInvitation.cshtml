@@ -1,27 +1,29 @@
-﻿@using Platform.Server.Templates;
+﻿@using Platform.Server.Dto.AuthCode
+@using Platform.Server.Templates;
 @{
-    var data = (@Model as UserInvitationEmailTemplateView)!;
+    var m = (@Model as AuthCodeEmailTemplateView<AuthCodeMemberInvitationData>)!;
+    var data = m.Data;
 
-    if (data.Language.StartsWith("zh-"))
+    if (m.Language.StartsWith("zh-"))
     {
-        data.Subject = $"[司有云ERP] {data.UserData.Name}的邀请";
+        m.Subject = $"[司有云ERP] {data.UserData.Name}的邀请";
     }
     else
     {
-        data.Subject = "[SmartERP] Invitation from {data.MemberData.Name}";
+        m.Subject = $"[SmartERP] Invitation from {data.UserData.Name}";
     }
 
-    var url = data.WebUrl + $"/invite/{data.Guid}";
+    var url = data.WebUrl + $"/invite/{m.Id}?code={m.Code}";
 }
 <!DOCTYPE html>
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@data.Subject</title>
+    <title>@m.Subject</title>
 </head>
 <body>
-    @if (data.Language.StartsWith("zh-"))
+    @if (m.Language.StartsWith("zh-"))
     {
         <p>您好！</p>
         <p><b>@data.UserData.Name</b> 邀请您加入司有云ERP平台上的 <b>@data.UserData.OrganizationName</b>。</p>
@@ -29,7 +31,7 @@
         {
             <p>留言：<q style="font-style:italic">@data.Message</q></p>
         }
-        <p><a href="@url">点击这里</a>打开程序，或者复制字符串 <pre>"@url"</pre> 在浏览器中访问，注册登陆后请接受邀请，<b>@data.LocalExpiry.ToString("f")</b> 前有效。</p>
+        <p><a href="@url">点击这里</a>打开程序，或者复制字符串 <pre>"@url"</pre> 在浏览器中访问，注册登陆后请接受邀请，<b>@m.LocalExpiry.ToString("f")</b> 前有效。</p>
         <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
         <table border="0" width="100%">
             <tr>
@@ -41,7 +43,7 @@
     else
     {
         <p>Hi there,</p>
-        <p><b>@data.UserData.Name</b> invites you to join <b>@data.UserData.OrganizationName</b> on SmartERP platform, valid before <b>@data.LocalExpiry.ToString("f")</b>. Please accept the invitation after registering and logging in.</p>
+        <p><b>@data.UserData.Name</b> invites you to join <b>@data.UserData.OrganizationName</b> on SmartERP platform, valid before <b>@m.LocalExpiry.ToString("f")</b>. Please accept the invitation after registering and logging in.</p>
         @if (!string.IsNullOrWhiteSpace(data.Message))
         {
             <p>Message: <q style="font-style:italic">@data.Message</q></p>

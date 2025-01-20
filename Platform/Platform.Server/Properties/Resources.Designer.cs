@@ -70,6 +70,15 @@ namespace Platform.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Member email invitation code.
+        /// </summary>
+        public static string MemberInvitationEmailCode {
+            get {
+                return ResourceManager.GetString("MemberInvitationEmailCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The password cannot be less than 4 characters or more than 30 characters.
         /// </summary>
         public static string PasswordLengthInvalid {

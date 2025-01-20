@@ -87,12 +87,6 @@ namespace PlatformShared.Database.Models
         public ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = [];
 
         /// <summary>
-        /// Core users
-        /// 核心用户
-        /// </summary>
-        public ICollection<CoreUser> CoreUsers { get; set; } = [];
-
-        /// <summary>
         /// Core user device tokens
         /// 核心用户设备令牌
         /// </summary>

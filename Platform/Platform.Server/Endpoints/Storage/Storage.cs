@@ -19,6 +19,13 @@ namespace Platform.Server.Endpoints.Storage
                     await stream.CopyToAsync(accessor.HttpContext.Response.Body, cancellationToken);
             }).WithDescription("Read organization avatar / 读取机构头像").WithTags("Storage");
 
+            g.MapGet("OUAvatar/{folder}/{file}", async (IStorage storage, IHttpContextAccessor accessor, string folder, string file, CancellationToken cancellationToken) =>
+            {
+                await using var stream = await storage.ReadAsync($"/OUAvatar/{folder}/{file}", cancellationToken);
+                if (stream != null && accessor.HttpContext != null)
+                    await stream.CopyToAsync(accessor.HttpContext.Response.Body, cancellationToken);
+            }).WithDescription("Read organization user avatar / 读取机构用户头像").WithTags("Storage");
+
             g.MapGet("Resources/{path}", async (IStorage storage, IHttpContextAccessor accessor, string path, CancellationToken cancellationToken) =>
             {
                 await using var stream = await storage.ReadAsync($"/Resources/{path}", cancellationToken);

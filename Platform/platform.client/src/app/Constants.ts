@@ -28,6 +28,11 @@ export namespace Constants {
   export const CurentService = "CurrentService";
 
   /**
+   * Member invitation key
+   */
+  export const MemberInvitation = "MemberInvitation";
+
+  /**
    * Registration token scheme
    */
   export const RegistrationTokenScheme = "registration";

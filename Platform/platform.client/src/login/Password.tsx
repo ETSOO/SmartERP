@@ -122,15 +122,8 @@ export default function Password() {
         return;
       }
 
-      if (auth) {
-        app.authLogin(refreshToken);
-      } else {
-        // User login
-        app.userLogin(result.data, refreshToken, false);
-
-        // Navigate to main URL
-        app.toMain();
-      }
+      // Login success
+      app.loginComplete(auth, result.data, refreshToken);
     } else if (app.checkDeviceResult(result)) {
       app.notifier.alert(labels.environmentChanged, () => {
         navigate(homeUrl);

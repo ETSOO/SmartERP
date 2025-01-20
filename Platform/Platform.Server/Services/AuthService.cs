@@ -7,9 +7,6 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.HTTP;
-using com.etsoo.Localization;
-using com.etsoo.SMS;
-using com.etsoo.SMTP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
 using com.etsoo.Utils.Serialization;
@@ -17,12 +14,11 @@ using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
-using MimeKit.Text;
 using Npgsql;
 using Platform.Server.Application;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Endpoints.Auth.RQ;
-using Platform.Server.Templates;
+using Platform.Server.Endpoints.AuthCode.RQ;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using System.Globalization;
@@ -51,24 +47,6 @@ namespace Platform.Server.Services
         }
 
         private const string BearerTokenType = "Bearer";
-
-        private const short UserRegistrationSMSCode = 1;
-        private const short UserRegistrationEmailCode = 2;
-        private const short UserCallbackSMSCode = 3;
-        private const short UserCallbackEmailCode = 4;
-        private const short UserVerificationSMSCode = 5;
-        private const short UserVerificationEmailCode = 6;
-
-        // Code actions
-        static List<AuthCodeAction> Actions =>
-        [
-            new(UserRegistrationSMSCode, Properties.Resources.UserRegistrationSMSCode, 10, RandStringKind.Digit, 6),
-            new(UserRegistrationEmailCode, Properties.Resources.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailRegistration.cshtml"),
-            new(UserCallbackSMSCode, Properties.Resources.UserCallbackSMSCode, 10, RandStringKind.Digit, 6),
-            new(UserCallbackEmailCode, Properties.Resources.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailCallback.cshtml"),
-            new(UserVerificationSMSCode, Properties.Resources.UserVerificationSMSCode, 10, RandStringKind.Digit, 6),
-            new(UserVerificationEmailCode, Properties.Resources.UserVerificationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailVerification.cshtml"),
-        ];
 
         // 检查用户登录编号
         /// <summary>
@@ -114,12 +92,10 @@ namespace Platform.Server.Services
         readonly MyDbContext _db;
         readonly IStorage _storage;
         readonly IHttpClientFactory _httpClientFactory;
-        readonly ISMSClient _smsClient;
-        readonly ISMTPClient _smtpClient;
-        readonly string _root;
         readonly IPAddress _ip;
         readonly IMinUserToken? _regUser;
         readonly IPublicService _publicService;
+        readonly IAuthCodeService _authCodeService;
 
         /// <summary>
         /// Constructor
@@ -135,22 +111,19 @@ namespace Platform.Server.Services
         /// <param name="smtpClient">SMTP client</param>
         /// <param name="host">Host environment</param>
         /// <param name="publicService">Public service</param>
+        /// <param name="authCodeService">Auth code service</param>
         public AuthService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthService> logger,
-            IStorage storage, IHttpClientFactory httpClientFactory,
-            ISMSClient smsClient, ISMTPClient smtpClient, IWebHostEnvironment host,
-            IPublicService publicService)
+            IStorage storage, IHttpClientFactory httpClientFactory, IPublicService publicService, IAuthCodeService authCodeService)
             : base(app, userAccessor.User, "auth", logger)
         {
             _db = db;
             _storage = storage;
             _httpClientFactory=httpClientFactory;
 
-            _smsClient = smsClient;
-            _smtpClient = smtpClient;
-            _root = host.ContentRootPath;
             _ip = userAccessor.Ip;
             _regUser = userAccessor.User == null ? userAccessor.CreateUserFromAuthorization<MinUserToken>(app.AuthService, MyAppConstants.RegistrationTokenAudience, MyAppConstants.RegistrationTokenScheme) : null;
             _publicService = publicService;
+            _authCodeService = authCodeService;
         }
 
         private async Task<AppData?> AuthGetAppSecretAsync(int appId, string appKey, CancellationToken cancellationToken)
@@ -708,12 +681,12 @@ namespace Platform.Server.Services
             var (result, tokenUser) = CreateUserFrom(tokenQueryData, new TokenQueryUser
             {
                 Id = user.Id,
-                Name = user.Name,
+                Name = data.LocalName ?? user.Name,
                 GivenName = user.GivenName,
                 FamilyName = user.FamilyName,
                 LatinGivenName = user.LatinGivenName,
                 LatinFamilyName = user.LatinFamilyName,
-                Avatar = user.Avatar,
+                Avatar = data.LocalAvatar ?? user.Avatar,
                 LatestAppId = user.LatestAppIds?.FirstOrDefault(),
                 OrganizationName = data.OrganizationName,
                 Oid = data.Oid,
@@ -949,17 +922,6 @@ namespace Platform.Server.Services
         {
             var url = $"{App.Configuration.AuthFailureUrl}?type={type}&error={HttpUtility.UrlEncode(error)}&errorType={HttpUtility.UrlEncode(errorType)}&errorField={HttpUtility.UrlEncode(errorField)}";
             response.Redirect(url, true);
-        }
-
-        private string CreateRegistrationToken(int id)
-        {
-            var user = new MinUserToken
-            {
-                Id = id.ToString(),
-                Scopes = ["core"]
-            };
-
-            return App.AuthService.CreateAccessToken(user, MyAppConstants.RegistrationTokenAudience, 60);
         }
 
         private bool TokenDataEquals(DeviceTokenData source, DeviceTokenData data)
@@ -1337,503 +1299,6 @@ namespace Platform.Server.Services
         {
             await _db.CoreUserDevices.Where(d => d.Id == deviceId && d.ClientId.Equals(prevDeviceId))
                 .ExecuteUpdateAsync(d => d.SetProperty(d => d.ClientId, newDeviceId), cancellationToken);
-        }
-
-        private string HashAuthCode(short id, string code, DateTime expiry)
-        {
-            return App.HashPassword($"{id}-{code}-{expiry.ToBinary()}");
-        }
-
-        private CoreAuthCode CreateAuthCode(AuthCodeAction action, string openid, out string code)
-        {
-            // Code
-            code = CryptographyUtils.CreateRandString(action.Kind, action.Length).ToString();
-
-            // Expiry
-            // Miliseconds with same accuracy with Database rounded to increments of .000, .003, or .007 seconds
-            var expiry = DateTime.UtcNow.AddMinutes(action.Minutes).ToSqlDateTime();
-
-            // Code hashed
-            var codeHashed = HashAuthCode(action.Id, code, expiry);
-
-            return new CoreAuthCode
-            {
-                Id = Guid.NewGuid(),
-                Action = action.Id,
-                Openid = openid,
-                Code = codeHashed,
-                Expiry = expiry,
-                Ip= _ip
-            };
-        }
-
-        private async Task<IActionResult> AddAuthCodeAsync(CoreAuthCode authCode, CancellationToken cancellationToken)
-        {
-            // Save
-            _db.CoreAuthCodes.Add(authCode);
-            if (await _db.SaveChangesAsync(cancellationToken) > 0)
-            {
-                // Hold the id
-                var result = ActionResult.Success;
-                result.Data.Add("Id", authCode.Id);
-                return result;
-            }
-            else
-            {
-                return ApplicationErrors.DataProcessingFailed.AsResult();
-            }
-        }
-
-        private async Task<IActionResult> CheckFrequencyAsync(AuthCodeAction action, string openid, CancellationToken cancellationToken)
-        {
-            // Check frequency
-            var lastMinutes = DateTime.UtcNow.AddMinutes(-2);
-            var lastExists = await _db.CoreAuthCodes
-                .AsNoTracking()
-                .AnyAsync(c => c.Action == action.Id && c.Openid == openid && c.Creation > lastMinutes, cancellationToken);
-
-            if (lastExists)
-            {
-                return ApplicationErrors.HighRequestRrequency.AsResult();
-            }
-
-            var lasthours = DateTime.UtcNow.AddHours(-1);
-            var lastHoursCount = await _db.CoreAuthCodes
-                .AsNoTracking()
-                .CountAsync(c => c.Action == action.Id && c.Openid == openid && c.Creation > lasthours, cancellationToken);
-
-            if (lastHoursCount > 10)
-            {
-                return ApplicationErrors.HighRequestRrequency.AsResult("Creation");
-            }
-
-            var lastIpCount = await _db.CoreAuthCodes
-                .AsNoTracking()
-                .CountAsync(c => c.Ip.Equals(_ip) && c.Creation > lasthours, cancellationToken);
-
-            if (lastIpCount > 1000)
-            {
-                return ApplicationErrors.HighRequestRrequency.AsResult("IP");
-            }
-
-            return ActionResult.Success;
-        }
-
-        /// <summary>
-        /// Send Email code
-        /// 发送邮件验证码
-        /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Result</returns>
-        public async ValueTask<IActionResult> SendEmailAsync(SendEmailData data, CancellationToken cancellationToken = default)
-        {
-            var email = data.Email;
-            if (!MailboxAddress.TryParse(email, out var emailAddress))
-            {
-                return ApplicationErrors.InvalidEmail.AsResult();
-            }
-
-            // Action
-            var action = Actions.Find(a => a.Id == data.Action);
-            if (action == null || action.Template == null)
-            {
-                return ApplicationErrors.NoValidData.AsResult("Action");
-            }
-
-            // Check frequency
-            var result = await CheckFrequencyAsync(action, email, cancellationToken);
-            if (!result.Ok)
-            {
-                return result;
-            }
-
-            // Auth code
-            var authCode = CreateAuthCode(action, email, out var code);
-
-            try
-            {
-                // Time zone
-                var tz = LocalizationUtils.GetTimeZone(data.TimeZone);
-
-                // Model
-                var dataModel = new AuthCodeEmailTemplateView
-                {
-                    Action = action,
-                    Code = code,
-                    Language = CultureInfo.CurrentCulture.Name,
-                    TimeZone = tz,
-                    LocalExpiry = authCode.Expiry.UtcToLocal(tz)
-                };
-
-                // Template
-                var file = Path.Join(_root, action.Template);
-                var template = await RazorUtils.RenderAsync(file, dataModel);
-
-                // Message
-                var message = new MimeMessage
-                {
-                    Subject = dataModel.Subject,
-                    Body = new TextPart(TextFormat.Html) { Text = template }
-                };
-                message.To.Add(emailAddress);
-
-                // Send
-                await _smtpClient.SendAsync(message, cancellationToken);
-
-                // Save
-                result = await AddAuthCodeAsync(authCode, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // Log for trace
-                ex.Data.Add("Model", JsonSerializer.Serialize(data, MyJsonSerializerContext.Default.SendSMSData));
-                ex.Data.Add("Action", JsonSerializer.Serialize(action, MyJsonSerializerContext.Default.AuthCodeAction));
-
-                LogException(ex);
-
-                // New result
-                result = ApplicationErrors.CodeSendingFailed.AsResult();
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Send SMS code
-        /// 发送短信验证码
-        /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Result</returns>
-        public async ValueTask<IActionResult> SendSMSAsync(SendSMSData data, CancellationToken cancellationToken = default)
-        {
-            // Mobile
-            var mobile = AddressRegion.CreatePhone(data.Mobile, data.Region ?? _smsClient.Region.Id);
-            if (mobile == null)
-            {
-                return ApplicationErrors.InvalidMobile.AsResult("Mobile");
-            }
-
-            // Action
-            var action = Actions.Find(a => a.Id == data.Action);
-            if (action == null)
-            {
-                return ApplicationErrors.NoValidData.AsResult("Action");
-            }
-
-            var mobileString = mobile.ToInternationalFormat();
-
-            // Check frequency
-            var result = await CheckFrequencyAsync(action, mobileString, cancellationToken);
-            if (!result.Ok)
-            {
-                return result;
-            }
-
-            // Auth code
-            var authCode = CreateAuthCode(action, mobileString, out var code);
-
-            // Template
-            var template = _smsClient.GetTemplate(TemplateKind.Code, region: data.Region, language: CultureInfo.CurrentCulture.Name);
-            if (template == null)
-            {
-                return ApplicationErrors.NoValidData.AsResult("Template");
-            }
-
-            // Send
-            var smsResult = await _smsClient.SendCodeAsync(mobile, code, template, cancellationToken);
-
-            if (smsResult.Ok)
-            {
-                // Save
-                result = await AddAuthCodeAsync(authCode, cancellationToken);
-            }
-            else
-            {
-                // Log for trace
-                var exception = new Exception(smsResult.Title);
-                exception.Data.Add("Model", JsonSerializer.Serialize(data));
-                exception.Data.Add("Template", JsonSerializer.Serialize(template));
-                exception.Data.Add("SMSResult", JsonSerializer.Serialize(smsResult));
-
-                LogException(exception);
-
-                // New result
-                result = ApplicationErrors.CodeSendingFailed.AsResult();
-            }
-
-            // Return
-            return result;
-        }
-
-        /// <summary>
-        /// Validate code
-        /// 验证验证码
-        /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Task</returns>
-        private async Task<(ActionResult result, string? openId, int? userId)> ValidateAsync(short actionId, ValidateCodeData data, CancellationToken cancellationToken = default)
-        {
-            // Auth code
-            var code = await _db.CoreAuthCodes.FirstOrDefaultAsync(c => c.Id == data.Id && c.Action == actionId, cancellationToken);
-            if (code == null || code.Expiry.Subtract(DateTime.UtcNow).TotalMilliseconds < 0)
-            {
-                // Deleted or expired
-                return (ApplicationErrors.CodeExpired.AsResult(), null, null);
-            }
-
-            if (!code.Ip.Equals(_ip))
-            {
-                // IP address changed
-                return (ApplicationErrors.IPAddressChanged.AsResult(), null, null);
-            }
-
-            var codeHashed = HashAuthCode(actionId, data.Code, code.Expiry);
-            if (code.Code != codeHashed)
-            {
-                // No match
-                if (code.Times > 5)
-                {
-                    // Ignore instead of delete
-                    // _db.CoreAuthCodes.Remove(code);
-                }
-                else
-                {
-                    // Update
-                    code.Times++;
-                    _db.CoreAuthCodes.Update(code);
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
-                return (ApplicationErrors.CodesNoMatch.AsResult(), null, null);
-            }
-
-            // Return data
-            var openId = code.Openid;
-            var userId = code.CoreUserId;
-
-            // Delete
-            _db.CoreAuthCodes.Remove(code);
-            await _db.SaveChangesAsync(cancellationToken);
-
-            return (ActionResult.Success, openId, userId);
-        }
-
-        /// <summary>
-        /// Validate password callback
-        /// 验证密码找回
-        /// </summary>
-        /// <returns>Task</returns>
-        public async Task<ActionResult> ValidateCallbackAsync(CoreUserIdentifier identifier, CancellationToken cancellationToken = default)
-        {
-            // Find the user
-            var user = await _db.CoreUsers
-                .Where(u => u.CoreUserIdentifiers.Any(i => i.Type == identifier.Type && i.Value == identifier.Value))
-                .Select(u => new { u.Id, u.Step })
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (user == null)
-            {
-                return ApplicationErrors.NoUserMatch.AsResult();
-            }
-            else if (user.Step > 0)
-            {
-                return ApplicationErrors.InvalidAction.AsResult("Step");
-            }
-
-            var result = ActionResult.Success;
-
-            result.Data["token"] = CreateRegistrationToken(user.Id);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validate registration
-        /// 验证注册
-        /// </summary>
-        /// <returns>Task</returns>
-        public async Task<ActionResult> ValidateRegistrationAsync(CoreUserIdentifier identifier, short step, ActionResult existError, CancellationToken cancellationToken = default)
-        {
-            int userId;
-
-            if (_regUser == null)
-            {
-                // Find the user
-                var data = await _db.CoreUsers.Where(u => u.CoreUserIdentifiers.Any(i => i.Type == identifier.Type && i.Value == identifier.Value))
-                    .Select(u => new { u.Id, u.Step }).FirstOrDefaultAsync(cancellationToken);
-
-                if (data == null)
-                {
-                    // New user
-                    var user = new CoreUser
-                    {
-                        Name = string.Empty,
-                        Step = step
-                    };
-
-                    user.CoreUserIdentifiers.Add(identifier);
-
-                    // AddAsync vs Add
-                    _db.CoreUsers.Add(user);
-                    await _db.SaveChangesAsync(cancellationToken);
-
-                    userId = user.Id;
-                }
-                else if (data.Step == 0)
-                {
-                    // Registered
-                    // Not secure to return the user with one time code
-                    return existError;
-                }
-                else
-                {
-                    // Continue to register
-                    userId = data.Id;
-                }
-            }
-            else
-            {
-                // Update the user
-                var user = await _db.CoreUsers.Where(u => u.Id == _regUser.IdInt)
-                    .Include(u => u.CoreUserIdentifiers.Where(i => i.Type == identifier.Type))
-                    .Select(u => new CoreUser
-                    {
-                        Id = u.Id,
-                        Name = u.Name,
-                        Step = u.Step,
-                        CoreUserIdentifiers = u.CoreUserIdentifiers
-                    })
-                    .FirstOrDefaultAsync(cancellationToken);
-                if (user == null)
-                {
-                    return ApplicationErrors.NoValidData.AsResult("User");
-                }
-
-                if (!user.CoreUserIdentifiers.Any(i => i.Type.Equals(identifier.Type) && i.Value.Equals(identifier.Value)))
-                {
-                    // New identifier, check global exists or not
-                    if (await _db.CoreUserIdentifiers.AnyAsync(i => i.Type == identifier.Type && i.Value == identifier.Value, cancellationToken))
-                    {
-                        return existError;
-                    }
-
-                    user.CoreUserIdentifiers.Add(identifier);
-                }
-
-                user.Step = CoreUserStep.Email;
-
-                _db.CoreUsers.Update(user);
-                await _db.SaveChangesAsync(cancellationToken);
-
-                userId = 0;
-            }
-
-            var result = ActionResult.Success;
-
-            if (userId > 0)
-            {
-                result.Data["token"] = CreateRegistrationToken(userId);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validate email callback password code
-        /// 验证电子邮箱找回密码代码
-        /// </summary>
-        /// <returns>Task</returns>
-        public async Task<ActionResult> ValidateEmailCallbackAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
-        {
-            var (result, email, _) = await ValidateAsync(UserCallbackEmailCode, data, cancellationToken);
-            if (!result.Ok || email == null)
-            {
-                return result;
-            }
-
-            // Identifier
-            var identifier = new CoreUserIdentifier
-            {
-                Type = CoreUserIdentifierType.Email,
-                Value = email
-            };
-
-            // Validate
-            return await ValidateCallbackAsync(identifier, cancellationToken);
-        }
-
-        /// <summary>
-        /// Validate email registration code
-        /// 验证电子邮箱注册验证码
-        /// </summary>
-        /// <returns>Task</returns>
-        public async Task<ActionResult> ValidateEmailRegistrationAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
-        {
-            var (result, email, _) = await ValidateAsync(UserRegistrationEmailCode, data, cancellationToken);
-            if (!result.Ok || email == null)
-            {
-                return result;
-            }
-
-            // Identifier
-            var identifier = new CoreUserIdentifier
-            {
-                Type = CoreUserIdentifierType.Email,
-                Value = email
-            };
-
-            // Validate
-            return await ValidateRegistrationAsync(identifier, CoreUserStep.Email, ApplicationErrors.EmailExists.AsResult(), cancellationToken);
-        }
-
-        /// <summary>
-        /// Validate mobile callback password code
-        /// 验证手机找回密码代码
-        /// </summary>
-        /// <returns>Task</returns>
-        public async Task<ActionResult> ValidateMobileCallbackAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
-        {
-            var (result, mobile, _) = await ValidateAsync(UserCallbackSMSCode, data, cancellationToken);
-            if (!result.Ok || mobile == null)
-            {
-                return result;
-            }
-
-            // Identifier
-            var identifier = new CoreUserIdentifier
-            {
-                Type = CoreUserIdentifierType.Mobile,
-                Value = mobile
-            };
-
-            // Validate
-            return await ValidateCallbackAsync(identifier, cancellationToken);
-        }
-
-        /// <summary>
-        /// Validate mobile registration code
-        /// 验证手机注册验证码
-        /// </summary>
-        /// <returns>Task</returns>
-        public async Task<ActionResult> ValidateMobileRegistrationAsync(ValidateCodeData data, CancellationToken cancellationToken = default)
-        {
-            var (result, mobile, _) = await ValidateAsync(UserRegistrationSMSCode, data, cancellationToken);
-            if (!result.Ok || mobile == null)
-            {
-                return result;
-            }
-
-            // Identifier
-            var identifier = new CoreUserIdentifier
-            {
-                Type = CoreUserIdentifierType.Mobile,
-                Value = mobile
-            };
-
-            // Validate
-            return await ValidateRegistrationAsync(identifier, CoreUserStep.Mobile, ApplicationErrors.MobileExists.AsResult(), cancellationToken);
         }
 
         /// <summary>
@@ -2272,6 +1737,279 @@ namespace Platform.Server.Services
             {
                 return ActionResult.Success;
             }
+        }
+
+        /// <summary>
+        /// Create registration access token
+        /// 创建注册访问令牌
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <returns>Result</returns>
+        private string CreateRegistrationToken(int id)
+        {
+            var user = new MinUserToken
+            {
+                Id = id.ToString(),
+                Scopes = ["core"]
+            };
+
+            return App.AuthService.CreateAccessToken(user, MyAppConstants.RegistrationTokenAudience, 60);
+        }
+
+        /// <summary>
+        /// Validate password callback
+        /// 验证密码找回
+        /// </summary>
+        /// <returns>Task</returns>
+        public async Task<ActionResult> ValidateCallbackAsync(CoreUserIdentifier identifier, CancellationToken cancellationToken = default)
+        {
+            // Find the user
+            var user = await _db.CoreUsers
+                .Where(u => u.CoreUserIdentifiers.Any(i => i.Type == identifier.Type && i.Value == identifier.Value))
+                .Select(u => new { u.Id, u.Step })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (user == null)
+            {
+                return ApplicationErrors.NoUserMatch.AsResult();
+            }
+            else if (user.Step > 0)
+            {
+                return ApplicationErrors.InvalidAction.AsResult("Step");
+            }
+
+            var result = ActionResult.Success;
+
+            result.Data["token"] = CreateRegistrationToken(user.Id);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validate registration
+        /// 验证注册
+        /// </summary>
+        /// <returns>Task</returns>
+        private async Task<ActionResult> ValidateRegistrationAsync(CoreUserIdentifier identifier, short step, ActionResult existError, CancellationToken cancellationToken = default)
+        {
+            int userId;
+
+            if (_regUser == null)
+            {
+                // Find the user
+                var data = await _db.CoreUsers.AsNoTracking()
+                    .Where(u => u.CoreUserIdentifiers.Any(i => i.Type == identifier.Type && i.Value == identifier.Value))
+                    .Select(u => new { u.Id, u.Step }).FirstOrDefaultAsync(cancellationToken);
+
+                if (data == null)
+                {
+                    // Clear changes
+                    _db.ChangeTracker.Clear();
+
+                    // New user
+                    var user = new CoreUser
+                    {
+                        Name = string.Empty,
+                        Step = step
+                    };
+
+                    user.CoreUserIdentifiers.Add(identifier);
+
+                    // AddAsync vs Add
+                    _db.CoreUsers.Add(user);
+                    await _db.SaveChangesAsync(cancellationToken);
+
+                    userId = user.Id;
+                }
+                else if (data.Step == 0)
+                {
+                    // Registered
+                    // Not secure to return the user with one time code
+                    return existError;
+                }
+                else
+                {
+                    // Continue to register
+                    userId = data.Id;
+                }
+            }
+            else
+            {
+                // Update the user
+                var user = await _db.CoreUsers.Where(u => u.Id == _regUser.IdInt)
+                    .Include(u => u.CoreUserIdentifiers.Where(i => i.Type == identifier.Type))
+                    .Select(u => new CoreUser
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        Step = u.Step,
+                        CoreUserIdentifiers = u.CoreUserIdentifiers
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (user == null)
+                {
+                    return ApplicationErrors.NoValidData.AsResult("User");
+                }
+
+                if (!user.CoreUserIdentifiers.Any(i => i.Type.Equals(identifier.Type) && i.Value.Equals(identifier.Value)))
+                {
+                    // New identifier, check global exists or not
+                    if (await _db.CoreUserIdentifiers.AnyAsync(i => i.Type == identifier.Type && i.Value == identifier.Value, cancellationToken))
+                    {
+                        return existError;
+                    }
+
+                    user.CoreUserIdentifiers.Add(identifier);
+                }
+
+                user.Step = CoreUserStep.Email;
+
+                _db.CoreUsers.Update(user);
+                await _db.SaveChangesAsync(cancellationToken);
+
+                userId = 0;
+            }
+
+            var result = ActionResult.Success;
+
+            if (userId > 0)
+            {
+                result.Data["token"] = CreateRegistrationToken(userId);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validate email callback password code
+        /// 验证电子邮箱找回密码代码
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IActionResult> ValidateEmailCallbackAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            var (result, data) = _authCodeService.CreateValidateCodeData(rq, userAgent);
+            if (!result.Ok || data == null)
+            {
+                return result;
+            }
+
+            var (resultValidate, resultData) = await _authCodeService.ValidateAsync(AuthCodeAction.UserCallbackEmailCode, data, cancellationToken);
+            if (!resultValidate.Ok || resultData == null)
+            {
+                return resultValidate;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                Type = CoreUserIdentifierType.Email,
+                Value = resultData.OpenId
+            };
+
+            // Validate
+            return await ValidateCallbackAsync(identifier, cancellationToken);
+        }
+
+        /// <summary>
+        /// Validate email registration code
+        /// 验证电子邮箱注册验证码
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IActionResult> ValidateEmailRegistrationAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            var (result, data) = _authCodeService.CreateValidateCodeData(rq, userAgent);
+            if (!result.Ok || data == null)
+            {
+                return result;
+            }
+
+            var (resultValidate, resultData) = await _authCodeService.ValidateAsync(AuthCodeAction.UserRegistrationEmailCode, data, cancellationToken);
+            if (!resultValidate.Ok || resultData == null)
+            {
+                return resultValidate;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                Type = CoreUserIdentifierType.Email,
+                Value = resultData.OpenId
+            };
+
+            // Validate
+            return await ValidateRegistrationAsync(identifier, CoreUserStep.Email, ApplicationErrors.EmailExists.AsResult(), cancellationToken);
+        }
+
+        /// <summary>
+        /// Validate mobile callback password code
+        /// 验证手机找回密码代码
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IActionResult> ValidateMobileCallbackAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            var (result, data) = _authCodeService.CreateValidateCodeData(rq, userAgent);
+            if (!result.Ok || data == null)
+            {
+                return result;
+            }
+
+            var (resultValidate, resultData) = await _authCodeService.ValidateAsync(AuthCodeAction.UserCallbackSMSCode, data, cancellationToken);
+            if (!resultValidate.Ok || resultData == null)
+            {
+                return resultValidate;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                Type = CoreUserIdentifierType.Mobile,
+                Value = resultData.OpenId
+            };
+
+            // Validate
+            return await ValidateCallbackAsync(identifier, cancellationToken);
+        }
+
+        /// <summary>
+        /// Validate mobile registration code
+        /// 验证手机注册验证码
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IActionResult> ValidateMobileRegistrationAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            var (result, data) = _authCodeService.CreateValidateCodeData(rq, userAgent);
+            if (!result.Ok || data == null)
+            {
+                return result;
+            }
+
+            var (resultValidate, resultData) = await _authCodeService.ValidateAsync(AuthCodeAction.UserRegistrationSMSCode, data, cancellationToken);
+            if (!resultValidate.Ok || resultData == null)
+            {
+                return resultValidate;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                Type = CoreUserIdentifierType.Mobile,
+                Value = resultData.OpenId
+            };
+
+            // Validate
+            return await ValidateRegistrationAsync(identifier, CoreUserStep.Mobile, ApplicationErrors.MobileExists.AsResult(), cancellationToken);
         }
     }
 }

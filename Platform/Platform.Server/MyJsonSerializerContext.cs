@@ -6,10 +6,13 @@ using com.etsoo.SMS;
 using Microsoft.AspNetCore.Mvc;
 using Platform.Server.Dto.App;
 using Platform.Server.Dto.Auth;
+using Platform.Server.Dto.AuthCode;
+using Platform.Server.Dto.Member;
 using Platform.Server.Dto.Org;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.App.RQ;
 using Platform.Server.Endpoints.Auth.RQ;
+using Platform.Server.Endpoints.AuthCode.RQ;
 using Platform.Server.Endpoints.Member.RQ;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Endpoints.Public.RQ;
@@ -44,20 +47,27 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<AppQueryData>))]
 
     // Auth
-    [JsonSerializable(typeof(CodeValidateRQ))]
     [JsonSerializable(typeof(CompleteRegisterRQ))]
-    [JsonSerializable(typeof(EmailCodeRQ))]
     [JsonSerializable(typeof(ResetPasswordRQ))]
+    [JsonSerializable(typeof(RegisterUserData))]
+
+    // Auth Code
+    [JsonSerializable(typeof(CodeValidateRQ))]
+    [JsonSerializable(typeof(EmailCodeRQ))]
     [JsonSerializable(typeof(SMSCodeRQ))]
 
-    [JsonSerializable(typeof(AuthCodeAction))]
-    [JsonSerializable(typeof(RegisterUserData))]
+    [JsonSerializable(typeof(AuthCodeActionItem))]
+    [JsonSerializable(typeof(AuthCodeData))]
     [JsonSerializable(typeof(SendEmailData))]
     [JsonSerializable(typeof(SendSMSData))]
 
     // Members
     [JsonSerializable(typeof(IEnumerable<MemberListRQ>))]
+    [JsonSerializable(typeof(MemberInviteRQ))]
     [JsonSerializable(typeof(MemberQueryRQ))]
+    [JsonSerializable(typeof(MemberUpdateRQ))]
+
+    [JsonSerializable(typeof(MemberInvitationData))]
 
     // Org
     [JsonSerializable(typeof(OrgCreateRQ))]
@@ -70,6 +80,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]
 
     // Public
+    [JsonSerializable(typeof(AcceptInvitationRQ))]
     [JsonSerializable(typeof(MobileQRCodeRQ))]
     [JsonSerializable(typeof(OrgInfoRQ))]
     [JsonSerializable(typeof(PlaceQueryRQ))]

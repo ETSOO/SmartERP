@@ -1,17 +1,9 @@
-import {
-  IApiPayload,
-  AuthApi as AuthApiBase,
-  LoginRQ,
-  StringIdResultPayload
-} from "@etsoo/appscript";
+import { IApiPayload, AuthApi as AuthApiBase, LoginRQ } from "@etsoo/appscript";
 import { SmartERPLoginResult } from "@etsoo/materialui";
-import { InviteDto } from "./dto/auth/InviteDto";
-import { SendEmailRQ } from "./rq/auth/SendEmailRQ";
-import { SendSMSRQ } from "./rq/auth/SendSMSRQ";
-import { ValidateRQ } from "./rq/auth/ValidateRQ";
 import { TokenResultPayload } from "./dto/auth/TokenResultPayload";
 import { RegisterUserData } from "./dto/auth/RegisterUserData";
 import { CompleteRegisterRQ } from "./rq/auth/CompleteRegisterRQ";
+import { ValidateRQ } from "@etsoo/smarterp-core";
 
 /**
  * Authentication API
@@ -71,16 +63,6 @@ export class AuthApi extends AuthApiBase {
   }
 
   /**
-   * Invite
-   * @param id Id
-   * @param payload Payload
-   * @returns Result
-   */
-  invite(id: string, payload?: IApiPayload<InviteDto>) {
-    return this.api.get<InviteDto>(`Auth/Invite/${id}`, undefined, payload);
-  }
-
-  /**
    * Login
    * @param rq Request data
    * @param payload Payload
@@ -88,26 +70,6 @@ export class AuthApi extends AuthApiBase {
    */
   login(rq: LoginRQ, payload?: IApiPayload<SmartERPLoginResult>) {
     return this.loginBase(rq, payload);
-  }
-
-  /**
-   * Send email
-   * @param rq Request data
-   * @param payload Payload
-   * @returns Result
-   */
-  sendEmail(rq: SendEmailRQ, payload?: StringIdResultPayload) {
-    return this.api.put("Auth/SendEmail", rq, payload);
-  }
-
-  /**
-   * Send email
-   * @param rq Request data
-   * @param payload Payload
-   * @returns Result
-   */
-  sendSMS(rq: SendSMSRQ, payload?: StringIdResultPayload) {
-    return this.api.put("Auth/SendSMS", rq, payload);
   }
 
   /**

@@ -2,7 +2,7 @@
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 
-namespace Platform.Server.Endpoints.Auth.RQ
+namespace Platform.Server.Endpoints.AuthCode.RQ
 {
     /// <summary>
     /// Code validate request data

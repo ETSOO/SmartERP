@@ -1,4 +1,4 @@
-﻿namespace Platform.Server.Dto.Auth
+﻿namespace Platform.Server.Dto.AuthCode
 {
     public record ValidateCodeData
     {

@@ -134,18 +134,26 @@ export default function Home() {
     ];
 
     if (organization) {
-      items.splice(1, 0, {
-        segment: "home/member/all",
-        title: labels.allMembers,
-        icon: <PeopleIcon />
-      });
+      let spliceIndex = 3;
+      if (app.isHRUser()) {
+        items.splice(1, 0, {
+          segment: "home/member/all",
+          title: labels.allMembers,
+          icon: <PeopleIcon />,
+          subs: ["/home/member/.*"]
+        });
 
-      items.splice(4, 0, {
-        segment: "home/app/my",
-        title: labels.purchasedApps,
-        icon: <PaidIcon />,
-        subs: ["/home/app/.*"]
-      });
+        spliceIndex++;
+      }
+
+      if (app.isFinanceUser()) {
+        items.splice(spliceIndex, 0, {
+          segment: "home/app/my",
+          title: labels.purchasedApps,
+          icon: <PaidIcon />,
+          subs: ["/home/app/.*"]
+        });
+      }
     }
 
     return items;

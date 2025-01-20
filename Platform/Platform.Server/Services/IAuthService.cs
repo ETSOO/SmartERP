@@ -3,6 +3,7 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Endpoints.Auth.RQ;
+using Platform.Server.Endpoints.AuthCode.RQ;
 using PlatformShared.Database.Models;
 
 namespace Platform.Server.Services
@@ -23,12 +24,6 @@ namespace Platform.Server.Services
         ValueTask<(IActionResult result, string? newRefreshToken)> RefreshTokenAsync(RefreshTokenData data, CancellationToken cancellationToken = default);
         ValueTask SignUpAsync(IAuthClient client, CoreUserIdentifierType type, HttpContext context, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> WebInitCallAsync(InitCallRQ rq, string identifier);
-        ValueTask<IActionResult> SendEmailAsync(SendEmailData data, CancellationToken cancellationToken = default);
-        ValueTask<IActionResult> SendSMSAsync(SendSMSData data, CancellationToken cancellationToken = default);
-        Task<ActionResult> ValidateEmailCallbackAsync(ValidateCodeData data, CancellationToken cancellationToken = default);
-        Task<ActionResult> ValidateEmailRegistrationAsync(ValidateCodeData data, CancellationToken cancellationToken = default);
-        Task<ActionResult> ValidateMobileCallbackAsync(ValidateCodeData data, CancellationToken cancellationToken = default);
-        Task<ActionResult> ValidateMobileRegistrationAsync(ValidateCodeData data, CancellationToken cancellationToken = default);
         ValueTask<RegisterUserData?> ViewRegisterDataAsync(CancellationToken cancellationToken = default);
         ValueTask<AppTokenData?> OAuthCreateTokenAsync(AuthCreateTokenRQ rq, CancellationToken cancellationToken = default);
         ValueTask<AppTokenData?> OAuthRefreshTokenAsync(AuthRefreshTokenRQ rq, CancellationToken cancellationToken = default);
@@ -37,5 +32,10 @@ namespace Platform.Server.Services
         ValueTask<AppTokenData?> SwitchOrgAsync(SwitchOrgProxyRQ rq, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> ResetPasswordAsync(ResetPasswordRQ rq, string? userAgent, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> SignoutAsync(string token);
+
+        Task<IActionResult> ValidateEmailCallbackAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default);
+        Task<IActionResult> ValidateEmailRegistrationAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default);
+        Task<IActionResult> ValidateMobileCallbackAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default);
+        Task<IActionResult> ValidateMobileRegistrationAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default);
     }
 }

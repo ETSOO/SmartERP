@@ -29,6 +29,8 @@ public partial class CoreOrganization
 
     public string QueryKeyword { get; set; }
 
+    public string Region { get; set; }
+
     public virtual ICollection<CoreLog> CoreLogs { get; set; } = new List<CoreLog>();
 
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();

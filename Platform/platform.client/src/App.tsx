@@ -262,15 +262,7 @@ export default function App() {
       if (!isMounted.current) return;
       if (result === true) {
         // Login success
-        if (auth) {
-          app.authApi.authRequest(auth).then((url) => {
-            if (!url) return;
-            app.authLogin(url);
-          });
-        } else {
-          // Navigate to main URL
-          app.toMain();
-        }
+        app.loginComplete(auth);
       } else {
         // Load app data and the login UI
         loadAppData();

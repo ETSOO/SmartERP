@@ -8,9 +8,9 @@ import {
 } from "@etsoo/materialui";
 import { Constants } from "../app/Constants";
 import { app } from "../app/SmartApp";
-import { ValidateRQ } from "../api/rq/auth/ValidateRQ";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { IdActionResult } from "@etsoo/shared";
+import { AuthCodeAction, ValidateRQ } from "@etsoo/smarterp-core";
 
 const homeUrl = "./../../../";
 function NavigateHome() {
@@ -60,19 +60,19 @@ export default function RegisterVerify() {
   const resending = async () => {
     let result: IdActionResult<string> | undefined;
     if (isEmail) {
-      result = await app.authApi.sendEmail({
+      result = await app.authCodeApi.sendEmail({
         deviceId: app.deviceId,
         region: app.region,
         email: usernameDecoded,
-        action: 4,
+        action: AuthCodeAction.UserCallbackEmailCode,
         timezone: app.getTimeZone()
       });
     } else {
-      result = await app.authApi.sendSMS({
+      result = await app.authCodeApi.sendSMS({
         deviceId: app.deviceId,
         region: app.region,
         mobile: usernameDecoded,
-        action: 3
+        action: AuthCodeAction.UserCallbackSMSCode
       });
     }
 

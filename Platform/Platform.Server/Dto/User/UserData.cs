@@ -25,21 +25,15 @@
         public string? FamilyName { get; init; }
 
         /// <summary>
+        /// Current organization id
+        /// 当前机构编号
+        /// </summary>
+        public required int OrganizationId { get; init; }
+
+        /// <summary>
         /// Organization name
         /// 机构名称
         /// </summary>
         public required string OrganizationName { get; init; }
-
-        /// <summary>
-        /// Organization trade as
-        /// 机构交易名称
-        /// </summary>
-        public string? TradeAs { get; init; }
-
-        /// <summary>
-        /// Organization brand
-        /// 机构品牌
-        /// </summary>
-        public string? Brand { get; init; }
     }
 }

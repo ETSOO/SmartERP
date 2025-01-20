@@ -48,13 +48,6 @@ export default function AllApps() {
 
   // Identities
   const identities = app.core.getIdentities();
-  const identityLabel = React.useCallback(
-    (data?: AppQueryData) => {
-      if (data == null) return "";
-      return identities.find((item) => item.id === data.identityType)?.label;
-    },
-    [identities]
-  );
 
   // Load data
   const reloadData = () => ref.current?.reset();
@@ -100,7 +93,8 @@ export default function AllApps() {
           field: "identityType",
           header: labels.identityType,
           width: 120,
-          valueFormatter: ({ data }) => identityLabel(data),
+          valueFormatter: ({ data }) =>
+            app.core.getIdentityLabel(data?.identityType),
           sortable: true
         },
         {
@@ -162,7 +156,7 @@ export default function AllApps() {
         MobileListItemRenderer(props, (data) => {
           return [
             data.name,
-            identityLabel(data),
+            app.core.getIdentityLabel(data.identityType),
             [
               {
                 label: labels.appWebUrl,

@@ -9,6 +9,7 @@ import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
 import { useNavigate } from "react-router-dom";
 import { useSearchParamsEx } from "@etsoo/react";
+import { AuthCodeAction } from "@etsoo/smarterp-core";
 
 export default function Register20() {
   // Navigate
@@ -54,9 +55,9 @@ export default function Register20() {
     const mobile = input.value.trim();
 
     // Send verification code
-    const result = await app.authApi.sendSMS({
+    const result = await app.authCodeApi.sendSMS({
       deviceId: app.deviceId,
-      action: 1,
+      action: AuthCodeAction.UserRegistrationSMSCode,
       mobile: app.encrypt(mobile),
       region: app.region
     });
@@ -69,6 +70,11 @@ export default function Register20() {
     }
 
     codeIdRef.current = result.data?.id;
+
+    if (codeRef.current) {
+      codeRef.current.value = "";
+      codeRef.current.focus();
+    }
 
     return 90;
   }, []);

@@ -3,6 +3,22 @@
 namespace PlatformShared.Database.Models
 {
     /// <summary>
+    /// Auth code action id
+    /// 验证码操作编号
+    /// </summary>
+    public enum AuthCodeAction : short
+    {
+        UserRegistrationSMSCode = 1,
+        UserRegistrationEmailCode = 2,
+        UserCallbackSMSCode = 3,
+        UserCallbackEmailCode = 4,
+        UserVerificationSMSCode = 5,
+        UserVerificationEmailCode = 6,
+
+        MemberInvitationEmailCode = 20
+    }
+
+    /// <summary>
     /// Core authentication code
     /// 核心认证码
     /// </summary>
@@ -24,7 +40,7 @@ namespace PlatformShared.Database.Models
         /// Code action
         /// 认证码动作
         /// </summary>
-        public short Action { get; init; }
+        public AuthCodeAction Action { get; init; }
 
         /// <summary>
         /// Openid
@@ -61,6 +77,12 @@ namespace PlatformShared.Database.Models
         /// 创建时间
         /// </summary>
         public DateTimeOffset Creation { get; init; } = DateTimeOffset.UtcNow;
+
+        /// <summary>
+        /// Extended data
+        /// 扩展数据
+        /// </summary>
+        public string? Data { get; set; }
 
         /// <summary>
         /// Core user

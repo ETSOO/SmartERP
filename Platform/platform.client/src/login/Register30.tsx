@@ -101,15 +101,8 @@ export default function RegisterPassword() {
         return;
       }
 
-      if (auth) {
-        app.authLogin(refreshToken);
-      } else {
-        // User login
-        app.userLogin(result.data, refreshToken);
-
-        // Navigate to home
-        app.toHome(navigate, "./../../home/");
-      }
+      // Login success
+      app.loginComplete(auth, result.data, refreshToken);
     } else {
       app.alertResult(result, () => {
         // Back to home

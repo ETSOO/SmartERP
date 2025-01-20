@@ -148,7 +148,10 @@ namespace PlatformShared.Database
                     .ValueGeneratedNever()
                     .HasColumnName("id");
                 entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.Action).HasColumnName("action");
+                entity.Property(e => e.Action)
+                    .IsRequired()
+                    .HasConversion<short>()
+                    .HasColumnName("action");
                 entity.Property(e => e.Openid)
                     .IsRequired()
                     .HasMaxLength(256)
@@ -169,6 +172,9 @@ namespace PlatformShared.Database
                 entity.Property(e => e.Creation)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("creation");
+                entity.Property(e => e.Data)
+                    .HasColumnType("jsonb")
+                    .HasColumnName("data");
 
                 entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserAuthCodes)
                     .HasForeignKey(d => d.CoreUserId)

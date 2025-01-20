@@ -1,78 +1,83 @@
 import { VBox } from "@etsoo/materialui";
-import { Button, CircularProgress, TextField } from "@mui/material";
+import { Button, CircularProgress, TextField, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { app } from "../app/SmartApp";
-import { InviteDto } from "../api/dto/auth/InviteDto";
 import { SharedLayout } from "./SharedLayout";
+import { MemberInvitationDto } from "@etsoo/smarterp-core";
+import { useSearchParamsEx } from "@etsoo/react";
+import { Constants } from "../app/Constants";
 
 export default function Invite() {
   // Router
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { code } = useSearchParamsEx({ code: "string" });
 
   // Labels
   const labels = app.getLabels(
     "acceptInvitation",
     "email",
-    "organization",
+    "inviterOrg",
     "inviter",
+    "inviteTipMessage",
     "loading",
-    "login",
-    "register"
+    "ok"
   );
 
   // State
-  const [status, setStatus] = React.useState(0);
-  const [data, setData] = React.useState<InviteDto>();
+  const [data, setData] = React.useState<MemberInvitationDto>();
   const [subTitle, setSubTitle] = React.useState<string>();
 
   // Mount
   const isMounted = React.useRef(true);
 
   // Is loading
-  const isLoading = status === 0;
+  const isLoading = data == null;
 
   // Button label
-  const buttonLabel =
-    status === 0
-      ? labels.loading
-      : status === 1
-      ? labels.register
-      : labels.login;
+  const buttonLabel = isLoading ? labels.loading : labels.ok;
+
+  // Email
+  const email =
+    id && data?.email ? app.decrypt(data.email, id.substring(0, 4)) : undefined;
 
   // Button click handler
   const buttonHandler =
     data == null || isLoading
       ? undefined
       : () => {
-          const url =
-            (status === 1
-              ? "./../../login/registerpassword/"
-              : "./../../?loginid=") +
-            encodeURIComponent(app.encrypt(data.identifier, app.name));
-          navigate(url);
+          app.storage.setData(Constants.MemberInvitation, [id, code]);
+          if (email) {
+            if (data.userExists) {
+              navigate(`./../../login/password/${app.encrypt(email)}`);
+            } else {
+              navigate(`./../../login/register10?openid=${email}`);
+            }
+          } else {
+            navigate(`./../../`);
+          }
         };
 
   // Ready
   React.useEffect(() => {
-    if (id == null) return;
+    if (!id || !code) return;
 
     // Labels
-    const { inviteMemberExpired, inviteMemberDone, inviteMemberExist } =
-      app.getLabels(
-        "inviteMemberExpired",
-        "inviteMemberDone",
-        "inviteMemberExist"
-      );
+    const { inviteMemberExpired, inviteMemberDone } = app.getLabels(
+      "inviteMemberExpired",
+      "inviteMemberDone"
+    );
 
     // Query data
-    app.authApi.invite(id).then((result) => {
-      // No data or unmounted
-      if (result == null || !isMounted.current) return;
+    app.publicApi.readInvitation(id).then((result) => {
+      // Unmounted
+      if (!isMounted.current) return;
 
-      // Decrypt
-      result.identifier = app.decrypt(result.identifier, result.inviterName)!;
+      if (result == null) {
+        setSubTitle(inviteMemberDone);
+        return;
+      }
 
       // Update data
       setData(result);
@@ -82,23 +87,6 @@ export default function Invite() {
         setSubTitle(inviteMemberExpired);
         return;
       }
-
-      if (result.isInvited) {
-        setSubTitle(inviteMemberDone);
-        return;
-      }
-
-      // Cache the id to page data
-      app.setPageData({ inviteId: id });
-
-      // Is a current user?
-      app.authApi.loginId(result.identifier).then((idResult) => {
-        if (idResult == null) return;
-
-        if (idResult.ok) setSubTitle(inviteMemberExist);
-
-        setStatus(idResult.ok ? 2 : 1);
-      });
     });
   }, [id]);
 
@@ -130,23 +118,24 @@ export default function Invite() {
             margin="dense"
             variant="standard"
             label={labels.email}
-            value={data.identifier.hideEmail()}
+            value={email?.hideEmail()}
             disabled
           />
           <TextField
             margin="dense"
             variant="standard"
             label={labels.inviter}
-            value={data.inviterName}
+            value={data.inviter}
             disabled
           />
           <TextField
             margin="dense"
             variant="standard"
-            label={labels.organization}
-            value={data.organizationName}
+            label={labels.inviterOrg}
+            value={data.orgName}
             disabled
           />
+          <Typography variant="caption">{labels.inviteTipMessage}</Typography>
         </VBox>
       )}
     </SharedLayout>

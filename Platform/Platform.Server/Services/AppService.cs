@@ -36,7 +36,7 @@ namespace Platform.Server.Services
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="orgService">Organization service</param>
-        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<PublicService> logger,
+        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AppService> logger,
             IOrgService orgService)
             : base(app, userAccessor.UserSafe, "app", logger)
         {
@@ -425,6 +425,7 @@ namespace Platform.Server.Services
                 oa.Status,
                 oa.Creation,
 
+                oa.CoreApp.IdentityType,
                 AppId = oa.CoreAppId,
                 oa.CoreApp.Name
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);

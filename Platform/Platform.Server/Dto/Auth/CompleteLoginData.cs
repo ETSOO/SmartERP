@@ -70,6 +70,18 @@ namespace Platform.Server.Dto.Auth
         public UserRole UserRole { get; init; }
 
         /// <summary>
+        /// Local name
+        /// 本地姓名
+        /// </summary>
+        public string? LocalName { get; init; }
+
+        /// <summary>
+        /// Local avatar
+        /// 本地头像
+        /// </summary>
+        public string? LocalAvatar { get; init; }
+
+        /// <summary>
         /// Permission scopes
         /// 权限范围
         /// </summary>

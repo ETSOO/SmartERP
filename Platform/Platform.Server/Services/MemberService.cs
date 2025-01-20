@@ -1,15 +1,22 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.HTTP;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Storage;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
+using Platform.Server.Dto.AuthCode;
 using Platform.Server.Dto.Member;
+using Platform.Server.Dto.User;
 using Platform.Server.Endpoints.Member.RQ;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using System.Buffers;
+using System.Collections.Concurrent;
 
 namespace Platform.Server.Services
 {
@@ -20,6 +27,8 @@ namespace Platform.Server.Services
     public class MemberService : CommonUserService, IMemberService
     {
         readonly MyDbContext _db;
+        readonly IStorage _storage;
+        readonly IAuthCodeService _authCodeService;
 
         /// <summary>
         /// Constructor
@@ -29,10 +38,16 @@ namespace Platform.Server.Services
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
-        public MemberService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<UserService> logger)
+        /// <param name="storage">Storage</param>
+        /// <param name="authCodeService">Auth code service</param>
+        /// 
+        public MemberService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<MemberService> logger,
+            IStorage storage, IAuthCodeService authCodeService)
             : base(app, userAccessor.UserSafe, "member", logger)
         {
             _db = db;
+            _storage=storage;
+            _authCodeService = authCodeService;
         }
 
         /// <summary>
@@ -44,7 +59,12 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            var result = await _db.CoreOrganizationUsers.Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt && ou.CoreOrganization.OwnerId != User.IdInt).ExecuteDeleteAsync(cancellationToken);
+            var result = await _db.CoreOrganizationUsers.Where(ou => ou.Id == id
+                && ou.CoreOrganizationId == User.OrganizationInt
+                && ou.CoreOrganization.OwnerId != User.IdInt
+                && ou.Status == EntityStatus.Deleted
+                && ou.UserRole < User.Role)
+            .ExecuteDeleteAsync(cancellationToken);
 
             if (result < 1)
             {
@@ -58,7 +78,7 @@ namespace Platform.Server.Services
         {
             var query = _db.CoreOrganizationUsers
                 .AsNoTracking()
-                .Where(ou => ou.CoreOrganizationId == User.OrganizationInt)
+                .Where(ou => ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User))
                 .QueryEtsoo(rq, (ou) => ou.Id, (ou) => ou.Status, (q) =>
                 {
                     if (rq.ExcludeSelf is true)
@@ -99,6 +119,78 @@ namespace Platform.Server.Services
                 });
 
             return query;
+        }
+
+        /// <summary>
+        /// Invite member
+        /// 邀请成员
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <returns>Task</returns>
+        public async ValueTask<IActionResult> InviteAsync(MemberInviteRQ rq)
+        {
+            // Current org must exist
+            if (string.IsNullOrEmpty(User.OrganizationName))
+            {
+                return ApplicationErrors.AccessDenied.AsResult(nameof(User.OrganizationName));
+            }
+
+            // Validate role
+            var userRole = rq.UserRole;
+            if (userRole > UserRole.User)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.UserRole));
+            }
+
+            // Data
+            var data = new UserData
+            {
+                Name = User.Name,
+                FamilyName = User.FamilyName,
+                GivenName = User.GivenName,
+                OrganizationId = User.OrganizationInt,
+                OrganizationName = User.OrganizationName
+            };
+
+            // Tasks
+            var items = new ConcurrentBag<string>();
+            await Parallel.ForEachAsync(rq.Emails.Distinct(), async (email, cancelToken) =>
+            {
+                var view = new SendEmailData<AuthCodeMemberInvitationData>
+                {
+                    Action = AuthCodeAction.MemberInvitationEmailCode,
+                    Email = email,
+                    Region = rq.Region,
+                    TimeZone = rq.TimeZone,
+                    Data = new AuthCodeMemberInvitationData
+                    {
+                        UserData = data,
+                        WebUrl = App.Configuration.WebUrl,
+                        UserRole = userRole,
+                        Message = rq.Message,
+                    }
+                };
+
+                // Send email
+                var result = await _authCodeService.SendEmailAsync(view, MyJsonSerializerContext.Default.AuthCodeMemberInvitationData, cancelToken);
+                if (result.Ok)
+                {
+                    items.Add(email);
+                }
+                else
+                {
+                    Logger.LogError("InviteAsync email {email} failed with {error}", email, result.Title);
+                }
+            });
+
+            // Results
+            if (items.IsEmpty)
+            {
+                return ApplicationErrors.NoDataReturned.AsResult("Results");
+            }
+
+            // Result
+            return ActionResult.Succeed(string.Join(", ", items));
         }
 
         /// <summary>
@@ -156,6 +248,181 @@ namespace Platform.Server.Services
             {
                 Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
+        }
+
+        /// <summary>
+        /// Read member data for view
+        /// 读取用于浏览的成员数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User));
+
+            var (hasContent, _) = await query.Select(ou => new
+            {
+                ou.Id,
+                ou.CoreUser.Name,
+                ou.UserRole,
+                ou.IdentityType,
+                ou.LocalName,
+                ou.LocalAvatar,
+                ou.AssignedId,
+                ou.Creation,
+                ou.Expiry,
+                ou.RefreshTime,
+                ou.Status
+            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Update member
+        /// 更新成员
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateAsync(MemberUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            var ou = await _db.CoreOrganizationUsers.FirstOrDefaultAsync(o => o.Id == rq.Id && o.CoreOrganizationId == User.OrganizationInt, cancellationToken);
+            if (ou == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Is not self
+            var isNotSelf = ou.CoreUserId != User.IdInt && ou.UserRole < User.Role;
+
+            // Update
+            if (rq.IsModified(nameof(rq.UserRole)) && rq.UserRole.HasValue && isNotSelf)
+            {
+                // Except the founder, the user role should be lower than the current user
+                if (User.Role != UserRole.Founder && rq.UserRole.Value >= User.Role)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.UserRole));
+                }
+
+                ou.UserRole = rq.UserRole.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.LocalName)))
+            {
+                ou.LocalName = rq.LocalName;
+            }
+
+            if (rq.IsModified(nameof(rq.AssignedId)))
+            {
+                ou.AssignedId = rq.AssignedId?.ToUpper();
+            }
+
+            if (rq.IsModified(nameof(rq.Expiry)) && isNotSelf)
+            {
+                ou.Expiry = rq.Expiry;
+            }
+
+            if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue && isNotSelf)
+            {
+                ou.Status = rq.Status.Value;
+            }
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Update local avatar
+        /// 更新本地头像
+        /// </summary>
+        /// <param name="id">Organization id</param>
+        /// <param name="avatarStream">Avatar stream</param>
+        /// <param name="contentType">Cotent type</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>New URL</returns>
+        public async Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
+        {
+            // Check the stream
+            if (avatarStream.Length is not > 10240 and < 102400000)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(avatarStream));
+            }
+
+            // Check the avatar
+            var ou = await _db.CoreOrganizationUsers.AsNoTracking()
+                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt)
+                .Select(ou => new { ou.LocalAvatar })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (ou == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var extension = MimeTypeMap.TryGetExtension(contentType);
+            if (string.IsNullOrEmpty(extension))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(contentType));
+            }
+
+            // File path
+            var path = "/OUAvatar/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
+
+            // Save the stream to file directly
+            var saveResult = await _storage.WriteAsync(path, avatarStream, WriteCase.CreateNew, cancellationToken: cancellationToken);
+
+            if (saveResult)
+            {
+                // New avatar URL
+                var url = _storage.GetUrl(path);
+
+                // Update
+                await _db.CoreOrganizationUsers.Where(ou => ou.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.LocalAvatar, url), cancellationToken);
+
+                // Remove current avatar
+                if (!string.IsNullOrEmpty(ou.LocalAvatar))
+                    await _storage.DeleteUrlAsync(ou.LocalAvatar, cancellationToken);
+
+                // Return
+                return ActionResult.Succeed(url);
+            }
+            else
+            {
+                Logger.LogError("Avatar write path is {path}", path);
+                return ApplicationErrors.DataProcessingFailed.AsResult();
+            }
+        }
+
+        /// <summary>
+        /// Read member data for update
+        /// 读取用于更新的成员数据
+        /// </summary>
+        /// <param name="id">Organization id</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User));
+
+            var (hasContent, _) = await query.Select(ou => new
+            {
+                ou.Id,
+                ou.CoreUser.Name,
+                IsSelf = ou.CoreUserId == User.IdInt,
+                ou.UserRole,
+                ou.LocalName,
+                ou.AssignedId,
+                ou.Expiry,
+                ou.Status
+            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
     }
 }

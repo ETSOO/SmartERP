@@ -1,4 +1,5 @@
-﻿using Platform.Server.Dto.Auth;
+﻿using Platform.Server.Dto.AuthCode;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Platform.Server.Templates
 {
@@ -9,10 +10,16 @@ namespace Platform.Server.Templates
     public record AuthCodeEmailTemplateView : CommonEmailTemplateView
     {
         /// <summary>
+        /// Id
+        /// 编号
+        /// </summary>
+        public required Guid Id { get; init; }
+
+        /// <summary>
         /// Action data
         /// 操作数据
         /// </summary>
-        public required AuthCodeAction Action { get; init; }
+        public required AuthCodeActionItem Action { get; init; }
 
         /// <summary>
         /// Authorization code
@@ -31,5 +38,24 @@ namespace Platform.Server.Templates
         /// 本地过期时间
         /// </summary>
         public required DateTime LocalExpiry { get; init; }
+    }
+
+    /// <summary>
+    /// Authorization code email template view model
+    /// 验证码邮件模板浏览模型
+    /// </summary>
+    public record AuthCodeEmailTemplateView<D> : AuthCodeEmailTemplateView where D : AuthCodeData
+    {
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public virtual required D Data { get; init; }
+
+        [SetsRequiredMembers]
+        public AuthCodeEmailTemplateView(AuthCodeEmailTemplateView view, D data) : base(view)
+        {
+            Data = data;
+        }
     }
 }

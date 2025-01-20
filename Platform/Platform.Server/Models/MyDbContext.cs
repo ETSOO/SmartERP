@@ -94,6 +94,9 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+            entity.Property(e => e.Data)
+                .HasColumnType("jsonb")
+                .HasColumnName("data");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
             entity.Property(e => e.Ip)
                 .IsRequired()
@@ -193,6 +196,11 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.QueryKeyword)
                 .HasMaxLength(30)
                 .HasColumnName("query_keyword");
+            entity.Property(e => e.Region)
+                .IsRequired()
+                .HasMaxLength(2)
+                .IsFixedLength()
+                .HasColumnName("region");
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
@@ -218,11 +226,9 @@ public partial class MyDbContext : DbContext
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.AppKey)
-                .IsRequired()
                 .HasMaxLength(128)
                 .HasColumnName("app_key");
             entity.Property(e => e.AppSecret)
-                .IsRequired()
                 .HasMaxLength(256)
                 .HasColumnName("app_secret");
             entity.Property(e => e.CoreAppId).HasColumnName("core_app_id");

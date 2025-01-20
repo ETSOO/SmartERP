@@ -1,25 +1,30 @@
-import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
+import { AddressUtils, AuthRequest, ExternalSettings } from "@etsoo/appscript";
 import { ISmartSettings } from "./SmartSettings";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { Constants } from "./Constants";
-import { ISmartPageData } from "./SmartPageData";
 import { CommonApp, ISmartERPUser, MUGlobal } from "@etsoo/materialui";
-import { AppApi, CoreCulture, UserApi } from "@etsoo/smarterp-core";
+import {
+  AppApi,
+  AuthCodeApi,
+  CoreCulture,
+  UserApi
+} from "@etsoo/smarterp-core";
 import { AuthApi } from "../api/AuthApi";
 import { PublicApi } from "../api/PublicApi";
 
 /**
  * SmartERP App
  */
-class SmartApp extends CommonApp<
-  ISmartERPUser,
-  ISmartPageData,
-  ISmartSettings
-> {
+class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
   /**
    * Authorization API
    */
   readonly authApi = new AuthApi(this);
+
+  /**
+   * Authorization code API
+   */
+  readonly authCodeApi = new AuthCodeApi(this);
 
   /**
    * App API
@@ -49,17 +54,64 @@ class SmartApp extends CommonApp<
   }
 
   /**
+   * Login complete
+   * @param auth Auth request
+   * @param data User data
+   * @param refreshToken Refresh token
+   */
+  async loginComplete(
+    auth: AuthRequest | undefined,
+    data?: ISmartERPUser,
+    refreshToken?: string
+  ) {
+    if (auth) {
+      if (refreshToken) {
+        this.authLogin(refreshToken);
+      } else {
+        const url = await this.authApi.authRequest(auth);
+        if (!url) return;
+        this.authLogin(url);
+      }
+    } else {
+      if (data && refreshToken) {
+        // User login
+        this.userLogin(data, refreshToken, false);
+
+        // Accept invitation
+        const [id, code] =
+          this.storage.getData<[string, string]>(Constants.MemberInvitation) ??
+          [];
+
+        if (id && code) {
+          const result = await this.publicApi.acceptInvitation({ id, code });
+          if (result == null) return;
+
+          if (result.ok) {
+            this.storage.setData(Constants.MemberInvitation, null);
+          } else {
+            this.alertResult(result, () => this.toMain());
+            return;
+          }
+        }
+      }
+
+      // Navigate to main URL
+      this.toMain();
+    }
+  }
+
+  /**
    * Set login token
    * @param token Login token
    */
   setLoginToken(token?: string) {
     if (token) {
-      app.api.authorize(Constants.RegistrationTokenScheme, token);
+      this.api.authorize(Constants.RegistrationTokenScheme, token);
     }
   }
 
   private addCultureParam(url: string) {
-    return url.addUrlParam(DomUtils.CultureField, app.culture);
+    return url.addUrlParam(DomUtils.CultureField, this.culture);
   }
 
   /**

@@ -38,7 +38,7 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="publicService">Public service</param>
         /// <param name="storage">Storage</param>
-        public OrgService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<UserService> logger, IPublicService publicService, IStorage storage)
+        public OrgService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<OrgService> logger, IPublicService publicService, IStorage storage)
             : base(app, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
@@ -97,6 +97,7 @@ namespace Platform.Server.Services
                     new CoreOrganizationUser
                     {
                         CoreUserId = User.IdInt,
+                        IdentityType = IdentityTypeFlags.User,
                         UserRole = UserRole.Founder
                     }
                 ]
