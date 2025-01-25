@@ -17,7 +17,7 @@ namespace Platform.Server.Endpoints.AuthCode
             g.MapPut("SendEmail", (IAuthCodeService service, IHttpContextAccessor accessor, EmailCodeRQ rq, CancellationToken cancellationToken) => service.SendEmailAsync(rq, accessor.UserAgent(), cancellationToken))
             .WithDescription("Send Email code / 发送电子邮箱验证码").WithTags("AuthCode");
 
-            g.MapPut("SendSMS", async (IAuthCodeService service, IHttpContextAccessor accessor, SMSCodeRQ rq, CancellationToken cancellationToken) => service.SendSMSAsync(rq, accessor.UserAgent(), cancellationToken))
+            g.MapPut("SendSMS", (IAuthCodeService service, IHttpContextAccessor accessor, SMSCodeRQ rq, CancellationToken cancellationToken) => service.SendSMSAsync(rq, accessor.UserAgent(), cancellationToken))
                 .WithDescription("Send SMS code / 发送短信验证码").WithTags("AuthCode");
 
             return builder;

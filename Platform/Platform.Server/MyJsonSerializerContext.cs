@@ -47,8 +47,11 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<AppQueryData>))]
 
     // Auth
+    [JsonSerializable(typeof(CheckUserIdentifierRQ))]
     [JsonSerializable(typeof(CompleteRegisterRQ))]
     [JsonSerializable(typeof(ResetPasswordRQ))]
+
+    [JsonSerializable(typeof(CheckUserIdentifierData))]
     [JsonSerializable(typeof(RegisterUserData))]
 
     // Auth Code

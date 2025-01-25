@@ -111,6 +111,13 @@ export default function RegisterPassword() {
     }
   };
 
+  React.useEffect(() => {
+    // Check authorized
+    if (!app.registrationAuthorized) {
+      navigate("./../../");
+    }
+  }, [app.registrationAuthorized]);
+
   return (
     <SharedLayout
       title={labels.createPassword}
@@ -150,7 +157,6 @@ export default function RegisterPassword() {
         <TextFieldEx
           label={labels.familyName}
           inputRef={familyNameRef}
-          autoFocus
           autoCorrect="off"
           autoCapitalize="none"
           autoComplete="familyName"
@@ -159,7 +165,6 @@ export default function RegisterPassword() {
         <TextFieldEx
           label={labels.givenName}
           inputRef={givenNameRef}
-          autoFocus
           autoCorrect="off"
           autoCapitalize="none"
           autoComplete="givenName"

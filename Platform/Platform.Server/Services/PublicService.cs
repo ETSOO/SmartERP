@@ -113,6 +113,20 @@ namespace Platform.Server.Services
                     IdentityType = IdentityTypeFlags.User
                 });
 
+                var user = await _db.CoreUsers.FindAsync([userId], cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    if (user.LatestOrganizationIds == null)
+                    {
+                        user.LatestOrganizationIds = [orgId];
+                    }
+                    else
+                    {
+                        user.LatestOrganizationIds.Remove(orgId);
+                        user.LatestOrganizationIds = [orgId, .. user.LatestOrganizationIds.Take(9)];
+                    }
+                }
+
                 await _db.SaveChangesAsync(cancellationToken);
             }
 
@@ -325,7 +339,18 @@ namespace Platform.Server.Services
             var data = code.DeserializeData(MyJsonSerializerContext.Default.AuthCodeMemberInvitationData);
             if (data == null) return null;
 
-            var userExists = await _db.CoreUserIdentifiers.AnyAsync(ui => ui.Type == CoreUserIdentifierType.Email && ui.Value == code.OpenId, cancellationToken);
+            var userId = await _db.CoreUserIdentifiers.Where(ui => ui.Type == CoreUserIdentifierType.Email
+                && ui.Value == code.OpenId
+                && ui.CoreUser.Step == 0)
+            .Select(ui => ui.CoreUserId).FirstOrDefaultAsync(cancellationToken);
+
+            var isAccepted = false;
+            var userExists = false;
+            if (userId > 0)
+            {
+                userExists = true;
+                isAccepted = await _db.CoreOrganizationUsers.AnyAsync(ou => ou.CoreOrganizationId == data.UserData.OrganizationId && ou.CoreUserId == userId, cancellationToken);
+            }
 
             return new MemberInvitationData
             {
@@ -333,6 +358,7 @@ namespace Platform.Server.Services
                 Inviter = StringUtils.HideData(data.UserData.Name),
                 OrgName = data.UserData.OrganizationName,
                 IsExpired = code.Expiry < DateTime.UtcNow,
+                IsAccepted = isAccepted,
                 UserExists = userExists
             };
         }

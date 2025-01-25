@@ -19,7 +19,7 @@ export default function ViewMember() {
   const labels = app.getLabels("edit", "editAvatar", "logo", "view");
 
   // Permissions
-  const editPermission = app.isHRUser();
+  const editPermission = app.isAdminUser();
 
   // Page data hook
   usePageData(app, labels.view, [loadData]);

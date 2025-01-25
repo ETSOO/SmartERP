@@ -49,6 +49,9 @@ namespace Platform.Server.Endpoints.Auth
             g.MapPut("ChangePassword", (IAuthService service, IHttpContextAccessor accessor, ChangePasswordRQ rq, CancellationToken cancellationToken) => service.ChangePasswordAsync(rq, accessor.UserAgent(), cancellationToken))
                 .WithDescription("Change password / 修改密码").RequireAuthorization().WithTags("Auth");
 
+            g.MapPost("CheckUserIdentifier", (IAuthService service, IHttpContextAccessor accessor, CheckUserIdentifierRQ rq, CancellationToken cancellationToken) => service.CheckUserIdentifierAsync(rq, accessor.UserAgent(), cancellationToken))
+                .WithDescription("Check user identifier exists / 检查用户标识是否存在").WithTags("Auth").RequireRateLimiting("PII"); ;
+
             g.MapPost("Login", async (IAuthService service, IHttpContextAccessor accessor, LoginRQ rq, CancellationToken cancellationToken) =>
             {
                 var (result, refreshToken) = await service.LoginWithPwdAsync(rq, accessor.UserAgent(), cancellationToken);

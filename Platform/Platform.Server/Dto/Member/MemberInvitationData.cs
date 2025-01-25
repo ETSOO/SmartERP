@@ -7,5 +7,6 @@
         public required string OrgName { get; init; }
         public required bool IsExpired { get; init; }
         public required bool UserExists { get; init; }
+        public required bool IsAccepted { get; init; }
     }
 }

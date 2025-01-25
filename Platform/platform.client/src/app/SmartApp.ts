@@ -41,6 +41,17 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
    */
   readonly userApi = new UserApi(this);
 
+  private _registrationAuthorized: boolean = false;
+  /**
+   * Registration authorized
+   */
+  get registrationAuthorized() {
+    return this._registrationAuthorized;
+  }
+  private set registrationAuthorized(value: boolean) {
+    this._registrationAuthorized = value;
+  }
+
   /**
    * Authorization login
    * @param url Authorization URL
@@ -107,6 +118,7 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
   setLoginToken(token?: string) {
     if (token) {
       this.api.authorize(Constants.RegistrationTokenScheme, token);
+      this.registrationAuthorized = true;
     }
   }
 

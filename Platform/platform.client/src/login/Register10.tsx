@@ -26,14 +26,14 @@ export default function Register20() {
   // Labels
   const labels = app.getLabels(
     "back",
-    "nextStep",
+    "confirmClear",
     "email",
-    "verifyEmail",
-    "resending",
+    "nextStep",
+    "noCodeId",
     "oneTimePin",
     "oneTimePinEmailTip",
-    "noCodeId",
-    "confirmClear"
+    "resending",
+    "verifyEmail"
   );
 
   // States
@@ -46,16 +46,10 @@ export default function Register20() {
 
   // Send verification code
   const sendCode = React.useCallback(async () => {
-    // Input check
-    const input = inputRef.current;
-    if (input == null) return 0;
-
-    if (!input.checkValidity()) {
-      input.focus();
+    const email = inputRef.current?.value.trim();
+    if (!email) {
       return 0;
     }
-
-    const email = input.value.trim();
 
     // Send verification code
     const result = await app.authCodeApi.sendEmail({
@@ -114,6 +108,15 @@ export default function Register20() {
         app.alertResult(result);
       }
     } else {
+      // Input check
+      const input = inputRef.current;
+      if (input == null) return;
+
+      if (!input.checkValidity()) {
+        input.focus();
+        return;
+      }
+
       const result = await sendCode();
       if (result > 0) {
         setReady(true);

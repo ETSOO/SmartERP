@@ -10,6 +10,8 @@ import { app } from "../app/SmartApp";
 import { useNavigate } from "react-router-dom";
 import { useSearchParamsEx } from "@etsoo/react";
 import { AuthCodeAction } from "@etsoo/smarterp-core";
+import { UserIdentifierType } from "@etsoo/appscript";
+import { DataTypes } from "@etsoo/shared";
 
 export default function Register20() {
   // Navigate
@@ -23,14 +25,15 @@ export default function Register20() {
 
   // Labels
   const labels = app.getLabels(
-    "nextStep",
+    "confirmClear",
     "mobile",
-    "verifyMobileNumber",
-    "resending",
+    "mobileAlreadyExists",
+    "nextStep",
+    "noCodeId",
     "oneTimePin",
     "oneTimePinMobileTip",
-    "noCodeId",
-    "confirmClear"
+    "resending",
+    "verifyMobileNumber"
   );
 
   // States
@@ -43,16 +46,8 @@ export default function Register20() {
 
   // Send verification code
   const sendCode = React.useCallback(async () => {
-    // Input check
-    const input = inputRef.current;
-    if (input == null) return 0;
-
-    if (!input.checkValidity()) {
-      input.focus();
-      return 0;
-    }
-
-    const mobile = input.value.trim();
+    const mobile = inputRef.current?.value.trim();
+    if (!mobile) return 0;
 
     // Send verification code
     const result = await app.authCodeApi.sendSMS({
@@ -110,12 +105,39 @@ export default function Register20() {
         app.alertResult(result);
       }
     } else {
+      const input = inputRef.current;
+      if (input == null) return;
+
+      if (!input.checkValidity()) {
+        input.focus();
+      }
+
+      // Check the mobile number already exists or not
+      const status = await app.authApi.checkUserIdentifier(
+        UserIdentifierType.Mobile,
+        input.value
+      );
+
+      if (status == null) return;
+
+      if (status === DataTypes.TristateEnum.True) {
+        app.notifier.alert(labels.mobileAlreadyExists);
+        return;
+      }
+
       const result = await sendCode();
       if (result > 0) {
         setReady(true);
       }
     }
   };
+
+  React.useEffect(() => {
+    // Check authorized
+    if (!app.registrationAuthorized) {
+      navigate("./../../");
+    }
+  }, [app.registrationAuthorized]);
 
   React.useEffect(() => {
     // Focus
@@ -141,7 +163,7 @@ export default function Register20() {
         autoCapitalize="none"
         autoComplete="mobile"
         type="tel"
-        inputProps={{ inputMode: "tel" }}
+        slotProps={{ input: { inputMode: "tel" } }}
         required
         showClear
         onChange={() => setReady(false)}

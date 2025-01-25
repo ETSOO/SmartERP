@@ -428,7 +428,7 @@ namespace PlatformShared.Database
                 entity.ToTable("core_user");
 
                 entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
+                    //.UseIdentityAlwaysColumn()
                     .HasIdentityOptions(1001L)
                     .HasColumnName("id");
                 entity.Property(e => e.Password)

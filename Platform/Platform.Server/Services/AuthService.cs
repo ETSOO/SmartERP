@@ -9,6 +9,7 @@ using com.etsoo.Database;
 using com.etsoo.HTTP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
+using com.etsoo.Utils.Models;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
@@ -53,14 +54,13 @@ namespace Platform.Server.Services
         /// Check user login id
         /// 检查用户登录编号
         /// </summary>
+        /// <param name="type">Identifier type</param>
         /// <param name="id">Email or mobile</param>
         /// <param name="region">Region</param>
-        /// <param name="isEmail">Is email</param>
         /// <returns>Action result</returns>
-        static ActionResult CheckId(ref string id, string region, out bool isEmail)
+        static ActionResult CheckId(CoreUserIdentifierType type, ref string id, string region)
         {
-            isEmail = id.Contains('@');
-            if (isEmail)
+            if (type == CoreUserIdentifierType.Email)
             {
                 // Try parse
                 if (MailboxAddress.TryParse(id, out var emailAddress))
@@ -72,7 +72,7 @@ namespace Platform.Server.Services
                     return ApplicationErrors.InvalidEmail.AsResult();
                 }
             }
-            else
+            else if (type == CoreUserIdentifierType.Mobile)
             {
                 // Try parse and format
                 var phone = AddressRegion.CreatePhone(id, region);
@@ -267,6 +267,65 @@ namespace Platform.Server.Services
             }
 
             return AuthRequestAsync(rq, User, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Check user identifier exists
+        /// 检查用户标识符是否存在
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<TristateEnum> CheckUserIdentifierAsync(CheckUserIdentifierRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            // Check device
+            if (!this.CheckDevice(userAgent, rq.DeviceId, out var _, out var cd))
+            {
+                return TristateEnum.Unsure;
+            }
+
+            var deviceCore = cd.Value.DeviceCore;
+
+            var openid = DecryptDeviceData(rq.Openid, deviceCore);
+            if (string.IsNullOrEmpty(openid))
+            {
+                return TristateEnum.Unsure;
+            }
+
+            var data = new CheckUserIdentifierData
+            {
+                Type = rq.Type,
+                Openid = openid,
+                Region = rq.Region
+            };
+
+            return await CheckUserIdentifierAsync(data, cancellationToken);
+        }
+
+        /// <summary>
+        /// Check user identifier exists
+        /// 检查用户标识符是否存在
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<TristateEnum> CheckUserIdentifierAsync(CheckUserIdentifierData data, CancellationToken cancellationToken = default)
+        {
+            if (_regUser == null && User == null)
+            {
+                return TristateEnum.Unsure;
+            }
+
+            var openid = data.Openid;
+            var result = CheckId(data.Type, ref openid, data.Region);
+            if (!result.Ok)
+            {
+                return TristateEnum.Unsure;
+            }
+
+            var exists = await _db.CoreUserIdentifiers.AnyAsync(i => i.Type == data.Type && i.Value == openid, cancellationToken);
+            return exists ? TristateEnum.True : TristateEnum.False;
         }
 
         private async Task<TokenQueryData?> CreateTokenQueryDataAsync(CurrentUser user, CancellationToken cancellationToken)
@@ -877,13 +936,12 @@ namespace Platform.Server.Services
         public async ValueTask<(IActionResult, LoginUserWithPassword?)> LoginIdAsync(string id, string region, CancellationToken cancellationToken = default)
         {
             // Check
-            var result = CheckId(ref id, region, out var isEmail);
+            var type = id.Contains('@') ? CoreUserIdentifierType.Email : CoreUserIdentifierType.Mobile;
+            var result = CheckId(type, ref id, region);
             if (!result.Ok)
             {
                 return (result, null);
             }
-
-            var type = isEmail ? CoreUserIdentifierType.Email : CoreUserIdentifierType.Mobile;
 
             // Login with id check
             var data = await _db.CoreUserIdentifiers
@@ -1939,7 +1997,7 @@ namespace Platform.Server.Services
             var identifier = new CoreUserIdentifier
             {
                 Type = CoreUserIdentifierType.Email,
-                Value = resultData.OpenId
+                Value = resultData.OpenId.ToLower()
             };
 
             // Validate

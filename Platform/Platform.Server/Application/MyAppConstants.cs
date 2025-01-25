@@ -37,9 +37,9 @@
         public const string RegistrationTokenAudience = "registration";
 
         /// <summary>
-        /// Registration token scheme
+        /// Registration token scheme, using Bearer to share the same AddAuthentication of the API
         /// 注册令牌方案
         /// </summary>
-        public const string RegistrationTokenScheme = "registration";
+        public const string RegistrationTokenScheme = "Bearer";
     }
 }

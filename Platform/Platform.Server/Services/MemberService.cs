@@ -143,12 +143,13 @@ namespace Platform.Server.Services
             }
 
             // Data
+            var orgId = User.OrganizationInt;
             var data = new UserData
             {
                 Name = User.Name,
                 FamilyName = User.FamilyName,
                 GivenName = User.GivenName,
-                OrganizationId = User.OrganizationInt,
+                OrganizationId = orgId,
                 OrganizationName = User.OrganizationName
             };
 
@@ -156,6 +157,15 @@ namespace Platform.Server.Services
             var items = new ConcurrentBag<string>();
             await Parallel.ForEachAsync(rq.Emails.Distinct(), async (email, cancelToken) =>
             {
+                // User already exists
+                var userExists = await _db.CoreOrganizationUsers.AnyAsync(ou => ou.CoreOrganizationId == orgId
+                    && ou.CoreUser.CoreUserIdentifiers.Any(i => i.Type == CoreUserIdentifierType.Email && i.Value == email), cancelToken);
+
+                if (userExists)
+                {
+                    return;
+                }
+
                 var view = new SendEmailData<AuthCodeMemberInvitationData>
                 {
                     Action = AuthCodeAction.MemberInvitationEmailCode,
@@ -186,7 +196,7 @@ namespace Platform.Server.Services
             // Results
             if (items.IsEmpty)
             {
-                return ApplicationErrors.NoDataReturned.AsResult("Results");
+                return ApplicationErrors.EmailExists.AsResult("Results");
             }
 
             // Result
@@ -240,6 +250,7 @@ namespace Platform.Server.Services
                 AssignedId = ou.AssignedId,
                 IsOwner = ou.CoreOrganization.OwnerId == User.IdInt,
                 IsSelf = ou.CoreUserId == User.IdInt,
+                IsEditable = ou.UserRole <= User.Role,
                 Status = ou.Status,
                 Creation = ou.Creation
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
@@ -289,7 +300,10 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> UpdateAsync(MemberUpdateRQ rq, CancellationToken cancellationToken = default)
         {
-            var ou = await _db.CoreOrganizationUsers.FirstOrDefaultAsync(o => o.Id == rq.Id && o.CoreOrganizationId == User.OrganizationInt, cancellationToken);
+            var ou = await _db.CoreOrganizationUsers.FirstOrDefaultAsync(o => o.Id == rq.Id
+                && o.CoreOrganizationId == User.OrganizationInt
+                && o.UserRole <= User.Role, cancellationToken);
+
             if (ou == null)
             {
                 return ApplicationErrors.NoId.AsResult();
@@ -410,7 +424,10 @@ namespace Platform.Server.Services
         {
             var query = _db.CoreOrganizationUsers
                 .AsNoTracking()
-                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User));
+                .Where(ou => ou.Id == id
+                    && ou.CoreOrganizationId == User.OrganizationInt
+                    && ou.IdentityType.HasFlag(IdentityTypeFlags.User)
+                    && ou.UserRole <= User.Role);
 
             var (hasContent, _) = await query.Select(ou => new
             {

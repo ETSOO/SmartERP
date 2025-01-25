@@ -18,6 +18,7 @@ export default function Invite() {
   const labels = app.getLabels(
     "acceptInvitation",
     "email",
+    "inviteMemberDone",
     "inviterOrg",
     "inviter",
     "inviteTipMessage",
@@ -55,7 +56,7 @@ export default function Invite() {
               navigate(`./../../login/register10?openid=${email}`);
             }
           } else {
-            navigate(`./../../`);
+            navigate("./../../");
           }
         };
 
@@ -101,11 +102,18 @@ export default function Invite() {
       title={labels.acceptInvitation}
       subTitle={subTitle}
       buttons={[
+        data?.isAccepted ? (
+          <Button variant="contained" onClick={() => navigate("./../../")}>
+            {labels.inviteMemberDone}
+          </Button>
+        ) : (
+          <></>
+        ),
         <Button
           key="submit"
           onClick={buttonHandler}
           variant="outlined"
-          disabled={isLoading}
+          disabled={isLoading || data.isAccepted}
           endIcon={isLoading ? <CircularProgress size={12} /> : undefined}
         >
           {buttonLabel}

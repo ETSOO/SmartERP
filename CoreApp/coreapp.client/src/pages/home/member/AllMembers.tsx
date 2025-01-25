@@ -41,7 +41,7 @@ export default function AllMembers() {
   const roles = app.getRoles();
 
   // Edit permission
-  const editPermission = app.isHRUser();
+  const editPermission = app.isAdminUser();
 
   // Labels
   const labels = app.getLabels(
@@ -168,7 +168,7 @@ export default function AllMembers() {
 
             return (
               <React.Fragment>
-                {editPermission && (
+                {editPermission && data.isEditable && (
                   <IconButtonLink
                     title={labels.edit}
                     href={`./../edit/${data.id}`}

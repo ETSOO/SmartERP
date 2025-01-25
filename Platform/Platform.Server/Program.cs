@@ -40,6 +40,7 @@ using PlatformShared.Database;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,21 @@ otBuilder
         })
     );
 */
+
+// Rate limiter
+// https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-8.0
+// https://blog.maartenballiauw.be/post/2022/09/26/aspnet-core-rate-limiting-middleware.html
+services.AddRateLimiter(options =>
+{
+    var globalRateOptions = configuration.GetSection("RateLimiters:Global").Get<EtsooRateLimiterOptions>();
+    var globalPolicy = new EtsooRateLimiterPolicy(globalRateOptions);
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context => globalPolicy.GetPartition(context));
+    options.OnRejected = globalPolicy.OnRejected;
+
+    var piiRateOptions = configuration.GetSection("RateLimiters:PII").Get<EtsooRateLimiterOptions>();
+    var piiPolicy = new EtsooRateLimiterPolicy(piiRateOptions);
+    options.AddPolicy("PII", piiPolicy);
+});
 
 // Entity framework
 var connectonString = configuration.GetConnectionString("SmartERP");
@@ -327,6 +343,9 @@ else
     // Production
     app.UseHttpsRedirection();
 }
+
+// Rate limiter must be called after UseRouting, at least before UseAuthentication
+app.UseRateLimiter();
 
 // APIs
 var api = app.MapGroup("/api").WithOpenApi();

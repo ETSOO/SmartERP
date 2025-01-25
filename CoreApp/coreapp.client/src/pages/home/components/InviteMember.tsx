@@ -21,7 +21,7 @@ export function InviteMember() {
         options={roles}
         name="userRole"
         label={labels.role}
-        idValue={8}
+        idValue={UserRole.User}
         inputVariant="standard"
         inputMargin="dense"
         inputRequired

@@ -35,5 +35,5 @@ export namespace Constants {
   /**
    * Registration token scheme
    */
-  export const RegistrationTokenScheme = "registration";
+  export const RegistrationTokenScheme = "Bearer";
 }

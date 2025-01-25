@@ -28,7 +28,7 @@ namespace Platform.Server.Endpoints.Member
                 .WithDescription("Query members JSON data / 查询成员JSON数据").WithTags("Member");
 
             g.MapGet("Read/{id:int}", (IMemberService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
-                .WithDescription("Read member JSON data / 浏览成员JSON数据").WithTags("Member");
+                .WithDescription("Read member JSON data / 浏览成员JSON数据").WithTags("Member").RequireRateLimiting("PII");
 
             g.MapPut("Update", (IMemberService service, MemberUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update member / 更新成员").WithTags("Member");

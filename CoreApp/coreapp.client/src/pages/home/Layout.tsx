@@ -135,7 +135,7 @@ export default function Home() {
 
     if (organization) {
       let spliceIndex = 3;
-      if (app.isHRUser()) {
+      if (app.isManagerUser()) {
         items.splice(1, 0, {
           segment: "home/member/all",
           title: labels.allMembers,
@@ -204,7 +204,7 @@ export default function Home() {
         slots={{ sidebarFooter: SidebarFooter, toolbarActions: org }}
       >
         <PageDataContextProvider>
-          <PageContainer defaultTitle="">
+          <PageContainer defaultTitle="" maxWidth="xl">
             <Outlet />
           </PageContainer>
         </PageDataContextProvider>
