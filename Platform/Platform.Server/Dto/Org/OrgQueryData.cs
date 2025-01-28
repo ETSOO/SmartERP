@@ -16,5 +16,7 @@ namespace Platform.Server.Dto.Org
         public int? ParentId { get; init; }
         public EntityStatus Status { get; init; }
         public DateTimeOffset Creation { get; init; }
+        public EntityStatus UserStatus { get; init; }
+        public bool IsUserExpired { get; init; }
     }
 }

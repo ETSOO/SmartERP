@@ -114,7 +114,8 @@ export default function Home() {
       {
         segment: "home/user/data",
         title: labels.personalData,
-        icon: <PortraitIcon />
+        icon: <PortraitIcon />,
+        subs: ["/home/user/data/.*"]
       },
       {
         segment: "home/user/updateavatar",

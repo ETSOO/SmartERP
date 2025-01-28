@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.5.95",
-    "@etsoo/materialui": "^1.4.75",
+    "@etsoo/materialui": "^1.4.76",
     "@etsoo/react": "^1.8.26",
     "@etsoo/shared": "^1.2.59",
     "@etsoo/smarterp-core": "file:../../../../EtsooUI/SmartERP/core",

@@ -59,14 +59,7 @@ export default function ViewApp() {
                 paddingRight={2}
                 title={item.name}
               >
-                {item.localName ? (
-                  <>
-                    {item.localName}
-                    <br />({app.get(`app${item.appId}`) ?? item.name})
-                  </>
-                ) : (
-                  app.get(`app${item.appId}`) ?? item.name
-                )}
+                {app.core.getAppName(item)}
               </Typography>
               <IconButtonLink
                 href={`./../../edit/${item.id}`}

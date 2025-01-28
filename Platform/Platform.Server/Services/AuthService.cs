@@ -93,7 +93,7 @@ namespace Platform.Server.Services
         readonly IStorage _storage;
         readonly IHttpClientFactory _httpClientFactory;
         readonly IPAddress _ip;
-        readonly IMinUserToken? _regUser;
+        readonly MinUserToken? _regUser;
         readonly IPublicService _publicService;
         readonly IAuthCodeService _authCodeService;
 
@@ -107,9 +107,6 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="storage">Storage</param>
         /// <param name="httpClientFactory">HTTP client factory</param>
-        /// <param name="smsClient">SMS client</param>
-        /// <param name="smtpClient">SMTP client</param>
-        /// <param name="host">Host environment</param>
         /// <param name="publicService">Public service</param>
         /// <param name="authCodeService">Auth code service</param>
         public AuthService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthService> logger,
@@ -136,7 +133,7 @@ namespace Platform.Server.Services
             }
             else
             {
-                data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey).Select(oa => new AppData { AppSecret = oa.AppSecret, WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl, ApiUrls = oa.LocalApis ?? oa.CoreApp.ApiUrls }).FirstOrDefaultAsync(cancellationToken);
+                data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey && oa.AppSecret != null).Select(oa => new AppData { AppSecret = oa.AppSecret!, WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl, ApiUrls = oa.LocalApis ?? oa.CoreApp.ApiUrls }).FirstOrDefaultAsync(cancellationToken);
             }
 
             if (data != null)
@@ -681,17 +678,27 @@ namespace Platform.Server.Services
 
             if (data == null)
             {
-                return (ApplicationErrors.DataProcessingFailed.AsResult("Data"), null, null);
+                return (ApplicationErrors.DataProcessingFailed.AsResult(nameof(data)), null, null);
             }
             else if (organizationId.HasValue && !organizationId.Equals(data.OrganizationId))
             {
                 // Required organization id is invalid
-                return (ApplicationErrors.NoValidData.AsResult("OrganizationId"), null, null);
+                return (ApplicationErrors.NoValidData.AsResult(nameof(organizationId)), null, null);
             }
             else if (fromOrganizationId.HasValue && !fromOrganizationId.Equals(data.ChannelOrganizationId))
             {
                 // Required from organization id is invalid
-                return (ApplicationErrors.NoValidData.AsResult("FromOrganizationId"), null, null);
+                return (ApplicationErrors.NoValidData.AsResult(nameof(fromOrganizationId)), null, null);
+            }
+            else if (data.OrgStatus.HasValue && data.OrgStatus.Value > EntityStatus.Approved)
+            {
+                // User status is invalid
+                return (ApplicationErrors.AccountDisabled.AsResult(nameof(data.OrgStatus)), null, null);
+            }
+            else if (data.OrgExpiry.HasValue && data.OrgExpiry.Value < DateTimeOffset.UtcNow)
+            {
+                // User expired
+                return (ApplicationErrors.AccountExpired.AsResult(nameof(data.OrgExpiry)), null, null);
             }
 
             // Permission scopes

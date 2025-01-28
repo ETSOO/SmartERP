@@ -18,6 +18,6 @@ namespace Platform.Server.Endpoints.App.RQ
         /// Identity type
         /// 识别类型
         /// </summary>
-        public IdentityType IdentityType { get; init; } = IdentityType.User;
+        public IdentityType IdentityType { get; init; }
     }
 }

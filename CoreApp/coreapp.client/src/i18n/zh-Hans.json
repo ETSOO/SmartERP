@@ -1,4 +1,6 @@
 {
+  "addEmail": "添加邮箱",
+  "addMobile": "添加手机号",
   "allApps": "所有应用",
   "allMembers": "所有成员",
   "appKeyTip": "确定需要重新创建密钥吗？重新创建后，之前创建的密钥将失效，请妥善保管新密钥。",
@@ -12,6 +14,7 @@
   "inviteResult": "已发送邀请邮件给 {0}，请等待对方接受邀请",
   "joinedOrgs": "加入的机构",
   "joinOrganization": "加入新机构",
+  "leaveOrg": "退出机构",
   "localApis": "自定义接口URL",
   "localHelpUrl": "自定义帮助URL",
   "localName": "自定义名称",
@@ -24,5 +27,7 @@
   "purchasedApps": "购买的应用",
   "purchaseExists": "所选机构已购买该应用",
   "smarterpCore": "司友云ERP主控制台",
-  "updateAvator": "更新头像"
+  "updateAvator": "更新头像",
+  "userExpiry": "用户到期时间",
+  "userStatus": "用户状态"
 }

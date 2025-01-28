@@ -17,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 import {
   GridCellRendererProps,
   GridDataType,
-  GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
@@ -25,6 +24,7 @@ import { OrgQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { AppUtils } from "../components/AppUtils";
 import { DefaultUI, OrgTiplist } from "@etsoo/smarterp-core/components";
+import { EntityStatus } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -127,7 +127,20 @@ export default function AllOrgs() {
           field: "name",
           header: labels.orgName,
           sortable: true,
-          cellBoxStyle: GridDeletedCellBoxStyle
+          cellBoxStyle: (data) =>
+            data
+              ? {
+                  textDecoration:
+                    data.status > EntityStatus.Approved
+                      ? "line-through"
+                      : undefined,
+                  color:
+                    data.userStatus > EntityStatus.Approved ||
+                    data.isUserExpired
+                      ? "red"
+                      : undefined
+                }
+              : {}
         },
         {
           field: "pin",

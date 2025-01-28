@@ -228,6 +228,38 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Leave the organization
+        /// 退出机构
+        /// </summary>
+        /// <param name="id">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> LeaveAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Delete the user from the organization
+            var affacted = await _db.CoreOrganizationUsers.Where(ou => ou.CoreOrganizationId == id && ou.CoreUserId == User.IdInt).ExecuteDeleteAsync(cancellationToken);
+            if (affacted == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Update user's latest organizations
+            var user = await _db.CoreUsers.FindAsync([User.IdInt], cancellationToken);
+            if (user != null)
+            {
+                var ids = user.LatestOrganizationIds;
+                if (ids != null)
+                {
+                    ids.Remove(id);
+                    user.LatestOrganizationIds = [.. ids];
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+            }
+
+            return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
         /// List organization JSON data
         /// 机构列表JSON数据
         /// </summary>
@@ -239,24 +271,24 @@ namespace Platform.Server.Services
         {
             var query = CreateQuery(rq);
 
-            await query.Select(o => new OrgListData
+            await query.Select(ou => new OrgListData
             {
-                Id = o.Id,
-                Name = o.Name,
-                Pin = MyDbFunctions.HideData(o.Pin, default)
+                Id = ou.CoreOrganization.Id,
+                Name = ou.CoreOrganization.Name,
+                Pin = MyDbFunctions.HideData(ou.CoreOrganization.Pin, default)
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
-        private IQueryable<CoreOrganization> CreateQuery(OrgListRQ rq, Func<IQueryable<CoreOrganization>, IQueryable<CoreOrganization>>? filters = null)
+        private IQueryable<CoreOrganizationUser> CreateQuery(OrgListRQ rq, Func<IQueryable<CoreOrganizationUser>, IQueryable<CoreOrganizationUser>>? filters = null)
         {
-            var query = _db.CoreOrganizations
+            var query = _db.CoreOrganizationUsers
                 .AsNoTracking()
-                .Where(o => o.CoreOrganizationUsers.Any(ou => ou.CoreOrganizationId == o.Id && ou.CoreUserId == User.IdInt))
-                .QueryEtsoo(rq, (o) => o.Id, (o) => o.Status, (q) =>
+                .Where(ou => ou.CoreUserId == User.IdInt)
+                .QueryEtsoo(rq, (ou) => ou.CoreOrganizationId, (ou) => ou.CoreOrganization.Status, (q) =>
                 {
                     if (rq.ParentId.HasValue)
                     {
-                        q = q.Where(o => o.ParentId == rq.ParentId);
+                        q = q.Where(ou => ou.CoreOrganization.ParentId == rq.ParentId);
                     }
 
                     if (rq.Keyword?.Length > 1)
@@ -265,11 +297,14 @@ namespace Platform.Server.Services
 
                         if (keyword.IsComplexQueryKeywords())
                         {
-                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, o => o.Name);
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, ou => ou.CoreOrganization.Name);
                         }
                         else
                         {
-                            q = q.Where(o => o.Brand == keyword || EF.Functions.ILike(o.Name, $"%{keyword}%") || (o.Pin != null && EF.Functions.ILike(o.Pin, $"%{keyword}%")) || (o.QueryKeyword != null && EF.Functions.ILike(o.QueryKeyword, $"%{keyword}%")));
+                            q = q.Where(ou => ou.CoreOrganization.Brand == keyword
+                            || EF.Functions.ILike(ou.CoreOrganization.Name, $"%{keyword}%")
+                            || (ou.CoreOrganization.Pin != null && EF.Functions.ILike(ou.CoreOrganization.Pin, $"%{keyword}%"))
+                            || (ou.CoreOrganization.QueryKeyword != null && EF.Functions.ILike(ou.CoreOrganization.QueryKeyword, $"%{keyword}%")));
                         }
                     }
 
@@ -315,21 +350,24 @@ namespace Platform.Server.Services
             {
                 if (rq.Pin?.Length > 1)
                 {
-                    q = q.Where(o => o.Pin != null && EF.Functions.ILike(o.Pin, $"%{rq.Pin}%"));
+                    q = q.Where(ou => ou.CoreOrganization.Pin != null && EF.Functions.ILike(ou.CoreOrganization.Pin, $"%{rq.Pin}%"));
                 }
 
                 return q;
             });
 
-            var data = await query.Select(o => new OrgQueryData
+            var data = await query.Select(ou => new OrgQueryData
             {
-                Id = o.Id,
-                Name = o.Name,
-                IsOwner = o.OwnerId == User.IdInt,
-                Brand = o.Brand,
-                Pin = o.Pin,
-                ParentId = o.ParentId,
-                Status = o.Status
+                Id = ou.CoreOrganization.Id,
+                Name = ou.CoreOrganization.Name,
+                IsOwner = ou.CoreOrganization.OwnerId == User.IdInt,
+                Brand = ou.CoreOrganization.Brand,
+                Pin = ou.CoreOrganization.Pin,
+                ParentId = ou.CoreOrganization.ParentId,
+                Status = ou.CoreOrganization.Status,
+                Creation = ou.CoreOrganization.Creation,
+                UserStatus = ou.Status,
+                IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToListAsync(cancellationToken);
 
             return data;
@@ -349,22 +387,24 @@ namespace Platform.Server.Services
             {
                 if (rq.Pin?.Length > 1)
                 {
-                    q = q.Where(o => o.Pin != null && EF.Functions.ILike(o.Pin, $"%{rq.Pin}%"));
+                    q = q.Where(ou => ou.CoreOrganization.Pin != null && EF.Functions.ILike(ou.CoreOrganization.Pin, $"%{rq.Pin}%"));
                 }
 
                 return q;
             });
 
-            var (hasContent, commandText) = await query.Select(o => new OrgQueryData
+            var (hasContent, commandText) = await query.Select(ou => new OrgQueryData
             {
-                Id = o.Id,
-                Name = o.Name,
-                IsOwner = o.OwnerId == User.IdInt,
-                Brand = o.Brand,
-                Pin = MyDbFunctions.HideData(o.Pin, default),
-                ParentId = o.ParentId,
-                Status = o.Status,
-                Creation = o.Creation
+                Id = ou.CoreOrganization.Id,
+                Name = ou.CoreOrganization.Name,
+                IsOwner = ou.CoreOrganization.OwnerId == User.IdInt,
+                Brand = ou.CoreOrganization.Brand,
+                Pin = MyDbFunctions.HideData(ou.CoreOrganization.Pin, default),
+                ParentId = ou.CoreOrganization.ParentId,
+                Status = ou.CoreOrganization.Status,
+                Creation = ou.CoreOrganization.Creation,
+                UserStatus = ou.Status,
+                IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
             if (_db.IsSensitiveDataLoggingEnabled)
@@ -383,26 +423,32 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = _db.CoreOrganizations
+            var query = _db.CoreOrganizationUsers
                 .AsNoTracking()
-                .Where(o => o.Id == id && o.CoreOrganizationUsers.Any(ou => ou.CoreUserId == User.IdInt));
+                .Where(ou => ou.CoreOrganizationId == id && ou.CoreUserId == User.IdInt);
 
-            var (hasContent, _) = await query.Select(o => new
+            var (hasContent, commandText) = await query.Select(ou => new
             {
-                o.Id,
-                IsOwner = o.OwnerId == User.IdInt,
-                OwnerName = MyDbFunctions.HideData(o.Owner.Name, default),
-                o.Name,
-                o.Brand,
-                o.Logo,
-                o.Pin,
-                ParentName = (o.Parent == null ? null : o.Parent.Name),
-                o.ParentId,
-                o.Creation,
-                o.Status,
-                o.QueryKeyword,
-
+                Id = ou.CoreOrganizationId,
+                IsOwner = ou.CoreOrganization.OwnerId == User.IdInt,
+                OwnerName = MyDbFunctions.HideData(ou.CoreOrganization.Owner.Name, default),
+                ou.CoreOrganization.Name,
+                ou.CoreOrganization.Brand,
+                ou.CoreOrganization.Logo,
+                ou.CoreOrganization.Pin,
+                ParentName = (ou.CoreOrganization.Parent == null ? null : ou.CoreOrganization.Parent.Name),
+                ou.CoreOrganization.ParentId,
+                ou.CoreOrganization.Creation,
+                ou.CoreOrganization.Status,
+                ou.CoreOrganization.QueryKeyword,
+                UserStatus = ou.Status,
+                UserExpiry = ou.Expiry
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
         }
 
         /// <summary>

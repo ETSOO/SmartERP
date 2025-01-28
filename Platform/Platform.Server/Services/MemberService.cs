@@ -336,7 +336,7 @@ namespace Platform.Server.Services
 
             if (rq.IsModified(nameof(rq.Expiry)) && isNotSelf)
             {
-                ou.Expiry = rq.Expiry;
+                ou.Expiry = rq.Expiry?.ToUniversalTime();
             }
 
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue && isNotSelf)

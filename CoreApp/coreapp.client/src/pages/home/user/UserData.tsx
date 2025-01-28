@@ -1,60 +1,134 @@
-import { ComboBox, SearchBar, SearchField, Tiplist } from "@etsoo/materialui";
-import { DateUtils } from "@etsoo/shared";
+import { ButtonLink, CommonPage } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
-import { DeviceListDto } from "@etsoo/smarterp-core";
+import {
+  Card,
+  CardActions,
+  CardContent,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
+import { UserIdentifierData } from "@etsoo/smarterp-core";
+import React from "react";
+import { UserIdentifierType } from "@etsoo/appscript";
 
 export default function UserData() {
   // Labels
   const labels = app.getLabels(
-    "actions",
-    "creation",
-    "device",
-    "endDate",
-    "startDate",
-    "title"
+    "addEmail",
+    "addMobile",
+    "confirmAction",
+    "delete"
+  );
+
+  // State
+  const [items, setItems] = React.useState<UserIdentifierData[]>([]);
+
+  // Load data
+  const reloadData = React.useCallback(async () => {
+    const data = await app.core.userApi.allIdentifiers();
+    setItems(data ?? []);
+  }, []);
+
+  // Check deletable
+  const checkDeletable = React.useCallback(
+    (item: UserIdentifierData) => {
+      if (
+        item.type === UserIdentifierType.Email ||
+        item.type === UserIdentifierType.Mobile
+      ) {
+        return items.filter((i) => i.type === item.type).length > 1;
+      }
+      return true;
+    },
+    [items]
   );
 
   return (
-    <SearchBar
-      onSubmit={(data) => {
-        console.log("data", data);
-      }}
-      fields={[
-        <SearchField label={labels.title} name="keyword" />,
-        <ComboBox
-          name="paymentStatus"
-          label={"Status"}
-          search
-          options={app.getStatusList()}
-        />,
-        <Tiplist<DeviceListDto>
-          label={labels.device}
-          name="deviceId"
-          search
-          loadData={(keyword, id) =>
-            app.core.userApi.deviceList(
-              { id, keyword },
-              { defaultValue: [], showLoading: false }
-            )
-          }
-        />,
-        <SearchField
-          label={labels.startDate}
-          name="creationStart"
-          type="date"
-          slotProps={{
-            htmlInput: { max: DateUtils.formatForInput(new Date()) }
-          }}
-        />,
-        <SearchField
-          label={labels.endDate}
-          name="creationEnd"
-          type="date"
-          slotProps={{
-            htmlInput: { max: DateUtils.formatForInput(new Date()) }
-          }}
-        />
-      ]}
-    />
+    <CommonPage paddings={0} onRefresh={reloadData}>
+      <Card sx={{ marginTop: 1 }}>
+        <CardContent>
+          <List disablePadding>
+            {items.map((item, index) => (
+              <ListItem
+                key={item.id}
+                sx={{
+                  backgroundColor: (theme) =>
+                    index % 2 === 0
+                      ? theme.palette.grey[100]
+                      : theme.palette.grey[50]
+                }}
+                secondaryAction={
+                  checkDeletable(item) && (
+                    <IconButton
+                      edge="end"
+                      size="small"
+                      title={labels.delete}
+                      onClick={() => {
+                        app.notifier.confirm(
+                          labels.confirmAction.format(labels.delete),
+                          item.value,
+                          async (confirmed) => {
+                            if (!confirmed) return;
+
+                            const result =
+                              await app.core.userApi.deleteIdentifier(item.id, {
+                                showLoading: false
+                              });
+
+                            if (result == null) return;
+
+                            if (result.ok) {
+                              reloadData();
+                              return;
+                            }
+
+                            app.alertResult(result);
+                            return false;
+                          }
+                        );
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )
+                }
+              >
+                <ListItemText
+                  primary={item.value}
+                  secondary={
+                    app.core.getIdentifierTypeLabel(item.type) +
+                    ", " +
+                    app.formatDate(item.creation)
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        </CardContent>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <ButtonLink
+            color="primary"
+            variant="outlined"
+            startIcon={<EmailIcon />}
+            href="./addemail"
+          >
+            {labels.addEmail}
+          </ButtonLink>
+          <ButtonLink
+            color="primary"
+            variant="outlined"
+            startIcon={<PhoneIphoneIcon />}
+            href="./addmobile"
+          >
+            {labels.addMobile}
+          </ButtonLink>
+        </CardActions>
+      </Card>
+    </CommonPage>
   );
 }

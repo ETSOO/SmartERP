@@ -12,6 +12,7 @@ namespace Platform.Server.Dto.AuthCode
     /// <param name="Minutes">Valid minutes</param>
     /// <param name="Kind">Kind</param>
     /// <param name="Length">Length</param>
+    /// <param name="LoginRequired">Login required</param>
     /// <param name="Template">Template path</param>
     public record AuthCodeActionItem(
         AuthCodeAction Id,
@@ -19,6 +20,7 @@ namespace Platform.Server.Dto.AuthCode
         short Minutes,
         RandStringKind Kind,
         byte Length,
+        bool LoginRequired = false,
         string? Template = null
     );
 }

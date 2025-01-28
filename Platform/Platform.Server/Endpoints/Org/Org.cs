@@ -26,6 +26,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapPost("GetMy", (IOrgService service, OrgGetMyRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.GetMyAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get my organizations JSON data / 获取我的机构JSON数据").WithTags("Org");
 
+            g.MapPost("Leave/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.LeaveAsync(id, cancellationToken))
+                .WithDescription("Leave organization / 离开机构").WithTags("Org");
+
             g.MapPost("List", (IOrgService service, OrgListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("List organizations JSON data / 列出机构JSON数据").WithTags("Org");
 

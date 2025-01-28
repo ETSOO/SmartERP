@@ -21,6 +21,12 @@ namespace Platform.Server.Dto.App
         public required string Name { get; init; }
 
         /// <summary>
+        /// Local name
+        /// 本地名称
+        /// </summary>
+        public string? LocalName { get; init; }
+
+        /// <summary>
         /// Identity type
         /// 身份类型
         /// </summary>

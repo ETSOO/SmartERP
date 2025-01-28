@@ -162,41 +162,89 @@ namespace Platform.Server.Services
         /// <returns>Task</returns>
         public async Task<IEnumerable<AppQueryData>> GetMyAsync(AppGetMyRQ rq, CancellationToken cancellationToken = default)
         {
-            // Current user's latest applications
-            var ids = await _db.CoreUsers.AsNoTracking()
-                .Where(u => u.Id == User.IdInt)
-                .Select(u => u.LatestAppIds).FirstOrDefaultAsync(cancellationToken) ?? [];
+            // Current user's organization
+            var orgId = User.OrganizationInt;
 
-            var query = _db.CoreOrganizationApps
-                .AsNoTracking()
-                .Where(oa => oa.CoreOrganizationId == User.OrganizationInt
-                    && oa.Status <= EntityStatus.Approved
-                    && (oa.Expiry == null || oa.Expiry >= DateTimeOffset.UtcNow)
-                    && oa.CoreApp.IdentityType == rq.IdentityType)
-                .Select(oa => new AppQueryData
-                {
-                    Id = oa.Id,
-                    Name = oa.LocalName ?? oa.CoreApp.Name,
-                    IdentityType = oa.CoreApp.IdentityType,
-                    RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
-                    WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
-                    HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
-                    Logo = oa.CoreApp.Logo
-                });
+            // Current user's states
+            var typeFlag = Enum.Parse<IdentityTypeFlags>(rq.IdentityType.ToString());
+            var isUserValid = await _db.CoreOrganizationUsers.AsNoTracking()
+                .AnyAsync(ou => ou.CoreOrganizationId == orgId
+                    && ou.CoreUserId == User.IdInt
+                    && ou.IdentityType.HasFlag(typeFlag)
+                    && ou.Status <= EntityStatus.Approved
+                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow), cancellationToken);
 
             List<AppQueryData> apps = [];
 
-            if (ids.Count > 0)
+            List<int> defaultApps = [1];
+
+            // Max items except the core app
+            var maxItems = rq.MaxItems - 1;
+
+            if (User.Scopes?.Contains(MyAppConstants.SuperApp) is true)
             {
-                apps.AddRange(await query.Where(ou => ids.Contains(ou.Id)).Take(rq.MaxItems).ToListAsync(cancellationToken));
-                apps = [.. apps.OrderBy(ou => ids.IndexOf(ou.Id))];
+                // Super app
+                defaultApps.Add(2);
+                maxItems--;
             }
 
-            var left = rq.MaxItems - apps.Count;
-            if (left > 0)
+            if (isUserValid)
             {
-                apps.AddRange(await query.Where(ou => !ids.Contains(ou.Id)).OrderByDescending(ou => ou.Id).Take(left).ToListAsync(cancellationToken));
+                // Current user's latest applications
+                var ids = await _db.CoreUsers.AsNoTracking()
+                    .Where(u => u.Id == User.IdInt)
+                    .Select(u => u.LatestAppIds).FirstOrDefaultAsync(cancellationToken) ?? [];
+
+                // Current user's organization's latest applications
+                var query = _db.CoreOrganizationApps
+                     .AsNoTracking()
+                     .Where(oa => oa.CoreOrganizationId == orgId
+                         && oa.Status <= EntityStatus.Approved
+                         && (oa.Expiry == null || oa.Expiry >= DateTimeOffset.UtcNow)
+                         && oa.CoreApp.IdentityType == rq.IdentityType)
+                     .Select(oa => new AppQueryData
+                     {
+                         Id = oa.CoreAppId,
+                         Name = oa.CoreApp.Name,
+                         LocalName = oa.LocalName,
+                         IdentityType = oa.CoreApp.IdentityType,
+                         RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
+                         WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
+                         HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
+                         Logo = oa.CoreApp.Logo
+                     });
+
+                if (ids.Count > 0)
+                {
+                    apps.AddRange(await query.Where(ou => ids.Contains(ou.Id)).Take(maxItems).ToListAsync(cancellationToken));
+                    apps = [.. apps.OrderBy(ou => ids.IndexOf(ou.Id))];
+                }
+
+                var left = maxItems - apps.Count;
+                if (left > 0)
+                {
+                    if (ids.Count > 0)
+                    {
+                        apps.AddRange(await query.Where(ou => !ids.Contains(ou.Id)).OrderByDescending(ou => ou.Id).Take(left).ToListAsync(cancellationToken));
+                    }
+                    else
+                    {
+                        apps.AddRange(await query.OrderByDescending(ou => ou.Id).Take(left).ToListAsync(cancellationToken));
+                    }
+                }
             }
+
+            // Add the default apps
+            apps.AddRange(await _db.CoreApps.Where(a => defaultApps.Contains(a.Id)).Select(a => new AppQueryData
+            {
+                Id = a.Id,
+                Name = a.Name,
+                IdentityType = a.IdentityType,
+                RequireLocalUrl = a.RequireLocalUrl,
+                WebUrl = a.WebUrl,
+                HelpUrl = a.HelpUrl,
+                Logo = a.Logo
+            }).ToListAsync(cancellationToken));
 
             return apps;
         }
@@ -374,8 +422,8 @@ namespace Platform.Server.Services
                     }).Select(oa => new AppPurchasedQueryData
                     {
                         Id = oa.Id,
-                        Name = oa.LocalName ?? "app" + oa.CoreAppId,
-                        FullName = oa.CoreApp.Name,
+                        Name = oa.CoreApp.Name,
+                        LocalName = oa.LocalName,
                         IdentityType = oa.CoreApp.IdentityType,
                         RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
                         WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,

@@ -1,4 +1,6 @@
 {
+  "addEmail": "Add email",
+  "addMobile": "Add mobile",
   "allApps": "All apps",
   "allMembers": "All members",
   "appKeyTip": "Are you sure you want to recreate the key? The previous key will be invalid after recreation. Please keep the new key safe.",
@@ -12,6 +14,7 @@
   "inviteResult": "Invitation emails have been sent to {0}. Please wait for the invitee to accept the invitation.",
   "joinedOrgs": "Joined orgs",
   "joinOrganization": "Join a new organization",
+  "leaveOrg": "Leave the organization",
   "localApis": "Custom API URLs",
   "localHelpUrl": "Custom help URL",
   "localName": "Custom name",
@@ -24,5 +27,7 @@
   "purchasedApps": "Purchased apps",
   "purchaseExists": "The selected organization has already purchased this app",
   "smarterpCore": "SmartERP Main Console",
-  "updateAvator": "Update avator"
+  "updateAvator": "Update avator",
+  "userExpiry": "User expiry",
+  "userStatus": "User status"
 }

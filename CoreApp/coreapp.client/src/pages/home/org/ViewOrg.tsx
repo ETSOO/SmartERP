@@ -1,15 +1,20 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { BusinessTax } from "@etsoo/appscript";
 import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import { app } from "../../../app/MyApp";
 import { OrgReadDto, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ViewOrg() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
+
+  // Route
+  const navigate = useNavigate();
 
   // Load data
   const loadData = React.useCallback(() => {
@@ -17,7 +22,14 @@ export default function ViewOrg() {
   }, [id]);
 
   // Labels
-  const labels = app.getLabels("edit", "editLogo", "logo", "view");
+  const labels = app.getLabels(
+    "confirmAction",
+    "edit",
+    "editLogo",
+    "leaveOrg",
+    "logo",
+    "view"
+  );
 
   // Tax
   const tax = BusinessTax.getById(app.region);
@@ -108,9 +120,42 @@ export default function ViewOrg() {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"
         },
+        {
+          data: (item) => app.getStatusLabel(item.userStatus),
+          label: "userStatus"
+        },
+        ["userExpiry", GridDataType.DateTime],
         ["creation", GridDataType.DateTime]
       ]}
       loadData={loadData}
+      actions={(data, _refresh) => (
+        <React.Fragment>
+          {!data.isOwner && (
+            <Button
+              variant="outlined"
+              startIcon={<NotInterestedIcon />}
+              onClick={() => {
+                app.notifier.confirm(
+                  labels.confirmAction.format(labels.leaveOrg),
+                  data.name,
+                  async (ok) => {
+                    if (!ok) return;
+                    const result = await app.core.orgApi.leave(id);
+                    if (result == null) return;
+                    if (result.ok) {
+                      navigate("./../");
+                      return;
+                    }
+                    app.alertResult(result);
+                  }
+                );
+              }}
+            >
+              {labels.leaveOrg}
+            </Button>
+          )}
+        </React.Fragment>
+      )}
     ></ViewPage>
   );
 }

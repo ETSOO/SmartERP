@@ -8,8 +8,11 @@ using com.etsoo.Utils.Storage;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.App;
+using Platform.Server.Dto.User;
+using Platform.Server.Endpoints.AuthCode.RQ;
 using Platform.Server.Endpoints.User.RQ;
 using PlatformShared.Database;
+using PlatformShared.Database.Models;
 using System.Buffers;
 using System.Diagnostics;
 
@@ -23,6 +26,7 @@ namespace Platform.Server.Services
     {
         readonly MyDbContext _db;
         readonly IStorage _storage;
+        readonly IAuthCodeService _authCodeService;
 
         /// <summary>
         /// Constructor
@@ -33,11 +37,163 @@ namespace Platform.Server.Services
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="storage">Storage</param>
-        public UserService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<UserService> logger, IStorage storage)
+        /// <param name="authCodeService">AuthCode service</param>
+        public UserService(MyDbContext db,
+            IMyApp app,
+            CurrentUserAccessor userAccessor,
+            ILogger<UserService> logger,
+            IStorage storage,
+            IAuthCodeService authCodeService)
             : base(app, userAccessor.UserSafe, "user", logger)
         {
             _db = db;
             _storage=storage;
+            _authCodeService = authCodeService;
+        }
+
+        /// <summary>
+        /// Add user email identifier
+        /// 添加用户电子邮件标识
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async ValueTask<IActionResult> AddEmailAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            var (result, data) = _authCodeService.CreateValidateCodeData(rq, userAgent);
+            if (!result.Ok || data == null)
+            {
+                return result;
+            }
+
+            var (resultValidate, resultData) = await _authCodeService.ValidateAsync(AuthCodeAction.UserVerificationEmailCode, data, cancellationToken);
+            if (!resultValidate.Ok || resultData == null)
+            {
+                return resultValidate;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                CoreUserId = User.IdInt,
+                Type = CoreUserIdentifierType.Email,
+                Value = resultData.OpenId.ToLower()
+            };
+
+            // Validate
+            return await AddIdentifierAsync(identifier, cancellationToken);
+        }
+
+        /// <summary>
+        /// Add user identifier
+        /// 添加用户标识
+        /// </summary>
+        /// <param name="identifier">Identifier data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<IActionResult> AddIdentifierAsync(CoreUserIdentifier identifier, CancellationToken cancellationToken = default)
+        {
+            // Check the existence of the identifier
+            var id = await _db.CoreUserIdentifiers.AsNoTracking()
+                .Where(d => d.Type == identifier.Type && d.Value == identifier.Value)
+                .Select(d => d.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (id > 0)
+            {
+                // Update
+                await _db.CoreUserIdentifiers
+                    .Where(d => d.Id == id)
+                    .ExecuteUpdateAsync(d => d.SetProperty(d => d.CoreUserId, identifier.CoreUserId), cancellationToken);
+            }
+            else
+            {
+                // Add
+                _db.CoreUserIdentifiers.Add(identifier);
+
+                // Save changes
+                await _db.SaveChangesAsync(cancellationToken);
+
+                id = identifier.Id;
+            }
+
+            return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// Add user mobile identifier
+        /// 添加用户移动电话标识
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="userAgent">User agent</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async ValueTask<IActionResult> AddMobileAsync(CodeValidateRQ rq, string? userAgent, CancellationToken cancellationToken = default)
+        {
+            var (result, data) = _authCodeService.CreateValidateCodeData(rq, userAgent);
+            if (!result.Ok || data == null)
+            {
+                return result;
+            }
+
+            var (resultValidate, resultData) = await _authCodeService.ValidateAsync(AuthCodeAction.UserVerificationSMSCode, data, cancellationToken);
+            if (!resultValidate.Ok || resultData == null)
+            {
+                return resultValidate;
+            }
+
+            // Identifier
+            var identifier = new CoreUserIdentifier
+            {
+                CoreUserId = User.IdInt,
+                Type = CoreUserIdentifierType.Mobile,
+                Value = resultData.OpenId
+            };
+
+            // Validate
+            return await AddIdentifierAsync(identifier, cancellationToken);
+        }
+
+        /// <summary>
+        /// All user identifiers
+        /// 获取所有用户标识
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<UserIdentifierData[]> AllIdentifiersAsync(CancellationToken cancellationToken = default)
+        {
+            return _db.CoreUserIdentifiers.AsNoTracking()
+                .Where(d => d.CoreUserId == User.IdInt)
+                .Select(d => new UserIdentifierData
+                {
+                    Id = d.Id,
+                    Type = d.Type,
+                    Value = MyDbFunctions.HideData(d.Value, '@'),
+                    Creation = d.Creation
+                })
+                .ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// All user identifiers
+        /// 获取所有用户标识
+        /// </summary>
+        /// <param name="writer">HTTP writer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task AllIdentifiersAsync(IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            await _db.CoreUserIdentifiers.AsNoTracking()
+                .Where(d => d.CoreUserId == User.IdInt)
+                .Select(d => new UserIdentifierData
+                {
+                    Id = d.Id,
+                    Type = d.Type,
+                    Value = MyDbFunctions.HideData(d.Value, '@'),
+                    Creation = d.Creation
+                })
+                .ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -83,6 +239,26 @@ namespace Platform.Server.Services
             {
                 Logger.LogInformation("AuditHistoryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
+        }
+
+        /// <summary>
+        /// Delete user identifier
+        /// 删除用户标识
+        /// </summary>
+        /// <param name="id">Identifier id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteIdentifierAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var affacted = await _db.CoreUserIdentifiers.Where(d => d.Id == id
+                    && d.CoreUserId == User.IdInt
+                    && (d.Type > CoreUserIdentifierType.Mobile || _db.CoreUserIdentifiers.Any(sub => sub.CoreUserId == User.IdInt && sub.Type == d.Type && sub.Id != id)))
+                .ExecuteDeleteAsync(cancellationToken);
+            if (affacted == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ services:
     # name: 'etsoo', db: 'smarterp', user: 'smarterp'
     # 司友云ERP(SmartERP)的 Postgres 数据库
     postgres:
-        image: postgres:17.0-alpine
+        image: postgres:17.2-alpine
         container_name: postgres.app.local
         restart: unless-stopped
         environment:
@@ -34,6 +34,18 @@ services:
             - "5501:5501"
         volumes:
             - ./data/pgadmin:/var/lib/pgadmin
+
+    # RabbitMQ for message queue
+    # 消息队列的 RabbitMQ
+    rabbitmq:
+        image: rabbitmq:4.0.5-management-alpine
+        container_name: rabbitmq.app.local
+        restart: unless-stopped
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - ./data/rabbitmq:/var/lib/rabbitmq
 
     # Etsoo Local setup
     # 亿速思维本地设置

@@ -34,14 +34,14 @@ namespace Platform.Server.Services
         static List<AuthCodeActionItem> Actions =>
         [
             new(AuthCodeAction.UserRegistrationSMSCode, Properties.Resources.UserRegistrationSMSCode, 10, RandStringKind.Digit, 6),
-            new(AuthCodeAction.UserRegistrationEmailCode, Properties.Resources.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailRegistration.cshtml"),
+            new(AuthCodeAction.UserRegistrationEmailCode, Properties.Resources.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailRegistration.cshtml"),
             new(AuthCodeAction.UserCallbackSMSCode, Properties.Resources.UserCallbackSMSCode, 10, RandStringKind.Digit, 6),
-            new(AuthCodeAction.UserCallbackEmailCode, Properties.Resources.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailCallback.cshtml"),
-            new(AuthCodeAction.UserVerificationSMSCode, Properties.Resources.UserVerificationSMSCode, 10, RandStringKind.Digit, 6),
-            new(AuthCodeAction.UserVerificationEmailCode, Properties.Resources.UserVerificationEmailCode, 30, RandStringKind.Digit, 6, "/Templates/EmailVerification.cshtml"),
+            new(AuthCodeAction.UserCallbackEmailCode, Properties.Resources.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailCallback.cshtml"),
+            new(AuthCodeAction.UserVerificationSMSCode, Properties.Resources.UserVerificationSMSCode, 10, RandStringKind.Digit, 6, true),
+            new(AuthCodeAction.UserVerificationEmailCode, Properties.Resources.UserVerificationEmailCode, 30, RandStringKind.Digit, 6, true, "/Templates/EmailVerification.cshtml"),
 
             // Member invitation, 3 days = 72 hours = 4320 minutes
-            new(AuthCodeAction.MemberInvitationEmailCode, Properties.Resources.MemberInvitationEmailCode, 4320, RandStringKind.DigitAndLetter, 16, "/Templates/EmailMemberInvitation.cshtml")
+            new(AuthCodeAction.MemberInvitationEmailCode, Properties.Resources.MemberInvitationEmailCode, 4320, RandStringKind.DigitAndLetter, 16, true, "/Templates/EmailMemberInvitation.cshtml")
         ];
 
         readonly MyDbContext _db;
@@ -175,6 +175,12 @@ namespace Platform.Server.Services
             if (action == null || action.Template == null)
             {
                 return ApplicationErrors.NoValidData.AsResult("Action");
+            }
+
+            // Login required
+            if (action.LoginRequired && User == null)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
             }
 
             // Check frequency
@@ -315,6 +321,12 @@ namespace Platform.Server.Services
             if (action == null)
             {
                 return ApplicationErrors.NoValidData.AsResult("Action");
+            }
+
+            // Login required
+            if (action.LoginRequired && User == null)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
             }
 
             var mobileString = mobile.ToInternationalFormat();
