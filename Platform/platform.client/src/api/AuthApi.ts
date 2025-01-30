@@ -1,8 +1,16 @@
-import { IApiPayload, AuthApi as AuthApiBase, LoginRQ } from "@etsoo/appscript";
+import {
+  IApiPayload,
+  AuthApi as AuthApiBase,
+  LoginRQ,
+  LoginInputRQ
+} from "@etsoo/appscript";
 import { SmartERPLoginResult } from "@etsoo/materialui";
 import { TokenResultPayload } from "./dto/auth/TokenResultPayload";
 import { RegisterUserData } from "./dto/auth/RegisterUserData";
-import { CompleteRegisterRQ } from "./rq/auth/CompleteRegisterRQ";
+import {
+  CompleteRegisterInputRQ,
+  CompleteRegisterRQ
+} from "./rq/auth/CompleteRegisterRQ";
 import { ValidateRQ } from "@etsoo/smarterp-core";
 
 /**
@@ -16,11 +24,13 @@ export class AuthApi extends AuthApiBase {
    * @returns Result
    */
   async completeRegister(
-    rq: CompleteRegisterRQ,
+    rq: CompleteRegisterInputRQ,
     payload?: IApiPayload<SmartERPLoginResult>
   ): Promise<[SmartERPLoginResult | undefined, string | null]> {
+    const { deviceId, region } = this.app;
+    const data: CompleteRegisterRQ = { ...rq, deviceId, region };
     payload ??= {};
-    const result = await this.api.put("Auth/CompleteRegister", rq, payload);
+    const result = await this.api.put("Auth/CompleteRegister", data, payload);
     const refreshToken = result?.ok
       ? this.app.getResponseToken(
           payload.response,
@@ -68,8 +78,15 @@ export class AuthApi extends AuthApiBase {
    * @param payload Payload
    * @returns Result
    */
-  login(rq: LoginRQ, payload?: IApiPayload<SmartERPLoginResult>) {
-    return this.loginBase(rq, payload);
+  login(rq: LoginInputRQ, payload?: IApiPayload<SmartERPLoginResult>) {
+    const { deviceId, region } = this.app;
+    const data: LoginRQ = {
+      ...rq,
+      deviceId,
+      region,
+      timezone: this.app.getTimeZone()
+    };
+    return this.loginBase(data, payload);
   }
 
   /**

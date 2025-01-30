@@ -227,9 +227,7 @@ export namespace AppUtils {
           {
             userRole,
             emails: emails.toUnique(),
-            message,
-            region: app.region,
-            timeZone: app.getTimeZone()
+            message
           },
           { showLoading: false }
         );

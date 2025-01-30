@@ -61,16 +61,11 @@ export default function RegisterVerify() {
     let result: IdActionResult<string> | undefined;
     if (isEmail) {
       result = await app.authCodeApi.sendEmail({
-        deviceId: app.deviceId,
-        region: app.region,
         email: usernameDecoded,
-        action: AuthCodeAction.UserCallbackEmailCode,
-        timezone: app.getTimeZone()
+        action: AuthCodeAction.UserCallbackEmailCode
       });
     } else {
       result = await app.authCodeApi.sendSMS({
-        deviceId: app.deviceId,
-        region: app.region,
         mobile: usernameDecoded,
         action: AuthCodeAction.UserCallbackSMSCode
       });

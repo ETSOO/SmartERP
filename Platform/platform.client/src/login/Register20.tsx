@@ -51,10 +51,8 @@ export default function Register20() {
 
     // Send verification code
     const result = await app.authCodeApi.sendSMS({
-      deviceId: app.deviceId,
       action: AuthCodeAction.UserRegistrationSMSCode,
-      mobile: app.encrypt(mobile),
-      region: app.region
+      mobile: app.encrypt(mobile)
     });
 
     if (result == null) return 0;

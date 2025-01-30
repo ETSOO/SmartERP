@@ -1,14 +1,9 @@
 import { AuthRequest } from "@etsoo/appscript";
 
 /**
- * Complete register request data
+ * Complete register input request data
  */
-export type CompleteRegisterRQ = {
-  /**
-   * Device id
-   */
-  deviceId: string;
-
+export type CompleteRegisterInputRQ = {
   /**
    * Password
    */
@@ -30,12 +25,22 @@ export type CompleteRegisterRQ = {
   givenName?: string;
 
   /**
-   * Country or region
-   */
-  region: string;
-
-  /**
    * Authorization request data
    */
   auth?: AuthRequest;
+};
+
+/**
+ * Complete register request data
+ */
+export type CompleteRegisterRQ = CompleteRegisterInputRQ & {
+  /**
+   * Device id
+   */
+  deviceId: string;
+
+  /**
+   * Country or region
+   */
+  region: string;
 };

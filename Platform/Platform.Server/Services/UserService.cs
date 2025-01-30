@@ -25,6 +25,7 @@ namespace Platform.Server.Services
     public class UserService : CommonUserService, IUserService
     {
         readonly MyDbContext _db;
+        readonly LogDbContext _logDb;
         readonly IStorage _storage;
         readonly IAuthCodeService _authCodeService;
 
@@ -39,6 +40,7 @@ namespace Platform.Server.Services
         /// <param name="storage">Storage</param>
         /// <param name="authCodeService">AuthCode service</param>
         public UserService(MyDbContext db,
+            LogDbContext logDb,
             IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<UserService> logger,
@@ -47,6 +49,7 @@ namespace Platform.Server.Services
             : base(app, userAccessor.UserSafe, "user", logger)
         {
             _db = db;
+            _logDb = logDb;
             _storage=storage;
             _authCodeService = authCodeService;
         }
@@ -206,8 +209,8 @@ namespace Platform.Server.Services
         /// <returns>Task</returns>
         public async Task AuditHistoryAsync(AuditHistoryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var (hasContent, commandText) = await _db.CoreLogs.AsNoTracking()
-                .Where(d => d.CoreUserId == User.IdInt)
+            var (hasContent, commandText) = await _logDb.CoreLogs.AsNoTracking()
+                .Where(d => d.UserId == User.IdInt)
                 .QueryEtsoo(rq, d => d.Id, null, (q) =>
                 {
                     if (rq.Keyword?.Length > 1)
@@ -217,7 +220,12 @@ namespace Platform.Server.Services
 
                     if (rq.DeviceId.HasValue)
                     {
-                        q = q.Where(d => d.DeviceId ==  rq.DeviceId);
+                        q = q.Where(d => d.DeviceId == rq.DeviceId);
+                    }
+
+                    if (rq.Kind?.Length > 1)
+                    {
+                        q = q.Where(d => d.Kind == rq.Kind);
                     }
 
                     if (rq.CreationStart.HasValue)
@@ -232,7 +240,7 @@ namespace Platform.Server.Services
 
                     return q;
                 })
-                .Select(d => new { d.Id, d.Title, d.DeviceName, d.Data, d.Creation })
+                .Select(d => new { d.Id, d.Kind, d.Title, d.Data, d.Culture, d.Creation })
                 .ToJsonAsync(writer, cancellationToken: cancellationToken);
 
             if (_db.IsSensitiveDataLoggingEnabled)

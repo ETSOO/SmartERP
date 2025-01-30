@@ -34,13 +34,13 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
         /// Country or region code, like CN = China
         /// 国家或地区编号，如 CN = 中国
         /// </summary>
-        public string? Region { get; init; }
+        public required string Region { get; init; }
 
         /// <summary>
         /// Current's time zone
         /// 所在时区
         /// </summary>
-        public string? TimeZone { get; init; }
+        public required string TimeZone { get; init; }
 
         /// <summary>
         /// Validate the model
@@ -59,12 +59,12 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
                 return ApplicationErrors.NoValidData.AsResult(nameof(Email));
             }
 
-            if (Region != null && Region.Length is not 2)
+            if (Region.Length is not 2)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Region));
             }
 
-            if (TimeZone != null && !LocalizationUtils.IsTimeZone(TimeZone))
+            if (!LocalizationUtils.IsTimeZone(TimeZone))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(TimeZone));
             }

@@ -2,7 +2,6 @@ using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.DI;
 using com.etsoo.GarnetClient;
 using com.etsoo.ServiceApp.Application;
 using com.etsoo.ServiceApp.SmartERP;
@@ -66,7 +65,7 @@ if (string.IsNullOrEmpty(connectonString))
 }
 
 // services.AddDbContextPool
-services.AddDbContext<MyDbContext>((provider, options) =>
+services.AddDbContext<LogDbContext>((provider, options) =>
 {
     options.UseNpgsql(connectonString);
 
@@ -147,9 +146,6 @@ else
 {
     services.AddDistributedMemoryCache();
 }
-
-// Fire and forget
-services.AddSingleton<IFireAndForgetService, FireAndForgetService>();
 
 // Configue CORS
 var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray();

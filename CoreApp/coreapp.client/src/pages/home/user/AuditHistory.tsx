@@ -26,6 +26,7 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
+  kind: "string",
   deviceId: "number",
   creationStart: "date",
   creationEnd: "date"
@@ -39,7 +40,8 @@ export default function LoginHistory() {
     "device",
     "endDate",
     "startDate",
-    "title"
+    "title",
+    "type"
   );
 
   // Refs
@@ -69,6 +71,12 @@ export default function LoginHistory() {
           name="keyword"
           minChars={2}
           defaultValue={data.keyword}
+        />,
+        <SearchField
+          label={labels.type}
+          name="kind"
+          minChars={2}
+          defaultValue={data.kind}
         />,
         <Tiplist<DeviceListDto>
           label={labels.device}
@@ -130,7 +138,6 @@ export default function LoginHistory() {
           renderProps: app.getDateFormatProps()
         },
         { field: "title", header: labels.title },
-        { field: "deviceName", header: labels.device, width: 200 },
         {
           width: DefaultUI.Widths.icon1,
           header: labels.actions,
@@ -178,7 +185,7 @@ export default function LoginHistory() {
               JSON data
             </DialogButton>,
             <React.Fragment>
-              <Typography variant="caption">{data.deviceName}</Typography>
+              <Typography variant="caption">{data.kind}</Typography>
             </React.Fragment>
           ];
         })

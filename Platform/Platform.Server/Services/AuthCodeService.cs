@@ -3,22 +3,22 @@ using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.SMS;
-using com.etsoo.SMTP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
 using com.etsoo.Web;
 using Microsoft.EntityFrameworkCore;
-using MimeKit;
-using MimeKit.Text;
 using Platform.Server.Application;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Endpoints.AuthCode.RQ;
 using Platform.Server.Templates;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Globalization;
 using System.Net;
+using System.Net.Mail;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
@@ -45,10 +45,9 @@ namespace Platform.Server.Services
         ];
 
         readonly MyDbContext _db;
-        readonly ISMSClient _smsClient;
-        readonly ISMTPClient _smtpClient;
         readonly string _root;
         readonly IPAddress _ip;
+        readonly IQueueService _queueService;
 
         /// <summary>
         /// Constructor
@@ -59,17 +58,16 @@ namespace Platform.Server.Services
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="smsClient">SMS client</param>
-        /// <param name="smtpClient">SMTP client</param>
         /// <param name="host">Host environment</param>
+        /// <param name="queueService">Queue service</param>
         public AuthCodeService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthCodeService> logger,
-            ISMSClient smsClient, ISMTPClient smtpClient, IWebHostEnvironment host)
+            IWebHostEnvironment host, IQueueService queueService)
             : base(app, userAccessor.User, "auth_code", logger)
         {
             _db = db;
-            _smsClient = smsClient;
-            _smtpClient = smtpClient;
             _root = host.ContentRootPath;
             _ip = userAccessor.Ip;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -165,7 +163,7 @@ namespace Platform.Server.Services
         public async ValueTask<IActionResult> SendEmailAsync(SendEmailData data, Func<AuthCodeEmailTemplateView, (AuthCodeEmailTemplateView, string?)>? enhancer = null, CancellationToken cancellationToken = default)
         {
             var email = data.Email;
-            if (!MailboxAddress.TryParse(email, out var emailAddress))
+            if (!MailAddress.TryCreate(email, out var emailAddress))
             {
                 return ApplicationErrors.InvalidEmail.AsResult();
             }
@@ -221,15 +219,14 @@ namespace Platform.Server.Services
                 var template = await RazorUtils.RenderAsync(file, dataModel);
 
                 // Message
-                var message = new MimeMessage
+                var message = new SendEmailMessage
                 {
-                    Subject = dataModel.Subject,
-                    Body = new TextPart(TextFormat.Html) { Text = template }
+                    Subject = dataModel.Subject ?? action.Name,
+                    Body = template,
+                    To = [emailAddress.ToString()]
                 };
-                message.To.Add(emailAddress);
 
-                // Send
-                await _smtpClient.SendAsync(message, cancellationToken);
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.SendEmailMessage, cancellationToken);
 
                 // Save
                 result = await AddAuthCodeAsync(authCode, cancellationToken);
@@ -310,7 +307,8 @@ namespace Platform.Server.Services
         public async ValueTask<IActionResult> SendSMSAsync(SendSMSData data, Action<CoreAuthCode>? enhancer = null, CancellationToken cancellationToken = default)
         {
             // Mobile
-            var mobile = AddressRegion.CreatePhone(data.Mobile, data.Region ?? _smsClient.Region.Id);
+            var region = data.Region;
+            var mobile = AddressRegion.CreatePhone(data.Mobile, region);
             if (mobile == null)
             {
                 return ApplicationErrors.InvalidMobile.AsResult("Mobile");
@@ -344,34 +342,18 @@ namespace Platform.Server.Services
             // Enhance data
             enhancer?.Invoke(authCode);
 
-            // Template
-            var template = _smsClient.GetTemplate(TemplateKind.Code, region: data.Region, language: CultureInfo.CurrentCulture.Name);
-            if (template == null)
-            {
-                return ApplicationErrors.NoValidData.AsResult("Template");
-            }
-
             // Send
-            var smsResult = await _smsClient.SendCodeAsync(mobile, code, template, cancellationToken);
-
-            if (smsResult.Ok)
+            await _queueService.PushAsync(new SendSMSMessage
             {
-                // Save
-                result = await AddAuthCodeAsync(authCode, cancellationToken);
-            }
-            else
-            {
-                // Log for trace
-                var exception = new Exception(smsResult.Title);
-                exception.Data.Add("Model", JsonSerializer.Serialize(data));
-                exception.Data.Add("Template", JsonSerializer.Serialize(template));
-                exception.Data.Add("SMSResult", JsonSerializer.Serialize(smsResult));
+                Kind = SendSMSMessage.KindCode,
+                Culture = CultureInfo.CurrentCulture.Name,
+                Region = region,
+                To = [mobile],
+                Body = code
+            }, PlatformSharedContext.Default.SendSMSMessage, cancellationToken);
 
-                LogException(exception);
-
-                // New result
-                result = ApplicationErrors.CodeSendingFailed.AsResult();
-            }
+            // Save
+            result = await AddAuthCodeAsync(authCode, cancellationToken);
 
             // Return
             return result;

@@ -28,12 +28,6 @@ namespace PlatformShared.Database
         public required DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
 
         /// <summary>
-        /// Core logs
-        /// 核心日志
-        /// </summary>
-        public required DbSet<CoreLog> CoreLogs { get; set; }
-
-        /// <summary>
         /// Core organizations
         /// 核心机构
         /// </summary>
@@ -179,57 +173,6 @@ namespace PlatformShared.Database
                 entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserAuthCodes)
                     .HasForeignKey(d => d.CoreUserId)
                     .HasConstraintName("core_auth_code_core_user_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreLog>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_log_pkey");
-
-                entity.ToTable("core_log");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasColumnName("id");
-                entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-                entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Culture)
-                    .IsRequired()
-                    .HasMaxLength(10)
-                    .HasColumnName("culture");
-                entity.Property(e => e.Data)
-                    .HasColumnType("jsonb")
-                    .HasColumnName("data");
-                entity.Property(e => e.DeviceId).HasColumnName("device_id");
-                entity.Property(e => e.DeviceName)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnName("device_name");
-                entity.Property(e => e.Ip)
-                    .IsRequired()
-                    .HasMaxLength(45)
-                    .HasConversion<IPAddressToStringConverter>()
-                    .HasColumnName("ip");
-                entity.Property(e => e.Title)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("title");
-
-                entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreLogs)
-                    .HasForeignKey(d => d.CoreOrganizationId)
-                    .HasConstraintName("core_log_core_organization_id_fkey");
-
-                entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreLogs)
-                    .HasForeignKey(d => d.CoreUserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_log_core_user_id_fkey");
-
-                entity.HasOne(d => d.Device).WithMany(p => p.CoreLogs)
-                    .HasForeignKey(d => d.DeviceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_log_device_id_fkey");
             });
 
             modelBuilder.Entity<CoreOrganization>(entity =>
@@ -457,7 +400,6 @@ namespace PlatformShared.Database
                     .HasMaxLength(256)
                     .HasColumnName("avatar");
                 entity.Property(e => e.FrozenTime)
-                    .HasColumnType("timestamp without time zone")
                     .HasColumnName("frozen_time");
                 entity.Property(e => e.Step)
                     .HasColumnName("step");

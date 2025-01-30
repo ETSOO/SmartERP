@@ -33,7 +33,7 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
         /// Country or region code, like CN = China
         /// 国家或地区编号，如 CN = 中国
         /// </summary>
-        public string? Region { get; init; }
+        public required string Region { get; init; }
 
         /// <summary>
         /// Validate the model
@@ -52,7 +52,7 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
                 return ApplicationErrors.NoValidData.AsResult(nameof(Mobile));
             }
 
-            if (Region != null && Region.Length is not 2)
+            if (Region.Length is not 2)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Region));
             }

@@ -11,9 +11,8 @@ using com.etsoo.Database;
 using com.etsoo.DI;
 using com.etsoo.GarnetClient;
 using com.etsoo.GoogleApi;
+using com.etsoo.MessageQueue.LocalRabbitMQ;
 using com.etsoo.MicrosoftApi;
-using com.etsoo.SendCloudSDK;
-using com.etsoo.SMTP;
 using com.etsoo.ThirdPartyExtentions.Minio;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
@@ -37,6 +36,7 @@ using Platform.Server.Endpoints.User;
 using Platform.Server.OAuth2;
 using Platform.Server.Services;
 using PlatformShared.Database;
+using PlatformShared.Extentions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -106,10 +106,27 @@ if (string.IsNullOrEmpty(connectonString))
     throw new Exception("SmartERP connection string not found");
 }
 
+var logConnectionString = configuration.GetConnectionString("SmartERPLog");
+if (string.IsNullOrEmpty(logConnectionString))
+{
+    throw new Exception("SmartERPLog connection string not found");
+}
+
 // services.AddDbContextPool
 services.AddDbContext<MyDbContext>((provider, options) =>
 {
     options.UseNpgsql(connectonString);
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
+
+services.AddDbContext<LogDbContext>((provider, options) =>
+{
+    options.UseNpgsql(logConnectionString);
 
     if (builder.Environment.IsDevelopment())
     {
@@ -136,19 +153,6 @@ services.AddSingleton<IMyApp>(erp);
 
 // It's done by JwtService of MyApp
 // services.AddAuthentication().AddJwtBearer();
-
-// SMS client
-var smsClientSection = erpSection.GetSection("SMS");
-if (!smsClientSection.Exists())
-{
-    throw new Exception("SMS configuration not found");
-}
-services.AddSendCloudClient(smsClientSection);
-
-// SMTP client
-var smtpOptions = erpSection.GetSection("SMTP").Get<SMTPClientOptions>() ?? throw new Exception("SMTP configuration not found");
-var smtpClient = new SMTPClient(smtpOptions);
-services.AddSingleton<ISMTPClient>(smtpClient);
 
 // Storage
 var storageS3Section = erpSection.GetSection("StorageS3");
@@ -224,9 +228,6 @@ services.AddSwaggerGen(options =>
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 
-// Rate limiter
-// https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-8.0
-
 // Cache
 var redis = configuration.GetConnectionString("SmartERPRedis");
 if (!string.IsNullOrEmpty(redis))
@@ -243,6 +244,12 @@ else
 
 // Fire and forget
 services.AddSingleton<IFireAndForgetService, FireAndForgetService>();
+
+// Add message queue
+var mqOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer configuration not found");
+services.AddLocalRabbitMQProducer(mqOptions);
+
+services.AddSingleton<IQueueService, QueueService>();
 
 // Configue CORS
 // Cors for internal (SmartERP) APIs

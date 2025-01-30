@@ -1,0 +1,48 @@
+﻿@using WorkerCenter.Templates;
+@{ 
+    var data = (@Model as ActionNoticeData)!;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@data.Subject</title>
+</head>
+<body>
+    @if (data.Language.StartsWith("zh-"))
+    {
+        <p>尊敬的用户 <b>@data.UserName</b>：</p>
+        @if (!string.IsNullOrEmpty(data.Action))
+        {
+            <p>@data.Action</p>
+        }
+        <p>如果这不是您本人的操作，请第一时间联系我们进行干预！</p>
+        <p>IP地址：<b>@data.IP</b></p>
+        <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+        <table border="0" width="100%">
+            <tr>
+                <td valign="middle"><a href="https://www.etsoo.com/"><img src="https://cn.etsoo.com/etsoo.png" alt="ETSOO Logo" height="42" /></a></td>
+                <td valign="middle" align="right"><small>亿速思维 - 司友云ERP<br />为中小企业技术赋能</small></td>
+            </tr>
+        </table>
+    }
+    else
+    {
+        <p>Dear <b>@data.UserName</b>,</p>
+        @if (!string.IsNullOrEmpty(data.Action))
+        {
+            <p>@data.Action</p>
+        }
+        <p>If this is not your operation, please contact us immediately for intervention!</p>
+        <p>IP address: <b>@data.IP</b></p>
+        <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+        <table border="0" width="100%">
+            <tr>
+                <td valign="middle"><a href="https://www.etsoo.com/"><img src="https://cn.etsoo.com/etsoo.png" alt="ETSOO Logo" height="42" /></a></td>
+                <td valign="middle" align="right"><small>ETSOO - SmartERP<br /><b>E</b>mpowering <b>T</b>echnology for <b>S</b>MEs</small></td>
+            </tr>
+        </table>
+    }
+</body>
+</html>

@@ -42,10 +42,8 @@ export default function AddMobile() {
 
     // Send verification code
     const result = await app.core.authCodeApi.sendSMS({
-      deviceId: app.deviceId,
       action: AuthCodeAction.UserVerificationSMSCode,
-      mobile: app.encrypt(mobile),
-      region: app.region
+      mobile: app.encrypt(mobile)
     });
 
     if (result == null) return 0;

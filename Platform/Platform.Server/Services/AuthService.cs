@@ -14,16 +14,19 @@ using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
 using Microsoft.EntityFrameworkCore;
-using MimeKit;
 using Npgsql;
 using Platform.Server.Application;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Endpoints.Auth.RQ;
 using Platform.Server.Endpoints.AuthCode.RQ;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Globalization;
 using System.Net;
+using System.Net.Mail;
 using System.Text;
 using System.Text.Json;
 using System.Web;
@@ -47,6 +50,12 @@ namespace Platform.Server.Services
             public required string[] ApiUrls { get; init; }
         }
 
+        private record MoreData
+        {
+            public required int DeviceId { get; init; }
+            public required int? OrganizationId { get; init; }
+        }
+
         private const string BearerTokenType = "Bearer";
 
         // 检查用户登录编号
@@ -63,7 +72,7 @@ namespace Platform.Server.Services
             if (type == CoreUserIdentifierType.Email)
             {
                 // Try parse
-                if (MailboxAddress.TryParse(id, out var emailAddress))
+                if (MailAddress.TryCreate(id, out var emailAddress))
                 {
                     id = emailAddress.Address;
                 }
@@ -96,6 +105,7 @@ namespace Platform.Server.Services
         readonly MinUserToken? _regUser;
         readonly IPublicService _publicService;
         readonly IAuthCodeService _authCodeService;
+        readonly IQueueService _queueService;
 
         /// <summary>
         /// Constructor
@@ -109,8 +119,10 @@ namespace Platform.Server.Services
         /// <param name="httpClientFactory">HTTP client factory</param>
         /// <param name="publicService">Public service</param>
         /// <param name="authCodeService">Auth code service</param>
+        /// <param name="queueService">Queue service</param>
         public AuthService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthService> logger,
-            IStorage storage, IHttpClientFactory httpClientFactory, IPublicService publicService, IAuthCodeService authCodeService)
+            IStorage storage, IHttpClientFactory httpClientFactory, IPublicService publicService, IAuthCodeService authCodeService,
+            IQueueService queueService)
             : base(app, userAccessor.User, "auth", logger)
         {
             _db = db;
@@ -121,6 +133,7 @@ namespace Platform.Server.Services
             _regUser = userAccessor.User == null ? userAccessor.CreateUserFromAuthorization<MinUserToken>(app.AuthService, MyAppConstants.RegistrationTokenAudience, MyAppConstants.RegistrationTokenScheme) : null;
             _publicService = publicService;
             _authCodeService = authCodeService;
+            _queueService = queueService;
         }
 
         private async Task<AppData?> AuthGetAppSecretAsync(int appId, string appKey, CancellationToken cancellationToken)
@@ -489,7 +502,9 @@ namespace Platform.Server.Services
             _db.CoreUsers.Update(user);
             await _db.SaveChangesAsync(cancellationToken);
 
-            return await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, cancellationToken);
+            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, cancellationToken);
+
+            return (loginResult, refreshToken);
         }
 
         /// <summary>
@@ -552,7 +567,7 @@ namespace Platform.Server.Services
             var user = await _db.CoreUsers
                 .AsNoTracking()
                 .Where(u => u.Id == User.IdInt)
-                .Select(u => new LoginUserWithPassword { Id = u.Id, Password = u.Password, Status = u.Status, FrozenTime = u.FrozenTime, Step = u.Step })
+                .Select(u => new LoginUserWithPassword { Id = u.Id, Name = u.Name, Password = u.Password, Status = u.Status, FrozenTime = u.FrozenTime, Step = u.Step })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (user == null)
@@ -576,6 +591,12 @@ namespace Platform.Server.Services
             // Update password
             var newPassword = await App.HashPasswordAsync(user.Id + data.Password);
             await _db.CoreUsers.AsNoTracking().Where(u => u.Id == user.Id).ExecuteUpdateAsync(u => u.SetProperty(u => u.Password, newPassword), cancellationToken);
+
+            // Log
+            await _queueService.PushAsync(new ChangePasswordMessage
+            {
+                Data = User.CreateMessageData()
+            }, PlatformSharedContext.Default.ChangePasswordMessage, cancellationToken);
 
             return ActionResult.Success;
         }
@@ -620,6 +641,21 @@ namespace Platform.Server.Services
             var hashedPassword = await App.HashPasswordAsync(login.Id + password);
             if (string.IsNullOrEmpty(hashedPassword) || !hashedPassword.Equals(login.Password))
             {
+                // Log
+                await _queueService.PushAsync(new LoginFailedMessage
+                {
+                    Data = new CommonMessageData
+                    {
+                        Culture = CultureInfo.CurrentCulture.Name,
+                        DeviceId = null,
+                        IP = _ip.ToString(),
+                        UserId = login.Id,
+                        UserName = login.Name,
+                        OrganizationId = null
+                    },
+                    Reason = "Password"
+                }, PlatformSharedContext.Default.LoginFailedMessage, cancellationToken);
+
                 return (ApplicationErrors.NoPasswordMatch.AsResult(), null);
             }
 
@@ -646,7 +682,42 @@ namespace Platform.Server.Services
 
             var deviceName = cd.Value.Parser.ToShortName();
 
-            return await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, cancellationToken);
+            var (loginResult, refreshToken, moreData) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, cancellationToken);
+
+            if (loginResult.Ok)
+            {
+                // Log
+                await _queueService.PushAsync(new LoginSuccessMessage
+                {
+                    Data = new CommonMessageData
+                    {
+                        Culture = CultureInfo.CurrentCulture.Name,
+                        DeviceId = moreData?.DeviceId,
+                        IP = _ip.ToString(),
+                        UserId = login.Id,
+                        UserName = login.Name,
+                        OrganizationId = moreData?.OrganizationId
+                    }
+                }, PlatformSharedContext.Default.LoginSuccessMessage, cancellationToken);
+            }
+            else
+            {
+                await _queueService.PushAsync(new LoginFailedMessage
+                {
+                    Data = new CommonMessageData
+                    {
+                        Culture = CultureInfo.CurrentCulture.Name,
+                        DeviceId = moreData?.DeviceId,
+                        IP = _ip.ToString(),
+                        UserId = login.Id,
+                        UserName = login.Name,
+                        OrganizationId = moreData?.OrganizationId
+                    },
+                    Reason = loginResult.Type
+                }, PlatformSharedContext.Default.LoginFailedMessage, cancellationToken);
+            }
+
+            return (loginResult, refreshToken);
         }
 
         private async Task<(ActionResult result, CurrentUser? user, TokenQueryData? data)> LoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, IEnumerable<string>? authScopes, CancellationToken cancellationToken)
@@ -772,14 +843,20 @@ namespace Platform.Server.Services
         // API Refresh token - 接口刷新令牌
         // Log in from OAuth2 client - 从OAuth2客户端登录
         // Sign up from OAuth2 client - 从OAuth2客户端注册
-        private async Task<(ActionResult result, string? refreshToken)> CompleteLoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, AuthRequest? auth, CancellationToken cancellationToken)
+        private async Task<(ActionResult result, string? refreshToken, MoreData? moreData)> CompleteLoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, AuthRequest? auth, CancellationToken cancellationToken)
         {
             var (result, tokenUser, data) = await LoginAsync(user, clientId, deviceName, deviceType, region, organizationId, fromOrganizationId, auth?.Scopes, cancellationToken);
 
             if (!result.Ok || tokenUser == null || data == null)
             {
-                return (result, null);
+                return (result, null, null);
             }
+
+            var moreData = new MoreData
+            {
+                DeviceId = tokenUser.DeviceIdInt,
+                OrganizationId = tokenUser.OrganizationInt > 0 ? tokenUser.OrganizationInt : null
+            };
 
             if (auth == null)
             {
@@ -816,12 +893,12 @@ namespace Platform.Server.Services
                 // Save
                 publicData.SaveTo(result);
 
-                return (result, refreshToken);
+                return (result, refreshToken, moreData);
             }
             else
             {
                 var uri = await AuthRequestAsync(auth, tokenUser, data, cancellationToken);
-                return (result, uri);
+                return (result, uri, moreData);
             }
         }
 
@@ -954,7 +1031,7 @@ namespace Platform.Server.Services
             var data = await _db.CoreUserIdentifiers
                 .AsNoTracking()
                 .Where(i => i.Type == type && i.Value == id)
-                .Select(i => new LoginUserWithPassword { Id = i.CoreUser.Id, Password = i.CoreUser.Password, Status = i.CoreUser.Status, FrozenTime = i.CoreUser.FrozenTime, Step = i.CoreUser.Step })
+                .Select(i => new LoginUserWithPassword { Id = i.CoreUser.Id, Name = i.CoreUser.Name, Password = i.CoreUser.Password, Status = i.CoreUser.Status, FrozenTime = i.CoreUser.FrozenTime, Step = i.CoreUser.Step })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (data == null)
@@ -1131,7 +1208,9 @@ namespace Platform.Server.Services
             var user = tokenData.CoreUser;
             var td = tokenData.Data.Data;
 
-            return await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
+            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
+
+            return (loginResult, refreshToken);
         }
 
         private async Task ValidateUserAsync(HttpContext context, CoreUserIdentifierType type, LoginUser user, AuthLoginValidateData loginData, CancellationToken cancellationToken)
@@ -1182,7 +1261,7 @@ namespace Platform.Server.Services
             var deviceName = loginData.Parser.ToShortName();
 
             // No authorization request, will be done in the client side
-            var (result, refreshToken) = await CompleteLoginAsync(user, loginData.DeviceId, deviceName, DeviceType.Web, loginData.Region, null, null, null, cancellationToken);
+            var (result, refreshToken, _) = await CompleteLoginAsync(user, loginData.DeviceId, deviceName, DeviceType.Web, loginData.Region, null, null, null, cancellationToken);
 
             var jsonResult = JsonSerializer.Serialize(result, CommonJsonSerializerContext.Default.ActionResult);
 
@@ -1626,7 +1705,9 @@ namespace Platform.Server.Services
             var data = tokenData.Data;
             var td = data.Data;
 
-            return await CompleteLoginAsync(tokenData.CoreUser, tokenData.ClientId, tokenData.Name, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
+            var (loginResult, refreshToken, _) = await CompleteLoginAsync(tokenData.CoreUser, tokenData.ClientId, tokenData.Name, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
+
+            return (loginResult, refreshToken);
         }
 
         /// <summary>

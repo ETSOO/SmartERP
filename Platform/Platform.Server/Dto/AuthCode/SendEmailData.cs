@@ -6,8 +6,8 @@ namespace Platform.Server.Dto.AuthCode
     {
         public required AuthCodeAction Action { get; init; }
         public required string Email { get; init; }
-        public string? Region { get; init; }
-        public string? TimeZone { get; init; }
+        public required string Region { get; init; }
+        public required string TimeZone { get; init; }
     }
 
     public class SendEmailData<D> : SendEmailData where D : AuthCodeData

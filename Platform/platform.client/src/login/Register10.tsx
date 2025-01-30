@@ -53,11 +53,8 @@ export default function Register20() {
 
     // Send verification code
     const result = await app.authCodeApi.sendEmail({
-      deviceId: app.deviceId,
       action: AuthCodeAction.UserRegistrationEmailCode,
-      email: app.encrypt(email),
-      region: app.region,
-      timezone: app.getTimeZone()
+      email: app.encrypt(email)
     });
 
     if (result == null) return 0;

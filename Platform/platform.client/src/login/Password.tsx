@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, FormControlLabel, Switch, Box } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
-import { AuthRequest, LoginRQ } from "@etsoo/appscript";
+import { AuthRequest } from "@etsoo/appscript";
 import { HBox, TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
 import { Lock } from "@mui/icons-material";
 import { Constants } from "../app/Constants";
@@ -101,18 +101,12 @@ export default function Password() {
     );
     const auth = app.storage.getData<AuthRequest>(Constants.AuthRequestField);
 
-    // Model
-    const data: LoginRQ = {
+    const [result, refreshToken] = await app.authApi.login({
       id: usernameDecoded,
-      deviceId: app.deviceId,
       pwd: app.encrypt(app.hash(password)),
       org: org?.orgId,
-      region: app.region,
-      timezone: app.getTimeZone(),
       auth
-    };
-
-    const [result, refreshToken] = await app.authApi.login(data);
+    });
 
     if (result == null) return;
 

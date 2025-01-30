@@ -170,7 +170,7 @@ namespace Platform.Server.Services
                 {
                     Action = AuthCodeAction.MemberInvitationEmailCode,
                     Email = email,
-                    Region = rq.Region,
+                    Region = User.Region,
                     TimeZone = rq.TimeZone,
                     Data = new AuthCodeMemberInvitationData
                     {

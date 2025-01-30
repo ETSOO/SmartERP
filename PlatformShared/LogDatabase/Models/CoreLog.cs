@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace PlatformShared.Database.Models
+namespace PlatformShared.LogDatabase.Models
 {
     /// <summary>
     /// Core log
@@ -15,16 +15,22 @@ namespace PlatformShared.Database.Models
         public long Id { get; set; }
 
         /// <summary>
-        /// Core user id
-        /// 核心用户编号
+        /// Kind
+        /// 类型
         /// </summary>
-        public int CoreUserId { get; set; }
+        public string Kind { get; set; } = default!;
 
         /// <summary>
-        /// Core organization id
-        /// 核心机构编号
+        /// User id
+        /// 用户编号
         /// </summary>
-        public int? CoreOrganizationId { get; set; }
+        public int UserId { get; set; }
+
+        /// <summary>
+        /// Organization id
+        /// 机构编号
+        /// </summary>
+        public int? OrganizationId { get; set; }
 
         /// <summary>
         /// Title
@@ -41,13 +47,7 @@ namespace PlatformShared.Database.Models
         /// Device id
         /// 设备编号
         /// </summary>
-        public int DeviceId { get; set; }
-
-        /// <summary>
-        /// Device name
-        /// 设备名称
-        /// </summary>
-        public string DeviceName { get; set; } = default!;
+        public int? DeviceId { get; set; }
 
         /// <summary>
         /// Culture
@@ -65,23 +65,5 @@ namespace PlatformShared.Database.Models
         /// 创建时间
         /// </summary>
         public DateTimeOffset Creation { get; set; } = DateTimeOffset.UtcNow;
-
-        /// <summary>
-        /// Core organization
-        /// 核心机构
-        /// </summary>
-        public CoreOrganization CoreOrganization { get; set; } = default!;
-
-        /// <summary>
-        /// Core user
-        /// 核心用户
-        /// </summary>
-        public CoreUser CoreUser { get; set; } = default!;
-
-        /// <summary>
-        /// Device
-        /// 设备
-        /// </summary>
-        public CoreUserDevice Device { get; set; } = default!;
     }
 }

@@ -44,11 +44,8 @@ export default function AddEmail() {
 
     // Send verification code
     const result = await app.core.authCodeApi.sendEmail({
-      deviceId: app.deviceId,
       action: AuthCodeAction.UserVerificationEmailCode,
-      email: app.encrypt(email),
-      region: app.region,
-      timezone: app.getTimeZone()
+      email: app.encrypt(email)
     });
 
     if (result == null) return 0;

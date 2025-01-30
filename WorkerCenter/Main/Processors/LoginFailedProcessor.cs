@@ -1,0 +1,93 @@
+﻿using com.etsoo.MessageQueue;
+using Microsoft.EntityFrameworkCore;
+using PlatformShared;
+using PlatformShared.Database;
+using PlatformShared.Database.Models;
+using PlatformShared.Messages;
+using System.Globalization;
+using WorkerCenter.Templates;
+
+namespace WorkerCenter.Main.Processors
+{
+    /// <summary>
+    /// Login failed processor
+    /// 登录失败处理器
+    /// </summary>
+    public class LoginFailedProcessor : LogQueueProcessor<LoginFailedMessage>
+    {
+        private const int FreezeMinutes = 30;
+
+        private readonly MyDbContext _db;
+        private readonly IMessageQueueProducer _producer;
+
+        public LoginFailedProcessor(ILogger<LoginFailedProcessor> logger,
+            LogDbContext logDb, MyDbContext db, IMessageQueueProducer producer)
+            : base(logger, PlatformSharedContext.Default.LoginFailedMessage, logDb)
+        {
+            _db = db;
+            _producer = producer;
+        }
+
+        protected override async Task ProcessMessageAsync(LoginFailedMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
+        {
+            await base.ProcessMessageAsync(message, properties, cancellationToken);
+
+            // User id
+            var userId = message.Data.UserId;
+
+            // 6 consecutive login failures, freeze the user
+            var dateAgo = DateTimeOffset.UtcNow.AddMinutes(-FreezeMinutes);
+            var count = await LogDb.CoreLogs
+                .Where(l => l.Kind == LoginFailedMessage.Type && l.UserId == userId && l.Creation >= dateAgo)
+                .CountAsync(cancellationToken);
+
+            if (count > 5)
+            {
+                // Freeze user
+                var affacted = await _db.CoreUsers.Where(u => u.Id == userId).ExecuteUpdateAsync(u => u.SetProperty(u => u.FrozenTime, DateTimeOffset.UtcNow.AddMinutes(FreezeMinutes)), cancellationToken);
+
+                if (affacted > 0)
+                {
+                    // Emails
+                    var emails = await _db.CoreUserIdentifiers
+                        .AsNoTracking()
+                        .Where(i => i.CoreUserId == userId && i.Type == CoreUserIdentifierType.Email)
+                        .Select(i => i.Value)
+                        .ToArrayAsync(cancellationToken);
+
+                    if (emails.Length > 0)
+                    {
+                        // Load email template
+                        var culture = message.Data.Culture;
+                        var ci = CultureInfo.GetCultureInfo(culture);
+                        var notice = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
+                        var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.LoginFailedFrozenSubject), ci)!;
+                        var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.LoginFailedFrozenAction), ci)!;
+
+                        var data = new ActionNoticeData
+                        {
+                            Language = culture,
+                            Subject = string.Format(notice, subject),
+                            Action = action,
+                            IP = message.Data.IP,
+                            UserName = message.Data.UserName
+                        };
+
+                        var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
+
+                        // Send email notice
+                        var email = new SendEmailMessage
+                        {
+                            Subject = data.Subject,
+                            Body = body,
+                            To = emails,
+                            Importance = EmailImportance.High
+                        };
+
+                        await _producer.SendJsonAsync(email, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
+                    }
+                }
+            }
+        }
+    }
+}

@@ -5,7 +5,6 @@ import { TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
 import { Constants } from "../app/Constants";
 import { app } from "../app/SmartApp";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { ResetPasswordRQ } from "@etsoo/appscript";
 
 const homeUrl = "./../../../";
 function NavigateHome() {
@@ -82,15 +81,10 @@ export default function CallbackComplete() {
       return;
     }
 
-    // Submit data
-    const data: ResetPasswordRQ = {
+    const result = await app.authApi.resetPassword({
       id: usernameDecoded,
-      deviceId: app.deviceId,
-      password: app.encrypt(app.hash(repeat.value)),
-      region: app.region
-    };
-
-    const result = await app.authApi.resetPassword(data);
+      password: app.encrypt(app.hash(repeat.value))
+    });
     if (result == null) return;
 
     if (result.ok) {

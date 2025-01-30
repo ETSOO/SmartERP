@@ -118,7 +118,7 @@ namespace PlatformShared.Database.Models
         /// Frozen expiry time
         /// 冻结到期时间
         /// </summary>
-        public DateTime? FrozenTime { get; set; }
+        public DateTimeOffset? FrozenTime { get; set; }
 
         /// <summary>
         /// Registration step, 0 for completed
@@ -161,12 +161,6 @@ namespace PlatformShared.Database.Models
         /// 核心用户认证验证码
         /// </summary>
         public ICollection<CoreAuthCode> CoreUserAuthCodes { get; set; } = [];
-
-        /// <summary>
-        /// Core logs
-        /// 核心日志
-        /// </summary>
-        public ICollection<CoreLog> CoreLogs { get; set; } = [];
 
         /// <summary>
         /// Core organizations

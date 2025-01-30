@@ -6,7 +6,7 @@ namespace Platform.Server.Dto.AuthCode
     {
         public required AuthCodeAction Action { get; init; }
         public required string Mobile { get; init; }
-        public string? Region { get; init; }
+        public required string Region { get; init; }
     }
 
     public record SendSMSData<D> : SendSMSData where D : AuthCodeData

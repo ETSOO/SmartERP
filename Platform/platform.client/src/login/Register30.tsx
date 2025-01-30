@@ -4,7 +4,6 @@ import { SharedLayout } from "./SharedLayout";
 import { HBox, TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
 import { app } from "../app/SmartApp";
 import { useNavigate } from "react-router-dom";
-import { CompleteRegisterRQ } from "../api/rq/auth/CompleteRegisterRQ";
 import { AuthRequest } from "@etsoo/appscript";
 import { Constants } from "../app/Constants";
 
@@ -82,17 +81,13 @@ export default function RegisterPassword() {
     const auth = app.storage.getData<AuthRequest>(Constants.AuthRequestField);
 
     // Complete the registration
-    const rq: CompleteRegisterRQ = {
-      deviceId: app.deviceId,
+    const [result, refreshToken] = await app.authApi.completeRegister({
       name: name.value,
       familyName: familyNameRef.current?.value,
       givenName: givenNameRef.current?.value,
       password: app.encrypt(app.hash(repeat.value)),
-      region: app.region,
       auth
-    };
-
-    const [result, refreshToken] = await app.authApi.completeRegister(rq);
+    });
     if (result == null) return;
 
     if (result.ok) {

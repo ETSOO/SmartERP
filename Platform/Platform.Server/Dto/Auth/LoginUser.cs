@@ -23,6 +23,7 @@ namespace Platform.Server.Dto.Auth
     /// </summary>
     public record LoginUserWithPassword : LoginUser
     {
+        public required string Name { get; init; }
         public string? Password { get; init; }
     }
 }
