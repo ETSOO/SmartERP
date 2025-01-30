@@ -28,7 +28,12 @@ export class AuthApi extends AuthApiBase {
     payload?: IApiPayload<SmartERPLoginResult>
   ): Promise<[SmartERPLoginResult | undefined, string | null]> {
     const { deviceId, region } = this.app;
-    const data: CompleteRegisterRQ = { ...rq, deviceId, region };
+    const data: CompleteRegisterRQ = {
+      ...rq,
+      deviceId,
+      region,
+      timezone: this.app.getTimeZone()
+    };
     payload ??= {};
     const result = await this.api.put("Auth/CompleteRegister", data, payload);
     const refreshToken = result?.ok

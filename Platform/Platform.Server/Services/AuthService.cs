@@ -502,7 +502,7 @@ namespace Platform.Server.Services
             _db.CoreUsers.Update(user);
             await _db.SaveChangesAsync(cancellationToken);
 
-            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, cancellationToken);
+            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, rq.Timezone, cancellationToken);
 
             return (loginResult, refreshToken);
         }
@@ -682,7 +682,7 @@ namespace Platform.Server.Services
 
             var deviceName = cd.Value.Parser.ToShortName();
 
-            var (loginResult, refreshToken, moreData) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, rq.Auth, cancellationToken);
+            var (loginResult, refreshToken, moreData) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, rq.Org, null, rq.Auth, rq.Timezone, cancellationToken);
 
             if (loginResult.Ok)
             {
@@ -720,7 +720,7 @@ namespace Platform.Server.Services
             return (loginResult, refreshToken);
         }
 
-        private async Task<(ActionResult result, CurrentUser? user, TokenQueryData? data)> LoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, IEnumerable<string>? authScopes, CancellationToken cancellationToken)
+        private async Task<(ActionResult result, CurrentUser? user, TokenQueryData? data)> LoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, IEnumerable<string>? authScopes, string? timezone, CancellationToken cancellationToken)
         {
             // Default values
             var culture = CultureInfo.CurrentCulture.Name;
@@ -739,12 +739,13 @@ namespace Platform.Server.Services
             var clientIdSP = new NpgsqlParameter<string>("p_client_id", clientId);
             var ipSP = new NpgsqlParameter<string>("p_ip", _ip.ToString());
             var cultureSP = new NpgsqlParameter<string>("p_culture", culture);
+            var timezoneSP = new NpgsqlParameter<string?>("p_timezone", timezone);
 
             // IQuerable<T>.FirstOrDefault() adds SQL that filters by the first row number
             // Here we use the function to get the first row, not the filter
             // The returned columns naming should be the same as the model, otherwise EFCore.NamingConventions need to be used
             // CALL SP_NAME (stored procedure)
-            var data = (await _db.Database.SqlQuery<CompleteLoginData>($"SELECT * FROM complete_login({userIdSP}, {latestOrganizationIdSP}, {organizationIdSP}, {fromOrganizationIdSP}, {deviceNameSP}, {deviceTypeSP}, {clientIdSP}, {ipSP}, {cultureSP})")
+            var data = (await _db.Database.SqlQuery<CompleteLoginData>($"SELECT * FROM complete_login({userIdSP}, {latestOrganizationIdSP}, {organizationIdSP}, {fromOrganizationIdSP}, {deviceNameSP}, {deviceTypeSP}, {clientIdSP}, {ipSP}, {cultureSP}, {timezoneSP})")
                 .ToListAsync(cancellationToken)).FirstOrDefault();
 
             if (data == null)
@@ -843,9 +844,9 @@ namespace Platform.Server.Services
         // API Refresh token - 接口刷新令牌
         // Log in from OAuth2 client - 从OAuth2客户端登录
         // Sign up from OAuth2 client - 从OAuth2客户端注册
-        private async Task<(ActionResult result, string? refreshToken, MoreData? moreData)> CompleteLoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, AuthRequest? auth, CancellationToken cancellationToken)
+        private async Task<(ActionResult result, string? refreshToken, MoreData? moreData)> CompleteLoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, int? organizationId, int? fromOrganizationId, AuthRequest? auth, string? timezone, CancellationToken cancellationToken)
         {
-            var (result, tokenUser, data) = await LoginAsync(user, clientId, deviceName, deviceType, region, organizationId, fromOrganizationId, auth?.Scopes, cancellationToken);
+            var (result, tokenUser, data) = await LoginAsync(user, clientId, deviceName, deviceType, region, organizationId, fromOrganizationId, auth?.Scopes, timezone, cancellationToken);
 
             if (!result.Ok || tokenUser == null || data == null)
             {
@@ -1208,7 +1209,7 @@ namespace Platform.Server.Services
             var user = tokenData.CoreUser;
             var td = tokenData.Data.Data;
 
-            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
+            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, null, cancellationToken);
 
             return (loginResult, refreshToken);
         }
@@ -1261,7 +1262,7 @@ namespace Platform.Server.Services
             var deviceName = loginData.Parser.ToShortName();
 
             // No authorization request, will be done in the client side
-            var (result, refreshToken, _) = await CompleteLoginAsync(user, loginData.DeviceId, deviceName, DeviceType.Web, loginData.Region, null, null, null, cancellationToken);
+            var (result, refreshToken, _) = await CompleteLoginAsync(user, loginData.DeviceId, deviceName, DeviceType.Web, loginData.Region, null, null, null, null, cancellationToken);
 
             var jsonResult = JsonSerializer.Serialize(result, CommonJsonSerializerContext.Default.ActionResult);
 
@@ -1705,7 +1706,7 @@ namespace Platform.Server.Services
             var data = tokenData.Data;
             var td = data.Data;
 
-            var (loginResult, refreshToken, _) = await CompleteLoginAsync(tokenData.CoreUser, tokenData.ClientId, tokenData.Name, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, cancellationToken);
+            var (loginResult, refreshToken, _) = await CompleteLoginAsync(tokenData.CoreUser, tokenData.ClientId, tokenData.Name, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, null, cancellationToken);
 
             return (loginResult, refreshToken);
         }
@@ -1793,7 +1794,7 @@ namespace Platform.Server.Services
             }
 
             // Login
-            var (result, tokenUser, data) = await LoginAsync(user, device.ClientId, device.Name, device.DeviceType, User.Region, rq.OrganizationId, rq.FromOrganizationId, User.Scopes, cancellationToken);
+            var (result, tokenUser, data) = await LoginAsync(user, device.ClientId, device.Name, device.DeviceType, User.Region, rq.OrganizationId, rq.FromOrganizationId, User.Scopes, null, cancellationToken);
 
             if (!result.Ok || tokenUser == null || data == null)
             {

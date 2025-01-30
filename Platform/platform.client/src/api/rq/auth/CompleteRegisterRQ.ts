@@ -43,4 +43,9 @@ export type CompleteRegisterRQ = CompleteRegisterInputRQ & {
    * Country or region
    */
   region: string;
+
+  /**
+   * Timezone
+   */
+  timezone: string;
 };

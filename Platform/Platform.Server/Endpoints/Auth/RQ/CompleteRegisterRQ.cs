@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
+using com.etsoo.Localization;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 
@@ -48,6 +49,12 @@ namespace Platform.Server.Endpoints.Auth.RQ
         public required string Region { get; init; }
 
         /// <summary>
+        /// Timezone name
+        /// 时区名称
+        /// </summary>
+        public required string Timezone { get; init; }
+
+        /// <summary>
         /// Authentication request
         /// 授权请求
         /// </summary>
@@ -88,6 +95,11 @@ namespace Platform.Server.Endpoints.Auth.RQ
             if (Region.Length is not 2)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Region));
+            }
+
+            if (!LocalizationUtils.IsTimeZone(Timezone))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Timezone));
             }
 
             return null;
