@@ -14,10 +14,15 @@ namespace PlatformShared
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
 
+    [JsonSerializable(typeof(AcceptInvitationMessage))]
     [JsonSerializable(typeof(CommonMessage))]
-    [JsonSerializable(typeof(LoginFailedMessageData))]
+    [JsonSerializable(typeof(ResetPasswordMessage))]
     [JsonSerializable(typeof(SendEmailMessage))]
     [JsonSerializable(typeof(SendSMSMessage))]
+
+    [JsonSerializable(typeof(AcceptInvitationMessageData))]
+    [JsonSerializable(typeof(LoginFailedMessageData))]
+    [JsonSerializable(typeof(LoginSuccessMessageData))]
 
     public partial class PlatformSharedContext : JsonSerializerContext
     {

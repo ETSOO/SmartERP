@@ -17,13 +17,23 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="user">User</param>
         /// <returns>Result</returns>
-        public static ActionResult ValidateUser(this LoginUser user)
+        public static ActionResult ValidateUser(this LoginUser user, TimeZoneInfo? tz)
         {
-            if (user.FrozenTime.HasValue)
+            if (user.FrozenTime.HasValue && user.FrozenTime.Value > DateTimeOffset.UtcNow)
             {
                 var result = ApplicationErrors.UserFrozen.AsResult();
-                if (result.Title != null)
-                    result.Title = string.Format(result.Title, user.FrozenTime.ToString());
+
+                // Always send back the frozen time for the client to customize the message
+                result.Data[nameof(user.FrozenTime)] = user.FrozenTime.Value;
+
+                if (tz != null && result.Title != null)
+                {
+                    // Default error message
+                    var targetTime = TimeZoneInfo.ConvertTime(user.FrozenTime.Value, tz);
+                    var targetStr = $"{targetTime} ({tz.StandardName})";
+                    result.Title = string.Format(result.Title, targetStr);
+                }
+
                 return result;
             }
             else if (user.Status > EntityStatus.Approved)

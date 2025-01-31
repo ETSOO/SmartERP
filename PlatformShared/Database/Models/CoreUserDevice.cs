@@ -62,6 +62,12 @@
         public DateTimeOffset LastLogin { get; set; }
 
         /// <summary>
+        /// Timezone
+        /// 时区
+        /// </summary>
+        public TimeZoneInfo? Timezone { get; set; }
+
+        /// <summary>
         /// Core user
         /// 核心用户
         /// </summary>

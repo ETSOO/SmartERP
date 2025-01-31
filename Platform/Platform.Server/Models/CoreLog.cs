@@ -19,8 +19,6 @@ public partial class CoreLog
 
     public int DeviceId { get; set; }
 
-    public string DeviceName { get; set; }
-
     public string Culture { get; set; }
 
     public string Data { get; set; }

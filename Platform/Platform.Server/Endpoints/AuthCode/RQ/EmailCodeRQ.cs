@@ -1,5 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
-using com.etsoo.Localization;
+using com.etsoo.Database.Converters;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using PlatformShared.Database.Models;
@@ -64,7 +64,7 @@ namespace Platform.Server.Endpoints.AuthCode.RQ
                 return ApplicationErrors.NoValidData.AsResult(nameof(Region));
             }
 
-            if (!LocalizationUtils.IsTimeZone(TimeZone))
+            if (!TimeZoneUtils.IsTimeZone(TimeZone))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(TimeZone));
             }

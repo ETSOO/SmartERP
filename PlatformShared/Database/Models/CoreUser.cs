@@ -175,6 +175,12 @@ namespace PlatformShared.Database.Models
         public ICollection<CoreOrganizationUser> CoreOrganizationUsers { get; set; } = [];
 
         /// <summary>
+        /// Core user inviters
+        /// 核心用户邀请者
+        /// </summary>
+        public ICollection<CoreOrganizationUser> CoreOrganizationUserInviters { get; set; } = [];
+
+        /// <summary>
         /// Core user devices
         /// 核心用户设备
         /// </summary>

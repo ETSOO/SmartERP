@@ -6,6 +6,8 @@ namespace PlatformShared.Messages
     public record LoginFailedMessageData
     {
         public string? Reason { get; init; }
+        public string? UserAgent { get; init; }
+        public required string TimeZone { get; init; }
     }
 
     /// <summary>
@@ -22,11 +24,19 @@ namespace PlatformShared.Messages
         /// </summary>
         public string? Reason { get; init; }
 
+        /// <summary>
+        /// User agent
+        /// 用户代理
+        /// </summary>
+        public string? UserAgent { get; init; }
+
         public override string? GetMoreData()
         {
             return JsonSerializer.Serialize(new LoginFailedMessageData
             {
-                Reason = Reason
+                Reason = Reason,
+                UserAgent = UserAgent,
+                TimeZone = Data.TimeZone
             }, PlatformSharedContext.Default.LoginFailedMessageData);
         }
     }

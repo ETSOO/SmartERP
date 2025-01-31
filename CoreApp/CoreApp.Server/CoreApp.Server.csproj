@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.ServiceApp" Version="1.2.79" />
+    <PackageReference Include="com.etsoo.ServiceApp" Version="1.2.82" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.3" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.12" />

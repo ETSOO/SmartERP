@@ -28,5 +28,17 @@ namespace WorkerCenter.Templates
             var filePath = Path.Combine(AppContext.BaseDirectory, file);
             return RazorUtils.RenderAsync(filePath, model);
         }
+
+        /// <summary>
+        /// Format notice date time
+        /// 格式化通知日期时间
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static string FormatDateTime(this ActionNoticeData data)
+        {
+            var localTime = TimeZoneInfo.ConvertTime(data.TimeStamp, data.TZ);
+            return $"{localTime.ToString()} ({data.TZ.StandardName})";
+        }
     }
 }

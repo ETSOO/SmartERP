@@ -37,7 +37,11 @@ public partial class CoreOrganizationUser
 
     public short Status { get; set; }
 
+    public int? InviterId { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; }
 
     public virtual CoreUser CoreUser { get; set; }
+
+    public virtual CoreUser Inviter { get; set; }
 }

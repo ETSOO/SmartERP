@@ -1,10 +1,10 @@
-﻿namespace Platform.Server.Dto.User
+﻿namespace PlatformShared.Dto
 {
     /// <summary>
-    /// Core user data
-    /// 核心用户数据
+    /// Code user data
+    /// 验证码用户数据
     /// </summary>
-    public record UserData
+    public record CodeUserData
     {
         /// <summary>
         /// Name

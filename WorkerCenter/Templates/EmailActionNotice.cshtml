@@ -13,9 +13,10 @@
     @if (data.Language.StartsWith("zh-"))
     {
         <p>尊敬的用户 <b>@data.UserName</b>：</p>
-        @if (!string.IsNullOrEmpty(data.Action))
+        <p>在 @data.FormatDateTime()，<b>@data.Action</b>.</p>
+        @if (!string.IsNullOrEmpty(data.Detail))
         {
-            <p>@data.Action</p>
+            <p>@Html.Raw(data.Detail)</p>
         }
         <p>如果这不是您本人的操作，请第一时间联系我们进行干预！</p>
         <p>IP地址：<b>@data.IP</b></p>
@@ -30,9 +31,10 @@
     else
     {
         <p>Dear <b>@data.UserName</b>,</p>
-        @if (!string.IsNullOrEmpty(data.Action))
+        <p>At <b>@data.FormatDateTime()</b>, <b>@data.Action</b>.</p>
+        @if (!string.IsNullOrEmpty(data.Detail))
         {
-            <p>@data.Action</p>
+            <p>@data.Detail</p>
         }
         <p>If this is not your operation, please contact us immediately for intervention!</p>
         <p>IP address: <b>@data.IP</b></p>

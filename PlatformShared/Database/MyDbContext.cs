@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using com.etsoo.Database.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -352,6 +353,7 @@ namespace PlatformShared.Database
                     .HasConversion<byte>()
                     .HasDefaultValue(EntityStatus.Normal)
                     .HasColumnName("status");
+                entity.Property(e => e.InviterId).HasColumnName("inviter_id");
 
                 entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreOrganizationUsers)
                     .HasForeignKey(d => d.CoreOrganizationId)
@@ -362,6 +364,10 @@ namespace PlatformShared.Database
                     .HasForeignKey(d => d.CoreUserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("core_organization_user_core_user_id_fkey");
+
+                entity.HasOne(d => d.Inviter).WithMany(p => p.CoreOrganizationUserInviters)
+                    .HasForeignKey(d => d.InviterId)
+                    .HasConstraintName("core_organization_user_inviter_id_fkey");
             });
 
             modelBuilder.Entity<CoreUser>(entity =>
@@ -453,6 +459,10 @@ namespace PlatformShared.Database
                 entity.Property(e => e.LastLogin)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("last_login");
+                entity.Property(e => e.Timezone)
+                    .HasMaxLength(64)
+                    .HasConversion<TimeZoneInfoToStringConverter>()
+                    .HasColumnName("timezone");
 
                 entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserDevices)
                     .HasForeignKey(d => d.CoreUserId)

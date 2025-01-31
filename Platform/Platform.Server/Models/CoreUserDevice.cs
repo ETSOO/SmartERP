@@ -21,6 +21,8 @@ public partial class CoreUserDevice
 
     public DateTime LastLogin { get; set; }
 
+    public string Timezone { get; set; }
+
     public virtual ICollection<CoreLog> CoreLogs { get; set; } = new List<CoreLog>();
 
     public virtual CoreUser CoreUser { get; set; }

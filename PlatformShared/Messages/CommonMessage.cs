@@ -43,6 +43,18 @@ namespace PlatformShared.Messages
         /// 机构编号
         /// </summary>
         public int? OrganizationId { get; init; }
+
+        /// <summary>
+        /// Time zone
+        /// 时区
+        /// </summary>
+        public required string TimeZone { get; init; }
+
+        /// <summary>
+        /// Time stamp
+        /// 时间戳
+        /// </summary>
+        public DateTimeOffset TimeStamp { get; init; } = DateTimeOffset.Now;
     }
 
     /// <summary>

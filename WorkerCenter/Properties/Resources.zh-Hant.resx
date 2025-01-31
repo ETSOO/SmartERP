@@ -126,13 +126,28 @@
   <data name="LoginFailed" xml:space="preserve">
     <value>登入失敗</value>
   </data>
-  <data name="LoginFailedFrozenAction" xml:space="preserve">
+  <data name="LoginFailedFrozenDetail" xml:space="preserve">
     <value>多次登入失敗，帳號已凍結30分鐘，請30分鐘後再試一次。</value>
   </data>
-  <data name="LoginFailedFrozenSubject" xml:space="preserve">
+  <data name="LoginFailedFrozenAction" xml:space="preserve">
     <value>帳戶凍結</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>成功登入</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>重設密碼</value>
+  </data>
+  <data name="AcceptInvitation" xml:space="preserve">
+    <value>接受邀請</value>
+  </data>
+  <data name="InvitationAccepted" xml:space="preserve">
+    <value>邀請已接受</value>
+  </data>
+  <data name="AcceptInvitationDetail" xml:space="preserve">
+    <value>您已經接受 &lt;b&gt;{0}&lt;/b&gt; 的邀請加入了 &lt;b&gt;{1}&lt;/b&gt;。</value>
+  </data>
+  <data name="InvitationAcceptedDetail" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已經接受您的邀請加入了 &lt;b&gt;{1}&lt;/b&gt;。</value>
   </data>
 </root>

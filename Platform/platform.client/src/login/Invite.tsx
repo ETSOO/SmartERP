@@ -51,9 +51,15 @@ export default function Invite() {
           app.storage.setData(Constants.MemberInvitation, [id, code]);
           if (email) {
             if (data.userExists) {
-              navigate(`./../../login/password/${app.encrypt(email)}`);
+              navigate(
+                `./../../login/password/${encodeURIComponent(
+                  app.encrypt(email)
+                )}`
+              );
             } else {
-              navigate(`./../../login/register10?openid=${email}`);
+              navigate(
+                `./../../login/register10?openid=${encodeURIComponent(email)}`
+              );
             }
           } else {
             navigate("./../../");

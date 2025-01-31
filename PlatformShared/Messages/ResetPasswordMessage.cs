@@ -3,19 +3,13 @@ using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record LoginSuccessMessageData
-    {
-        public string? UserAgent { get; init; }
-        public required string TimeZone { get; init; }
-    }
-
     /// <summary>
-    /// Login success message
-    /// 成功登录消息
+    /// Reset password message
+    /// 重置密码消息
     /// </summary>
-    public record LoginSuccessMessage : CommonMessage, IMessageQueueMessage
+    public record ResetPasswordMessage : CommonMessage, IMessageQueueMessage
     {
-        public static string Type => "LoginSuccess";
+        public static string Type => "ResetPassword";
 
         /// <summary>
         /// User agent

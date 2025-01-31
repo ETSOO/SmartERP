@@ -60,17 +60,20 @@ namespace WorkerCenter.Main.Processors
                         // Load email template
                         var culture = message.Data.Culture;
                         var ci = CultureInfo.GetCultureInfo(culture);
-                        var notice = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
-                        var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.LoginFailedFrozenSubject), ci)!;
+                        var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
                         var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.LoginFailedFrozenAction), ci)!;
+                        var detail = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.LoginFailedFrozenDetail), ci)!;
 
                         var data = new ActionNoticeData
                         {
                             Language = culture,
-                            Subject = string.Format(notice, subject),
+                            Subject = string.Format(subject, action),
                             Action = action,
+                            Detail = detail,
                             IP = message.Data.IP,
-                            UserName = message.Data.UserName
+                            UserName = message.Data.UserName,
+                            TimeZone = message.Data.TimeZone,
+                            TimeStamp = message.Data.TimeStamp
                         };
 
                         var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);

@@ -6,6 +6,7 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.Database.Converters;
 using com.etsoo.HTTP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
@@ -157,7 +158,7 @@ namespace Platform.Server.Services
             return data;
         }
 
-        private async Task<AppTokenData?> CreateAppTokenDataAsync(int appId, string refreshToken, string? appSecret, CancellationToken cancellationToken)
+        private async Task<AppTokenData?> CreateAppTokenDataAsync(int appId, string refreshToken, string? appSecret, string timezone, CancellationToken cancellationToken)
         {
             var tokenData = await _db.CoreUserDeviceTokens
                 .AsNoTracking()
@@ -193,7 +194,7 @@ namespace Platform.Server.Services
             var data = tokenData.Data;
 
             // User
-            var (result, user) = await CreateUserFromQueryDataAsync(data, cancellationToken);
+            var (result, user) = await CreateUserFromQueryDataAsync(data, timezone, cancellationToken);
             if (user == null || !result.Ok)
             {
                 Logger.LogWarning("User not found with @{data}, @{result}", data, result);
@@ -250,7 +251,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async ValueTask<ApiTokenData?> ApiRefreshTokenAsync(ApiRefreshTokenRQ rq, CancellationToken cancellationToken = default)
         {
-            var data = await CreateAppTokenDataAsync(rq.AppId, rq.Token, null, cancellationToken);
+            var data = await CreateAppTokenDataAsync(rq.AppId, rq.Token, null, rq.TimeZone, cancellationToken);
             if (data == null || string.IsNullOrEmpty(data.RefreshToken)) return null;
 
             return new ApiTokenData
@@ -575,7 +576,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoUserFound.AsResult();
             }
 
-            var result = user.ValidateUser();
+            var result = user.ValidateUser(User.TimeZone);
             if (!result.Ok)
             {
                 return result;
@@ -631,7 +632,7 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.NoValidData.AsResult("Password"), null);
             }
 
-            var (result, login) = await LoginIdAsync(id, rq.Region, cancellationToken);
+            var (result, login) = await LoginIdAsync(id, rq.Region, rq.TimeZone, cancellationToken);
             if (!result.Ok || login == null)
             {
                 return (result, null);
@@ -651,9 +652,11 @@ namespace Platform.Server.Services
                         IP = _ip.ToString(),
                         UserId = login.Id,
                         UserName = login.Name,
-                        OrganizationId = null
+                        OrganizationId = null,
+                        TimeZone = rq.TimeZone
                     },
-                    Reason = "Password"
+                    Reason = "Password",
+                    UserAgent = userAgent
                 }, PlatformSharedContext.Default.LoginFailedMessage, cancellationToken);
 
                 return (ApplicationErrors.NoPasswordMatch.AsResult(), null);
@@ -682,7 +685,7 @@ namespace Platform.Server.Services
 
             var deviceName = cd.Value.Parser.ToShortName();
 
-            var (loginResult, refreshToken, moreData) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, rq.Org, null, rq.Auth, rq.Timezone, cancellationToken);
+            var (loginResult, refreshToken, moreData) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, rq.Org, null, rq.Auth, rq.TimeZone, cancellationToken);
 
             if (loginResult.Ok)
             {
@@ -696,8 +699,10 @@ namespace Platform.Server.Services
                         IP = _ip.ToString(),
                         UserId = login.Id,
                         UserName = login.Name,
-                        OrganizationId = moreData?.OrganizationId
-                    }
+                        OrganizationId = moreData?.OrganizationId,
+                        TimeZone = rq.TimeZone
+                    },
+                    UserAgent = userAgent
                 }, PlatformSharedContext.Default.LoginSuccessMessage, cancellationToken);
             }
             else
@@ -711,9 +716,11 @@ namespace Platform.Server.Services
                         IP = _ip.ToString(),
                         UserId = login.Id,
                         UserName = login.Name,
-                        OrganizationId = moreData?.OrganizationId
+                        OrganizationId = moreData?.OrganizationId,
+                        TimeZone = rq.TimeZone
                     },
-                    Reason = loginResult.Type
+                    Reason = loginResult.Type,
+                    UserAgent = userAgent
                 }, PlatformSharedContext.Default.LoginFailedMessage, cancellationToken);
             }
 
@@ -829,7 +836,7 @@ namespace Platform.Server.Services
                 OrganizationName = data.OrganizationName,
                 Oid = data.Oid,
                 Role = data.UserRole
-            });
+            }, timezone);
 
             if (tokenUser == null)
             {
@@ -999,7 +1006,7 @@ namespace Platform.Server.Services
                 {
                     return ApplicationErrors.NoValidData.AsResult();
                 }
-                var (result, _) = await LoginIdAsync(id, rq.Region, cancellationToken);
+                var (result, _) = await LoginIdAsync(id, rq.Region, rq.TimeZone, cancellationToken);
 
                 return result;
             }
@@ -1016,9 +1023,10 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="id">Email or mobile</param>
         /// <param name="region">Country or region id</param>
+        /// <param name="timezone">Time zone</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Tuple results</returns>
-        public async ValueTask<(IActionResult, LoginUserWithPassword?)> LoginIdAsync(string id, string region, CancellationToken cancellationToken = default)
+        public async ValueTask<(IActionResult, LoginUserWithPassword?)> LoginIdAsync(string id, string region, string timezone, CancellationToken cancellationToken = default)
         {
             // Check
             var type = id.Contains('@') ? CoreUserIdentifierType.Email : CoreUserIdentifierType.Mobile;
@@ -1040,7 +1048,7 @@ namespace Platform.Server.Services
                 return (ApplicationErrors.NoUserFound.AsResult(), null);
             }
 
-            result = data.ValidateUser();
+            result = data.ValidateUser(TimeZoneUtils.GetTimeZoneBase(timezone));
             if (!result.Ok)
             {
                 return (result, null);
@@ -1209,14 +1217,14 @@ namespace Platform.Server.Services
             var user = tokenData.CoreUser;
             var td = tokenData.Data.Data;
 
-            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, null, cancellationToken);
+            var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, data.DeviceId, deviceName, tokenData.DeviceType, td.Region, td.OrganizationId, td.ChannelOrganizationId ?? td.ParentOrganizationId, null, data.TimeZone, cancellationToken);
 
             return (loginResult, refreshToken);
         }
 
         private async Task ValidateUserAsync(HttpContext context, CoreUserIdentifierType type, LoginUser user, AuthLoginValidateData loginData, CancellationToken cancellationToken)
         {
-            var result = user.ValidateUser();
+            var result = user.ValidateUser(null);
             if (result.Ok)
             {
                 if (user.Step > 0)
@@ -1294,11 +1302,11 @@ namespace Platform.Server.Services
                         loginUser = await ReadUserAsync(CoreUserIdentifierType.Email, userInfo.Email);
                         if (loginUser != null)
                         {
-                            result = loginUser.ValidateUser();
+                            result = loginUser.ValidateUser(null);
                             if (result.Ok)
                             {
                                 // Current user
-                                var currentUser = await _db.CoreUsers.FindAsync(loginUser.Id, cancellationToken);
+                                var currentUser = await _db.CoreUsers.FindAsync([loginUser.Id], cancellationToken);
                                 if (currentUser == null)
                                 {
                                     return;
@@ -1519,7 +1527,7 @@ namespace Platform.Server.Services
             }
 
             // User
-            var (result, user) = await CreateUserFromQueryDataAsync(data, cancellationToken);
+            var (result, user) = await CreateUserFromQueryDataAsync(data, null, cancellationToken);
             if (user == null)
             {
                 Logger.LogWarning("User not found with @{data}, @{result}", data, result);
@@ -1529,7 +1537,7 @@ namespace Platform.Server.Services
             return await CreateAppTokenDataAsync(user, rq.AppId, appData.AppSecret, data.Data.AccessType == AuthRequest.OfflineAccessType, data, cancellationToken);
         }
 
-        private async Task<(ActionResult, CurrentUser?)> CreateUserFromQueryDataAsync(TokenQueryData data, CancellationToken cancellationToken)
+        private async Task<(ActionResult, CurrentUser?)> CreateUserFromQueryDataAsync(TokenQueryData data, string? timezone, CancellationToken cancellationToken)
         {
             var userData = await _db.CoreUsers
                 .AsNoTracking()
@@ -1556,17 +1564,20 @@ namespace Platform.Server.Services
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return CreateUserFrom(data, userData);
+            return CreateUserFrom(data, userData, timezone);
         }
 
-        private (ActionResult, CurrentUser?) CreateUserFrom(TokenQueryData data, TokenQueryUser? userData)
+        private (ActionResult, CurrentUser?) CreateUserFrom(TokenQueryData data, TokenQueryUser? userData, string? timezone)
         {
             if (userData == null)
             {
                 return (ApplicationErrors.NoUserFound.AsResult(), null);
             }
 
-            var result = userData.ValidateUser();
+            // Time zone info
+            var tz = TimeZoneUtils.GetTimeZoneBase(timezone);
+
+            var result = userData.ValidateUser(tz);
             if (!result.Ok)
             {
                 return (result, null);
@@ -1597,7 +1608,8 @@ namespace Platform.Server.Services
                 Scopes = data.Data.Scopes,
                 ClientIp = _ip,
                 Language = new CultureInfo(data.Culture),
-                Region = data.Data.Region
+                Region = data.Data.Region,
+                TimeZone = tz
             };
 
             return (result, user);
@@ -1629,7 +1641,7 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            return await CreateAppTokenDataAsync(rq.AppId, rq.RefreshToken, appData.AppSecret, cancellationToken);
+            return await CreateAppTokenDataAsync(rq.AppId, rq.RefreshToken, appData.AppSecret, rq.TimeZone, cancellationToken);
         }
 
         /// <summary>
@@ -1842,8 +1854,8 @@ namespace Platform.Server.Services
                     return ApplicationErrors.NoValidData.AsResult("Password");
                 }
 
-                var (result, _) = await LoginIdAsync(id, rq.Region, cancellationToken);
-                if (!result.Ok)
+                var (result, user) = await LoginIdAsync(id, rq.Region, rq.TimeZone, cancellationToken);
+                if (!result.Ok || user == null)
                 {
                     return result;
                 }
@@ -1852,6 +1864,22 @@ namespace Platform.Server.Services
                 var newPassword = await App.HashPasswordAsync(_regUser.Id + password);
                 await _db.CoreUsers.AsNoTracking().Where(u => u.Id == _regUser.IdInt)
                     .ExecuteUpdateAsync(u => u.SetProperty(u => u.Password, newPassword), cancellationToken);
+
+                // Log
+                await _queueService.PushAsync(new ResetPasswordMessage
+                {
+                    Data = new CommonMessageData
+                    {
+                        Culture = CultureInfo.CurrentCulture.Name,
+                        DeviceId = null,
+                        IP = _ip.ToString(),
+                        UserId = user.Id,
+                        UserName = user.Name,
+                        OrganizationId = null,
+                        TimeZone = rq.TimeZone
+                    },
+                    UserAgent = userAgent
+                }, PlatformSharedContext.Default.ResetPasswordMessage, cancellationToken);
 
                 return ActionResult.Success;
             }

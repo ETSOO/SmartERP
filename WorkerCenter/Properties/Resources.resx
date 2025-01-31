@@ -126,13 +126,28 @@
   <data name="LoginFailed" xml:space="preserve">
     <value>Login Failed</value>
   </data>
-  <data name="LoginFailedFrozenAction" xml:space="preserve">
+  <data name="LoginFailedFrozenDetail" xml:space="preserve">
     <value>Due to multiple failed login attempts, your account has been frozen for 30 minutes. Please try again after 30 minutes.</value>
   </data>
-  <data name="LoginFailedFrozenSubject" xml:space="preserve">
+  <data name="LoginFailedFrozenAction" xml:space="preserve">
     <value>Account Frozen</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Login Success</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="AcceptInvitation" xml:space="preserve">
+    <value>Accept Invitation</value>
+  </data>
+  <data name="InvitationAccepted" xml:space="preserve">
+    <value>Invitation Accepted</value>
+  </data>
+  <data name="AcceptInvitationDetail" xml:space="preserve">
+    <value>You have accepted &lt;b&gt;{0}&lt;/b&gt;'s invitation to join &lt;b&gt;{1}&lt;/b&gt;.</value>
+  </data>
+  <data name="InvitationAcceptedDetail" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; has accepted your invitation to join &lt;b&gt;{1}&lt;/b&gt;.</value>
   </data>
 </root>

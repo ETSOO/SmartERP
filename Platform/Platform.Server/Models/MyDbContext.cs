@@ -137,10 +137,6 @@ public partial class MyDbContext : DbContext
                 .HasColumnType("jsonb")
                 .HasColumnName("data");
             entity.Property(e => e.DeviceId).HasColumnName("device_id");
-            entity.Property(e => e.DeviceName)
-                .IsRequired()
-                .HasMaxLength(128)
-                .HasColumnName("device_name");
             entity.Property(e => e.Ip)
                 .IsRequired()
                 .HasMaxLength(45)
@@ -318,6 +314,7 @@ public partial class MyDbContext : DbContext
                 .HasColumnName("data");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
             entity.Property(e => e.IdentityType).HasColumnName("identity_type");
+            entity.Property(e => e.InviterId).HasColumnName("inviter_id");
             entity.Property(e => e.LocalAvatar)
                 .HasMaxLength(256)
                 .HasColumnName("local_avatar");
@@ -341,10 +338,14 @@ public partial class MyDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("core_organization_user_core_organization_id_fkey");
 
-            entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreOrganizationUsers)
+            entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreOrganizationUserCoreUsers)
                 .HasForeignKey(d => d.CoreUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("core_organization_user_core_user_id_fkey");
+
+            entity.HasOne(d => d.Inviter).WithMany(p => p.CoreOrganizationUserInviters)
+                .HasForeignKey(d => d.InviterId)
+                .HasConstraintName("core_organization_user_inviter_id_fkey");
         });
 
         modelBuilder.Entity<CoreUser>(entity =>
@@ -354,7 +355,7 @@ public partial class MyDbContext : DbContext
             entity.ToTable("core_user");
 
             entity.Property(e => e.Id)
-                .HasIdentityOptions(1001L, null, null, null, null, null)
+                .HasIdentityOptions(1021L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.Avatar)
                 .HasMaxLength(256)
@@ -365,9 +366,7 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.FamilyName)
                 .HasMaxLength(50)
                 .HasColumnName("family_name");
-            entity.Property(e => e.FrozenTime)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("frozen_time");
+            entity.Property(e => e.FrozenTime).HasColumnName("frozen_time");
             entity.Property(e => e.GivenName)
                 .HasMaxLength(50)
                 .HasColumnName("given_name");
@@ -431,6 +430,9 @@ public partial class MyDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(128)
                 .HasColumnName("name");
+            entity.Property(e => e.Timezone)
+                .HasMaxLength(64)
+                .HasColumnName("timezone");
 
             entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserDevices)
                 .HasForeignKey(d => d.CoreUserId)

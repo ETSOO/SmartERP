@@ -35,10 +35,10 @@ namespace Platform.Server.Endpoints.Auth.RQ
         public required string Region { get; init; }
 
         /// <summary>
-        /// Timezone name
-        /// 时区名称
+        /// Time zone
+        /// 时区
         /// </summary>
-        public required string Timezone { get; init; }
+        public required string TimeZone { get; init; }
 
         /// <summary>
         /// Validate the model
@@ -67,9 +67,9 @@ namespace Platform.Server.Endpoints.Auth.RQ
                 return ApplicationErrors.NoValidData.AsResult(nameof(Region));
             }
 
-            if (Timezone.Length is not (>= 3 and <= 64))
+            if (TimeZone.Length is not (>= 3 and <= 64))
             {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Timezone));
+                return ApplicationErrors.NoValidData.AsResult(nameof(TimeZone));
             }
 
             return null;

@@ -2,7 +2,7 @@
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.Localization;
+using com.etsoo.Database.Converters;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
 using com.etsoo.Web;
@@ -14,6 +14,7 @@ using Platform.Server.Templates;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Globalization;
@@ -43,6 +44,8 @@ namespace Platform.Server.Services
             // Member invitation, 3 days = 72 hours = 4320 minutes
             new(AuthCodeAction.MemberInvitationEmailCode, Properties.Resources.MemberInvitationEmailCode, 4320, RandStringKind.DigitAndLetter, 16, true, "/Templates/EmailMemberInvitation.cshtml")
         ];
+
+        static readonly Type CodeUserDataType = typeof(CodeUserData);
 
         readonly MyDbContext _db;
         readonly string _root;
@@ -191,50 +194,53 @@ namespace Platform.Server.Services
             // Auth code
             var authCode = CreateAuthCode(action, email, out var code);
 
+            // Time zone
+            var tz = TimeZoneUtils.GetTimeZone(data.TimeZone);
+
+            // Model
+            var dataModel = new AuthCodeEmailTemplateView
+            {
+                Id = authCode.Id,
+                Action = action,
+                Code = code,
+                Language = CultureInfo.CurrentCulture.Name,
+                TimeZone = tz,
+                LocalExpiry = authCode.Expiry.UtcToLocal(tz)
+            };
+
+            if (enhancer != null)
+            {
+                var (enhancedModel, json) = enhancer(dataModel);
+                dataModel = enhancedModel;
+                authCode.Data = json;
+            }
+
             try
             {
-                // Time zone
-                var tz = LocalizationUtils.GetTimeZone(data.TimeZone);
-
-                // Model
-                var dataModel = new AuthCodeEmailTemplateView
-                {
-                    Id = authCode.Id,
-                    Action = action,
-                    Code = code,
-                    Language = CultureInfo.CurrentCulture.Name,
-                    TimeZone = tz,
-                    LocalExpiry = authCode.Expiry.UtcToLocal(tz)
-                };
-
-                if (enhancer != null)
-                {
-                    var (enhancedModel, json) = enhancer(dataModel);
-                    dataModel = enhancedModel;
-                    authCode.Data = json;
-                }
-
-                // Template
-                var file = Path.Join(_root, action.Template);
-                var template = await RazorUtils.RenderAsync(file, dataModel);
-
-                // Message
-                var message = new SendEmailMessage
-                {
-                    Subject = dataModel.Subject ?? action.Name,
-                    Body = template,
-                    To = [emailAddress.ToString()]
-                };
-
-                await _queueService.PushAsync(message, PlatformSharedContext.Default.SendEmailMessage, cancellationToken);
-
                 // Save
                 result = await AddAuthCodeAsync(authCode, cancellationToken);
+
+                if (result.Ok)
+                {
+                    // Template
+                    var file = Path.Join(_root, action.Template);
+                    var template = await RazorUtils.RenderAsync(file, dataModel, [CodeUserDataType], cancellationToken);
+
+                    // Message
+                    var message = new SendEmailMessage
+                    {
+                        Subject = dataModel.Subject ?? action.Name,
+                        Body = template,
+                        To = [emailAddress.ToString()]
+                    };
+
+                    await _queueService.PushAsync(message, PlatformSharedContext.Default.SendEmailMessage, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
                 // Log for trace
-                ex.Data.Add("Model", JsonSerializer.Serialize(data, MyJsonSerializerContext.Default.SendSMSData));
+                ex.Data.Add("Model", JsonSerializer.Serialize(data, MyJsonSerializerContext.Default.SendEmailData));
                 ex.Data.Add("Action", JsonSerializer.Serialize(action, MyJsonSerializerContext.Default.AuthCodeActionItem));
 
                 LogException(ex);
@@ -342,18 +348,21 @@ namespace Platform.Server.Services
             // Enhance data
             enhancer?.Invoke(authCode);
 
-            // Send
-            await _queueService.PushAsync(new SendSMSMessage
-            {
-                Kind = SendSMSMessage.KindCode,
-                Culture = CultureInfo.CurrentCulture.Name,
-                Region = region,
-                To = [mobile],
-                Body = code
-            }, PlatformSharedContext.Default.SendSMSMessage, cancellationToken);
-
             // Save
             result = await AddAuthCodeAsync(authCode, cancellationToken);
+
+            if (result.Ok)
+            {
+                // Send
+                await _queueService.PushAsync(new SendSMSMessage
+                {
+                    Kind = SendSMSMessage.KindCode,
+                    Culture = CultureInfo.CurrentCulture.Name,
+                    Region = region,
+                    To = [mobile],
+                    Body = code
+                }, PlatformSharedContext.Default.SendSMSMessage, cancellationToken);
+            }
 
             // Return
             return result;

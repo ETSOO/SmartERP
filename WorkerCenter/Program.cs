@@ -88,9 +88,11 @@ services.AddDbContext<LogDbContext>((provider, options) =>
 }, ServiceLifetime.Singleton);
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
+services.AddSingleton<IMessageQueueProcessor, AcceptInvitationProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ChangePasswordProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginFailedProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginSuccessProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ResetPasswordProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendEmailProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendSMSProcessor>();
 services.AddLocalRabbitMQConsumer(consumerOptions);

@@ -29,7 +29,7 @@ namespace CoreApp.Server.Endpoints.Auth
                 ).WithDescription("API refresh token / 接口刷新令牌");
 
             g.MapPut("ExchangeToken", (ISEAuthService service, ApiTokenRQ rq, CancellationToken cancellation)
-                => service.ExchangeTokenAsync(rq.Token, cancellation)
+                => service.ExchangeTokenAsync(rq.Token, rq.TimeZone, cancellation)
                 ).WithDescription("API exchange token with core system / 接口和核心系统交换令牌");
 
             g.MapPut("RefreshToken", (ISEAuthService service, IHttpContextAccessor accessor, RefreshTokenRQ rq, CancellationToken cancellationToken)

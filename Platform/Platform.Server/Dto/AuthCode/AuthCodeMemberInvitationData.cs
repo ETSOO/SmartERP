@@ -1,5 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
-using Platform.Server.Dto.User;
+using PlatformShared.Dto;
 
 namespace Platform.Server.Dto.AuthCode
 {
@@ -13,7 +13,7 @@ namespace Platform.Server.Dto.AuthCode
         /// User data
         /// 用户信息
         /// </summary>
-        public required UserData UserData { get; init; }
+        public required CodeUserData UserData { get; init; }
 
         /// <summary>
         /// Web URL to access

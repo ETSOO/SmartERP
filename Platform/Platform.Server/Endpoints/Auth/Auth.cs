@@ -89,7 +89,8 @@ namespace Platform.Server.Endpoints.Auth
                 {
                     DeviceId = rq.DeviceId,
                     UserAgent = accessor.UserAgent(),
-                    Token = token
+                    Token = token,
+                    TimeZone = rq.TimeZone
                 };
 
                 var (result, newRefeshToken) = await service.RefreshTokenAsync(data, cancellationToken);

@@ -25,7 +25,8 @@ namespace PlatformShared.Extentions
                 IP = user.ClientIp.ToString(),
                 UserId = user.IdInt,
                 UserName = user.Name,
-                OrganizationId = user.OrganizationInt
+                OrganizationId = user.OrganizationInt,
+                TimeZone = (user.TimeZone ?? TimeZoneInfo.Local).Id
             };
         }
     }

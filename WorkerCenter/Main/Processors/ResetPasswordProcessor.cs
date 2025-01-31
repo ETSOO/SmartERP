@@ -9,24 +9,20 @@ using WorkerCenter.Templates;
 
 namespace WorkerCenter.Main.Processors
 {
-    /// <summary>
-    /// Change password processor
-    /// 修改密码处理器
-    /// </summary>
-    public class ChangePasswordProcessor : LogQueueProcessor<ChangePasswordMessage>
+    public class ResetPasswordProcessor : LogQueueProcessor<ResetPasswordMessage>
     {
         private readonly MyDbContext _db;
         private readonly IMessageQueueProducer _producer;
 
-        public ChangePasswordProcessor(ILogger<ChangePasswordProcessor> logger, LogDbContext logDb,
+        public ResetPasswordProcessor(ILogger<ResetPasswordProcessor> logger, LogDbContext logDb,
             MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.ChangePasswordMessage, logDb)
+            : base(logger, PlatformSharedContext.Default.ResetPasswordMessage, logDb)
         {
             _producer = producer;
             _db = db;
         }
 
-        protected override async Task ProcessMessageAsync(ChangePasswordMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
+        protected override async Task ProcessMessageAsync(ResetPasswordMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
             await base.ProcessMessageAsync(message, properties, cancellationToken);
 
@@ -47,12 +43,12 @@ namespace WorkerCenter.Main.Processors
                 var culture = message.Data.Culture;
                 var ci = CultureInfo.GetCultureInfo(culture);
                 var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ChangePassword), ci)!;
+                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ResetPassword), ci)!;
 
                 var data = new ActionNoticeData
                 {
                     Language = culture,
-                    Subject = string.Format(action, subject),
+                    Subject = string.Format(subject, action),
                     Action = action,
                     IP = message.Data.IP,
                     UserName = message.Data.UserName,

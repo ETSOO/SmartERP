@@ -18,8 +18,11 @@ using Platform.Server.Application;
 using Platform.Server.Dto.Member;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Public.RQ;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Globalization;
 using System.Web;
 
@@ -37,6 +40,7 @@ namespace Platform.Server.Services
         readonly IMapPlaceService _baidu;
         readonly IBridgeProxy _proxy;
         readonly IAuthCodeService _authCodeService;
+        readonly IQueueService _queueService;
 
         /// <summary>
         /// Constructor
@@ -58,7 +62,8 @@ namespace Platform.Server.Services
             IHttpContextAccessor accessor,
             IMapPlaceService baidu,
             IBridgeProxy proxy,
-            IAuthCodeService authCodeService)
+            IAuthCodeService authCodeService,
+            IQueueService queueService)
             : base(app, userAccessor.User, "public", logger)
         {
             _db = db;
@@ -67,6 +72,7 @@ namespace Platform.Server.Services
             _baidu = baidu;
             _proxy = proxy;
             _authCodeService = authCodeService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -84,7 +90,7 @@ namespace Platform.Server.Services
             }
 
             var code = await _authCodeService.ReadAsync(rq.Id, AuthCodeAction.MemberInvitationEmailCode, cancellationToken);
-            if (code == null)
+            if (code == null || !code.UserId.HasValue)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
@@ -102,6 +108,7 @@ namespace Platform.Server.Services
 
             var orgId = data.UserData.OrganizationId;
             var userId = User.IdInt;
+            var inviterId = code.UserId.Value;
             var exists = await _db.CoreOrganizationUsers.AnyAsync(ou => ou.CoreOrganizationId == orgId && ou.CoreUserId == userId, cancellationToken);
             if (!exists)
             {
@@ -110,7 +117,8 @@ namespace Platform.Server.Services
                     CoreOrganizationId = orgId,
                     CoreUserId = userId,
                     UserRole = data.UserRole,
-                    IdentityType = IdentityTypeFlags.User
+                    IdentityType = IdentityTypeFlags.User,
+                    InviterId = inviterId,
                 });
 
                 var user = await _db.CoreUsers.FindAsync([userId], cancellationToken: cancellationToken);
@@ -128,6 +136,14 @@ namespace Platform.Server.Services
                 }
 
                 await _db.SaveChangesAsync(cancellationToken);
+
+                // Log
+                await _queueService.PushAsync(new AcceptInvitationMessage
+                {
+                    Data = User.CreateMessageData(),
+                    InviterId = inviterId,
+                    UserData = data.UserData
+                }, PlatformSharedContext.Default.AcceptInvitationMessage, cancellationToken);
             }
 
             // Delete the code

@@ -61,6 +61,24 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Accept Invitation.
+        /// </summary>
+        internal static string AcceptInvitation {
+            get {
+                return ResourceManager.GetString("AcceptInvitation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have accepted &lt;b&gt;{0}&lt;/b&gt;&apos;s invitation to join &lt;b&gt;{1}&lt;/b&gt;..
+        /// </summary>
+        internal static string AcceptInvitationDetail {
+            get {
+                return ResourceManager.GetString("AcceptInvitationDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [SmartERP] {0} Notice.
         /// </summary>
         internal static string ActionNoticeSubject {
@@ -79,6 +97,24 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invitation Accepted.
+        /// </summary>
+        internal static string InvitationAccepted {
+            get {
+                return ResourceManager.GetString("InvitationAccepted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; has accepted your invitation to join &lt;b&gt;{1}&lt;/b&gt;..
+        /// </summary>
+        internal static string InvitationAcceptedDetail {
+            get {
+                return ResourceManager.GetString("InvitationAcceptedDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login Failed.
         /// </summary>
         internal static string LoginFailed {
@@ -88,7 +124,7 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Due to multiple failed login attempts, your account has been frozen for 30 minutes. Please try again after 30 minutes..
+        ///   Looks up a localized string similar to Account Frozen.
         /// </summary>
         internal static string LoginFailedFrozenAction {
             get {
@@ -97,11 +133,11 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Account Frozen.
+        ///   Looks up a localized string similar to Due to multiple failed login attempts, your account has been frozen for 30 minutes. Please try again after 30 minutes..
         /// </summary>
-        internal static string LoginFailedFrozenSubject {
+        internal static string LoginFailedFrozenDetail {
             get {
-                return ResourceManager.GetString("LoginFailedFrozenSubject", resourceCulture);
+                return ResourceManager.GetString("LoginFailedFrozenDetail", resourceCulture);
             }
         }
         
@@ -111,6 +147,15 @@ namespace WorkerCenter.Properties {
         internal static string LoginSuccess {
             get {
                 return ResourceManager.GetString("LoginSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset Password.
+        /// </summary>
+        internal static string ResetPassword {
+            get {
+                return ResourceManager.GetString("ResetPassword", resourceCulture);
             }
         }
     }

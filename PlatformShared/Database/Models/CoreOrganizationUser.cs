@@ -100,6 +100,12 @@ namespace PlatformShared.Database.Models
         public EntityStatus Status { get; set; } = EntityStatus.Normal;
 
         /// <summary>
+        /// Inviter id
+        /// 邀请人编号
+        /// </summary>
+        public int? InviterId { get; set; }
+
+        /// <summary>
         /// Core organization
         /// 核心机构
         /// </summary>
@@ -110,5 +116,11 @@ namespace PlatformShared.Database.Models
         /// 核心用户
         /// </summary>
         public CoreUser CoreUser { get; set; } = default!;
+
+        /// <summary>
+        /// Inviter
+        /// 邀请人
+        /// </summary>
+        public CoreUser Inviter { get; set; } = default!;
     }
 }

@@ -11,10 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Dto.Member;
-using Platform.Server.Dto.User;
 using Platform.Server.Endpoints.Member.RQ;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using System.Buffers;
 using System.Collections.Concurrent;
 
@@ -61,7 +61,6 @@ namespace Platform.Server.Services
         {
             var result = await _db.CoreOrganizationUsers.Where(ou => ou.Id == id
                 && ou.CoreOrganizationId == User.OrganizationInt
-                && ou.CoreOrganization.OwnerId != User.IdInt
                 && ou.Status == EntityStatus.Deleted
                 && ou.UserRole < User.Role)
             .ExecuteDeleteAsync(cancellationToken);
@@ -144,7 +143,7 @@ namespace Platform.Server.Services
 
             // Data
             var orgId = User.OrganizationInt;
-            var data = new UserData
+            var data = new CodeUserData
             {
                 Name = User.Name,
                 FamilyName = User.FamilyName,
@@ -159,7 +158,7 @@ namespace Platform.Server.Services
             {
                 // User already exists
                 var userExists = await _db.CoreOrganizationUsers.AnyAsync(ou => ou.CoreOrganizationId == orgId
-                    && ou.CoreUser.CoreUserIdentifiers.Any(i => i.Type == CoreUserIdentifierType.Email && i.Value == email), cancelToken);
+                    && ou.CoreUser.CoreUserIdentifiers.Any(i => i.CoreUserId == ou.CoreUserId && i.Type == CoreUserIdentifierType.Email && i.Value == email), cancelToken);
 
                 if (userExists)
                 {
@@ -171,7 +170,7 @@ namespace Platform.Server.Services
                     Action = AuthCodeAction.MemberInvitationEmailCode,
                     Email = email,
                     Region = User.Region,
-                    TimeZone = rq.TimeZone,
+                    TimeZone = (User.TimeZone ?? TimeZoneInfo.Local).Id,
                     Data = new AuthCodeMemberInvitationData
                     {
                         UserData = data,
