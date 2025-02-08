@@ -1,8 +1,8 @@
 ﻿using com.etsoo.MessageQueue;
-using Microsoft.EntityFrameworkCore;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Globalization;
 using WorkerCenter.Templates;
@@ -35,11 +35,7 @@ namespace WorkerCenter.Main.Processors
 
             // Send email notice
             // Emails
-            var emails = await _db.CoreUserIdentifiers
-                .AsNoTracking()
-                .Where(i => i.CoreUserId == userId && i.Type == CoreUserIdentifierType.Email)
-                .Select(i => i.Value)
-                .ToArrayAsync(cancellationToken);
+            var emails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId]))[0];
 
             if (emails.Length > 0)
             {
@@ -49,16 +45,10 @@ namespace WorkerCenter.Main.Processors
                 var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
                 var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ChangePassword), ci)!;
 
-                var data = new ActionNoticeData
-                {
-                    Language = culture,
-                    Subject = string.Format(action, subject),
-                    Action = action,
-                    IP = message.Data.IP,
-                    UserName = message.Data.UserName,
-                    TimeZone = message.Data.TimeZone,
-                    TimeStamp = message.Data.TimeStamp
-                };
+                var data = new ActionNoticeData(message.Data,
+                    string.Format(action, subject),
+                    action
+                );
 
                 var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
 

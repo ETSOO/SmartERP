@@ -140,8 +140,7 @@ namespace Platform.Server.Services
                 // Log
                 await _queueService.PushAsync(new AcceptInvitationMessage
                 {
-                    Data = User.CreateMessageData(),
-                    InviterId = inviterId,
+                    Data = User.CreateMessageData(inviterId),
                     UserData = data.UserData
                 }, PlatformSharedContext.Default.AcceptInvitationMessage, cancellationToken);
             }

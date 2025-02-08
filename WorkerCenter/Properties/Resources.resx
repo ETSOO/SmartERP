@@ -150,4 +150,46 @@
   <data name="InvitationAcceptedDetail" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; has accepted your invitation to join &lt;b&gt;{1}&lt;/b&gt;.</value>
   </data>
+  <data name="LeaveOrg" xml:space="preserve">
+    <value>Leave Organization</value>
+  </data>
+  <data name="LeaveOrgDetail" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; (inviter: {1}) left &lt;b&gt;{2}&lt;/b&gt; on his own initiative</value>
+  </data>
+  <data name="UpdateOrgAvatar" xml:space="preserve">
+    <value>Update Organization Avatar</value>
+  </data>
+  <data name="UpdateMemberAvatar" xml:space="preserve">
+    <value>Update Member Avatar</value>
+  </data>
+  <data name="UpdateUserAvatar" xml:space="preserve">
+    <value>Update Avatar</value>
+  </data>
+  <data name="DeleteMember" xml:space="preserve">
+    <value>Remove Member</value>
+  </data>
+  <data name="DeleteMemberDetail" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; removed member &lt;b&gt;{2}&lt;/b&gt; from &lt;b&gt;{1}&lt;/b&gt; (invited by: {3})</value>
+  </data>
+  <data name="AddUserIdentifier" xml:space="preserve">
+    <value>Add User Identifier</value>
+  </data>
+  <data name="AddUserIdentifierDetail" xml:space="preserve">
+    <value>Type: &lt;b&gt;{0}&lt;/b&gt;, Value: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="DeleteUserIdentifier" xml:space="preserve">
+    <value>Delete User Identifier</value>
+  </data>
+  <data name="UpdateMember" xml:space="preserve">
+    <value>Update Member</value>
+  </data>
+  <data name="UpdateApp" xml:space="preserve">
+    <value>Update Application</value>
+  </data>
+  <data name="CreateApiKey" xml:space="preserve">
+    <value>Create API Key</value>
+  </data>
+  <data name="UpdateOrg" xml:space="preserve">
+    <value>Update Organization</value>
+  </data>
 </root>

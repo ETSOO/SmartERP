@@ -121,6 +121,6 @@ namespace PlatformShared.Database.Models
         /// Inviter
         /// 邀请人
         /// </summary>
-        public CoreUser Inviter { get; set; } = default!;
+        public CoreUser? Inviter { get; set; }
     }
 }

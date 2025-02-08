@@ -1,4 +1,6 @@
 ﻿using com.etsoo.Database.Converters;
+using PlatformShared.Messages;
+using System.Diagnostics.CodeAnalysis;
 
 namespace WorkerCenter.Templates
 {
@@ -69,6 +71,27 @@ namespace WorkerCenter.Templates
                 _tz ??= TimeZoneUtils.GetTimeZone(TimeZone);
                 return _tz;
             }
+        }
+
+        /// <summary>
+        /// Constructor
+        /// 构造函数
+        /// </summary>
+        /// <param name="data">Message data</param>
+        /// <param name="subject">Subject</param>
+        /// <param name="action">Action</param>
+        /// <param name="detail">Detail</param>
+        [SetsRequiredMembers]
+        public ActionNoticeData(CommonMessageData data, string subject, string action, string? detail = null)
+        {
+            Language = data.Culture;
+            Subject = subject;
+            UserName = data.UserName;
+            Action = action;
+            Detail = detail;
+            IP = data.IP;
+            TimeZone = data.TimeZone;
+            TimeStamp = data.TimeStamp;
         }
     }
 }

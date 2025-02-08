@@ -21,12 +21,6 @@ namespace PlatformShared.Messages
         public static string Type => "AcceptInvitation";
 
         /// <summary>
-        /// Inviter id
-        /// 邀请人编号
-        /// </summary>
-        public required int InviterId { get; init; }
-
-        /// <summary>
         /// Inviter data
         /// 邀请人信息
         /// </summary>

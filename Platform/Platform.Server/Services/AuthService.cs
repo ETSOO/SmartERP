@@ -596,7 +596,7 @@ namespace Platform.Server.Services
             // Log
             await _queueService.PushAsync(new ChangePasswordMessage
             {
-                Data = User.CreateMessageData()
+                Data = User.CreateMessageData(0)
             }, PlatformSharedContext.Default.ChangePasswordMessage, cancellationToken);
 
             return ActionResult.Success;
@@ -653,7 +653,8 @@ namespace Platform.Server.Services
                         UserId = login.Id,
                         UserName = login.Name,
                         OrganizationId = null,
-                        TimeZone = rq.TimeZone
+                        TimeZone = rq.TimeZone,
+                        TargetId = 0
                     },
                     Reason = "Password",
                     UserAgent = userAgent
@@ -700,7 +701,8 @@ namespace Platform.Server.Services
                         UserId = login.Id,
                         UserName = login.Name,
                         OrganizationId = moreData?.OrganizationId,
-                        TimeZone = rq.TimeZone
+                        TimeZone = rq.TimeZone,
+                        TargetId = 0
                     },
                     UserAgent = userAgent
                 }, PlatformSharedContext.Default.LoginSuccessMessage, cancellationToken);
@@ -717,7 +719,8 @@ namespace Platform.Server.Services
                         UserId = login.Id,
                         UserName = login.Name,
                         OrganizationId = moreData?.OrganizationId,
-                        TimeZone = rq.TimeZone
+                        TimeZone = rq.TimeZone,
+                        TargetId = 0
                     },
                     Reason = loginResult.Type,
                     UserAgent = userAgent
@@ -1876,7 +1879,8 @@ namespace Platform.Server.Services
                         UserId = user.Id,
                         UserName = user.Name,
                         OrganizationId = null,
-                        TimeZone = rq.TimeZone
+                        TimeZone = rq.TimeZone,
+                        TargetId = 0
                     },
                     UserAgent = userAgent
                 }, PlatformSharedContext.Default.ResetPasswordMessage, cancellationToken);

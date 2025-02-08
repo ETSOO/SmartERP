@@ -11,8 +11,11 @@ using Platform.Server.Dto.App;
 using Platform.Server.Dto.User;
 using Platform.Server.Endpoints.AuthCode.RQ;
 using Platform.Server.Endpoints.User.RQ;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Buffers;
 using System.Diagnostics;
 
@@ -28,30 +31,35 @@ namespace Platform.Server.Services
         readonly LogDbContext _logDb;
         readonly IStorage _storage;
         readonly IAuthCodeService _authCodeService;
+        readonly IQueueService _queueService;
 
         /// <summary>
         /// Constructor
         /// 构造函数
         /// </summary>
         /// <param name="db">Database EF</param>
+        /// <param name="logDb">Log DB</param>
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="storage">Storage</param>
         /// <param name="authCodeService">AuthCode service</param>
+        /// <param name="queueService">Queue service</param>
         public UserService(MyDbContext db,
             LogDbContext logDb,
             IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<UserService> logger,
             IStorage storage,
-            IAuthCodeService authCodeService)
+            IAuthCodeService authCodeService,
+            IQueueService queueService)
             : base(app, userAccessor.UserSafe, "user", logger)
         {
             _db = db;
             _logDb = logDb;
             _storage=storage;
             _authCodeService = authCodeService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -120,6 +128,14 @@ namespace Platform.Server.Services
 
                 id = identifier.Id;
             }
+
+            // Push message
+            await _queueService.PushAsync(new AddUserIdentifierMessage
+            {
+                Data = User.CreateMessageData(id),
+                IdentifierType = identifier.Type,
+                IdentifierValue = identifier.Value
+            }, PlatformSharedContext.Default.AddUserIdentifierMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -209,8 +225,9 @@ namespace Platform.Server.Services
         /// <returns>Task</returns>
         public async Task AuditHistoryAsync(AuditHistoryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            var orgId = User.OrganizationInt;
             var (hasContent, commandText) = await _logDb.CoreLogs.AsNoTracking()
-                .Where(d => d.UserId == User.IdInt)
+                .Where(d => d.UserId == User.IdInt && (d.OrganizationId == null || d.OrganizationId == orgId))
                 .QueryEtsoo(rq, d => d.Id, null, (q) =>
                 {
                     if (rq.Keyword?.Length > 1)
@@ -221,6 +238,11 @@ namespace Platform.Server.Services
                     if (rq.DeviceId.HasValue)
                     {
                         q = q.Where(d => d.DeviceId == rq.DeviceId);
+                    }
+
+                    if (rq.TargetId.HasValue)
+                    {
+                        q = q.Where(d => d.TargetId == rq.TargetId);
                     }
 
                     if (rq.Kind?.Length > 1)
@@ -258,14 +280,27 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteIdentifierAsync(int id, CancellationToken cancellationToken = default)
         {
-            var affacted = await _db.CoreUserIdentifiers.Where(d => d.Id == id
+            var data = await _db.CoreUserIdentifiers.Where(d => d.Id == id
                     && d.CoreUserId == User.IdInt
                     && (d.Type > CoreUserIdentifierType.Mobile || _db.CoreUserIdentifiers.Any(sub => sub.CoreUserId == User.IdInt && sub.Type == d.Type && sub.Id != id)))
-                .ExecuteDeleteAsync(cancellationToken);
-            if (affacted == 0)
+                .Select(d => new { d.Type, d.Value })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (data == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
+
+            await _db.CoreUserIdentifiers.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new DeleteUserIdentifierMessage
+            {
+                Data = User.CreateMessageData(id),
+                IdentifierType = data.Type,
+                IdentifierValue = data.Value
+            }, PlatformSharedContext.Default.DeleteUserIdentifierMessage, cancellationToken);
+
             return ActionResult.Succeed(id);
         }
 
@@ -405,6 +440,12 @@ namespace Platform.Server.Services
                 // Remove current avatar
                 if (!string.IsNullOrEmpty(User.Avatar))
                     await _storage.DeleteUrlAsync(User.Avatar, cancellationToken);
+
+                // Push message
+                await _queueService.PushAsync(new UpdateUserAvatarMessage
+                {
+                    Data = User.CreateMessageData(0)
+                }, PlatformSharedContext.Default.UpdateUserAvatarMessage, cancellationToken);
 
                 // Return
                 return ActionResult.Succeed(url);

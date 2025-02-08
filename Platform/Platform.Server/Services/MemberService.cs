@@ -12,9 +12,12 @@ using Platform.Server.Application;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Dto.Member;
 using Platform.Server.Endpoints.Member.RQ;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Buffers;
 using System.Collections.Concurrent;
 
@@ -29,6 +32,7 @@ namespace Platform.Server.Services
         readonly MyDbContext _db;
         readonly IStorage _storage;
         readonly IAuthCodeService _authCodeService;
+        readonly IQueueService _queueService;
 
         /// <summary>
         /// Constructor
@@ -40,14 +44,17 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="storage">Storage</param>
         /// <param name="authCodeService">Auth code service</param>
+        /// <param name="queueService">Queue service</param>
         /// 
         public MemberService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<MemberService> logger,
-            IStorage storage, IAuthCodeService authCodeService)
+            IStorage storage, IAuthCodeService authCodeService,
+            IQueueService queueService)
             : base(app, userAccessor.UserSafe, "member", logger)
         {
             _db = db;
             _storage=storage;
             _authCodeService = authCodeService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -59,16 +66,31 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            var result = await _db.CoreOrganizationUsers.Where(ou => ou.Id == id
-                && ou.CoreOrganizationId == User.OrganizationInt
-                && ou.Status == EntityStatus.Deleted
-                && ou.UserRole < User.Role)
-            .ExecuteDeleteAsync(cancellationToken);
+            var ou = await _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.Id == id
+                    && ou.CoreOrganizationId == User.OrganizationInt
+                    && ou.Status == EntityStatus.Deleted
+                    && ou.UserRole < User.Role)
+                .Select(ou => new { ou.InviterId, InviterName = ou.Inviter == null ? null : ou.Inviter.Name, ou.CoreUserId, Name = ou.LocalName ?? ou.CoreUser.Name })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (result < 1)
+            if (ou == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
+
+            // Delete
+            await _db.CoreOrganizationUsers.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new DeleteMemberMessage
+            {
+                Data = User.CreateMessageData(ou.CoreUserId, ou.Name),
+                OrgName = User.OrganizationName ?? "Unknown",
+                InviterId = ou.InviterId,
+                InviterName = ou.InviterName
+            }, PlatformSharedContext.Default.DeleteMemberMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -93,6 +115,11 @@ namespace Platform.Server.Services
                     if (rq.UserRoleStart.HasValue)
                     {
                         q = q.Where(ou => ou.UserRole >= rq.UserRoleStart);
+                    }
+
+                    if (rq.InviterId.HasValue)
+                    {
+                        q = q.Where(ou => ou.InviterId == rq.InviterId);
                     }
 
                     if (rq.Keyword?.Length > 1)
@@ -286,7 +313,8 @@ namespace Platform.Server.Services
                 ou.Creation,
                 ou.Expiry,
                 ou.RefreshTime,
-                ou.Status
+                ou.Status,
+                Inviter = ou.Inviter == null ? null : ou.Inviter.Name
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -299,14 +327,22 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> UpdateAsync(MemberUpdateRQ rq, CancellationToken cancellationToken = default)
         {
-            var ou = await _db.CoreOrganizationUsers.FirstOrDefaultAsync(o => o.Id == rq.Id
+            var ou = await _db.CoreOrganizationUsers.Where(o => o.Id == rq.Id
                 && o.CoreOrganizationId == User.OrganizationInt
-                && o.UserRole <= User.Role, cancellationToken);
+                && o.UserRole <= User.Role)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (ou == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
+
+            // Name
+            var name = await _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.Id == rq.Id)
+                .Select(ou => ou.LocalName ?? ou.CoreUser.Name)
+                .FirstOrDefaultAsync(cancellationToken);
 
             // Is not self
             var isNotSelf = ou.CoreUserId != User.IdInt && ou.UserRole < User.Role;
@@ -343,8 +379,18 @@ namespace Platform.Server.Services
                 ou.Status = rq.Status.Value;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new UpdateMemberMessage
+            {
+                Data = User.CreateMessageData(rq.Id, name),
+                Changes = changes
+            }, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -370,7 +416,7 @@ namespace Platform.Server.Services
             // Check the avatar
             var ou = await _db.CoreOrganizationUsers.AsNoTracking()
                 .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt)
-                .Select(ou => new { ou.LocalAvatar })
+                .Select(ou => new { ou.LocalAvatar, Name = ou.LocalName ?? ou.CoreUser.Name })
                 .FirstOrDefaultAsync(cancellationToken);
             if (ou == null)
             {
@@ -400,6 +446,12 @@ namespace Platform.Server.Services
                 // Remove current avatar
                 if (!string.IsNullOrEmpty(ou.LocalAvatar))
                     await _storage.DeleteUrlAsync(ou.LocalAvatar, cancellationToken);
+
+                // Push message
+                await _queueService.PushAsync(new UpdateMemberAvatarMessage
+                {
+                    Data = User.CreateMessageData(id, ou.Name)
+                }, PlatformSharedContext.Default.UpdateMemberAvatarMessage, cancellationToken);
 
                 // Return
                 return ActionResult.Succeed(url);

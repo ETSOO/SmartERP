@@ -1,4 +1,6 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.MessageQueue;
+using Microsoft.EntityFrameworkCore;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -9,28 +11,45 @@ using WorkerCenter.Templates;
 
 namespace WorkerCenter.Main.Processors
 {
-    public class ResetPasswordProcessor : LogQueueProcessor<ResetPasswordMessage>
+    /// <summary>
+    /// Create API key processor
+    /// 创建API密钥处理器
+    /// </summary>
+    public class CreateApiKeyProcessor : LogQueueProcessor<CreateApiKeyMessage>
     {
         private readonly MyDbContext _db;
         private readonly IMessageQueueProducer _producer;
 
-        public ResetPasswordProcessor(ILogger<ResetPasswordProcessor> logger, LogDbContext logDb,
+        public CreateApiKeyProcessor(ILogger<CreateApiKeyProcessor> logger, LogDbContext logDb,
             MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.ResetPasswordMessage, logDb)
+            : base(logger, PlatformSharedContext.Default.CreateApiKeyMessage, logDb)
         {
             _producer = producer;
             _db = db;
         }
 
-        protected override async Task ProcessMessageAsync(ResetPasswordMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
+        protected override async Task ProcessMessageAsync(CreateApiKeyMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
             await base.ProcessMessageAsync(message, properties, cancellationToken);
 
             // User id
             var userId = message.Data.UserId;
 
+            // Organization id
+            var orgId = message.Data.OrganizationId;
+
+            // All admins
+            var admins = await _db.CoreOrganizationUsers
+                .Where(ou => ou.CoreOrganizationId == orgId && ou.UserRole >= UserRole.Admin)
+                .Select(ou => ou.CoreUserId)
+                .ToArrayAsync(cancellationToken);
+            ;
+
             // Send email notice
-            var emails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId]))[0];
+            // Emails
+            var allEmails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], admins));
+            var emails = allEmails[0];
+            var adminEmails = allEmails[1];
 
             if (emails.Length > 0)
             {
@@ -38,11 +57,11 @@ namespace WorkerCenter.Main.Processors
                 var culture = message.Data.Culture;
                 var ci = CultureInfo.GetCultureInfo(culture);
                 var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ResetPassword), ci)!;
+                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.CreateApiKey), ci)!;
 
                 var data = new ActionNoticeData(message.Data,
-                    string.Format(subject, action),
-                    action
+                    string.Format(action, subject),
+                    $"{action} ({message.Data.TargetName})"
                 );
 
                 var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
@@ -53,6 +72,7 @@ namespace WorkerCenter.Main.Processors
                     Subject = data.Subject,
                     Body = body,
                     To = emails,
+                    Cc = adminEmails,
                     Importance = EmailImportance.High
                 };
 

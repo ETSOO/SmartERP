@@ -25,5 +25,11 @@ namespace Platform.Server.Endpoints.Member.RQ
         /// 用户角色起始
         /// </summary>
         public UserRole? UserRoleStart { get; init; }
+
+        /// <summary>
+        /// Inviter id
+        /// 邀请人编号
+        /// </summary>
+        public int? InviterId { get; init; }
     }
 }

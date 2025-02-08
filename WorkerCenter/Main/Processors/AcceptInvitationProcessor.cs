@@ -1,9 +1,12 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
+using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
 using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;
 using System.Globalization;
@@ -37,6 +40,7 @@ namespace WorkerCenter.Main.Processors
         private async Task LogAsync(AcceptInvitationMessage message, int userId, string kind, CancellationToken cancellationToken)
         {
             var data = message.Data;
+            var orgId = message.UserData.OrganizationId;
 
             var title = Properties.Resources.ResourceManager.GetString(kind) ?? kind;
             if (message.Data.UserId == userId)
@@ -56,7 +60,7 @@ namespace WorkerCenter.Main.Processors
                 Data = message.GetMoreData(),
                 DeviceId = data.DeviceId,
                 Ip = IPAddress.Parse(data.IP),
-                OrganizationId = data.OrganizationId,
+                OrganizationId = orgId,
                 Title = title,
                 UserId = userId,
                 Kind = kind
@@ -70,48 +74,49 @@ namespace WorkerCenter.Main.Processors
         {
             // Notice inviter
             // 通知邀请人
-            var inviterId = message.InviterId;
-
-            // Inviter name
+            var inviterId = (int)message.Data.TargetId;
             var inviter = HttpUtility.HtmlEncode(message.UserData.Name);
 
-            // Invitee name
+            // Invitee
+            var userId = message.Data.UserId;
             var invitee = HttpUtility.HtmlEncode(message.Data.UserName);
 
             // Organization name
             var orgName = HttpUtility.HtmlEncode(message.UserData.OrganizationName);
 
+            // Organization owner
+            var organizationId = message.UserData.OrganizationId;
+            var owners = await _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.CoreOrganizationId == organizationId && ou.UserRole == UserRole.Founder && ou.Status <= EntityStatus.Approved)
+                .Select(ou => ou.CoreUserId)
+                .ToListAsync(cancellationToken)
+            ;
+
             var culture = message.Data.Culture;
             var ci = CultureInfo.GetCultureInfo(culture);
             var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
 
-            // Send email notice
-            var inviterEmails = await _db.CoreUserIdentifiers
-                .AsNoTracking()
-                .Where(i => i.CoreUserId == inviterId && i.Type == CoreUserIdentifierType.Email)
-                .Select(i => i.Value)
-                .ToArrayAsync(cancellationToken);
+            // Emails
+            var emails = await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], [inviterId], owners);
 
-            if (inviterEmails.Length > 0)
+            // Log
+            await LogAsync(message, inviterId, nameof(Properties.Resources.InvitationAccepted), cancellationToken);
+
+            var inviterEmails = emails[1];
+            var ownerEmails = emails[2];
+
+            if (inviterEmails.Length > 0 || ownerEmails.Length > 0)
             {
-                // Log
-                await LogAsync(message, inviterId, nameof(Properties.Resources.InvitationAccepted), cancellationToken);
-
                 var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvitationAccepted), ci)!;
                 var detail = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvitationAcceptedDetail), ci)!;
 
                 // Load email template
-                var data = new ActionNoticeData
-                {
-                    Language = culture,
-                    Subject = string.Format(subject, $"{action} - {invitee}"),
-                    Action = action,
-                    Detail = string.Format(detail, invitee, orgName),
-                    IP = message.Data.IP,
-                    UserName = inviter,
-                    TimeZone = message.Data.TimeZone,
-                    TimeStamp = message.Data.TimeStamp
-                };
+                var data = new ActionNoticeData(message.Data,
+                    string.Format(subject, $"{action} - {invitee}"),
+                    $"{action} ({inviter})",
+                    string.Format(detail, invitee, orgName)
+                );
 
                 var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
 
@@ -120,53 +125,41 @@ namespace WorkerCenter.Main.Processors
                 {
                     Subject = data.Subject,
                     Body = body,
-                    To = inviterEmails
+                    To = inviterEmails,
+                    Cc = ownerEmails
                 };
 
                 await _producer.SendJsonAsync(email, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
             }
 
+            // Log
+            await LogAsync(message, userId, nameof(Properties.Resources.AcceptInvitation), cancellationToken);
+
             // 通知受邀人
-            var userId = message.Data.UserId;
-
-            var emails = await _db.CoreUserIdentifiers
-                .AsNoTracking()
-                .Where(i => i.CoreUserId == userId && i.Type == CoreUserIdentifierType.Email)
-                .Select(i => i.Value)
-                .ToArrayAsync(cancellationToken);
-
-            if (emails.Length > 0)
+            var inviteeEmails = emails[0];
+            if (inviteeEmails.Length > 0)
             {
-                // Log
-                await LogAsync(message, userId, nameof(Properties.Resources.AcceptInvitation), cancellationToken);
-
                 var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.AcceptInvitation), ci)!;
                 var detail = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.AcceptInvitationDetail), ci)!;
 
                 // Load email template
-                var data = new ActionNoticeData
-                {
-                    Language = culture,
-                    Subject = string.Format(subject, $"{action} - {inviter}"),
-                    Action = action,
-                    Detail = string.Format(detail, inviter, orgName),
-                    IP = message.Data.IP,
-                    UserName = invitee,
-                    TimeZone = message.Data.TimeZone,
-                    TimeStamp = message.Data.TimeStamp
-                };
+                var inviteeData = new ActionNoticeData(message.Data,
+                    string.Format(subject, $"{action} - {inviter}"),
+                    action,
+                    string.Format(detail, inviter, orgName)
+                );
 
-                var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
+                var inviteeBody = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, inviteeData);
 
                 // Send email notice
-                var email = new SendEmailMessage
+                var inviteeeEmail = new SendEmailMessage
                 {
-                    Subject = data.Subject,
-                    Body = body,
-                    To = emails
+                    Subject = inviteeData.Subject,
+                    Body = inviteeBody,
+                    To = inviteeEmails
                 };
 
-                await _producer.SendJsonAsync(email, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
+                await _producer.SendJsonAsync(inviteeeEmail, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
             }
         }
     }

@@ -51,6 +51,18 @@ namespace PlatformShared.Messages
         public required string TimeZone { get; init; }
 
         /// <summary>
+        /// Target id
+        /// 目标编号
+        /// </summary>
+        public required long TargetId { get; init; }
+
+        /// <summary>
+        /// Target name
+        /// 目标名称
+        /// </summary>
+        public string? TargetName { get; init; }
+
+        /// <summary>
         /// Time stamp
         /// 时间戳
         /// </summary>
@@ -61,9 +73,22 @@ namespace PlatformShared.Messages
     /// Common message
     /// 通用消息
     /// </summary>
+    [JsonDerivedType(typeof(AcceptInvitationMessage))]
+    [JsonDerivedType(typeof(AddUserIdentifierMessage))]
     [JsonDerivedType(typeof(ChangePasswordMessage))]
+    [JsonDerivedType(typeof(CreateApiKeyMessage))]
+    [JsonDerivedType(typeof(DeleteMemberMessage))]
+    [JsonDerivedType(typeof(DeleteUserIdentifierMessage))]
+    [JsonDerivedType(typeof(LeaveOrgMessage))]
     [JsonDerivedType(typeof(LoginFailedMessage))]
     [JsonDerivedType(typeof(LoginSuccessMessage))]
+    [JsonDerivedType(typeof(ResetPasswordMessage))]
+    [JsonDerivedType(typeof(UpdateAppMessage))]
+    [JsonDerivedType(typeof(UpdateMemberAvatarMessage))]
+    [JsonDerivedType(typeof(UpdateMemberMessage))]
+    [JsonDerivedType(typeof(UpdateOrgAvatarMessage))]
+    [JsonDerivedType(typeof(UpdateOrgMessage))]
+    [JsonDerivedType(typeof(UpdateUserAvatarMessage))]
 
     public abstract record CommonMessage
     {

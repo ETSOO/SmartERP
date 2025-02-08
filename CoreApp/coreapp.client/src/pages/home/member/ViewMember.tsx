@@ -92,6 +92,10 @@ export default function ViewMember() {
           label: "identityType"
         },
         {
+          data: "inviter",
+          label: "inviter"
+        },
+        {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"
         },

@@ -40,13 +40,16 @@ namespace WorkerCenter.Main.Processors
                 Body = new TextPart(TextFormat.Html) { Text = message.Body }
             };
 
+            // Add recipients
+            // Avoid duplicate addresses
+
             email.To.AddRange(ParseAddresss(message.To));
 
             if (message.Cc != null)
-                email.Cc.AddRange(ParseAddresss(message.Cc));
+                email.Cc.AddRange(ParseAddresss(message.Cc.Where(c => !message.To.Contains(c))));
 
             if (message.Bcc != null)
-                email.Bcc.AddRange(ParseAddresss(message.Bcc));
+                email.Bcc.AddRange(ParseAddresss(message.Bcc.Where(b => !message.To.Contains(b) && (message.Cc == null || !message.Cc.Contains(b)))));
 
             if (message.Importance != null)
             {

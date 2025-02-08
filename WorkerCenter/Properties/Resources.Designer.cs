@@ -88,11 +88,65 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add User Identifier.
+        /// </summary>
+        internal static string AddUserIdentifier {
+            get {
+                return ResourceManager.GetString("AddUserIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type: &lt;b&gt;{0}&lt;/b&gt;, Value: &lt;b&gt;{1}&lt;/b&gt;.
+        /// </summary>
+        internal static string AddUserIdentifierDetail {
+            get {
+                return ResourceManager.GetString("AddUserIdentifierDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Change Password.
         /// </summary>
         internal static string ChangePassword {
             get {
                 return ResourceManager.GetString("ChangePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create API Key.
+        /// </summary>
+        internal static string CreateApiKey {
+            get {
+                return ResourceManager.GetString("CreateApiKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove Member.
+        /// </summary>
+        internal static string DeleteMember {
+            get {
+                return ResourceManager.GetString("DeleteMember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; removed member &lt;b&gt;{2}&lt;/b&gt; from &lt;b&gt;{1}&lt;/b&gt; (invited by: {3}).
+        /// </summary>
+        internal static string DeleteMemberDetail {
+            get {
+                return ResourceManager.GetString("DeleteMemberDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete User Identifier.
+        /// </summary>
+        internal static string DeleteUserIdentifier {
+            get {
+                return ResourceManager.GetString("DeleteUserIdentifier", resourceCulture);
             }
         }
         
@@ -111,6 +165,24 @@ namespace WorkerCenter.Properties {
         internal static string InvitationAcceptedDetail {
             get {
                 return ResourceManager.GetString("InvitationAcceptedDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Leave Organization.
+        /// </summary>
+        internal static string LeaveOrg {
+            get {
+                return ResourceManager.GetString("LeaveOrg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; (inviter: {1}) left &lt;b&gt;{2}&lt;/b&gt; on his own initiative.
+        /// </summary>
+        internal static string LeaveOrgDetail {
+            get {
+                return ResourceManager.GetString("LeaveOrgDetail", resourceCulture);
             }
         }
         
@@ -156,6 +228,60 @@ namespace WorkerCenter.Properties {
         internal static string ResetPassword {
             get {
                 return ResourceManager.GetString("ResetPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Application.
+        /// </summary>
+        internal static string UpdateApp {
+            get {
+                return ResourceManager.GetString("UpdateApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Member.
+        /// </summary>
+        internal static string UpdateMember {
+            get {
+                return ResourceManager.GetString("UpdateMember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Member Avatar.
+        /// </summary>
+        internal static string UpdateMemberAvatar {
+            get {
+                return ResourceManager.GetString("UpdateMemberAvatar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Organization.
+        /// </summary>
+        internal static string UpdateOrg {
+            get {
+                return ResourceManager.GetString("UpdateOrg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Organization Avatar.
+        /// </summary>
+        internal static string UpdateOrgAvatar {
+            get {
+                return ResourceManager.GetString("UpdateOrgAvatar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Avatar.
+        /// </summary>
+        internal static string UpdateUserAvatar {
+            get {
+                return ResourceManager.GetString("UpdateUserAvatar", resourceCulture);
             }
         }
     }

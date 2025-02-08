@@ -1,5 +1,4 @@
-﻿using com.etsoo.MessageQueue;
-using PlatformShared;
+﻿using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Messages;
 
@@ -14,11 +13,6 @@ namespace WorkerCenter.Main.Processors
         public LoginSuccessProcessor(ILogger<LoginSuccessProcessor> logger, LogDbContext logDb)
             : base(logger, PlatformSharedContext.Default.LoginSuccessMessage, logDb)
         {
-        }
-
-        protected override Task ProcessMessageAsync(LoginSuccessMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
-        {
-            return base.ProcessMessageAsync(message, properties, cancellationToken);
         }
     }
 }

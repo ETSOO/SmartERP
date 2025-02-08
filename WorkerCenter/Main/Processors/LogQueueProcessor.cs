@@ -29,13 +29,35 @@ namespace WorkerCenter.Main.Processors
             _logDb = logDb;
         }
 
+        /// <summary>
+        /// Get log title
+        /// 获取日志标题
+        /// </summary>
+        /// <param name="message">Current message</param>
+        /// <param name="ci">Current culture</param>
+        /// <returns>Result</returns>
+        protected virtual string GetLogTitle(T message, CultureInfo ci)
+        {
+            var type = T.Type;
+            var label = Properties.Resources.ResourceManager.GetString(type, ci) ?? type;
+
+            if (string.IsNullOrEmpty(message.Data.TargetName))
+            {
+                return label;
+            }
+            else
+            {
+                return $"{label} ({message.Data.TargetName})";
+            }
+        }
+
         protected override async Task ProcessMessageAsync(T message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
             var data = message.Data;
             var type = T.Type;
 
             var ci = CultureInfo.GetCultureInfo(data.Culture);
-            var title = Properties.Resources.ResourceManager.GetString(type, ci) ?? type;
+            var title = GetLogTitle(message, ci);
 
             var log = new CoreLog
             {
@@ -46,7 +68,8 @@ namespace WorkerCenter.Main.Processors
                 OrganizationId = data.OrganizationId,
                 Title = title,
                 UserId = data.UserId,
-                Kind = type
+                Kind = type,
+                TargetId = data.TargetId > 0 ? data.TargetId : null
             };
 
             _logDb.CoreLogs.Add(log);

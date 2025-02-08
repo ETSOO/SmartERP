@@ -89,12 +89,23 @@ services.AddDbContext<LogDbContext>((provider, options) =>
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
 services.AddSingleton<IMessageQueueProcessor, AcceptInvitationProcessor>();
+services.AddSingleton<IMessageQueueProcessor, AddUserIdentifierProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ChangePasswordProcessor>();
+services.AddSingleton<IMessageQueueProcessor, CreateApiKeyProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeleteMemberProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeleteUserIdentifierProcessor>();
+services.AddSingleton<IMessageQueueProcessor, LeaveOrgProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginFailedProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginSuccessProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ResetPasswordProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendEmailProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendSMSProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateAppProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateMemberAvatarProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateMemberProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateOrgAvatarProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateOrgProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateUserAvatarProcessor>();
 services.AddLocalRabbitMQConsumer(consumerOptions);
 
 var producerOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer Options Not Found");

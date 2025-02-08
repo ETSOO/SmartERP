@@ -61,6 +61,12 @@ namespace PlatformShared.LogDatabase.Models
         public string? Data { get; set; }
 
         /// <summary>
+        /// Target id
+        /// 目标编号
+        /// </summary>
+        public long? TargetId { get; set; }
+
+        /// <summary>
         /// Creation
         /// 创建时间
         /// </summary>

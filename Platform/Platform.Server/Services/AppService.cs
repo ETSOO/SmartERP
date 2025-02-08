@@ -12,8 +12,11 @@ using Platform.Server.Application;
 using Platform.Server.Dto.App;
 using Platform.Server.Endpoints.App.RQ;
 using Platform.Server.Endpoints.Org.RQ;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Buffers;
 
 namespace Platform.Server.Services
@@ -26,6 +29,7 @@ namespace Platform.Server.Services
     {
         readonly MyDbContext _db;
         readonly IOrgService _orgService;
+        readonly IQueueService _queueService;
 
         /// <summary>
         /// Constructor
@@ -36,12 +40,15 @@ namespace Platform.Server.Services
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="orgService">Organization service</param>
+        /// <param name="queueService">Queue service</param>
         public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AppService> logger,
-            IOrgService orgService)
+            IOrgService orgService,
+            IQueueService queueService)
             : base(app, userAccessor.UserSafe, "app", logger)
         {
             _db = db;
             _orgService = orgService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -134,17 +141,29 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> CreateApiKeyAsync(int id, string passphase, CancellationToken cancellationToken = default)
         {
+            var app = await _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.Id == id && oa.CoreOrganizationId == User.OrganizationInt && oa.Status == EntityStatus.Normal)
+                .Select(oa => new { Name = oa.LocalName ?? oa.CoreApp.Name })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (app == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
             var appKey = Guid.NewGuid().ToString("N");
             var appSecret = await App.HashPasswordAsync(id + CryptographyUtils.CreateRandString(RandStringKind.All, 32).ToString());
             var appSecretDB = App.EncriptData(appSecret, id.ToString(), 0);
 
-            var affected = await _db.CoreOrganizationApps.Where(oa => oa.Id == id && oa.CoreOrganizationId == User.OrganizationInt)
+            await _db.CoreOrganizationApps.Where(oa => oa.Id == id)
                 .ExecuteUpdateAsync(oa => oa.SetProperty(oa => oa.AppKey, appKey).SetProperty(oa => oa.AppSecret, appSecretDB), cancellationToken);
 
-            if (affected == 0)
+            // Push message
+            await _queueService.PushAsync(new CreateApiKeyMessage
             {
-                return ApplicationErrors.NoId.AsResult();
-            }
+                Data = User.CreateMessageData(id, app.Name)
+            }, PlatformSharedContext.Default.CreateApiKeyMessage, cancellationToken);
 
             var result = ActionResult.Success;
             result.Data[nameof(appKey)] = appKey;
@@ -516,6 +535,13 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            // Name
+            var name = await _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.Id == rq.Id)
+                .Select(oa => oa.LocalName ?? oa.CoreApp.Name)
+                .FirstOrDefaultAsync(cancellationToken);
+
             // Update
             if (rq.IsModified(nameof(rq.LocalName)))
             {
@@ -542,8 +568,18 @@ namespace Platform.Server.Services
                 app.Status = rq.Status.Value;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new UpdateAppMessage
+            {
+                Data = User.CreateMessageData(rq.Id, name),
+                Changes = changes
+            }, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);

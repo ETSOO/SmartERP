@@ -12,8 +12,11 @@ using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.Org;
 using Platform.Server.Endpoints.Org.RQ;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Buffers;
 
 namespace Platform.Server.Services
@@ -27,6 +30,7 @@ namespace Platform.Server.Services
         readonly MyDbContext _db;
         readonly IPublicService _publicService;
         readonly IStorage _storage;
+        readonly IQueueService _queueService;
 
         /// <summary>
         /// Constructor
@@ -38,12 +42,19 @@ namespace Platform.Server.Services
         /// <param name="logger">Logger</param>
         /// <param name="publicService">Public service</param>
         /// <param name="storage">Storage</param>
-        public OrgService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<OrgService> logger, IPublicService publicService, IStorage storage)
+        /// <param name="queueService">Queue service</param>
+        public OrgService(MyDbContext db, IMyApp app,
+            CurrentUserAccessor userAccessor,
+            ILogger<OrgService> logger,
+            IPublicService publicService,
+            IStorage storage,
+            IQueueService queueService)
             : base(app, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
             _publicService=publicService;
             _storage=storage;
+            _queueService=queueService;
         }
 
         /// <summary>
@@ -236,8 +247,19 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> LeaveAsync(int id, CancellationToken cancellationToken = default)
         {
+            // Read data
+            var ou = await _db.CoreOrganizationUsers.AsNoTracking()
+                .Where(ou => ou.CoreOrganizationId == id && ou.CoreUserId == User.IdInt)
+                .Select(ou => new { ou.Id, ou.InviterId, InviterName = ou.Inviter == null ? null : ou.Inviter.Name, ou.CoreOrganization.Name })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (ou == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
             // Delete the user from the organization
-            var affacted = await _db.CoreOrganizationUsers.Where(ou => ou.CoreOrganizationId == id && ou.CoreUserId == User.IdInt).ExecuteDeleteAsync(cancellationToken);
+            var affacted = await _db.CoreOrganizationUsers.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
             if (affacted == 0)
             {
                 return ApplicationErrors.NoId.AsResult();
@@ -255,6 +277,15 @@ namespace Platform.Server.Services
                     await _db.SaveChangesAsync(cancellationToken);
                 }
             }
+
+            // Push message
+            await _queueService.PushAsync(new LeaveOrgMessage
+            {
+                Data = User.CreateMessageData(id),
+                OrgName = ou.Name,
+                InviterId = ou.InviterId,
+                InviterName = ou.InviterName
+            }, PlatformSharedContext.Default.LeaveOrgMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -504,8 +535,18 @@ namespace Platform.Server.Services
                 org.QueryKeyword = rq.QueryKeyword;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new UpdateOrgMessage
+            {
+                Data = User.CreateMessageData(rq.Id, org.Name),
+                Changes = changes
+            }, PlatformSharedContext.Default.UpdateOrgMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -531,7 +572,7 @@ namespace Platform.Server.Services
             // Check the organization id
             var org = await _db.CoreOrganizations.AsNoTracking()
                 .Where(o => o.Id == id && o.OwnerId == User.IdInt)
-                .Select(o => new { o.Logo })
+                .Select(o => new { o.Logo, o.Name })
                 .FirstOrDefaultAsync(cancellationToken);
             if (org == null)
             {
@@ -561,6 +602,12 @@ namespace Platform.Server.Services
                 // Remove current avatar
                 if (!string.IsNullOrEmpty(org.Logo))
                     await _storage.DeleteUrlAsync(org.Logo, cancellationToken);
+
+                // Push message
+                await _queueService.PushAsync(new UpdateOrgAvatarMessage
+                {
+                    Data = User.CreateMessageData(id, org.Name)
+                }, PlatformSharedContext.Default.UpdateOrgAvatarMessage, cancellationToken);
 
                 // Return
                 return ActionResult.Succeed(url);

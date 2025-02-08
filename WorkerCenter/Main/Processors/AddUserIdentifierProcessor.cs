@@ -1,4 +1,5 @@
 ﻿using com.etsoo.MessageQueue;
+using com.etsoo.Utils.String;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -9,20 +10,24 @@ using WorkerCenter.Templates;
 
 namespace WorkerCenter.Main.Processors
 {
-    public class ResetPasswordProcessor : LogQueueProcessor<ResetPasswordMessage>
+    /// <summary>
+    /// Add user identifier processor
+    /// 添加用户标识处理器
+    /// </summary>
+    public class AddUserIdentifierProcessor : LogQueueProcessor<AddUserIdentifierMessage>
     {
         private readonly MyDbContext _db;
         private readonly IMessageQueueProducer _producer;
 
-        public ResetPasswordProcessor(ILogger<ResetPasswordProcessor> logger, LogDbContext logDb,
+        public AddUserIdentifierProcessor(ILogger<AddUserIdentifierProcessor> logger, LogDbContext logDb,
             MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.ResetPasswordMessage, logDb)
+            : base(logger, PlatformSharedContext.Default.AddUserIdentifierMessage, logDb)
         {
             _producer = producer;
             _db = db;
         }
 
-        protected override async Task ProcessMessageAsync(ResetPasswordMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
+        protected override async Task ProcessMessageAsync(AddUserIdentifierMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
             await base.ProcessMessageAsync(message, properties, cancellationToken);
 
@@ -30,6 +35,7 @@ namespace WorkerCenter.Main.Processors
             var userId = message.Data.UserId;
 
             // Send email notice
+            // Emails
             var emails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId]))[0];
 
             if (emails.Length > 0)
@@ -38,11 +44,13 @@ namespace WorkerCenter.Main.Processors
                 var culture = message.Data.Culture;
                 var ci = CultureInfo.GetCultureInfo(culture);
                 var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ResetPassword), ci)!;
+                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.AddUserIdentifier), ci)!;
+                var detail = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.AddUserIdentifierDetail), ci)!;
 
                 var data = new ActionNoticeData(message.Data,
-                    string.Format(subject, action),
-                    action
+                    string.Format(action, subject),
+                    action,
+                    string.Format(detail, message.IdentifierType.ToString(), StringUtils.HideEmail(message.IdentifierValue))
                 );
 
                 var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
