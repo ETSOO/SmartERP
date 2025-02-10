@@ -12,23 +12,23 @@ using WorkerCenter.Templates;
 namespace WorkerCenter.Main.Processors
 {
     /// <summary>
-    /// Create API key processor
-    /// 创建API密钥处理器
+    /// Renew app processor
+    /// 应用续费处理器
     /// </summary>
-    public class CreateApiKeyProcessor : LogQueueProcessor<CreateApiKeyMessage>
+    public class RenewAppProcessor : LogQueueProcessor<RenewAppMessage>
     {
         private readonly MyDbContext _db;
         private readonly IMessageQueueProducer _producer;
 
-        public CreateApiKeyProcessor(ILogger<CreateApiKeyProcessor> logger, LogDbContext logDb,
+        public RenewAppProcessor(ILogger<RenewAppProcessor> logger, LogDbContext logDb,
             MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.CreateApiKeyMessage, logDb)
+            : base(logger, PlatformSharedContext.Default.RenewAppMessage, logDb)
         {
             _producer = producer;
             _db = db;
         }
 
-        protected override async Task ProcessMessageAsync(CreateApiKeyMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
+        protected override async Task ProcessMessageAsync(RenewAppMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
             await base.ProcessMessageAsync(message, properties, cancellationToken);
 
@@ -57,7 +57,7 @@ namespace WorkerCenter.Main.Processors
                 var culture = message.Data.Culture;
                 var ci = CultureInfo.GetCultureInfo(culture);
                 var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.CreateApiKey), ci)!;
+                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.RenewApp), ci)!;
 
                 var data = new ActionNoticeData(message.Data,
                     string.Format(action, subject),

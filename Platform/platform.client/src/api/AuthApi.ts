@@ -89,7 +89,7 @@ export class AuthApi extends AuthApiBase {
       ...rq,
       deviceId,
       region,
-      timezone: this.app.getTimeZone()
+      timeZone: this.app.getTimeZone()
     };
     return this.loginBase(data, payload);
   }

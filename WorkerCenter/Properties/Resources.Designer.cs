@@ -106,6 +106,15 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Buy Application.
+        /// </summary>
+        internal static string BuyApp {
+            get {
+                return ResourceManager.GetString("BuyApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Change Password.
         /// </summary>
         internal static string ChangePassword {
@@ -120,6 +129,15 @@ namespace WorkerCenter.Properties {
         internal static string CreateApiKey {
             get {
                 return ResourceManager.GetString("CreateApiKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Organization.
+        /// </summary>
+        internal static string CreateOrg {
+            get {
+                return ResourceManager.GetString("CreateOrg", resourceCulture);
             }
         }
         
@@ -223,11 +241,29 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Renew Application.
+        /// </summary>
+        internal static string RenewApp {
+            get {
+                return ResourceManager.GetString("RenewApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reset Password.
         /// </summary>
         internal static string ResetPassword {
             get {
                 return ResourceManager.GetString("ResetPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Switch Organization.
+        /// </summary>
+        internal static string SwitchOrg {
+            get {
+                return ResourceManager.GetString("SwitchOrg", resourceCulture);
             }
         }
         

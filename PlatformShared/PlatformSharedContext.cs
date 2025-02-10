@@ -21,11 +21,14 @@ namespace PlatformShared
 
     [JsonSerializable(typeof(AcceptInvitationMessageData))]
     [JsonSerializable(typeof(AddUserIdentifierMessageData))]
+    [JsonSerializable(typeof(BuyAppMessageData))]
     [JsonSerializable(typeof(CommonUpdateMessageData))]
     [JsonSerializable(typeof(DeleteMemberMessageData))]
     [JsonSerializable(typeof(LeaveOrgMessageData))]
     [JsonSerializable(typeof(LoginFailedMessageData))]
     [JsonSerializable(typeof(LoginSuccessMessageData))]
+    [JsonSerializable(typeof(RenewAppMessageData))]
+    [JsonSerializable(typeof(SwitchOrgMessageData))]
 
     [JsonSerializable(typeof(JsonElement))]
 

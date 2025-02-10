@@ -192,4 +192,16 @@
   <data name="UpdateOrg" xml:space="preserve">
     <value>Update Organization</value>
   </data>
+  <data name="RenewApp" xml:space="preserve">
+    <value>Renew Application</value>
+  </data>
+  <data name="BuyApp" xml:space="preserve">
+    <value>Buy Application</value>
+  </data>
+  <data name="SwitchOrg" xml:space="preserve">
+    <value>Switch Organization</value>
+  </data>
+  <data name="CreateOrg" xml:space="preserve">
+    <value>Create Organization</value>
+  </data>
 </root>

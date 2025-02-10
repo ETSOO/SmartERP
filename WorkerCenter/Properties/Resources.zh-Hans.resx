@@ -192,4 +192,16 @@
   <data name="UpdateOrg" xml:space="preserve">
     <value>更新机构</value>
   </data>
+  <data name="RenewApp" xml:space="preserve">
+    <value>应用续费</value>
+  </data>
+  <data name="BuyApp" xml:space="preserve">
+    <value>购买应用</value>
+  </data>
+  <data name="SwitchOrg" xml:space="preserve">
+    <value>切换机构</value>
+  </data>
+  <data name="CreateOrg" xml:space="preserve">
+    <value>创建机构</value>
+  </data>
 </root>

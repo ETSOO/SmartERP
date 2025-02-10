@@ -12,23 +12,23 @@ using WorkerCenter.Templates;
 namespace WorkerCenter.Main.Processors
 {
     /// <summary>
-    /// Create API key processor
-    /// 创建API密钥处理器
+    /// Buy app processor
+    /// 购买应用处理器
     /// </summary>
-    public class CreateApiKeyProcessor : LogQueueProcessor<CreateApiKeyMessage>
+    public class BuyAppProcessor : LogQueueProcessor<BuyAppMessage>
     {
         private readonly MyDbContext _db;
         private readonly IMessageQueueProducer _producer;
 
-        public CreateApiKeyProcessor(ILogger<CreateApiKeyProcessor> logger, LogDbContext logDb,
+        public BuyAppProcessor(ILogger<BuyAppProcessor> logger, LogDbContext logDb,
             MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.CreateApiKeyMessage, logDb)
+            : base(logger, PlatformSharedContext.Default.BuyAppMessage, logDb)
         {
             _producer = producer;
             _db = db;
         }
 
-        protected override async Task ProcessMessageAsync(CreateApiKeyMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
+        protected override async Task ProcessMessageAsync(BuyAppMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
             await base.ProcessMessageAsync(message, properties, cancellationToken);
 
@@ -36,7 +36,26 @@ namespace WorkerCenter.Main.Processors
             var userId = message.Data.UserId;
 
             // Organization id
-            var orgId = message.Data.OrganizationId;
+            var orgId = message.OrgId;
+
+            // New organization
+            if (message.NewOrg)
+            {
+                // Organization name
+                var orgName = await _db.CoreOrganizations
+                    .AsNoTracking()
+                    .Where(o => o.Id == orgId)
+                    .Select(o => o.Name)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                // Create organization message
+                var createOrgMessage = new CreateOrgMessage
+                {
+                    Data = message.Data with { TargetId = orgId, TargetName = orgName }
+                };
+
+                await _producer.SendJsonAsync(createOrgMessage, PlatformSharedContext.Default.CreateOrgMessage, CreateOrgMessage.Type, cancellationToken);
+            }
 
             // All admins
             var admins = await _db.CoreOrganizationUsers
@@ -57,7 +76,7 @@ namespace WorkerCenter.Main.Processors
                 var culture = message.Data.Culture;
                 var ci = CultureInfo.GetCultureInfo(culture);
                 var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.CreateApiKey), ci)!;
+                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.BuyApp), ci)!;
 
                 var data = new ActionNoticeData(message.Data,
                     string.Format(action, subject),

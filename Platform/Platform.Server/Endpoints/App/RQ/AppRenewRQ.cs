@@ -34,7 +34,7 @@ namespace Platform.Server.Endpoints.App.RQ
                 return ApplicationErrors.NoValidData.AsResult(nameof(Id));
             }
 
-            if (Months == 0 ||  Math.Abs(Months) > 1200)
+            if (Months == 0 || Math.Abs(Months) > 1200)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Months));
             }

@@ -7,11 +7,13 @@
     <UserSecretsId>82c1b486-7653-4980-93a1-7000968472fc</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <SpaRoot>..\platform.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:9002</SpaProxyServerUrl>
     <PublishAot>false</PublishAot>
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <SatelliteResourceLanguages>en;zh-Hans;zh-Hant</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

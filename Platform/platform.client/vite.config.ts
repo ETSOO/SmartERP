@@ -13,6 +13,8 @@ const baseFolder =
     ? `${env.APPDATA}/ASP.NET/https`
     : `${env.HOME}/.aspnet/https`;
 
+fs.mkdirSync(baseFolder, { recursive: true });
+
 const certificateName = "platform.client";
 const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
 const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
@@ -56,8 +58,8 @@ export default defineConfig({
     },
     proxy: {
       "^/api": {
-        target: "https://localhost:9001",
-        secure: false
+        target: "https://localhost:8801",
+        secure: true
       }
     },
     port: 9002,

@@ -18,6 +18,7 @@ import { app } from "../../../app/MyApp";
 import { AppReadDto, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
 import { AppUtils } from "../components/AppUtils";
+import { EntityStatus } from "@etsoo/appscript";
 
 export default function ViewApp() {
   // Route
@@ -139,7 +140,7 @@ export default function ViewApp() {
               {labels.edit}
             </ButtonLink>
           )}
-          {editPermission && (
+          {editPermission && data.status == EntityStatus.Normal && (
             <Button
               variant="outlined"
               startIcon={<KeyIcon />}

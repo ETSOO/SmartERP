@@ -57,12 +57,22 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> BuyAsync(AppBuyRQ rq, CancellationToken cancellationToken = default)
+        public Task<IActionResult> BuyAsync(AppBuyRQ rq, CancellationToken cancellationToken = default)
+        {
+            return BuyAsync(rq, false, cancellationToken);
+        }
+
+        async Task<IActionResult> BuyAsync(AppBuyRQ rq, bool newOrg, CancellationToken cancellationToken)
         {
             // Check the application
-            if (rq.Id < 3)
+            var app = await _db.CoreApps.AsNoTracking()
+                .Where(a => a.Id == rq.Id && a.Enabled && a.IsPublic)
+                .Select(a => new { a.Name })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (app == null)
             {
-                return ApplicationErrors.NoValidData.AsResult();
+                return ApplicationErrors.NoId.AsResult();
             }
 
             // Check the organization
@@ -77,16 +87,28 @@ namespace Platform.Server.Services
                 return ApplicationErrors.ItemExists.AsResult();
             }
 
+            // Default months
+            var months = rq.Months.GetValueOrDefault(12);
+
             // Repository
             _db.CoreOrganizationApps.Add(new CoreOrganizationApp
             {
                 CoreAppId = rq.Id,
                 CoreOrganizationId = rq.OrganizationId,
-                Expiry = DateTimeOffset.UtcNow.AddYears(1)
+                Expiry = DateTimeOffset.UtcNow.AddMonths(months)
             });
 
             // Save
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new BuyAppMessage
+            {
+                Data = User.CreateMessageData(rq.Id, app.Name),
+                Months = months,
+                OrgId = rq.OrganizationId,
+                NewOrg = newOrg
+            }, PlatformSharedContext.Default.BuyAppMessage, cancellationToken);
 
             return ActionResult.Success;
         }
@@ -121,7 +143,7 @@ namespace Platform.Server.Services
                 OrganizationId = id.Value
             };
 
-            result = await BuyAsync(buyRq, cancellationToken);
+            result = await BuyAsync(buyRq, true, cancellationToken);
 
             if (result.Ok && id.HasValue)
             {
@@ -508,14 +530,27 @@ namespace Platform.Server.Services
         public async Task<IActionResult> RenewAsync(AppRenewRQ rq, CancellationToken cancellationToken = default)
         {
             // Validate the organization app
-            if (!await _db.CoreOrganizationApps.AnyAsync(oa => oa.Id == rq.Id && oa.CoreOrganizationId == User.OrganizationInt, cancellationToken: cancellationToken))
+            var app = await _db.CoreOrganizationApps.AsNoTracking()
+                .Where(oa => oa.Id == rq.Id && oa.CoreOrganizationId == User.OrganizationInt)
+                .Select(oa => new { Name = oa.LocalName ?? oa.CoreApp.Name })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (app == null)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.Id));
             }
 
             // Update the expiry
-            await _db.CoreOrganizationApps.Where(oa => oa.Id == rq.Id)
+            await _db.CoreOrganizationApps.AsNoTracking()
+                .Where(oa => oa.Id == rq.Id)
                 .ExecuteUpdateAsync(oa => oa.SetProperty(a => a.Expiry, a => a.Expiry == null ? DateTimeOffset.UtcNow.AddMonths(rq.Months) : a.Expiry.Value.AddMonths(rq.Months)), cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new RenewAppMessage
+            {
+                Data = User.CreateMessageData(rq.Id, app.Name),
+                Months = rq.Months
+            }, PlatformSharedContext.Default.RenewAppMessage, cancellationToken);
 
             return ActionResult.Success;
         }

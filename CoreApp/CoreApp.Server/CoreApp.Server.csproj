@@ -10,6 +10,7 @@
     <SpaRoot>..\coreapp.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:9005</SpaProxyServerUrl>
+    <SatelliteResourceLanguages>en;zh-Hans;zh-Hant</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

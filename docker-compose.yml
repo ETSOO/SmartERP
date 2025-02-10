@@ -156,6 +156,21 @@ services:
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
 
+    # Platform site
+    platform:
+        image: ${DOCKER_REGISTRY-}platform
+        build:
+            context: .
+            dockerfile: Platform/Platform.Server/Dockerfile
+        container_name: platform.app.local
+        ports:
+            - "8980:8080"
+        environment:
+            - DOTNET_ENVIRONMENT=Development
+            - ASPNETCORE_URLS=http://+:8080
+        volumes:
+            - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
 # Volumes for persistance
 volumes:
   certs:

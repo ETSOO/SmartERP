@@ -26,7 +26,6 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
-  kind: "string",
   deviceId: "number",
   creationStart: "date",
   creationEnd: "date"
@@ -71,12 +70,6 @@ export default function LoginHistory() {
           name="keyword"
           minChars={2}
           defaultValue={data.keyword}
-        />,
-        <SearchField
-          label={labels.type}
-          name="kind"
-          minChars={2}
-          defaultValue={data.kind}
         />,
         <Tiplist<DeviceListDto>
           label={labels.device}

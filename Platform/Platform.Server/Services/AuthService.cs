@@ -1817,7 +1817,17 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            return await CreateAppTokenDataAsync(tokenUser, rq.AppId, appData.AppSecret, true, data, cancellationToken);
+            var token = await CreateAppTokenDataAsync(tokenUser, rq.AppId, appData.AppSecret, true, data, cancellationToken);
+
+            // Push message
+            await _queueService.PushAsync(new SwitchOrgMessage
+            {
+                Data = User.CreateMessageData(tokenUser.OrganizationInt, tokenUser.OrganizationName),
+                FromOrganizationId = tokenUser.ChannelOrganizationInt,
+                AppId = rq.AppId
+            }, PlatformSharedContext.Default.SwitchOrgMessage, cancellationToken);
+
+            return token;
         }
 
         /// <summary>

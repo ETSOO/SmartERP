@@ -59,7 +59,7 @@ export function BuyApp(props: BuyAppProps) {
       />
       {kind === 1 && (
         <React.Fragment>
-          <OrgTiplist />
+          <OrgTiplist idValue={app.userData?.organization} />
           <VBox height="60px" />
         </React.Fragment>
       )}
