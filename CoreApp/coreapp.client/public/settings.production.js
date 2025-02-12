@@ -12,5 +12,20 @@ window.settings = {
   /**
    * Web url of the cloud
    */
-  webUrl: "https://etsoo.nz"
+  webUrl: "https://{hostname}/",
+
+  /**
+   * Service application id
+   */
+  appId: 1,
+
+  /**
+   * Endpoints
+   */
+  endpoints: {
+    core: {
+      endpoint: "https://{hostname}/api/",
+      webUrl: "https://{hostname}/"
+    }
+  }
 };

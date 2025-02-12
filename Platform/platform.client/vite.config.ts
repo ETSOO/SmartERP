@@ -57,11 +57,12 @@ export default defineConfig({
       "frame-ancestors": "none"
     },
     proxy: {
-      "^/api": {
-        target: "https://localhost:8801",
-        secure: true
+      "^/api/": {
+        target: "https://localhost:9001",
+        secure: false
       }
     },
+    host: true,
     port: 9002,
     https: {
       key: fs.readFileSync(keyFilePath),

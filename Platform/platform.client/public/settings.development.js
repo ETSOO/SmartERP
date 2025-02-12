@@ -12,7 +12,7 @@ window.settings = {
   /**
    * Web url of the cloud
    */
-  webUrl: "https://platform.app.local",
+  webUrl: "https://{hostname}:9002/",
 
   /**
    * Application id

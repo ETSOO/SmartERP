@@ -49,11 +49,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "^/api": {
+      "^/api/": {
         target: "https://localhost:9004",
         secure: false
       }
     },
+    host: true,
     port: 9005,
     https: {
       key: fs.readFileSync(keyFilePath),

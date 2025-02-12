@@ -2,19 +2,15 @@ using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.GarnetClient;
 using com.etsoo.ServiceApp.Application;
+using com.etsoo.ServiceApp.Services;
 using com.etsoo.ServiceApp.SmartERP;
-using com.etsoo.ThirdPartyExtentions.Minio;
 using com.etsoo.Utils.Serialization;
-using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
 using CoreApp.Server;
-using CoreApp.Server.Endpoints.Auth;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
-using PlatformShared.Database;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -64,18 +60,6 @@ if (string.IsNullOrEmpty(connectonString))
     throw new Exception("SmartERP connection string not found");
 }
 
-// services.AddDbContextPool
-services.AddDbContext<LogDbContext>((provider, options) =>
-{
-    options.UseNpgsql(connectonString);
-
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-    }
-});
-
 // SmartERP Service Application
 var seSection = configuration.GetSection("SmartERPService");
 var seSettings = seSection.GetSection("Configuration").Get<ServiceAppConfiguration>();
@@ -91,19 +75,6 @@ if (seSettings.Cultures.Length == 0)
 
 var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connectonString), seJwt);
 services.AddSingleton<ISEServiceApp>(seApp);
-
-// Storage
-var storageS3Section = seSection.GetSection("StorageS3");
-if (storageS3Section.Exists())
-{
-    services.AddS3StorageClient(storageS3Section);
-}
-else
-{
-    var storageOptions = seSection.GetSection("Storage").Get<StorageOptions>() ?? throw new Exception("Storage configuration not found");
-    var storage = new LocalStorage(storageOptions);
-    services.AddSingleton<IStorage>(storage);
-}
 
 // Authentication is the process of determining a user's identity.
 // Authorization is the process of determining whether a user has access to a resource.
@@ -129,23 +100,6 @@ services.ConfigureHttpJsonOptions(options =>
         MyJsonSerializerContext.Default
     );
 });
-
-// Rate limiter
-// https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-8.0
-
-// Cache
-var redis = configuration.GetConnectionString("SmartERPRedis");
-if (!string.IsNullOrEmpty(redis))
-{
-    services.AddGarnetCache(options =>
-    {
-        options.Configuration = redis;
-    });
-}
-else
-{
-    services.AddDistributedMemoryCache();
-}
 
 // Configue CORS
 var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray();

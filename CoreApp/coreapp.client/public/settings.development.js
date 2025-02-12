@@ -12,7 +12,7 @@ window.settings = {
   /**
    * Web url of the cloud
    */
-  webUrl: "https://localhost:9005/",
+  webUrl: "https://{hostname}:9005/",
 
   /**
    * Service application id
@@ -25,7 +25,7 @@ window.settings = {
   endpoints: {
     core: {
       endpoint: "https://{hostname}:9001/api/",
-      webUrl: "https://localhost:9002/"
+      webUrl: "https://{hostname}:9002/"
     }
   }
 };

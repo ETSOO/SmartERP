@@ -164,16 +164,10 @@ const supportedCultures: DataTypes.CultureDefinition[] = [
 // Supported regions
 const supportedRegions = ["CN"];
 
-// External settings
-const externalSettings = ExternalSettings.create<ISmartSettings>();
-if (externalSettings == null) {
-  throw new Error("No external settings");
-}
-
 // Settings
 const settings: ISmartSettings = {
   // Merge external configs first
-  ...externalSettings,
+  ...ExternalSettings.create<ISmartSettings>(),
 
   // Detected culture
   detectedCulture,

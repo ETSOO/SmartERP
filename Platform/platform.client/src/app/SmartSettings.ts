@@ -4,5 +4,5 @@ import { IAppSettings } from "@etsoo/appscript";
  * SmartERP App Settings
  */
 export interface ISmartSettings extends IAppSettings {
-  authClients: string[];
+  readonly authClients: string[];
 }

@@ -157,23 +157,43 @@ services:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
 
     # Platform site
+    # dotnet dev-certs https -ep "%USERPROFILE%\.aspnet\https\aspnetapp.pfx" -p etsoo --trust
     platform:
         image: ${DOCKER_REGISTRY-}platform
         build:
             context: .
             dockerfile: Platform/Platform.Server/Dockerfile
         container_name: platform.app.local
-        ports:
-            - "8980:8080"
         environment:
             - DOTNET_ENVIRONMENT=Development
-            - ASPNETCORE_URLS=http://+:8080
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
+            - Kestrel__Certificates__Default__Password=etsoo
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
 
-# Volumes for persistance
+    # CoreApp site
+    coreapp:
+        image: ${DOCKER_REGISTRY-}platform
+        build:
+            context: .
+            dockerfile: CoreApp/CoreApp.Server/Dockerfile
+        container_name: core.app.local
+        environment:
+            - DOTNET_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
+            - Kestrel__Certificates__Default__Password=etsoo
+        volumes:
+            - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+
 volumes:
   certs:
     name: "dev-certs"
   garnetdata:
     name: "garnet-data"
+

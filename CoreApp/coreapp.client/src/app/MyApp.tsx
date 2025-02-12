@@ -33,16 +33,10 @@ const supportedCultures: DataTypes.CultureDefinition[] = [
 ];
 const supportedRegions = ["CN"];
 
-// External settings
-const externalSettings = ExternalSettings.create();
-if (externalSettings == null) {
-  throw new Error("No external settings");
-}
-
 // Settings
 const settings: IServiceAppSettings = {
   // Merge external configs first
-  ...externalSettings,
+  ...ExternalSettings.create(),
 
   // Detected culture
   detectedCulture,

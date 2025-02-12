@@ -7,20 +7,20 @@
     <UserSecretsId>429ac826-bf69-4687-bdde-580892d2f185</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <SpaRoot>..\coreapp.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:9005</SpaProxyServerUrl>
+    <PublishAot>false</PublishAot>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
     <SatelliteResourceLanguages>en;zh-Hans;zh-Hant</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.ServiceApp" Version="1.2.83" />
-    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.3" />
-    <PackageReference Include="EfCore.SchemaCompare" Version="8.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.12" />
+    <PackageReference Include="com.etsoo.ServiceApp" Version="1.2.84" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>8.0.12</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.1" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.11.1" />
