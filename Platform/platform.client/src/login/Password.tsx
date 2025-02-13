@@ -143,34 +143,41 @@ export default function Password() {
         </Button>
       }
     >
-      <input hidden name="username" defaultValue={id} autoComplete="username" />
-      <HBox spacing={1} alignItems="flex-start">
-        <Box sx={{ paddingTop: 3 }}>
-          <Lock color="primary" />
-        </Box>
-        <TextFieldEx
-          name="password"
-          label={labels.yourPassword}
-          showPassword
-          autoComplete="current-password"
-          inputRef={passwordRef}
-          ref={mRef}
-          autoFocus
-          onEnter={(e) => {
-            submit();
-            e.preventDefault();
-          }}
+      <form>
+        <input
+          hidden
+          name="username"
+          defaultValue="SmartERP"
+          autoComplete="username"
         />
-      </HBox>
-      <FormControlLabel
-        control={
-          <Switch
-            defaultChecked={app.keepLogin}
-            onChange={(e) => (app.keepLogin = e.target.checked)}
+        <HBox spacing={1} alignItems="flex-start">
+          <Box sx={{ paddingTop: 3 }}>
+            <Lock color="primary" />
+          </Box>
+          <TextFieldEx
+            name="password"
+            label={labels.yourPassword}
+            showPassword
+            autoComplete="current-password"
+            inputRef={passwordRef}
+            ref={mRef}
+            autoFocus
+            onEnter={(e) => {
+              submit();
+              e.preventDefault();
+            }}
           />
-        }
-        label={labels.keepLogged}
-      />
+        </HBox>
+        <FormControlLabel
+          control={
+            <Switch
+              defaultChecked={app.keepLogin}
+              onChange={(e) => (app.keepLogin = e.target.checked)}
+            />
+          }
+          label={labels.keepLogged}
+        />
+      </form>
       <div>
         <Link to={`./../../callbackverify/${encodeURIComponent(username)}`}>
           {labels.forgotPasswordTip}

@@ -46,6 +46,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 
+// Custom environment
+var envName = Environment.GetEnvironmentVariable("ETSOO_ENVIRONMENT");
+if (!string.IsNullOrEmpty(envName))
+{
+    configuration.AddJsonFile($"appsettings.{envName}.json", optional: true, reloadOnChange: true);
+}
+
 var services = builder.Services;
 
 // Logging with OpenTelemetry

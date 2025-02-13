@@ -22,7 +22,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["CoreApp/coreapp.client/nuget.config", "CoreApp/coreapp.client/"]
 COPY ["CoreApp/CoreApp.Server/CoreApp.Server.csproj", "CoreApp/CoreApp.Server/"]
-COPY ["CoreAppShared/CoreAppShared.csproj", "CoreAppShared/"]
+COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
 COPY ["CoreApp/coreapp.client/coreapp.client.esproj", "CoreApp/coreapp.client/"]
 RUN dotnet restore "./CoreApp/CoreApp.Server/CoreApp.Server.csproj"
 COPY . .

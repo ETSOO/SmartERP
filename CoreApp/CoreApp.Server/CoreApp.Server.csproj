@@ -20,7 +20,7 @@
     <PackageReference Include="com.etsoo.ServiceApp" Version="1.2.84" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>9.0.2</Version>
+      <Version>8.0.13</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.1" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.11.1" />

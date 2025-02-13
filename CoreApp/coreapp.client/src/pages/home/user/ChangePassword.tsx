@@ -88,11 +88,18 @@ export default function ChangePassword() {
         }}
       >
         <VBox spacing={2}>
+          <input
+            hidden
+            name="username"
+            defaultValue="SmartERP"
+            autoComplete="username"
+          />
           <TextFieldEx
             name="oldPassword"
             label={labels.currentPassword}
             showPassword
             autoFocus
+            autoComplete="current-password"
             value={formik.values.oldPassword}
             onChange={formik.handleChange}
             error={
@@ -114,6 +121,7 @@ export default function ChangePassword() {
             name="rePassword"
             label={labels.repeatPassword}
             showPassword
+            autoComplete="new-password"
             value={formik.values.rePassword}
             onChange={formik.handleChange}
             error={

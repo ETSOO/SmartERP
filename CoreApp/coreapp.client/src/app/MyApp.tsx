@@ -36,7 +36,7 @@ const supportedRegions = ["CN"];
 // Settings
 const settings: IServiceAppSettings = {
   // Merge external configs first
-  ...ExternalSettings.create(),
+  ...ExternalSettings.create(undefined, import.meta.env.VITE_APP_HOST_NAME),
 
   // Detected culture
   detectedCulture,
