@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Messages;
-using System.Globalization;
 
 namespace PlatformShared.Extentions
 {
@@ -25,7 +24,7 @@ namespace PlatformShared.Extentions
         {
             return new CommonMessageData
             {
-                Culture = CultureInfo.CurrentCulture.Name,
+                Culture = user.Language.Name,
                 DeviceId = user.DeviceIdInt,
                 IP = user.ClientIp.ToString(),
                 UserId = user.IdInt,

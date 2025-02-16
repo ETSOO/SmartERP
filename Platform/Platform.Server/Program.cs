@@ -17,7 +17,11 @@ using com.etsoo.ThirdPartyExtentions.Minio;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
 using com.etsoo.Web;
+using com.etsoo.WebUtils;
 using com.etsoo.WeiXin;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Logs;
@@ -37,12 +41,16 @@ using Platform.Server.OAuth2;
 using Platform.Server.Services;
 using PlatformShared.Database;
 using PlatformShared.Extentions;
+using System.Globalization;
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var isDevelopment = builder.Environment.IsDevelopment();
 
 var configuration = builder.Configuration;
 
@@ -124,7 +132,7 @@ services.AddDbContext<MyDbContext>((provider, options) =>
 {
     options.UseNpgsql(connectonString);
 
-    if (builder.Environment.IsDevelopment())
+    if (isDevelopment)
     {
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
@@ -135,7 +143,7 @@ services.AddDbContext<LogDbContext>((provider, options) =>
 {
     options.UseNpgsql(logConnectionString);
 
-    if (builder.Environment.IsDevelopment())
+    if (isDevelopment)
     {
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
@@ -155,23 +163,69 @@ if (erpSettings.Cultures.Length == 0)
     throw new Exception("SmartERP cultures not found");
 }
 
-var erp = new MyApp(services, erpSettings, new PostgreDatabase(connectonString), erpJwt);
+/*
+new JwtBearerEvents
+{
+    OnAuthenticationFailed = context =>
+    {
+        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("OnAuthenticationFailed {context}", context);
+        return Task.CompletedTask;
+    },
+    OnTokenValidated = context =>
+    {
+        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        var claims = context.Principal?.Claims.Select(claim => $"{claim.Type} = {claim.Value}");
+        var claimsString = claims == null ? null : string.Join(", ", claims);
+        logger.LogWarning("OnTokenValidated {IsAuthenticated} with {claims}", context.Principal?.Identity?.IsAuthenticated, claimsString);
+        return Task.CompletedTask;
+    },
+    OnChallenge = context =>
+    {
+        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("OnChallenge {context}", context);
+        return Task.CompletedTask;
+    }
+}
+*/
+
+var erp = new MyApp(services, erpSettings, new PostgreDatabase(connectonString), erpJwt, new JwtBearerEvents
+{
+    OnAuthenticationFailed = context =>
+    {
+        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(context.Exception, "OnAuthenticationFailed");
+        return Task.CompletedTask;
+    }
+});
 services.AddSingleton<IMyApp>(erp);
+
+// Localization cultures
+var Cultures = erp.Configuration.Cultures;
+if (Cultures == null || Cultures.Length == 0)
+{
+    throw new Exception("No SmartERP Culture Defined");
+}
 
 // It's done by JwtService of MyApp
 // services.AddAuthentication().AddJwtBearer();
+
+var healthBuilder = services.AddHealthChecks()
+    .AddNpgSql(connectonString);
 
 // Storage
 var storageS3Section = erpSection.GetSection("StorageS3");
 if (storageS3Section.Exists())
 {
     services.AddS3StorageClient(storageS3Section);
+    healthBuilder.AddS3Storage();
 }
 else
 {
     var storageOptions = erpSection.GetSection("Storage").Get<StorageOptions>() ?? throw new Exception("Storage configuration not found");
     var storage = new LocalStorage(storageOptions);
     services.AddSingleton<IStorage>(storage);
+    healthBuilder.AddLocalStorage();
 }
 
 // Bridge Proxy APIs
@@ -235,6 +289,19 @@ services.AddSwaggerGen(options =>
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 
+if (isDevelopment)
+{
+    // Development environment only
+    // The remote certificate is invalid according to the validation procedure
+    services.ConfigureHttpClientDefaults(builder =>
+    {
+        builder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
+    });
+}
+
 // Cache
 var redis = configuration.GetConnectionString("SmartERPRedis");
 if (!string.IsNullOrEmpty(redis))
@@ -258,12 +325,25 @@ services.AddLocalRabbitMQProducer(mqOptions);
 
 services.AddSingleton<IQueueService, QueueService>();
 
+// Configue compression
+// https://gunnarpeipman.com/aspnet-core-compress-gzip-brotli-content-encoding/
+services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal;
+});
+
+services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+});
+
 // Configue CORS
 // Cors for internal (SmartERP) APIs
 // PublicCors for public (Custom applications) APIs
 var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray();
 var publicCors = configuration.GetSection("PublicCors").Get<IEnumerable<string>?>()?.ToArray();
-var corsOptions = new CorsPolicySetupOptions(cors, builder.Environment.IsDevelopment())
+var corsOptions = new CorsPolicySetupOptions(cors, isDevelopment)
 {
     ExposedHeaders = [Constants.RefreshTokenHeaderName, Constants.ContentDispositionHeaderName]
 };
@@ -333,6 +413,9 @@ app.UseForwardedHeaders();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// Enable compression
+app.UseResponseCompression();
+
 // Enable CORS (Cross-Origin Requests)
 // The call to UseCors must be placed after UseRouting, but before UseAuthorization
 if (corsOptions.Required)
@@ -346,7 +429,7 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (isDevelopment)
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
@@ -358,8 +441,28 @@ else
     app.UseHttpsRedirection();
 }
 
+// Request localization setup
+// Use Content-Language Header for culture detection
+// https://docs.microsoft.com/en-us/aspnet/core/fundamentals/localization?view=aspnetcore-5.0
+// https://www.jerriepelser.com/blog/how-aspnet5-determines-culture-info-for-localization/
+var localizationOptions = new RequestLocalizationOptions
+{
+    ApplyCurrentCultureToResponseHeaders = true,
+    RequestCultureProviders = [
+        new QueryStringRequestCultureProvider(),
+        new ContentLanguageHeaderRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    ]
+}.SetDefaultCulture(Cultures[0])
+    .AddSupportedCultures(Cultures)
+    .AddSupportedUICultures(Cultures);
+
+app.UseRequestLocalization(localizationOptions);
+
 // Rate limiter must be called after UseRouting, at least before UseAuthentication
 app.UseRateLimiter();
+
+app.MapHealthChecks("/healthz");
 
 // APIs
 var api = app.MapGroup("/api").WithOpenApi();
@@ -408,6 +511,8 @@ app.MapFallbackToFile("/index.html");
 try
 {
     app.Run();
+
+    app.Logger.LogWarning("Current culture is {culture}, {nativeName}", CultureInfo.CurrentCulture.Name, CultureInfo.CurrentCulture.NativeName);
 }
 catch (Exception ex)
 {

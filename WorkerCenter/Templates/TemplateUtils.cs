@@ -38,7 +38,7 @@ namespace WorkerCenter.Templates
         public static string FormatDateTime(this ActionNoticeData data)
         {
             var localTime = TimeZoneInfo.ConvertTime(data.TimeStamp, data.TZ);
-            return $"{localTime.ToString()} ({data.TZ.StandardName})";
+            return $"{localTime} ({data.TZ.StandardName})";
         }
     }
 }

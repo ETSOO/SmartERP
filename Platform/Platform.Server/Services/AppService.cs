@@ -102,13 +102,14 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new BuyAppMessage
+            var message = new BuyAppMessage
             {
                 Data = User.CreateMessageData(rq.Id, app.Name),
                 Months = months,
                 OrgId = rq.OrganizationId,
                 NewOrg = newOrg
-            }, PlatformSharedContext.Default.BuyAppMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.BuyAppMessage, cancellationToken);
 
             return ActionResult.Success;
         }
@@ -182,10 +183,11 @@ namespace Platform.Server.Services
                 .ExecuteUpdateAsync(oa => oa.SetProperty(oa => oa.AppKey, appKey).SetProperty(oa => oa.AppSecret, appSecretDB), cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new CreateApiKeyMessage
+            var message = new CreateApiKeyMessage
             {
                 Data = User.CreateMessageData(id, app.Name)
-            }, PlatformSharedContext.Default.CreateApiKeyMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateApiKeyMessage, cancellationToken);
 
             var result = ActionResult.Success;
             result.Data[nameof(appKey)] = appKey;
@@ -546,11 +548,12 @@ namespace Platform.Server.Services
                 .ExecuteUpdateAsync(oa => oa.SetProperty(a => a.Expiry, a => a.Expiry == null ? DateTimeOffset.UtcNow.AddMonths(rq.Months) : a.Expiry.Value.AddMonths(rq.Months)), cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new RenewAppMessage
+            var message = new RenewAppMessage
             {
                 Data = User.CreateMessageData(rq.Id, app.Name),
                 Months = rq.Months
-            }, PlatformSharedContext.Default.RenewAppMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.RenewAppMessage, cancellationToken);
 
             return ActionResult.Success;
         }
@@ -610,11 +613,12 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new UpdateAppMessage
+            var message = new UpdateAppMessage
             {
                 Data = User.CreateMessageData(rq.Id, name),
                 Changes = changes
-            }, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);

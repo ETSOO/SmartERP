@@ -1,4 +1,5 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.Localization;
+using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using PlatformShared.Database;
 using PlatformShared.LogDatabase.Models;
@@ -34,12 +35,11 @@ namespace WorkerCenter.Main.Processors
         /// 获取日志标题
         /// </summary>
         /// <param name="message">Current message</param>
-        /// <param name="ci">Current culture</param>
         /// <returns>Result</returns>
-        protected virtual string GetLogTitle(T message, CultureInfo ci)
+        protected virtual string GetLogTitle(T message)
         {
             var type = T.Type;
-            var label = Properties.Resources.ResourceManager.GetString(type, ci) ?? type;
+            var label = Properties.Resources.ResourceManager.GetString(type) ?? type;
 
             if (string.IsNullOrEmpty(message.Data.TargetName))
             {
@@ -57,7 +57,9 @@ namespace WorkerCenter.Main.Processors
             var type = T.Type;
 
             var ci = CultureInfo.GetCultureInfo(data.Culture);
-            var title = GetLogTitle(message, ci);
+            LocalizationUtils.SetCulture(ci);
+
+            var title = GetLogTitle(message);
 
             var log = new CoreLog
             {

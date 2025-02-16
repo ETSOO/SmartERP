@@ -84,13 +84,14 @@ namespace Platform.Server.Services
             await _db.CoreOrganizationUsers.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new DeleteMemberMessage
+            var message = new DeleteMemberMessage
             {
                 Data = User.CreateMessageData(ou.CoreUserId, ou.Name),
                 OrgName = User.OrganizationName ?? "Unknown",
                 InviterId = ou.InviterId,
                 InviterName = ou.InviterName
-            }, PlatformSharedContext.Default.DeleteMemberMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteMemberMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -386,11 +387,12 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new UpdateMemberMessage
+            var message = new UpdateMemberMessage
             {
                 Data = User.CreateMessageData(rq.Id, name),
                 Changes = changes
-            }, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -448,10 +450,11 @@ namespace Platform.Server.Services
                     await _storage.DeleteUrlAsync(ou.LocalAvatar, cancellationToken);
 
                 // Push message
-                await _queueService.PushAsync(new UpdateMemberAvatarMessage
+                var message = new UpdateMemberAvatarMessage
                 {
                     Data = User.CreateMessageData(id, ou.Name)
-                }, PlatformSharedContext.Default.UpdateMemberAvatarMessage, cancellationToken);
+                };
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberAvatarMessage, cancellationToken);
 
                 // Return
                 return ActionResult.Succeed(url);

@@ -59,7 +59,20 @@ function formatLoginTip(
 
 function checkAppUri(redirectUri: string) {
   const uri = new URL(redirectUri);
-  return uri.hostname !== window.location.hostname;
+  const hostname = window.location.hostname;
+  if (uri.hostname === hostname) return false;
+
+  // Check Etsoo sub domain
+  const etsooDomains = [".etsoo.com", ".etsoo.cn", ".etsoo.nz"];
+  if (
+    etsooDomains.some(
+      (domain) => uri.hostname.endsWith(domain) && hostname.endsWith(domain)
+    )
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export default function App() {
@@ -283,7 +296,7 @@ export default function App() {
 
     const idResult = app.encrypt(id, app.name);
     app.publicApi
-      .mobileQRCode(idResult, undefined, {
+      .mobileQRCode(idResult, location.origin + location.pathname, {
         showLoading: false,
         onError: () => false
       })

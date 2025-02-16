@@ -17,6 +17,8 @@ services:
             - "5432:5432"
         volumes:
             - ./data/postgres:/var/lib/postgresql/data
+        networks:
+            - etsoo
 
     # PgAdmin4 for Postgres management
     # 用于 Postgres 管理的 PgAdmin4
@@ -34,11 +36,13 @@ services:
             - "5501:5501"
         volumes:
             - ./data/pgadmin:/var/lib/pgadmin
+        networks:
+            - etsoo
 
     # RabbitMQ for message queue
     # 消息队列的 RabbitMQ
     rabbitmq:
-        image: rabbitmq:4.0.5-management-alpine
+        image: rabbitmq:4.0.6-management-alpine
         container_name: rabbitmq.app.local
         restart: unless-stopped
         ports:
@@ -46,6 +50,8 @@ services:
             - "15672:15672"
         volumes:
             - ./data/rabbitmq:/var/lib/rabbitmq
+        networks:
+            - etsoo
 
     # Etsoo Local setup
     # 亿速思维本地设置
@@ -59,6 +65,8 @@ services:
         container_name: localsetup
         volumes:
             - certs:/var/etsoo/certs
+        networks:
+            - etsoo
 
     # Distributed Cache (like Redis)
     garnet:
@@ -72,6 +80,8 @@ services:
         # network_mode: "host"
         volumes:
           - garnetdata:/data
+        networks:
+            - etsoo
 
     # Redis Insight for Redis management
     redis-insight:
@@ -82,6 +92,8 @@ services:
         restart: unless-stopped
         ports:
             - "5540:5540"
+        networks:
+            - etsoo
 
     # minio, API compatible with Amazon S3 cloud storage service
     # Create the folder instead of using the "MINIO_DEFAULT_BUCKETS" in standalone mode
@@ -105,6 +117,8 @@ services:
             - "8901:8901"
         volumes:
             - ./data/minio:/data
+        networks:
+            - etsoo
 
     # seq, port 80 for web, 5341 for API, 45341 for ingestion
     seq:
@@ -119,9 +133,37 @@ services:
             - "45341:45341"
         volumes:
             - ./data/seq:/data
+        networks:
+            - etsoo
+
+    # Platform site
+    # dotnet dev-certs https -ep "%USERPROFILE%\.aspnet\https\aspnetapp.pfx" -p etsoo --trust
+    platform:
+        depends_on:
+            - postgres
+            - rabbitmq
+        image: ${DOCKER_REGISTRY-}platform
+        build:
+            context: .
+            dockerfile: Platform/Platform.Server/Dockerfile
+        container_name: platform.app.local
+        environment:
+            - DOTNET_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080;80
+            - ASPNETCORE_HTTPS_PORTS=8081;443
+            - ETSOO_ENVIRONMENT=Docker
+            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
+            - Kestrel__Certificates__Default__Password=etsoo
+        volumes:
+            - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+        networks:
+            - etsoo
 
     # Worker Center for background tasks
     workercenter:
+        depends_on:
+            - platform
         image: ${DOCKER_REGISTRY-}workercenter
         build:
             context: .
@@ -131,25 +173,8 @@ services:
             - DOTNET_ENVIRONMENT=Development
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-
-    # Platform site
-    # dotnet dev-certs https -ep "%USERPROFILE%\.aspnet\https\aspnetapp.pfx" -p etsoo --trust
-    platform:
-        image: ${DOCKER_REGISTRY-}platform
-        build:
-            context: .
-            dockerfile: Platform/Platform.Server/Dockerfile
-        container_name: platform.app.local
-        environment:
-            - DOTNET_ENVIRONMENT=Development
-            - ASPNETCORE_HTTP_PORTS=8080
-            - ASPNETCORE_HTTPS_PORTS=8081
-            - ETSOO_ENVIRONMENT=Docker
-            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
-            - Kestrel__Certificates__Default__Password=etsoo
-        volumes:
-            - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+        networks:
+            - etsoo
 
     # CoreApp site
     coreapp:
@@ -162,14 +187,16 @@ services:
         container_name: core.app.local
         environment:
             - DOTNET_ENVIRONMENT=Development
-            - ASPNETCORE_HTTP_PORTS=8080
-            - ASPNETCORE_HTTPS_PORTS=8081
+            - ASPNETCORE_HTTP_PORTS=8080;80
+            - ASPNETCORE_HTTPS_PORTS=8081;443
             - ETSOO_ENVIRONMENT=Docker
             - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
             - Kestrel__Certificates__Default__Password=etsoo
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
             - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+        networks:
+            - etsoo
 
     # Nginx for reverse proxy
     # Change the nginx.conf under root for your needs, make sure the ports (80, 443) are not used by other services (like IIS)
@@ -177,12 +204,6 @@ services:
     # 修改根目录下的 nginx.conf 文件以适应你的需求，确保(80, 443)端口没有被其他服务占用（如 IIS）
     nginx:
         depends_on:
-            - pgadmin
-            - localsetup
-            - rabbitmq
-            - redis-insight
-            - minio
-            - seq
             - platform
             - coreapp
         image: nginx:1.27-alpine
@@ -196,10 +217,15 @@ services:
             - ./data/nginx/logs:/etc/nginx/logs
             - ./data/nginx/cache:/var/cache/nginx
             - certs:/etc/nginx/ssl
+        networks:
+            - etsoo
 
 volumes:
   certs:
     name: "dev-certs"
   garnetdata:
     name: "garnet-data"
+
+networks:
+  etsoo:
 

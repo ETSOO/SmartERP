@@ -4,7 +4,6 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
-using System.Globalization;
 using WorkerCenter.Templates;
 
 namespace WorkerCenter.Main.Processors
@@ -40,10 +39,8 @@ namespace WorkerCenter.Main.Processors
             if (emails.Length > 0)
             {
                 // Load email template
-                var culture = message.Data.Culture;
-                var ci = CultureInfo.GetCultureInfo(culture);
-                var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ChangePassword), ci)!;
+                var subject = Properties.Resources.ActionNoticeSubject;
+                var action = Properties.Resources.ChangePassword;
 
                 var data = new ActionNoticeData(message.Data,
                     string.Format(action, subject),

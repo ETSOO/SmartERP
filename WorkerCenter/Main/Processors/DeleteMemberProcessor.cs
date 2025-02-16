@@ -7,7 +7,6 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
-using System.Globalization;
 using System.Web;
 using WorkerCenter.Templates;
 
@@ -58,9 +57,7 @@ namespace WorkerCenter.Main.Processors
             // Organization name
             var orgName = HttpUtility.HtmlEncode(message.OrgName);
 
-            var culture = message.Data.Culture;
-            var ci = CultureInfo.GetCultureInfo(culture);
-            var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
+            var subject = Properties.Resources.ActionNoticeSubject;
 
             // Emails
             var allEmails = await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [message.Data.UserId], [(int)message.Data.TargetId], owners);
@@ -70,9 +67,9 @@ namespace WorkerCenter.Main.Processors
 
             if (emails.Length > 0 || inviteeEmails.Length > 0 || ownerEmails.Length > 0)
             {
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.DeleteMember), ci)!;
+                var action = Properties.Resources.DeleteMember;
                 action = $"{action} {inviteeName}";
-                var detail = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.DeleteMemberDetail), ci)!;
+                var detail = Properties.Resources.DeleteMemberDetail;
 
                 // Load email template
                 var data = new ActionNoticeData(message.Data,

@@ -7,6 +7,13 @@ import { AuthApi } from "../api/AuthApi";
 
 class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   /**
+   * Core name
+   */
+  override get coreName(): string {
+    return "platform";
+  }
+
+  /**
    * Core application
    */
   readonly core = new CoreApp(this, this.coreApi);

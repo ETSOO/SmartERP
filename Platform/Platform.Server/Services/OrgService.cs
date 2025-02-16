@@ -279,13 +279,14 @@ namespace Platform.Server.Services
             }
 
             // Push message
-            await _queueService.PushAsync(new LeaveOrgMessage
+            var message = new LeaveOrgMessage
             {
                 Data = User.CreateMessageData(id),
                 OrgName = ou.Name,
                 InviterId = ou.InviterId,
                 InviterName = ou.InviterName
-            }, PlatformSharedContext.Default.LeaveOrgMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.LeaveOrgMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -542,11 +543,12 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new UpdateOrgMessage
+            var message = new UpdateOrgMessage
             {
                 Data = User.CreateMessageData(rq.Id, org.Name),
                 Changes = changes
-            }, PlatformSharedContext.Default.UpdateOrgMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -604,10 +606,11 @@ namespace Platform.Server.Services
                     await _storage.DeleteUrlAsync(org.Logo, cancellationToken);
 
                 // Push message
-                await _queueService.PushAsync(new UpdateOrgAvatarMessage
+                var message = new UpdateOrgAvatarMessage
                 {
                     Data = User.CreateMessageData(id, org.Name)
-                }, PlatformSharedContext.Default.UpdateOrgAvatarMessage, cancellationToken);
+                };
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgAvatarMessage, cancellationToken);
 
                 // Return
                 return ActionResult.Succeed(url);

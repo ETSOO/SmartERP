@@ -23,7 +23,7 @@ window.settings = {
    * Endpoints
    */
   endpoints: {
-    core: {
+    platform: {
       endpoint: "https://{hostname}/api/",
       webUrl: "https://{hostname}/"
     }

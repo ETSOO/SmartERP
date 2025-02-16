@@ -62,6 +62,11 @@ export default defineConfig({
         secure: false
       }
     },
+    cors: {
+      origin: [/^localhost:[0-9]+$/, /\.app\.local$/],
+      exposedHeaders: ["Etsoo-Refresh-Token", "Content-Disposition"],
+      credentials: true
+    },
     host: true,
     port: 9002,
     https: {

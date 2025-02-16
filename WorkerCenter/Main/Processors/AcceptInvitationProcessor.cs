@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.Localization;
 using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using Microsoft.EntityFrameworkCore;
@@ -37,12 +38,12 @@ namespace WorkerCenter.Main.Processors
             _db = db;
         }
 
-        private async Task LogAsync(AcceptInvitationMessage message, int userId, string kind, CancellationToken cancellationToken)
+        private async Task LogAsync(AcceptInvitationMessage message, int userId, string kind, string kindText, CancellationToken cancellationToken)
         {
             var data = message.Data;
             var orgId = message.UserData.OrganizationId;
 
-            var title = Properties.Resources.ResourceManager.GetString(kind) ?? kind;
+            var title = kindText;
             if (message.Data.UserId == userId)
             {
                 // Invitee
@@ -94,22 +95,25 @@ namespace WorkerCenter.Main.Processors
             ;
 
             var culture = message.Data.Culture;
+
             var ci = CultureInfo.GetCultureInfo(culture);
-            var subject = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.ActionNoticeSubject), ci)!;
+            LocalizationUtils.SetCulture(ci);
+
+            var subject = Properties.Resources.ActionNoticeSubject;
 
             // Emails
             var emails = await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], [inviterId], owners);
 
             // Log
-            await LogAsync(message, inviterId, nameof(Properties.Resources.InvitationAccepted), cancellationToken);
+            await LogAsync(message, inviterId, nameof(Properties.Resources.InvitationAccepted), Properties.Resources.InvitationAccepted, cancellationToken);
 
             var inviterEmails = emails[1];
             var ownerEmails = emails[2];
 
             if (inviterEmails.Length > 0 || ownerEmails.Length > 0)
             {
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvitationAccepted), ci)!;
-                var detail = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvitationAcceptedDetail), ci)!;
+                var action = Properties.Resources.InvitationAccepted;
+                var detail = Properties.Resources.InvitationAcceptedDetail;
 
                 // Load email template
                 var data = new ActionNoticeData(message.Data,
@@ -133,14 +137,14 @@ namespace WorkerCenter.Main.Processors
             }
 
             // Log
-            await LogAsync(message, userId, nameof(Properties.Resources.AcceptInvitation), cancellationToken);
+            await LogAsync(message, userId, nameof(Properties.Resources.AcceptInvitation), Properties.Resources.AcceptInvitation, cancellationToken);
 
             // 通知受邀人
             var inviteeEmails = emails[0];
             if (inviteeEmails.Length > 0)
             {
-                var action = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.AcceptInvitation), ci)!;
-                var detail = Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.AcceptInvitationDetail), ci)!;
+                var action = Properties.Resources.AcceptInvitation;
+                var detail = Properties.Resources.AcceptInvitationDetail;
 
                 // Load email template
                 var inviteeData = new ActionNoticeData(message.Data,

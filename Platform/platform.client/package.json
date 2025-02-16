@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.1",
-    "@etsoo/materialui": "^1.4.80",
-    "@etsoo/react": "^1.8.29",
+    "@etsoo/appscript": "^1.6.2",
+    "@etsoo/materialui": "^1.4.81",
+    "@etsoo/react": "^1.8.30",
     "@etsoo/shared": "^1.2.61",
-    "@etsoo/smarterp-core": "^1.0.3",
+    "@etsoo/smarterp-core": "^1.0.4",
     "@mui/material": "^6.4.4",
     "formik": "^2.4.6",
     "react": "^18.3.1",
@@ -22,7 +22,7 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.4",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",

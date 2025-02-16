@@ -354,14 +354,15 @@ namespace Platform.Server.Services
             if (result.Ok)
             {
                 // Send
-                await _queueService.PushAsync(new SendSMSMessage
+                var message = new SendSMSMessage
                 {
                     Kind = SendSMSMessage.KindCode,
                     Culture = CultureInfo.CurrentCulture.Name,
                     Region = region,
                     To = [mobile],
                     Body = code
-                }, PlatformSharedContext.Default.SendSMSMessage, cancellationToken);
+                };
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.SendSMSMessage, cancellationToken);
             }
 
             // Return

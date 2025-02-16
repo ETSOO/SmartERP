@@ -138,11 +138,12 @@ namespace Platform.Server.Services
                 await _db.SaveChangesAsync(cancellationToken);
 
                 // Log
-                await _queueService.PushAsync(new AcceptInvitationMessage
+                var message = new AcceptInvitationMessage
                 {
                     Data = User.CreateMessageData(inviterId),
                     UserData = data.UserData
-                }, PlatformSharedContext.Default.AcceptInvitationMessage, cancellationToken);
+                };
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.AcceptInvitationMessage, cancellationToken);
             }
 
             // Delete the code

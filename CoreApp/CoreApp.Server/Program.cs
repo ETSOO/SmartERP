@@ -7,16 +7,23 @@ using com.etsoo.ServiceApp.Services;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Web;
+using com.etsoo.WebUtils;
 using CoreApp.Server;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var isDevelopment = builder.Environment.IsDevelopment();
 
 var configuration = builder.Configuration;
 
@@ -80,12 +87,29 @@ if (seSettings.Cultures.Length == 0)
     throw new Exception("SmartERP Service Application cultures not found");
 }
 
-var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connectonString), seJwt);
+var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connectonString), seJwt, new JwtBearerEvents
+{
+    OnAuthenticationFailed = context =>
+    {
+        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(context.Exception, "OnAuthenticationFailed");
+        return Task.CompletedTask;
+    }
+});
 services.AddSingleton<ISEServiceApp>(seApp);
+
+// Localization cultures
+var Cultures = seApp.Configuration.Cultures;
+if (Cultures == null || Cultures.Length == 0)
+{
+    throw new Exception("No SmartERP Culture Defined");
+}
 
 // Authentication is the process of determining a user's identity.
 // Authorization is the process of determining whether a user has access to a resource.
 services.AddAuthorization();
+
+services.AddHealthChecks();
 
 // Add services to the container.
 // services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
@@ -108,9 +132,35 @@ services.ConfigureHttpJsonOptions(options =>
     );
 });
 
+if (isDevelopment)
+{
+    // Development environment only
+    // The remote certificate is invalid according to the validation procedure
+    services.ConfigureHttpClientDefaults(builder =>
+    {
+        builder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
+    });
+}
+
+// Configue compression
+// https://gunnarpeipman.com/aspnet-core-compress-gzip-brotli-content-encoding/
+services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal;
+});
+
+services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+});
+
 // Configue CORS
 var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray();
-var corsOptions = new CorsPolicySetupOptions(cors, builder.Environment.IsDevelopment())
+var corsOptions = new CorsPolicySetupOptions(cors, isDevelopment)
 {
     ExposedHeaders = [Constants.RefreshTokenHeaderName, Constants.ContentDispositionHeaderName]
 };
@@ -134,6 +184,9 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// Enable compression
+app.UseResponseCompression();
+
 // Enable CORS (Cross-Origin Requests)
 // The call to UseCors must be placed after UseRouting, but before UseAuthorization
 if (corsOptions.Required)
@@ -145,7 +198,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (isDevelopment)
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
@@ -157,8 +210,28 @@ else
     app.UseHttpsRedirection();
 }
 
+// Request localization setup
+// Use Content-Language Header for culture detection
+// https://docs.microsoft.com/en-us/aspnet/core/fundamentals/localization?view=aspnetcore-5.0
+// https://www.jerriepelser.com/blog/how-aspnet5-determines-culture-info-for-localization/
+var localizationOptions = new RequestLocalizationOptions
+{
+    ApplyCurrentCultureToResponseHeaders = true,
+    RequestCultureProviders = [
+        new QueryStringRequestCultureProvider(),
+        new ContentLanguageHeaderRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    ]
+}.SetDefaultCulture(Cultures[0])
+    .AddSupportedCultures(Cultures)
+    .AddSupportedUICultures(Cultures);
+
+app.UseRequestLocalization(localizationOptions);
+
 // Rate limiter must be called after UseRouting, at least before UseAuthentication
 app.UseRateLimiter();
+
+app.MapHealthChecks("/healthz");
 
 // APIs
 var api = app.MapGroup("/api").WithOpenApi();
@@ -166,6 +239,7 @@ var api = app.MapGroup("/api").WithOpenApi();
 // Endpoints
 api.MapAuth()
     .AddModelValidators()
+    .RequireAuthorization()
 ;
 
 app.MapFallbackToFile("/index.html");

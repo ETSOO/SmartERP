@@ -130,12 +130,13 @@ namespace Platform.Server.Services
             }
 
             // Push message
-            await _queueService.PushAsync(new AddUserIdentifierMessage
+            var message = new AddUserIdentifierMessage
             {
                 Data = User.CreateMessageData(id),
                 IdentifierType = identifier.Type,
                 IdentifierValue = identifier.Value
-            }, PlatformSharedContext.Default.AddUserIdentifierMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.AddUserIdentifierMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -294,12 +295,13 @@ namespace Platform.Server.Services
             await _db.CoreUserIdentifiers.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             // Push message
-            await _queueService.PushAsync(new DeleteUserIdentifierMessage
+            var message = new DeleteUserIdentifierMessage
             {
                 Data = User.CreateMessageData(id),
                 IdentifierType = data.Type,
                 IdentifierValue = data.Value
-            }, PlatformSharedContext.Default.DeleteUserIdentifierMessage, cancellationToken);
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteUserIdentifierMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -442,10 +444,11 @@ namespace Platform.Server.Services
                     await _storage.DeleteUrlAsync(User.Avatar, cancellationToken);
 
                 // Push message
-                await _queueService.PushAsync(new UpdateUserAvatarMessage
+                var message = new UpdateUserAvatarMessage
                 {
                     Data = User.CreateMessageData(0)
-                }, PlatformSharedContext.Default.UpdateUserAvatarMessage, cancellationToken);
+                };
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateUserAvatarMessage, cancellationToken);
 
                 // Return
                 return ActionResult.Succeed(url);
