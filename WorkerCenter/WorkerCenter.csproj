@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.Localization" Version="1.0.22" />
+    <PackageReference Include="com.etsoo.Localization" Version="1.0.23" />
     <PackageReference Include="com.etsoo.SMTP" Version="1.0.73" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.1" />

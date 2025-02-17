@@ -165,10 +165,10 @@ services:
         depends_on:
             - platform
         image: ${DOCKER_REGISTRY-}workercenter
+        container_name: workercenter
         build:
             context: .
             dockerfile: WorkerCenter/Dockerfile
-        container_name: workercenter
         environment:
             - DOTNET_ENVIRONMENT=Development
         volumes:

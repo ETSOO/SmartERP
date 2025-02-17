@@ -10,7 +10,6 @@ using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;
-using System.Globalization;
 using System.Net;
 using System.Web;
 using WorkerCenter.Templates;
@@ -94,10 +93,8 @@ namespace WorkerCenter.Main.Processors
                 .ToListAsync(cancellationToken)
             ;
 
-            var culture = message.Data.Culture;
-
-            var ci = CultureInfo.GetCultureInfo(culture);
-            LocalizationUtils.SetCulture(ci);
+            var ci = LocalizationUtils.SetCulture(message.Data.Culture, true);
+            Properties.Resources.Culture = ci;
 
             var subject = Properties.Resources.ActionNoticeSubject;
 

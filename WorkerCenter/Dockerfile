@@ -1,30 +1,29 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
-# USER $APP_UID
-USER root
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+#USER $APP_UID
 WORKDIR /app
 
 # Install the required dependencies to avoid "Only the invariant culture is supported in globalization-invariant mode"
-ENV \
-    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8
-RUN apk add --no-cache \
-    icu-data-full \
-    icu-libs \
-    tzdata
+# ENV \
+#    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+#    LC_ALL=en_US.UTF-8 \
+#    LANG=en_US.UTF-8
+# RUN apk add --no-cache \
+#    icu-data-full \
+#    icu-libs \
+#    tzdata
 
 # This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
-ARG BUILD_CONFIGURATION=Release
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["WorkerCenter/WorkerCenter.csproj", "WorkerCenter/"]
 COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
 RUN dotnet restore "./WorkerCenter/WorkerCenter.csproj"
 COPY . .
 WORKDIR "/src/WorkerCenter"
+ARG BUILD_CONFIGURATION=Release
 RUN dotnet build "./WorkerCenter.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage

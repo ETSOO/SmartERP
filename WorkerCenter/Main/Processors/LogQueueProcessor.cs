@@ -4,7 +4,6 @@ using com.etsoo.MessageQueue.QueueProcessors;
 using PlatformShared.Database;
 using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;
-using System.Globalization;
 using System.Net;
 using System.Text.Json.Serialization.Metadata;
 
@@ -56,8 +55,8 @@ namespace WorkerCenter.Main.Processors
             var data = message.Data;
             var type = T.Type;
 
-            var ci = CultureInfo.GetCultureInfo(data.Culture);
-            LocalizationUtils.SetCulture(ci);
+            var ci = LocalizationUtils.SetCulture(data.Culture, true);
+            Properties.Resources.Culture = ci;
 
             var title = GetLogTitle(message);
 

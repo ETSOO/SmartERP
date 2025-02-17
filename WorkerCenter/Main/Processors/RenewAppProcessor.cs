@@ -57,7 +57,7 @@ namespace WorkerCenter.Main.Processors
                 var action = Properties.Resources.RenewApp;
 
                 var data = new ActionNoticeData(message.Data,
-                    string.Format(action, subject),
+                    string.Format(subject, action),
                     $"{action} ({message.Data.TargetName})"
                 );
 

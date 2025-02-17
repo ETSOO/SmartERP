@@ -45,7 +45,7 @@ namespace WorkerCenter.Main.Processors
                 var detail = Properties.Resources.AddUserIdentifierDetail;
 
                 var data = new ActionNoticeData(message.Data,
-                    string.Format(action, subject),
+                    string.Format(subject, action),
                     action,
                     string.Format(detail, message.IdentifierType.ToString(), StringUtils.HideEmail(message.IdentifierValue))
                 );

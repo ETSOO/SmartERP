@@ -21,7 +21,6 @@ using com.etsoo.WebUtils;
 using com.etsoo.WeiXin;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Logs;
@@ -42,7 +41,6 @@ using Platform.Server.Services;
 using PlatformShared.Database;
 using PlatformShared.Extentions;
 using System.Globalization;
-using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -327,6 +325,7 @@ services.AddSingleton<IQueueService, QueueService>();
 
 // Configue compression
 // https://gunnarpeipman.com/aspnet-core-compress-gzip-brotli-content-encoding/
+/*
 services.Configure<BrotliCompressionProviderOptions>(options =>
 {
     options.Level = CompressionLevel.Optimal;
@@ -337,6 +336,7 @@ services.AddResponseCompression(options =>
     options.EnableForHttps = true;
     options.Providers.Add<BrotliCompressionProvider>();
 });
+*/
 
 // Configue CORS
 // Cors for internal (SmartERP) APIs
@@ -414,7 +414,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 // Enable compression
-app.UseResponseCompression();
+// app.UseResponseCompression();
 
 // Enable CORS (Cross-Origin Requests)
 // The call to UseCors must be placed after UseRouting, but before UseAuthorization

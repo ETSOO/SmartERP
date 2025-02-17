@@ -11,11 +11,9 @@ using com.etsoo.WebUtils;
 using CoreApp.Server;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
-using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -145,19 +143,6 @@ if (isDevelopment)
     });
 }
 
-// Configue compression
-// https://gunnarpeipman.com/aspnet-core-compress-gzip-brotli-content-encoding/
-services.Configure<BrotliCompressionProviderOptions>(options =>
-{
-    options.Level = CompressionLevel.Optimal;
-});
-
-services.AddResponseCompression(options =>
-{
-    options.EnableForHttps = true;
-    options.Providers.Add<BrotliCompressionProvider>();
-});
-
 // Configue CORS
 var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray();
 var corsOptions = new CorsPolicySetupOptions(cors, isDevelopment)
@@ -183,9 +168,6 @@ var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
-// Enable compression
-app.UseResponseCompression();
 
 // Enable CORS (Cross-Origin Requests)
 // The call to UseCors must be placed after UseRouting, but before UseAuthorization
