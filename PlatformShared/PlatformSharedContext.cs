@@ -1,4 +1,5 @@
-﻿using PlatformShared.Messages;
+﻿using PlatformShared.Dto;
+using PlatformShared.Messages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,6 +15,8 @@ namespace PlatformShared
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
+
+    [JsonSerializable(typeof(AppUrl[]))]
 
     [JsonSerializable(typeof(CommonMessage))]
     [JsonSerializable(typeof(SendEmailMessage))]

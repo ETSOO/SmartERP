@@ -76,37 +76,53 @@ export default function ViewApp() {
         { data: "name", label: "fullName", singleRow: true },
         { data: "appKey", label: "appKey", singleRow: true },
         {
-          data: (item) =>
-            item.localUrl ? (
-              <a href={item.localUrl} target="_blank" rel="noreferrer">
-                {item.localUrl}
-              </a>
-            ) : undefined,
-          label: "localUrl",
-          singleRow: "medium"
-        },
-        {
-          data: (item) =>
-            item.localHelpUrl ? (
-              <a href={item.localHelpUrl} target="_blank" rel="noreferrer">
-                {item.localHelpUrl}
-              </a>
-            ) : undefined,
-          label: "localHelpUrl",
-          singleRow: "medium"
-        },
-        {
-          data: (item) =>
-            item.localApis && item.localApis.length > 0 ? (
+          data: (item) => {
+            const urls = (item.localUrls ?? item.urls).map((u) => u.web);
+            return urls.length < 1 ? undefined : (
               <Stack spacing={1} direction="row">
-                {item.localApis.map((a) => (
+                {urls.map((a) => (
                   <a href={a} key={a} target="_blank" rel="noreferrer">
                     {a}
                   </a>
                 ))}
               </Stack>
-            ) : undefined,
-          label: "localApis",
+            );
+          },
+          label: "appWebUrl",
+          singleRow: "medium"
+        },
+        {
+          data: (item) => {
+            const urls = (item.localUrls ?? item.urls)
+              .map((u) => u.help)
+              .filter((u): u is string => u != null);
+            return urls.length < 1 ? undefined : (
+              <Stack spacing={1} direction="row">
+                {urls.map((a) => (
+                  <a href={a} key={a} target="_blank" rel="noreferrer">
+                    {a}
+                  </a>
+                ))}
+              </Stack>
+            );
+          },
+          label: "appHelpUrl",
+          singleRow: "medium"
+        },
+        {
+          data: (item) => {
+            const urls = (item.localUrls ?? item.urls).map((u) => u.api);
+            return urls.length < 1 ? undefined : (
+              <Stack spacing={1} direction="row">
+                {urls.map((a) => (
+                  <a href={a} key={a} target="_blank" rel="noreferrer">
+                    {a}
+                  </a>
+                ))}
+              </Stack>
+            );
+          },
+          label: "appApiUrl",
           singleRow: true
         },
         ["expiry", GridDataType.DateTime],

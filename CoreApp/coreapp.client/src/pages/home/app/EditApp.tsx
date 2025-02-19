@@ -23,22 +23,15 @@ export default function EditApp() {
   const labels = app.getLabels(
     "edit",
     "fullName",
-    "localApis",
-    "localHelpUrl",
     "localName",
-    "localUrl",
+    "localUrls",
+    "localUrlsHelp",
     "noChanges",
-    "oneUrlPerLine",
     "status"
   );
 
   // Input refs
-  const refFields = [
-    "localName",
-    "localUrl",
-    "localHelpUrl",
-    "localApis"
-  ] as const;
+  const refFields = ["localName", "localUrls"] as const;
   const refs = useRefs(refFields);
 
   // Form validation schema
@@ -64,14 +57,29 @@ export default function EditApp() {
       // Request data
       const rq = { ...values };
 
-      ReactUtils.updateRefValues(refs, rq, (item) => {
-        const v = item.value.trim();
-        if (item.name === "localApis") {
-          return v ? v.split("\n") : undefined;
-        } else {
-          return v ? v : undefined;
+      ReactUtils.updateRefValues(refs, rq);
+
+      if (typeof rq.localUrls === "string") {
+        try {
+          if (rq.localUrls === "") {
+            delete rq.localUrls;
+          } else {
+            const items = JSON.parse(rq.localUrls);
+            if (
+              Array.isArray(items) &&
+              !items.some((item) => !item.web || !item.api)
+            ) {
+              rq.localUrls = items;
+            } else {
+              refs.localUrls.current?.focus();
+              return;
+            }
+          }
+        } catch (error) {
+          refs.localUrls.current?.focus();
+          return;
         }
-      });
+      }
 
       // Changed fields
       const fields = Utils.getDataChanges(rq, data);
@@ -99,8 +107,8 @@ export default function EditApp() {
     const data = await app.core.appApi.updateRead(id);
     if (data == null) return;
     ReactUtils.updateRefs(refs, data, (item, value) => {
-      if (item.name === "localApis" && Array.isArray(value)) {
-        item.value = value.join("\n");
+      if (item.name === "localUrls" && value != null) {
+        item.value = JSON.stringify(value);
       } else {
         item.value = value == null ? "" : `${value}`;
       }
@@ -142,32 +150,12 @@ export default function EditApp() {
       <Grid2 size={{ xs: 12, sm: 12 }}>
         <InputField
           fullWidth
-          name="localUrl"
-          slotProps={{ htmlInput: { maxLength: 256 } }}
-          type="url"
-          label={labels.localUrl}
-          inputRef={refs.localUrl}
-        />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 12 }}>
-        <InputField
-          fullWidth
-          name="localHelpUrl"
-          slotProps={{ htmlInput: { maxLength: 256 } }}
-          type="url"
-          label={labels.localHelpUrl}
-          inputRef={refs.localHelpUrl}
-        />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 12 }}>
-        <InputField
-          fullWidth
-          name="localApis"
-          label={labels.localApis}
-          inputRef={refs.localApis}
+          name="localUrls"
+          label={labels.localUrls}
+          inputRef={refs.localUrls}
           multiline
-          rows={3}
-          helperText={labels.oneUrlPerLine}
+          rows={5}
+          helperText={labels.localUrlsHelp}
         />
       </Grid2>
     </EditPage>

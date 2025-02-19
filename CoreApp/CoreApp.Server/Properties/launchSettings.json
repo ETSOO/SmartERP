@@ -9,15 +9,15 @@
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:9004;http://localhost:9003"
+      "applicationUrl": "https://*:9004;http://*:9003"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "environmentVariables": {
-        "ASPNETCORE_HTTPS_PORTS": "8083",
-        "ASPNETCORE_HTTP_PORTS": "8082"
+        "ASPNETCORE_HTTPS_PORTS": "8084",
+        "ASPNETCORE_HTTP_PORTS": "8083"
       },
       "publishAllPorts": true,
       "useSSL": true

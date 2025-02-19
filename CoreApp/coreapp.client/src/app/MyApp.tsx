@@ -3,7 +3,6 @@ import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
-import { AuthApi } from "../api/AuthApi";
 
 class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   /**
@@ -17,11 +16,6 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
    * Core application
    */
   readonly core = new CoreApp(this, this.coreApi);
-
-  /**
-   * Auth APIs
-   */
-  readonly authApi = new AuthApi(this);
 }
 
 // Detected country or region

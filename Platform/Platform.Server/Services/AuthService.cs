@@ -23,6 +23,7 @@ using Platform.Server.Endpoints.AuthCode.RQ;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Globalization;
@@ -47,8 +48,7 @@ namespace Platform.Server.Services
         private record AppData
         {
             public required string AppSecret { get; set; }
-            public required string WebUrl { get; init; }
-            public required string[] ApiUrls { get; init; }
+            public required AppUrl[] Urls { get; init; }
         }
 
         private record MoreData
@@ -150,16 +150,16 @@ namespace Platform.Server.Services
 
             if (string.IsNullOrEmpty(appKey))
             {
-                data = await _db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, WebUrl = a.WebUrl, ApiUrls = a.ApiUrls }).FirstOrDefaultAsync(cancellationToken);
+                data = await _db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, Urls = a.Urls }).FirstOrDefaultAsync(cancellationToken);
             }
             else
             {
-                data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey && oa.AppSecret != null).Select(oa => new AppData { AppSecret = oa.AppSecret!, WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl, ApiUrls = oa.LocalApis ?? oa.CoreApp.ApiUrls }).FirstOrDefaultAsync(cancellationToken);
+                data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey && oa.AppSecret != null).Select(oa => new AppData { AppSecret = oa.AppSecret!, Urls = oa.LocalUrls ?? oa.CoreApp.Urls }).FirstOrDefaultAsync(cancellationToken);
             }
 
             if (data != null)
             {
-                data.AppSecret = App.DecriptData(data.AppSecret, "Token");
+                data.AppSecret = App.DecriptData(data.AppSecret, "Token" + appId);
             }
 
             return data;
@@ -375,7 +375,7 @@ namespace Platform.Server.Services
         {
             // User for authorization, update the scopes
             var scopes = currentUser.Scopes?.Intersect(rq.Scopes);
-            var user = currentUser with { AppId = rq.AppId, Scopes = scopes };
+            var user = currentUser with { App = rq.AppId.ToString(), Scopes = scopes };
 
             var result = ActionResult.Success;
 
@@ -389,7 +389,7 @@ namespace Platform.Server.Services
             {
                 result = ApplicationErrors.NoValidData.AsResult("AppId");
             }
-            else if (!redirectUri.StartsWith(appData.WebUrl) && !appData.ApiUrls.Any(redirectUri.StartsWith))
+            else if (!appData.Urls.Any(u => redirectUri.StartsWith(u.Web) || redirectUri.StartsWith(u.Api)))
             {
                 result = ApplicationErrors.NoValidData.AsResult("RedirectUri");
             }
@@ -806,7 +806,7 @@ namespace Platform.Server.Services
                 && data.ParentOrganizationId == null && data.ChannelOrganizationId == null
                 && data.UserRole >= UserRole.Manager)
             {
-                scopes.Add(MyAppConstants.SuperApp);
+                scopes.Add(MyAppConstants.AdminApp);
             }
 
             // App paid scopes
@@ -1620,7 +1620,7 @@ namespace Platform.Server.Services
                 Oid = userData.Oid.GetValueOrDefault().ToString(),
                 Uid = data.Data.Uid.ToString(),
                 RoleValue = (short)userData.Role.GetValueOrDefault(UserRole.User),
-                AppId = userData.LatestAppId,
+                App = userData.LatestAppId?.ToString(),
                 Scopes = data.Data.Scopes,
                 ClientIp = _ip,
                 Language = new CultureInfo(data.Culture),

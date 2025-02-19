@@ -15,11 +15,6 @@ window.settings = {
   webUrl: "https://localhost:9002/",
 
   /**
-   * Application id
-   */
-  appId: 0,
-
-  /**
    * OAuth2 clients
    */
   authClients: ["Wechat", "Alipay", "Google", "Microsoft"]

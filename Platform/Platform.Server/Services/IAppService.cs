@@ -10,7 +10,7 @@ namespace Platform.Server.Services
         Task<IActionResult> BuyAsync(AppBuyRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> BuyNewAsync(AppBuyNewRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> CreateApiKeyAsync(int id, string passphase, CancellationToken cancellationToken = default);
-        Task<IEnumerable<AppQueryData>> GetMyAsync(AppGetMyRQ rq, CancellationToken cancellationToken = default);
+        Task<IEnumerable<AppData>> GetMyAsync(AppGetMyRQ rq, CancellationToken cancellationToken = default);
         Task GetMyAsync(AppGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task ListAsync(AppListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task QueryAsync(AppQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);

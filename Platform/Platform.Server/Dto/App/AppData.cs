@@ -1,4 +1,6 @@
-﻿namespace Platform.Server.Dto.App
+﻿using PlatformShared.Dto;
+
+namespace Platform.Server.Dto.App
 {
     /// <summary>
     /// Application data
@@ -19,16 +21,16 @@
         public required string Name { get; init; }
 
         /// <summary>
-        /// Web URL
-        /// Web网址
+        /// Local name
+        /// 本地名称
         /// </summary>
-        public required string WebUrl { get; init; }
+        public string? LocalName { get; init; }
 
         /// <summary>
-        /// Help URL
-        /// 帮助网址
+        /// URLs
+        /// 网址
         /// </summary>
-        public string? HelpUrl { get; init; }
+        public required AppUrl[] Urls { get; init; }
 
         /// <summary>
         /// Logo

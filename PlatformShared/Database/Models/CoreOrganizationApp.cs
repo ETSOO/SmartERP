@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Dto;
 
 namespace PlatformShared.Database.Models
 {
@@ -45,22 +46,10 @@ namespace PlatformShared.Database.Models
         public string? LocalName { get; set; }
 
         /// <summary>
-        /// Local UI URL
-        /// 本地用户界面网址
+        /// Local URLs
+        /// 本地网址
         /// </summary>
-        public string? LocalUrl { get; set; }
-
-        /// <summary>
-        /// Local API URLs
-        /// 本地接口网址
-        /// </summary>
-        public string[]? LocalApis { get; set; }
-
-        /// <summary>
-        /// Local help URL
-        /// 本地帮助网址
-        /// </summary>
-        public string? LocalHelpUrl { get; set; }
+        public AppUrl[]? LocalUrls { get; set; }
 
         /// <summary>
         /// Expiry

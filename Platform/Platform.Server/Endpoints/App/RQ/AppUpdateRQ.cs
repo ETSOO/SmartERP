@@ -3,6 +3,7 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using PlatformShared.Dto;
 
 namespace Platform.Server.Endpoints.App.RQ
 {
@@ -19,22 +20,10 @@ namespace Platform.Server.Endpoints.App.RQ
         public string? LocalName { get; init; }
 
         /// <summary>
-        /// Local Web URL
+        /// Local URLs
         /// 本地网址
         /// </summary>
-        public string? LocalUrl { get; init; }
-
-        /// <summary>
-        /// Local help URL
-        /// 本地帮助网址
-        /// </summary>
-        public string? LocalHelpUrl { get; init; }
-
-        /// <summary>
-        /// Local APIs
-        /// 本地接口
-        /// </summary>
-        public IEnumerable<string>? LocalApis { get; init; }
+        public AppUrl[]? LocalUrls { get; init; }
 
         /// <summary>
         /// Status
@@ -54,19 +43,12 @@ namespace Platform.Server.Endpoints.App.RQ
                 return ApplicationErrors.NoValidData.AsResult(nameof(LocalName));
             }
 
-            if (LocalUrl != null && !Uri.IsWellFormedUriString(LocalUrl, UriKind.Absolute))
+            if (LocalUrls != null && LocalUrls.Any(u => !Uri.IsWellFormedUriString(u.Web, UriKind.Absolute)
+                || !Uri.IsWellFormedUriString(u.Api, UriKind.Absolute)
+                || (u.Help != null && !Uri.IsWellFormedUriString(u.Help, UriKind.Absolute))
+            ))
             {
-                return ApplicationErrors.NoValidData.AsResult(nameof(LocalUrl));
-            }
-
-            if (LocalHelpUrl != null && !Uri.IsWellFormedUriString(LocalHelpUrl, UriKind.Absolute))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(LocalHelpUrl));
-            }
-
-            if (LocalApis != null && LocalApis.Any(a => !Uri.IsWellFormedUriString(a, UriKind.Absolute)))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(LocalApis));
+                return ApplicationErrors.NoValidData.AsResult(nameof(LocalUrls));
             }
 
             return null;

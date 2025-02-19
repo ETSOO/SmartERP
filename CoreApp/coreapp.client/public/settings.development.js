@@ -15,11 +15,6 @@ window.settings = {
   webUrl: "https://localhost:9005/",
 
   /**
-   * Service application id
-   */
-  appId: 1,
-
-  /**
    * Endpoints
    */
   endpoints: {

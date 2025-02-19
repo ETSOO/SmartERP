@@ -133,13 +133,40 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
    */
   toMain() {
     // Get user's latest app
-    this.userApi.getLatestApp().then((url) => {
-      if (url) {
-        // Go to the app
-        globalThis.location.href = this.addCultureParam(url);
-      } else {
-        // Go to the home page
-        this.navigate("/");
+    this.userApi.getLatestApp().then((appData) => {
+      if (appData) {
+        // Error message
+        const error = this.get("networkFailure");
+
+        // Call the api
+        const tasks = appData.urls.map((u) =>
+          app.authApi.getLogInUrl(
+            "APP",
+            { showLoading: false, onError: () => false },
+            u.api
+          )
+        );
+
+        Promise.allSettled(tasks)
+          .then((result) => {
+            const url = result.find(
+              (r) => r.status === "fulfilled" && r.value != null
+            ) as PromiseFulfilledResult<string> | undefined;
+
+            if (url) {
+              this.loadUrl(url.value);
+            } else {
+              this.notifier.alert(error, () => {
+                // Navigate to home
+                this.navigate("/");
+              });
+            }
+          })
+          .catch((error) => {
+            // Navigate to home
+            this.navigate("/");
+            console.error("SmartApp.toMain", error);
+          });
       }
     });
   }
@@ -194,8 +221,9 @@ const settings: ISmartSettings = {
 
 /**
  * Application
+ * import.meta.env.DEV
  */
-export const app = new SmartApp(settings, "smartERP", import.meta.env.DEV);
+export const app = new SmartApp(settings, "smartERP");
 
 /**
  * Notifier provider

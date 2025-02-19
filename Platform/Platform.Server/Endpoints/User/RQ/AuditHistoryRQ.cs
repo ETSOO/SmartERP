@@ -13,18 +13,6 @@
         public int? DeviceId { get; init; }
 
         /// <summary>
-        /// Kind
-        /// 类型
-        /// </summary>
-        public string? Kind { get; init; }
-
-        /// <summary>
-        /// Target id
-        /// 目标编号
-        /// </summary>
-        public long? TargetId { get; init; }
-
-        /// <summary>
         /// Creation start
         /// 登记开始时间
         /// </summary>

@@ -19,16 +19,16 @@
         public const int CoreAppId = 1;
 
         /// <summary>
-        /// Super app
-        /// 超级程序
+        /// Admin app
+        /// 管理程序
         /// </summary>
-        public const string SuperApp = "super";
+        public const string AdminApp = "admin";
 
         /// <summary>
-        /// Super app id
-        /// 超级程序编号
+        /// Admin app id
+        /// 管理程序编号
         /// </summary>
-        public const int SuperAppId = 2;
+        public const int AdminAppId = 2;
 
         /// <summary>
         /// Registration token audience

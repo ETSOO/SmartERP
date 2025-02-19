@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Dto;
 
 namespace Platform.Server.Dto.App
 {
@@ -33,22 +34,16 @@ namespace Platform.Server.Dto.App
         public IdentityType IdentityType { get; init; }
 
         /// <summary>
+        /// URLs
+        /// 网址
+        /// </summary>
+        public required AppUrl[] Urls { get; init; }
+
+        /// <summary>
         /// Require local URL or not
         /// 是否需要本地地址
         /// </summary>
         public bool? RequireLocalUrl { get; init; }
-
-        /// <summary>
-        /// Web URL
-        /// 网页地址
-        /// </summary>
-        public required string WebUrl { get; init; }
-
-        /// <summary>
-        /// Help URL
-        /// 帮助地址
-        /// </summary>
-        public string? HelpUrl { get; init; }
 
         /// <summary>
         /// Logo

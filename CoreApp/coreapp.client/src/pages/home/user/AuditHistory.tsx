@@ -62,7 +62,6 @@ export default function LoginHistory() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      cacheKey="search-history-cache"
       fieldTemplate={template}
       fields={(data) => [
         <SearchField

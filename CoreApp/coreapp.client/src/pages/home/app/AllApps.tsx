@@ -14,7 +14,7 @@ import React from "react";
 import { DataTypes, DomUtils } from "@etsoo/shared";
 import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { AppQueryData, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { AppQueryData, AppUrl, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { AppUtils } from "../components/AppUtils";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BuyKind } from "../components/BuyApp";
@@ -24,6 +24,14 @@ const template = {
   keyword: "string",
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
+
+function getWebUrl(urls: AppUrl[]): string | undefined {
+  return urls[0]?.web;
+}
+
+function getHelpUrl(urls: AppUrl[]): string | undefined {
+  return urls[0]?.help;
+}
 
 export default function AllApps() {
   // Route
@@ -103,9 +111,11 @@ export default function AllApps() {
           sortable: false
         },
         {
-          field: "webUrl",
+          field: "urls",
           header: labels.appWebUrl,
-          sortable: false
+          sortable: false,
+          valueFormatter: ({ data }) =>
+            data == null ? undefined : getWebUrl(data.urls)
         },
         {
           width: DefaultUI.Widths.icon4,
@@ -122,6 +132,9 @@ export default function AllApps() {
               paddingBottom: "9px!important"
             };
 
+            const webUrl = getWebUrl(data.urls);
+            const helpUrl = getHelpUrl(data.urls);
+
             return (
               <React.Fragment>
                 <Button
@@ -132,15 +145,17 @@ export default function AllApps() {
                 >
                   {labels.buy}
                 </Button>
-                <IconButton
-                  onClick={() => window.open(data.webUrl, "_blank")}
-                  title={labels.appWebUrl}
-                >
-                  <OpenInBrowserIcon />
-                </IconButton>
-                {data.helpUrl && (
+                {webUrl && (
                   <IconButton
-                    onClick={() => window.open(data.helpUrl, "_blank")}
+                    onClick={() => window.open(webUrl, "_blank")}
+                    title={labels.appWebUrl}
+                  >
+                    <OpenInBrowserIcon />
+                  </IconButton>
+                )}
+                {helpUrl && (
+                  <IconButton
+                    onClick={() => window.open(helpUrl, "_blank")}
                     title={labels.appHelpUrl}
                   >
                     <HelpCenterIcon />
@@ -154,27 +169,29 @@ export default function AllApps() {
       itemSize={[134, margin]}
       innerItemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
+          const webUrl = getWebUrl(data.urls);
+          const helpUrl = getHelpUrl(data.urls);
           return [
             data.name,
             app.core.getIdentityLabel(data.identityType),
             [
-              {
+              webUrl != null && {
                 label: labels.appWebUrl,
                 icon: <OpenInBrowserIcon />,
                 action: () => {
-                  window.open(data.webUrl, "_blank");
+                  window.open(webUrl, "_blank");
                 }
               },
-              data.helpUrl != null && {
+              helpUrl != null && {
                 label: labels.appHelpUrl,
                 icon: <HelpCenterIcon />,
                 action: () => {
-                  window.open(data.helpUrl, "_blank");
+                  window.open(helpUrl, "_blank");
                 }
               }
             ],
             <React.Fragment>
-              <Typography variant="body2">{data.webUrl}</Typography>
+              <Typography variant="body2">{webUrl}</Typography>
               <Button
                 variant="outlined"
                 fullWidth

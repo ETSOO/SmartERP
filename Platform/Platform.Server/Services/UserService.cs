@@ -241,16 +241,6 @@ namespace Platform.Server.Services
                         q = q.Where(d => d.DeviceId == rq.DeviceId);
                     }
 
-                    if (rq.TargetId.HasValue)
-                    {
-                        q = q.Where(d => d.TargetId == rq.TargetId);
-                    }
-
-                    if (rq.Kind?.Length > 1)
-                    {
-                        q = q.Where(d => d.Kind == rq.Kind);
-                    }
-
                     if (rq.CreationStart.HasValue)
                     {
                         q = q.Where(d => d.Creation >= rq.CreationStart);
@@ -349,8 +339,8 @@ namespace Platform.Server.Services
 
             if (User.Scopes != null)
             {
-                // Super user
-                if (User.Scopes.Contains(MyAppConstants.SuperApp)) ids.Add(MyAppConstants.SuperAppId);
+                // Admin user
+                if (User.Scopes.Contains(MyAppConstants.AdminApp)) ids.Add(MyAppConstants.AdminAppId);
 
                 // Other apps
                 foreach (var scope in User.Scopes)
@@ -366,8 +356,7 @@ namespace Platform.Server.Services
                 {
                     Id = t.a.Id,
                     Name = (oa == null || oa.LocalName == null) ? t.a.Name : oa.LocalName,
-                    WebUrl = (oa == null || oa.LocalUrl == null) ? t.a.WebUrl : oa.LocalUrl,
-                    HelpUrl = (oa == null || oa.LocalHelpUrl == null) ? t.a.HelpUrl : oa.LocalHelpUrl,
+                    Urls = (oa == null || oa.LocalUrls == null) ? t.a.Urls : oa.LocalUrls,
                     Logo = t.a.Logo
                 })
                .ToArrayAsync(cancellationToken);
@@ -381,26 +370,39 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns>Web URL</returns>
-        public async Task<string> GetLatestAppAsync(CancellationToken cancellationToken = default)
+        public async Task<AppData> GetLatestAppAsync(CancellationToken cancellationToken = default)
         {
             // Latest accessed app id
             var appId = User.AppId ?? MyAppConstants.CoreAppId;
 
-            var url = await _db.CoreApps.AsNoTracking()
+            var app = await _db.CoreApps.AsNoTracking()
+                .Where(a => a.Id == appId)
                 .GroupJoin(_db.CoreOrganizationApps, a => a.Id, oa => oa.CoreAppId, (a, oa) => new { a, oa })
-                .SelectMany(t => t.oa.Where(oa => oa.CoreOrganizationId == User.OrganizationInt).DefaultIfEmpty(), (t, oa) => oa == null ? t.a.WebUrl : oa.LocalUrl ?? t.a.WebUrl)
+                .SelectMany(t => t.oa.Where(oa => oa.CoreOrganizationId == User.OrganizationInt).DefaultIfEmpty(), (t, oa) => new AppData
+                {
+                    Id = t.a.Id,
+                    Name = (oa == null || oa.LocalName == null) ? t.a.Name : oa.LocalName,
+                    Urls = (oa == null || oa.LocalUrls == null) ? t.a.Urls : oa.LocalUrls,
+                    Logo = t.a.Logo
+                })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (string.IsNullOrEmpty(url))
+            if (app == null)
             {
                 // Extreme case, get the core app url
-                url = await _db.CoreApps.AsNoTracking()
+                app = await _db.CoreApps.AsNoTracking()
                     .Where(a => a.Id == MyAppConstants.CoreAppId)
-                    .Select(a => a.WebUrl)
+                    .Select(a => new AppData
+                    {
+                        Id = a.Id,
+                        Name = a.Name,
+                        Urls = a.Urls,
+                        Logo = a.Logo
+                    })
                     .FirstAsync(cancellationToken);
             }
 
-            return url;
+            return app;
         }
 
         /// <summary>

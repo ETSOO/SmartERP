@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.2",
-    "@etsoo/materialui": "^1.4.81",
-    "@etsoo/react": "^1.8.30",
+    "@etsoo/appscript": "^1.6.8",
+    "@etsoo/materialui": "^1.4.82",
+    "@etsoo/react": "^1.8.31",
     "@etsoo/shared": "^1.2.61",
-    "@etsoo/smarterp-core": "^1.0.4",
+    "@etsoo/smarterp-core": "^1.0.9",
     "@etsoo/toolpad": "^1.0.15",
     "@mui/material": "^6.4.4",
     "formik": "^2.4.6",

@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Dto;
 
 namespace PlatformShared.Database.Models
 {
@@ -33,22 +34,10 @@ namespace PlatformShared.Database.Models
         public required string AppSecret { get; set; }
 
         /// <summary>
-        /// Web URL
+        /// URLs
         /// 网址
         /// </summary>
-        public required string WebUrl { get; set; }
-
-        /// <summary>
-        /// API URLs
-        /// 接口网址
-        /// </summary>
-        public required string[] ApiUrls { get; set; }
-
-        /// <summary>
-        /// Help URL
-        /// 帮助网址
-        /// </summary>
-        public string? HelpUrl { get; set; }
+        public required AppUrl[] Urls { get; set; }
 
         /// <summary>
         /// Require local URL

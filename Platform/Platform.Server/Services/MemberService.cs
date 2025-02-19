@@ -298,25 +298,24 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = _db.CoreOrganizationUsers
+            await _db.CoreOrganizationUsers
                 .AsNoTracking()
-                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User));
-
-            var (hasContent, _) = await query.Select(ou => new
-            {
-                ou.Id,
-                ou.CoreUser.Name,
-                ou.UserRole,
-                ou.IdentityType,
-                ou.LocalName,
-                ou.LocalAvatar,
-                ou.AssignedId,
-                ou.Creation,
-                ou.Expiry,
-                ou.RefreshTime,
-                ou.Status,
-                Inviter = ou.Inviter == null ? null : ou.Inviter.Name
-            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User))
+                .Select(ou => new
+                {
+                    ou.Id,
+                    ou.CoreUser.Name,
+                    ou.UserRole,
+                    ou.IdentityType,
+                    ou.LocalName,
+                    ou.LocalAvatar,
+                    ou.AssignedId,
+                    ou.Creation,
+                    ou.Expiry,
+                    ou.RefreshTime,
+                    ou.Status,
+                    Inviter = ou.Inviter == null ? null : ou.Inviter.Name
+                }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using com.etsoo.Database;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
 using com.etsoo.Utils.Serialization;
+using com.etsoo.Utils.String;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.App;
@@ -18,6 +19,7 @@ using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Buffers;
+using System.Text.Json;
 
 namespace Platform.Server.Services
 {
@@ -167,7 +169,7 @@ namespace Platform.Server.Services
             var app = await _db.CoreOrganizationApps
                 .AsNoTracking()
                 .Where(oa => oa.Id == id && oa.CoreOrganizationId == User.OrganizationInt && oa.Status == EntityStatus.Normal)
-                .Select(oa => new { Name = oa.LocalName ?? oa.CoreApp.Name })
+                .Select(oa => new { AppId = oa.CoreAppId, Name = oa.LocalName ?? oa.CoreApp.Name })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (app == null)
@@ -177,7 +179,7 @@ namespace Platform.Server.Services
 
             var appKey = Guid.NewGuid().ToString("N");
             var appSecret = await App.HashPasswordAsync(id + CryptographyUtils.CreateRandString(RandStringKind.All, 32).ToString());
-            var appSecretDB = App.EncriptData(appSecret, id.ToString(), 0);
+            var appSecretDB = App.EncriptData(appSecret, "Token" + app.AppId, 0);
 
             await _db.CoreOrganizationApps.Where(oa => oa.Id == id)
                 .ExecuteUpdateAsync(oa => oa.SetProperty(oa => oa.AppKey, appKey).SetProperty(oa => oa.AppSecret, appSecretDB), cancellationToken);
@@ -203,7 +205,7 @@ namespace Platform.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task<IEnumerable<AppQueryData>> GetMyAsync(AppGetMyRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<AppData>> GetMyAsync(AppGetMyRQ rq, CancellationToken cancellationToken = default)
         {
             // Current user's organization
             var orgId = User.OrganizationInt;
@@ -217,17 +219,17 @@ namespace Platform.Server.Services
                     && ou.Status <= EntityStatus.Approved
                     && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow), cancellationToken);
 
-            List<AppQueryData> apps = [];
+            List<AppData> apps = [];
 
             List<int> defaultApps = [1];
 
             // Max items except the core app
             var maxItems = rq.MaxItems - 1;
 
-            if (User.Scopes?.Contains(MyAppConstants.SuperApp) is true)
+            if (User.Scopes?.Contains(MyAppConstants.AdminApp) is true)
             {
-                // Super app
-                defaultApps.Add(2);
+                // Admin app
+                defaultApps.Add(MyAppConstants.AdminAppId);
                 maxItems--;
             }
 
@@ -245,15 +247,12 @@ namespace Platform.Server.Services
                          && oa.Status <= EntityStatus.Approved
                          && (oa.Expiry == null || oa.Expiry >= DateTimeOffset.UtcNow)
                          && oa.CoreApp.IdentityType == rq.IdentityType)
-                     .Select(oa => new AppQueryData
+                     .Select(oa => new AppData
                      {
                          Id = oa.CoreAppId,
                          Name = oa.CoreApp.Name,
                          LocalName = oa.LocalName,
-                         IdentityType = oa.CoreApp.IdentityType,
-                         RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
-                         WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
-                         HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
+                         Urls = oa.LocalUrls ?? oa.CoreApp.Urls,
                          Logo = oa.CoreApp.Logo
                      });
 
@@ -278,14 +277,11 @@ namespace Platform.Server.Services
             }
 
             // Add the default apps
-            apps.AddRange(await _db.CoreApps.Where(a => defaultApps.Contains(a.Id)).Select(a => new AppQueryData
+            apps.AddRange(await _db.CoreApps.Where(a => defaultApps.Contains(a.Id)).Select(a => new AppData
             {
                 Id = a.Id,
                 Name = a.Name,
-                IdentityType = a.IdentityType,
-                RequireLocalUrl = a.RequireLocalUrl,
-                WebUrl = a.WebUrl,
-                HelpUrl = a.HelpUrl,
+                Urls = a.Urls,
                 Logo = a.Logo
             }).ToListAsync(cancellationToken));
 
@@ -303,7 +299,7 @@ namespace Platform.Server.Services
         public async Task GetMyAsync(AppGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             var apps = await GetMyAsync(rq, cancellationToken);
-            await writer.SerializeAsync(apps, MyJsonSerializerContext.Default.IEnumerableAppQueryData);
+            await writer.SerializeAsync(apps, MyJsonSerializerContext.Default.IEnumerableAppData);
 
             /*
             var (hasContent, commandText) = await _db.CoreOrganizationApps
@@ -405,8 +401,7 @@ namespace Platform.Server.Services
                 Name = a.Name,
                 IdentityType = a.IdentityType,
                 RequireLocalUrl = a.RequireLocalUrl,
-                WebUrl = a.WebUrl,
-                HelpUrl = a.HelpUrl,
+                Urls = a.Urls,
                 Logo = a.Logo
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
@@ -426,66 +421,58 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task QueryPurchasedAsync(AppPurchasedQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                var (hasContent, commandText) =  await _db.CoreOrganizationApps
-                    .AsNoTracking()
-                    .Where(oa => oa.CoreOrganizationId == User.OrganizationInt)
-                    .QueryEtsoo(rq, oa => oa.Id, null, (q) =>
-                    {
-                        if (rq.IdentityType.HasValue)
-                        {
-                            q = q.Where(oa => oa.CoreApp.IdentityType == rq.IdentityType);
-                        }
-
-                        if (rq.RequireLocalUrl.HasValue)
-                        {
-                            q = q.Where(oa => oa.CoreApp.RequireLocalUrl == rq.RequireLocalUrl.Value);
-                        }
-
-                        if (rq.Keyword?.Length > 1)
-                        {
-                            var keyword = rq.Keyword;
-
-                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.CoreApp.Name, oa => oa.LocalName);
-                        }
-
-                        if (rq.Expiry.HasValue)
-                        {
-                            q = q.Where(oa => oa.Expiry < rq.Expiry);
-                        }
-
-                        if (rq.ExpiryDays.HasValue)
-                        {
-                            var expiryDays = rq.ExpiryDays.Value;
-                            q = q.Where(oa => oa.Expiry < DateTimeOffset.UtcNow.AddDays(expiryDays));
-                        }
-
-                        return q;
-                    }).Select(oa => new AppPurchasedQueryData
-                    {
-                        Id = oa.Id,
-                        Name = oa.CoreApp.Name,
-                        LocalName = oa.LocalName,
-                        IdentityType = oa.CoreApp.IdentityType,
-                        RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
-                        WebUrl = oa.LocalUrl ?? oa.CoreApp.WebUrl,
-                        HelpUrl = oa.LocalHelpUrl ?? oa.CoreApp.HelpUrl,
-                        Logo = oa.CoreApp.Logo,
-                        Expiry = oa.Expiry,
-                        ExpiryDays = oa.Expiry == null || oa.Expiry <= DateTimeOffset.UtcNow.AddDays(-90) ? null : (int)(oa.Expiry.Value - DateTimeOffset.UtcNow).TotalDays,
-                        Status = oa.Status,
-                        Creation = oa.Creation
-                    }).ToJsonAsync(writer, cancellationToken: cancellationToken);
-
-                if (_db.IsSensitiveDataLoggingEnabled)
+            var (hasContent, commandText) =  await _db.CoreOrganizationApps
+                .AsNoTracking()
+                .Where(oa => oa.CoreOrganizationId == User.OrganizationInt)
+                .QueryEtsoo(rq, oa => oa.Id, oa => oa.Status, (q) =>
                 {
-                    Logger.LogInformation("GetPurchasedAppsAsync is {hasContent} with {commandText}", hasContent, commandText);
-                }
-            }
-            catch (Exception ex)
+                    if (rq.IdentityType.HasValue)
+                    {
+                        q = q.Where(oa => oa.CoreApp.IdentityType == rq.IdentityType);
+                    }
+
+                    if (rq.RequireLocalUrl.HasValue)
+                    {
+                        q = q.Where(oa => oa.CoreApp.RequireLocalUrl == rq.RequireLocalUrl.Value);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.CoreApp.Name, oa => oa.LocalName);
+                    }
+
+                    if (rq.Expiry.HasValue)
+                    {
+                        q = q.Where(oa => oa.Expiry < rq.Expiry);
+                    }
+
+                    if (rq.ExpiryDays.HasValue)
+                    {
+                        var expiryDays = rq.ExpiryDays.Value;
+                        q = q.Where(oa => oa.Expiry < DateTimeOffset.UtcNow.AddDays(expiryDays));
+                    }
+
+                    return q;
+                }).Select(oa => new AppPurchasedQueryData
+                {
+                    Id = oa.Id,
+                    Name = oa.CoreApp.Name,
+                    LocalName = oa.LocalName,
+                    IdentityType = oa.CoreApp.IdentityType,
+                    RequireLocalUrl = oa.CoreApp.RequireLocalUrl,
+                    Urls = oa.LocalUrls ?? oa.CoreApp.Urls,
+                    Logo = oa.CoreApp.Logo,
+                    Expiry = oa.Expiry,
+                    ExpiryDays = oa.Expiry == null || oa.Expiry <= DateTimeOffset.UtcNow.AddDays(-90) ? null : (int)(oa.Expiry.Value - DateTimeOffset.UtcNow).TotalDays,
+                    Status = oa.Status,
+                    Creation = oa.Creation
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
             {
-                LogException(ex);
+                Logger.LogInformation("GetPurchasedAppsAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
         }
 
@@ -508,9 +495,7 @@ namespace Platform.Server.Services
                 oa.Id,
                 oa.AppKey,
                 oa.LocalName,
-                oa.LocalUrl,
-                oa.LocalApis,
-                oa.LocalHelpUrl,
+                oa.LocalUrls,
                 oa.Expiry,
                 ExpiryDays = oa.Expiry == null || oa.Expiry <= DateTimeOffset.UtcNow.AddDays(-90) ? (int?)null : (int)(oa.Expiry.Value - DateTimeOffset.UtcNow).TotalDays,
                 oa.Status,
@@ -518,7 +503,8 @@ namespace Platform.Server.Services
 
                 oa.CoreApp.IdentityType,
                 AppId = oa.CoreAppId,
-                oa.CoreApp.Name
+                oa.CoreApp.Name,
+                oa.CoreApp.Urls
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -586,19 +572,9 @@ namespace Platform.Server.Services
                 app.LocalName = rq.LocalName;
             }
 
-            if (rq.IsModified(nameof(rq.LocalUrl)))
+            if (rq.IsModified(nameof(rq.LocalUrls)))
             {
-                app.LocalUrl = rq.LocalUrl;
-            }
-
-            if (rq.IsModified(nameof(rq.LocalHelpUrl)))
-            {
-                app.LocalHelpUrl = rq.LocalHelpUrl;
-            }
-
-            if (rq.IsModified(nameof(rq.LocalApis)))
-            {
-                app.LocalApis = rq.LocalApis?.ToArray();
+                app.LocalUrls = rq.LocalUrls;
             }
 
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
@@ -607,7 +583,17 @@ namespace Platform.Server.Services
             }
 
             // Changes
-            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties((name, value) =>
+            {
+                if (name == nameof(rq.LocalUrls) && value != null)
+                {
+                    return JsonSerializer.Serialize(value, PlatformSharedContext.Default.AppUrlArray);
+                }
+                else
+                {
+                    return StringUtils.GetPrimitiveValue(value);
+                }
+            });
 
             // Save
             await _db.SaveChangesAsync(cancellationToken);
@@ -642,9 +628,7 @@ namespace Platform.Server.Services
             {
                 oa.Id,
                 oa.LocalName,
-                oa.LocalUrl,
-                oa.LocalApis,
-                oa.LocalHelpUrl,
+                oa.LocalUrls,
                 oa.Status,
                 oa.CoreApp.Name
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);

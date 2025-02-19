@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 
 namespace PlatformShared.Database
 {
@@ -112,16 +113,10 @@ namespace PlatformShared.Database
                 entity.Property(e => e.AppSecret)
                     .HasMaxLength(256)
                     .HasColumnName("app_secret");
-                entity.Property(e => e.WebUrl)
-                    .HasMaxLength(256)
-                    .HasColumnName("web_url");
-                entity.Property(e => e.ApiUrls)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("api_urls");
-                entity.Property(e => e.HelpUrl)
-                    .HasMaxLength(256)
-                    .HasColumnName("help_url");
+                entity.Property(e => e.Urls)
+                    .HasColumnType("jsonb")
+                    .HasConversion(new JsonTypeConverter<AppUrl[]>(PlatformSharedContext.Default.AppUrlArray))
+                    .HasColumnName("urls");
                 entity.Property(e => e.RequireLocalUrl).HasColumnName("require_local_url");
                 entity.Property(e => e.Logo)
                     .HasMaxLength(256)
@@ -248,15 +243,10 @@ namespace PlatformShared.Database
                 entity.Property(e => e.LocalName)
                     .HasMaxLength(128)
                     .HasColumnName("local_name");
-                entity.Property(e => e.LocalUrl)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_url");
-                entity.Property(e => e.LocalApis)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_apis");
-                entity.Property(e => e.LocalHelpUrl)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_help_url");
+                entity.Property(e => e.LocalUrls)
+                    .HasColumnType("jsonb")
+                    .HasConversion(new JsonTypeConverter<AppUrl[]?>(PlatformSharedContext.Default.AppUrlArray))
+                    .HasColumnName("local_urls");
                 entity.Property(e => e.Expiry).HasColumnName("expiry");
                 entity.Property(e => e.Status)
                     .HasConversion<byte>()

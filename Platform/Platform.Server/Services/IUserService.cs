@@ -17,7 +17,7 @@ namespace Platform.Server.Services
         Task<IActionResult> DeleteIdentifierAsync(int id, CancellationToken cancellationToken = default);
         Task DeviceListAsync(QueryIntRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IEnumerable<AppData>> GetCurrentAppsAsync(CancellationToken cancellationToken = default);
-        Task<string> GetLatestAppAsync(CancellationToken cancellationToken = default);
+        Task<AppData> GetLatestAppAsync(CancellationToken cancellationToken = default);
         ValueTask<IActionResult> UpdateAvatarAsync(Stream avatarStream, string contentType, CancellationToken cancellationToken = default);
     }
 }
