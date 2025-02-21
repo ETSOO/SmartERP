@@ -7,6 +7,11 @@ import { AllOrgRQ } from "./rq/query/AllOrgRQ";
 import { AllOrgDto } from "./dto/query/AllOrgDto";
 import { AllUserRQ } from "./rq/query/AllUserRQ";
 import { AllUserDto } from "./dto/query/AllUserDto";
+import { DataTypes } from "@etsoo/shared";
+import { OrgListRQ } from "./rq/query/OrgListRQ";
+import { AppListRQ } from "./rq/query/AppListRQ";
+import { UserListRQ } from "./rq/query/UserListRQ";
+import { OrgListDto } from "./dto/query/OrgListDto";
 
 /**
  * Query API
@@ -43,6 +48,16 @@ export class QueryApi extends BaseApi {
   }
 
   /**
+   * App list
+   * @param rq Request data
+   * @param payload Payload
+   * @returns Result
+   */
+  appList(rq: AppListRQ, payload?: IApiPayload<DataTypes.IdNameItem[]>) {
+    return this.api.post("Query/AppList", rq, payload);
+  }
+
+  /**
    * Audit history
    * @param rq Request data
    * @param payload Payload
@@ -50,6 +65,16 @@ export class QueryApi extends BaseApi {
    */
   auditHistory(rq: AuditHistoryRQ, payload?: IApiPayload<AuditHistoryDto[]>) {
     return this.api.post("Query/AuditHistory", rq, payload);
+  }
+
+  /**
+   * Organization list
+   * @param rq Request data
+   * @param payload Payload
+   * @returns Result
+   */
+  orgList(rq: OrgListRQ, payload?: IApiPayload<OrgListDto[]>) {
+    return this.api.post("Query/OrgList", rq, payload);
   }
 
   /**
@@ -80,5 +105,15 @@ export class QueryApi extends BaseApi {
    */
   readUser(id: number, payload?: IApiPayload<AllUserDto>) {
     return this.api.get(`Query/ReadUser/${id}`, payload);
+  }
+
+  /**
+   * User list
+   * @param rq Request data
+   * @param payload Payload
+   * @returns Result
+   */
+  userList(rq: UserListRQ, payload?: IApiPayload<DataTypes.IdNameItem[]>) {
+    return this.api.post("Query/UserList", rq, payload);
   }
 }

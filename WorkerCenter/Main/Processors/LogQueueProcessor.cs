@@ -62,6 +62,7 @@ namespace WorkerCenter.Main.Processors
 
             var log = new CoreLog
             {
+                AppId = data.AppId,
                 Culture = data.Culture,
                 Data = message.GetMoreData(),
                 DeviceId = data.DeviceId,

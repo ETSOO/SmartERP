@@ -6,6 +6,7 @@ using com.etsoo.ServiceApp.SmartERP;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using System.Buffers;
+using System.Net;
 
 namespace Admin.Server.Services
 {
@@ -64,18 +65,18 @@ namespace Admin.Server.Services
                     {
                         var keyword = rq.Keyword;
 
-                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.CoreApp.Name, oa => oa.LocalName);
+                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.LocalName ?? oa.CoreApp.Name);
                     }
 
                     if (rq.Expiry.HasValue)
                     {
-                        q = q.Where(oa => oa.Expiry < rq.Expiry);
+                        q = q.Where(oa => oa.Expiry < rq.Expiry && oa.Expiry >= DateTimeOffset.UtcNow);
                     }
 
                     if (rq.ExpiryDays.HasValue)
                     {
                         var expiryDays = rq.ExpiryDays.Value;
-                        q = q.Where(oa => oa.Expiry < DateTimeOffset.UtcNow.AddDays(expiryDays));
+                        q = q.Where(oa => oa.Expiry < DateTimeOffset.UtcNow.AddDays(expiryDays) && oa.Expiry >= DateTimeOffset.UtcNow.AddDays(-expiryDays));
                     }
 
                     if (rq.CreationStart.HasValue)
@@ -263,6 +264,144 @@ namespace Admin.Server.Services
         }
 
         /// <summary>
+        /// App list
+        /// 应用列表
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task AppListAsync(AppListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var (hasContent, commandText) = await _db.CoreApps
+                .AsNoTracking()
+                .QueryEtsoo(rq, a => a.Id, null, (q) =>
+                {
+                    if (rq.Keyword?.Length > 0)
+                    {
+                        if (int.TryParse(rq.Keyword, out int id))
+                        {
+                            q = q.Where(a => a.Id == id);
+                        }
+                        else
+                        {
+                            q = q.QueryEtsooKeywords(rq.Keyword, DbUtils.ILikeMethod, a => a.Name);
+                        }
+                    }
+
+                    if (rq.Enabled.HasValue)
+                    {
+                        q = q.Where(a => a.Enabled == rq.Enabled);
+                    }
+
+                    return q;
+                })
+                .Select(a => new
+                {
+                    a.Id,
+                    a.Name
+                })
+                .ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("AppListAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        /// <summary>
+        /// Organization list
+        /// 机构列表
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task OrgListAsync(OrgListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var (hasContent, commandText) = await _db.CoreOrganizations
+                .AsNoTracking()
+                .QueryEtsoo(rq, o => o.Id, o => o.Status, (q) =>
+                {
+                    if (rq.Keyword?.Length > 0)
+                    {
+                        var keyword = rq.Keyword;
+                        if (int.TryParse(keyword, out int id))
+                        {
+                            q = q.Where(o => o.Id == id);
+                        }
+                        else
+                        {
+                            q = q.Where(o => o.Brand == keyword
+                            || EF.Functions.ILike(o.Name, $"%{keyword}%")
+                            || (o.Pin != null && EF.Functions.ILike(o.Pin, $"%{keyword}%"))
+                            || (o.QueryKeyword != null && EF.Functions.ILike(o.QueryKeyword, $"%{keyword}%")));
+                        }
+                    }
+
+                    return q;
+                })
+                .Select(o => new
+                {
+                    o.Id,
+                    o.Name,
+                    Pin = MyDbFunctions.HideData(o.Pin, default),
+                })
+                .ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("OrgListAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        /// <summary>
+        /// User list
+        /// 用户列表
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task UserListAsync(UserListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var (hasContent, commandText) = await _db.CoreUsers
+                .AsNoTracking()
+                .QueryEtsoo(rq, u => u.Id, null, (q) =>
+                {
+                    if (rq.OrgId.HasValue)
+                    {
+                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreUserId == u.Id && ou.CoreOrganizationId == rq.OrgId.Value));
+                    }
+
+                    if (rq.Keyword?.Length > 0)
+                    {
+                        if (int.TryParse(rq.Keyword, out int id))
+                        {
+                            q = q.Where(u => u.Id == id);
+                        }
+                        else
+                        {
+                            q = q.QueryEtsooKeywords(rq.Keyword, DbUtils.ILikeMethod, u => u.Name, u => u.PreferredName);
+                        }
+                    }
+
+                    return q;
+                })
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Name
+                })
+                .ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("UserListAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        /// <summary>
         /// Audit history
         /// 操作历史
         /// </summary>
@@ -290,6 +429,11 @@ namespace Admin.Server.Services
                         q = q.Where(d => d.OrganizationId == rq.OrgId);
                     }
 
+                    if (rq.AppId.HasValue)
+                    {
+                        q = q.Where(d => d.AppId == rq.AppId);
+                    }
+
                     if (rq.TargetId.HasValue)
                     {
                         q = q.Where(d => d.TargetId == rq.TargetId);
@@ -298,6 +442,11 @@ namespace Admin.Server.Services
                     if (rq.Kind?.Length > 1)
                     {
                         q = q.Where(d => d.Kind == rq.Kind);
+                    }
+
+                    if (rq.Ip?.Length > 1)
+                    {
+                        q = q.Where(d => d.Ip == IPAddress.Parse(rq.Ip));
                     }
 
                     if (rq.CreationStart.HasValue)
@@ -323,6 +472,7 @@ namespace Admin.Server.Services
                 d.UserId,
                 d.OrganizationId,
                 d.TargetId,
+                d.AppId,
                 d.Creation
             })
             .ToJsonAsync(writer, cancellationToken: cancellationToken);

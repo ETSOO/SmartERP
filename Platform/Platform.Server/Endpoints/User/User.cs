@@ -28,6 +28,9 @@ namespace Platform.Server.Endpoints.User
             g.MapPost("AuditHistory", (IUserService service, IHttpContextAccessor accessor, AuditHistoryRQ rq, CancellationToken cancellationToken) => service.AuditHistoryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get user audit history / 获取用户操作历史").WithTags("User");
 
+            g.MapPost("CheckSession/{id:int}", (IUserService service, int id, CancellationToken cancellationToken) => service.CheckSessionAsync(id, cancellationToken))
+                .WithDescription("Check app session / 检查应用会话").WithTags("User");
+
             g.MapDelete("DeleteIdentifier/{id:int}", (IUserService service, int id, CancellationToken cancellationToken) => service.DeleteIdentifierAsync(id, cancellationToken))
                 .WithDescription("Delete user identifier / 删除用户标识").WithTags("User");
 

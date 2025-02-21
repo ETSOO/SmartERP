@@ -4,11 +4,13 @@ import {
   SearchField,
   MobileListItemRenderer,
   MUUtils,
-  ResponsivePage
+  ResponsivePage,
+  IconButtonLink
 } from "@etsoo/materialui";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { BoxProps, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
+import PersonIcon from "@mui/icons-material/Person";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -19,8 +21,18 @@ import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { AuditHistoryDto } from "../../../api/dto/query/AuditHistoryDto";
+import { AppTiplist } from "../../../components/AppTiplist";
+import { OrgTiplist } from "../../../components/OrgTiplist";
+import { UserTiplist } from "../../../components/UserTiplist";
 
 const template = {
+  id: "number",
+  userId: "number",
+  orgId: "number",
+  appId: "number",
+  kind: "string",
+  ip: "string",
+  targetId: "number",
   keyword: "string",
   creationStart: "date",
   creationEnd: "date"
@@ -32,9 +44,14 @@ export default function LoginHistory() {
     "actions",
     "creation",
     "endDate",
+    "id",
+    "org",
+    "app",
     "startDate",
+    "targetId",
     "title",
-    "type"
+    "type",
+    "user"
   );
 
   // Refs
@@ -59,10 +76,40 @@ export default function LoginHistory() {
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
+          label={labels.id}
+          name="id"
+          minChars={2}
+          type="number"
+          inputMode="numeric"
+          defaultValue={data.id}
+        />,
+        <SearchField
           label={labels.title}
           name="keyword"
           minChars={2}
           defaultValue={data.keyword}
+        />,
+        <UserTiplist width={120} idValue={data.userId} />,
+        <OrgTiplist idValue={data.orgId} />,
+        <AppTiplist idValue={data.appId} />,
+        <SearchField
+          label={labels.type}
+          name="kind"
+          minChars={2}
+          defaultValue={data.kind}
+        />,
+        <SearchField
+          label="IP"
+          name="ip"
+          minChars={2}
+          defaultValue={data.ip}
+        />,
+        <SearchField
+          label={labels.targetId}
+          name="targetId"
+          type="number"
+          inputMode="numeric"
+          defaultValue={data.targetId}
         />,
         <SearchField
           label={labels.startDate}
@@ -110,9 +157,12 @@ export default function LoginHistory() {
           sortAsc: false,
           renderProps: app.getDateFormatProps()
         },
+        { field: "userId", header: labels.user, width: 80 },
+        { field: "organizationId", header: labels.org, width: 80 },
         { field: "title", header: labels.title },
+        { field: "appId", header: labels.app, width: 72 },
         {
-          width: DefaultUI.Widths.icon1,
+          width: DefaultUI.Widths.icon2,
           header: labels.actions,
           align: "center",
           cellRenderer: ({
@@ -127,41 +177,54 @@ export default function LoginHistory() {
             };
 
             return (
-              <DialogButton
-                content={JSON.stringify(data, undefined, 2)}
-                contentPre
-                disableScrollLock
-                maxWidth="xs"
-                size="small"
-                icon={<InfoIcon />}
-              >
-                JSON data
-              </DialogButton>
+              <React.Fragment>
+                <DialogButton
+                  content={JSON.stringify(data, undefined, 2)}
+                  contentPre
+                  disableScrollLock
+                  maxWidth="xs"
+                  size="small"
+                  icon={<InfoIcon />}
+                >
+                  JSON data
+                </DialogButton>
+                <IconButtonLink
+                  size="small"
+                  href={`./../user/view/${data.userId}`}
+                >
+                  <PersonIcon />
+                </IconButtonLink>
+              </React.Fragment>
             );
           }
         }
       ]}
       itemSize={[112, margin]}
       innerItemRenderer={(props) =>
-        MobileListItemRenderer(props, (data) => {
-          return [
-            data.title,
-            app.formatDate(data.creation, "ds"),
-            <DialogButton
-              content={JSON.stringify(data, undefined, 2)}
-              contentPre
-              disableScrollLock
-              maxWidth="xs"
-              size="small"
-              icon={<InfoIcon />}
-            >
-              JSON data
-            </DialogButton>,
-            <React.Fragment>
-              <Typography variant="caption">{data.kind}</Typography>
-            </React.Fragment>
-          ];
-        })
+        MobileListItemRenderer(props, (data) => [
+          data.title,
+          app.formatDate(data.creation, "ds"),
+          [
+            {
+              label: labels.user,
+              icon: <PersonIcon />,
+              action: `./../user/view/${data.userId}`
+            }
+          ],
+          <DialogButton
+            content={JSON.stringify(data, undefined, 2)}
+            contentPre
+            disableScrollLock
+            maxWidth="xs"
+            size="small"
+            icon={<InfoIcon />}
+          >
+            JSON data
+          </DialogButton>,
+          <React.Fragment>
+            <Typography variant="caption">{data.kind}</Typography>
+          </React.Fragment>
+        ])
       }
     />
   );

@@ -17,13 +17,15 @@ namespace PlatformShared.Extentions
         /// 创建通用消息数据
         /// </summary>
         /// <param name="user">Current user</param>
+        /// <param name="appId">Application id</param>
         /// <param name="targetId">Target id</param>
         /// <param name="targetName">Target name</param>
         /// <returns>Result</returns>
-        public static CommonMessageData CreateMessageData(this CurrentUser user, long targetId, string? targetName = null)
+        public static CommonMessageData CreateMessageData(this CurrentUser user, int appId, long targetId, string? targetName = null)
         {
             return new CommonMessageData
             {
+                AppId = appId,
                 Culture = user.Language.Name,
                 DeviceId = user.DeviceIdInt,
                 IP = user.ClientIp.ToString(),

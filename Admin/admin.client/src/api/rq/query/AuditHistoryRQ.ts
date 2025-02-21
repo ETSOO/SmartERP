@@ -24,6 +24,12 @@ export type AuditHistoryRQ = QueryRQ & {
   kind?: string;
 
   /**
+   * IP address
+   * IP地址
+   */
+  ip?: string;
+
+  /**
    * Target id
    * 目标编号
    */

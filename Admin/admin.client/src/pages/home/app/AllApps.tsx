@@ -4,31 +4,37 @@ import {
   SearchField,
   SelectEx,
   MobileListItemRenderer,
-  MUUtils
+  MUUtils,
+  IconButtonLink
 } from "@etsoo/materialui";
-import { BoxProps, IconButton, Typography } from "@mui/material";
-import HelpCenterIcon from "@mui/icons-material/HelpCenter";
-import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
+import { BoxProps, Typography } from "@mui/material";
 import React from "react";
-import { DataTypes } from "@etsoo/shared";
-import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
+import { DataTypes, DateUtils } from "@etsoo/shared";
+import {
+  GridCellRendererProps,
+  GridDataType,
+  GridDeletedCellBoxStyle,
+  ScrollerListForwardRef
+} from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { AppQueryData, AppUrl, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { useNavigate } from "react-router-dom";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, IdentityType } from "@etsoo/smarterp-core/components";
+import { AllAppDto } from "../../../api/dto/query/AllAppDto";
+import ArticleIcon from "@mui/icons-material/Article";
+import { OrgTiplist } from "../../../components/OrgTiplist";
+import { AppTiplist } from "../../../components/AppTiplist";
 
 const template = {
+  orgId: "number",
   keyword: "string",
-  identityType: "number"
+  identityType: "number",
+  expiry: "date",
+  expiryDays: "number",
+  appId: "number",
+  creationStart: "date",
+  creationEnd: "date"
 } as const satisfies DataTypes.BasicTemplate;
-
-function getWebUrl(urls: AppUrl[]): string | undefined {
-  return urls[0]?.web;
-}
-
-function getHelpUrl(urls: AppUrl[]): string | undefined {
-  return urls[0]?.help;
-}
 
 export default function AllApps() {
   // Route
@@ -37,58 +43,102 @@ export default function AllApps() {
   // Labels
   const labels = app.getLabels(
     "actions",
-    "appHelpUrl",
+    "app",
     "appName",
-    "appWebUrl",
-    "buy",
+    "creation",
+    "days",
+    "endDate",
+    "expiry",
     "identityType",
-    "statusNormal"
+    "org",
+    "startDate",
+    "view"
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<AppQueryData>>();
-
-  // Identities
-  const identities = app.core.getIdentities();
+  const ref = React.useRef<ScrollerListForwardRef<AllAppDto>>();
 
   // Load data
   const reloadData = () => ref.current?.reset();
 
   const margin = MUGlobal.pagePaddings;
+  const creationEndRef = React.useRef<HTMLInputElement>();
 
   // Page data hook
   usePageDataEmpty(app);
 
   return (
-    <ResponsivePage<AppQueryData, typeof template>
+    <ResponsivePage<AllAppDto, typeof template>
       {...DefaultUI.createProps({
         onRefresh: reloadData
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
+      quickAction={(data) => navigate(`./../view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
+        <OrgTiplist idValue={data.orgId} />,
         <SearchField
           label={labels.appName}
           name="keyword"
           defaultValue={data.keyword}
         />,
+        <IdentityType value={data.identityType} search />,
+        <SearchField
+          label={labels.expiry}
+          name="expiry"
+          type="date"
+          defaultValue={DateUtils.formatForInput(data.expiry)}
+        />,
         <SelectEx
-          label={labels.identityType}
-          name="identityType"
+          label={labels.days}
+          name="expiryDays"
           search
-          options={identities}
-          value={data.identityType}
+          options={[
+            { id: "", label: "---" },
+            { id: 3, label: "3" },
+            { id: 7, label: "7" },
+            { id: 15, label: "15" },
+            { id: 30, label: "30" },
+            { id: 60, label: "60" },
+            { id: 90, label: "90" },
+            { id: 180, label: "180" }
+          ]}
+          value={data.expiryDays}
+        />,
+        <AppTiplist idValue={data.appId} />,
+        <SearchField
+          label={labels.startDate}
+          name="creationStart"
+          type="date"
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            if (creationEndRef.current == null) return;
+            const date = DateUtils.formatForInput(
+              event.currentTarget.valueAsDate
+            );
+            if (date) creationEndRef.current.min = date;
+          }}
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
+          }}
+          defaultValue={DateUtils.formatForInput(data.creationStart)}
+        />,
+        <SearchField
+          label={labels.endDate}
+          name="creationEnd"
+          type="date"
+          inputRef={creationEndRef}
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
+          }}
+          defaultValue={DateUtils.formatForInput(data.creationEnd)}
         />
       ]}
       loadData={(data, lastItem) =>
-        app.core.appApi.query(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
-          {
-            defaultValue: [],
-            showLoading: false
-          }
-        )
+        app.queryApi.allApps(MUUtils.setupPagingKeysets(data, lastItem, "id"), {
+          defaultValue: [],
+          showLoading: false
+        })
       }
       columns={[
         {
@@ -100,25 +150,48 @@ export default function AllApps() {
           sortable: true
         },
         {
-          field: "name",
-          header: labels.appName,
+          field: "orgName",
+          header: labels.org,
           sortable: false
         },
         {
-          field: "urls",
-          header: labels.appWebUrl,
+          field: "name",
+          header: labels.appName,
           sortable: false,
-          valueFormatter: ({ data }) =>
-            data == null ? undefined : getWebUrl(data.urls)
+          cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
-          width: DefaultUI.Widths.icon4,
+          field: "expiry",
+          type: GridDataType.Date,
+          width: 116,
+          header: labels.expiry,
+          sortable: true,
+          sortAsc: false,
+          renderProps: { nearDays: 30 }
+        },
+        {
+          field: "expiryDays",
+          type: GridDataType.Int,
+          header: labels.days,
+          width: 72,
+          sortable: false
+        },
+        {
+          field: "creation",
+          type: GridDataType.Date,
+          width: 116,
+          header: labels.creation,
+          sortable: true,
+          sortAsc: false
+        },
+        {
+          width: DefaultUI.Widths.icon2,
           header: labels.actions,
           align: "center",
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<AppQueryData, BoxProps>) => {
+          }: GridCellRendererProps<AllAppDto, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -126,27 +199,14 @@ export default function AllApps() {
               paddingBottom: "9px!important"
             };
 
-            const webUrl = getWebUrl(data.urls);
-            const helpUrl = getHelpUrl(data.urls);
-
             return (
               <React.Fragment>
-                {webUrl && (
-                  <IconButton
-                    onClick={() => window.open(webUrl, "_blank")}
-                    title={labels.appWebUrl}
-                  >
-                    <OpenInBrowserIcon />
-                  </IconButton>
-                )}
-                {helpUrl && (
-                  <IconButton
-                    onClick={() => window.open(helpUrl, "_blank")}
-                    title={labels.appHelpUrl}
-                  >
-                    <HelpCenterIcon />
-                  </IconButton>
-                )}
+                <IconButtonLink
+                  title={labels.view}
+                  href={`./../view/${data.id}`}
+                >
+                  <ArticleIcon />
+                </IconButtonLink>
               </React.Fragment>
             );
           }
@@ -154,33 +214,20 @@ export default function AllApps() {
       ]}
       itemSize={[134, margin]}
       innerItemRenderer={(props) =>
-        MobileListItemRenderer(props, (data) => {
-          const webUrl = getWebUrl(data.urls);
-          const helpUrl = getHelpUrl(data.urls);
-          return [
-            data.name,
-            app.core.getIdentityLabel(data.identityType),
-            [
-              webUrl != null && {
-                label: labels.appWebUrl,
-                icon: <OpenInBrowserIcon />,
-                action: () => {
-                  window.open(webUrl, "_blank");
-                }
-              },
-              helpUrl != null && {
-                label: labels.appHelpUrl,
-                icon: <HelpCenterIcon />,
-                action: () => {
-                  window.open(helpUrl, "_blank");
-                }
-              }
-            ],
-            <React.Fragment>
-              <Typography variant="body2">{webUrl}</Typography>
-            </React.Fragment>
-          ];
-        })
+        MobileListItemRenderer(props, (data) => [
+          data.name,
+          app.core.getIdentityLabel(data.identityType),
+          [
+            {
+              label: labels.view,
+              icon: <ArticleIcon />,
+              action: `./../view/${data.id}`
+            }
+          ],
+          <React.Fragment>
+            <Typography variant="body2"></Typography>
+          </React.Fragment>
+        ])
       }
     />
   );

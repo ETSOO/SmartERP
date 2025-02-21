@@ -44,6 +44,11 @@ export type AuditHistoryDto = {
   targetId?: number;
 
   /**
+   * Application id
+   */
+  appId: number;
+
+  /**
    * JSON data
    */
   data?: string;

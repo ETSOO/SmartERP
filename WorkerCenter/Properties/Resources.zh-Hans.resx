@@ -204,4 +204,16 @@
   <data name="CreateOrg" xml:space="preserve">
     <value>创建机构</value>
   </data>
+  <data name="CheckSession" xml:space="preserve">
+    <value>登录应用</value>
+  </data>
+  <data name="AdminRenewApp" xml:space="preserve">
+    <value>管理员应用续费</value>
+  </data>
+  <data name="AdminRenewAppDetail" xml:space="preserve">
+    <value>应用 &lt;b&gt;{0}&lt;/b&gt; 已经通过管理员续费 &lt;b&gt;{1}&lt;/b&gt; 个月，不需要支付任何费用，备注如下：&lt;blockquote&gt;{2}&lt;/blockquote&gt;</value>
+  </data>
+  <data name="AdminClearUserFrozen" xml:space="preserve">
+    <value>管理员清除用户冻结时间</value>
+  </data>
 </root>

@@ -106,6 +106,33 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Admin Clear User Frozen Time.
+        /// </summary>
+        internal static string AdminClearUserFrozen {
+            get {
+                return ResourceManager.GetString("AdminClearUserFrozen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admin Renew Application.
+        /// </summary>
+        internal static string AdminRenewApp {
+            get {
+                return ResourceManager.GetString("AdminRenewApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The application &lt;b&gt;{0}&lt;/b&gt; has been renewed by the administrator for &lt;b&gt;{1}&lt;/b&gt; months, and no payment is required. The following are the notes: &lt;blockquote&gt;{2}&lt;/blockquote&gt;.
+        /// </summary>
+        internal static string AdminRenewAppDetail {
+            get {
+                return ResourceManager.GetString("AdminRenewAppDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Buy Application.
         /// </summary>
         internal static string BuyApp {
@@ -120,6 +147,15 @@ namespace WorkerCenter.Properties {
         internal static string ChangePassword {
             get {
                 return ResourceManager.GetString("ChangePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login application.
+        /// </summary>
+        internal static string CheckSession {
+            get {
+                return ResourceManager.GetString("CheckSession", resourceCulture);
             }
         }
         

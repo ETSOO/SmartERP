@@ -65,6 +65,9 @@ namespace PlatformShared.Database
                     .HasColumnName("data");
                 entity.Property(e => e.TargetId)
                     .HasColumnName("target_id");
+                entity.Property(e => e.AppId)
+                    .IsRequired()
+                    .HasColumnName("app_id");
                 entity.Property(e => e.Creation)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("creation");

@@ -106,7 +106,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new BuyAppMessage
             {
-                Data = User.CreateMessageData(rq.Id, app.Name),
+                Data = User.CreateMessageData(App.AppId, rq.Id, app.Name),
                 Months = months,
                 OrgId = rq.OrganizationId,
                 NewOrg = newOrg
@@ -187,7 +187,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new CreateApiKeyMessage
             {
-                Data = User.CreateMessageData(id, app.Name)
+                Data = User.CreateMessageData(App.AppId, id, app.Name)
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateApiKeyMessage, cancellationToken);
 
@@ -440,7 +440,7 @@ namespace Platform.Server.Services
                     {
                         var keyword = rq.Keyword;
 
-                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.CoreApp.Name, oa => oa.LocalName);
+                        q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, oa => oa.LocalName ?? oa.CoreApp.Name);
                     }
 
                     if (rq.Expiry.HasValue)
@@ -536,7 +536,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new RenewAppMessage
             {
-                Data = User.CreateMessageData(rq.Id, app.Name),
+                Data = User.CreateMessageData(App.AppId, rq.Id, app.Name),
                 Months = rq.Months
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.RenewAppMessage, cancellationToken);
@@ -601,7 +601,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new UpdateAppMessage
             {
-                Data = User.CreateMessageData(rq.Id, name),
+                Data = User.CreateMessageData(App.AppId, rq.Id, name),
                 Changes = changes
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);

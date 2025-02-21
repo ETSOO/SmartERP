@@ -39,8 +39,7 @@ export default function LoginHistory() {
     "device",
     "endDate",
     "startDate",
-    "title",
-    "type"
+    "title"
   );
 
   // Refs

@@ -603,7 +603,7 @@ namespace Platform.Server.Services
             // Log
             var message = new ChangePasswordMessage
             {
-                Data = User.CreateMessageData(0)
+                Data = User.CreateMessageData(App.AppId, 0)
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.ChangePasswordMessage, cancellationToken);
 
@@ -658,6 +658,7 @@ namespace Platform.Server.Services
                 {
                     Data = new CommonMessageData
                     {
+                        AppId = App.AppId,
                         Culture = culture,
                         DeviceId = null,
                         IP = _ip.ToString(),
@@ -707,6 +708,7 @@ namespace Platform.Server.Services
                 {
                     Data = new CommonMessageData
                     {
+                        AppId = App.AppId,
                         Culture = culture,
                         DeviceId = moreData?.DeviceId,
                         IP = _ip.ToString(),
@@ -726,6 +728,7 @@ namespace Platform.Server.Services
                 {
                     Data = new CommonMessageData
                     {
+                        AppId = App.AppId,
                         Culture = culture,
                         DeviceId = moreData?.DeviceId,
                         IP = _ip.ToString(),
@@ -1835,7 +1838,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new SwitchOrgMessage
             {
-                Data = User.CreateMessageData(tokenUser.OrganizationInt, tokenUser.OrganizationName),
+                Data = User.CreateMessageData(App.AppId, tokenUser.OrganizationInt, tokenUser.OrganizationName),
                 FromOrganizationId = tokenUser.ChannelOrganizationInt,
                 AppId = rq.AppId
             };
@@ -1897,6 +1900,7 @@ namespace Platform.Server.Services
                 {
                     Data = new CommonMessageData
                     {
+                        AppId = App.AppId,
                         Culture = CultureInfo.CurrentCulture.Name,
                         DeviceId = null,
                         IP = _ip.ToString(),

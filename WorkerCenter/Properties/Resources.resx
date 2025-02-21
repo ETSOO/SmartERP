@@ -204,4 +204,16 @@
   <data name="CreateOrg" xml:space="preserve">
     <value>Create Organization</value>
   </data>
+  <data name="CheckSession" xml:space="preserve">
+    <value>Login application</value>
+  </data>
+  <data name="AdminRenewApp" xml:space="preserve">
+    <value>Admin Renew Application</value>
+  </data>
+  <data name="AdminRenewAppDetail" xml:space="preserve">
+    <value>The application &lt;b&gt;{0}&lt;/b&gt; has been renewed by the administrator for &lt;b&gt;{1}&lt;/b&gt; months, and no payment is required. The following are the notes: &lt;blockquote&gt;{2}&lt;/blockquote&gt;</value>
+  </data>
+  <data name="AdminClearUserFrozen" xml:space="preserve">
+    <value>Admin Clear User Frozen Time</value>
+  </data>
 </root>

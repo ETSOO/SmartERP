@@ -101,7 +101,19 @@ export default function Home() {
   // When unauthorized (by refresh)
   // Return blank and try login
   React.useEffect(() => {
-    if (!authorized) app.tryLogin();
+    if (authorized) {
+      app.checkSession(async (isSame) => {
+        if (!isSame) {
+          // First time login
+          const result = await app.core.userApi.checkSession({
+            showLoading: false
+          });
+          if (result == null || !result.ok) return false;
+        }
+      });
+    } else {
+      app.tryLogin();
+    }
   }, [authorized]);
 
   if (!authorized) {
@@ -143,7 +155,7 @@ export default function Home() {
         slots={{ sidebarFooter: SidebarFooter }}
       >
         <PageDataContextProvider>
-          <PageContainer defaultTitle="" maxWidth="xl">
+          <PageContainer defaultTitle="" width="100%">
             <Outlet />
           </PageContainer>
         </PageDataContextProvider>

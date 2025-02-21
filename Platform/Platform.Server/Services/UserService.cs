@@ -132,7 +132,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new AddUserIdentifierMessage
             {
-                Data = User.CreateMessageData(id),
+                Data = User.CreateMessageData(App.AppId, id),
                 IdentifierType = identifier.Type,
                 IdentifierValue = identifier.Value
             };
@@ -253,13 +253,63 @@ namespace Platform.Server.Services
 
                     return q;
                 })
-                .Select(d => new { d.Id, d.Kind, d.Title, d.Data, d.Culture, d.Creation })
+                .Select(d => new
+                {
+                    d.Id,
+                    d.Kind,
+                    d.OrganizationId,
+                    d.AppId,
+                    d.Title,
+                    d.Data,
+                    d.Culture,
+                    d.Creation
+                })
                 .ToJsonAsync(writer, cancellationToken: cancellationToken);
 
             if (_db.IsSensitiveDataLoggingEnabled)
             {
                 Logger.LogInformation("AuditHistoryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
+        }
+
+        /// <summary>
+        /// Check session
+        /// 检查会话
+        /// </summary>
+        /// <param name="id">App id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CheckSessionAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Check permission
+            var app = CurrentUser.AppIdToScope(id);
+            if (User.Scopes?.Contains(app) is not true)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var appName = id < 3 ? await _db.CoreApps.AsNoTracking()
+                .Where(a => a.Id == id)
+                .Select(a => a.Name)
+                .FirstOrDefaultAsync(cancellationToken)
+            : await _db.CoreOrganizationApps.AsNoTracking()
+                .Where(a => a.CoreAppId == id && a.CoreOrganizationId == User.OrganizationInt)
+                .Select(a => a.LocalName ?? a.CoreApp.Name)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (string.IsNullOrEmpty(appName))
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Push message
+            var message = new CheckSessionMessage
+            {
+                Data = User.CreateMessageData(id, 0, appName)
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.CheckSessionMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -287,7 +337,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new DeleteUserIdentifierMessage
             {
-                Data = User.CreateMessageData(id),
+                Data = User.CreateMessageData(App.AppId, id),
                 IdentifierType = data.Type,
                 IdentifierValue = data.Value
             };
@@ -448,7 +498,7 @@ namespace Platform.Server.Services
                 // Push message
                 var message = new UpdateUserAvatarMessage
                 {
-                    Data = User.CreateMessageData(0)
+                    Data = User.CreateMessageData(App.AppId, 0)
                 };
                 await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateUserAvatarMessage, cancellationToken);
 

@@ -2,7 +2,6 @@ import {
   MUGlobal,
   ResponsivePage,
   SearchField,
-  SelectEx,
   MobileListItemRenderer,
   MUUtils
 } from "@etsoo/materialui";
@@ -18,7 +17,7 @@ import { AppQueryData, AppUrl, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { AppUtils } from "../components/AppUtils";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BuyKind } from "../components/BuyApp";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, IdentityType } from "@etsoo/smarterp-core/components";
 
 const template = {
   keyword: "string",
@@ -54,9 +53,6 @@ export default function AllApps() {
   // Refs
   const ref = React.useRef<ScrollerListForwardRef<AppQueryData>>();
 
-  // Identities
-  const identities = app.core.getIdentities();
-
   // Load data
   const reloadData = () => ref.current?.reset();
 
@@ -79,13 +75,7 @@ export default function AllApps() {
           name="keyword"
           defaultValue={data.keyword}
         />,
-        <SelectEx
-          label={labels.identityType}
-          name="identityType"
-          search
-          options={identities}
-          value={data.identityType}
-        />
+        <IdentityType value={data.identityType} />
       ]}
       loadData={(data, lastItem) =>
         app.core.appApi.query(

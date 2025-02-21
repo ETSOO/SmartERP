@@ -86,7 +86,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new DeleteMemberMessage
             {
-                Data = User.CreateMessageData(ou.CoreUserId, ou.Name),
+                Data = User.CreateMessageData(App.AppId, ou.CoreUserId, ou.Name),
                 OrgName = User.OrganizationName ?? "Unknown",
                 InviterId = ou.InviterId,
                 InviterName = ou.InviterName
@@ -388,7 +388,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new UpdateMemberMessage
             {
-                Data = User.CreateMessageData(rq.Id, name),
+                Data = User.CreateMessageData(App.AppId, rq.Id, name),
                 Changes = changes
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
@@ -451,7 +451,7 @@ namespace Platform.Server.Services
                 // Push message
                 var message = new UpdateMemberAvatarMessage
                 {
-                    Data = User.CreateMessageData(id, ou.Name)
+                    Data = User.CreateMessageData(App.AppId, id, ou.Name)
                 };
                 await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberAvatarMessage, cancellationToken);
 

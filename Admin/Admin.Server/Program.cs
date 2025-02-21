@@ -7,6 +7,8 @@ using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.DI;
+using com.etsoo.MessageQueue.LocalRabbitMQ;
 using com.etsoo.ServiceApp.Services;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Serialization;
@@ -20,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using PlatformShared.Database;
+using PlatformShared.Extentions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -128,7 +131,7 @@ var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connecton
         logger.LogError(context.Exception, "OnAuthenticationFailed");
         return Task.CompletedTask;
     }
-});
+}, appId: 2);
 services.AddSingleton<ISEServiceApp>(seApp);
 
 // Localization cultures
@@ -206,6 +209,15 @@ if (isDevelopment)
     });
 }
 
+// Fire and forget
+services.AddSingleton<IFireAndForgetService, FireAndForgetService>();
+
+// Add message queue
+var mqOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer configuration not found");
+services.AddLocalRabbitMQProducer(mqOptions);
+
+services.AddSingleton<IQueueService, QueueService>();
+
 // Configue CORS
 var cors = configuration.GetSection("Cors").Get<IEnumerable<string>?>()?.ToArray();
 var corsOptions = new CorsPolicySetupOptions(cors, isDevelopment)
@@ -225,8 +237,9 @@ if (corsOptions.Required)
 
 // API services
 services.AddScoped<CurrentUserAccessor>();
-services.AddScoped<ISEAuthService, SEAuthService>();
+services.AddScoped<IAdminService, AdminService>();
 services.AddScoped<IQueryService, QueryService>();
+services.AddScoped<ISEAuthService, SEAuthService>();
 
 var app = builder.Build();
 
@@ -284,6 +297,7 @@ var api = app.MapGroup("/api").WithOpenApi();
 
 // Endpoints
 api.MapAuth()
+    .MapAdmin()
     .MapQuery()
     .AddModelValidators()
     .RequireAuthorization()

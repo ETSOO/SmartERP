@@ -24,7 +24,6 @@ import { app } from "../../../app/MyApp";
 import { MemberQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
-import { AppUtils } from "../components/AppUtils";
 
 const template = {
   name: "string",
@@ -76,12 +75,7 @@ export default function AllUsers() {
         fabButtons: (
           <React.Fragment>
             {editPermission && (
-              <Fab
-                title={labels.inviteMember}
-                size="medium"
-                color="primary"
-                onClick={() => AppUtils.inviteMember(() => reloadData())}
-              >
+              <Fab title={labels.inviteMember} size="medium" color="primary">
                 <PersonAddAlt1Icon />
               </Fab>
             )}

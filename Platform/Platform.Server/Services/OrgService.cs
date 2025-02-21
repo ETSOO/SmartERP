@@ -281,7 +281,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new LeaveOrgMessage
             {
-                Data = User.CreateMessageData(id),
+                Data = User.CreateMessageData(App.AppId, id),
                 OrgName = ou.Name,
                 InviterId = ou.InviterId,
                 InviterName = ou.InviterName
@@ -545,7 +545,7 @@ namespace Platform.Server.Services
             // Push message
             var message = new UpdateOrgMessage
             {
-                Data = User.CreateMessageData(rq.Id, org.Name),
+                Data = User.CreateMessageData(App.AppId, rq.Id, org.Name),
                 Changes = changes
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgMessage, cancellationToken);
@@ -608,7 +608,7 @@ namespace Platform.Server.Services
                 // Push message
                 var message = new UpdateOrgAvatarMessage
                 {
-                    Data = User.CreateMessageData(id, org.Name)
+                    Data = User.CreateMessageData(App.AppId, id, org.Name)
                 };
                 await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgAvatarMessage, cancellationToken);
 

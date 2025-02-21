@@ -9,6 +9,12 @@ namespace PlatformShared.Messages
     public record CommonMessageData
     {
         /// <summary>
+        /// Application ID
+        /// 应用编号
+        /// </summary>
+        public required int AppId { get; init; }
+
+        /// <summary>
         /// Culture
         /// 文化
         /// </summary>
@@ -75,8 +81,11 @@ namespace PlatformShared.Messages
     /// </summary>
     [JsonDerivedType(typeof(AcceptInvitationMessage))]
     [JsonDerivedType(typeof(AddUserIdentifierMessage))]
+    [JsonDerivedType(typeof(AdminClearUserFrozenMessage))]
+    [JsonDerivedType(typeof(AdminRenewAppMessage))]
     [JsonDerivedType(typeof(BuyAppMessage))]
     [JsonDerivedType(typeof(ChangePasswordMessage))]
+    [JsonDerivedType(typeof(CheckSessionMessage))]
     [JsonDerivedType(typeof(CreateApiKeyMessage))]
     [JsonDerivedType(typeof(CreateOrgMessage))]
     [JsonDerivedType(typeof(DeleteMemberMessage))]

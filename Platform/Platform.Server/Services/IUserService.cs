@@ -14,6 +14,7 @@ namespace Platform.Server.Services
         Task<UserIdentifierData[]> AllIdentifiersAsync(CancellationToken cancellationToken = default);
         Task AllIdentifiersAsync(IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task AuditHistoryAsync(AuditHistoryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
+        Task<IActionResult> CheckSessionAsync(int id, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteIdentifierAsync(int id, CancellationToken cancellationToken = default);
         Task DeviceListAsync(QueryIntRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IEnumerable<AppData>> GetCurrentAppsAsync(CancellationToken cancellationToken = default);

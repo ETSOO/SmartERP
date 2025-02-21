@@ -93,7 +93,7 @@ var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connecton
         logger.LogError(context.Exception, "OnAuthenticationFailed");
         return Task.CompletedTask;
     }
-});
+}, appId: 1);
 services.AddSingleton<ISEServiceApp>(seApp);
 
 // Localization cultures
