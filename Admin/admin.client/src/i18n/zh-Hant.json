@@ -2,6 +2,8 @@
   "allApps": "所有應用",
   "allOrgs": "所有機構",
   "allUsers": "所有用戶",
+  "apps": "應用數",
   "auditHistory": "操作歷史",
+  "joinedOrgs": "機構數",
   "smarterpAdmin": "司友雲ERP運維中心"
 }

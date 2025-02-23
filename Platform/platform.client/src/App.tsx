@@ -212,7 +212,7 @@ export default function App() {
   // Save login
   const trySaveLogin =
     params.tryLogin !== "false" &&
-    app.keepLogin &&
+    (app.keepLogin || auth != null) &&
     (id === "" || id === userIdSaved) &&
     refreshToken;
 
@@ -271,7 +271,7 @@ export default function App() {
     }
 
     // Refresh token
-    app.refreshToken({ showLoading: true }, (result) => {
+    app.refreshToken({ showLoading: true, token: refreshToken }, (result) => {
       if (!isMounted.current) return;
       if (result === true) {
         // Login success

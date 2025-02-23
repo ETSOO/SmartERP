@@ -2,7 +2,12 @@ import React from "react";
 import { Button, FormControlLabel, Switch, Box } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import { AuthRequest } from "@etsoo/appscript";
-import { HBox, TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
+import {
+  HBox,
+  ISmartERPUser,
+  TextFieldEx,
+  TextFieldExMethods
+} from "@etsoo/materialui";
 import { Lock } from "@mui/icons-material";
 import { Constants } from "../app/Constants";
 import { app } from "../app/SmartApp";
@@ -101,7 +106,7 @@ export default function Password() {
     );
     const auth = app.storage.getData<AuthRequest>(Constants.AuthRequestField);
 
-    const [result, refreshToken] = await app.authApi.login({
+    const [result, refreshToken] = await app.authApi.login<ISmartERPUser>({
       id: usernameDecoded,
       pwd: app.encrypt(app.hash(password)),
       org: org?.orgId,

@@ -31,5 +31,11 @@ namespace Platform.Server.Endpoints.Member.RQ
         /// 邀请人编号
         /// </summary>
         public int? InviterId { get; init; }
+
+        /// <summary>
+        /// Report to
+        /// 汇报对象
+        /// </summary>
+        public int? ReportTo { get; init; }
     }
 }

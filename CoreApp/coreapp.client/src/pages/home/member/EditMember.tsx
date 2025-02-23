@@ -13,6 +13,7 @@ import {
   MemberUpdateRQ,
   usePageData
 } from "@etsoo/smarterp-core";
+import { UserTiplist } from "@etsoo/smarterp-core/components";
 
 export default function EditMember() {
   // Route
@@ -31,6 +32,7 @@ export default function EditMember() {
     "fullName",
     "noChanges",
     "preferredName",
+    "reportTo",
     "role",
     "status"
   );
@@ -69,8 +71,9 @@ export default function EditMember() {
         data,
         isNotSelf
           ? ["id", "isSelf", "name"]
-          : ["id", "isSelf", "name", "expiry", "status", "userRole"]
+          : ["id", "isSelf", "name", "expiry", "status", "userRole", "reportTo"]
       );
+
       if (fields.length === 0) {
         app.warning(labels.noChanges);
         return;
@@ -163,6 +166,18 @@ export default function EditMember() {
       </Grid2>
       {isNotSelf && data.name !== "" && (
         <React.Fragment>
+          <Grid2 size={{ xs: 6, sm: 3 }}>
+            <UserTiplist
+              label={labels.reportTo}
+              idValue={formik.values.reportTo}
+              rq={{ enabled: true, excludedIds: [id] }}
+              onChange={(_event, value) =>
+                // Set null instead of undefined to avoid remove the property causing
+                // Utils.getDataChanges ignore the field
+                formik.setFieldValue("reportTo", value?.id ?? null)
+              }
+            />
+          </Grid2>
           <Grid2 size={{ xs: 6, sm: 3 }}>
             <ComboBox
               name="userRole"

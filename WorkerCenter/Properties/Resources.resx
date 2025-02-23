@@ -216,4 +216,10 @@
   <data name="AdminClearUserFrozen" xml:space="preserve">
     <value>Admin Clear User Frozen Time</value>
   </data>
+  <data name="AdjustReportTo" xml:space="preserve">
+    <value>Batch Adjustment of Reporting</value>
+  </data>
+  <data name="AdjustReportToDetail" xml:space="preserve">
+    <value>&lt;b&gt;{1}&lt;/b&gt; people who previously reported to &lt;b&gt;{0}&lt;/b&gt; have been batch adjusted to report to &lt;b&gt;{2}&lt;/b&gt;.</value>
+  </data>
 </root>

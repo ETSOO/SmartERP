@@ -44,6 +44,12 @@ namespace Platform.Server.Endpoints.Member.RQ
         public EntityStatus? Status { get; init; }
 
         /// <summary>
+        /// Report to
+        /// 汇报对象
+        /// </summary>
+        public int? ReportTo { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>

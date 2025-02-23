@@ -6,6 +6,7 @@ namespace Platform.Server.Services
 {
     public interface IMemberService
     {
+        Task<IActionResult> AdjustReportToAsync(MemberAdjustReportToRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task ListAsync(MemberListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> InviteAsync(MemberInviteRQ rq);

@@ -34,6 +34,12 @@ namespace Admin.Server.RQ.Query
         public string? Identifier { get; init; }
 
         /// <summary>
+        /// PIN
+        /// 证件号码
+        /// </summary>
+        public string? Pin { get; init; }
+
+        /// <summary>
         /// Creation start
         /// 登记开始时间
         /// </summary>
@@ -56,6 +62,11 @@ namespace Admin.Server.RQ.Query
             if (Identifier != null && Identifier.Length > 256)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Identifier));
+            }
+
+            if (Pin != null && Pin.Length > 20)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Pin));
             }
 
             return null;

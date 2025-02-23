@@ -5,7 +5,8 @@ import {
   MobileListItemRenderer,
   MUUtils,
   ResponsivePage,
-  IconButtonLink
+  IconButtonLink,
+  HBox
 } from "@etsoo/materialui";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { BoxProps, Typography } from "@mui/material";
@@ -88,6 +89,7 @@ export default function LoginHistory() {
           name="keyword"
           minChars={2}
           defaultValue={data.keyword}
+          slotProps={{ htmlInput: { maxLength: 128 } }}
         />,
         <UserTiplist width={120} idValue={data.userId} />,
         <OrgTiplist idValue={data.orgId} />,
@@ -97,12 +99,14 @@ export default function LoginHistory() {
           name="kind"
           minChars={2}
           defaultValue={data.kind}
+          slotProps={{ htmlInput: { maxLength: 30 } }}
         />,
         <SearchField
           label="IP"
           name="ip"
           minChars={2}
           defaultValue={data.ip}
+          slotProps={{ htmlInput: { maxLength: 45 } }}
         />,
         <SearchField
           label={labels.targetId}
@@ -157,10 +161,25 @@ export default function LoginHistory() {
           sortAsc: false,
           renderProps: app.getDateFormatProps()
         },
-        { field: "userId", header: labels.user, width: 80 },
-        { field: "organizationId", header: labels.org, width: 80 },
+        {
+          field: "userId",
+          header: labels.user,
+          width: 80,
+          type: GridDataType.Unkwown
+        },
+        {
+          field: "organizationId",
+          header: labels.org,
+          width: 80,
+          type: GridDataType.Unkwown
+        },
         { field: "title", header: labels.title },
-        { field: "appId", header: labels.app, width: 72 },
+        {
+          field: "appId",
+          header: labels.app,
+          width: 72,
+          type: GridDataType.Unkwown
+        },
         {
           width: DefaultUI.Widths.icon2,
           header: labels.actions,
@@ -211,19 +230,19 @@ export default function LoginHistory() {
               action: `./../user/view/${data.userId}`
             }
           ],
-          <DialogButton
-            content={JSON.stringify(data, undefined, 2)}
-            contentPre
-            disableScrollLock
-            maxWidth="xs"
-            size="small"
-            icon={<InfoIcon />}
-          >
-            JSON data
-          </DialogButton>,
-          <React.Fragment>
+          <HBox alignItems="center">
+            <DialogButton
+              content={JSON.stringify(data, undefined, 2)}
+              contentPre
+              disableScrollLock
+              maxWidth="xs"
+              size="small"
+              icon={<InfoIcon />}
+            >
+              JSON data
+            </DialogButton>
             <Typography variant="caption">{data.kind}</Typography>
-          </React.Fragment>
+          </HBox>
         ])
       }
     />

@@ -344,6 +344,7 @@ namespace PlatformShared.Database
                     .HasDefaultValue(EntityStatus.Normal)
                     .HasColumnName("status");
                 entity.Property(e => e.InviterId).HasColumnName("inviter_id");
+                entity.Property(e => e.ReportTo).HasColumnName("report_to");
 
                 entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreOrganizationUsers)
                     .HasForeignKey(d => d.CoreOrganizationId)
@@ -358,6 +359,10 @@ namespace PlatformShared.Database
                 entity.HasOne(d => d.Inviter).WithMany(p => p.CoreOrganizationUserInviters)
                     .HasForeignKey(d => d.InviterId)
                     .HasConstraintName("core_organization_user_inviter_id_fkey");
+
+                entity.HasOne(d => d.ReportToUser).WithMany(p => p.DirectReports)
+                    .HasForeignKey(d => d.ReportTo)
+                    .HasConstraintName("core_organization_user_report_to_fkey");
             });
 
             modelBuilder.Entity<CoreUser>(entity =>

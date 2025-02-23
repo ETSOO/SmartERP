@@ -16,6 +16,7 @@ namespace Platform.Server.Dto.Member
         public required bool IsSelf { get; init; }
         public required bool IsOwner { get; init; }
         public required bool IsEditable { get; init; }
+        public required int DirectReports { get; init; }
         public EntityStatus Status { get; init; }
         public required DateTimeOffset Creation { get; init; }
     }

@@ -28,6 +28,12 @@ export type AllUserDto = {
   pin?: string;
 
   /**
+   * Organizations joined
+   * 加入的组织
+   */
+  orgs: number;
+
+  /**
    * Status
    */
   status: EntityStatus;

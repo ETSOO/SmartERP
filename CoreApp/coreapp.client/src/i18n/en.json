@@ -1,6 +1,9 @@
 {
   "addEmail": "Add email",
   "addMobile": "Add mobile",
+  "adjustReportFrom": "Original report to",
+  "adjustReportNew": "New report to",
+  "adjustReportTo": "Adjust direct reports",
   "allApps": "All apps",
   "allMembers": "All members",
   "appKeyTip": "Are you sure you want to recreate the key? The previous key will be invalid after recreation. Please keep the new key safe.",

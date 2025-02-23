@@ -58,6 +58,51 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Adjust report to from old id to new id
+        /// 批量调整汇报对象
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> AdjustReportToAsync(MemberAdjustReportToRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Check ids
+            var users = await _db.CoreOrganizationUsers
+                .AsNoTracking()
+                .Where(ou => ou.CoreOrganizationId == User.OrganizationInt
+                    && (ou.Id == rq.OldId || ou.Id == rq.NewId)
+                    && ou.IdentityType.HasFlag(IdentityTypeFlags.User))
+                .Select(ou => new { ou.Id, ou.CoreUserId, Name = ou.LocalName ?? ou.CoreUser.Name })
+                .ToListAsync(cancellationToken);
+
+            if (users.Count != 2)
+            {
+                return ApplicationErrors.NoValidData.AsResult();
+            }
+
+            var oldUser = users.Find(u => u.Id == rq.OldId)!;
+            var newUser = users.Find(u => u.Id == rq.NewId)!;
+
+            // Update
+            var count = await _db.CoreOrganizationUsers
+                .Where(ou => ou.ReportTo == rq.OldId)
+                .ExecuteUpdateAsync(ou => ou.SetProperty(ou => ou.ReportTo, rq.NewId), cancellationToken);
+
+            // Push message
+            var message = new AdjustReportToMessage
+            {
+                Data = User.CreateMessageData(App.AppId, oldUser.Id, oldUser.Name),
+                Count = count,
+                NewReportTo = newUser.CoreUserId,
+                NewReportToName = newUser.Name
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.AdjustReportToMessage, cancellationToken);
+
+            // Return
+            return ActionResult.Success;
+        }
+
+        /// <summary>
         /// Delete member
         /// 删除成员
         /// </summary>
@@ -78,6 +123,12 @@ namespace Platform.Server.Services
             if (ou == null)
             {
                 return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Check reports
+            if (await _db.CoreOrganizationUsers.AnyAsync(ou => ou.ReportTo == id, cancellationToken))
+            {
+                return ApplicationErrors.DeleteReferencedData.AsResult(nameof(CoreOrganizationUser.ReportTo));
             }
 
             // Delete
@@ -121,6 +172,11 @@ namespace Platform.Server.Services
                     if (rq.InviterId.HasValue)
                     {
                         q = q.Where(ou => ou.InviterId == rq.InviterId);
+                    }
+
+                    if (rq.ReportTo.HasValue)
+                    {
+                        q = q.Where(ou => ou.ReportTo == rq.ReportTo);
                     }
 
                     if (rq.Keyword?.Length > 1)
@@ -278,6 +334,7 @@ namespace Platform.Server.Services
                 IsOwner = ou.CoreOrganization.OwnerId == User.IdInt,
                 IsSelf = ou.CoreUserId == User.IdInt,
                 IsEditable = ou.UserRole <= User.Role,
+                DirectReports = ou.DirectReports.Count(),
                 Status = ou.Status,
                 Creation = ou.Creation
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
@@ -314,7 +371,9 @@ namespace Platform.Server.Services
                     ou.Expiry,
                     ou.RefreshTime,
                     ou.Status,
-                    Inviter = ou.Inviter == null ? null : ou.Inviter.Name
+                    Inviter = ou.Inviter == null ? null : ou.Inviter.Name,
+                    DirectReports = ou.DirectReports.Count(),
+                    ReportTo = ou.ReportToUser == null ? null : ou.ReportToUser.LocalName ?? ou.ReportToUser.CoreUser.Name
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -335,6 +394,11 @@ namespace Platform.Server.Services
             if (ou == null)
             {
                 return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (rq.ReportTo.HasValue && !await _db.CoreOrganizationUsers.AnyAsync(o => o.Id == rq.ReportTo.Value && o.CoreOrganizationId == User.OrganizationInt, cancellationToken))
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.ReportTo));
             }
 
             // Name
@@ -377,6 +441,11 @@ namespace Platform.Server.Services
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue && isNotSelf)
             {
                 ou.Status = rq.Status.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.ReportTo)) && isNotSelf)
+            {
+                ou.ReportTo = rq.ReportTo;
             }
 
             // Changes
@@ -491,7 +560,8 @@ namespace Platform.Server.Services
                 ou.LocalName,
                 ou.AssignedId,
                 ou.Expiry,
-                ou.Status
+                ou.Status,
+                ou.ReportTo
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
     }

@@ -45,8 +45,6 @@ public partial class CoreUser
 
     public virtual ICollection<CoreAuthCode> CoreAuthCodes { get; set; } = new List<CoreAuthCode>();
 
-    public virtual ICollection<CoreLog> CoreLogs { get; set; } = new List<CoreLog>();
-
     public virtual ICollection<CoreOrganizationUser> CoreOrganizationUserCoreUsers { get; set; } = new List<CoreOrganizationUser>();
 
     public virtual ICollection<CoreOrganizationUser> CoreOrganizationUserInviters { get; set; } = new List<CoreOrganizationUser>();

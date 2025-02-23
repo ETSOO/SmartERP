@@ -884,15 +884,14 @@ namespace Platform.Server.Services
                 OrganizationId = tokenUser.OrganizationInt > 0 ? tokenUser.OrganizationInt : null
             };
 
+            // Refresh token
+            var tokenData = data.Data;
+            var refreshToken = await CreateRefreshTokenAsync(user.Id, data.DeviceId, data.Culture, TokenResponseType.Token, tokenData, null, cancellationToken);
+
             if (auth == null)
             {
                 var minutes = App.AuthService.AccessTokenMinutes;
                 var accessToken = App.AuthService.CreateAccessToken(tokenUser, null, minutes);
-
-                var tokenData = data.Data;
-
-                // Refresh token
-                var refreshToken = await CreateRefreshTokenAsync(user.Id, data.DeviceId, data.Culture, TokenResponseType.Token, tokenData, null, cancellationToken);
 
                 // Serverside device id
                 // Encrypt DeviceId for client identifier
@@ -924,7 +923,8 @@ namespace Platform.Server.Services
             else
             {
                 var uri = await AuthRequestAsync(auth, tokenUser, data, cancellationToken);
-                return (result, uri, moreData);
+                result.Data[nameof(uri)] = uri;
+                return (result, refreshToken, moreData);
             }
         }
 
@@ -1141,7 +1141,8 @@ namespace Platform.Server.Services
                 token = await App.HashPasswordAsync($"{userId}-{deviceId}-{Guid.NewGuid()}-{CryptographyUtils.CreateRandString(RandStringKind.All, 6)}");
 
                 // Create token
-                await _db.CoreUserDeviceTokens.AddAsync(new CoreUserDeviceToken
+                _db.ChangeTracker.Clear();
+                _db.CoreUserDeviceTokens.Add(new CoreUserDeviceToken
                 {
                     DeviceId = deviceId,
                     AppId = appId,
@@ -1150,7 +1151,7 @@ namespace Platform.Server.Services
                     Data = data,
                     Culture = culture,
                     ResponseType = responseType
-                }, cancellationToken);
+                });
 
                 // Save it
                 await _db.SaveChangesAsync(cancellationToken);

@@ -216,4 +216,10 @@
   <data name="AdminClearUserFrozen" xml:space="preserve">
     <value>管理员清除用户冻结时间</value>
   </data>
+  <data name="AdjustReportTo" xml:space="preserve">
+    <value>批量调整汇报对象</value>
+  </data>
+  <data name="AdjustReportToDetail" xml:space="preserve">
+    <value>之前汇报给 &lt;b&gt;{0}&lt;/b&gt; 的 &lt;b&gt;{1}&lt;/b&gt; 人，已批量调整为汇报给 &lt;b&gt;{2}&lt;/b&gt;。</value>
+  </data>
 </root>

@@ -258,6 +258,15 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            // Check direct reports
+            var hasDirectReports = await _db.CoreOrganizationUsers.AsNoTracking()
+                .AnyAsync(ou => ou.CoreOrganizationId == id && ou.ReportTo == ou.Id, cancellationToken);
+
+            if (hasDirectReports)
+            {
+                return ApplicationErrors.DeleteReferencedData.AsResult(nameof(CoreOrganizationUser.ReportTo));
+            }
+
             // Delete the user from the organization
             var affacted = await _db.CoreOrganizationUsers.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
             if (affacted == 0)
@@ -394,10 +403,11 @@ namespace Platform.Server.Services
                 Name = ou.CoreOrganization.Name,
                 IsOwner = ou.CoreOrganization.OwnerId == User.IdInt,
                 Brand = ou.CoreOrganization.Brand,
-                Pin = ou.CoreOrganization.Pin,
+                Pin = MyDbFunctions.HideData(ou.CoreOrganization.Pin, default),
                 ParentId = ou.CoreOrganization.ParentId,
                 Status = ou.CoreOrganization.Status,
                 Creation = ou.CoreOrganization.Creation,
+                Users = ou.CoreOrganization.CoreOrganizationUsers.Count,
                 UserStatus = ou.Status,
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToListAsync(cancellationToken);
@@ -436,6 +446,7 @@ namespace Platform.Server.Services
                 Status = ou.CoreOrganization.Status,
                 Creation = ou.CoreOrganization.Creation,
                 UserStatus = ou.Status,
+                Users = ou.CoreOrganization.CoreOrganizationUsers.Count,
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
@@ -473,6 +484,7 @@ namespace Platform.Server.Services
                 ou.CoreOrganization.Creation,
                 ou.CoreOrganization.Status,
                 ou.CoreOrganization.QueryKeyword,
+                Users = ou.CoreOrganization.CoreOrganizationUsers.Count,
                 UserStatus = ou.Status,
                 UserExpiry = ou.Expiry
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);

@@ -1,16 +1,13 @@
-import { EntityStatus } from "@etsoo/appscript";
 import {
   MUGlobal,
   ResponsivePage,
   SearchField,
-  ComboBox,
   IconButtonLink,
   MobileListItemRenderer,
-  Switch
+  SelectBool,
+  ComboBox
 } from "@etsoo/materialui";
-import { BoxProps, Fab, Typography } from "@mui/material";
-import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
-import EditIcon from "@mui/icons-material/Edit";
+import { BoxProps } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import {
@@ -21,66 +18,57 @@ import {
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
-import { MemberQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
-import { DataTypes } from "@etsoo/shared";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { AllUserDto } from "../../../api/dto/query/AllUserDto";
 
 const template = {
   name: "string",
-  userRole: "number",
-  assignedId: "string",
-  enabled: "boolean"
+  pin: "string",
+  identifier: "string",
+  isFrozen: "boolean",
+  status: "number",
+  creationStart: "date",
+  creationEnd: "date"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllUsers() {
   // Route
   const navigate = useNavigate();
 
-  // Roles
-  const roles = app.getRoles();
-
-  // Edit permission
-  const editPermission = app.isAdminUser();
-
   // Labels
   const labels = app.getLabels(
     "actions",
-    "assignedId",
-    "confirmAction",
     "creation",
-    "edit",
-    "entityStatus",
-    "inviteMember",
+    "endDate",
+    "identifier",
+    "isFrozen",
+    "joinedOrgs",
     "name",
-    "role",
-    "statusNormal",
+    "pin",
+    "preferredName",
+    "startDate",
+    "status",
     "view"
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<MemberQueryDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<AllUserDto>>();
 
   // Load data
   const reloadData = () => ref.current?.reset();
 
   const margin = MUGlobal.pagePaddings;
+  const creationEndRef = React.useRef<HTMLInputElement>();
 
   // Page data hook
   usePageDataEmpty(app);
 
   return (
-    <ResponsivePage<MemberQueryDto, typeof template>
+    <ResponsivePage<AllUserDto, typeof template>
       {...DefaultUI.createProps({
-        onRefresh: reloadData,
-        fabButtons: (
-          <React.Fragment>
-            {editPermission && (
-              <Fab title={labels.inviteMember} size="medium" color="primary">
-                <PersonAddAlt1Icon />
-              </Fab>
-            )}
-          </React.Fragment>
-        )
+        onRefresh: reloadData
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
@@ -91,29 +79,66 @@ export default function AllUsers() {
           label={labels.name}
           name="keywords"
           defaultValue={data.name}
-          slotProps={{ input: { sx: { width: "120px" } } }}
-        />,
-        <ComboBox
-          options={roles}
-          name="role"
-          label={labels.role}
-          search
-          idValue={data.userRole}
+          slotProps={{
+            input: { sx: { width: "120px", htmlInput: { maxLength: 128 } } }
+          }}
         />,
         <SearchField
-          label={labels.assignedId}
-          name="assignedId"
-          minChars={3}
-          defaultValue={data.assignedId}
+          label={labels.pin}
+          name="pin"
+          minChars={2}
+          slotProps={{ htmlInput: { maxLength: 20 } }}
+          defaultValue={data.pin}
         />,
-        <Switch
-          label={labels.statusNormal}
-          name="enabled"
-          checked={data.enabled ?? true}
+        <SearchField
+          label={labels.identifier}
+          name="identifier"
+          minChars={2}
+          slotProps={{ htmlInput: { maxLength: 256 } }}
+          defaultValue={data.identifier}
+        />,
+        <SelectBool
+          search
+          name="isFrozen"
+          label={labels.isFrozen}
+          value={data.isFrozen?.toString()}
+        />,
+        <ComboBox
+          name="status"
+          label={labels.status}
+          search
+          options={app.getStatusList()}
+          idValue={data.status}
+        />,
+        <SearchField
+          label={labels.startDate}
+          name="creationStart"
+          type="date"
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            if (creationEndRef.current == null) return;
+            const date = DateUtils.formatForInput(
+              event.currentTarget.valueAsDate
+            );
+            if (date) creationEndRef.current.min = date;
+          }}
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
+          }}
+          defaultValue={DateUtils.formatForInput(data.creationStart)}
+        />,
+        <SearchField
+          label={labels.endDate}
+          name="creationEnd"
+          type="date"
+          inputRef={creationEndRef}
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
+          }}
+          defaultValue={DateUtils.formatForInput(data.creationEnd)}
         />
       ]}
       loadData={async (data) => {
-        return await app.core.memberApi.query(data, {
+        return await app.queryApi.allUsers(data, {
           defaultValue: [],
           showLoading: false
         });
@@ -126,17 +151,21 @@ export default function AllUsers() {
           cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
-          field: "userRole",
-          width: 180,
-          header: labels.role,
-          valueFormatter: ({ data }) => app.getRoleLabel(data?.userRole),
+          field: "preferredName",
+          header: labels.preferredName
+        },
+        {
+          field: "pin",
+          width: 120,
+          header: labels.pin,
           sortable: false
         },
         {
-          field: "assignedId",
-          width: 150,
-          header: labels.assignedId,
-          sortable: true
+          field: "orgs",
+          width: 80,
+          header: labels.joinedOrgs,
+          sortable: false,
+          align: "right"
         },
         {
           field: "creation",
@@ -147,12 +176,12 @@ export default function AllUsers() {
           sortAsc: false
         },
         {
-          width: DefaultUI.Widths.icon2,
+          width: DefaultUI.Widths.icon1,
           header: labels.actions,
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<MemberQueryDto, BoxProps>) => {
+          }: GridCellRendererProps<AllUserDto, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -162,14 +191,6 @@ export default function AllUsers() {
 
             return (
               <React.Fragment>
-                {editPermission && data.isEditable && (
-                  <IconButtonLink
-                    title={labels.edit}
-                    href={`./../edit/${data.id}`}
-                  >
-                    <EditIcon />
-                  </IconButtonLink>
-                )}
                 <IconButtonLink
                   title={labels.view}
                   href={`./../view/${data.id}`}
@@ -188,33 +209,13 @@ export default function AllUsers() {
             data.name,
             app.formatDate(data.creation, "d"),
             [
-              editPermission && {
-                label: labels.edit,
-                icon: <EditIcon />,
-                action: `./../edit/${data.id}`
-              },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
                 action: `./../view/${data.id}`
               }
             ],
-            <React.Fragment>
-              <Typography variant="body2" noWrap>
-                {app.getRoleLabel(data.userRole) +
-                  (data.assignedId ? ", " + data.assignedId : "")}
-              </Typography>
-              {data.status >= EntityStatus.Inactivated && (
-                <React.Fragment>
-                  <Typography variant="caption">
-                    {labels.entityStatus + ": "}
-                  </Typography>
-                  <Typography variant="caption" color="error">
-                    {app.getStatusLabel(data?.status)}
-                  </Typography>
-                </React.Fragment>
-              )}
-            </React.Fragment>
+            <React.Fragment></React.Fragment>
           ];
         })
       }

@@ -1,8 +1,10 @@
-﻿using Admin.Server.RQ.Query;
+﻿using Admin.Server.Dto.Query;
+using Admin.Server.RQ.Query;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
+using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using System.Buffers;
@@ -172,7 +174,11 @@ namespace Admin.Server.Services
                 {
                     o.Id,
                     o.Name,
+                    o.Brand,
+                    Apps = o.CoreOrganizationApps.Count(),
+                    Users = o.CoreOrganizationUsers.Count(),
                     Owner = o.Owner.Name,
+                    Pin = MyDbFunctions.HideData(o.Pin, default),
                     o.Status,
                     o.Creation
                 })
@@ -244,6 +250,11 @@ namespace Admin.Server.Services
                         q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreUserId == u.Id && ou.InviterId == rq.InviterId.Value));
                     }
 
+                    if (rq.Pin?.Length > 1)
+                    {
+                        q = q.Where(u => u.Pin != null && EF.Functions.ILike(u.Pin, $"%{rq.Pin}%"));
+                    }
+
                     return q;
                 })
                 .Select(u => new
@@ -253,7 +264,9 @@ namespace Admin.Server.Services
                     u.PreferredName,
                     Pin = MyDbFunctions.HideData(u.Pin, default),
                     u.Status,
-                    u.Creation
+                    u.Creation,
+
+                    Orgs = u.CoreOrganizationUsers.Count(),
                 })
                 .ToJsonAsync(writer, cancellationToken: cancellationToken);
 
@@ -555,29 +568,53 @@ namespace Admin.Server.Services
         /// 读取用户数据
         /// </summary>
         /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<ReadUserDto?> ReadUserAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _db.CoreUsers
+                .AsNoTracking()
+                .Where(u => u.Id == id)
+                .Select(u => new ReadUserDto
+                {
+                    Id = u.Id,
+                    Avatar = u.Avatar,
+                    Pin = u.Pin,
+                    FamilyName = u.FamilyName,
+                    GivenName = u.GivenName,
+                    LatinFamilyName = u.LatinFamilyName,
+                    LatinGivenName = u.LatinGivenName,
+                    PreferredName = u.PreferredName,
+                    Name = u.Name,
+                    Status = u.Status,
+                    Creation = u.Creation,
+
+                    Orgs = u.CoreOrganizations.OrderByDescending(d => d.Id).Select(o => new IdNameItem
+                    {
+                        Id = o.Id,
+                        Name = o.Name
+                    }).Take(8),
+                    Devices = u.CoreUserDevices.OrderByDescending(d => d.Id).Select(d => new IdNameItem
+                    {
+                        Id = d.Id,
+                        Name = d.Name
+                    }).Take(8)
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read user data
+        /// 读取用户数据
+        /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="writer">Writer</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
         public async Task ReadUserAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _db.CoreUsers
-                .AsNoTracking()
-                .Where(u => u.Id == id)
-                .Select(u => new
-                {
-                    u.Id,
-                    u.Avatar,
-                    u.Pin,
-                    u.FamilyName,
-                    u.GivenName,
-                    u.LatinFamilyName,
-                    u.LatinGivenName,
-                    u.PreferredName,
-                    u.Name,
-                    u.Status,
-                    u.Creation
-                })
-                .ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+            var user = await ReadUserAsync(id, cancellationToken);
+            await writer.SerializeAsync(user, MyJsonSerializerContext.Default.ReadUserDto);
         }
     }
 }

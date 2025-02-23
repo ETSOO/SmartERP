@@ -19,17 +19,13 @@ public partial class CoreOrganizationApp
 
     public string LocalName { get; set; }
 
-    public string LocalUrl { get; set; }
-
-    public List<string> LocalApis { get; set; }
-
-    public string LocalHelpUrl { get; set; }
-
     public DateTime? Expiry { get; set; }
 
     public short Status { get; set; }
 
     public DateTime Creation { get; set; }
+
+    public string LocalUrls { get; set; }
 
     public virtual CoreApp CoreApp { get; set; }
 

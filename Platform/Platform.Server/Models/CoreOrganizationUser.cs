@@ -39,9 +39,15 @@ public partial class CoreOrganizationUser
 
     public int? InviterId { get; set; }
 
+    public int? ReportTo { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; }
 
     public virtual CoreUser CoreUser { get; set; }
 
+    public virtual ICollection<CoreOrganizationUser> InverseReportToNavigation { get; set; } = new List<CoreOrganizationUser>();
+
     public virtual CoreUser Inviter { get; set; }
+
+    public virtual CoreOrganizationUser ReportToNavigation { get; set; }
 }

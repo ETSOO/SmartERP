@@ -1,54 +1,28 @@
-import {
-  GridDataType,
-  NotificationMessageType,
-  useParamsEx
-} from "@etsoo/react";
-import {
-  ButtonLink,
-  HBox,
-  IconButtonLink,
-  TooltipClick,
-  ViewPage
-} from "@etsoo/materialui";
-import { Button, Stack, Typography } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import KeyIcon from "@mui/icons-material/Key";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { GridDataType, useParamsEx } from "@etsoo/react";
+import { HBox, ViewPage } from "@etsoo/materialui";
+import { Stack, Typography } from "@mui/material";
 import { app } from "../../../app/MyApp";
-import { AppReadDto, usePageData } from "@etsoo/smarterp-core";
+import { usePageData } from "@etsoo/smarterp-core";
 import React from "react";
-import { EntityStatus } from "@etsoo/appscript";
+import { ReadAppDto } from "../../../api/dto/query/ReadAppDto";
 
 export default function ViewApp() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
-  // Permissions
-  const editPermission = app.isAdminUser();
-
   // Load data
   const loadData = React.useCallback(() => {
-    return app.core.appApi.read(id);
+    return app.queryApi.readApp(id);
   }, [id]);
 
   // Labels
-  const labels = app.getLabels(
-    "appKey",
-    "appKeyTip",
-    "appSecret",
-    "completeTip",
-    "copy",
-    "createApiKey",
-    "edit",
-    "renew",
-    "view"
-  );
+  const labels = app.getLabels("view");
 
   // Page data hook
   usePageData(app, labels.view, [loadData]);
 
   return (
-    <ViewPage<AppReadDto>
+    <ViewPage<ReadAppDto>
       fields={[
         {
           data: (item) => (
@@ -59,20 +33,12 @@ export default function ViewApp() {
                 paddingRight={2}
                 title={item.name}
               >
-                {app.core.getAppName(item)}
+                {item.name}
               </Typography>
-              <IconButtonLink
-                href={`./../../edit/${item.id}`}
-                title={labels.edit}
-                size="small"
-              >
-                <EditIcon />
-              </IconButtonLink>
             </HBox>
           ),
           singleRow: true
         },
-        { data: "name", label: "fullName", singleRow: true },
         { data: "appKey", label: "appKey", singleRow: true },
         {
           data: (item) => {
@@ -137,90 +103,7 @@ export default function ViewApp() {
         ["creation", GridDataType.DateTime]
       ]}
       loadData={loadData}
-      actions={(data, refresh) => (
-        <React.Fragment>
-          <Button variant="outlined" startIcon={<ShoppingCartIcon />}>
-            {labels.renew}
-          </Button>
-          {editPermission && (
-            <ButtonLink
-              variant="outlined"
-              startIcon={<EditIcon />}
-              href={`./../../edit/${data.id}`}
-            >
-              {labels.edit}
-            </ButtonLink>
-          )}
-          {editPermission && data.status == EntityStatus.Normal && (
-            <Button
-              variant="outlined"
-              startIcon={<KeyIcon />}
-              onClick={() => {
-                app.notifier.confirm(
-                  labels.appKeyTip,
-                  `${data.localName ?? app.get(`app${data.appId}`)} (${
-                    data.name
-                  })`,
-                  async (ok) => {
-                    if (!ok) return;
-                    const result = await app.core.appApi.createApiKey(
-                      { id: data.id, deviceId: app.deviceId },
-                      {
-                        showLoading: false
-                      }
-                    );
-                    if (result == null) return;
-                    if (!result.ok || result.data == null) {
-                      app.alertResult(result);
-                      return;
-                    }
-
-                    const key = result.data;
-                    const appSecret = app.decrypt(key.appSecret);
-                    if (appSecret == null) {
-                      app.warning("Failed to decrypt the app secret.");
-                      return;
-                    }
-
-                    app.notifier
-                      .alert(
-                        <React.Fragment>
-                          <Typography component="span">
-                            {labels.appKey}: <b>{key.appKey}</b>,{" "}
-                            {labels.appSecret}:{" "}
-                          </Typography>
-                          <TooltipClick
-                            title={labels.completeTip.format(labels.copy)}
-                          >
-                            {(openTooltip) => (
-                              <Button
-                                variant="outlined"
-                                size="small"
-                                onClick={() => {
-                                  navigator.clipboard?.writeText(appSecret);
-                                  openTooltip();
-                                }}
-                              >
-                                {labels.copy}
-                              </Button>
-                            )}
-                          </TooltipClick>
-                        </React.Fragment>,
-                        undefined,
-                        NotificationMessageType.Success
-                      )
-                      .dismiss(180);
-
-                    refresh();
-                  }
-                );
-              }}
-            >
-              {labels.createApiKey}
-            </Button>
-          )}
-        </React.Fragment>
-      )}
+      actions={(data, refresh) => <React.Fragment></React.Fragment>}
     ></ViewPage>
   );
 }

@@ -82,6 +82,7 @@ export default function AllApps() {
           label={labels.appName}
           name="keyword"
           defaultValue={data.keyword}
+          slotProps={{ htmlInput: { maxLength: 128 } }}
         />,
         <IdentityType value={data.identityType} search />,
         <SearchField
@@ -185,7 +186,7 @@ export default function AllApps() {
           sortAsc: false
         },
         {
-          width: DefaultUI.Widths.icon2,
+          width: DefaultUI.Widths.icon1,
           header: labels.actions,
           align: "center",
           cellRenderer: ({
@@ -216,7 +217,7 @@ export default function AllApps() {
       innerItemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => [
           data.name,
-          app.core.getIdentityLabel(data.identityType),
+          data.orgName,
           [
             {
               label: labels.view,
@@ -225,7 +226,15 @@ export default function AllApps() {
             }
           ],
           <React.Fragment>
-            <Typography variant="body2"></Typography>
+            <Typography variant="body2">
+              {app.core.getIdentityLabel(data.identityType)}
+            </Typography>
+            <Typography variant="body2">
+              {app.formatDate(data.expiry)}
+              {data.expiryDays == null
+                ? ""
+                : ` (${app.formatNumber(data.expiryDays)} ${labels.days})`}
+            </Typography>
           </React.Fragment>
         ])
       }

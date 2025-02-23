@@ -46,6 +46,7 @@ export default function AllOrgs() {
     "creation",
     "edit",
     "id",
+    "members",
     "orgName",
     "orgPin",
     "orgs",
@@ -153,6 +154,13 @@ export default function AllOrgs() {
           width: 100,
           header: labels.brand,
           sortable: false
+        },
+        {
+          field: "users",
+          width: 80,
+          header: labels.members,
+          sortable: false,
+          align: "right"
         },
         {
           field: "creation",

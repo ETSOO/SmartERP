@@ -155,7 +155,7 @@ export default function Home() {
         slots={{ sidebarFooter: SidebarFooter }}
       >
         <PageDataContextProvider>
-          <PageContainer defaultTitle="" width="100%">
+          <PageContainer defaultTitle="">
             <Outlet />
           </PageContainer>
         </PageDataContextProvider>

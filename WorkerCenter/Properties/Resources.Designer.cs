@@ -106,6 +106,24 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Batch Adjustment of Reporting.
+        /// </summary>
+        internal static string AdjustReportTo {
+            get {
+                return ResourceManager.GetString("AdjustReportTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{1}&lt;/b&gt; people who previously reported to &lt;b&gt;{0}&lt;/b&gt; have been batch adjusted to report to &lt;b&gt;{2}&lt;/b&gt;..
+        /// </summary>
+        internal static string AdjustReportToDetail {
+            get {
+                return ResourceManager.GetString("AdjustReportToDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admin Clear User Frozen Time.
         /// </summary>
         internal static string AdminClearUserFrozen {

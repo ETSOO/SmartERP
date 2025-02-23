@@ -79,12 +79,16 @@ export default function ViewMember() {
           singleRow: false
         },
         {
-          data: "assignedId",
-          label: "assignedId"
-        },
-        {
           data: (item) => app.getRoleLabel(item.userRole),
           label: "role"
+        },
+        {
+          data: "reportTo",
+          label: "reportTo"
+        },
+        {
+          data: "assignedId",
+          label: "assignedId"
         },
         ["expiry", GridDataType.DateTime],
         {

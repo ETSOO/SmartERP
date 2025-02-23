@@ -31,8 +31,6 @@ public partial class CoreOrganization
 
     public string Region { get; set; }
 
-    public virtual ICollection<CoreLog> CoreLogs { get; set; } = new List<CoreLog>();
-
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
     public virtual ICollection<CoreOrganizationChannel> CoreOrganizationChannelOwners { get; set; } = new List<CoreOrganizationChannel>();

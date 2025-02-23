@@ -65,6 +65,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(SendSMSData))]
 
     // Members
+    [JsonSerializable(typeof(MemberAdjustReportToRQ))]
     [JsonSerializable(typeof(IEnumerable<MemberListRQ>))]
     [JsonSerializable(typeof(MemberInviteRQ))]
     [JsonSerializable(typeof(MemberQueryRQ))]

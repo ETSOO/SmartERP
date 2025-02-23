@@ -5,7 +5,8 @@ import {
   MobileListItemRenderer,
   Tiplist,
   MUUtils,
-  ResponsivePage
+  ResponsivePage,
+  HBox
 } from "@etsoo/materialui";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { BoxProps, Typography } from "@mui/material";
@@ -165,19 +166,20 @@ export default function LoginHistory() {
           return [
             data.title,
             app.formatDate(data.creation, "ds"),
-            <DialogButton
-              content={JSON.stringify(data, undefined, 2)}
-              contentPre
-              disableScrollLock
-              maxWidth="xs"
-              size="small"
-              icon={<InfoIcon />}
-            >
-              JSON data
-            </DialogButton>,
-            <React.Fragment>
+            [],
+            <HBox alignItems="center">
+              <DialogButton
+                content={JSON.stringify(data, undefined, 2)}
+                contentPre
+                disableScrollLock
+                maxWidth="xs"
+                size="small"
+                icon={<InfoIcon />}
+              >
+                JSON data
+              </DialogButton>
               <Typography variant="caption">{data.kind}</Typography>
-            </React.Fragment>
+            </HBox>
           ];
         })
       }

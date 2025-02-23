@@ -17,8 +17,6 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
 
-    public virtual DbSet<CoreLog> CoreLogs { get; set; }
-
     public virtual DbSet<CoreOrganization> CoreOrganizations { get; set; }
 
     public virtual DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
@@ -46,10 +44,6 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.ApiUrls)
-                .IsRequired()
-                .HasColumnType("character varying(256)[]")
-                .HasColumnName("api_urls");
             entity.Property(e => e.AppSecret)
                 .IsRequired()
                 .HasMaxLength(256)
@@ -58,9 +52,6 @@ public partial class MyDbContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
             entity.Property(e => e.Enabled).HasColumnName("enabled");
-            entity.Property(e => e.HelpUrl)
-                .HasMaxLength(256)
-                .HasColumnName("help_url");
             entity.Property(e => e.IdentityType).HasColumnName("identity_type");
             entity.Property(e => e.IsPublic).HasColumnName("is_public");
             entity.Property(e => e.Logo)
@@ -71,9 +62,10 @@ public partial class MyDbContext : DbContext
                 .HasMaxLength(128)
                 .HasColumnName("name");
             entity.Property(e => e.RequireLocalUrl).HasColumnName("require_local_url");
-            entity.Property(e => e.WebUrl)
-                .HasMaxLength(256)
-                .HasColumnName("web_url");
+            entity.Property(e => e.Urls)
+                .IsRequired()
+                .HasColumnType("jsonb")
+                .HasColumnName("urls");
         });
 
         modelBuilder.Entity<CoreAuthCode>(entity =>
@@ -113,52 +105,6 @@ public partial class MyDbContext : DbContext
             entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreAuthCodes)
                 .HasForeignKey(d => d.CoreUserId)
                 .HasConstraintName("core_auth_code_core_user_id_fkey");
-        });
-
-        modelBuilder.Entity<CoreLog>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("core_log_pkey");
-
-            entity.ToTable("core_log");
-
-            entity.Property(e => e.Id)
-                .UseIdentityAlwaysColumn()
-                .HasColumnName("id");
-            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-            entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-            entity.Property(e => e.Creation)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("creation");
-            entity.Property(e => e.Culture)
-                .IsRequired()
-                .HasMaxLength(10)
-                .HasColumnName("culture");
-            entity.Property(e => e.Data)
-                .HasColumnType("jsonb")
-                .HasColumnName("data");
-            entity.Property(e => e.DeviceId).HasColumnName("device_id");
-            entity.Property(e => e.Ip)
-                .IsRequired()
-                .HasMaxLength(45)
-                .HasColumnName("ip");
-            entity.Property(e => e.Title)
-                .IsRequired()
-                .HasMaxLength(256)
-                .HasColumnName("title");
-
-            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreLogs)
-                .HasForeignKey(d => d.CoreOrganizationId)
-                .HasConstraintName("core_log_core_organization_id_fkey");
-
-            entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreLogs)
-                .HasForeignKey(d => d.CoreUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("core_log_core_user_id_fkey");
-
-            entity.HasOne(d => d.Device).WithMany(p => p.CoreLogs)
-                .HasForeignKey(d => d.DeviceId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("core_log_device_id_fkey");
         });
 
         modelBuilder.Entity<CoreOrganization>(entity =>
@@ -233,18 +179,12 @@ public partial class MyDbContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
-            entity.Property(e => e.LocalApis)
-                .HasColumnType("character varying(256)[]")
-                .HasColumnName("local_apis");
-            entity.Property(e => e.LocalHelpUrl)
-                .HasMaxLength(256)
-                .HasColumnName("local_help_url");
             entity.Property(e => e.LocalName)
                 .HasMaxLength(128)
                 .HasColumnName("local_name");
-            entity.Property(e => e.LocalUrl)
-                .HasMaxLength(256)
-                .HasColumnName("local_url");
+            entity.Property(e => e.LocalUrls)
+                .HasColumnType("jsonb")
+                .HasColumnName("local_urls");
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
@@ -325,6 +265,7 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.RefreshTime)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("refresh_time");
+            entity.Property(e => e.ReportTo).HasColumnName("report_to");
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
@@ -346,6 +287,10 @@ public partial class MyDbContext : DbContext
             entity.HasOne(d => d.Inviter).WithMany(p => p.CoreOrganizationUserInviters)
                 .HasForeignKey(d => d.InviterId)
                 .HasConstraintName("core_organization_user_inviter_id_fkey");
+
+            entity.HasOne(d => d.ReportToNavigation).WithMany(p => p.InverseReportToNavigation)
+                .HasForeignKey(d => d.ReportTo)
+                .HasConstraintName("core_organization_user_report_to_fkey");
         });
 
         modelBuilder.Entity<CoreUser>(entity =>

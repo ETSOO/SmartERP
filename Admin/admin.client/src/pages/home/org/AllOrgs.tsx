@@ -5,30 +5,35 @@ import {
   IconButtonLink,
   MobileListItemRenderer,
   MUUtils,
-  Switch
+  SelectBool
 } from "@etsoo/materialui";
 import { BoxProps, Fab, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   GridCellRendererProps,
   GridDataType,
+  GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { OrgQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
-import { DataTypes } from "@etsoo/shared";
-import { DefaultUI, OrgTiplist } from "@etsoo/smarterp-core/components";
-import { EntityStatus } from "@etsoo/appscript";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { DataTypes, DateUtils } from "@etsoo/shared";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { AllOrgDto } from "../../../api/dto/query/AllOrgDto";
+import { OrgTiplist } from "../../../components/OrgTiplist";
+import { UserTiplist } from "../../../components/UserTiplist";
 
 const template = {
   keyword: "string",
+  ownerId: "number",
   pin: "string",
   parentId: "number",
-  enabled: "boolean"
+  enabled: "boolean",
+  creationStart: "date",
+  creationEnd: "date"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllOrgs() {
@@ -38,34 +43,40 @@ export default function AllOrgs() {
   // Labels
   const labels = app.getLabels(
     "actions",
+    "apps",
     "brand",
     "companyNo",
     "createNewOrganization",
     "creation",
     "edit",
+    "endDate",
     "id",
+    "members",
     "orgName",
     "orgPin",
     "orgs",
+    "owner",
     "parentOrg",
+    "startDate",
     "statusNormal",
     "switchOrg",
     "view"
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<OrgQueryDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<AllOrgDto>>();
 
   // Load data
   const reloadData = () => ref.current?.reset();
 
   const margin = MUGlobal.pagePaddings;
+  const creationEndRef = React.useRef<HTMLInputElement>();
 
   // Page data hook
   usePageDataEmpty(app);
 
   return (
-    <ResponsivePage<OrgQueryDto, typeof template>
+    <ResponsivePage<AllOrgDto, typeof template>
       {...DefaultUI.createProps({
         onRefresh: reloadData,
         fabButtons: (
@@ -85,60 +96,98 @@ export default function AllOrgs() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./${data.id}`)}
+      quickAction={(data) => navigate(`./../view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
           label={labels.orgName}
           name="keyword"
           defaultValue={data.keyword}
+          slotProps={{ htmlInput: { maxLength: 128 } }}
+        />,
+        <UserTiplist
+          width={120}
+          name="ownerId"
+          label={labels.owner}
+          idValue={data.ownerId}
         />,
         <OrgTiplist
-          label={labels.parentOrg}
           name="parentId"
-          search
+          label={labels.parentOrg}
           idValue={data.parentId}
         />,
         <SearchField
           label={labels.companyNo}
           name="pin"
-          minChars={3}
+          minChars={2}
           defaultValue={data.pin}
         />,
-        <Switch
-          label={labels.statusNormal}
+        <SelectBool
+          search
           name="enabled"
-          checked={data.enabled ?? true}
+          label={labels.statusNormal}
+          value={data.enabled?.toString()}
+        />,
+        <SearchField
+          label={labels.startDate}
+          name="creationStart"
+          type="date"
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            if (creationEndRef.current == null) return;
+            const date = DateUtils.formatForInput(
+              event.currentTarget.valueAsDate
+            );
+            if (date) creationEndRef.current.min = date;
+          }}
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
+          }}
+          defaultValue={DateUtils.formatForInput(data.creationStart)}
+        />,
+        <SearchField
+          label={labels.endDate}
+          name="creationEnd"
+          type="date"
+          inputRef={creationEndRef}
+          slotProps={{
+            htmlInput: { max: DateUtils.formatForInput(new Date()) }
+          }}
+          defaultValue={DateUtils.formatForInput(data.creationEnd)}
         />
       ]}
       loadData={(data, lastItem) =>
-        app.core.orgApi.query(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
-          {
-            defaultValue: [],
-            showLoading: false
-          }
-        )
+        app.queryApi.allOrgs(MUUtils.setupPagingKeysets(data, lastItem, "id"), {
+          defaultValue: [],
+          showLoading: false
+        })
       }
       columns={[
+        {
+          field: "id",
+          width: 90,
+          header: labels.id,
+          sortable: false,
+          type: GridDataType.Unkwown
+        },
         {
           field: "name",
           header: labels.orgName,
           sortable: true,
-          cellBoxStyle: (data) =>
-            data
-              ? {
-                  textDecoration:
-                    data.status > EntityStatus.Approved
-                      ? "line-through"
-                      : undefined,
-                  color:
-                    data.userStatus > EntityStatus.Approved ||
-                    data.isUserExpired
-                      ? "red"
-                      : undefined
-                }
-              : {}
+          cellBoxStyle: GridDeletedCellBoxStyle
+        },
+        {
+          field: "apps",
+          width: 80,
+          header: labels.apps,
+          sortable: false,
+          align: "right"
+        },
+        {
+          field: "users",
+          width: 80,
+          header: labels.members,
+          sortable: false,
+          align: "right"
         },
         {
           field: "pin",
@@ -153,6 +202,12 @@ export default function AllOrgs() {
           sortable: false
         },
         {
+          field: "owner",
+          width: 90,
+          header: labels.owner,
+          sortable: false
+        },
+        {
           field: "creation",
           type: GridDataType.Date,
           width: 116,
@@ -161,12 +216,12 @@ export default function AllOrgs() {
           sortAsc: false
         },
         {
-          width: DefaultUI.Widths.icon3,
+          width: DefaultUI.Widths.icon1,
           header: labels.actions,
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<OrgQueryDto, BoxProps>) => {
+          }: GridCellRendererProps<AllOrgDto, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -176,14 +231,6 @@ export default function AllOrgs() {
 
             return (
               <React.Fragment>
-                {data.isOwner && (
-                  <IconButtonLink
-                    title={labels.edit}
-                    href={`./../edit/${data.id}`}
-                  >
-                    <EditIcon />
-                  </IconButtonLink>
-                )}
                 <IconButtonLink title={labels.view} href={`./${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
@@ -199,11 +246,6 @@ export default function AllOrgs() {
             data.name,
             app.formatDate(data.creation, "d"),
             [
-              data.isOwner && {
-                label: labels.edit,
-                icon: <EditIcon />,
-                action: `./../edit/${data.id}`
-              },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,

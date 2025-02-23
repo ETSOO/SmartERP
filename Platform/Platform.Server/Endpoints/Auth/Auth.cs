@@ -127,10 +127,8 @@ namespace Platform.Server.Endpoints.Auth
             g.MapGet("OAuthUserInfo", (IAuthService service, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.OAuthUserInfoAsync(accessor.HttpContext?.Response, cancellationToken))
                 .WithDescription("OAuth get user information / OAuth 获取用户信息").RequireAuthorization().WithTags("Auth");
 
-            g.MapPost("AuthRequest", (IAuthService service, AuthRequest rq, CancellationToken cancellationToken) =>
-            {
-                return service.AuthRequestAsync(rq, cancellationToken);
-            }).WithDescription("User authorization request / 用户授权请求").RequireAuthorization().WithTags("Auth");
+            g.MapPost("AuthRequest", (IAuthService service, AuthRequest rq, CancellationToken cancellationToken) => service.AuthRequestAsync(rq, cancellationToken))
+                .WithDescription("User authorization request / 用户授权请求").RequireAuthorization().WithTags("Auth");
 
             g.MapPut("SwitchOrg", (IAuthService service, SwitchOrgProxyRQ rq, CancellationToken cancellationToken) => service.SwitchOrgAsync(rq, cancellationToken))
                 .WithDescription("User switch organization / 用户切换机构").RequireAuthorization().WithTags("Auth");

@@ -30,14 +30,20 @@ export type AllUserRQ = QueryRQ & {
   identifier?: string;
 
   /**
+   * PIN
+   * 证件号码
+   */
+  pin?: string;
+
+  /**
    * Creation start
    * 登记开始时间
    */
-  creationStart?: Date;
+  creationStart?: Date | string;
 
   /**
    * Creation end
    * 登记结束时间
    */
-  creationEnd?: Date;
+  creationEnd?: Date | string;
 };

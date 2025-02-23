@@ -15,6 +15,9 @@ namespace Platform.Server.Endpoints.Member
         {
             var g = builder.MapGroup("Member");
 
+            g.MapPut("AdjustReportTo", (IMemberService service, MemberAdjustReportToRQ rq, CancellationToken cancellationToken) => service.AdjustReportToAsync(rq, cancellationToken))
+                .WithDescription("Adjust member report to / 调整成员汇报对象").WithTags("Member");
+
             g.MapDelete("Delete/{id:int}", (IMemberService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete member / 删除成员").WithTags("Member");
 

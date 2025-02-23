@@ -23,12 +23,13 @@ import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { MemberQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
 import { AppUtils } from "../components/AppUtils";
 
 const template = {
   name: "string",
   userRole: "number",
+  reportTo: "number",
   assignedId: "string",
   enabled: "boolean"
 } as const satisfies DataTypes.BasicTemplate;
@@ -53,6 +54,7 @@ export default function AllMembers() {
     "entityStatus",
     "inviteMember",
     "name",
+    "reportTo",
     "role",
     "statusNormal",
     "view"
@@ -105,6 +107,12 @@ export default function AllMembers() {
           label={labels.role}
           search
           idValue={data.userRole}
+        />,
+        <UserTiplist
+          name="reportTo"
+          label={labels.reportTo}
+          search
+          idValue={data.reportTo}
         />,
         <SearchField
           label={labels.assignedId}

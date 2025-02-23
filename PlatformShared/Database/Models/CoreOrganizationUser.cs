@@ -106,6 +106,12 @@ namespace PlatformShared.Database.Models
         public int? InviterId { get; set; }
 
         /// <summary>
+        /// Report to
+        /// 汇报对象
+        /// </summary>
+        public int? ReportTo { get; set; }
+
+        /// <summary>
         /// Core organization
         /// 核心机构
         /// </summary>
@@ -122,5 +128,17 @@ namespace PlatformShared.Database.Models
         /// 邀请人
         /// </summary>
         public CoreUser? Inviter { get; set; }
+
+        /// <summary>
+        /// Report to user
+        /// 汇报对象用户
+        /// </summary>
+        public CoreOrganizationUser? ReportToUser { get; set; }
+
+        /// <summary>
+        /// Direct reports
+        /// 直接下属
+        /// </summary>
+        public ICollection<CoreOrganizationUser> DirectReports { get; set; } = [];
     }
 }

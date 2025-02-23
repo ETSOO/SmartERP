@@ -1,9 +1,4 @@
-import {
-  IApiPayload,
-  AuthApi as AuthApiBase,
-  LoginRQ,
-  LoginInputRQ
-} from "@etsoo/appscript";
+import { IApiPayload, AuthApi as AuthApiBase } from "@etsoo/appscript";
 import { SmartERPLoginResult } from "@etsoo/materialui";
 import { TokenResultPayload } from "./dto/auth/TokenResultPayload";
 import { RegisterUserData } from "./dto/auth/RegisterUserData";
@@ -75,23 +70,6 @@ export class AuthApi extends AuthApiBase {
       undefined,
       payload
     );
-  }
-
-  /**
-   * Login
-   * @param rq Request data
-   * @param payload Payload
-   * @returns Result
-   */
-  login(rq: LoginInputRQ, payload?: IApiPayload<SmartERPLoginResult>) {
-    const { deviceId, region } = this.app;
-    const data: LoginRQ = {
-      ...rq,
-      deviceId,
-      region,
-      timeZone: this.app.getTimeZone()
-    };
-    return this.loginBase(data, payload);
   }
 
   /**

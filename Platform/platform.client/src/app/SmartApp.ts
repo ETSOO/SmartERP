@@ -1,4 +1,9 @@
-import { AddressUtils, AuthRequest, ExternalSettings } from "@etsoo/appscript";
+import {
+  AddressUtils,
+  AuthRequest,
+  ExternalSettings,
+  LoginInputAuthResult
+} from "@etsoo/appscript";
 import { ISmartSettings } from "./SmartSettings";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
 import { Constants } from "./Constants";
@@ -72,19 +77,20 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
    */
   async loginComplete(
     auth: AuthRequest | undefined,
-    data?: ISmartERPUser,
+    data?: ISmartERPUser | LoginInputAuthResult,
     refreshToken?: string
   ) {
     if (auth) {
-      if (refreshToken) {
-        this.authLogin(refreshToken);
+      if (refreshToken && data && "uri" in data) {
+        this.saveCacheToken(refreshToken);
+        this.authLogin(data.uri);
       } else {
         const url = await this.authApi.authRequest(auth);
         if (!url) return;
         this.authLogin(url);
       }
     } else {
-      if (data && refreshToken) {
+      if (refreshToken && data && !("uri" in data)) {
         // User login
         this.userLogin(data, refreshToken, false);
 

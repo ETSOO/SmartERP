@@ -12,6 +12,8 @@ import { OrgListRQ } from "./rq/query/OrgListRQ";
 import { AppListRQ } from "./rq/query/AppListRQ";
 import { UserListRQ } from "./rq/query/UserListRQ";
 import { OrgListDto } from "./dto/query/OrgListDto";
+import { ReadOrgData } from "./dto/query/ReadOrgDto";
+import { ReadAppDto } from "./dto/query/ReadAppDto";
 
 /**
  * Query API
@@ -83,8 +85,8 @@ export class QueryApi extends BaseApi {
    * @param payload Payload
    * @returns Result
    */
-  readApp(id: number, payload?: IApiPayload<AllAppDto>) {
-    return this.api.get(`Query/ReadApp/${id}`, payload);
+  readApp(id: number, payload?: IApiPayload<ReadAppDto>) {
+    return this.api.get(`Query/ReadApp/${id}`, undefined, payload);
   }
 
   /**
@@ -93,8 +95,8 @@ export class QueryApi extends BaseApi {
    * @param payload Payload
    * @returns Result
    */
-  readOrg(id: number, payload?: IApiPayload<AllOrgDto>) {
-    return this.api.get(`Query/ReadOrg/${id}`, payload);
+  readOrg(id: number, payload?: IApiPayload<ReadOrgData>) {
+    return this.api.get(`Query/ReadOrg/${id}`, undefined, payload);
   }
 
   /**
@@ -104,7 +106,7 @@ export class QueryApi extends BaseApi {
    * @returns Result
    */
   readUser(id: number, payload?: IApiPayload<AllUserDto>) {
-    return this.api.get(`Query/ReadUser/${id}`, payload);
+    return this.api.get(`Query/ReadUser/${id}`, undefined, payload);
   }
 
   /**

@@ -1,6 +1,9 @@
 {
   "addEmail": "添加邮箱",
   "addMobile": "添加手机号",
+  "adjustReportFrom": "原汇报对象",
+  "adjustReportNew": "新汇报对象",
+  "adjustReportTo": "批量调整汇报对象",
   "allApps": "所有应用",
   "allMembers": "所有成员",
   "appKeyTip": "确定需要重新创建密钥吗？重新创建后，之前创建的密钥将失效，请妥善保管新密钥。",

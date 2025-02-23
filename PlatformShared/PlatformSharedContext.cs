@@ -23,6 +23,7 @@ namespace PlatformShared
     [JsonSerializable(typeof(SendSMSMessage))]
 
     [JsonSerializable(typeof(AcceptInvitationMessageData))]
+    [JsonSerializable(typeof(AdjustReportToMessageData))]
     [JsonSerializable(typeof(AdminRenewAppMessageData))]
     [JsonSerializable(typeof(AddUserIdentifierMessageData))]
     [JsonSerializable(typeof(BuyAppMessageData))]

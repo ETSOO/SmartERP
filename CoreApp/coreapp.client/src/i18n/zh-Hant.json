@@ -1,6 +1,9 @@
 {
   "addEmail": "添加郵箱",
   "addMobile": "添加手機號",
+  "adjustReportFrom": "原匯報對象",
+  "adjustReportNew": "新匯報對象",
+  "adjustReportTo": "批量調整匯報對象",
   "allApps": "所有應用",
   "allMembers": "所有成員",
   "appKeyTip": "確定需要重新創建密鑰嗎？重新創建後，之前創建的密鑰將失效，請妥善保管新密鑰。",
