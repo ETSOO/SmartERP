@@ -39,61 +39,54 @@ export default function ViewOrg() {
 
   return (
     <ViewPage<OrgReadDto>
+      paddings={0}
+      titleBar={(item) => (
+        <HBox justifyContent="center" alignItems="center">
+          <Typography
+            variant="subtitle2"
+            fontWeight="bold"
+            textAlign="center"
+            paddingRight={2}
+          >
+            {item.name}
+          </Typography>
+          {item.isOwner && (
+            <IconButtonLink
+              href={`./../../edit/${item.id}`}
+              title={labels.edit}
+              size="small"
+            >
+              <EditIcon />
+            </IconButtonLink>
+          )}
+        </HBox>
+      )}
+      leftContainerLines={2}
+      leftContainer={(item) => (
+        <HBox>
+          <img
+            src={item.logo}
+            alt={labels.logo}
+            style={{
+              width: "160px",
+              height: "80px",
+              border: "1px solid #666"
+            }}
+          />
+          {item.isOwner && (
+            <IconButtonLink
+              href={`./../../avatar/${item.id}`}
+              state={item.logo}
+              title={labels.editLogo}
+              size="small"
+            >
+              <EditIcon />
+            </IconButtonLink>
+          )}
+        </HBox>
+      )}
       fields={[
-        {
-          data: (item) => (
-            <HBox justifyContent="center" alignItems="center">
-              <Typography
-                variant="subtitle2"
-                textAlign="center"
-                paddingRight={2}
-              >
-                {item.name}
-              </Typography>
-              {item.isOwner && (
-                <IconButtonLink
-                  href={`./../../edit/${item.id}`}
-                  title={labels.edit}
-                  size="small"
-                >
-                  <EditIcon />
-                </IconButtonLink>
-              )}
-            </HBox>
-          ),
-          singleRow: true
-        },
-        {
-          data: (item) => (
-            <HBox>
-              <img
-                src={item.logo}
-                alt={labels.logo}
-                style={{
-                  width: "160px",
-                  height: "80px",
-                  border: "1px solid #666"
-                }}
-              />
-              {item.isOwner && (
-                <IconButtonLink
-                  href={`./../../avatar/${item.id}`}
-                  state={item.logo}
-                  title={labels.editLogo}
-                  size="small"
-                >
-                  <EditIcon />
-                </IconButtonLink>
-              )}
-            </HBox>
-          ),
-          singleRow: false
-        },
-        {
-          data: "brand",
-          label: "brand",
-          singleRow: false
-        },
+        "brand",
         {
           data: "pin",
           label: app.get(tax?.labelKey ?? "taxId"),
@@ -110,7 +103,8 @@ export default function ViewOrg() {
                 {item.parentName}
               </ButtonLink>
             ) : undefined,
-          label: "parentOrg"
+          label: "parentOrg",
+          singleRow: true
         },
         {
           data: "ownerName",

@@ -97,6 +97,7 @@ namespace Platform.Server
 
     // User
     [JsonSerializable(typeof(AuditHistoryRQ))]
+    [JsonSerializable(typeof(UserUpdateRQ))]
 
     // Others
     [JsonSerializable(typeof(TemplateItem))]

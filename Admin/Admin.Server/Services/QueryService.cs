@@ -237,17 +237,17 @@ namespace Admin.Server.Services
 
                     if (rq.Identifier?.Length >= 5)
                     {
-                        q = q.Where(u => u.CoreUserIdentifiers.Any(i => i.CoreUserId == u.Id && i.Value == rq.Identifier));
+                        q = q.Where(u => u.CoreUserIdentifiers.Any(i => i.Value == rq.Identifier));
                     }
 
                     if (rq.OrgId.HasValue)
                     {
-                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreUserId == u.Id && ou.CoreOrganizationId == rq.OrgId.Value));
+                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreOrganizationId == rq.OrgId.Value));
                     }
 
                     if (rq.InviterId.HasValue)
                     {
-                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreUserId == u.Id && ou.InviterId == rq.InviterId.Value));
+                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.InviterId == rq.InviterId.Value));
                     }
 
                     if (rq.Pin?.Length > 1)
@@ -579,7 +579,7 @@ namespace Admin.Server.Services
                 {
                     Id = u.Id,
                     Avatar = u.Avatar,
-                    Pin = u.Pin,
+                    Pin = MyDbFunctions.HideData(u.Pin, default),
                     FamilyName = u.FamilyName,
                     GivenName = u.GivenName,
                     LatinFamilyName = u.LatinFamilyName,

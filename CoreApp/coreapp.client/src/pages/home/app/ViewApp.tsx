@@ -50,6 +50,7 @@ export default function ViewApp() {
 
   return (
     <ViewPage<AppReadDto>
+      paddings={0}
       fields={[
         {
           data: (item) => (
@@ -73,8 +74,8 @@ export default function ViewApp() {
           ),
           singleRow: true
         },
-        { data: "name", label: "fullName", singleRow: true },
-        { data: "appKey", label: "appKey", singleRow: true },
+        { data: "name", label: "fullName", singleRow: "medium" },
+        { data: "appKey", singleRow: "medium" },
         {
           data: (item) => {
             const urls = (item.localUrls ?? item.urls).map((u) => u.web);

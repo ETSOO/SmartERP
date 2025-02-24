@@ -222,4 +222,7 @@
   <data name="AdjustReportToDetail" xml:space="preserve">
     <value>&lt;b&gt;{1}&lt;/b&gt; people who previously reported to &lt;b&gt;{0}&lt;/b&gt; have been batch adjusted to report to &lt;b&gt;{2}&lt;/b&gt;.</value>
   </data>
+  <data name="UpdateUserSelf" xml:space="preserve">
+    <value>Update User Self Data</value>
+  </data>
 </root>

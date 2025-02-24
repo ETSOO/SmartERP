@@ -374,5 +374,14 @@ namespace WorkerCenter.Properties {
                 return ResourceManager.GetString("UpdateUserAvatar", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update User Self Data.
+        /// </summary>
+        internal static string UpdateUserSelf {
+            get {
+                return ResourceManager.GetString("UpdateUserSelf", resourceCulture);
+            }
+        }
     }
 }

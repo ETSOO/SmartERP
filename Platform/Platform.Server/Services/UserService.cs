@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -32,6 +33,7 @@ namespace Platform.Server.Services
         readonly IStorage _storage;
         readonly IAuthCodeService _authCodeService;
         readonly IQueueService _queueService;
+        readonly IPublicService _publicService;
 
         /// <summary>
         /// Constructor
@@ -45,6 +47,7 @@ namespace Platform.Server.Services
         /// <param name="storage">Storage</param>
         /// <param name="authCodeService">AuthCode service</param>
         /// <param name="queueService">Queue service</param>
+        /// <param name="publicService">Public service</param>
         public UserService(MyDbContext db,
             LogDbContext logDb,
             IMyApp app,
@@ -52,7 +55,8 @@ namespace Platform.Server.Services
             ILogger<UserService> logger,
             IStorage storage,
             IAuthCodeService authCodeService,
-            IQueueService queueService)
+            IQueueService queueService,
+            IPublicService publicService)
             : base(app, userAccessor.UserSafe, "user", logger)
         {
             _db = db;
@@ -60,6 +64,7 @@ namespace Platform.Server.Services
             _storage=storage;
             _authCodeService = authCodeService;
             _queueService = queueService;
+            _publicService = publicService;
         }
 
         /// <summary>
@@ -456,6 +461,72 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Update user
+        /// 更新用户
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateAsync(UserUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            var u = await _db.CoreUsers.Where(u => u.Id == User.IdInt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (u == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (rq.IsModified(nameof(rq.Name)) && !string.IsNullOrEmpty(rq.Name))
+            {
+                u.Name = rq.Name;
+                u.QueryKeyword = _publicService.GetPinyin(new PinyinRQ { Input = rq.Name, Format = PinyinFormatType.Initial });
+            }
+
+            if (rq.IsModified(nameof(rq.GivenName)))
+            {
+                u.GivenName = rq.GivenName;
+            }
+
+            if (rq.IsModified(nameof(rq.FamilyName)))
+            {
+                u.FamilyName = rq.FamilyName;
+            }
+
+            if (rq.IsModified(nameof(rq.LatinGivenName)))
+            {
+                u.LatinGivenName = rq.LatinGivenName;
+            }
+
+            if (rq.IsModified(nameof(rq.LatinFamilyName)))
+            {
+                u.LatinFamilyName = rq.LatinFamilyName;
+            }
+
+            if (rq.IsModified(nameof(rq.PreferredName)))
+            {
+                u.PreferredName = rq.PreferredName;
+            }
+
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateMemberMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id),
+                Changes = changes
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
         /// Update avatar
         /// 更新头像
         /// </summary>
@@ -510,6 +581,29 @@ namespace Platform.Server.Services
                 Logger.LogError("Avatar write path is {path}", path);
                 return ApplicationErrors.DataProcessingFailed.AsResult();
             }
+        }
+
+        /// <summary>
+        /// Read user data for update
+        /// 读取用于更新的用户数据
+        /// </summary>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task UpdateReadAsync(IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            await _db.CoreUsers.AsNoTracking()
+                .Where(u => u.Id == User.IdInt)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Name,
+                    u.PreferredName,
+                    u.FamilyName,
+                    u.GivenName,
+                    u.LatinFamilyName,
+                    u.LatinGivenName
+                }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
     }
 }

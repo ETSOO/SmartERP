@@ -26,70 +26,59 @@ export default function ViewMember() {
 
   return (
     <ViewPage<MemberReadDto>
+      paddings={0}
+      titleBar={(item) => (
+        <HBox justifyContent="center" alignItems="center" marginBottom={2}>
+          <Typography
+            variant="subtitle2"
+            fontWeight="bold"
+            textAlign="center"
+            paddingRight={2}
+          >
+            {item.localName ? `${item.localName} (${item.name})` : item.name}
+          </Typography>
+          {editPermission && (
+            <IconButtonLink
+              href={`./../../edit/${item.id}`}
+              title={labels.edit}
+              size="small"
+            >
+              <EditIcon />
+            </IconButtonLink>
+          )}
+        </HBox>
+      )}
+      leftContainerLines={3}
+      leftContainer={(item) => (
+        <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
+          <img
+            src={item.localAvatar ?? item.avatar}
+            alt={labels.logo}
+            style={{
+              width: "160px",
+              height: "160px",
+              border: "1px solid #666"
+            }}
+          />
+          {editPermission && (
+            <IconButtonLink
+              href={`./../../avatar/${item.id}`}
+              state={item.localAvatar}
+              title={labels.editAvatar}
+              size="small"
+            >
+              <EditIcon />
+            </IconButtonLink>
+          )}
+        </HBox>
+      )}
       fields={[
-        {
-          data: (item) => (
-            <HBox justifyContent="center" alignItems="center">
-              <Typography
-                variant="subtitle2"
-                textAlign="center"
-                paddingRight={2}
-              >
-                {item.localName
-                  ? `${item.localName} (${item.name})`
-                  : item.name}
-              </Typography>
-              {editPermission && (
-                <IconButtonLink
-                  href={`./../../edit/${item.id}`}
-                  title={labels.edit}
-                  size="small"
-                >
-                  <EditIcon />
-                </IconButtonLink>
-              )}
-            </HBox>
-          ),
-          singleRow: true
-        },
-        {
-          data: (item) => (
-            <HBox>
-              <img
-                src={item.localAvatar}
-                alt={labels.logo}
-                style={{
-                  width: "160px",
-                  height: "160px",
-                  border: "1px solid #666"
-                }}
-              />
-              {editPermission && (
-                <IconButtonLink
-                  href={`./../../avatar/${item.id}`}
-                  state={item.localAvatar}
-                  title={labels.editAvatar}
-                  size="small"
-                >
-                  <EditIcon />
-                </IconButtonLink>
-              )}
-            </HBox>
-          ),
-          singleRow: false
-        },
         {
           data: (item) => app.getRoleLabel(item.userRole),
           label: "role"
         },
-        {
-          data: "reportTo",
-          label: "reportTo"
-        },
-        {
-          data: "assignedId",
-          label: "assignedId"
-        },
+        "reportTo",
+        "assignedId",
         ["expiry", GridDataType.DateTime],
         {
           data: (item) => app.core.getIdentityLabel(item.identityType),

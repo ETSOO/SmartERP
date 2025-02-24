@@ -31,6 +31,7 @@ export default function ViewOrg() {
 
   return (
     <ViewPage<ReadOrgData>
+      paddings={0}
       fields={[
         {
           data: (item) => (

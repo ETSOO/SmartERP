@@ -23,37 +23,36 @@ export default function ViewUser() {
 
   return (
     <ViewPage<ReadUserDto>
+      paddings={0}
+      titleBar={(item) => (
+        <HBox justifyContent="center" alignItems="center">
+          <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
+            {item.name}
+            {item.preferredName ? ` (${item.preferredName})` : ""}
+          </Typography>
+        </HBox>
+      )}
+      leftContainerLines={3}
+      leftContainer={(item) =>
+        item.avatar ? (
+          <HBox>
+            <img
+              src={item.avatar}
+              alt={labels.logo}
+              style={{
+                width: "160px",
+                height: "160px",
+                border: "1px solid #666"
+              }}
+            />
+          </HBox>
+        ) : undefined
+      }
       fields={[
-        {
-          data: (item) => (
-            <HBox justifyContent="center" alignItems="center">
-              <Typography
-                variant="subtitle2"
-                textAlign="center"
-                paddingRight={2}
-              >
-                {item.name}
-              </Typography>
-            </HBox>
-          ),
-          singleRow: true
-        },
-        {
-          data: (item) => (
-            <HBox>
-              <img
-                src={item.avatar}
-                alt={labels.logo}
-                style={{
-                  width: "160px",
-                  height: "160px",
-                  border: "1px solid #666"
-                }}
-              />
-            </HBox>
-          ),
-          singleRow: false
-        },
+        "familyName",
+        "givenName",
+        "latinFamilyName",
+        "latinGivenName",
         ["creation", GridDataType.DateTime]
       ]}
       loadData={loadData}

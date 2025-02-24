@@ -199,6 +199,13 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/user/data/edit",
+            lazy: async () => {
+              const EditUser = await import("./pages/home/user/EditUser");
+              return { Component: EditUser.default };
+            }
+          },
+          {
             path: "/home/user/data/addemail",
             lazy: async () => {
               const AddEmail = await import("./pages/home/user/AddEmail");

@@ -1,9 +1,11 @@
 import { ButtonLink, CommonPage } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
 import {
+  Box,
   Card,
   CardActions,
   CardContent,
+  Grid2,
   IconButton,
   List,
   ListItem,
@@ -12,6 +14,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
+import EditIcon from "@mui/icons-material/Edit";
 import { UserIdentifierData } from "@etsoo/smarterp-core";
 import React from "react";
 import { UserIdentifierType } from "@etsoo/appscript";
@@ -22,8 +25,12 @@ export default function UserData() {
     "addEmail",
     "addMobile",
     "confirmAction",
-    "delete"
+    "delete",
+    "edit"
   );
+
+  // User context
+  const Context = app.userState.context;
 
   // State
   const [items, setItems] = React.useState<UserIdentifierData[]>([]);
@@ -50,7 +57,34 @@ export default function UserData() {
 
   return (
     <CommonPage paddings={0} onRefresh={reloadData}>
-      <Card sx={{ marginTop: 1 }}>
+      <Context.Consumer>
+        {({ state }) => (
+          <Grid2 container spacing={1}>
+            <Grid2 size={{ xs: 6, md: 4 }}>{state.name}</Grid2>
+            {(state.familyName || state.givenName) && (
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                {state.familyName} / {state.givenName}
+              </Grid2>
+            )}
+            {(state.latinFamilyName || state.latinGivenName) && (
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                {state.latinFamilyName} / {state.latinGivenName}
+              </Grid2>
+            )}
+          </Grid2>
+        )}
+      </Context.Consumer>
+      <Box padding={2} textAlign="right">
+        <ButtonLink
+          color="primary"
+          variant="outlined"
+          startIcon={<EditIcon />}
+          href="./edit"
+        >
+          {labels.edit}
+        </ButtonLink>
+      </Box>
+      <Card>
         <CardContent>
           <List disablePadding>
             {items.map((item, index) => (

@@ -371,6 +371,7 @@ namespace Platform.Server.Services
                     ou.Expiry,
                     ou.RefreshTime,
                     ou.Status,
+                    ou.CoreUser.Avatar,
                     Inviter = ou.Inviter == null ? null : ou.Inviter.Name,
                     DirectReports = ou.DirectReports.Count(),
                     ReportTo = ou.ReportToUser == null ? null : ou.ReportToUser.LocalName ?? ou.ReportToUser.CoreUser.Name
@@ -538,7 +539,7 @@ namespace Platform.Server.Services
         /// Read member data for update
         /// 读取用于更新的成员数据
         /// </summary>
-        /// <param name="id">Organization id</param>
+        /// <param name="id">Member id</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>

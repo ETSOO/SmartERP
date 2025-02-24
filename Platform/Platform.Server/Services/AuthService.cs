@@ -121,8 +121,14 @@ namespace Platform.Server.Services
         /// <param name="publicService">Public service</param>
         /// <param name="authCodeService">Auth code service</param>
         /// <param name="queueService">Queue service</param>
-        public AuthService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthService> logger,
-            IStorage storage, IHttpClientFactory httpClientFactory, IPublicService publicService, IAuthCodeService authCodeService,
+        public AuthService(MyDbContext db,
+            IMyApp app,
+            CurrentUserAccessor userAccessor,
+            ILogger<AuthService> logger,
+            IStorage storage,
+            IHttpClientFactory httpClientFactory,
+            IPublicService publicService,
+            IAuthCodeService authCodeService,
             IQueueService queueService)
             : base(app, userAccessor.User, "auth", logger)
         {

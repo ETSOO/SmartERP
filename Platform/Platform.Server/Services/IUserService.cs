@@ -19,6 +19,8 @@ namespace Platform.Server.Services
         Task DeviceListAsync(QueryIntRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IEnumerable<AppData>> GetCurrentAppsAsync(CancellationToken cancellationToken = default);
         Task<AppData> GetLatestAppAsync(CancellationToken cancellationToken = default);
+        Task<IActionResult> UpdateAsync(UserUpdateRQ rq, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> UpdateAvatarAsync(Stream avatarStream, string contentType, CancellationToken cancellationToken = default);
+        Task UpdateReadAsync(IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
     }
 }

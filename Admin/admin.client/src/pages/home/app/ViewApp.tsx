@@ -23,6 +23,7 @@ export default function ViewApp() {
 
   return (
     <ViewPage<ReadAppDto>
+      paddings={0}
       fields={[
         {
           data: (item) => (

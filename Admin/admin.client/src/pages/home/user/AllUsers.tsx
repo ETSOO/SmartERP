@@ -93,7 +93,7 @@ export default function AllUsers() {
         <SearchField
           label={labels.identifier}
           name="identifier"
-          minChars={2}
+          minChars={5}
           slotProps={{ htmlInput: { maxLength: 256 } }}
           defaultValue={data.identifier}
         />,
