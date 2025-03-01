@@ -81,7 +81,13 @@ function MyRouter() {
   // Ready
   React.useEffect(() => {
     if (app.isReady) {
-      setInit(true);
+      if (app.deviceId === "") {
+        app.initCall((result) => {
+          setInit(result);
+        });
+      } else {
+        setInit(true);
+      }
     } else {
       app.pendings.push(() => {
         app.initCall((result) => {

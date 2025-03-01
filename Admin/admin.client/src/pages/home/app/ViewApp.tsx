@@ -1,10 +1,12 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
-import { HBox, ViewPage } from "@etsoo/materialui";
-import { Stack, Typography } from "@mui/material";
+import { ButtonLink, HBox, ViewPage } from "@etsoo/materialui";
+import { Button, Stack, Typography } from "@mui/material";
+import HandymanIcon from "@mui/icons-material/Handyman";
 import { app } from "../../../app/MyApp";
 import { usePageData } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadAppDto } from "../../../api/dto/query/ReadAppDto";
+import { AppUtils } from "../../../components/AppUtils";
 
 export default function ViewApp() {
   // Route
@@ -16,7 +18,7 @@ export default function ViewApp() {
   }, [id]);
 
   // Labels
-  const labels = app.getLabels("view");
+  const labels = app.getLabels("adminRenew", "view");
 
   // Page data hook
   usePageData(app, labels.view, [loadData]);
@@ -27,7 +29,7 @@ export default function ViewApp() {
       fields={[
         {
           data: (item) => (
-            <HBox justifyContent="center" alignItems="center">
+            <HBox justifyContent="center" alignItems="center" marginBottom={2}>
               <Typography
                 variant="subtitle2"
                 textAlign="center"
@@ -39,6 +41,19 @@ export default function ViewApp() {
             </HBox>
           ),
           singleRow: true
+        },
+        {
+          data: (item) => (
+            <ButtonLink
+              href={`./../../../org/view/${item.orgId}`}
+              size="small"
+              variant="outlined"
+            >
+              {item.orgName}
+            </ButtonLink>
+          ),
+          label: "org",
+          singleRow: "medium"
         },
         { data: "appKey", label: "appKey", singleRow: true },
         {
@@ -98,13 +113,27 @@ export default function ViewApp() {
           label: "identityType"
         },
         {
+          data: (item) => `${item.id} (${item.appId})`,
+          label: "id"
+        },
+        {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"
         },
         ["creation", GridDataType.DateTime]
       ]}
       loadData={loadData}
-      actions={(data, refresh) => <React.Fragment></React.Fragment>}
+      actions={(data, refresh) => (
+        <React.Fragment>
+          <Button
+            variant="contained"
+            startIcon={<HandymanIcon />}
+            onClick={() => AppUtils.renewApp(data, refresh)}
+          >
+            {labels.adminRenew}
+          </Button>
+        </React.Fragment>
+      )}
     ></ViewPage>
   );
 }

@@ -18,6 +18,18 @@ namespace Platform.Server.Endpoints.Auth
         {
             var g = builder.MapGroup("Auth").AllowAnonymous();
 
+            g.MapPost("AdminSupport", async (IAuthService service, IHttpContextAccessor accessor, AdminSupportRQ rq, CancellationToken cancellationToken) =>
+            {
+                // Device check
+                if (!MinimalApiUtils.CheckDevice(accessor.UserAgent(), out var checkResult, out var parser))
+                {
+                    return checkResult;
+                }
+
+                // Result
+                return await service.AdminSupportAsync(rq, parser.ToShortName(), cancellationToken);
+            }).WithDescription("Admin support / 管理员支持").RequireAuthorization().WithTags("Auth");
+
             g.MapPut("ApiRefreshToken", (IAuthService service, ApiRefreshTokenRQ rq, CancellationToken cancellation)
                 => service.ApiRefreshTokenAsync(rq, cancellation)
                 ).WithDescription("API refresh token / 接口刷新令牌").WithTags("Auth");

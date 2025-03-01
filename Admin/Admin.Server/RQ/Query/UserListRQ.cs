@@ -11,5 +11,11 @@
         /// 所属机构
         /// </summary>
         public int? OrgId { get; init; }
+
+        /// <summary>
+        /// Exclude self
+        /// 排除自己
+        /// </summary>
+        public bool? ExcludeSelf { get; init; }
     }
 }

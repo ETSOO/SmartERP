@@ -54,7 +54,7 @@ export default function ViewApp() {
       fields={[
         {
           data: (item) => (
-            <HBox justifyContent="center" alignItems="center">
+            <HBox justifyContent="center" alignItems="center" marginBottom={2}>
               <Typography
                 variant="subtitle2"
                 textAlign="center"

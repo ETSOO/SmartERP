@@ -106,7 +106,6 @@ export default function AllOrgs() {
           slotProps={{ htmlInput: { maxLength: 128 } }}
         />,
         <UserTiplist
-          width={120}
           name="ownerId"
           label={labels.owner}
           idValue={data.ownerId}

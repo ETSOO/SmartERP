@@ -11,6 +11,7 @@ namespace Platform.Server.Services
 {
     public interface IAuthService : ICommonService
     {
+        Task<IActionResult> AdminSupportAsync(AdminSupportRQ rq, string device, CancellationToken cancellationToken);
         ValueTask<ApiTokenData?> ApiRefreshTokenAsync(ApiRefreshTokenRQ rq, CancellationToken cancellationToken = default);
         ValueTask<string> AuthRequestAsync(AuthRequest rq, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> ChangePasswordAsync(ChangePasswordRQ rq, string? userAgent, CancellationToken cancellationToken = default);

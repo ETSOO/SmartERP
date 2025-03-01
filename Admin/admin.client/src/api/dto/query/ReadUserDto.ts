@@ -1,4 +1,6 @@
 import { EntityStatus } from "@etsoo/appscript";
+import { DataTypes } from "@etsoo/shared";
+import { UserIdentifierItem } from "./UserIdentifierItem";
 
 /**
  * Read user data
@@ -64,4 +66,34 @@ export type ReadUserDto = {
    * Creation
    */
   creation: string | Date;
+
+  /**
+   * Frozen time
+   */
+  frozenTime?: string | Date;
+
+  /**
+   * Organization count
+   */
+  orgs: number;
+
+  /**
+   * Organization list
+   */
+  orgList: DataTypes.IdNameItem[];
+
+  /**
+   * Device count
+   */
+  devices: number;
+
+  /**
+   * Device list
+   */
+  deviceList: DataTypes.IdNameItem[];
+
+  /**
+   * Identifier list
+   */
+  identifierList: UserIdentifierItem[];
 };

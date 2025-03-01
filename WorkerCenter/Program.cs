@@ -93,6 +93,7 @@ services.AddSingleton<IMessageQueueProcessor, AddUserIdentifierProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AdjustReportToProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AdminClearUserFrozenProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AdminRenewAppProcessor>();
+services.AddSingleton<IMessageQueueProcessor, AdminSupportProcessor>();
 services.AddSingleton<IMessageQueueProcessor, BuyAppProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ChangePasswordProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CheckSessionProcessor>();

@@ -1,9 +1,14 @@
 {
+  "adminRenew": "管理员续费",
+  "adminSupport": "管理员技术支持登录",
   "allApps": "所有应用",
   "allOrgs": "所有机构",
   "allUsers": "所有用户",
   "apps": "应用数",
   "auditHistory": "操作历史",
-  "joinedOrgs": "机构数",
+  "clearUserFrozen": "解冻用户",
+  "deviceList": "设备",
+  "frozenTime": "冻结时间",
+  "revoke": "撤销",
   "smarterpAdmin": "司友云ERP运维中心"
 }

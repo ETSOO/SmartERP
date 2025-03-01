@@ -76,15 +76,39 @@ namespace Admin.Server.Dto.Query
         public DateTimeOffset Creation { get; init; }
 
         /// <summary>
+        /// Frozen time
+        /// 冻结时间
+        /// </summary>
+        public DateTimeOffset? FrozenTime { get; init; }
+
+        /// <summary>
+        /// Organization count
+        /// 加入的机构数量
+        /// </summary>
+        public required int Orgs { get; init; }
+
+        /// <summary>
         /// Organization belongs to
         /// 加入的机构
         /// </summary>
-        public required IEnumerable<IdNameItem> Orgs { get; init; }
+        public required IEnumerable<IdNameItem> OrgList { get; init; }
+
+        /// <summary>
+        /// Device count
+        /// 设备数量
+        /// </summary>
+        public required int Devices { get; init; }
 
         /// <summary>
         /// Devices
         /// 设备
         /// </summary>
-        public required IEnumerable<IdNameItem> Devices { get; init; }
+        public required IEnumerable<IdNameItem> DeviceList { get; init; }
+
+        /// <summary>
+        /// Identifier list
+        /// 识别项目列表
+        /// </summary>
+        public required IEnumerable<UserIdentifierItem> IdentifierList { get; init; }
     }
 }

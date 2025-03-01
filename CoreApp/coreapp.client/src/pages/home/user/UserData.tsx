@@ -1,7 +1,6 @@
 import { ButtonLink, CommonPage } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
 import {
-  Box,
   Card,
   CardActions,
   CardContent,
@@ -57,34 +56,38 @@ export default function UserData() {
 
   return (
     <CommonPage paddings={0} onRefresh={reloadData}>
-      <Context.Consumer>
-        {({ state }) => (
-          <Grid2 container spacing={1}>
-            <Grid2 size={{ xs: 6, md: 4 }}>{state.name}</Grid2>
-            {(state.familyName || state.givenName) && (
-              <Grid2 size={{ xs: 6, md: 4 }}>
-                {state.familyName} / {state.givenName}
-              </Grid2>
-            )}
-            {(state.latinFamilyName || state.latinGivenName) && (
-              <Grid2 size={{ xs: 6, md: 4 }}>
-                {state.latinFamilyName} / {state.latinGivenName}
-              </Grid2>
-            )}
-          </Grid2>
-        )}
-      </Context.Consumer>
-      <Box padding={2} textAlign="right">
-        <ButtonLink
-          color="primary"
-          variant="outlined"
-          startIcon={<EditIcon />}
-          href="./edit"
-        >
-          {labels.edit}
-        </ButtonLink>
-      </Box>
       <Card>
+        <CardContent>
+          <Context.Consumer>
+            {({ state }) => (
+              <Grid2 container spacing={1}>
+                <Grid2 size={{ xs: 6, md: 4 }}>{state.name}</Grid2>
+                {(state.familyName || state.givenName) && (
+                  <Grid2 size={{ xs: 6, md: 4 }}>
+                    {state.familyName} / {state.givenName}
+                  </Grid2>
+                )}
+                {(state.latinFamilyName || state.latinGivenName) && (
+                  <Grid2 size={{ xs: 6, md: 4 }}>
+                    {state.latinFamilyName} / {state.latinGivenName}
+                  </Grid2>
+                )}
+              </Grid2>
+            )}
+          </Context.Consumer>
+        </CardContent>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <ButtonLink
+            color="primary"
+            variant="outlined"
+            startIcon={<EditIcon />}
+            href="./edit"
+          >
+            {labels.edit}
+          </ButtonLink>
+        </CardActions>
+      </Card>
+      <Card sx={{ mt: 2 }}>
         <CardContent>
           <List disablePadding>
             {items.map((item, index) => (

@@ -1,5 +1,6 @@
 ﻿using Admin.Server.RQ.Operation;
 using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
@@ -42,25 +43,33 @@ namespace Admin.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> AppRenewAsync(AppRenewRQ rq, CancellationToken cancellationToken = default)
         {
-            var result = await _db.CoreOrganizationApps.AsNoTracking()
+            if (rq.Requester == User.IdInt)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Requester));
+            }
+            else if (rq.Approver == User.IdInt)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Approver));
+            }
+
+            var data = await _db.CoreOrganizationApps.AsNoTracking()
                 .Where(app => app.Id == rq.Id)
-                .Join(_db.CoreOrganizationUsers.AsNoTracking(),
+                .Join(_db.CoreOrganizationUsers,
                     app => new { OrgId = app.CoreOrganizationId, UserId = rq.Requester },
-                    requester => new { OrgId = requester.CoreOrganizationId, UserId = requester.Id },
-                    (app, requester) => new { app, requester })
-                .Join(_db.CoreOrganizationUsers.AsNoTracking(),
-                    temp => new { OrgId = User.OrganizationInt, UserId = rq.Approver },
-                    approver => new { OrgId = approver.CoreOrganizationId, UserId = approver.Id },
-                    (temp, approver) => new
+                    requester => new { OrgId = requester.CoreOrganizationId, UserId = requester.CoreUserId },
+                    (app, requester) => new
                     {
-                        OrganizationId = temp.app.CoreOrganizationId,
-                        AppName = temp.app.LocalName ?? temp.app.CoreApp.Name,
-                        RequesterUserId = temp.requester.CoreUserId,
-                        ApproverUserId = approver.CoreUserId
+                        OrganizationId = app.CoreOrganizationId,
+                        AppName = app.LocalName ?? app.CoreApp.Name,
+                        RequesterId = requester.Id,
+                        Approver = _db.CoreOrganizationUsers
+                            .Where(u => u.CoreOrganizationId == User.OrganizationInt && u.CoreUserId == rq.Approver && u.Status <= EntityStatus.Approved)
+                            .Select(u => new { ApproverId = u.Id })
+                            .FirstOrDefault()
                     })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (result == null)
+            if (data == null || data.Approver == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
@@ -68,14 +77,14 @@ namespace Admin.Server.Services
             // Push message
             var message = new AdminRenewAppMessage
             {
-                Data = User.CreateMessageData(App.AppId, rq.Id, result.AppName),
+                Data = User.CreateMessageData(App.AppId, rq.Id, data.AppName),
                 Months = rq.Months,
                 Comment = rq.Comment,
-                Requester = result.RequesterUserId,
-                RequesterLocalId = rq.Requester,
-                RequesterOrgId = result.OrganizationId,
-                Approver = result.ApproverUserId,
-                ApproverLocalId = rq.Approver
+                Requester = rq.Requester,
+                RequesterLocalId = data.RequesterId,
+                RequesterOrgId = data.OrganizationId,
+                Approver = rq.Approver,
+                ApproverLocalId = data.Approver.ApproverId
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.AdminRenewAppMessage, cancellationToken);
 
@@ -94,10 +103,10 @@ namespace Admin.Server.Services
             // Validate user
             var user = await _db.CoreUsers.AsNoTracking()
                 .Where(u => u.Id == userId)
-                .Select(u => new { u.Name })
+                .Select(u => new { u.Name, u.FrozenTime })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (user == null)
+            if (user == null || user.FrozenTime == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
@@ -106,6 +115,7 @@ namespace Admin.Server.Services
             var message = new AdminClearUserFrozenMessage
             {
                 Data = User.CreateMessageData(App.AppId, userId, user.Name),
+                FrozenTime = user.FrozenTime.Value
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.AdminClearUserFrozenMessage, cancellationToken);
 

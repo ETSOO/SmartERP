@@ -62,6 +62,16 @@ export type ReadAppDto = {
   status: EntityStatus;
 
   /**
+   * Organization id
+   */
+  orgId: number;
+
+  /**
+   * Organization name
+   */
+  orgName: string;
+
+  /**
    * Creation
    * 创建时间
    */

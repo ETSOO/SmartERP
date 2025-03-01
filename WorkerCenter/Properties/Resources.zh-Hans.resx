@@ -225,4 +225,10 @@
   <data name="UpdateUserSelf" xml:space="preserve">
     <value>更新用户本人信息</value>
   </data>
+  <data name="AdminSupport" xml:space="preserve">
+    <value>管理员技术支持登录</value>
+  </data>
+  <data name="AdminSupportDetail" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 同意 &lt;b&gt;{1}&lt;/b&gt; 以其身份登录系统以便提供技术支持，并已获得 {2} 批准。更多细节：&lt;blockquote&gt;{3}&lt;/blockquote&gt;</value>
+  </data>
 </root>

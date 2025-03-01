@@ -1,9 +1,14 @@
 {
+  "adminRenew": "Admin renew",
+  "adminSupport": "Admin technical support login",
   "allApps": "All apps",
   "allOrgs": "All organizations",
   "allUsers": "All users",
   "apps": "Apps",
   "auditHistory": "Audit history",
-  "joinedOrgs": "Orgs",
+  "clearUserFrozen": "Unfreeze user",
+  "deviceList": "Devices",
+  "frozenTime": "Frozen time",
+  "revoke": "Revoke",
   "smarterpAdmin": "SmartERP Admin"
 }

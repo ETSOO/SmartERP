@@ -18,15 +18,12 @@ namespace WorkerCenter.Main.Processors
     {
         private readonly LogDbContext _logDb;
         private readonly MyDbContext _db;
-        private readonly IMessageQueueProducer _producer;
 
         public AdminClearUserFrozenProcessor(ILogger<AdminClearUserFrozenProcessor> logger,
             LogDbContext logDb,
-            MyDbContext db,
-            IMessageQueueProducer producer)
+            MyDbContext db)
             : base(logger, PlatformSharedContext.Default.AdminClearUserFrozenMessage)
         {
-            _producer = producer;
             _logDb = logDb;
             _db = db;
         }
@@ -46,7 +43,8 @@ namespace WorkerCenter.Main.Processors
                 Title = title,
                 UserId = userId,
                 TargetId = data.TargetId,
-                Kind = AdminClearUserFrozenMessage.Type
+                Kind = AdminClearUserFrozenMessage.Type,
+                AppId = data.AppId
             };
             _logDb.CoreLogs.Add(log);
 
@@ -66,11 +64,13 @@ namespace WorkerCenter.Main.Processors
             await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             // Clear the frozen time
+            // Change the last 3 failed login records to clear type
+            var clearStartTime = message.FrozenTime.AddMinutes(-60);
             await _logDb.CoreLogs
-                .Where(l => l.Kind == LoginFailedMessage.Type && l.UserId == userId)
+                .Where(l => l.Kind == LoginFailedMessage.Type && l.UserId == userId && l.Creation >= clearStartTime)
                 .OrderByDescending(l => l.Id)
                 .Take(3)
-                .ExecuteDeleteAsync(cancellationToken);
+                .ExecuteUpdateAsync(l => l.SetProperty(l => l.Kind, LoginFailedMessage.ClearType), cancellationToken);
 
             await _db.CoreUsers.AsNoTracking()
                 .Where(u => u.Id == userId)

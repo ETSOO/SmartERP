@@ -14,6 +14,7 @@ import { UserListRQ } from "./rq/query/UserListRQ";
 import { OrgListDto } from "./dto/query/OrgListDto";
 import { ReadOrgData } from "./dto/query/ReadOrgDto";
 import { ReadAppDto } from "./dto/query/ReadAppDto";
+import { ReadUserDto } from "./dto/query/ReadUserDto";
 
 /**
  * Query API
@@ -105,7 +106,7 @@ export class QueryApi extends BaseApi {
    * @param payload Payload
    * @returns Result
    */
-  readUser(id: number, payload?: IApiPayload<AllUserDto>) {
+  readUser(id: number, payload?: IApiPayload<ReadUserDto>) {
     return this.api.get(`Query/ReadUser/${id}`, undefined, payload);
   }
 

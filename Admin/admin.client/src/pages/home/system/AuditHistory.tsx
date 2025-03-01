@@ -16,7 +16,8 @@ import React from "react";
 import {
   GridCellRendererProps,
   GridDataType,
-  ScrollerListForwardRef
+  ScrollerListForwardRef,
+  useSearchParamsEx
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
@@ -40,6 +41,9 @@ const template = {
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function LoginHistory() {
+  // Route
+  const { userId } = useSearchParamsEx({ userId: "number" });
+
   // Labels
   const labels = app.getLabels(
     "actions",
@@ -91,7 +95,7 @@ export default function LoginHistory() {
           defaultValue={data.keyword}
           slotProps={{ htmlInput: { maxLength: 128 } }}
         />,
-        <UserTiplist width={120} idValue={data.userId} />,
+        <UserTiplist idValue={data.userId ?? userId} />,
         <OrgTiplist idValue={data.orgId} />,
         <AppTiplist idValue={data.appId} />,
         <SearchField

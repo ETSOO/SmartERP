@@ -47,6 +47,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<AppQueryData>))]
 
     // Auth
+    [JsonSerializable(typeof(AdminSupportRQ))]
     [JsonSerializable(typeof(CheckUserIdentifierRQ))]
     [JsonSerializable(typeof(CompleteRegisterRQ))]
     [JsonSerializable(typeof(ResetPasswordRQ))]

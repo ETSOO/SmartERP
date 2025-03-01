@@ -2,25 +2,19 @@
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 
-namespace Admin.Server.RQ.Operation
+namespace Platform.Server.Endpoints.Auth.RQ
 {
     /// <summary>
-    /// Application renew request data
-    /// 应用续费请求数据
+    /// Admin support request data
+    /// 管理员支持请求数据
     /// </summary>
-    public record AppRenewRQ : IModelValidator
+    public record AdminSupportRQ : IModelValidator
     {
         /// <summary>
-        /// Organization application ID
-        /// 机构应用编号
+        /// Target organization ID
+        /// 目标机构编号
         /// </summary>
-        public int Id { get; init; }
-
-        /// <summary>
-        /// Months to review
-        /// 续费月数
-        /// </summary>
-        public int Months { get; init; }
+        public required int OrgId { get; init; }
 
         /// <summary>
         /// Requester
@@ -47,14 +41,9 @@ namespace Admin.Server.RQ.Operation
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (Id < 1)
+            if (OrgId < 1)
             {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Id));
-            }
-
-            if (Months == 0 || Math.Abs(Months) > 1200)
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Months));
+                return ApplicationErrors.NoValidData.AsResult(nameof(OrgId));
             }
 
             if (Approver < 1 || Requester < 1 || Approver == Requester)

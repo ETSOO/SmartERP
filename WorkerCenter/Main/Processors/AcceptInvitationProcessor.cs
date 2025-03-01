@@ -63,7 +63,8 @@ namespace WorkerCenter.Main.Processors
                 OrganizationId = orgId,
                 Title = title,
                 UserId = userId,
-                Kind = kind
+                Kind = kind,
+                AppId = data.AppId
             };
             _logDb.CoreLogs.Add(log);
 

@@ -78,7 +78,7 @@ export namespace AppUtils {
 
         if (result.ok) {
           // Refresh token in silence
-          app.refreshToken({ showLoading: false });
+          // app.refreshToken({ showLoading: false });
 
           // Succeed
           app.notifier.succeed(labels.operationSucceeded, undefined, () => {

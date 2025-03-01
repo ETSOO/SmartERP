@@ -387,6 +387,11 @@ namespace Admin.Server.Services
                         q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreUserId == u.Id && ou.CoreOrganizationId == rq.OrgId.Value));
                     }
 
+                    if (rq.ExcludeSelf is true)
+                    {
+                        q = q.Where(u => u.Id != User.IdInt);
+                    }
+
                     if (rq.Keyword?.Length > 0)
                     {
                         if (int.TryParse(rq.Keyword, out int id))
@@ -516,6 +521,7 @@ namespace Admin.Server.Services
                     oa.LocalName,
                     oa.LocalUrls,
                     oa.CoreApp.IdentityType,
+                    OrgId = oa.CoreOrganizationId,
                     OrgName = oa.CoreOrganization.Name,
                     AppId = oa.CoreAppId,
                     oa.CoreApp.Urls,
@@ -588,17 +594,26 @@ namespace Admin.Server.Services
                     Name = u.Name,
                     Status = u.Status,
                     Creation = u.Creation,
+                    FrozenTime = u.FrozenTime,
 
-                    Orgs = u.CoreOrganizations.OrderByDescending(d => d.Id).Select(o => new IdNameItem
+                    Orgs = u.CoreOrganizations.Count(),
+                    OrgList = u.CoreOrganizations.OrderByDescending(d => d.Id).Select(o => new IdNameItem
                     {
                         Id = o.Id,
                         Name = o.Name
-                    }).Take(8),
-                    Devices = u.CoreUserDevices.OrderByDescending(d => d.Id).Select(d => new IdNameItem
+                    }).Take(6),
+                    Devices = u.CoreUserDevices.Count(),
+                    DeviceList = u.CoreUserDevices.OrderByDescending(d => d.Id).Select(d => new IdNameItem
                     {
                         Id = d.Id,
                         Name = d.Name
-                    }).Take(8)
+                    }).Take(6),
+                    IdentifierList = u.CoreUserIdentifiers.OrderByDescending(d => d.Id).Select(i => new UserIdentifierItem
+                    {
+                        Id = i.Id,
+                        Type = i.Type,
+                        Value = MyDbFunctions.HideData(i.Value, default)
+                    }).Take(6)
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }

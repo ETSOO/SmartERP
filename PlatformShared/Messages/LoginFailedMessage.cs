@@ -19,6 +19,12 @@ namespace PlatformShared.Messages
         public static string Type => "LoginFailed";
 
         /// <summary>
+        /// Login failed clear type
+        /// 登录失败清除类型
+        /// </summary>
+        public const string ClearType = "LoginFailedClear";
+
+        /// <summary>
         /// Reason
         /// 原因
         /// </summary>

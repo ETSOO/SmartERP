@@ -29,12 +29,7 @@ export default function ViewMember() {
       paddings={0}
       titleBar={(item) => (
         <HBox justifyContent="center" alignItems="center" marginBottom={2}>
-          <Typography
-            variant="subtitle2"
-            fontWeight="bold"
-            textAlign="center"
-            paddingRight={2}
-          >
+          <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
             {item.localName ? `${item.localName} (${item.name})` : item.name}
           </Typography>
           {editPermission && (
@@ -84,10 +79,7 @@ export default function ViewMember() {
           data: (item) => app.core.getIdentityLabel(item.identityType),
           label: "identityType"
         },
-        {
-          data: "inviter",
-          label: "inviter"
-        },
+        "inviter",
         {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"

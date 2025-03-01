@@ -1,9 +1,14 @@
 {
+  "adminRenew": "管理員續費",
+  "adminSupport": "管理員技術支持登錄",
   "allApps": "所有應用",
   "allOrgs": "所有機構",
   "allUsers": "所有用戶",
   "apps": "應用數",
   "auditHistory": "操作歷史",
-  "joinedOrgs": "機構數",
+  "clearUserFrozen": "解凍用戶",
+  "deviceList": "設備",
+  "frozenTime": "凍結時間",
+  "revoke": "撤銷",
   "smarterpAdmin": "司友雲ERP運維中心"
 }

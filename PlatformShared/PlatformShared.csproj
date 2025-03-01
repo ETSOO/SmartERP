@@ -8,9 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="com.etsoo.DI" Version="1.0.18" />
-    <PackageReference Include="com.etsoo.MessageQueue" Version="1.0.82" />
+    <PackageReference Include="com.etsoo.MessageQueue" Version="1.0.83" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.29" />
-    <PackageReference Include="com.etsoo.Web" Version="1.3.31" />
+    <PackageReference Include="com.etsoo.Web" Version="1.3.39" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
   </ItemGroup>
 

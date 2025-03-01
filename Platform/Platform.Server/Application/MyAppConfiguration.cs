@@ -31,5 +31,11 @@ namespace Platform.Server.Application
         /// 超级管理员机构编号
         /// </summary>
         public required int SuperAdminOrganizationId { get; set; }
+
+        /// <summary>
+        /// Core app auth API URL
+        /// 中心应用授权接口URL
+        /// </summary>
+        public required string CoreAppAuthApiUrl { get; set; }
     }
 }

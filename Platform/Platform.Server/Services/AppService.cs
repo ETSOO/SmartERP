@@ -179,7 +179,7 @@ namespace Platform.Server.Services
 
             var appKey = Guid.NewGuid().ToString("N");
             var appSecret = await App.HashPasswordAsync(id + CryptographyUtils.CreateRandString(RandStringKind.All, 32).ToString());
-            var appSecretDB = App.EncriptData(appSecret, "Token" + app.AppId, 0);
+            var appSecretDB = App.EncriptData(appSecret, "Token" + app.AppId);
 
             await _db.CoreOrganizationApps.Where(oa => oa.Id == id)
                 .ExecuteUpdateAsync(oa => oa.SetProperty(oa => oa.AppKey, appKey).SetProperty(oa => oa.AppSecret, appSecretDB), cancellationToken);
