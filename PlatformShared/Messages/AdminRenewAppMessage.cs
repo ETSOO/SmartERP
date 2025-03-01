@@ -10,6 +10,7 @@ namespace PlatformShared.Messages
         public required int ApproverLocalId { get; init; }
         public required int Requester { get; init; }
         public required int RequesterLocalId { get; init; }
+        public required string RequesterOrgName { get; init; }
     }
 
     /// <summary>
@@ -45,6 +46,12 @@ namespace PlatformShared.Messages
         public required int RequesterOrgId { get; init; }
 
         /// <summary>
+        /// Requester organization name
+        /// 请求人机构名称
+        /// </summary>
+        public required string RequesterOrgName { get; init; }
+
+        /// <summary>
         /// Approver
         /// 批准人
         /// </summary>
@@ -70,7 +77,8 @@ namespace PlatformShared.Messages
                 Comment = Comment,
                 ApproverLocalId = ApproverLocalId,
                 Requester = Requester,
-                RequesterLocalId = RequesterLocalId
+                RequesterLocalId = RequesterLocalId,
+                RequesterOrgName = RequesterOrgName
             }, PlatformSharedContext.Default.AdminRenewAppMessageData);
         }
     }

@@ -60,6 +60,7 @@ namespace Admin.Server.Services
                     (app, requester) => new
                     {
                         OrganizationId = app.CoreOrganizationId,
+                        OrgName = app.CoreOrganization.Name,
                         AppName = app.LocalName ?? app.CoreApp.Name,
                         RequesterId = requester.Id,
                         Approver = _db.CoreOrganizationUsers
@@ -83,6 +84,7 @@ namespace Admin.Server.Services
                 Requester = rq.Requester,
                 RequesterLocalId = data.RequesterId,
                 RequesterOrgId = data.OrganizationId,
+                RequesterOrgName = data.OrgName,
                 Approver = rq.Approver,
                 ApproverLocalId = data.Approver.ApproverId
             };

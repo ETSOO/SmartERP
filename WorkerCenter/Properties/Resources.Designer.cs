@@ -142,7 +142,7 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The application &lt;b&gt;{0}&lt;/b&gt; has been renewed by the administrator for &lt;b&gt;{1}&lt;/b&gt; months, and no payment is required. The following are the notes: &lt;blockquote&gt;{2}&lt;/blockquote&gt;.
+        ///   Looks up a localized string similar to The application &lt;b&gt;{0}&lt;/b&gt; of &lt;b&gt;{3}&lt;/b&gt; has been renewed by the administrator for &lt;b&gt;{1}&lt;/b&gt; months, and no payment is required. The following are the notes: &lt;blockquote&gt;{2}&lt;/blockquote&gt;.
         /// </summary>
         internal static string AdminRenewAppDetail {
             get {

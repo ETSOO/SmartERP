@@ -211,7 +211,7 @@
     <value>管理員應用續費</value>
   </data>
   <data name="AdminRenewAppDetail" xml:space="preserve">
-    <value>應用 &lt;b&gt;{0}&lt;/b&gt; 已透過管理員續費 &lt;b&gt;{1}&lt;/b&gt; 個月，不需要支付任何費用，備註如下：&lt;blockquote&gt;{2}&lt;/blockquote&gt;</value>
+    <value>&lt;b&gt;{3}&lt;/b&gt; 的應用 &lt;b&gt;{0}&lt;/b&gt; 已透過管理員續費 &lt;b&gt;{1}&lt;/b&gt; 個月，不需要支付任何費用，備註如下：&lt;blockquote&gt;{2}&lt;/blockquote&gt;</value>
   </data>
   <data name="AdminClearUserFrozen" xml:space="preserve">
     <value>管理員清除使用者凍結時間</value>
