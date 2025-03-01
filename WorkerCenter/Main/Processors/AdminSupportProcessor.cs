@@ -87,7 +87,7 @@ namespace WorkerCenter.Main.Processors
             var data = new ActionNoticeData(message.Data,
                 string.Format(subject, $"{action}"),
                 action,
-                string.Format(detail, message.RequesterName, message.Data.UserName, message.ApproverName, message.Comment)
+                string.Format(detail, message.RequesterName, message.ApproverName, message.Comment)
             );
 
             var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);

@@ -160,7 +160,7 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; has given &lt;b&gt;{1}&lt;/b&gt; permission to log in as the user for the purpose of providing technical support, and has been approved by {2}. More details: &lt;blockquote&gt;{3}&lt;/blockquote&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; has given you permission to log in as the user for the purpose of providing technical support, and has been approved by {1}. More details: &lt;blockquote&gt;{2}&lt;/blockquote&gt;.
         /// </summary>
         internal static string AdminSupportDetail {
             get {

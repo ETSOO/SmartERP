@@ -50,7 +50,7 @@ export default defineConfig({
   server: {
     proxy: {
       "^/api/": {
-        target: "https://localhost:9004",
+        target: "https://localhost:9007",
         secure: false
       }
     },

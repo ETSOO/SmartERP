@@ -6,7 +6,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS with-node
 RUN apt-get update
@@ -14,11 +13,13 @@ RUN apt-get install curl
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash
 RUN apt-get -y install nodejs
 
+# This stage is used to build the service project
 FROM with-node AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Admin/Admin.Server/Admin.Server.csproj", "Admin/Admin.Server/"]
-COPY ["admin.client/admin.client.esproj", "admin.client/"]
+COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
+COPY ["Admin/admin.client/admin.client.esproj", "Admin/admin.client/"]
 RUN dotnet restore "./Admin/Admin.Server/Admin.Server.csproj"
 COPY . .
 WORKDIR "/src/Admin/Admin.Server"

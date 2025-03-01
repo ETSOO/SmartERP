@@ -138,11 +138,11 @@ services:
 
     # Platform site
     # dotnet dev-certs https -ep "%USERPROFILE%\.aspnet\https\aspnetapp.pfx" -p etsoo --trust
-    platform:
+    etsoo-platform:
         depends_on:
             - postgres
             - rabbitmq
-        image: ${DOCKER_REGISTRY-}platform
+        image: ${DOCKER_REGISTRY-}etsoo-platform
         build:
             context: .
             dockerfile: Platform/Platform.Server/Dockerfile
@@ -161,11 +161,11 @@ services:
             - etsoo
 
     # Worker Center for background tasks
-    workercenter:
+    etsoo-workercenter:
         depends_on:
-            - platform
-        image: ${DOCKER_REGISTRY-}workercenter
-        container_name: workercenter
+            - etsoo-platform
+        image: ${DOCKER_REGISTRY-}etsoo-workercenter
+        container_name: etsoo-workercenter
         build:
             context: .
             dockerfile: WorkerCenter/Dockerfile
@@ -177,14 +177,36 @@ services:
             - etsoo
 
     # CoreApp site
-    coreapp:
-        image: ${DOCKER_REGISTRY-}coreapp
+    etsoo-coreapp:
+        image: ${DOCKER_REGISTRY-}etsoo-coreapp
         depends_on:
-            - platform
+            - etsoo-platform
         build:
             context: .
             dockerfile: CoreApp/CoreApp.Server/Dockerfile
         container_name: core.app.local
+        environment:
+            - DOTNET_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080;80
+            - ASPNETCORE_HTTPS_PORTS=8081;443
+            - ETSOO_ENVIRONMENT=Docker
+            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
+            - Kestrel__Certificates__Default__Password=etsoo
+        volumes:
+            - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+        networks:
+            - etsoo
+
+    # Admin site
+    etsoo-admin:
+        image: ${DOCKER_REGISTRY-}etsoo-admin
+        depends_on:
+            - etsoo-platform
+        build:
+            context: .
+            dockerfile: Admin/Admin.Server/Dockerfile
+        container_name: admin.app.local
         environment:
             - DOTNET_ENVIRONMENT=Development
             - ASPNETCORE_HTTP_PORTS=8080;80
@@ -203,11 +225,11 @@ services:
     # Nginx 用于反向代理
     # 修改根目录下的 nginx.conf 文件以适应你的需求，确保(80, 443)端口没有被其他服务占用（如 IIS）
     nginx:
-        depends_on:
-            - platform
-            - coreapp
         image: nginx:1.27-alpine
         container_name: nginx
+        depends_on:
+            - etsoo-coreapp
+            - etsoo-admin
         restart: unless-stopped
         ports:
             - "80:80"
