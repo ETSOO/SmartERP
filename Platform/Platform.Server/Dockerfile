@@ -16,7 +16,6 @@ RUN apt-get -y install nodejs
 # This stage is used to build the service project
 FROM with-node AS build
 WORKDIR /src
-COPY ["Platform/platform.client/nuget.config", "Platform/platform.client/"]
 COPY ["Platform/Platform.Server/Platform.Server.csproj", "Platform/Platform.Server/"]
 COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
 COPY ["Platform/platform.client/platform.client.esproj", "Platform/platform.client/"]

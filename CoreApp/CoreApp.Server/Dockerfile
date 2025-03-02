@@ -17,7 +17,6 @@ RUN apt-get -y install nodejs
 FROM with-node AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["CoreApp/coreapp.client/nuget.config", "CoreApp/coreapp.client/"]
 COPY ["CoreApp/CoreApp.Server/CoreApp.Server.csproj", "CoreApp/CoreApp.Server/"]
 COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
 COPY ["CoreApp/coreapp.client/coreapp.client.esproj", "CoreApp/coreapp.client/"]

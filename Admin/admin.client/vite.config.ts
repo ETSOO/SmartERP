@@ -14,7 +14,7 @@ const baseFolder =
 
 fs.mkdirSync(baseFolder, { recursive: true });
 
-const certificateName = "coreapp.client";
+const certificateName = "admin.client";
 const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
 const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
