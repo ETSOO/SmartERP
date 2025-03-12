@@ -360,7 +360,6 @@ namespace PlatformShared.Database
                     .HasForeignKey(d => d.InviterId)
                     .HasConstraintName("core_organization_user_inviter_id_fkey");
 
-                entity.HasOne(d => d.ReportToUser).WithMany(p => p.DirectReports)
                     .HasForeignKey(d => d.ReportTo)
                     .HasConstraintName("core_organization_user_report_to_fkey");
             });
