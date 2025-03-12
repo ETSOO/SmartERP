@@ -54,17 +54,17 @@ namespace Admin.Server.Services
 
             var data = await _db.CoreOrganizationApps.AsNoTracking()
                 .Where(app => app.Id == rq.Id)
-                .Join(_db.CoreOrganizationUsers,
+                .Join(_db.Persons.Where(u => u.CoreUserId != null),
                     app => new { OrgId = app.CoreOrganizationId, UserId = rq.Requester },
-                    requester => new { OrgId = requester.CoreOrganizationId, UserId = requester.CoreUserId },
+                    requester => new { OrgId = requester.OrganizationId, UserId = requester.CoreUserId.GetValueOrDefault(0) },
                     (app, requester) => new
                     {
                         OrganizationId = app.CoreOrganizationId,
                         OrgName = app.CoreOrganization.Name,
                         AppName = app.LocalName ?? app.CoreApp.Name,
                         RequesterId = requester.Id,
-                        Approver = _db.CoreOrganizationUsers
-                            .Where(u => u.CoreOrganizationId == User.OrganizationInt && u.CoreUserId == rq.Approver && u.Status <= EntityStatus.Approved)
+                        Approver = _db.Persons.Users(User.OrganizationInt)
+                            .Where(u => u.CoreUserId == rq.Approver && u.Status <= EntityStatus.Approved)
                             .Select(u => new { ApproverId = u.Id })
                             .FirstOrDefault()
                     })

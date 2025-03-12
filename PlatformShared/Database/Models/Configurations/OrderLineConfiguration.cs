@@ -1,0 +1,70 @@
+﻿using com.etsoo.CoreFramework.Business;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace PlatformShared.Database.Models.Configurations
+{
+    internal class OrderLineConfiguration : IEntityTypeConfiguration<OrderLine>
+    {
+        public void Configure(EntityTypeBuilder<OrderLine> entity)
+        {
+            entity.HasKey(e => e.Id).HasName("order_line_pkey");
+
+            entity.ToTable("order_line");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnName("title");
+            entity.Property(e => e.ForeignTitle)
+                .HasMaxLength(256)
+                .HasColumnName("foreign_title");
+            entity.Property(e => e.Description)
+                .HasMaxLength(1280)
+                .HasColumnName("description");
+            entity.Property(e => e.OriginalPrice)
+                .HasColumnType("money")
+                .HasColumnName("original_price");
+            entity.Property(e => e.CostPrice)
+                .HasColumnType("money")
+                .HasColumnName("cost_price");
+            entity.Property(e => e.Price)
+                .HasColumnType("money")
+                .HasColumnName("price");
+            entity.Property(e => e.Qty)
+                .HasPrecision(12, 2)
+                .HasColumnName("qty");
+            entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
+            entity.Property(e => e.Amount)
+                .HasColumnType("money")
+                .HasColumnName("amount");
+            entity.Property(e => e.Discount)
+                .HasColumnType("money")
+                .HasColumnName("discount");
+            entity.OwnsMany(e => e.Promotions, p =>
+            {
+                p.ToJson();
+                p.Property(e => e).HasColumnType("jsonb")
+                    .HasColumnName("promotions");
+            });
+            entity.Property(e => e.StartTime).HasColumnName("start_time");
+            entity.Property(e => e.EndTime).HasColumnName("end_time");
+            entity.Property(e => e.Data)
+                .HasColumnType("jsonb")
+                .HasColumnName("data");
+            entity.Property(e => e.AssetId).HasColumnName("asset_id");
+            entity.Property(e => e.Creation)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("creation");
+            entity.Property(e => e.Status)
+                .HasConversion<byte>()
+                .HasDefaultValue(EntityStatus.Normal)
+                .HasColumnName("status");
+        }
+    }
+}

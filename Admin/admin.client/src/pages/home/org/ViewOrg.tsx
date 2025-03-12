@@ -63,6 +63,8 @@ export default function ViewOrg() {
         },
         "apps",
         "users",
+        "persons",
+        "orders",
         {
           data: (item) => (
             <ButtonLink

@@ -1,4 +1,5 @@
-﻿using com.etsoo.CoreFramework.User;
+﻿using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.User;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -12,6 +13,81 @@ namespace PlatformShared.Extentions
     /// </summary>
     public static class SharedExtentions
     {
+        /// <summary>
+        /// Query users from persons
+        /// 从人员中查询用户
+        /// </summary>
+        /// <param name="persons">Persons</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Person> Users(this IQueryable<Person> persons, int orgId)
+        {
+            return persons.Where(p => p.OrganizationId == orgId
+                && p.CoreUserId != null
+                && p.IdentityType.HasValue
+                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)
+            );
+        }
+
+        /// <summary>
+        /// Query users from persons
+        /// 从人员中查询用户
+        /// </summary>
+        /// <param name="persons">Persons</param>
+        /// <returns>Result</returns>
+        public static IEnumerable<Person> Users(this ICollection<Person> persons)
+        {
+            return persons.Where(p => p.CoreUserId != null
+                && p.IdentityType.HasValue
+                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)
+            );
+        }
+
+        /// <summary>
+        /// Query customers from persons
+        /// 从人员中查询客户
+        /// </summary>
+        /// <param name="persons">Persons</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Person> Customers(this IQueryable<Person> persons, int orgId)
+        {
+            return persons.Where(p => p.OrganizationId == orgId
+                && p.IdentityType.HasValue
+                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.Customer)
+            );
+        }
+
+        /// <summary>
+        /// Query suppliers from persons
+        /// 从人员中查询供应商
+        /// </summary>
+        /// <param name="persons">Persons</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Person> Suppliers(this IQueryable<Person> persons, int orgId)
+        {
+            return persons.Where(p => p.OrganizationId == orgId
+                && p.IdentityType.HasValue
+                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.Supplier)
+            );
+        }
+
+        /// <summary>
+        /// Query contacts from persons
+        /// 从人员中查询联系人
+        /// </summary>
+        /// <param name="persons">Persons</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <param name="ownerId">Owner id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Person> Contacts(this IQueryable<Person> persons, int orgId, long ownerId)
+        {
+            return persons.Where(p => p.OrganizationId == orgId
+                && p.OwnerId == ownerId
+            );
+        }
+
         /// <summary>
         /// Create common message data
         /// 创建通用消息数据

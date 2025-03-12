@@ -9,6 +9,8 @@
   "clearUserFrozen": "Unfreeze user",
   "deviceList": "Devices",
   "frozenTime": "Frozen time",
+  "orders": "Orders",
+  "persons": "Persons",
   "revoke": "Revoke",
   "smarterpAdmin": "SmartERP Admin"
 }

@@ -10,12 +10,12 @@
         /// Old id
         /// 旧编号
         /// </summary>
-        public int OldId { get; init; }
+        public long OldId { get; init; }
 
         /// <summary>
         /// New id
         /// 新编号
         /// </summary>
-        public int NewId { get; init; }
+        public long NewId { get; init; }
     }
 }

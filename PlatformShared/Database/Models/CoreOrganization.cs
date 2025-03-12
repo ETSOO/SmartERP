@@ -84,25 +84,25 @@ namespace PlatformShared.Database.Models
         /// Core organization apps
         /// 核心机构应用
         /// </summary>
-        public ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = [];
+        public ICollection<CoreOrganizationApp> Apps { get; set; } = [];
 
         /// <summary>
-        /// Core organization channel owners
-        /// 核心机构渠道所有者
+        /// Core organization orders
+        /// 核心机构订单
         /// </summary>
-        public ICollection<CoreOrganizationChannel> CoreOrganizationChannelOwners { get; set; } = [];
+        public ICollection<OrderHeader> Orders { get; set; } = [];
 
         /// <summary>
-        /// Core organization channel partners
-        /// 核心机构渠道合作伙伴
+        /// Core organization persons
+        /// 核心机构人员
         /// </summary>
-        public ICollection<CoreOrganizationChannel> CoreOrganizationChannelPartners { get; set; } = [];
+        public ICollection<Person> Persons { get; set; } = [];
 
         /// <summary>
-        /// Core organization users
-        /// 核心机构用户
+        /// Core organization products
+        /// 核心机构产品
         /// </summary>
-        public ICollection<CoreOrganizationUser> CoreOrganizationUsers { get; set; } = [];
+        public ICollection<Product> Products { get; set; } = [];
 
         /// <summary>
         /// Core organization inverse parent

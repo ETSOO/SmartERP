@@ -6,7 +6,7 @@ namespace Platform.Server.Endpoints.Member.RQ
     /// Member list request data
     /// 成员列表请求数据
     /// </summary>
-    public record MemberListRQ : QueryIntRQ
+    public record MemberListRQ : QueryLongRQ
     {
         /// <summary>
         /// Exclude current user or not

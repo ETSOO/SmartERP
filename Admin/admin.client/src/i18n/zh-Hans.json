@@ -9,6 +9,8 @@
   "clearUserFrozen": "解冻用户",
   "deviceList": "设备",
   "frozenTime": "冻结时间",
+  "orders": "订单数",
+  "persons": "人员数",
   "revoke": "撤销",
   "smarterpAdmin": "司友云ERP运维中心"
 }

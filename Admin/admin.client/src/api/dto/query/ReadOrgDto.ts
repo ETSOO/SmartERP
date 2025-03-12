@@ -80,4 +80,14 @@ export type ReadOrgData = {
    * All users
    */
   users: number;
+
+  /**
+   * All persons
+   */
+  persons: number;
+
+  /**
+   * All orders
+   */
+  orders: number;
 };

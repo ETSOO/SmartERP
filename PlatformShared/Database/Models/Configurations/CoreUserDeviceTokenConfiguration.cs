@@ -1,0 +1,50 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace PlatformShared.Database.Models.Configurations
+{
+    internal class CoreUserDeviceTokenConfiguration : IEntityTypeConfiguration<CoreUserDeviceToken>
+    {
+        public void Configure(EntityTypeBuilder<CoreUserDeviceToken> entity)
+        {
+            entity.HasKey(e => e.Id).HasName("core_user_device_token_pkey");
+
+            entity.ToTable("core_user_device_token");
+
+            entity.HasIndex(e => new { e.DeviceId, e.AppId, e.Token }, "core_user_device_token_device_id_app_id_token_idx")
+                .IsUnique()
+                .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "true");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.DeviceId).HasColumnName("device_id");
+            entity.Property(e => e.AppId).HasColumnName("app_id");
+            entity.Property(e => e.ResponseType)
+                .HasConversion<byte>()
+                .HasColumnName("response_type");
+            entity.Property(e => e.Culture)
+                .IsRequired()
+                .HasMaxLength(10)
+                .HasColumnName("culture");
+            entity.Property(e => e.Token)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnName("token");
+            entity.Property(e => e.Expiry).HasColumnName("expiry");
+            entity.OwnsOne(c => c.Data, d =>
+            {
+                d.ToJson("data");
+            });
+
+            entity.HasOne(d => d.App).WithMany(p => p.CoreUserDeviceTokens)
+                .HasForeignKey(d => d.AppId)
+                .HasConstraintName("core_user_device_token_app_id_fkey");
+
+            entity.HasOne(d => d.Device).WithMany(p => p.CoreUserDeviceTokens)
+                .HasForeignKey(d => d.DeviceId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("core_user_device_token_device_id_fkey");
+        }
+    }
+}

@@ -169,18 +169,6 @@ namespace PlatformShared.Database.Models
         public ICollection<CoreOrganization> CoreOrganizations { get; set; } = [];
 
         /// <summary>
-        /// Core organization users
-        /// 核心机构用户
-        /// </summary>
-        public ICollection<CoreOrganizationUser> CoreOrganizationUsers { get; set; } = [];
-
-        /// <summary>
-        /// Core user inviters
-        /// 核心用户邀请者
-        /// </summary>
-        public ICollection<CoreOrganizationUser> CoreOrganizationUserInviters { get; set; } = [];
-
-        /// <summary>
         /// Core user devices
         /// 核心用户设备
         /// </summary>
@@ -191,5 +179,11 @@ namespace PlatformShared.Database.Models
         /// 核心用户登录编号
         /// </summary>
         public ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = [];
+
+        /// <summary>
+        /// Persons
+        /// 人员
+        /// </summary>
+        public ICollection<Person> UserPersons { get; set; } = [];
     }
 }

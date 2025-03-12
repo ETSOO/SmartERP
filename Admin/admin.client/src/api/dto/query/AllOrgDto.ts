@@ -30,6 +30,12 @@ export type AllOrgDto = {
   users: number;
 
   /**
+   * Persons
+   * 人员数
+   */
+  persons: number;
+
+  /**
    * Brand
    * 品牌
    */

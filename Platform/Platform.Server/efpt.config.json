@@ -15,6 +15,10 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "public.address",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.core_app",
          "ObjectType": 0
       },
@@ -28,14 +32,6 @@
       },
       {
          "Name": "public.core_organization_app",
-         "ObjectType": 0
-      },
-      {
-         "Name": "public.core_organization_channel",
-         "ObjectType": 0
-      },
-      {
-         "Name": "public.core_organization_user",
          "ObjectType": 0
       },
       {
@@ -53,6 +49,90 @@
       {
          "Name": "public.core_user_identifier",
          "ObjectType": 0
+      },
+      {
+         "Name": "public.feature_keyword",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.order_header",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.order_line",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_address",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_asset",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_category",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_favorite",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_info",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_keyword",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_product",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_profile",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_profile_attachment",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.product",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.product_category",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.product_culture",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.product_favorite",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.product_keyword",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.product_price",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.product_unit",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.promotion",
+         "ObjectType": 0
       }
    ],
    "UiHint": null,
@@ -61,7 +141,7 @@
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDateOnlyTimeOnly": true,
-   "UseDbContextSplitting": false,
+   "UseDbContextSplitting": true,
    "UseDecimalDataAnnotationForSprocResult": true,
    "UseFluentApiOnly": true,
    "UseHandleBars": false,
@@ -73,7 +153,7 @@
    "UseNoNavigations": false,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
-   "UseNullableReferences": false,
+   "UseNullableReferences": true,
    "UsePrefixNavigationNaming": false,
    "UseSchemaFolders": false,
    "UseSchemaNamespaces": false,

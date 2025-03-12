@@ -7,6 +7,7 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
+using PlatformShared.Extentions;
 using System.Buffers;
 using System.Net;
 
@@ -175,8 +176,9 @@ namespace Admin.Server.Services
                     o.Id,
                     o.Name,
                     o.Brand,
-                    Apps = o.CoreOrganizationApps.Count(),
-                    Users = o.CoreOrganizationUsers.Count(),
+                    Apps = o.Apps.Count,
+                    Users = o.Persons.Users().Count(),
+                    Persons = o.Persons.Count,
                     Owner = o.Owner.Name,
                     Pin = MyDbFunctions.HideData(o.Pin, default),
                     o.Status,
@@ -242,12 +244,12 @@ namespace Admin.Server.Services
 
                     if (rq.OrgId.HasValue)
                     {
-                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreOrganizationId == rq.OrgId.Value));
+                        q = q.Where(u => u.UserPersons.Users().Any(p => p.CoreOrganizationId == rq.OrgId.Value));
                     }
 
                     if (rq.InviterId.HasValue)
                     {
-                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.InviterId == rq.InviterId.Value));
+                        q = q.Where(u => u.UserPersons.Users().Any(p => p.InviterId == rq.InviterId.Value));
                     }
 
                     if (rq.Pin?.Length > 1)
@@ -266,7 +268,7 @@ namespace Admin.Server.Services
                     u.Status,
                     u.Creation,
 
-                    Orgs = u.CoreOrganizationUsers.Count(),
+                    Orgs = u.UserPersons.Users().Select(p => p.OrganizationId).Distinct().Count(),
                 })
                 .ToJsonAsync(writer, cancellationToken: cancellationToken);
 
@@ -384,7 +386,7 @@ namespace Admin.Server.Services
                 {
                     if (rq.OrgId.HasValue)
                     {
-                        q = q.Where(u => u.CoreOrganizationUsers.Any(ou => ou.CoreUserId == u.Id && ou.CoreOrganizationId == rq.OrgId.Value));
+                        q = q.Where(u => u.UserPersons.Users().Any(p => p.OrganizationId == rq.OrgId.Value));
                     }
 
                     if (rq.ExcludeSelf is true)
@@ -563,8 +565,10 @@ namespace Admin.Server.Services
                     o.Status,
                     o.Creation,
 
-                    Apps = o.CoreOrganizationApps.Count(),
-                    Users = o.CoreOrganizationUsers.Count()
+                    Apps = o.Apps.Count,
+                    Users = o.Persons.Users().Count(),
+                    Persons = o.Persons.Count,
+                    Orders = o.Orders.Count
                 })
                 .ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }

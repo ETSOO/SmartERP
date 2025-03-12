@@ -9,7 +9,7 @@ namespace Platform.Server.Dto.Member
     /// </summary>
     public record MemberQueryData
     {
-        public required int Id { get; init; }
+        public required long Id { get; init; }
         public required string Name { get; init; }
         public required UserRole UserRole { get; init; }
         public string? AssignedId { get; init; }

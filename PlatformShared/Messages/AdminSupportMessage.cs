@@ -6,10 +6,10 @@ namespace PlatformShared.Messages
     public record AdminSupportMessageData
     {
         public required string Comment { get; init; }
-        public required int ApproverLocalId { get; init; }
+        public required long ApproverLocalId { get; init; }
         public required string ApproverName { get; init; }
         public required int Requester { get; init; }
-        public required int RequesterLocalId { get; init; }
+        public required long RequesterLocalId { get; init; }
         public required string RequesterName { get; init; }
     }
 
@@ -27,7 +27,7 @@ namespace PlatformShared.Messages
         /// Requester local id
         /// 请求人本地编号
         /// </summary>
-        public required int RequesterLocalId { get; init; }
+        public required long RequesterLocalId { get; init; }
 
         /// <summary>
         /// Requester name
@@ -45,7 +45,7 @@ namespace PlatformShared.Messages
         /// Approver local id
         /// 批准人本地编号
         /// </summary>
-        public required int ApproverLocalId { get; init; }
+        public required long ApproverLocalId { get; init; }
 
         /// <summary>
         /// Approver name

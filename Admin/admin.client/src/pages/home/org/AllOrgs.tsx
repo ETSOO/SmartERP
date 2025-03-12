@@ -185,6 +185,8 @@ export default function AllOrgs() {
           field: "users",
           width: 80,
           header: labels.members,
+          valueFormatter: ({ data }) =>
+            data == null ? undefined : `${data.users} / ${data.persons}`,
           sortable: false,
           align: "right"
         },

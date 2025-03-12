@@ -67,12 +67,10 @@ namespace Platform.Server.Services
         public async Task<IActionResult> AdjustReportToAsync(MemberAdjustReportToRQ rq, CancellationToken cancellationToken = default)
         {
             // Check ids
-            var users = await _db.CoreOrganizationUsers
+            var users = await _db.Persons.Users(User.OrganizationInt)
                 .AsNoTracking()
-                .Where(ou => ou.CoreOrganizationId == User.OrganizationInt
-                    && (ou.Id == rq.OldId || ou.Id == rq.NewId)
-                    && ou.IdentityType.HasFlag(IdentityTypeFlags.User))
-                .Select(ou => new { ou.Id, ou.CoreUserId, Name = ou.LocalName ?? ou.CoreUser.Name })
+                .Where(ou => ou.Id == rq.OldId || ou.Id == rq.NewId)
+                .Select(ou => new { ou.Id, ou.CoreUserId, ou.Name })
                 .ToListAsync(cancellationToken);
 
             if (users.Count != 2)
@@ -81,10 +79,15 @@ namespace Platform.Server.Services
             }
 
             var oldUser = users.Find(u => u.Id == rq.OldId)!;
-            var newUser = users.Find(u => u.Id == rq.NewId)!;
+
+            var newUser = users.Find(u => u.Id == rq.NewId);
+            if (newUser?.CoreUserId == null)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(newUser));
+            }
 
             // Update
-            var count = await _db.CoreOrganizationUsers
+            var count = await _db.Persons
                 .Where(ou => ou.ReportTo == rq.OldId)
                 .ExecuteUpdateAsync(ou => ou.SetProperty(ou => ou.ReportTo, rq.NewId), cancellationToken);
 
@@ -93,7 +96,7 @@ namespace Platform.Server.Services
             {
                 Data = User.CreateMessageData(App.AppId, oldUser.Id, oldUser.Name),
                 Count = count,
-                NewReportTo = newUser.CoreUserId,
+                NewReportTo = newUser.CoreUserId.Value,
                 NewReportToName = newUser.Name
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.AdjustReportToMessage, cancellationToken);
@@ -111,33 +114,32 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            var ou = await _db.CoreOrganizationUsers
+            var ou = await _db.Persons.Users(User.OrganizationInt)
                 .AsNoTracking()
                 .Where(ou => ou.Id == id
-                    && ou.CoreOrganizationId == User.OrganizationInt
                     && ou.Status == EntityStatus.Deleted
                     && ou.UserRole < User.Role)
-                .Select(ou => new { ou.InviterId, InviterName = ou.Inviter == null ? null : ou.Inviter.Name, ou.CoreUserId, Name = ou.LocalName ?? ou.CoreUser.Name })
+                .Select(ou => new { ou.InviterId, InviterName = ou.Inviter == null ? null : ou.Inviter.Name, ou.CoreUserId, ou.Name })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (ou == null)
+            if (ou == null || !ou.CoreUserId.HasValue)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
 
             // Check reports
-            if (await _db.CoreOrganizationUsers.AnyAsync(ou => ou.ReportTo == id, cancellationToken))
+            if (await _db.Persons.AnyAsync(ou => ou.ReportTo == id, cancellationToken))
             {
-                return ApplicationErrors.DeleteReferencedData.AsResult(nameof(CoreOrganizationUser.ReportTo));
+                return ApplicationErrors.DeleteReferencedData.AsResult(nameof(Person.ReportTo));
             }
 
             // Delete
-            await _db.CoreOrganizationUsers.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
+            await _db.Persons.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             // Push message
             var message = new DeleteMemberMessage
             {
-                Data = User.CreateMessageData(App.AppId, ou.CoreUserId, ou.Name),
+                Data = User.CreateMessageData(App.AppId, ou.CoreUserId.Value, ou.Name),
                 OrgName = User.OrganizationName ?? "Unknown",
                 InviterId = ou.InviterId,
                 InviterName = ou.InviterName
@@ -147,11 +149,10 @@ namespace Platform.Server.Services
             return ActionResult.Succeed(id);
         }
 
-        private IQueryable<CoreOrganizationUser> CreateQuery(MemberListRQ rq, Func<IQueryable<CoreOrganizationUser>, IQueryable<CoreOrganizationUser>>? filters = null)
+        private IQueryable<Person> CreateQuery(MemberListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
         {
-            var query = _db.CoreOrganizationUsers
+            var query = _db.Persons.Users(User.OrganizationInt)
                 .AsNoTracking()
-                .Where(ou => ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User))
                 .QueryEtsoo(rq, (ou) => ou.Id, (ou) => ou.Status, (q) =>
                 {
                     if (rq.ExcludeSelf is true)
@@ -185,11 +186,13 @@ namespace Platform.Server.Services
 
                         if (keyword.IsComplexQueryKeywords())
                         {
-                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, ou => ou.LocalName ?? ou.CoreUser.Name);
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, ou => ou.Name, ou => ou.PreferredName);
                         }
                         else
                         {
-                            q = q.Where(ou => EF.Functions.ILike(ou.LocalName ?? ou.CoreUser.Name, $"%{keyword}%") ||(ou.AssignedId != null && EF.Functions.ILike(ou.AssignedId, $"%{keyword}%")));
+                            q = q.Where(ou => EF.Functions.ILike(ou.Name, $"%{keyword}%")
+                            || (ou.PreferredName != null && EF.Functions.ILike(ou.PreferredName, $"%{keyword}%"))
+                            || (ou.AssignedId != null && EF.Functions.ILike(ou.AssignedId, $"%{keyword}%")));
                         }
                     }
 
@@ -241,8 +244,8 @@ namespace Platform.Server.Services
             await Parallel.ForEachAsync(rq.Emails.Distinct(), async (email, cancelToken) =>
             {
                 // User already exists
-                var userExists = await _db.CoreOrganizationUsers.AnyAsync(ou => ou.CoreOrganizationId == orgId
-                    && ou.CoreUser.CoreUserIdentifiers.Any(i => i.CoreUserId == ou.CoreUserId && i.Type == CoreUserIdentifierType.Email && i.Value == email), cancelToken);
+                var userExists = await _db.Persons.Users(orgId)
+                    .AnyAsync(ou => ou.CoreUser != null && ou.CoreUser.CoreUserIdentifiers.Any(i => i.CoreUserId == ou.CoreUserId && i.Type == CoreUserIdentifierType.Email && i.Value == email), cancelToken);
 
                 if (userExists)
                 {
@@ -301,7 +304,7 @@ namespace Platform.Server.Services
             await query.Select(ou => new
             {
                 ou.Id,
-                Name = ou.LocalName ?? ou.CoreUser.Name
+                ou.Name
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -328,10 +331,10 @@ namespace Platform.Server.Services
             var (hasContent, commandText) = await query.Select(ou => new MemberQueryData
             {
                 Id = ou.Id,
-                Name = ou.LocalName ?? ou.CoreUser.Name,
-                UserRole = ou.UserRole,
+                Name = ou.Name,
+                UserRole = ou.UserRole.GetValueOrDefault(),
                 AssignedId = ou.AssignedId,
-                IsOwner = ou.CoreOrganization.OwnerId == User.IdInt,
+                IsOwner = ou.Organization.OwnerId == User.IdInt,
                 IsSelf = ou.CoreUserId == User.IdInt,
                 IsEditable = ou.UserRole <= User.Role,
                 DirectReports = ou.DirectReports.Count(),
@@ -355,17 +358,17 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _db.CoreOrganizationUsers
+            await _db.Persons.Users(User.OrganizationInt)
                 .AsNoTracking()
-                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt && ou.IdentityType.HasFlag(IdentityTypeFlags.User))
+                .Where(ou => ou.Id == id)
                 .Select(ou => new
                 {
                     ou.Id,
-                    ou.CoreUser.Name,
+                    ou.CoreUser!.Name,
                     ou.UserRole,
                     ou.IdentityType,
-                    ou.LocalName,
-                    ou.LocalAvatar,
+                    LocalName = ou.Name,
+                    LocalAvatar = ou.Avatar,
                     ou.AssignedId,
                     ou.Creation,
                     ou.Expiry,
@@ -373,8 +376,8 @@ namespace Platform.Server.Services
                     ou.Status,
                     ou.CoreUser.Avatar,
                     Inviter = ou.Inviter == null ? null : ou.Inviter.Name,
-                    DirectReports = ou.DirectReports.Count(),
-                    ReportTo = ou.ReportToUser == null ? null : ou.ReportToUser.LocalName ?? ou.ReportToUser.CoreUser.Name
+                    DirectReports = ou.DirectReports.Count,
+                    ReportTo = ou.ReportToUser == null ? null : ou.ReportToUser.Name
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -387,8 +390,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> UpdateAsync(MemberUpdateRQ rq, CancellationToken cancellationToken = default)
         {
-            var ou = await _db.CoreOrganizationUsers.Where(o => o.Id == rq.Id
-                && o.CoreOrganizationId == User.OrganizationInt
+            var ou = await _db.Persons.Users(User.OrganizationInt).Where(o => o.Id == rq.Id
                 && o.UserRole <= User.Role)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -397,16 +399,16 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            if (rq.ReportTo.HasValue && !await _db.CoreOrganizationUsers.AnyAsync(o => o.Id == rq.ReportTo.Value && o.CoreOrganizationId == User.OrganizationInt, cancellationToken))
+            if (rq.ReportTo.HasValue && !await _db.Persons.Users(User.OrganizationInt).AnyAsync(o => o.Id == rq.ReportTo.Value, cancellationToken))
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.ReportTo));
             }
 
             // Name
-            var name = await _db.CoreOrganizationUsers
+            var name = await _db.Persons
                 .AsNoTracking()
                 .Where(ou => ou.Id == rq.Id)
-                .Select(ou => ou.LocalName ?? ou.CoreUser.Name)
+                .Select(ou => ou.Name)
                 .FirstOrDefaultAsync(cancellationToken);
 
             // Is not self
@@ -424,9 +426,9 @@ namespace Platform.Server.Services
                 ou.UserRole = rq.UserRole.Value;
             }
 
-            if (rq.IsModified(nameof(rq.LocalName)))
+            if (rq.IsModified(nameof(rq.LocalName)) && !string.IsNullOrEmpty(rq.LocalName))
             {
-                ou.LocalName = rq.LocalName;
+                ou.Name = rq.LocalName;
             }
 
             if (rq.IsModified(nameof(rq.AssignedId)))
@@ -485,9 +487,9 @@ namespace Platform.Server.Services
             }
 
             // Check the avatar
-            var ou = await _db.CoreOrganizationUsers.AsNoTracking()
-                .Where(ou => ou.Id == id && ou.CoreOrganizationId == User.OrganizationInt)
-                .Select(ou => new { ou.LocalAvatar, Name = ou.LocalName ?? ou.CoreUser.Name })
+            var ou = await _db.Persons.Users(User.OrganizationInt).AsNoTracking()
+                .Where(ou => ou.Id == id)
+                .Select(ou => new { LocalAvatar = ou.Avatar, ou.Name })
                 .FirstOrDefaultAsync(cancellationToken);
             if (ou == null)
             {
@@ -512,7 +514,7 @@ namespace Platform.Server.Services
                 var url = _storage.GetUrl(path);
 
                 // Update
-                await _db.CoreOrganizationUsers.Where(ou => ou.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.LocalAvatar, url), cancellationToken);
+                await _db.Persons.Where(ou => ou.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Avatar, url), cancellationToken);
 
                 // Remove current avatar
                 if (!string.IsNullOrEmpty(ou.LocalAvatar))
@@ -545,20 +547,18 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = _db.CoreOrganizationUsers
+            var query = _db.Persons.Users(User.OrganizationInt)
                 .AsNoTracking()
                 .Where(ou => ou.Id == id
-                    && ou.CoreOrganizationId == User.OrganizationInt
-                    && ou.IdentityType.HasFlag(IdentityTypeFlags.User)
                     && ou.UserRole <= User.Role);
 
             var (hasContent, _) = await query.Select(ou => new
             {
                 ou.Id,
-                ou.CoreUser.Name,
+                ou.CoreUser!.Name,
                 IsSelf = ou.CoreUserId == User.IdInt,
                 ou.UserRole,
-                ou.LocalName,
+                LocalName = ou.Name,
                 ou.AssignedId,
                 ou.Expiry,
                 ou.Status,

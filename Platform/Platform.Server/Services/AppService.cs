@@ -212,10 +212,10 @@ namespace Platform.Server.Services
 
             // Current user's states
             var typeFlag = Enum.Parse<IdentityTypeFlags>(rq.IdentityType.ToString());
-            var isUserValid = await _db.CoreOrganizationUsers.AsNoTracking()
+            var isUserValid = await _db.Persons.AsNoTracking()
                 .AnyAsync(ou => ou.CoreOrganizationId == orgId
                     && ou.CoreUserId == User.IdInt
-                    && ou.IdentityType.HasFlag(typeFlag)
+                    && (ou.IdentityType.HasValue && ou.IdentityType.Value.HasFlag(typeFlag))
                     && ou.Status <= EntityStatus.Approved
                     && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow), cancellationToken);
 

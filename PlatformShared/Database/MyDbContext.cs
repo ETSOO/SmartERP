@@ -1,10 +1,7 @@
-﻿using com.etsoo.CoreFramework.Business;
-using com.etsoo.Database.Converters;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlatformShared.Database.Models;
-using PlatformShared.Dto;
+using PlatformShared.Database.Models.Configurations;
 
 namespace PlatformShared.Database
 {
@@ -17,6 +14,12 @@ namespace PlatformShared.Database
     /// </summary>
     public partial class MyDbContext : DbContext
     {
+        /// <summary>
+        /// Addresses
+        /// 地址
+        /// </summary>
+        public required DbSet<Address> Addresses { get; set; }
+
         /// <summary>
         /// Core applications
         /// 核心应用
@@ -40,18 +43,6 @@ namespace PlatformShared.Database
         /// 核心机构应用
         /// </summary>
         public required DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
-
-        /// <summary>
-        /// Core organization channels
-        /// 核心机构渠道
-        /// </summary>
-        public required DbSet<CoreOrganizationChannel> CoreOrganizationChannels { get; set; }
-
-        /// <summary>
-        /// Core organization users
-        /// 核心机构用户
-        /// </summary>
-        public required DbSet<CoreOrganizationUser> CoreOrganizationUsers { get; set; }
 
         /// <summary>
         /// Core users
@@ -78,6 +69,102 @@ namespace PlatformShared.Database
         public required DbSet<CoreUserIdentifier> CoreUserIdentifiers { get; set; }
 
         /// <summary>
+        /// Feature keywords
+        /// 特征关键词
+        /// </summary>
+        public required DbSet<FeatureKeyword> FeatureKeywords { get; set; }
+
+        /// <summary>
+        /// Order, PO or transaction
+        /// 订单，采购或交易
+        /// </summary>
+        public required DbSet<OrderHeader> OrderHeaders { get; set; }
+
+        /// <summary>
+        /// Order lines
+        /// 订单行
+        /// </summary>
+        public required DbSet<OrderLine> OrderLines { get; set; }
+
+        /// <summary>
+        /// Individuals or companies or contacts
+        /// 个人或企业或联系人
+        /// </summary>
+        public required DbSet<Person> Persons { get; set; }
+
+        /// <summary>
+        /// Person assets
+        /// 个人资产
+        /// </summary>
+        public required DbSet<PersonAsset> PersonAssets { get; set; }
+
+        /// <summary>
+        /// Person categories
+        /// 个人类目
+        /// </summary>
+        public required DbSet<PersonCategory> PersonCategories { get; set; }
+
+        /// <summary>
+        /// Person information
+        /// 个人信息
+        /// </summary>
+        public required DbSet<PersonInfo> PersonInfos { get; set; }
+
+        /// <summary>
+        /// Person products
+        /// 个人产品
+        /// </summary>
+        public required DbSet<PersonProduct> PersonProducts { get; set; }
+
+        /// <summary>
+        /// Person profiles
+        /// 个人档案
+        /// </summary>
+        public required DbSet<PersonProfile> PersonProfiles { get; set; }
+
+        /// <summary>
+        /// Person profile attachments
+        /// 个人档案附件
+        /// </summary>
+        public required DbSet<PersonProfileAttachment> PersonProfileAttachments { get; set; }
+
+        /// <summary>
+        /// Products
+        /// 产品
+        /// </summary>
+        public required DbSet<Product> Products { get; set; }
+
+        /// <summary>
+        /// Product categories
+        /// 产品类目
+        /// </summary>
+        public required DbSet<ProductCategory> ProductCategories { get; set; }
+
+        /// <summary>
+        /// Product cultures
+        /// 产品文化
+        /// </summary>
+        public required DbSet<ProductCulture> ProductCultures { get; set; }
+
+        /// <summary>
+        /// Product prices
+        /// 产品价格
+        /// </summary>
+        public required DbSet<ProductPrice> ProductPrices { get; set; }
+
+        /// <summary>
+        /// Product units
+        /// 产品单位
+        /// </summary>
+        public required DbSet<ProductUnit> ProductUnits { get; set; }
+
+        /// <summary>
+        /// Promotions
+        /// 促销
+        /// </summary>
+        public required DbSet<Promotion> Promotions { get; set; }
+
+        /// <summary>
         /// Is sensitive data logging enabled
         /// 敏感数据日志是否启用
         /// </summary>
@@ -94,447 +181,31 @@ namespace PlatformShared.Database
             // Register custom functions
             MyDbFunctions.Register(modelBuilder);
 
-            modelBuilder.Entity<CoreApp>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_app_pkey");
-
-                entity.ToTable("core_app");
-
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("id");
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnName("name");
-                entity.Property(e => e.IdentityType)
-                    .HasConversion<byte>()
-                    .HasColumnName("identity_type");
-                entity.Property(e => e.AppSecret)
-                    .HasMaxLength(256)
-                    .HasColumnName("app_secret");
-                entity.Property(e => e.Urls)
-                    .HasColumnType("jsonb")
-                    .HasConversion(new JsonTypeConverter<AppUrl[]>(PlatformSharedContext.Default.AppUrlArray))
-                    .HasColumnName("urls");
-                entity.Property(e => e.RequireLocalUrl).HasColumnName("require_local_url");
-                entity.Property(e => e.Logo)
-                    .HasMaxLength(256)
-                    .HasColumnName("logo");
-                entity.Property(e => e.IsPublic).HasColumnName("is_public");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Enabled).HasColumnName("enabled");
-            });
-
-            modelBuilder.Entity<CoreAuthCode>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_auth_code_pkey");
-
-                entity.ToTable("core_auth_code");
-
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("id");
-                entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.Action)
-                    .IsRequired()
-                    .HasConversion<short>()
-                    .HasColumnName("action");
-                entity.Property(e => e.Openid)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("openid");
-                entity.Property(e => e.Code)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("code");
-                entity.Property(e => e.Expiry).HasColumnName("expiry");
-                entity.Property(e => e.Ip)
-                    .IsRequired()
-                    .HasMaxLength(45)
-                    .HasConversion<IPAddressToStringConverter>()
-                    .HasColumnName("ip");
-                entity.Property(e => e.Times)
-                    .HasDefaultValue((short)0)
-                    .HasColumnName("times");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Data)
-                    .HasColumnType("jsonb")
-                    .HasColumnName("data");
-
-                entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserAuthCodes)
-                    .HasForeignKey(d => d.CoreUserId)
-                    .HasConstraintName("core_auth_code_core_user_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreOrganization>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_organization_pkey");
-
-                entity.ToTable("core_organization");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasIdentityOptions(1001L)
-                    .HasColumnName("id");
-                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnName("name");
-                entity.Property(e => e.Brand)
-                    .HasMaxLength(30)
-                    .HasColumnName("brand");
-                entity.Property(e => e.Logo)
-                    .HasMaxLength(256)
-                    .HasColumnName("logo");
-                entity.Property(e => e.Pin)
-                    .HasMaxLength(20)
-                    .HasColumnName("pin");
-                entity.Property(e => e.ParentId).HasColumnName("parent_id");
-                entity.Property(e => e.Uid).HasColumnName("uid");
-                entity.Property(e => e.Status)
-                    .HasConversion<byte>()
-                    .HasDefaultValue(EntityStatus.Normal)
-                    .HasColumnName("status");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.QueryKeyword)
-                    .HasMaxLength(30)
-                    .HasColumnName("query_keyword");
-                entity.Property(e => e.Region)
-                    .IsRequired()
-                    .HasMaxLength(2)
-                    .IsFixedLength(true)
-                    .HasColumnName("region");
-
-                entity.HasOne(d => d.Owner).WithMany(p => p.CoreOrganizations)
-                    .HasForeignKey(d => d.OwnerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_owner_id_fkey");
-
-                entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
-                    .HasForeignKey(d => d.ParentId)
-                    .HasConstraintName("core_organization_parent_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreOrganizationApp>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_organization_app_pkey");
-
-                entity.ToTable("core_organization_app");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasColumnName("id");
-                entity.Property(e => e.CoreAppId).HasColumnName("core_app_id");
-                entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-                entity.Property(e => e.AppKey)
-                    .HasMaxLength(128)
-                    .HasColumnName("app_key");
-                entity.Property(e => e.AppSecret)
-                    .HasMaxLength(256)
-                    .HasColumnName("app_secret");
-                entity.Property(e => e.LocalName)
-                    .HasMaxLength(128)
-                    .HasColumnName("local_name");
-                entity.Property(e => e.LocalUrls)
-                    .HasColumnType("jsonb")
-                    .HasConversion(new JsonTypeConverter<AppUrl[]?>(PlatformSharedContext.Default.AppUrlArray))
-                    .HasColumnName("local_urls");
-                entity.Property(e => e.Expiry).HasColumnName("expiry");
-                entity.Property(e => e.Status)
-                    .HasConversion<byte>()
-                    .HasDefaultValue(EntityStatus.Normal)
-                    .HasColumnName("status");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-
-                entity.HasOne(d => d.CoreApp).WithMany(p => p.CoreOrganizationApps)
-                    .HasForeignKey(d => d.CoreAppId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_app_core_app_id_fkey");
-
-                entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreOrganizationApps)
-                    .HasForeignKey(d => d.CoreOrganizationId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_app_core_organization_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreOrganizationChannel>(entity =>
-            {
-                entity.HasKey(e => new { e.PartnerId, e.OwnerId }).HasName("core_organization_channel_pkey");
-
-                entity.ToTable("core_organization_channel");
-
-                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-                entity.Property(e => e.PartnerId).HasColumnName("partner_id");
-                entity.Property(e => e.Enabled).HasColumnName("enabled");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.RefreshTime)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("refresh_time");
-
-                entity.HasOne(d => d.Owner).WithMany(p => p.CoreOrganizationChannelOwners)
-                    .HasForeignKey(d => d.OwnerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_channel_owner_id_fkey");
-
-                entity.HasOne(d => d.Partner).WithMany(p => p.CoreOrganizationChannelPartners)
-                    .HasForeignKey(d => d.PartnerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_channel_partner_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreOrganizationUser>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_organization_user_pkey");
-
-                entity.ToTable("core_organization_user");
-
-                entity.HasIndex(e => new { e.CoreOrganizationId, e.CoreUserId }, "core_organization_user_core_organization_id_core_user_id_idx")
-                    .IsUnique()
-                    .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "false");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasIdentityOptions(1001L)
-                    .HasColumnName("id");
-                entity.Property(e => e.Uid)
-                    .HasDefaultValueSql("gen_random_uuid()")
-                    .HasColumnName("uid");
-                entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-                entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.UserRole)
-                    .HasConversion<short>()
-                    .HasColumnName("user_role");
-                entity.Property(e => e.IdentityType)
-                    .HasConversion<byte>()
-                    .HasColumnName("identity_type");
-                entity.Property(e => e.LocalName)
-                    .HasMaxLength(128)
-                    .HasColumnName("local_name");
-                entity.Property(e => e.LocalAvatar)
-                    .HasMaxLength(256)
-                    .HasColumnName("local_avatar");
-                entity.Property(e => e.Permission).HasColumnName("permission");
-                entity.Property(e => e.AssignedId)
-                    .HasMaxLength(20)
-                    .HasColumnName("assigned_id");
-                entity.Property(e => e.Data)
-                    .HasColumnType("jsonb")
-                    .HasColumnName("data");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Expiry).HasColumnName("expiry");
-                entity.Property(e => e.RefreshTime)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("refresh_time");
-                entity.Property(e => e.Status)
-                    .HasConversion<byte>()
-                    .HasDefaultValue(EntityStatus.Normal)
-                    .HasColumnName("status");
-                entity.Property(e => e.InviterId).HasColumnName("inviter_id");
-                entity.Property(e => e.ReportTo).HasColumnName("report_to");
-
-                entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreOrganizationUsers)
-                    .HasForeignKey(d => d.CoreOrganizationId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_user_core_organization_id_fkey");
-
-                entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreOrganizationUsers)
-                    .HasForeignKey(d => d.CoreUserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_organization_user_core_user_id_fkey");
-
-                entity.HasOne(d => d.Inviter).WithMany(p => p.CoreOrganizationUserInviters)
-                    .HasForeignKey(d => d.InviterId)
-                    .HasConstraintName("core_organization_user_inviter_id_fkey");
-
-                    .HasForeignKey(d => d.ReportTo)
-                    .HasConstraintName("core_organization_user_report_to_fkey");
-            });
-
-            modelBuilder.Entity<CoreUser>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_user_pkey");
-
-                entity.ToTable("core_user");
-
-                entity.Property(e => e.Id)
-                    //.UseIdentityAlwaysColumn()
-                    .HasIdentityOptions(1001L)
-                    .HasColumnName("id");
-                entity.Property(e => e.Password)
-                    .HasMaxLength(128)
-                    .HasColumnName("password");
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnName("name");
-                entity.Property(e => e.GivenName)
-                    .HasMaxLength(50)
-                    .HasColumnName("given_name");
-                entity.Property(e => e.FamilyName)
-                    .HasMaxLength(50)
-                    .HasColumnName("family_name");
-                entity.Property(e => e.PreferredName)
-                    .HasMaxLength(128)
-                    .HasColumnName("preferred_name");
-                entity.Property(e => e.LatinGivenName)
-                    .HasMaxLength(50)
-                    .HasColumnName("latin_given_name");
-                entity.Property(e => e.LatinFamilyName)
-                    .HasMaxLength(50)
-                    .HasColumnName("latin_family_name");
-                entity.Property(e => e.Avatar)
-                    .HasMaxLength(256)
-                    .HasColumnName("avatar");
-                entity.Property(e => e.FrozenTime)
-                    .HasColumnName("frozen_time");
-                entity.Property(e => e.Step)
-                    .HasColumnName("step");
-                entity.Property(e => e.Region)
-                    .HasMaxLength(2)
-                    .HasColumnName("region");
-                entity.Property(e => e.Pin)
-                    .HasMaxLength(20)
-                    .HasColumnName("pin");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.Status)
-                    .HasConversion<byte>()
-                    .HasDefaultValue(EntityStatus.Normal)
-                    .HasColumnName("status");
-                entity.Property(e => e.QueryKeyword)
-                    .HasMaxLength(30)
-                    .HasColumnName("query_keyword");
-                entity.Property(e => e.LatestOrganizationIds)
-                    .HasColumnName("latest_organization_ids");
-                entity.Property(e => e.LatestAppIds)
-                    .HasColumnName("latest_app_ids");
-            });
-
-            modelBuilder.Entity<CoreUserDevice>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_user_device_pkey");
-
-                entity.ToTable("core_user_device");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasIdentityOptions(1001L)
-                    .HasColumnName("id");
-                entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.DeviceType)
-                    .HasConversion<byte>()
-                    .HasColumnName("device_type");
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnName("name");
-                entity.Property(e => e.ClientId)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("client_id");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-                entity.Property(e => e.LastLogin)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("last_login");
-                entity.Property(e => e.Timezone)
-                    .HasMaxLength(64)
-                    .HasConversion<TimeZoneInfoToStringConverter>()
-                    .HasColumnName("timezone");
-
-                entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserDevices)
-                    .HasForeignKey(d => d.CoreUserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_user_device_core_user_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreUserDeviceToken>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_user_device_token_pkey");
-
-                entity.ToTable("core_user_device_token");
-
-                entity.HasIndex(e => new { e.DeviceId, e.AppId, e.Token }, "core_user_device_token_device_id_app_id_token_idx")
-                    .IsUnique()
-                    .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "true");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasColumnName("id");
-                entity.Property(e => e.DeviceId).HasColumnName("device_id");
-                entity.Property(e => e.AppId).HasColumnName("app_id");
-                entity.Property(e => e.ResponseType)
-                    .HasConversion<byte>()
-                    .HasColumnName("response_type");
-                entity.Property(e => e.Culture)
-                    .IsRequired()
-                    .HasMaxLength(10)
-                    .HasColumnName("culture");
-                entity.Property(e => e.Token)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("token");
-                entity.Property(e => e.Expiry).HasColumnName("expiry");
-                entity.OwnsOne(c => c.Data, d =>
-                {
-                    d.ToJson("data");
-                });
-
-                entity.HasOne(d => d.App).WithMany(p => p.CoreUserDeviceTokens)
-                    .HasForeignKey(d => d.AppId)
-                    .HasConstraintName("core_user_device_token_app_id_fkey");
-
-                entity.HasOne(d => d.Device).WithMany(p => p.CoreUserDeviceTokens)
-                    .HasForeignKey(d => d.DeviceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_user_device_token_device_id_fkey");
-            });
-
-            modelBuilder.Entity<CoreUserIdentifier>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("core_user_identifier_pkey");
-
-                entity.ToTable("core_user_identifier");
-
-                entity.HasIndex(e => new { e.Type, e.Value }, "core_user_identifier_type_value_id_core_user_id_ref_type_idx")
-                    .IsUnique()
-                    .HasAnnotation("Npgsql:StorageParameter:deduplicate_items", "false");
-
-                entity.Property(e => e.Id)
-                    .UseIdentityAlwaysColumn()
-                    .HasColumnName("id");
-                entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
-                entity.Property(e => e.Type).HasColumnName("type");
-                entity.Property(e => e.Value)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasColumnName("value");
-                entity.Property(e => e.RefType).HasColumnName("ref_type");
-                entity.Property(e => e.Creation)
-                    .HasDefaultValueSql("now()")
-                    .HasColumnName("creation");
-
-                entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreUserIdentifiers)
-                    .HasForeignKey(d => d.CoreUserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("core_user_identifier_core_user_id_fkey");
-            });
+            modelBuilder.ApplyConfiguration(new AddressConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreAppConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreAuthCodeConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreOrganizationConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreOrganizationAppConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreUserConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreUserDeviceConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreUserDeviceTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreUserIdentifierConfiguration());
+            modelBuilder.ApplyConfiguration(new FeatureKeywordConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderHeaderConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderLineConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonAssetConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonCategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonInfoConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonProductConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonProfileConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonProfileAttachmentConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductCategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductCultureConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductPriceConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductUnitConfiguration());
+            modelBuilder.ApplyConfiguration(new PromotionConfiguration());
         }
     }
 }

@@ -191,18 +191,18 @@ namespace Platform.Server.Services
             // Validate
             var data = await _db.CoreOrganizations.AsNoTracking()
             .Where(o => o.Id == rq.OrgId)
-            .Join(_db.CoreOrganizationUsers,
+            .Join(_db.Persons.Where(u => u.CoreUserId != null),
                 org => new { OrgId = org.Id, UserId = rq.Requester },
-                requester => new { OrgId = requester.CoreOrganizationId, UserId = requester.CoreUserId },
+                requester => new { OrgId = requester.OrganizationId, UserId = requester.CoreUserId.GetValueOrDefault() },
                 (org, requester) => new
                 {
                     OrgName = org.Name,
                     org.OwnerId,
                     RequesterId = requester.Id,
-                    RequesterName = requester.LocalName ?? requester.CoreUser.Name,
-                    Approver = _db.CoreOrganizationUsers
-                        .Where(u => u.CoreOrganizationId == User.OrganizationInt && u.CoreUserId == rq.Approver && u.Status <= EntityStatus.Approved)
-                        .Select(u => new { ApproverId = u.Id, ApproverName = u.LocalName ?? u.CoreUser.Name })
+                    RequesterName = requester.Name,
+                    Approver = _db.Persons.Users(User.OrganizationInt)
+                        .Where(u => u.CoreUserId == rq.Approver && u.Status <= EntityStatus.Approved)
+                        .Select(u => new { ApproverId = u.Id, ApproverName = u.Name })
                         .FirstOrDefault()
                 })
             .FirstOrDefaultAsync(cancellationToken);
@@ -213,16 +213,16 @@ namespace Platform.Server.Services
             }
 
             // User data
-            var userData = await _db.CoreOrganizationUsers.AsNoTracking()
-                .Where(u => u.CoreOrganizationId == rq.OrgId && u.CoreUserId == rq.Requester)
+            var userData = await _db.Persons.Users(rq.OrgId).AsNoTracking()
+                .Where(u => u.CoreUserId == rq.Requester)
                 .Select(u => new
                 {
                     u.Id,
-                    Name = u.LocalName ?? u.CoreUser.Name,
+                    u.Name,
                     u.Uid,
                     u.UserRole,
-                    Avatar = u.LocalAvatar ?? u.CoreUser.Avatar,
-                    Apps = u.CoreOrganization.CoreOrganizationApps
+                    Avatar = u.Avatar ?? u.CoreUser!.Avatar,
+                    Apps = u.Organization.Apps
                         .Where(oa => oa.CoreOrganizationId == rq.OrgId && oa.Status <= EntityStatus.Approved)
                         .Select(oa => oa.CoreAppId)
                 })
@@ -291,7 +291,6 @@ namespace Platform.Server.Services
                 Organization = rq.OrgId.ToString(),
                 OrganizationName = data.OrgName,
                 ChannelOrganization = org, // Identifier the fake user
-                Oid = userData.Id.ToString(),
                 DeviceId = deviceId.ToString(),
                 App = User.App,
                 Language = User.Language
@@ -1100,7 +1099,6 @@ namespace Platform.Server.Services
                 Avatar = data.LocalAvatar ?? user.Avatar,
                 LatestAppId = user.LatestAppIds?.FirstOrDefault(),
                 OrganizationName = data.OrganizationName,
-                Oid = data.Oid,
                 Role = data.UserRole
             }, timezone);
 
@@ -1817,8 +1815,8 @@ namespace Platform.Server.Services
             var userData = await _db.CoreUsers
                 .AsNoTracking()
                 .Where(u => u.Id == data.UserId)
-                .GroupJoin(_db.CoreOrganizationUsers, u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
-                .SelectMany(d => d.ou.Where(ou => ou.CoreOrganizationId == data.Data.OrganizationId).DefaultIfEmpty(), (d, ou) => new TokenQueryUser
+                .GroupJoin(_db.Persons.Users(data.Data.OrganizationId), u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
+                .SelectMany(d => d.ou.DefaultIfEmpty(), (d, ou) => new TokenQueryUser
                 {
                     Id = d.u.Id,
                     GivenName = d.u.GivenName,
@@ -1831,11 +1829,10 @@ namespace Platform.Server.Services
                     LatestAppId = d.u.LatestAppIds == null ? null : d.u.LatestAppIds.FirstOrDefault(),
                     OrgStatus = ou == null ? null : ou.Status,
                     OrgExpiry = ou == null ? null : ou.Expiry,
-                    Name = ou == null ? d.u.Name : (ou.LocalName ?? d.u.Name),
-                    Avatar = ou == null ? d.u.Avatar : (ou.LocalAvatar ?? d.u.Avatar),
+                    Name = ou == null ? d.u.Name : ou.Name,
+                    Avatar = ou == null ? d.u.Avatar : (ou.Avatar ?? d.u.Avatar),
                     Role = ou == null ? null : ou.UserRole,
-                    Oid = ou == null ? null : ou.Id,
-                    OrganizationName = ou == null ? null : ou.CoreOrganization.Name
+                    OrganizationName = ou == null ? null : ou.Organization.Name
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -1876,7 +1873,6 @@ namespace Platform.Server.Services
                 OrganizationName = userData.OrganizationName,
                 ParentOrganization = data.Data.ParentOrganizationId?.ToString(),
                 ChannelOrganization = data.Data.ChannelOrganizationId?.ToString(),
-                Oid = userData.Oid.GetValueOrDefault().ToString(),
                 Uid = data.Data.Uid.ToString(),
                 RoleValue = (short)userData.Role.GetValueOrDefault(UserRole.User),
                 App = userData.LatestAppId?.ToString(),
