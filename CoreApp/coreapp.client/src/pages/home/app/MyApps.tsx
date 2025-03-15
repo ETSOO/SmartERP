@@ -142,7 +142,8 @@ export default function MyApps() {
           field: "name",
           header: labels.appName,
           sortable: false,
-          valueFormatter: ({ data }) => (data ? app.core.getAppName(data) : "")
+          valueFormatter: ({ data }) =>
+            data ? `${app.core.getAppName(data)} / ${data.name}` : ""
         },
         {
           field: "expiry",

@@ -88,6 +88,10 @@ export default function ViewOrg() {
           singleRow: false
         },
         {
+          data: (item) => `${item.users} / ${item.persons}`,
+          label: "members"
+        },
+        {
           data: (item) =>
             item.parentName ? (
               <ButtonLink

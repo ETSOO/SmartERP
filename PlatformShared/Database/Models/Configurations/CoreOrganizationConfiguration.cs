@@ -48,12 +48,12 @@ namespace PlatformShared.Database.Models.Configurations
                 .IsFixedLength(true)
                 .HasColumnName("region");
 
-            entity.HasOne(d => d.Owner).WithMany(p => p.CoreOrganizations)
+            entity.HasOne(d => d.Owner).WithMany(u => u.OwnedOrganizations)
                 .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("core_organization_owner_id_fkey");
 
-            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+            entity.HasOne(d => d.Parent).WithMany(p => p.Children)
                 .HasForeignKey(d => d.ParentId)
                 .HasConstraintName("core_organization_parent_id_fkey");
         }

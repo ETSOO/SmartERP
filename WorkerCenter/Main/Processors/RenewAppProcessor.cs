@@ -1,6 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.MessageQueue;
-using Microsoft.EntityFrameworkCore;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -35,14 +34,10 @@ namespace WorkerCenter.Main.Processors
             var userId = message.Data.UserId;
 
             // Organization id
-            var orgId = message.Data.OrganizationId;
+            var orgId = message.Data.OrganizationId.GetValueOrDefault();
 
             // All admins
-            var admins = await _db.CoreOrganizationUsers
-                .Where(ou => ou.CoreOrganizationId == orgId && ou.UserRole >= UserRole.Admin)
-                .Select(ou => ou.CoreUserId)
-                .ToArrayAsync(cancellationToken);
-            ;
+            var admins = await _db.QueryUsersAsync(orgId, UserRole.Admin, cancellationToken);
 
             // Send email notice
             // Emails

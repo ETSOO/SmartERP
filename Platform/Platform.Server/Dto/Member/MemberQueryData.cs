@@ -13,11 +13,11 @@ namespace Platform.Server.Dto.Member
         public required string Name { get; init; }
         public required UserRole UserRole { get; init; }
         public string? AssignedId { get; init; }
-        public required bool IsSelf { get; init; }
-        public required bool IsOwner { get; init; }
-        public required bool IsEditable { get; init; }
-        public required int DirectReports { get; init; }
+        public bool IsSelf { get; init; }
+        public bool IsOwner { get; init; }
+        public bool IsEditable { get; init; }
+        public int DirectReports { get; init; }
         public EntityStatus Status { get; init; }
-        public required DateTimeOffset Creation { get; init; }
+        public DateTimeOffset Creation { get; init; }
     }
 }

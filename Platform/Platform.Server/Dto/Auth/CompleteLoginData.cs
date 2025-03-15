@@ -43,7 +43,7 @@ namespace Platform.Server.Dto.Auth
         /// Organization user id
         /// 机构用户编号
         /// </summary>
-        public int? Oid { get; init; }
+        public long? Oid { get; init; }
 
         /// <summary>
         /// User global unique identifier

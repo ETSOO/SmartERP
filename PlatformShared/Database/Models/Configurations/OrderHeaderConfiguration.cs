@@ -59,12 +59,10 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Items)
                 .HasPrecision(12, 2)
                 .HasColumnName("items");
-            entity.OwnsMany(e => e.Promotions, p =>
-            {
-                p.ToJson();
-                p.Property(e => e).HasColumnType("jsonb")
-                    .HasColumnName("promotions");
-            });
+            entity.OwnsMany(e => e.Promotions,
+                p => p.ToJson("promotions")
+                    .HasColumnType("jsonb")
+                    .Property(p => p.Code).HasConversion<PromotionCodeConverter>());
             entity.Property(e => e.Culture)
                 .IsRequired()
                 .HasMaxLength(10)

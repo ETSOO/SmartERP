@@ -1,4 +1,5 @@
-﻿using com.etsoo.CoreFramework.Business;
+﻿using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
@@ -22,22 +23,8 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<Person> Users(this IQueryable<Person> persons, int orgId)
         {
-            return persons.Where(p => p.OrganizationId == orgId
+            return persons.Where(p => p.OrgId == orgId
                 && p.CoreUserId != null
-                && p.IdentityType.HasValue
-                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)
-            );
-        }
-
-        /// <summary>
-        /// Query users from persons
-        /// 从人员中查询用户
-        /// </summary>
-        /// <param name="persons">Persons</param>
-        /// <returns>Result</returns>
-        public static IEnumerable<Person> Users(this ICollection<Person> persons)
-        {
-            return persons.Where(p => p.CoreUserId != null
                 && p.IdentityType.HasValue
                 && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)
             );
@@ -52,7 +39,7 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<Person> Customers(this IQueryable<Person> persons, int orgId)
         {
-            return persons.Where(p => p.OrganizationId == orgId
+            return persons.Where(p => p.OrgId == orgId
                 && p.IdentityType.HasValue
                 && p.IdentityType.Value.HasFlag(IdentityTypeFlags.Customer)
             );
@@ -67,7 +54,7 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<Person> Suppliers(this IQueryable<Person> persons, int orgId)
         {
-            return persons.Where(p => p.OrganizationId == orgId
+            return persons.Where(p => p.OrgId == orgId
                 && p.IdentityType.HasValue
                 && p.IdentityType.Value.HasFlag(IdentityTypeFlags.Supplier)
             );
@@ -83,7 +70,7 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<Person> Contacts(this IQueryable<Person> persons, int orgId, long ownerId)
         {
-            return persons.Where(p => p.OrganizationId == orgId
+            return persons.Where(p => p.OrgId == orgId
                 && p.OwnerId == ownerId
             );
         }
@@ -112,6 +99,24 @@ namespace PlatformShared.Extentions
                 TargetId = targetId,
                 TargetName = targetName
             };
+        }
+
+        /// <summary>
+        /// Query users by role
+        /// 通过角色查询用户
+        /// </summary>
+        /// <param name="db">EF db</param>
+        /// <param name="orgId">Organization belonged id</param>
+        /// <param name="role">User role</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Id array</returns>
+        public static Task<List<int>> QueryUsersAsync(this MyDbContext db, int orgId, UserRole role, CancellationToken cancellationToken = default)
+        {
+            return db.Persons.AsNoTracking()
+                .Users(orgId)
+                .Where(ou => ou.UserRole >= role && ou.Status <= EntityStatus.Approved)
+                .Select(ou => ou.CoreUserId!.Value)
+                .ToListAsync(cancellationToken);
         }
 
         /// <summary>

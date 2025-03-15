@@ -9,6 +9,12 @@ namespace Platform.Server.Dto.App
     public record AppPurchasedQueryData : AppQueryData
     {
         /// <summary>
+        /// Global app id
+        /// 全局应用编号
+        /// </summary>
+        public int AppId { get; init; }
+
+        /// <summary>
         /// Expiry
         /// 到期时间
         /// </summary>

@@ -160,30 +160,36 @@ namespace PlatformShared.Database.Models
         /// Core user authentication codes
         /// 核心用户认证验证码
         /// </summary>
-        public ICollection<CoreAuthCode> CoreUserAuthCodes { get; set; } = [];
+        public ICollection<CoreAuthCode> CoreUserAuthCodes { get; } = default!;
 
         /// <summary>
-        /// Core organizations
-        /// 核心机构
+        /// Owned core organizations
+        /// 所属核心机构
         /// </summary>
-        public ICollection<CoreOrganization> CoreOrganizations { get; set; } = [];
+        public ICollection<CoreOrganization> OwnedOrganizations { get; } = default!;
 
         /// <summary>
         /// Core user devices
         /// 核心用户设备
         /// </summary>
-        public ICollection<CoreUserDevice> CoreUserDevices { get; set; } = [];
+        public ICollection<CoreUserDevice> CoreUserDevices { get; } = default!;
 
         /// <summary>
         /// Core user identifiers
         /// 核心用户登录编号
         /// </summary>
-        public ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = [];
+        public ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = default!;
 
         /// <summary>
-        /// Persons
-        /// 人员
+        /// Bound persons
+        /// 绑定的人员
         /// </summary>
-        public ICollection<Person> UserPersons { get; set; } = [];
+        public ICollection<Person> BoundPersons { get; } = default!;
+
+        /// <summary>
+        /// Invited persons
+        /// 邀请的人员
+        /// </summary>
+        public ICollection<Person> InvitedPersons { get; } = default!;
     }
 }

@@ -1,0 +1,1 @@
+﻿global using PromotionCodeConverter = com.etsoo.Database.Converters.EnumerationEFConverter<PlatformShared.Dto.PromotionCode, short>;

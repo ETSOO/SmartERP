@@ -265,7 +265,83 @@ namespace PlatformShared.Database.Models
     /// </summary>
     public enum PersonOwnerRelation : byte
     {
+        /// <summary>
+        /// Unknown
+        /// 未知
+        /// </summary>
+        Unknown = 0,
 
+        /// <summary>
+        /// Employee
+        /// 雇员
+        /// </summary>
+        Employee = 1,
+
+        /// <summary>
+        /// Supplier
+        /// 供应商
+        /// </summary>
+        Supplier = 3,
+
+        /// <summary>
+        /// Media
+        /// 媒体
+        /// </summary>
+        Media = 5,
+
+        /// <summary>
+        /// Government
+        /// 政府
+        /// </summary>
+        Government = 7,
+
+        /// <summary>
+        /// Shareholder
+        /// 股东
+        /// </summary>
+        Shareholder = 9,
+
+        /// <summary>
+        /// Consultant
+        /// 顾问
+        /// </summary>
+        Consultant = 11,
+
+        /// <summary>
+        /// Child
+        /// 子女
+        /// </summary>
+        Child = 50,
+
+        /// <summary>
+        /// Spouse
+        /// 配偶
+        /// </summary>
+        Spouse = 60,
+
+        /// <summary>
+        /// Brother
+        /// 兄弟
+        /// </summary>
+        Brother = 62,
+
+        /// <summary>
+        /// Sister
+        /// 姐妹
+        /// </summary>
+        Sister = 64,
+
+        /// <summary>
+        /// Parent
+        /// 父母
+        /// </summary>
+        Parent = 80,
+
+        /// <summary>
+        /// Grandparent
+        /// 祖父母
+        /// </summary>
+        Grandparent = 90
     }
 
     /// <summary>
@@ -302,7 +378,7 @@ namespace PlatformShared.Database.Models
         /// Organization (owner) Id
         /// 所属机构（所有者）编号
         /// </summary>
-        public int OrganizationId { get; set; }
+        public int OrgId { get; set; }
 
         /// <summary>
         /// Core organization Id related
@@ -338,7 +414,7 @@ namespace PlatformShared.Database.Models
         /// Name
         /// 名称
         /// </summary>
-        public string Name { get; set; } = default!;
+        public required string Name { get; set; }
 
         /// <summary>
         /// Given name
@@ -554,7 +630,13 @@ namespace PlatformShared.Database.Models
         /// Inviter
         /// 邀请人
         /// </summary>
-        public Person? Inviter { get; set; }
+        public CoreUser? Inviter { get; set; }
+
+        /// <summary>
+        /// Bound core organization
+        /// 绑定的核心机构
+        /// </summary>
+        public CoreOrganization? CoreOrganization { get; set; }
 
         /// <summary>
         /// Organization belonged
@@ -572,6 +654,6 @@ namespace PlatformShared.Database.Models
         /// Direct reports
         /// 直接下属
         /// </summary>
-        public ICollection<Person> DirectReports { get; set; } = [];
+        public ICollection<Person> DirectReports { get; } = default!;
     }
 }

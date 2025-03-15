@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PlatformShared.Dto;
 
 namespace PlatformShared.Database.Models.Configurations
 {
@@ -30,7 +31,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.ProductCategoryId).HasColumnName("product_category_id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.PersonCategoryId).HasColumnName("person_category_id");
-            entity.Property(e => e.Code).HasColumnName("code");
+            entity.Property(e => e.Code)
+                .HasConversion<PromotionCodeConverter>()
+                .HasColumnName("code");
             entity.Property(e => e.MinAmount)
                 .HasColumnType("money")
                 .HasColumnName("min_amount");

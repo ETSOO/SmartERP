@@ -73,12 +73,12 @@ namespace PlatformShared.Database.Models
         /// Core organization apps
         /// 核心机构应用
         /// </summary>
-        public ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = [];
+        public ICollection<CoreOrganizationApp> CoreOrganizationApps { get; } = default!;
 
         /// <summary>
         /// Core user device tokens
         /// 核心用户设备令牌
         /// </summary>
-        public ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; } = [];
+        public ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; } = default!;
     }
 }

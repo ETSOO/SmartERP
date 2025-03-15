@@ -1,7 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
-using com.etsoo.CoreFramework.Business;
 using com.etsoo.MessageQueue;
-using Microsoft.EntityFrameworkCore;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -47,12 +45,9 @@ namespace WorkerCenter.Main.Processors
 
             // Organization owner
             var organizationId = (int)message.Data.TargetId;
-            var owners = await _db.CoreOrganizationUsers
-                .AsNoTracking()
-                .Where(ou => ou.CoreOrganizationId == organizationId && ou.UserRole == UserRole.Founder && ou.Status <= EntityStatus.Approved)
-                .Select(ou => ou.CoreUserId)
-                .ToListAsync(cancellationToken)
-            ;
+
+            // Owners
+            var owners = await _db.QueryUsersAsync(organizationId, UserRole.Founder, cancellationToken);
 
             if (message.InviterId.HasValue)
             {

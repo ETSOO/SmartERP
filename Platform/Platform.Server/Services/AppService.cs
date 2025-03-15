@@ -213,11 +213,11 @@ namespace Platform.Server.Services
             // Current user's states
             var typeFlag = Enum.Parse<IdentityTypeFlags>(rq.IdentityType.ToString());
             var isUserValid = await _db.Persons.AsNoTracking()
-                .AnyAsync(ou => ou.CoreOrganizationId == orgId
-                    && ou.CoreUserId == User.IdInt
-                    && (ou.IdentityType.HasValue && ou.IdentityType.Value.HasFlag(typeFlag))
-                    && ou.Status <= EntityStatus.Approved
-                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow), cancellationToken);
+                .AnyAsync(u => u.OrgId == orgId
+                    && u.CoreUserId == User.IdInt
+                    && (u.IdentityType.HasValue && u.IdentityType.Value.HasFlag(typeFlag))
+                    && u.Status <= EntityStatus.Approved
+                    && (u.Expiry == null || u.Expiry >= DateTimeOffset.UtcNow), cancellationToken);
 
             List<AppData> apps = [];
 
@@ -458,6 +458,7 @@ namespace Platform.Server.Services
                 }).Select(oa => new AppPurchasedQueryData
                 {
                     Id = oa.Id,
+                    AppId = oa.CoreAppId,
                     Name = oa.CoreApp.Name,
                     LocalName = oa.LocalName,
                     IdentityType = oa.CoreApp.IdentityType,

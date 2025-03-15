@@ -1,5 +1,6 @@
 ﻿using Admin.Server.Dto.Query;
 using Admin.Server.RQ.Query;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -7,7 +8,6 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
-using PlatformShared.Extentions;
 using System.Buffers;
 using System.Net;
 
@@ -177,7 +177,7 @@ namespace Admin.Server.Services
                     o.Name,
                     o.Brand,
                     Apps = o.Apps.Count,
-                    Users = o.Persons.Users().Count(),
+                    Users = o.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
                     Persons = o.Persons.Count,
                     Owner = o.Owner.Name,
                     Pin = MyDbFunctions.HideData(o.Pin, default),
@@ -244,12 +244,12 @@ namespace Admin.Server.Services
 
                     if (rq.OrgId.HasValue)
                     {
-                        q = q.Where(u => u.UserPersons.Users().Any(p => p.CoreOrganizationId == rq.OrgId.Value));
+                        q = q.Where(u => u.BoundPersons.Any(p => p.OrgId == rq.OrgId.Value));
                     }
 
                     if (rq.InviterId.HasValue)
                     {
-                        q = q.Where(u => u.UserPersons.Users().Any(p => p.InviterId == rq.InviterId.Value));
+                        q = q.Where(u => u.BoundPersons.Any(p => p.InviterId == rq.InviterId.Value));
                     }
 
                     if (rq.Pin?.Length > 1)
@@ -268,7 +268,7 @@ namespace Admin.Server.Services
                     u.Status,
                     u.Creation,
 
-                    Orgs = u.UserPersons.Users().Select(p => p.OrganizationId).Distinct().Count(),
+                    Orgs = u.BoundPersons.Select(p => p.OrgId).Distinct().Count(),
                 })
                 .ToJsonAsync(writer, cancellationToken: cancellationToken);
 
@@ -386,7 +386,7 @@ namespace Admin.Server.Services
                 {
                     if (rq.OrgId.HasValue)
                     {
-                        q = q.Where(u => u.UserPersons.Users().Any(p => p.OrganizationId == rq.OrgId.Value));
+                        q = q.Where(u => u.BoundPersons.Any(p => p.OrgId == rq.OrgId.Value));
                     }
 
                     if (rq.ExcludeSelf is true)
@@ -566,7 +566,7 @@ namespace Admin.Server.Services
                     o.Creation,
 
                     Apps = o.Apps.Count,
-                    Users = o.Persons.Users().Count(),
+                    Users = o.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
                     Persons = o.Persons.Count,
                     Orders = o.Orders.Count
                 })
@@ -600,8 +600,8 @@ namespace Admin.Server.Services
                     Creation = u.Creation,
                     FrozenTime = u.FrozenTime,
 
-                    Orgs = u.CoreOrganizations.Count(),
-                    OrgList = u.CoreOrganizations.OrderByDescending(d => d.Id).Select(o => new IdNameItem
+                    Orgs = u.OwnedOrganizations.Count,
+                    OrgList = u.OwnedOrganizations.OrderByDescending(d => d.Id).Select(o => new IdNameItem
                     {
                         Id = o.Id,
                         Name = o.Name

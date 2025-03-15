@@ -19,13 +19,15 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Uid)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("uid");
-            entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+            entity.Property(e => e.OrgId).HasColumnName("org_id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.UserRole)
-                .HasConversion<byte>()
+                .HasConversion<short>()
                 .HasColumnName("user_role");
-            entity.Property(e => e.IdentityType).HasColumnName("identity_type");
+            entity.Property(e => e.IdentityType)
+                .HasConversion<byte>()
+                .HasColumnName("identity_type");
             entity.Property(e => e.IsLegalPerson)
                 .HasDefaultValue(false)
                 .HasColumnName("is_legal_person");
@@ -115,15 +117,30 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("political_status");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
             entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-            entity.Property(e => e.OwnerRelation).HasColumnName("owner_relation");
+            entity.Property(e => e.OwnerRelation)
+                .HasConversion<byte>()
+                .HasColumnName("owner_relation");
 
-            entity.HasOne(d => d.CoreUser).WithMany(p => p.UserPersons)
+            entity.HasOne(d => d.CoreUser).WithMany(u => u.BoundPersons)
                 .HasForeignKey(d => d.CoreUserId)
                 .HasConstraintName("person_core_user_id_fkey");
+
+            entity.HasOne(d => d.Inviter).WithMany(u => u.InvitedPersons)
+                .HasForeignKey(d => d.InviterId)
+                .HasConstraintName("person_inviter_id_fkey");
 
             entity.HasOne(d => d.ReportToUser).WithMany(p => p.DirectReports)
                 .HasForeignKey(d => d.ReportTo)
                 .HasConstraintName("person_report_to_fkey");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(o => o.BoundPersons)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .HasConstraintName("person_core_organization_id_fkey");
+
+            entity.HasOne(d => d.Organization).WithMany(o => o.Persons)
+                .HasForeignKey(d => d.OrgId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_org_id_fkey");
         }
     }
 }

@@ -77,6 +77,6 @@
         /// Core user device tokens
         /// 核心用户设备令牌
         /// </summary>
-        public ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; set; } = [];
+        public ICollection<CoreUserDeviceToken> CoreUserDeviceTokens { get; } = default!;
     }
 }

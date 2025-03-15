@@ -193,7 +193,7 @@ namespace Platform.Server.Services
             .Where(o => o.Id == rq.OrgId)
             .Join(_db.Persons.Where(u => u.CoreUserId != null),
                 org => new { OrgId = org.Id, UserId = rq.Requester },
-                requester => new { OrgId = requester.OrganizationId, UserId = requester.CoreUserId.GetValueOrDefault() },
+                requester => new { OrgId = requester.OrgId, UserId = requester.CoreUserId.GetValueOrDefault() },
                 (org, requester) => new
                 {
                     OrgName = org.Name,

@@ -47,6 +47,9 @@ namespace PlatformShared.Dto
     /// </summary>
     public abstract class PromotionCode : Enumeration<short>
     {
+        public static implicit operator short(PromotionCode pc) => pc.Value;
+        public static explicit operator PromotionCode(short value) => null!;
+
         /// <summary>
         /// 订单满{m}减{n}
         /// </summary>

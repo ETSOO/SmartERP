@@ -17,10 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.ServiceApp" Version="1.2.97" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.13" />
+    <PackageReference Include="com.etsoo.ServiceApp" Version="1.2.99" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>8.0.13</Version>
+      <Version>8.0.14</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.11.2" />

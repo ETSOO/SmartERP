@@ -232,7 +232,10 @@ export default function AllOrgs() {
 
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.view} href={`./${data.id}`}>
+                <IconButtonLink
+                  title={labels.view}
+                  href={`./../view/${data.id}`}
+                >
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>

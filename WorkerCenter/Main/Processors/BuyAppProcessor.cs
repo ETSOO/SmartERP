@@ -57,11 +57,7 @@ namespace WorkerCenter.Main.Processors
             }
 
             // All admins
-            var admins = await _db.CoreOrganizationUsers
-                .Where(ou => ou.CoreOrganizationId == orgId && ou.UserRole >= UserRole.Admin)
-                .Select(ou => ou.CoreUserId)
-                .ToArrayAsync(cancellationToken);
-            ;
+            var admins = await _db.QueryUsersAsync(orgId, UserRole.Admin, cancellationToken);
 
             // Send email notice
             // Emails

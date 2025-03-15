@@ -81,36 +81,6 @@ namespace PlatformShared.Database.Models
         public required string Region { get; set; }
 
         /// <summary>
-        /// Core organization apps
-        /// 核心机构应用
-        /// </summary>
-        public ICollection<CoreOrganizationApp> Apps { get; set; } = [];
-
-        /// <summary>
-        /// Core organization orders
-        /// 核心机构订单
-        /// </summary>
-        public ICollection<OrderHeader> Orders { get; set; } = [];
-
-        /// <summary>
-        /// Core organization persons
-        /// 核心机构人员
-        /// </summary>
-        public ICollection<Person> Persons { get; set; } = [];
-
-        /// <summary>
-        /// Core organization products
-        /// 核心机构产品
-        /// </summary>
-        public ICollection<Product> Products { get; set; } = [];
-
-        /// <summary>
-        /// Core organization inverse parent
-        /// 核心机构反向父机构
-        /// </summary>
-        public ICollection<CoreOrganization> InverseParent { get; set; } = [];
-
-        /// <summary>
         /// Owner
         /// 所有者
         /// </summary>
@@ -121,5 +91,41 @@ namespace PlatformShared.Database.Models
         /// 父机构
         /// </summary>
         public CoreOrganization? Parent { get; set; }
+
+        /// <summary>
+        /// Core organization apps
+        /// 核心机构应用
+        /// </summary>
+        public ICollection<CoreOrganizationApp> Apps { get; } = default!;
+
+        /// <summary>
+        /// Core organization orders
+        /// 核心机构订单
+        /// </summary>
+        public ICollection<OrderHeader> Orders { get; } = default!;
+
+        /// <summary>
+        /// Bound persons
+        /// 绑定的人员
+        /// </summary>
+        public ICollection<Person> BoundPersons { get; } = default!;
+
+        /// <summary>
+        /// Core organization persons
+        /// 核心机构人员
+        /// </summary>
+        public ICollection<Person> Persons { get; set; } = default!;
+
+        /// <summary>
+        /// Core organization products
+        /// 核心机构产品
+        /// </summary>
+        public ICollection<Product> Products { get; } = default!;
+
+        /// <summary>
+        /// Children organizations
+        /// 子机构
+        /// </summary>
+        public ICollection<CoreOrganization> Children { get; } = default!;
     }
 }

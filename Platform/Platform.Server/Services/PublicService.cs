@@ -114,8 +114,11 @@ namespace Platform.Server.Services
             {
                 _db.Persons.Add(new Person
                 {
-                    OrganizationId = orgId,
+                    OrgId = orgId,
                     CoreUserId = userId,
+                    Name = User.Name,
+                    FamilyName = User.FamilyName,
+                    GivenName = User.GivenName,
                     UserRole = data.UserRole,
                     IdentityType = IdentityTypeFlags.User,
                     InviterId = inviterId,
@@ -301,11 +304,14 @@ namespace Platform.Server.Services
                 if (string.IsNullOrEmpty(rq.AppKey))
                 {
                     // Get app name from root
-                    appName = await _db.CoreApps.Where(a => a.Id == rq.AppId).Select(a => a.Name).FirstOrDefaultAsync(cancellationToken);
+                    appName = await _db.CoreApps.AsNoTracking()
+                        .Where(a => a.Id == rq.AppId)
+                        .Select(a => a.Name)
+                        .FirstOrDefaultAsync(cancellationToken);
                 }
                 else
                 {
-                    appName = await _db.CoreOrganizationApps
+                    appName = await _db.CoreOrganizationApps.AsNoTracking()
                         .Where(oa => oa.CoreAppId == rq.AppId && oa.AppKey == rq.AppKey)
                         .Select(oa => oa.LocalName ?? oa.CoreApp.Name)
                         .FirstOrDefaultAsync(cancellationToken);

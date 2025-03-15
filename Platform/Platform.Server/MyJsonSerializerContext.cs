@@ -73,6 +73,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(MemberUpdateRQ))]
 
     [JsonSerializable(typeof(MemberInvitationData))]
+    [JsonSerializable(typeof(IEnumerable<MemberQueryData>))]
 
     // Org
     [JsonSerializable(typeof(OrgCreateRQ))]

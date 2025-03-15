@@ -151,8 +151,7 @@ namespace Platform.Server.Services
 
         private IQueryable<Person> CreateQuery(MemberListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
         {
-            var query = _db.Persons.Users(User.OrganizationInt)
-                .AsNoTracking()
+            var query = _db.Persons.AsNoTracking().Users(User.OrganizationInt)
                 .QueryEtsoo(rq, (ou) => ou.Id, (ou) => ou.Status, (q) =>
                 {
                     if (rq.ExcludeSelf is true)
@@ -332,12 +331,14 @@ namespace Platform.Server.Services
             {
                 Id = ou.Id,
                 Name = ou.Name,
-                UserRole = ou.UserRole.GetValueOrDefault(),
+                // ou.UserRole.GetValueOrDefault() will fail to translate with names to SQL
+                // 当构建列的时候，需要特别留意类似的问题，莫名其妙的错误可能会导致调试非常浪费时间
+                UserRole = ou.UserRole!.Value,
                 AssignedId = ou.AssignedId,
                 IsOwner = ou.Organization.OwnerId == User.IdInt,
                 IsSelf = ou.CoreUserId == User.IdInt,
                 IsEditable = ou.UserRole <= User.Role,
-                DirectReports = ou.DirectReports.Count(),
+                DirectReports = ou.DirectReports.Count,
                 Status = ou.Status,
                 Creation = ou.Creation
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);

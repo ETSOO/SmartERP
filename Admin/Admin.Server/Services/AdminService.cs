@@ -56,7 +56,7 @@ namespace Admin.Server.Services
                 .Where(app => app.Id == rq.Id)
                 .Join(_db.Persons.Where(u => u.CoreUserId != null),
                     app => new { OrgId = app.CoreOrganizationId, UserId = rq.Requester },
-                    requester => new { OrgId = requester.OrganizationId, UserId = requester.CoreUserId.GetValueOrDefault(0) },
+                    requester => new { requester.OrgId, UserId = requester.CoreUserId.GetValueOrDefault(0) },
                     (app, requester) => new
                     {
                         OrganizationId = app.CoreOrganizationId,

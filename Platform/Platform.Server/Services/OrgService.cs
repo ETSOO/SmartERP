@@ -107,6 +107,7 @@ namespace Platform.Server.Services
                 Persons = [
                     new Person
                     {
+                        Name = User.Name,
                         CoreUserId = User.IdInt,
                         IdentityType = IdentityTypeFlags.User,
                         UserRole = UserRole.Founder
@@ -182,7 +183,7 @@ namespace Platform.Server.Services
                     && ou.Organization.Status <= EntityStatus.Approved)
                 .Select(ou => new OrgGetMyData
                 {
-                    Id = ou.OrganizationId,
+                    Id = ou.OrgId,
                     Name = ou.Organization.Name,
                     Brand = ou.Organization.Brand
                 })
@@ -271,7 +272,7 @@ namespace Platform.Server.Services
             }
 
             // Delete the user from the organization
-            var affacted = await _db.Persons.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
+            var affacted = await _db.Persons.Where(p => p.Id == ou.Id).ExecuteDeleteAsync(cancellationToken);
             if (affacted == 0)
             {
                 return ApplicationErrors.NoId.AsResult();
@@ -328,7 +329,7 @@ namespace Platform.Server.Services
             var query = _db.Persons
                 .AsNoTracking()
                 .Where(ou => ou.CoreUserId == User.IdInt)
-                .QueryEtsoo(rq, (ou) => ou.OrganizationId, (ou) => ou.Organization.Status, (q) =>
+                .QueryEtsoo(rq, (ou) => ou.OrgId, (ou) => ou.Organization.Status, (q) =>
                 {
                     if (rq.ParentId.HasValue)
                     {
@@ -401,7 +402,7 @@ namespace Platform.Server.Services
 
             var data = await query.Select(ou => new OrgQueryData
             {
-                Id = ou.Organization.Id,
+                Id = ou.OrgId,
                 Name = ou.Organization.Name,
                 IsOwner = ou.Organization.OwnerId == User.IdInt,
                 Brand = ou.Organization.Brand,
@@ -409,7 +410,7 @@ namespace Platform.Server.Services
                 ParentId = ou.Organization.ParentId,
                 Status = ou.Organization.Status,
                 Creation = ou.Organization.Creation,
-                Users = ou.Organization.Persons.Users().Count(),
+                Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
                 UserStatus = ou.Status,
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToListAsync(cancellationToken);
@@ -439,7 +440,7 @@ namespace Platform.Server.Services
 
             var (hasContent, commandText) = await query.Select(ou => new OrgQueryData
             {
-                Id = ou.Organization.Id,
+                Id = ou.OrgId,
                 Name = ou.Organization.Name,
                 IsOwner = ou.Organization.OwnerId == User.IdInt,
                 Brand = ou.Organization.Brand,
@@ -448,7 +449,7 @@ namespace Platform.Server.Services
                 Status = ou.Organization.Status,
                 Creation = ou.Organization.Creation,
                 UserStatus = ou.Status,
-                Users = ou.Organization.Persons.Users().Count(),
+                Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
@@ -473,7 +474,7 @@ namespace Platform.Server.Services
                 .Where(ou => ou.CoreUserId == User.IdInt)
                 .Select(ou => new
                 {
-                    Id = ou.CoreOrganizationId,
+                    Id = ou.OrgId,
                     IsOwner = ou.Organization.OwnerId == User.IdInt,
                     OwnerName = MyDbFunctions.HideData(ou.Organization.Owner.Name, default),
                     ou.Organization.Name,
@@ -485,7 +486,8 @@ namespace Platform.Server.Services
                     ou.Organization.Creation,
                     ou.Organization.Status,
                     ou.Organization.QueryKeyword,
-                    Users = ou.Organization.Persons.Users().Count(),
+                    Persons = ou.Organization.Persons.Count,
+                    Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
                     UserStatus = ou.Status,
                     UserExpiry = ou.Expiry
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
