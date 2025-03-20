@@ -84,6 +84,31 @@ const router = createDynamicRouter([
           {
             path: "/home",
             Component: Home
+          },
+          {
+            path: "/home/contact/all",
+            lazy: async () => {
+              const AllContacts = await import(
+                "./pages/home/contact/AllContacts"
+              );
+              return { Component: AllContacts.default };
+            }
+          },
+          {
+            path: "/home/contact/view/:id",
+            lazy: async () => {
+              const ViewContact = await import(
+                "./pages/home/contact/ViewContact"
+              );
+              return { Component: ViewContact.default };
+            }
+          },
+          {
+            path: "/home/org/profile",
+            lazy: async () => {
+              const OrgProfile = await import("./pages/home/org/OrgProfile");
+              return { Component: OrgProfile.default };
+            }
           }
         ]
       }

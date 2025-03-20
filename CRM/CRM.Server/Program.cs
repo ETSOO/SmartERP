@@ -9,11 +9,14 @@ using com.etsoo.Utils.Serialization;
 using com.etsoo.Web;
 using com.etsoo.WebUtils;
 using CRM.Server;
+using CRM.Server.Endpoints;
+using CRM.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
+using PlatformShared.Database;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -71,6 +74,17 @@ if (string.IsNullOrEmpty(connectonString))
 {
     throw new Exception("SmartERP connection string not found");
 }
+
+services.AddDbContext<MyDbContext>((provider, options) =>
+{
+    options.UseNpgsql(connectonString);
+
+    if (isDevelopment)
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
 
 // SmartERP Service Application
 var seSection = configuration.GetSection("SmartERPService");
@@ -163,6 +177,7 @@ if (corsOptions.Required)
 // API services
 services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<ISEAuthService, SEAuthService>();
+services.AddScoped<IPersonService, PersonService>();
 
 var app = builder.Build();
 
@@ -220,6 +235,7 @@ var api = app.MapGroup("/api").WithOpenApi();
 
 // Endpoints
 api.MapAuth()
+    .MapPerson()
     .AddModelValidators()
     .RequireAuthorization()
 ;

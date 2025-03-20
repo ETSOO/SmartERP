@@ -75,7 +75,7 @@ export default function AllApps() {
           name="keyword"
           defaultValue={data.keyword}
         />,
-        <IdentityType value={data.identityType} />
+        <IdentityType search value={data.identityType} />
       ]}
       loadData={(data, lastItem) =>
         app.core.appApi.query(

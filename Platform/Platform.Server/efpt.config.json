@@ -67,10 +67,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "public.person_address",
-         "ObjectType": 0
-      },
-      {
          "Name": "public.person_asset",
          "ObjectType": 0
       },
@@ -79,15 +75,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "public.person_favorite",
-         "ObjectType": 0
-      },
-      {
          "Name": "public.person_info",
-         "ObjectType": 0
-      },
-      {
-         "Name": "public.person_keyword",
          "ObjectType": 0
       },
       {
@@ -103,6 +91,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.person_relation",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.product",
          "ObjectType": 0
       },
@@ -112,14 +104,6 @@
       },
       {
          "Name": "public.product_culture",
-         "ObjectType": 0
-      },
-      {
-         "Name": "public.product_favorite",
-         "ObjectType": 0
-      },
-      {
-         "Name": "public.product_keyword",
          "ObjectType": 0
       },
       {

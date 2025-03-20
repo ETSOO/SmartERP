@@ -40,7 +40,6 @@ namespace Platform.Server
     [JsonSerializable(typeof(AppListRQ))]
     [JsonSerializable(typeof(AppGetMyRQ))]
     [JsonSerializable(typeof(AppPurchasedQueryRQ))]
-    [JsonSerializable(typeof(AppQueryRQ))]
     [JsonSerializable(typeof(AppRenewRQ))]
     [JsonSerializable(typeof(AppUpdateRQ))]
 
@@ -69,7 +68,6 @@ namespace Platform.Server
     [JsonSerializable(typeof(MemberAdjustReportToRQ))]
     [JsonSerializable(typeof(IEnumerable<MemberListRQ>))]
     [JsonSerializable(typeof(MemberInviteRQ))]
-    [JsonSerializable(typeof(MemberQueryRQ))]
     [JsonSerializable(typeof(MemberUpdateRQ))]
 
     [JsonSerializable(typeof(MemberInvitationData))]
@@ -80,7 +78,6 @@ namespace Platform.Server
     [JsonSerializable(typeof(OrgListRQ))]
     [JsonSerializable(typeof(OrgGetMyRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
-    [JsonSerializable(typeof(OrgQueryRQ))]
 
     [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]

@@ -36,9 +36,9 @@ public partial class Address
 
     public short Status { get; set; }
 
+    public int CoreOrganizationId { get; set; }
+
+    public virtual CoreOrganization CoreOrganization { get; set; } = null!;
+
     public virtual ICollection<OrderHeader> OrderHeaders { get; set; } = new List<OrderHeader>();
-
-    public virtual ICollection<Person> People { get; set; } = new List<Person>();
-
-    public virtual ICollection<Person> PeopleNavigation { get; set; } = new List<Person>();
 }

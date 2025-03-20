@@ -263,5 +263,17 @@ namespace PlatformShared.Database.Models
         /// JSON 数据
         /// </summary>
         public string? Data { get; set; }
+
+        /// <summary>
+        /// Buyer
+        /// 购买方
+        /// </summary>
+        public Person Buyer { get; set; } = null!;
+
+        /// <summary>
+        /// Seller
+        /// 销售方
+        /// </summary>
+        public Person Seller { get; set; } = null!;
     }
 }

@@ -43,6 +43,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.InventoryWay)
                 .HasDefaultValue((short)0)
                 .HasColumnName("inventory_way");
+            entity.Property(e => e.Keywords).HasColumnName("keywords");
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)
                 .HasColumnName("logo");
@@ -77,44 +78,6 @@ namespace Platform.Server.Models.Configurations
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("product_unit_id_fkey");
-
-            entity.HasMany(d => d.CoreUsers).WithMany(p => p.Products)
-                .UsingEntity<Dictionary<string, object>>(
-                    "ProductFavorite",
-                    r => r.HasOne<CoreUser>().WithMany()
-                        .HasForeignKey("CoreUserId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("product_favorite_core_user_id_fkey"),
-                    l => l.HasOne<Product>().WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("product_favorite_product_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("ProductId", "CoreUserId").HasName("product_favorite_pkey");
-                        j.ToTable("product_favorite");
-                        j.IndexerProperty<int>("ProductId").HasColumnName("product_id");
-                        j.IndexerProperty<int>("CoreUserId").HasColumnName("core_user_id");
-                    });
-
-            entity.HasMany(d => d.FeatureKeywords).WithMany(p => p.Products)
-                .UsingEntity<Dictionary<string, object>>(
-                    "ProductKeyword",
-                    r => r.HasOne<FeatureKeyword>().WithMany()
-                        .HasForeignKey("FeatureKeywordId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("product_keyword_feature_keyword_id_fkey"),
-                    l => l.HasOne<Product>().WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("product_keyword_product_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("ProductId", "FeatureKeywordId").HasName("product_keyword_pkey");
-                        j.ToTable("product_keyword");
-                        j.IndexerProperty<int>("ProductId").HasColumnName("product_id");
-                        j.IndexerProperty<int>("FeatureKeywordId").HasColumnName("feature_keyword_id");
-                    });
 
             OnConfigurePartial(entity);
         }

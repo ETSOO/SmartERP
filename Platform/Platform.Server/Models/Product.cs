@@ -49,6 +49,8 @@ public partial class Product
 
     public short InventoryWay { get; set; }
 
+    public List<int>? Keywords { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
@@ -64,8 +66,4 @@ public partial class Product
     public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 
     public virtual ProductUnit Unit { get; set; } = null!;
-
-    public virtual ICollection<CoreUser> CoreUsers { get; set; } = new List<CoreUser>();
-
-    public virtual ICollection<FeatureKeyword> FeatureKeywords { get; set; } = new List<FeatureKeyword>();
 }

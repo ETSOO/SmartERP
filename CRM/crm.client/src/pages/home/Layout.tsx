@@ -1,5 +1,14 @@
 import { extendTheme, Theme } from "@mui/material/styles";
 import HomeIcon from "@mui/icons-material/Home";
+import ContactsIcon from "@mui/icons-material/Contacts";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import GroupsIcon from "@mui/icons-material/Groups";
+import ShopIcon from "@mui/icons-material/Shop";
+import HailIcon from "@mui/icons-material/Hail";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import GroupIcon from "@mui/icons-material/Group";
+import SettingsIcon from "@mui/icons-material/Settings";
+import DescriptionIcon from "@mui/icons-material/Description";
 import React from "react";
 import { Typography, useMediaQuery } from "@mui/material";
 import { Outlet } from "react-router-dom";
@@ -47,7 +56,21 @@ export default function Home() {
   app.mdUp = mdUp;
 
   // Labels
-  const labels = app.getLabels("app3", "menuHome", "signoutSuccess");
+  const labels = app.getLabels(
+    "app3",
+    "contacts",
+    "customers",
+    "menuHome",
+    "offerings",
+    "orders",
+    "org",
+    "profiles",
+    "purchases",
+    "signoutSuccess",
+    "system",
+    "suppliers",
+    "users"
+  );
 
   // User context / state
   const { state } = React.useContext(app.userState.context);
@@ -69,6 +92,67 @@ export default function Home() {
         segment: "home",
         title: labels.menuHome,
         icon: <HomeIcon />
+      },
+      {
+        segment: "home/contact/all",
+        title: labels.contacts,
+        icon: <ContactsIcon />,
+        subs: ["/home/contact/.*"]
+      },
+      {
+        segment: "home/order/all",
+        title: labels.orders,
+        icon: <ShoppingCartIcon />,
+        subs: ["/home/order/.*"]
+      },
+      {
+        segment: "home/customer/all",
+        title: labels.customers,
+        icon: <GroupsIcon />,
+        subs: ["/home/customer/.*"]
+      },
+      {
+        segment: "home/product/all",
+        title: labels.offerings,
+        icon: <ShopIcon />,
+        subs: ["/home/product/.*"]
+      },
+      {
+        segment: "home/po/all",
+        title: labels.purchases,
+        icon: <InventoryIcon />,
+        subs: ["/home/po/.*"]
+      },
+      {
+        segment: "home/supplier/all",
+        title: labels.suppliers,
+        icon: <HailIcon />,
+        subs: ["/home/supplier/.*"]
+      },
+      {
+        kind: "divider"
+      },
+      {
+        kind: "header",
+        title: labels.org
+      },
+      {
+        segment: "home/org/profile",
+        title: labels.profiles,
+        icon: <DescriptionIcon />,
+        subs: ["/home/org/.*"]
+      },
+      {
+        segment: "home/user/all",
+        title: labels.users,
+        icon: <GroupIcon />,
+        subs: ["/home/user/.*"]
+      },
+      {
+        segment: "home/system/all",
+        title: labels.system,
+        icon: <SettingsIcon />,
+        subs: ["/home/system/.*"]
       }
     ];
 

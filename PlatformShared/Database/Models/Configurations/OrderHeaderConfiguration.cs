@@ -93,6 +93,16 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasDefaultValue(EntityStatus.Normal)
                 .HasColumnName("status");
+
+            entity.HasOne(d => d.Buyer).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.BuyerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("order_header_buyer_fkey");
+
+            entity.HasOne(d => d.Seller).WithMany(p => p.Purchases)
+                .HasForeignKey(d => d.SellerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("order_header_seller_fkey");
         }
     }
 }

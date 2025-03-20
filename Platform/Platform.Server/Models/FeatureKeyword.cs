@@ -18,8 +18,4 @@ public partial class FeatureKeyword
     public short Kind { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
-
-    public virtual ICollection<Person> People { get; set; } = new List<Person>();
-
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

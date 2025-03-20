@@ -9,6 +9,8 @@ public partial class PersonInfo
 {
     public int Id { get; set; }
 
+    public long PersonId { get; set; }
+
     public short Kind { get; set; }
 
     public string Identifier { get; set; } = null!;
@@ -24,4 +26,6 @@ public partial class PersonInfo
     public bool? IsDefault { get; set; }
 
     public virtual CoreUser CoreUser { get; set; } = null!;
+
+    public virtual Person Person { get; set; } = null!;
 }

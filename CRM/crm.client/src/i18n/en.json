@@ -1,3 +1,16 @@
 {
-  "smarterpCRM": "SmartERP Business Management"
+  "assets": "Assets",
+  "basicInfo": "Basic Info",
+  "contacts": "Contacts",
+  "customers": "Customers",
+  "idUser": "User",
+  "jobTitle": "Job title",
+  "offerings": "Offerings",
+  "orders": "Orders",
+  "personName": "Name",
+  "profiles": "Profiles",
+  "purchases": "Purchases",
+  "smarterpCRM": "SmartERP Business Management",
+  "system": "System",
+  "suppliers": "Suppliers"
 }

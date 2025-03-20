@@ -129,6 +129,12 @@ namespace PlatformShared.Database
         public required DbSet<PersonProfileAttachment> PersonProfileAttachments { get; set; }
 
         /// <summary>
+        /// Person relations
+        /// 人员关系
+        /// </summary>
+        public required DbSet<PersonRelation> PersonRelations { get; set; }
+
+        /// <summary>
         /// Products
         /// 产品
         /// </summary>
@@ -200,6 +206,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new PersonProductConfiguration());
             modelBuilder.ApplyConfiguration(new PersonProfileConfiguration());
             modelBuilder.ApplyConfiguration(new PersonProfileAttachmentConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonRelationConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
             modelBuilder.ApplyConfiguration(new ProductCategoryConfiguration());
             modelBuilder.ApplyConfiguration(new ProductCultureConfiguration());

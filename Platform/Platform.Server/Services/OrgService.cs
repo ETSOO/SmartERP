@@ -94,9 +94,10 @@ namespace Platform.Server.Services
             ;
 
             // Create organization
+            var userId = User.IdInt;
             var org = new CoreOrganization
             {
-                OwnerId = User.IdInt,
+                OwnerId = userId,
                 Name = rq.Name,
                 Brand = rq.Brand,
                 Pin = rq.Pin,
@@ -108,9 +109,10 @@ namespace Platform.Server.Services
                     new Person
                     {
                         Name = User.Name,
-                        CoreUserId = User.IdInt,
+                        CoreUserId = userId,
                         IdentityType = IdentityTypeFlags.User,
-                        UserRole = UserRole.Founder
+                        UserRole = UserRole.Founder,
+                        UserId = userId
                     }
                 ]
             };

@@ -69,6 +69,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasDefaultValue(ProductInventoryWay.None)
                 .HasColumnName("inventory_way");
+            entity.Property(e => e.Keywords).HasColumnName("keywords");
         }
     }
 }

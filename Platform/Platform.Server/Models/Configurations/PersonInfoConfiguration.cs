@@ -32,12 +32,18 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("identifier");
             entity.Property(e => e.IsDefault).HasColumnName("is_default");
             entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.Subscribed).HasColumnName("subscribed");
 
             entity.HasOne(d => d.CoreUser).WithMany(p => p.PersonInfos)
                 .HasForeignKey(d => d.CoreUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_info_core_user_id_fkey");
+
+            entity.HasOne(d => d.Person).WithMany(p => p.PersonInfos)
+                .HasForeignKey(d => d.PersonId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_info_person_id_fkey");
 
             OnConfigurePartial(entity);
         }

@@ -24,6 +24,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.City)
                 .HasMaxLength(50)
                 .HasColumnName("city");
+            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -55,6 +56,11 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.Addresses)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("address_core_organization_id_fkey");
 
             OnConfigurePartial(entity);
         }

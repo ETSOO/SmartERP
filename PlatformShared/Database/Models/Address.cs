@@ -105,5 +105,11 @@ namespace PlatformShared.Database.Models
         /// 状态
         /// </summary>
         public EntityStatus Status { get; set; }
+
+        /// <summary>
+        /// Core organization Id
+        /// 核心机构（订单所属机构）编号
+        /// </summary>
+        public int CoreOrganizationId { get; set; }
     }
 }

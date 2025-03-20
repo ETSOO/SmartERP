@@ -1,3 +1,16 @@
 {
-  "smarterpCRM": "司友云ERP业务管理"
+  "assets": "资产",
+  "basicInfo": "基本信息",
+  "contacts": "联系人",
+  "customers": "客户",
+  "idUser": "用户",
+  "jobTitle": "职位",
+  "offerings": "产品和服务",
+  "orders": "订单",
+  "personName": "名称 / 姓名",
+  "profiles": "档案",
+  "purchases": "采购",
+  "smarterpCRM": "司友云ERP业务管理",
+  "system": "系统",
+  "suppliers": "供应商"
 }

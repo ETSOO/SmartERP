@@ -1,3 +1,16 @@
 {
-  "smarterpCRM": "司友雲ERP業務管理"
+  "assets": "資產",
+  "basicInfo": "基本信息",
+  "contacts": "聯絡人",
+  "customers": "客戶",
+  "idUser": "用戶",
+  "jobTitle": "職位",
+  "offerings": "產品和服務",
+  "orders": "訂單",
+  "personName": "名稱 / 姓名",
+  "profiles": "檔案",
+  "purchases": "採購",
+  "smarterpCRM": "司友雲ERP業務管理",
+  "system": "系統",
+  "suppliers": "供應商"
 }

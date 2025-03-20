@@ -122,6 +122,7 @@ namespace Platform.Server.Services
                     UserRole = data.UserRole,
                     IdentityType = IdentityTypeFlags.User,
                     InviterId = inviterId,
+                    UserId = userId
                 });
 
                 var user = await _db.CoreUsers.FindAsync([userId], cancellationToken: cancellationToken);

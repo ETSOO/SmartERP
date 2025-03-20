@@ -11,7 +11,7 @@ public partial class Person
 
     public Guid Uid { get; set; }
 
-    public int OrganizationId { get; set; }
+    public int OrgId { get; set; }
 
     public int? CoreOrganizationId { get; set; }
 
@@ -48,8 +48,6 @@ public partial class Person
     public string? AssignedId { get; set; }
 
     public List<string>? Regions { get; set; }
-
-    public int? AddressId { get; set; }
 
     public List<string>? Currencies { get; set; }
 
@@ -89,17 +87,15 @@ public partial class Person
 
     public List<int>? CategoryIds { get; set; }
 
-    public long? OwnerId { get; set; }
+    public List<int>? Keywords { get; set; }
 
-    public short? OwnerRelation { get; set; }
+    public List<int>? Addresses { get; set; }
 
-    public virtual Address? Address { get; set; }
+    public int UserId { get; set; }
 
     public virtual CoreOrganization? CoreOrganization { get; set; }
 
     public virtual CoreUser? CoreUser { get; set; }
-
-    public virtual ICollection<Person> InverseOwner { get; set; } = new List<Person>();
 
     public virtual ICollection<Person> InverseReportToNavigation { get; set; } = new List<Person>();
 
@@ -111,25 +107,25 @@ public partial class Person
 
     public virtual ICollection<OrderHeader> OrderHeaderSellers { get; set; } = new List<OrderHeader>();
 
-    public virtual CoreOrganization Organization { get; set; } = null!;
-
-    public virtual Person? Owner { get; set; }
+    public virtual CoreOrganization Org { get; set; } = null!;
 
     public virtual ICollection<PersonAsset> PersonAssetPeople { get; set; } = new List<PersonAsset>();
 
     public virtual ICollection<PersonAsset> PersonAssetSuppliers { get; set; } = new List<PersonAsset>();
 
+    public virtual ICollection<PersonInfo> PersonInfos { get; set; } = new List<PersonInfo>();
+
     public virtual ICollection<PersonProduct> PersonProducts { get; set; } = new List<PersonProduct>();
 
     public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
+
+    public virtual ICollection<PersonRelation> PersonRelationContacts { get; set; } = new List<PersonRelation>();
+
+    public virtual ICollection<PersonRelation> PersonRelationPeople { get; set; } = new List<PersonRelation>();
 
     public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 
     public virtual Person? ReportToNavigation { get; set; }
 
-    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
-
-    public virtual ICollection<CoreUser> CoreUsers { get; set; } = new List<CoreUser>();
-
-    public virtual ICollection<FeatureKeyword> FeatureKeywords { get; set; } = new List<FeatureKeyword>();
+    public virtual CoreUser User { get; set; } = null!;
 }

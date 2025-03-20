@@ -65,7 +65,5 @@ public partial class CoreUser
 
     public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
 
-    public virtual ICollection<Person> People { get; set; } = new List<Person>();
-
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<Person> PersonUsers { get; set; } = new List<Person>();
 }

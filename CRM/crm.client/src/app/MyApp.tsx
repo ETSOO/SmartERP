@@ -1,9 +1,12 @@
 import { IServiceAppSettings, MUGlobal, ServiceApp } from "@etsoo/materialui";
 import { MyUser } from "./MyUser";
-import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
+import { DataTypes, DomUtils, ExtendUtils, Utils } from "@etsoo/shared";
 import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
+import { CrmApp, ICrmApp } from "@etsoo/smarterp-crm";
 
+// Mixin, merge them together with the same name
+interface MyApp extends ICrmApp {}
 class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   /**
    * Core name
@@ -13,10 +16,18 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   }
 
   /**
+   * App, for mixin
+   */
+  get app() {
+    return this;
+  }
+
+  /**
    * Core application
    */
   readonly core = new CoreApp(this, this.coreApi);
 }
+ExtendUtils.applyMixins(MyApp, [CrmApp]);
 
 // Detected country or region
 const { detectedCountry } = DomUtils;

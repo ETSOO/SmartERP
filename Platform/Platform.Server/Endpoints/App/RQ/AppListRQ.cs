@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using System.Text.Json.Serialization;
 
 namespace Platform.Server.Endpoints.App.RQ
 {
@@ -6,6 +7,7 @@ namespace Platform.Server.Endpoints.App.RQ
     /// Application list request data
     /// 应用列表请求数据
     /// </summary>
+    [JsonDerivedType(typeof(AppQueryRQ))]
     public record AppListRQ : QueryIntRQ
     {
         /// <summary>

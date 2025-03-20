@@ -69,7 +69,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Regions)
                 .HasColumnType("character(2)[]")
                 .HasColumnName("regions");
-            entity.Property(e => e.AddressId).HasColumnName("address_id");
             entity.Property(e => e.Currencies)
                 .HasColumnType("character(3)[]")
                 .HasColumnName("currencies");
@@ -116,10 +115,9 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(50)
                 .HasColumnName("political_status");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
-            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-            entity.Property(e => e.OwnerRelation)
-                .HasConversion<byte>()
-                .HasColumnName("owner_relation");
+            entity.Property(e => e.Keywords).HasColumnName("keywords");
+            entity.Property(e => e.Addresses).HasColumnName("addresses");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.CoreUser).WithMany(u => u.BoundPersons)
                 .HasForeignKey(d => d.CoreUserId)

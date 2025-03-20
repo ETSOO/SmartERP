@@ -173,5 +173,11 @@ namespace PlatformShared.Database.Models
         /// 库存管理方式
         /// </summary>
         public ProductInventoryWay InventoryWay { get; set; }
+
+        /// <summary>
+        /// Keywords (id)
+        /// 关键词（编号）
+        /// </summary>
+        public List<int>? Keywords { get; set; }
     }
 }

@@ -260,91 +260,6 @@ namespace PlatformShared.Database.Models
     }
 
     /// <summary>
-    /// Person owner relation
-    /// 所有人关系
-    /// </summary>
-    public enum PersonOwnerRelation : byte
-    {
-        /// <summary>
-        /// Unknown
-        /// 未知
-        /// </summary>
-        Unknown = 0,
-
-        /// <summary>
-        /// Employee
-        /// 雇员
-        /// </summary>
-        Employee = 1,
-
-        /// <summary>
-        /// Supplier
-        /// 供应商
-        /// </summary>
-        Supplier = 3,
-
-        /// <summary>
-        /// Media
-        /// 媒体
-        /// </summary>
-        Media = 5,
-
-        /// <summary>
-        /// Government
-        /// 政府
-        /// </summary>
-        Government = 7,
-
-        /// <summary>
-        /// Shareholder
-        /// 股东
-        /// </summary>
-        Shareholder = 9,
-
-        /// <summary>
-        /// Consultant
-        /// 顾问
-        /// </summary>
-        Consultant = 11,
-
-        /// <summary>
-        /// Child
-        /// 子女
-        /// </summary>
-        Child = 50,
-
-        /// <summary>
-        /// Spouse
-        /// 配偶
-        /// </summary>
-        Spouse = 60,
-
-        /// <summary>
-        /// Brother
-        /// 兄弟
-        /// </summary>
-        Brother = 62,
-
-        /// <summary>
-        /// Sister
-        /// 姐妹
-        /// </summary>
-        Sister = 64,
-
-        /// <summary>
-        /// Parent
-        /// 父母
-        /// </summary>
-        Parent = 80,
-
-        /// <summary>
-        /// Grandparent
-        /// 祖父母
-        /// </summary>
-        Grandparent = 90
-    }
-
-    /// <summary>
     /// Individual and enterprise, presents an employee, customer, or supplier
     /// 个人和企业，表示员工、客户或供应商
     /// </summary>
@@ -474,7 +389,7 @@ namespace PlatformShared.Database.Models
         /// Birthday
         /// 生日
         /// </summary>
-        public DateTime? Birthday { get; set; }
+        public DateTimeOffset? Birthday { get; set; }
 
         /// <summary>
         /// Assigned id
@@ -487,12 +402,6 @@ namespace PlatformShared.Database.Models
         /// 地区
         /// </summary>
         public List<string>? Regions { get; set; }
-
-        /// <summary>
-        /// Address id
-        /// 地址编号
-        /// </summary>
-        public int? AddressId { get; set; }
 
         /// <summary>
         /// Currencies
@@ -609,16 +518,22 @@ namespace PlatformShared.Database.Models
         public List<int>? CategoryIds { get; set; }
 
         /// <summary>
-        /// Owner Id (person.id)
-        /// 所有人编号
+        /// Keywords (id)
+        /// 关键词（编号）
         /// </summary>
-        public long? OwnerId { get; set; }
+        public List<int>? Keywords { get; set; }
 
         /// <summary>
-        /// Owner relation
-        /// 与所有人关系
+        /// Addresses
+        /// 地址
         /// </summary>
-        public PersonOwnerRelation? OwnerRelation { get; set; }
+        public List<int>? Addresses { get; set; }
+
+        /// <summary>
+        /// Registrant's User id
+        /// 登记人的用户编号
+        /// </summary>
+        public required int UserId { get; set; }
 
         /// <summary>
         /// Core user related
@@ -655,5 +570,29 @@ namespace PlatformShared.Database.Models
         /// 直接下属
         /// </summary>
         public ICollection<Person> DirectReports { get; } = default!;
+
+        /// <summary>
+        /// Contacts
+        /// 联系人
+        /// </summary>
+        public ICollection<PersonRelation> Contacts { get; } = default!;
+
+        /// <summary>
+        /// Contact owners
+        /// 联系人所有者
+        /// </summary>
+        public ICollection<PersonRelation> ContactOwners { get; } = default!;
+
+        /// <summary>
+        /// Orders
+        /// 订单
+        /// </summary>
+        public ICollection<OrderHeader> Orders { get; set; } = default!;
+
+        /// <summary>
+        /// Purchases
+        /// 采购
+        /// </summary>
+        public ICollection<OrderHeader> Purchases { get; set; } = default!;
     }
 }

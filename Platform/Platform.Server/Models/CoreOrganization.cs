@@ -31,6 +31,8 @@ public partial class CoreOrganization
 
     public string Region { get; set; } = null!;
 
+    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
     public virtual ICollection<FeatureKeyword> FeatureKeywords { get; set; } = new List<FeatureKeyword>();
@@ -49,7 +51,7 @@ public partial class CoreOrganization
 
     public virtual ICollection<Person> PersonCoreOrganizations { get; set; } = new List<Person>();
 
-    public virtual ICollection<Person> PersonOrganizations { get; set; } = new List<Person>();
+    public virtual ICollection<Person> PersonOrgs { get; set; } = new List<Person>();
 
     public virtual ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
 

@@ -61,21 +61,6 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
-        /// Query contacts from persons
-        /// 从人员中查询联系人
-        /// </summary>
-        /// <param name="persons">Persons</param>
-        /// <param name="orgId">Organization id belonged</param>
-        /// <param name="ownerId">Owner id</param>
-        /// <returns>Result</returns>
-        public static IQueryable<Person> Contacts(this IQueryable<Person> persons, int orgId, long ownerId)
-        {
-            return persons.Where(p => p.OrgId == orgId
-                && p.OwnerId == ownerId
-            );
-        }
-
-        /// <summary>
         /// Create common message data
         /// 创建通用消息数据
         /// </summary>

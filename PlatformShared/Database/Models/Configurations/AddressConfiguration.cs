@@ -60,6 +60,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasDefaultValue(EntityStatus.Normal)
                 .HasColumnName("status");
+            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
         }
     }
 }

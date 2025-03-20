@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
+using System.Text.Json.Serialization;
 
 namespace Platform.Server.Endpoints.Member.RQ
 {
@@ -6,6 +7,7 @@ namespace Platform.Server.Endpoints.Member.RQ
     /// Member list request data
     /// 成员列表请求数据
     /// </summary>
+    [JsonDerivedType(typeof(MemberQueryRQ))]
     public record MemberListRQ : QueryLongRQ
     {
         /// <summary>

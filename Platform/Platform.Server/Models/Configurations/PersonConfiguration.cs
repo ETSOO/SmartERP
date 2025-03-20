@@ -21,7 +21,7 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(1001L, null, null, null, null, null)
                 .HasColumnName("id");
-            entity.Property(e => e.AddressId).HasColumnName("address_id");
+            entity.Property(e => e.Addresses).HasColumnName("addresses");
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)
                 .HasColumnName("assigned_id");
@@ -71,6 +71,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.JobTitle)
                 .HasMaxLength(50)
                 .HasColumnName("job_title");
+            entity.Property(e => e.Keywords).HasColumnName("keywords");
             entity.Property(e => e.LatinFamilyName)
                 .HasMaxLength(50)
                 .HasColumnName("latin_family_name");
@@ -81,9 +82,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Name)
                 .HasMaxLength(128)
                 .HasColumnName("name");
-            entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
-            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-            entity.Property(e => e.OwnerRelation).HasColumnName("owner_relation");
+            entity.Property(e => e.OrgId).HasColumnName("org_id");
             entity.Property(e => e.PoliticalStatus)
                 .HasMaxLength(50)
                 .HasColumnName("political_status");
@@ -107,14 +106,11 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Uid)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("uid");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.UserRole).HasColumnName("user_role");
             entity.Property(e => e.Weight)
                 .HasPrecision(6, 2)
                 .HasColumnName("weight");
-
-            entity.HasOne(d => d.Address).WithMany(p => p.People)
-                .HasForeignKey(d => d.AddressId)
-                .HasConstraintName("person_address_id_fkey");
 
             entity.HasOne(d => d.CoreOrganization).WithMany(p => p.PersonCoreOrganizations)
                 .HasForeignKey(d => d.CoreOrganizationId)
@@ -128,75 +124,19 @@ namespace Platform.Server.Models.Configurations
                 .HasForeignKey(d => d.InviterId)
                 .HasConstraintName("person_inviter_id_fkey");
 
-            entity.HasOne(d => d.Organization).WithMany(p => p.PersonOrganizations)
-                .HasForeignKey(d => d.OrganizationId)
+            entity.HasOne(d => d.Org).WithMany(p => p.PersonOrgs)
+                .HasForeignKey(d => d.OrgId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("person_organization_id_fkey");
-
-            entity.HasOne(d => d.Owner).WithMany(p => p.InverseOwner)
-                .HasForeignKey(d => d.OwnerId)
-                .HasConstraintName("person_owner_id_fkey");
+                .HasConstraintName("person_org_id_fkey");
 
             entity.HasOne(d => d.ReportToNavigation).WithMany(p => p.InverseReportToNavigation)
                 .HasForeignKey(d => d.ReportTo)
                 .HasConstraintName("person_report_to_fkey");
 
-            entity.HasMany(d => d.Addresses).WithMany(p => p.PeopleNavigation)
-                .UsingEntity<Dictionary<string, object>>(
-                    "PersonAddress",
-                    r => r.HasOne<Address>().WithMany()
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_address_address_id_fkey"),
-                    l => l.HasOne<Person>().WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_address_person_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("PersonId", "AddressId").HasName("person_address_pkey");
-                        j.ToTable("person_address");
-                        j.IndexerProperty<long>("PersonId").HasColumnName("person_id");
-                        j.IndexerProperty<int>("AddressId").HasColumnName("address_id");
-                    });
-
-            entity.HasMany(d => d.CoreUsers).WithMany(p => p.People)
-                .UsingEntity<Dictionary<string, object>>(
-                    "PersonFavorite",
-                    r => r.HasOne<CoreUser>().WithMany()
-                        .HasForeignKey("CoreUserId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_favorite_core_user_id_fkey"),
-                    l => l.HasOne<Person>().WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_favorite_person_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("PersonId", "CoreUserId").HasName("person_favorite_pkey");
-                        j.ToTable("person_favorite");
-                        j.IndexerProperty<long>("PersonId").HasColumnName("person_id");
-                        j.IndexerProperty<int>("CoreUserId").HasColumnName("core_user_id");
-                    });
-
-            entity.HasMany(d => d.FeatureKeywords).WithMany(p => p.People)
-                .UsingEntity<Dictionary<string, object>>(
-                    "PersonKeyword",
-                    r => r.HasOne<FeatureKeyword>().WithMany()
-                        .HasForeignKey("FeatureKeywordId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_keyword_feature_keyword_id_fkey"),
-                    l => l.HasOne<Person>().WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_keyword_person_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("PersonId", "FeatureKeywordId").HasName("person_keyword_pkey");
-                        j.ToTable("person_keyword");
-                        j.IndexerProperty<long>("PersonId").HasColumnName("person_id");
-                        j.IndexerProperty<int>("FeatureKeywordId").HasColumnName("feature_keyword_id");
-                    });
+            entity.HasOne(d => d.User).WithMany(p => p.PersonUsers)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_user_id_fkey");
 
             OnConfigurePartial(entity);
         }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CRM.Server.Dto.Person;
+using CRM.Server.RQ.Person;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
 namespace CRM.Server
@@ -13,6 +15,12 @@ namespace CRM.Server
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
+
+    // Person
+    [JsonSerializable(typeof(PersonQueryData))]
+    [JsonSerializable(typeof(PersonViewData))]
+
+    [JsonSerializable(typeof(PersonListRQ))]
 
     // Results.ValidationProblem
     [JsonSerializable(typeof(HttpValidationProblemDetails))]
