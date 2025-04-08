@@ -31,7 +31,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.BuyerId).HasColumnName("buyer_id");
             entity.Property(e => e.ContactId).HasColumnName("contact_id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-            entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -87,6 +86,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Address).WithMany(p => p.OrderHeaders)
                 .HasForeignKey(d => d.AddressId)
@@ -106,15 +106,15 @@ namespace Platform.Server.Models.Configurations
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_header_core_organization_id_fkey");
 
-            entity.HasOne(d => d.CoreUser).WithMany(p => p.OrderHeaders)
-                .HasForeignKey(d => d.CoreUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("order_header_core_user_id_fkey");
-
             entity.HasOne(d => d.Seller).WithMany(p => p.OrderHeaderSellers)
                 .HasForeignKey(d => d.SellerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_header_seller_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.OrderHeaderUsers)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("order_header_user_id_fkey");
 
             OnConfigurePartial(entity);
         }

@@ -101,10 +101,10 @@ namespace PlatformShared.Database.Models
         public int CoreOrganizationId { get; set; }
 
         /// <summary>
-        /// Core user Id
-        /// 核心用户（订单所属用户）编号
+        /// User Id
+        /// 用户（订单所属用户）编号
         /// </summary>
-        public int CoreUserId { get; set; }
+        public long UserId { get; set; }
 
         /// <summary>
         /// Source
@@ -275,5 +275,11 @@ namespace PlatformShared.Database.Models
         /// 销售方
         /// </summary>
         public Person Seller { get; set; } = null!;
+
+        /// <summary>
+        /// Profiles
+        /// 档案
+        /// </summary>
+        public ICollection<PersonProfile> Profiles { get; } = default!;
     }
 }

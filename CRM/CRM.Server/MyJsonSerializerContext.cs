@@ -1,5 +1,7 @@
 ﻿using CRM.Server.Dto.Person;
+using CRM.Server.Dto.PersonProfile;
 using CRM.Server.RQ.Person;
+using CRM.Server.RQ.PersonProfile;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
@@ -21,6 +23,19 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonViewData))]
 
     [JsonSerializable(typeof(PersonListRQ))]
+
+    // Person profile
+    [JsonSerializable(typeof(PersonProfileInnerViewData))]
+    [JsonSerializable(typeof(PersonProfileListData))]
+    [JsonSerializable(typeof(PersonProfileQueryData))]
+    [JsonSerializable(typeof(PersonProfileViewData))]
+
+    [JsonSerializable(typeof(PersonProfileAttachmentUpdateRQ))]
+    [JsonSerializable(typeof(PersonProfileCreateRQ))]
+    [JsonSerializable(typeof(PersonProfileListRQ))]
+    [JsonSerializable(typeof(PersonProfileQueryRQ))]
+    [JsonSerializable(typeof(PersonProfileUpdateRQ))]
+    [JsonSerializable(typeof(PersonTaskCreateRQ))]
 
     // Results.ValidationProblem
     [JsonSerializable(typeof(HttpValidationProblemDetails))]

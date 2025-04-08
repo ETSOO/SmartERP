@@ -17,11 +17,13 @@ public partial class PersonProfileAttachment
 
     public string ContentType { get; set; } = null!;
 
-    public int CoreUserId { get; set; }
+    public string Description { get; set; } = null!;
 
     public DateTime Creation { get; set; }
 
-    public virtual CoreUser CoreUser { get; set; } = null!;
+    public long UserId { get; set; }
 
     public virtual PersonProfile Profile { get; set; } = null!;
+
+    public virtual Person User { get; set; } = null!;
 }

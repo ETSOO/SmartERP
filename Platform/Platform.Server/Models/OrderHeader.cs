@@ -11,8 +11,6 @@ public partial class OrderHeader
 
     public int CoreOrganizationId { get; set; }
 
-    public int CoreUserId { get; set; }
-
     public string? Source { get; set; }
 
     public string? SourceId { get; set; }
@@ -67,6 +65,8 @@ public partial class OrderHeader
 
     public string? Data { get; set; }
 
+    public long UserId { get; set; }
+
     public virtual Address? Address { get; set; }
 
     public virtual Person Buyer { get; set; } = null!;
@@ -75,11 +75,11 @@ public partial class OrderHeader
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
-    public virtual CoreUser CoreUser { get; set; } = null!;
-
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 
     public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
 
     public virtual Person Seller { get; set; } = null!;
+
+    public virtual Person User { get; set; } = null!;
 }

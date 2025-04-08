@@ -15,9 +15,11 @@ using Platform.Server.Endpoints.Org.RQ;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Buffers;
+using System.Collections.Concurrent;
 
 namespace Platform.Server.Services
 {
@@ -161,6 +163,47 @@ namespace Platform.Server.Services
             await _db.CoreOrganizations.Where(o => o.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// Download file
+        /// 下载文件
+        /// </summary>
+        /// <param name="kind">Kind</param>
+        /// <param name="id">File id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<Microsoft.AspNetCore.Mvc.IActionResult> DownloadFileAsync(OrgDownloadKind kind, long id, CancellationToken cancellationToken = default)
+        {
+            FileData? data = null;
+            if (kind == OrgDownloadKind.Profile)
+            {
+                data = await _db.PersonProfileAttachments.AsNoTracking()
+                    .CheckEditable(User, id)
+                    .Select(a => new FileData { FileName = a.FileName, ContentType = a.ContentType, Description = a.Description })
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
+            if (data == null)
+            {
+                return new Microsoft.AspNetCore.Mvc.NoContentResult();
+            }
+
+            await using var stream = await _storage.ReadAsync(data.FileName, cancellationToken);
+
+            if (stream == null)
+            {
+                return new Microsoft.AspNetCore.Mvc.NoContentResult();
+            }
+
+            var file = new Microsoft.AspNetCore.Mvc.FileStreamResult(stream, data.ContentType);
+
+            if (!string.IsNullOrEmpty(data.Description))
+            {
+                file.FileDownloadName = data.Description;
+            }
+
+            return file;
         }
 
         /// <summary>
@@ -663,6 +706,77 @@ namespace Platform.Server.Services
                 o.Status,
                 o.QueryKeyword
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Async upload profile attachment files
+        /// 异步上传档案附件
+        /// </summary>
+        /// <param name="id">Profile id</param>
+        /// <param name="files">Attachment files</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
+        {
+            // Validate the profile id
+            var exists = await _db.PersonProfiles.AsNoTracking()
+               .UserProfiles(User, id)
+               .AnyAsync(cancellationToken);
+
+            if (!exists)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var oid = User.Oid;
+            if (oid < 1)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(oid));
+            }
+
+            var exceptions = new ConcurrentQueue<Exception>();
+
+            // File path
+            var path = $"/Profile/Org{User.Organization}/{DateTime.UtcNow:yyyyMM}/";
+
+            await Parallel.ForEachAsync(files, cancellationToken, async (file, cancellationToken) =>
+            {
+                try
+                {
+                    var filePath = path + Path.GetRandomFileName() + Path.GetExtension(file.FileName);
+
+                    var saveResult = await _storage.WriteAsync(filePath, file.OpenReadStream(), WriteCase.CreateNew, cancellationToken: cancellationToken);
+
+                    if (saveResult)
+                    {
+                        _db.PersonProfileAttachments.Add(new PersonProfileAttachment
+                        {
+                            ProfileId = id,
+                            FileName = filePath,
+                            FileSize = file.Length,
+                            ContentType = file.ContentType,
+                            Description = file.FileName,
+                            UserId = oid
+                        });
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        exceptions.Enqueue(new Exception($"Failed to save file {file.FileName}"));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Enqueue(ex);
+                }
+            });
+
+            if (!exceptions.IsEmpty)
+            {
+                return LogException(new AggregateException(exceptions));
+            }
+
+            return ActionResult.Success;
         }
     }
 }

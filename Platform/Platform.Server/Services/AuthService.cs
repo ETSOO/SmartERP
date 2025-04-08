@@ -193,7 +193,7 @@ namespace Platform.Server.Services
             .Where(o => o.Id == rq.OrgId)
             .Join(_db.Persons.Where(u => u.CoreUserId != null),
                 org => new { OrgId = org.Id, UserId = rq.Requester },
-                requester => new { OrgId = requester.OrgId, UserId = requester.CoreUserId.GetValueOrDefault() },
+                requester => new { requester.OrgId, UserId = requester.CoreUserId.GetValueOrDefault() },
                 (org, requester) => new
                 {
                     OrgName = org.Name,
@@ -285,13 +285,15 @@ namespace Platform.Server.Services
                 Id = rq.Requester.ToString(),
                 Scopes = scopes,
                 Name = userData.Name,
-                RoleValue = (short)userData.UserRole,
+                RoleValue = (short)(userData.UserRole.GetValueOrDefault()),
                 ClientIp = User.ClientIp,
                 Region = User.Region,
                 Organization = rq.OrgId.ToString(),
                 OrganizationName = data.OrgName,
                 ChannelOrganization = org, // Identifier the fake user
                 DeviceId = deviceId.ToString(),
+                Uid = userData.Uid.ToString(),
+                Oid = userData.Id,
                 App = User.App,
                 Language = User.Language
             };
@@ -1099,6 +1101,7 @@ namespace Platform.Server.Services
                 Avatar = data.LocalAvatar ?? user.Avatar,
                 LatestAppId = user.LatestAppIds?.FirstOrDefault(),
                 OrganizationName = data.OrganizationName,
+                Oid = data.Oid,
                 Role = data.UserRole
             }, timezone);
 
@@ -1827,6 +1830,7 @@ namespace Platform.Server.Services
                     FrozenTime = d.u.FrozenTime,
                     Step = d.u.Step,
                     LatestAppId = d.u.LatestAppIds == null ? null : d.u.LatestAppIds.FirstOrDefault(),
+                    Oid = ou == null ? null : ou.Id,
                     OrgStatus = ou == null ? null : ou.Status,
                     OrgExpiry = ou == null ? null : ou.Expiry,
                     Name = ou == null ? d.u.Name : ou.Name,
@@ -1874,6 +1878,7 @@ namespace Platform.Server.Services
                 ParentOrganization = data.Data.ParentOrganizationId?.ToString(),
                 ChannelOrganization = data.Data.ChannelOrganizationId?.ToString(),
                 Uid = data.Data.Uid.ToString(),
+                Oid = userData.Oid.GetValueOrDefault(),
                 RoleValue = (short)userData.Role.GetValueOrDefault(UserRole.User),
                 App = userData.LatestAppId?.ToString(),
                 Scopes = data.Data.Scopes,

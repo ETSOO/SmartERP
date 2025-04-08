@@ -107,6 +107,8 @@ public partial class Person
 
     public virtual ICollection<OrderHeader> OrderHeaderSellers { get; set; } = new List<OrderHeader>();
 
+    public virtual ICollection<OrderHeader> OrderHeaderUsers { get; set; } = new List<OrderHeader>();
+
     public virtual CoreOrganization Org { get; set; } = null!;
 
     public virtual ICollection<PersonAsset> PersonAssetPeople { get; set; } = new List<PersonAsset>();
@@ -117,7 +119,15 @@ public partial class Person
 
     public virtual ICollection<PersonProduct> PersonProducts { get; set; } = new List<PersonProduct>();
 
-    public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
+    public virtual ICollection<PersonProfile> PersonProfileAssignees { get; set; } = new List<PersonProfile>();
+
+    public virtual ICollection<PersonProfileAttachment> PersonProfileAttachments { get; set; } = new List<PersonProfileAttachment>();
+
+    public virtual ICollection<PersonProfileLink> PersonProfileLinks { get; set; } = new List<PersonProfileLink>();
+
+    public virtual ICollection<PersonProfile> PersonProfilePeople { get; set; } = new List<PersonProfile>();
+
+    public virtual ICollection<PersonProfile> PersonProfileUsers { get; set; } = new List<PersonProfile>();
 
     public virtual ICollection<PersonRelation> PersonRelationContacts { get; set; } = new List<PersonRelation>();
 

@@ -6,7 +6,6 @@ import {
   IconButtonLink,
   MobileListItemRenderer
 } from "@etsoo/materialui";
-import { BoxProps, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
@@ -22,6 +21,8 @@ import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { PersonQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   name: "string"
@@ -87,7 +88,7 @@ export default function AllContacts() {
           field: "identityType",
           width: 120,
           header: labels.identityType,
-          valueFormatter: ({ data }) => app.getIdentityType(data)
+          valueFormatter: ({ data }) => app.person.getIdentityType(data)
         },
         {
           field: "name",
@@ -147,11 +148,11 @@ export default function AllContacts() {
           }
         }
       ]}
-      itemSize={[116, margin]}
+      itemSize={[116, margin, "1px"]}
       innerItemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.name,
+            `[${app.person.getIdentityType(data)}] ${data.name}`,
             app.formatDate(data.creation, "d"),
             [
               {
@@ -166,6 +167,7 @@ export default function AllContacts() {
               }
             ],
             <React.Fragment>
+              <Typography variant="caption">{data.jobTitle}</Typography>
               {data.status >= EntityStatus.Inactivated && (
                 <React.Fragment>
                   <Typography variant="caption">

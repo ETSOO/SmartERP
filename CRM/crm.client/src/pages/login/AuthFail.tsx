@@ -1,9 +1,11 @@
-import { Alert, Button, Typography } from "@mui/material";
 import { useSearchParamsEx } from "@etsoo/react";
 import { IActionResult } from "@etsoo/shared";
 import { VBox } from "@etsoo/materialui";
 import { Link, Navigate } from "react-router-dom";
 import { app } from "../../app/MyApp";
+import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 
 export default function AuthFail() {
   // Labels

@@ -109,7 +109,7 @@ namespace Platform.Server.Services
         /// Delete member
         /// 删除成员
         /// </summary>
-        /// <param name="id">Organization id</param>
+        /// <param name="id">Member id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
@@ -190,6 +190,7 @@ namespace Platform.Server.Services
                         else
                         {
                             q = q.Where(ou => EF.Functions.ILike(ou.Name, $"%{keyword}%")
+                            || (ou.QueryKeyword != null && EF.Functions.ILike(ou.QueryKeyword, $"%{keyword}%"))
                             || (ou.PreferredName != null && EF.Functions.ILike(ou.PreferredName, $"%{keyword}%"))
                             || (ou.AssignedId != null && EF.Functions.ILike(ou.AssignedId, $"%{keyword}%")));
                         }

@@ -3,7 +3,8 @@ import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, ExtendUtils, Utils } from "@etsoo/shared";
 import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
-import { CrmApp, ICrmApp } from "@etsoo/smarterp-crm";
+import { CrmApp, ICrmApp, CrmCulture } from "@etsoo/smarterp-crm";
+import { AppModule } from "./AppModule";
 
 // Mixin, merge them together with the same name
 interface MyApp extends ICrmApp {}
@@ -23,6 +24,21 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   }
 
   /**
+   * Modules permission
+   */
+  readonly module: Record<AppModule, boolean> = {
+    [AppModule.Organization]: true,
+    [AppModule.User]: true,
+    [AppModule.Customer]: true,
+    [AppModule.Supplier]: true,
+    [AppModule.Product]: true,
+    [AppModule.Order]: true,
+    [AppModule.PO]: true,
+    [AppModule.Inventory]: true,
+    [AppModule.Finance]: true
+  };
+
+  /**
    * Core application
    */
   readonly core = new CoreApp(this, this.coreApi);
@@ -39,9 +55,9 @@ const { detectedCulture } = DomUtils;
 MUGlobal.textFieldVariant = "standard";
 
 const supportedCultures: DataTypes.CultureDefinition[] = [
-  CoreCulture.zhHans(() => import("../i18n/zh-Hans.json")),
-  CoreCulture.zhHant(() => import("../i18n/zh-Hant.json")),
-  CoreCulture.en(() => import("../i18n/en.json"))
+  CoreCulture.zhHans(CrmCulture.zhHans, () => import("../i18n/zh-Hans.json")),
+  CoreCulture.zhHant(CrmCulture.zhHant, () => import("../i18n/zh-Hant.json")),
+  CoreCulture.en(CrmCulture.en, () => import("../i18n/en.json"))
 ];
 const supportedRegions = ["CN"];
 

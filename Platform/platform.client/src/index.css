@@ -5,3 +5,8 @@ body {
 .noneTransformButton {
   text-transform: none !important;
 }
+
+.ET-ViewPage .MuiTypography-subtitle2,
+.ET-ViewContainer .MuiTypography-subtitle2 {
+  font-weight: bold;
+}

@@ -1,3 +1,97 @@
 #page-container {
   align-self: center;
 }
+
+.ET-ViewPage .MuiTypography-subtitle2,
+.ET-ViewContainer .MuiTypography-subtitle2 {
+  font-weight: bold;
+}
+
+.react-flow .node-disabled {
+  cursor: not-allowed !important;
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+  pointer-events: none;
+}
+
+.react-flow .react-flow__pane,
+.react-flow .react-flow__edge {
+  cursor: default;
+}
+
+.react-flow .react-flow__node {
+  cursor: pointer;
+}
+
+.react-flow .react-flow__handle {
+  opacity: 0;
+}
+
+.react-flow .react-flow__attribution {
+  display: none;
+}
+
+.responsive-table {
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+}
+
+.responsive-table tr {
+  border-bottom: 1px solid #ccc;
+}
+
+.responsive-table th {
+  width: 14.2857%;
+}
+
+.responsive-table th,
+.responsive-table td {
+  text-align: left;
+  padding: 8px;
+  border-right: 1px solid #ccc;
+}
+
+.responsive-table td {
+  height: 136px;
+  overflow-y: auto;
+}
+
+.responsive-table td .tasks {
+  padding-top: 8px;
+}
+
+.responsive-table td:nth-child(6),
+.responsive-table td:nth-child(7) {
+  background-color: #f2f2f2;
+}
+
+.responsive-table .cell {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .responsive-table th {
+    display: none;
+  }
+
+  .responsive-table .small {
+    display: none;
+  }
+
+  .responsive-table td {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    height: auto;
+  }
+
+  .responsive-table td .tasks {
+    flex: 0 0 100%;
+  }
+
+  .responsive-table .cell {
+    display: block;
+    font-weight: bold;
+  }
+}

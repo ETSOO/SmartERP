@@ -2,6 +2,7 @@
 using com.etsoo.WebUtils;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
+using Platform.Server.Dto.Org;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Services;
 
@@ -22,6 +23,9 @@ namespace Platform.Server.Endpoints.Org
 
             g.MapDelete("Delete/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete organization / 删除机构").WithTags("Org");
+
+            g.MapGet("DownloadProfileFile/{id:long}", (IOrgService service, long id, CancellationToken cancellationToken) => service.DownloadFileAsync(OrgDownloadKind.Profile, id, cancellationToken))
+                .WithDescription("Download profile attachment / 下载档案附件").WithTags("Org");
 
             g.MapPost("GetMy", (IOrgService service, OrgGetMyRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.GetMyAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get my organizations JSON data / 获取我的机构JSON数据").WithTags("Org");
@@ -56,6 +60,10 @@ namespace Platform.Server.Endpoints.Org
 
             g.MapGet("UpdateRead/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read JSON data for upate / 浏览JSON数据用于更新").WithTags("Org");
+
+            g.MapPost("UploadProfileFiles/{id:long}", (IOrgService service, long id, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadProfileFilesAsync(id, files, cancellationToken))
+                .DisableAntiforgery()
+                .WithDescription("Upload profile attachments / 上传档案附件").WithTags("Org");
 
             return builder;
         }

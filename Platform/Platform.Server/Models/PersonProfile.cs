@@ -29,9 +29,7 @@ public partial class PersonProfile
 
     public DateTime? HappenDateEnd { get; set; }
 
-    public int CoreUserId { get; set; }
-
-    public short UserRole { get; set; }
+    public short? UserRole { get; set; }
 
     public DateTime Creation { get; set; }
 
@@ -41,11 +39,23 @@ public partial class PersonProfile
 
     public string? IndexKey { get; set; }
 
-    public virtual CoreUser CoreUser { get; set; } = null!;
+    public short? Importance { get; set; }
+
+    public long? AssigneeId { get; set; }
+
+    public long UserId { get; set; }
+
+    public virtual Person? Assignee { get; set; }
 
     public virtual OrderHeader? Order { get; set; }
 
     public virtual Person Person { get; set; } = null!;
 
     public virtual ICollection<PersonProfileAttachment> PersonProfileAttachments { get; set; } = new List<PersonProfileAttachment>();
+
+    public virtual ICollection<PersonProfileLink> PersonProfileLinkProfiles { get; set; } = new List<PersonProfileLink>();
+
+    public virtual ICollection<PersonProfileLink> PersonProfileLinkTargetProfiles { get; set; } = new List<PersonProfileLink>();
+
+    public virtual Person User { get; set; } = null!;
 }

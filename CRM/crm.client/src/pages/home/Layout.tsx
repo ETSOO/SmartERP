@@ -10,7 +10,6 @@ import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DescriptionIcon from "@mui/icons-material/Description";
 import React from "react";
-import { Typography, useMediaQuery } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
 import {
@@ -27,6 +26,8 @@ import {
   AppSwitchPopover,
   OrgSwitchPopover
 } from "@etsoo/smarterp-core/components";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 function SidebarFooter({ mini }: SidebarFooterProps) {
   return (
@@ -60,11 +61,11 @@ export default function Home() {
     "app3",
     "contacts",
     "customers",
+    "info",
     "menuHome",
     "offerings",
     "orders",
     "org",
-    "profiles",
     "purchases",
     "signoutSuccess",
     "system",
@@ -138,7 +139,7 @@ export default function Home() {
       },
       {
         segment: "home/org/profile",
-        title: labels.profiles,
+        title: labels.info,
         icon: <DescriptionIcon />,
         subs: ["/home/org/.*"]
       },

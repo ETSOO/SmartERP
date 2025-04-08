@@ -51,8 +51,6 @@ public partial class CoreUser
 
     public virtual ICollection<CoreUserIdentifier> CoreUserIdentifiers { get; set; } = new List<CoreUserIdentifier>();
 
-    public virtual ICollection<OrderHeader> OrderHeaders { get; set; } = new List<OrderHeader>();
-
     public virtual ICollection<PersonAsset> PersonAssets { get; set; } = new List<PersonAsset>();
 
     public virtual ICollection<Person> PersonCoreUsers { get; set; } = new List<Person>();
@@ -60,10 +58,6 @@ public partial class CoreUser
     public virtual ICollection<PersonInfo> PersonInfos { get; set; } = new List<PersonInfo>();
 
     public virtual ICollection<Person> PersonInviters { get; set; } = new List<Person>();
-
-    public virtual ICollection<PersonProfileAttachment> PersonProfileAttachments { get; set; } = new List<PersonProfileAttachment>();
-
-    public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
 
     public virtual ICollection<Person> PersonUsers { get; set; } = new List<Person>();
 }

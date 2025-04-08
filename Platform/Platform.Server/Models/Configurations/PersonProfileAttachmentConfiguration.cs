@@ -23,25 +23,28 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.ContentType)
                 .HasMaxLength(128)
                 .HasColumnName("content_type");
-            entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+            entity.Property(e => e.Description)
+                .HasMaxLength(128)
+                .HasColumnName("description");
             entity.Property(e => e.FileName)
                 .HasMaxLength(256)
                 .HasColumnName("file_name");
             entity.Property(e => e.FileSize).HasColumnName("file_size");
             entity.Property(e => e.ProfileId).HasColumnName("profile_id");
-
-            entity.HasOne(d => d.CoreUser).WithMany(p => p.PersonProfileAttachments)
-                .HasForeignKey(d => d.CoreUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("person_profile_attachment_core_user_id_fkey");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Profile).WithMany(p => p.PersonProfileAttachments)
                 .HasForeignKey(d => d.ProfileId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_profile_attachment_profile_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.PersonProfileAttachments)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_profile_attachment_user_id_fkey");
 
             OnConfigurePartial(entity);
         }

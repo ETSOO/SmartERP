@@ -37,15 +37,33 @@
         public string ContentType { get; set; } = default!;
 
         /// <summary>
-        /// Core user id
-        /// 核心用户编号
+        /// Description
+        /// 描述
         /// </summary>
-        public int CoreUserId { get; set; }
+        public string Description { get; init; } = default!;
+
+        /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long UserId { get; set; }
 
         /// <summary>
         /// Creation
         /// 登记时间
         /// </summary>
-        public DateTimeOffset Creation { get; set; }
+        public DateTimeOffset Creation { get; }
+
+        /// <summary>
+        /// Profile
+        /// 档案
+        /// </summary>
+        public PersonProfile Profile { get; } = null!;
+
+        /// <summary>
+        /// Person user
+        /// 用户
+        /// </summary>
+        public Person User { get; } = null!;
     }
 }

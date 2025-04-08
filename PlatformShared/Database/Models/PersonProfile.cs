@@ -9,9 +9,60 @@ namespace PlatformShared.Database.Models
     /// </summary>
     public enum PersonProfileKind : byte
     {
+        /// <summary>
+        /// Normal
+        /// 默认
+        /// </summary>
         Normal = 1,
+
+        /// <summary>
+        /// Schedule
+        /// 日程
+        /// </summary>
         Schedule = 106,
-        Finance = 108
+
+        /// <summary>
+        /// Finance
+        /// 财务
+        /// </summary>
+        Finance = 108,
+
+        /// <summary>
+        /// Agile
+        /// 敏捷管理
+        /// </summary>
+        Agile = 110
+    }
+
+    /// <summary>
+    /// Person profile importance
+    /// 人员资料重要性
+    /// </summary>
+    public enum PersonProfileImportance : byte
+    {
+        /// <summary>
+        /// Low
+        /// 低
+        /// </summary>
+        Low = 1,
+
+        /// <summary>
+        /// Normal
+        /// 一般
+        /// </summary>
+        Normal = 3,
+
+        /// <summary>
+        /// Important
+        /// 重要
+        /// </summary>
+        Important = 6,
+
+        /// <summary>
+        /// Urgent
+        /// 紧急
+        /// </summary>
+        Urgent = 9
     }
 
     /// <summary>
@@ -87,16 +138,16 @@ namespace PlatformShared.Database.Models
         public DateTimeOffset? HappenDateEnd { get; set; }
 
         /// <summary>
-        /// Core user id
-        /// 核心用户编号
+        /// User id
+        /// 用户编号
         /// </summary>
-        public int CoreUserId { get; set; }
+        public long UserId { get; set; }
 
         /// <summary>
         /// User role used for privacy control
         /// 用于隐私控制的用户角色
         /// </summary>
-        public UserRole UserRole { get; set; }
+        public UserRole? UserRole { get; set; }
 
         /// <summary>
         /// Creation
@@ -121,5 +172,59 @@ namespace PlatformShared.Database.Models
         /// 索引键
         /// </summary>
         public string? IndexKey { get; set; }
+
+        /// <summary>
+        /// Importance
+        /// 重要性
+        /// </summary>
+        public PersonProfileImportance? Importance { get; set; }
+
+        /// <summary>
+        /// Assignee id
+        /// 经办人编号
+        /// </summary>
+        public long? AssigneeId { get; set; }
+
+        /// <summary>
+        /// User who assigned the profile
+        /// 档案经办人用户
+        /// </summary>
+        public Person? Assignee { get; }
+
+        /// <summary>
+        /// User who created the profile
+        /// 创建档案的用户
+        /// </summary>
+        public Person User { get; } = default!;
+
+        /// <summary>
+        /// Order or purcahse
+        /// 订单或采购
+        /// </summary>
+        public OrderHeader? Order { get; }
+
+        /// <summary>
+        /// Person related
+        /// 关联的人员
+        /// </summary>
+        public Person Person { get; } = default!;
+
+        /// <summary>
+        /// Attachments
+        /// 附件
+        /// </summary>
+        public ICollection<PersonProfileAttachment> Attachments { get; } = default!;
+
+        /// <summary>
+        /// Links
+        /// 关联
+        /// </summary>
+        public ICollection<PersonProfileLink> Links { get; } = default!;
+
+        /// <summary>
+        /// Target links
+        /// 目标关联
+        /// </summary>
+        public ICollection<PersonProfileLink> TargetLinks { get; } = default!;
     }
 }

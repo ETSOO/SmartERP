@@ -1,16 +1,9 @@
 {
-  "assets": "Assets",
+  "allProfiles": "All profiles",
   "basicInfo": "Basic Info",
-  "contacts": "Contacts",
-  "customers": "Customers",
-  "idUser": "User",
-  "jobTitle": "Job title",
-  "offerings": "Offerings",
-  "orders": "Orders",
-  "personName": "Name",
-  "profiles": "Profiles",
-  "purchases": "Purchases",
+  "dropFilesLabel": "Drop files here, or",
+  "flowchart": "Flowchart",
+  "simpleInventory": "Simple inventory",
   "smarterpCRM": "SmartERP Business Management",
-  "system": "System",
-  "suppliers": "Suppliers"
+  "latestTasks": "Latest tasks"
 }

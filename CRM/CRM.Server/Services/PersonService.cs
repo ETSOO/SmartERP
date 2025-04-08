@@ -49,6 +49,7 @@ namespace CRM.Server.Services
                         else
                         {
                             q = q.Where(p => EF.Functions.ILike(p.Name, $"%{keyword}%")
+                            || (p.QueryKeyword != null && EF.Functions.ILike(p.QueryKeyword, $"%{keyword}%"))
                             || (p.PreferredName != null && EF.Functions.ILike(p.PreferredName, $"%{keyword}%"))
                             || (p.AssignedId != null && EF.Functions.ILike(p.AssignedId, $"%{keyword}%")));
                         }

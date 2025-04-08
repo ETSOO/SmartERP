@@ -59,31 +59,31 @@ namespace PlatformShared.Database.Models
         PrimarySchool = 1,
 
         /// <summary>
-        /// Grade 2
+        /// Year 2
         /// 小学2年级
         /// </summary>
         PrimarySchool2 = 2,
 
         /// <summary>
-        /// Grade 3
+        /// Year 3
         /// 小学3年级
         /// </summary>
         PrimarySchool3 = 3,
 
         /// <summary>
-        /// Grade 4
+        /// Year 4
         /// 小学4年级
         /// </summary>
         PrimarySchool4 = 4,
 
         /// <summary>
-        /// Grade 5
+        /// Year 5
         /// 小学5年级
         /// </summary>
         PrimarySchool5 = 5,
 
         /// <summary>
-        /// Grade 6
+        /// Year 6
         /// 小学6年级
         /// </summary>
         PrimarySchool6 = 6,
@@ -95,19 +95,19 @@ namespace PlatformShared.Database.Models
         MiddleSchool = 20,
 
         /// <summary>
-        /// Grade 7
+        /// Year 7
         /// 初中1年级
         /// </summary>
         MiddleSchool1 = 27,
 
         /// <summary>
-        /// Grade 8
+        /// Year 8
         /// 初中2年级
         /// </summary>
         MiddleSchool2 = 28,
 
         /// <summary>
-        /// Grade 9
+        /// Year 9
         /// 初中3年级
         /// </summary>
         MiddleSchool3 = 29,
@@ -119,28 +119,22 @@ namespace PlatformShared.Database.Models
         HighSchool = 40,
 
         /// <summary>
-        /// Grade 10
+        /// Year 10
         /// 高中1年级
         /// </summary>
         HighSchool1 = 51,
 
         /// <summary>
-        /// Grade 11
+        /// Year 11
         /// 高中2年级
         /// </summary>
         HighSchool2 = 52,
 
         /// <summary>
-        /// Grade 12
+        /// Year 12
         /// 高中3年级
         /// </summary>
         HighSchool3 = 53,
-
-        /// <summary>
-        /// University
-        /// 大学
-        /// </summary>
-        University = 80,
 
         /// <summary>
         /// Diploma Graduate
@@ -588,6 +582,36 @@ namespace PlatformShared.Database.Models
         /// 订单
         /// </summary>
         public ICollection<OrderHeader> Orders { get; set; } = default!;
+
+        /// <summary>
+        /// Profiles related
+        /// 关联的档案
+        /// </summary>
+        public ICollection<PersonProfile> Profiles { get; } = default!;
+
+        /// <summary>
+        /// Created profiles
+        /// 创建的
+        /// </summary>
+        public ICollection<PersonProfile> CreatedProfiles { get; } = default!;
+
+        /// <summary>
+        /// Assigned profiles
+        /// 分配的档案
+        /// </summary>
+        public ICollection<PersonProfile> AssignedProfiles { get; } = default!;
+
+        /// <summary>
+        /// Profile attachments
+        /// 档案附件
+        /// </summary>
+        public ICollection<PersonProfileAttachment> ProfileAttachments { get; } = default!;
+
+        /// <summary>
+        /// Profile links
+        /// 档案链接
+        /// </summary>
+        public ICollection<PersonProfileLink> ProfileLinks { get; } = default!;
 
         /// <summary>
         /// Purchases

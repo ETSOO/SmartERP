@@ -2,12 +2,6 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { app, NotifierProvider } from "./app/MyApp";
-import {
-  createTheme,
-  CssBaseline,
-  LinearProgress,
-  ThemeProvider
-} from "@mui/material";
 import { RouterProvider, RouterProviderProps } from "react-router-dom";
 import { createDynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
@@ -16,6 +10,9 @@ import Index from "./pages/Index";
 import Home from "./pages/home/Home";
 import Layout from "./pages/home/Layout";
 import { ReactAppContext } from "@etsoo/materialui";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import LinearProgress from "@mui/material/LinearProgress";
 
 // Culture provider
 const CultureStateProvider = app.cultureState.provider;
@@ -104,10 +101,46 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/contact/avatar/:id",
+            lazy: async () => {
+              const ContactAvatar = await import(
+                "./pages/home/contact/ContactAvatar"
+              );
+              return { Component: ContactAvatar.default };
+            }
+          },
+
+          {
             path: "/home/org/profile",
             lazy: async () => {
               const OrgProfile = await import("./pages/home/org/OrgProfile");
               return { Component: OrgProfile.default };
+            }
+          },
+
+          {
+            path: "/home/org/profile/all",
+            lazy: async () => {
+              const AllProfiles = await import(
+                "./pages/home/profile/AllProfiles"
+              );
+              return { Component: AllProfiles.default };
+            }
+          },
+          {
+            path: "/home/org/profile/addTask",
+            lazy: async () => {
+              const AddTask = await import("./pages/home/profile/AddTask");
+              return { Component: AddTask.default };
+            }
+          },
+          {
+            path: "/home/org/profile/view/:id",
+            lazy: async () => {
+              const ViewProfile = await import(
+                "./pages/home/profile/ViewProfile"
+              );
+              return { Component: ViewProfile.default };
             }
           }
         ]

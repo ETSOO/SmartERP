@@ -51,6 +51,12 @@ namespace Platform.Server.Dto.Auth
         public string? OrganizationName { get; init; }
 
         /// <summary>
+        /// Organization user id
+        /// 机构用户编号
+        /// </summary>
+        public long? Oid { get; init; }
+
+        /// <summary>
         /// User role
         /// 用户角色
         /// </summary>

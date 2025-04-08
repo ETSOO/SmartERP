@@ -91,6 +91,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.person_profile_link",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.person_relation",
          "ObjectType": 0
       },

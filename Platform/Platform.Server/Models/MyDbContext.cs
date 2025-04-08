@@ -52,6 +52,8 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<PersonProfileAttachment> PersonProfileAttachments { get; set; }
 
+    public virtual DbSet<PersonProfileLink> PersonProfileLinks { get; set; }
+
     public virtual DbSet<PersonRelation> PersonRelations { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
@@ -87,6 +89,7 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.PersonProductConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonProfileConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonProfileAttachmentConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.PersonProfileLinkConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonRelationConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductCategoryConfiguration());

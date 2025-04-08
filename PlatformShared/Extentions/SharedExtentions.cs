@@ -15,6 +15,95 @@ namespace PlatformShared.Extentions
     public static class SharedExtentions
     {
         /// <summary>
+        /// Check person ids
+        /// 检查人员编号
+        /// </summary>
+        /// <param name="db">Database</param>
+        /// <param name="ids">Person ids</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static async Task<bool> CheckPersonsAsync(this MyDbContext db, IEnumerable<long> ids, int orgId, CancellationToken cancellationToken = default)
+        {
+            ids = ids.Distinct();
+
+            var items = ids.Count();
+            if (items == 0)
+                return true;
+
+            var count = await db.Persons.AsNoTracking()
+                .Where(p => p.OrgId == orgId && ids.Contains(p.Id))
+                .CountAsync(cancellationToken);
+
+            return count == items;
+        }
+
+        /// <summary>
+        /// Check order / purchase ids
+        /// 检查订单 / 采购编号
+        /// </summary>
+        /// <param name="db">Database</param>
+        /// <param name="ids">Orders ids</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static async Task<bool> CheckOrdersAsync(this MyDbContext db, IEnumerable<long> ids, int orgId, CancellationToken cancellationToken = default)
+        {
+            var count = await db.OrderHeaders.AsNoTracking()
+                .Where(o => o.CoreOrganizationId == orgId && ids.Contains(o.Id))
+                .CountAsync(cancellationToken);
+
+            return count == ids.Count();
+        }
+
+        /// <summary>
+        /// Query person profiles by user
+        /// 通过用户查询人员档案
+        /// </summary>
+        /// <param name="profiles">Person profiles</param>
+        /// <param name="user">Current user</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user)
+        {
+            var oid = user.Oid;
+            return profiles.Where(p => p.Person.OrgId == user.OrganizationInt
+                && (p.UserId == oid || p.AssigneeId == oid || p.UserRole == null || p.UserRole <= user.Role));
+        }
+
+        /// <summary>
+        /// Query person profiles by user
+        /// 通过用户查询人员档案
+        /// </summary>
+        /// <param name="profiles">Person profiles</param>
+        /// <param name="user">Current user</param>
+        /// <param name="id">Id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user, long id)
+        {
+            return profiles.Where(p => p.Id == id && p.Person.OrgId == user.OrganizationInt
+                && (p.UserRole == null || p.UserRole <= user.Role));
+        }
+
+        /// <summary>
+        /// Query person profile editable attachments by user
+        /// 通过用户查询人员档案可编辑的附件
+        /// </summary>
+        /// <param name="attachments">Attachments</param>
+        /// <param name="user">Current user</param>
+        /// <param name="id">Attachment id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonProfileAttachment> CheckEditable(this IQueryable<PersonProfileAttachment> attachments, CurrentUser user, long id)
+        {
+            var isAdmin = user.Role >= UserRole.Admin;
+            var oid = user.Oid;
+            var orgId = user.OrganizationInt;
+
+            return attachments.Where(a => a.Id == id
+                && a.Profile.Person.CoreOrganizationId == orgId
+                && (isAdmin || a.Profile.UserId == oid));
+        }
+
+        /// <summary>
         /// Query users from persons
         /// 从人员中查询用户
         /// </summary>

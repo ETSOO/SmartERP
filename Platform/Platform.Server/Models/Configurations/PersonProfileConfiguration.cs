@@ -20,8 +20,8 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
+            entity.Property(e => e.AssigneeId).HasColumnName("assignee_id");
             entity.Property(e => e.Comment).HasColumnName("comment");
-            entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -30,6 +30,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("data");
             entity.Property(e => e.HappenDate).HasColumnName("happen_date");
             entity.Property(e => e.HappenDateEnd).HasColumnName("happen_date_end");
+            entity.Property(e => e.Importance).HasColumnName("importance");
             entity.Property(e => e.IndexKey)
                 .HasMaxLength(30)
                 .HasColumnName("index_key");
@@ -47,21 +48,26 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Title)
                 .HasMaxLength(256)
                 .HasColumnName("title");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.UserRole).HasColumnName("user_role");
 
-            entity.HasOne(d => d.CoreUser).WithMany(p => p.PersonProfiles)
-                .HasForeignKey(d => d.CoreUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("person_profile_core_user_id_fkey");
+            entity.HasOne(d => d.Assignee).WithMany(p => p.PersonProfileAssignees)
+                .HasForeignKey(d => d.AssigneeId)
+                .HasConstraintName("person_profile_assignee_id_fkey");
 
             entity.HasOne(d => d.Order).WithMany(p => p.PersonProfiles)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("person_profile_order_id_fkey");
 
-            entity.HasOne(d => d.Person).WithMany(p => p.PersonProfiles)
+            entity.HasOne(d => d.Person).WithMany(p => p.PersonProfilePeople)
                 .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_profile_person_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.PersonProfileUsers)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_profile_user_id_fkey");
 
             OnConfigurePartial(entity);
         }

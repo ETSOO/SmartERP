@@ -1,16 +1,9 @@
 {
-  "assets": "資產",
+  "allProfiles": "所有檔案",
   "basicInfo": "基本信息",
-  "contacts": "聯絡人",
-  "customers": "客戶",
-  "idUser": "用戶",
-  "jobTitle": "職位",
-  "offerings": "產品和服務",
-  "orders": "訂單",
-  "personName": "名稱 / 姓名",
-  "profiles": "檔案",
-  "purchases": "採購",
+  "dropFilesLabel": "拖放文件到這裡，或者",
+  "flowchart": "流程圖",
+  "simpleInventory": "簡易庫存",
   "smarterpCRM": "司友雲ERP業務管理",
-  "system": "系統",
-  "suppliers": "供應商"
+  "latestTasks": "最近的任務"
 }
