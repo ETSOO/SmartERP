@@ -173,37 +173,33 @@ namespace Platform.Server.Services
         /// <param name="id">File id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task<Microsoft.AspNetCore.Mvc.IActionResult> DownloadFileAsync(OrgDownloadKind kind, long id, CancellationToken cancellationToken = default)
+        public async Task<IResult> DownloadFileAsync(OrgDownloadKind kind, long id, CancellationToken cancellationToken = default)
         {
+            var orgId = User.OrganizationInt;
+            var role = User.Role;
+
             FileData? data = null;
             if (kind == OrgDownloadKind.Profile)
             {
                 data = await _db.PersonProfileAttachments.AsNoTracking()
-                    .CheckEditable(User, id)
+                    .Where(a => a.Id == id && a.Profile.Person.OrgId == orgId && (a.Profile.UserRole == null || a.Profile.UserRole <= role))
                     .Select(a => new FileData { FileName = a.FileName, ContentType = a.ContentType, Description = a.Description })
                     .FirstOrDefaultAsync(cancellationToken);
             }
 
             if (data == null)
             {
-                return new Microsoft.AspNetCore.Mvc.NoContentResult();
+                return Results.BadRequest("Invalid Id");
             }
 
-            await using var stream = await _storage.ReadAsync(data.FileName, cancellationToken);
+            var stream = await _storage.ReadAsync(data.FileName, cancellationToken);
 
             if (stream == null)
             {
-                return new Microsoft.AspNetCore.Mvc.NoContentResult();
+                return Results.BadRequest("No Stream");
             }
 
-            var file = new Microsoft.AspNetCore.Mvc.FileStreamResult(stream, data.ContentType);
-
-            if (!string.IsNullOrEmpty(data.Description))
-            {
-                file.FileDownloadName = data.Description;
-            }
-
-            return file;
+            return Results.File(stream, data.ContentType, data.Description, enableRangeProcessing: true);
         }
 
         /// <summary>

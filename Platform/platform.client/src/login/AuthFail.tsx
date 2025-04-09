@@ -1,10 +1,13 @@
-import { Button, Stack, SvgIcon, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { app } from "../app/SmartApp";
 import { SharedLayout } from "./SharedLayout";
 import { AppUtils } from "../app/AppUtils";
 import { useSearchParamsEx } from "@etsoo/react";
 import React from "react";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import SvgIcon from "@mui/material/SvgIcon";
 
 export default function AuthFail() {
   // Labels

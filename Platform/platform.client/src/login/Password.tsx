@@ -1,5 +1,4 @@
 import React from "react";
-import { Button, FormControlLabel, Switch, Box } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import { AuthRequest } from "@etsoo/appscript";
 import {
@@ -15,6 +14,10 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { CoreConstants } from "@etsoo/react";
 import { DynamicActionResult } from "@etsoo/shared";
 import { PublicOrgRequest } from "../api/rq/public/PublicOrgRequest";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 
 const homeUrl = "./../../../";
 function NavigateHome() {

@@ -252,7 +252,7 @@ namespace CRM.Server.Services
         public async Task<IActionResult> DeleteAttachmentAsync(long id, CancellationToken cancellationToken = default)
         {
             var result = await _db.PersonProfileAttachments.AsNoTracking()
-                .CheckEditable(User, id)
+                .CheckAttachmentEditable(User, id)
                 .ExecuteDeleteAsync(cancellationToken);
 
             if (result == 0)
@@ -594,7 +594,7 @@ namespace CRM.Server.Services
         public async Task<IActionResult> UpdateAttachmentAsync(PersonProfileAttachmentUpdateRQ rq, CancellationToken cancellationToken = default)
         {
             var result = await _db.PersonProfileAttachments.AsNoTracking()
-                .CheckEditable(User, rq.Id)
+                .CheckAttachmentEditable(User, rq.Id)
                 .ExecuteUpdateAsync(a => a.SetProperty(p => p.Description, rq.Description), cancellationToken);
 
             if (result == 0)

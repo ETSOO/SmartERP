@@ -92,15 +92,15 @@ namespace PlatformShared.Extentions
         /// <param name="user">Current user</param>
         /// <param name="id">Attachment id</param>
         /// <returns>Result</returns>
-        public static IQueryable<PersonProfileAttachment> CheckEditable(this IQueryable<PersonProfileAttachment> attachments, CurrentUser user, long id)
+        public static IQueryable<PersonProfileAttachment> CheckAttachmentEditable(this IQueryable<PersonProfileAttachment> attachments, CurrentUser user, long id)
         {
             var isAdmin = user.Role >= UserRole.Admin;
             var oid = user.Oid;
             var orgId = user.OrganizationInt;
 
             return attachments.Where(a => a.Id == id
-                && a.Profile.Person.CoreOrganizationId == orgId
-                && (isAdmin || a.Profile.UserId == oid));
+                && a.Profile.Person.OrgId == orgId
+                && (isAdmin || a.UserId == oid || a.Profile.UserId == oid));
         }
 
         /// <summary>

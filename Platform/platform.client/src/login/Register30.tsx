@@ -1,11 +1,12 @@
 import React from "react";
-import { Button, Typography } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import { HBox, TextFieldEx, TextFieldExMethods } from "@etsoo/materialui";
 import { app } from "../app/SmartApp";
 import { useNavigate } from "react-router-dom";
 import { AuthRequest } from "@etsoo/appscript";
 import { Constants } from "../app/Constants";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
 export default function RegisterPassword() {
   // Router

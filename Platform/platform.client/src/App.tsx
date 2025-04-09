@@ -7,9 +7,7 @@ import {
   TextFieldExMethods
 } from "@etsoo/materialui";
 import { DataTypes, DomUtils, NumberUtils, Utils } from "@etsoo/shared";
-import { Alert, Box, Button, Grid2, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./login/SharedLayout";
-import { AccountCircle, Language } from "@mui/icons-material";
 import { AuthRequest, BridgeUtils } from "@etsoo/appscript";
 import { Constants } from "./app/Constants";
 import { app } from "./app/SmartApp";
@@ -19,6 +17,14 @@ import { CoreConstants } from "@etsoo/react";
 import { AppUtils } from "./app/AppUtils";
 import { PublicOrgInfo } from "./api/dto/public/PublicOrgInfo";
 import { PublicOrgRequest } from "./api/rq/public/PublicOrgRequest";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import Grid from "@mui/material/Grid";
+import SvgIcon from "@mui/material/SvgIcon";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LanguageIcon from "@mui/icons-material/Language";
 
 function formatLoginTip(
   appId: number,
@@ -348,7 +354,7 @@ export default function App() {
                   selectedValue={app.culture}
                   className="noneTransformButton"
                   minWidth="200px"
-                  icon={<Language />}
+                  icon={<LanguageIcon />}
                 />
               </HBox>
             }
@@ -403,7 +409,7 @@ export default function App() {
             )}
             <HBox spacing={1} alignItems="flex-start">
               <Box sx={{ paddingTop: 3 }}>
-                <AccountCircle color="primary" />
+                <AccountCircleIcon color="primary" />
               </Box>
               <TextFieldEx
                 label={value.get("loginId")}
@@ -425,9 +431,9 @@ export default function App() {
             </HBox>
             <Typography variant="caption">{value.get("signInWith")}</Typography>
             {app.settings.authClients.length > 0 && (
-              <Grid2 container spacing={0.5}>
+              <Grid container spacing={0.5}>
                 {app.settings.authClients.map((ac) => (
-                  <Grid2 size={{ xs: 6 }} key={ac}>
+                  <Grid size={{ xs: 6 }} key={ac}>
                     <LoadingButton
                       variant="outlined"
                       fullWidth
@@ -441,9 +447,9 @@ export default function App() {
                     >
                       {value.get(`brand${ac}`)}
                     </LoadingButton>
-                  </Grid2>
+                  </Grid>
                 ))}
-              </Grid2>
+              </Grid>
             )}
             <div>
               {value.get("noAccountTip")}&nbsp;

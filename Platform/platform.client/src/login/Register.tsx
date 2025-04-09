@@ -1,11 +1,14 @@
 import React from "react";
 import { HBox, LoadingButton } from "@etsoo/materialui";
-import { Button, Grid2, SvgIcon, Typography } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppUtils } from "../app/AppUtils";
 import { useSearchParamsEx } from "@etsoo/react";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import SvgIcon from "@mui/material/SvgIcon";
 
 export function Register() {
   // Navigate
@@ -60,9 +63,9 @@ export function Register() {
       </HBox>
       <Typography variant="caption">{labels.signUpWith}</Typography>
       {app.settings.authClients.length > 0 && (
-        <Grid2 container spacing={0.5}>
+        <Grid container spacing={0.5}>
           {app.settings.authClients.map((ac) => (
-            <Grid2 size={{ xs: 6 }} key={ac}>
+            <Grid size={{ xs: 6 }} key={ac}>
               <LoadingButton
                 variant="outlined"
                 fullWidth
@@ -76,9 +79,9 @@ export function Register() {
               >
                 {app.get(`brand${ac}`)}
               </LoadingButton>
-            </Grid2>
+            </Grid>
           ))}
-        </Grid2>
+        </Grid>
       )}
     </SharedLayout>
   );

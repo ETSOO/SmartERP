@@ -260,6 +260,9 @@ services.AddAntiforgery();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen(options =>
 {
+    // Avoid "InvalidOperationException: Can't use schemaId for type ..."
+    options.CustomSchemaIds(type => type.ToString());
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,

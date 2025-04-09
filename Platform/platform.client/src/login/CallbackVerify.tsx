@@ -1,5 +1,4 @@
 import React from "react";
-import { Button, Typography } from "@mui/material";
 import { SharedLayout } from "./SharedLayout";
 import {
   CountdownButton,
@@ -11,6 +10,8 @@ import { app } from "../app/SmartApp";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { IdActionResult } from "@etsoo/shared";
 import { AuthCodeAction, ValidateRQ } from "@etsoo/smarterp-core";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
 const homeUrl = "./../../../";
 function NavigateHome() {

@@ -11,7 +11,7 @@ namespace Platform.Server.Services
         Task<IActionResult> CreateAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default);
         Task<(IActionResult result, int? id)> CreateWithIdAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
-        Task<Microsoft.AspNetCore.Mvc.IActionResult> DownloadFileAsync(OrgDownloadKind kind, long id, CancellationToken cancellationToken = default);
+        Task<IResult> DownloadFileAsync(OrgDownloadKind kind, long id, CancellationToken cancellationToken = default);
         Task<IEnumerable<OrgGetMyData>> GetMyAsync(OrgGetMyRQ rq, CancellationToken cancellationToken = default);
         Task GetMyAsync(OrgGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> LeaveAsync(int id, CancellationToken cancellationToken = default);

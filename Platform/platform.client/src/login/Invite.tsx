@@ -1,5 +1,4 @@
 import { VBox } from "@etsoo/materialui";
-import { Button, CircularProgress, TextField, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { app } from "../app/SmartApp";
@@ -7,6 +6,10 @@ import { SharedLayout } from "./SharedLayout";
 import { MemberInvitationDto } from "@etsoo/smarterp-core";
 import { useSearchParamsEx } from "@etsoo/react";
 import { Constants } from "../app/Constants";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 export default function Invite() {
   // Router

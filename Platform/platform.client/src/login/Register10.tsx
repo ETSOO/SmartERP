@@ -8,9 +8,9 @@ import {
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@mui/material";
 import { useSearchParamsEx } from "@etsoo/react";
 import { AuthCodeAction } from "@etsoo/smarterp-core";
+import Button from "@mui/material/Button";
 
 export default function Register20() {
   // Navigate

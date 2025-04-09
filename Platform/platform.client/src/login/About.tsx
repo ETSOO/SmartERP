@@ -1,8 +1,8 @@
 import { PList } from "@etsoo/materialui";
-import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { app } from "../app/SmartApp";
 import { SharedLayout } from "./SharedLayout";
+import Button from "@mui/material/Button";
 
 export default function About() {
   // Labels

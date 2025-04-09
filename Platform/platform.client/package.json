@@ -5,16 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.17",
-    "@etsoo/materialui": "^1.4.97",
-    "@etsoo/react": "^1.8.32",
-    "@etsoo/shared": "^1.2.62",
-    "@etsoo/smarterp-core": "^1.0.23",
-    "@mui/material": "^6.4.6",
+    "@etsoo/appscript": "^1.6.22",
+    "@etsoo/materialui": "^1.5.20",
+    "@etsoo/react": "^1.8.38",
+    "@etsoo/shared": "^1.2.66",
+    "@etsoo/smarterp-core": "^1.0.39",
+    "@mui/icons-material": "^7.0.2",
+    "@mui/material": "^7.0.2",
     "formik": "^2.4.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -26,8 +27,8 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "^5.8.2",
-    "vite": "^6.2.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.2.5",
     "vite-plugin-svgr": "^4.3.0"
   },
   "optionalDependencies": {

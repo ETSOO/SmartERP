@@ -4,18 +4,15 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import { NotFound } from "./NotFound";
 import Password from "./login/Password";
-import {
-  createTheme,
-  CssBaseline,
-  LinearProgress,
-  ThemeProvider
-} from "@mui/material";
 import { app, NotifierProvider } from "./app/SmartApp";
 import { Route, Routes } from "react-router-dom";
 import { DynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
 import AuthSuccess from "./login/AuthSuccess";
 import { ReactAppContext } from "@etsoo/materialui";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import LinearProgress from "@mui/material/LinearProgress";
 
 // Root
 const root = document.getElementById("root")!;

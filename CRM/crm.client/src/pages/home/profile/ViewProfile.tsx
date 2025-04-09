@@ -11,8 +11,9 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { app } from "../../../app/MyApp";
-import { usePageData } from "@etsoo/smarterp-core";
+import { OrgDownloadKind, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
 import { PersonProfileViewData } from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
@@ -25,6 +26,7 @@ import IconButton from "@mui/material/IconButton";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import DOMPurify from "dompurify";
+import Link from "@mui/material/Link";
 
 export default function ViewProfile() {
   // Route
@@ -194,19 +196,29 @@ export default function ViewProfile() {
             <AccordionDetails>
               <HBoxList gap={0.5} marginBottom={1} flexWrap="wrap">
                 {data.attachments.map((file) => (
-                  <LinkEx
+                  <Link
                     key={file.id}
-                    to={file.fileName}
                     title={file.userName + ", " + app.formatDate(file.creation)}
                     variant="body2"
-                    target="_blank"
+                    underline="hover"
+                    href="#"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+
+                      app.core.orgApi.downloadFile(
+                        OrgDownloadKind.Profile,
+                        file.id
+                      );
+                    }}
                   >
-                    {file.description}{" "}
-                  </LinkEx>
+                    {file.description}
+                  </Link>
                 ))}
               </HBoxList>
               <FileUploadButton
                 dropFilesLabel={labels.dropFilesLabel}
+                startIcon={<FileUploadIcon />}
                 onUploadFiles={async (files) => {
                   const result = await app.core.orgApi.uploadProfileFiles(
                     id,

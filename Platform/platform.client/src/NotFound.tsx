@@ -1,7 +1,7 @@
-import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { app } from "./app/SmartApp";
 import { SharedLayout } from "./login/SharedLayout";
+import Button from "@mui/material/Button";
 
 /**
  * Not found case component

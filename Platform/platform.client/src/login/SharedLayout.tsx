@@ -1,8 +1,9 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
 import { HBox, MUGlobal, VBox } from "@etsoo/materialui";
 import logo from "./../images/etsoo.png";
 import { app } from "../app/SmartApp";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 /**
  * Shared layout props
