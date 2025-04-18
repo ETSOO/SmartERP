@@ -1,5 +1,4 @@
 import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
-import { Grid2 } from "@mui/material";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -13,6 +12,7 @@ import {
   AppUpdateRQ,
   usePageData
 } from "@etsoo/smarterp-core";
+import Grid from "@mui/material/Grid";
 
 export default function EditApp() {
   // Route
@@ -127,7 +127,7 @@ export default function EditApp() {
       }}
       onUpdate={reloadData}
     >
-      <Grid2 size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
           name="localName"
@@ -136,8 +136,8 @@ export default function EditApp() {
           inputRef={refs.localName}
           helperText={`${labels.fullName}: ${data.name}`}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 6, sm: 6 }}>
+      </Grid>
+      <Grid size={{ xs: 6, sm: 6 }}>
         <ComboBox
           name="status"
           label={labels.status}
@@ -146,8 +146,8 @@ export default function EditApp() {
           inputOnChange={formik.handleChange}
           options={app.getStatusList()}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 12 }}>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
         <InputField
           fullWidth
           name="localUrls"
@@ -157,7 +157,7 @@ export default function EditApp() {
           rows={5}
           helperText={labels.localUrlsHelp}
         />
-      </Grid2>
+      </Grid>
     </EditPage>
   );
 }

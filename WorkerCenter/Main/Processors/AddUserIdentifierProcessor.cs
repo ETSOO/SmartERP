@@ -1,4 +1,6 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.MessageQueue;
 using com.etsoo.Utils.String;
 using PlatformShared;
 using PlatformShared.Database;
@@ -61,7 +63,7 @@ namespace WorkerCenter.Main.Processors
                     Importance = EmailImportance.High
                 };
 
-                await _producer.SendJsonAsync(email, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
+                await _producer.SendJsonAsync(email, ApiModelJsonSerializerContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
             }
         }
     }

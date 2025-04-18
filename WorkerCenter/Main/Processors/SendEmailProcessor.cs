@@ -1,10 +1,10 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using com.etsoo.SMTP;
 using MimeKit;
 using MimeKit.Text;
-using PlatformShared;
-using PlatformShared.Messages;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -17,7 +17,7 @@ namespace WorkerCenter.Main.Processors
         readonly ISMTPClient _smtpClient;
 
         public SendEmailProcessor(ILogger<SendEmailProcessor> logger, ISMTPClient smtpClient)
-            : base(logger, PlatformSharedContext.Default.SendEmailMessage)
+            : base(logger, ApiModelJsonSerializerContext.Default.SendEmailMessage)
         {
             _smtpClient = smtpClient;
         }

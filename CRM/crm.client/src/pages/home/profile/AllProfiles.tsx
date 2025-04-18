@@ -12,6 +12,7 @@ import {
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
+import AddIcon from "@mui/icons-material/Add";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -25,9 +26,10 @@ import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import { ImportanceText } from "@etsoo/smarterp-crm/components";
-import { Typography } from "@mui/material";
 import { EntityStatus } from "@etsoo/appscript";
 import { usePageData } from "@etsoo/smarterp-core";
+import Fab from "@mui/material/Fab";
+import Typography from "@mui/material/Typography";
 
 const template = {
   importance: "number",
@@ -55,6 +57,7 @@ function AllProfilesInner() {
   // Labels
   const labels = app.getLabels(
     "actions",
+    "add",
     "creation",
     "dateTo",
     "edit",
@@ -79,9 +82,20 @@ function AllProfilesInner() {
 
   return (
     <ResponsivePage<PersonProfileQueryData, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: <React.Fragment></React.Fragment>
+        fabButtons: (
+          <React.Fragment>
+            <Fab
+              title={labels.add}
+              size="medium"
+              color="primary"
+              onClick={() => navigate("./../add")}
+            >
+              <AddIcon />
+            </Fab>
+          </React.Fragment>
+        )
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}

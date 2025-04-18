@@ -465,7 +465,7 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, name),
                 Changes = changes
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
+            await _queueService.FirePushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);

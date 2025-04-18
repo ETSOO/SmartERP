@@ -46,7 +46,7 @@ export default function AddTask() {
   type DataType = Omit<PersonProfileUpdateReadData, "id" | "personId" | "kind">;
 
   // State
-  const [data, _setData] = React.useState<DataType>({
+  const [data, setData] = React.useState<DataType>({
     status: EntityStatus.Normal,
     title: "",
     comment: "",
@@ -124,6 +124,9 @@ export default function AddTask() {
   // Load data
   const reloadData = React.useCallback(async () => {
     if (id < 1) return;
+    const result = await app.profileApi.updateRead(id);
+    if (result == null) return;
+    setData(result);
   }, [id]);
 
   // Page data hook

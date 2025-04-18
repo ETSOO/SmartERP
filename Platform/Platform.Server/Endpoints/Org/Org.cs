@@ -1,4 +1,5 @@
-﻿using com.etsoo.CoreFramework.Models;
+﻿using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.WebUtils;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,14 @@ namespace Platform.Server.Endpoints.Org
             g.MapGet("DownloadProfileFile/{id:long}", (IOrgService service, long id, CancellationToken cancellationToken) => service.DownloadFileAsync(OrgDownloadKind.Profile, id, cancellationToken))
                 .WithDescription("Download profile attachment / 下载档案附件").WithTags("Org");
 
+            g.MapPost("FormatHtmlContent", async (IOrgService service, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
+            {
+                // [FromBody] way only works for JSON content type, not plain text
+                var content = await accessor.GetBodyAsync(cancellationToken: cancellationToken);
+                if (string.IsNullOrEmpty(content)) return null;
+                return await service.FormatHtmlContentAsync(content, cancellationToken);
+            }).WithDescription("Format HTML content / 格式化HTML内容").WithTags("Org");
+
             g.MapPost("GetMy", (IOrgService service, OrgGetMyRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.GetMyAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get my organizations JSON data / 获取我的机构JSON数据").WithTags("Org");
 
@@ -50,6 +59,12 @@ namespace Platform.Server.Endpoints.Org
                 // Return the token
                 return new AntiforgeryRequestToken { Name = token.FormFieldName, HeaderName = token.HeaderName, Value = token.RequestToken };
             }).WithDescription("Get Antiforgery request token / 获取反伪造请求令牌").WithTags("Org");
+
+            g.MapPost("SendEmail", (IOrgService service, SendEmailMessage message, CancellationToken cancellationToken) => service.SendEmailAsync(message, cancellationToken))
+                .WithDescription("Send email / 发送邮件").WithTags("Org");
+
+            g.MapPost("SendSMS", (IOrgService service, SendSMSMessage message, CancellationToken cancellationToken) => service.SendSMSAsync(message, cancellationToken))
+                .WithDescription("Send SMS / 发送短信").WithTags("Org");
 
             g.MapPut("Update", (IOrgService service, OrgUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update organization / 更新机构").WithTags("Org");

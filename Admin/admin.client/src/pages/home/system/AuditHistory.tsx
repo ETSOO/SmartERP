@@ -9,7 +9,6 @@ import {
   HBox
 } from "@etsoo/materialui";
 import { DataTypes, DateUtils } from "@etsoo/shared";
-import { BoxProps, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import PersonIcon from "@mui/icons-material/Person";
 import React from "react";
@@ -26,6 +25,8 @@ import { AuditHistoryDto } from "../../../api/dto/query/AuditHistoryDto";
 import { AppTiplist } from "../../../components/AppTiplist";
 import { OrgTiplist } from "../../../components/OrgTiplist";
 import { UserTiplist } from "../../../components/UserTiplist";
+import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   id: "number",
@@ -73,7 +74,7 @@ export default function LoginHistory() {
 
   return (
     <ResponsivePage<AuditHistoryDto, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData
       })}
       mRef={ref}

@@ -1,5 +1,6 @@
-﻿using com.etsoo.CoreFramework.Application;
-using com.etsoo.CoreFramework.Business;
+﻿using com.etsoo.ApiModel.Dto.SmartERP;
+using com.etsoo.ApiModel.RQ.SmartERP;
+using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -312,7 +313,7 @@ namespace Platform.Server.Services
             {
                 Data = User.CreateMessageData(id, 0, appName)
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.CheckSessionMessage, cancellationToken);
+            await _queueService.FirePushAsync(message, PlatformSharedContext.Default.CheckSessionMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }

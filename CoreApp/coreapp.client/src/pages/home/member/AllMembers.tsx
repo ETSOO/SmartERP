@@ -8,7 +8,6 @@ import {
   MobileListItemRenderer,
   Switch
 } from "@etsoo/materialui";
-import { BoxProps, Fab, Typography } from "@mui/material";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -25,6 +24,9 @@ import { MemberQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
 import { AppUtils } from "../components/AppUtils";
+import Fab from "@mui/material/Fab";
+import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   name: "string",
@@ -73,7 +75,7 @@ export default function AllMembers() {
 
   return (
     <ResponsivePage<MemberQueryDto, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: (
           <React.Fragment>

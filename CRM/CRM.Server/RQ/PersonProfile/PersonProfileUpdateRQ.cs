@@ -15,6 +15,18 @@ namespace CRM.Server.RQ.PersonProfile
     public record PersonProfileUpdateRQ : UpdateModel<long>, IModelValidator
     {
         /// <summary>
+        /// Access token
+        /// 访问令牌
+        /// </summary>
+        public required string AccessToken { get; init; }
+
+        /// <summary>
+        /// Token schema
+        /// 令牌模式
+        /// </summary>
+        public string? TokenSchema { get; init; }
+
+        /// <summary>
         /// Person id
         /// 人员编号
         /// </summary>
@@ -114,12 +126,6 @@ namespace CRM.Server.RQ.PersonProfile
             if (Title != null && Title.Length is not (>= 1 and <= 256))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Title));
-            }
-
-            if (Kind != null && Kind >= PersonProfileKind.Schedule)
-            {
-                // Larger kinds are used for system internal use
-                return ApplicationErrors.NoValidData.AsResult(nameof(Kind));
             }
 
             if (Location != null && Location.Length is not (>= 1 and <= 256))

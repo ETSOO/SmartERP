@@ -1,6 +1,7 @@
 {
   "allProfiles": "所有檔案",
   "basicInfo": "基本信息",
+  "clickToView": "點擊左側列表項目瀏覽...",
   "dropFilesLabel": "拖放文件到這裡，或者",
   "flowchart": "流程圖",
   "simpleInventory": "簡易庫存",

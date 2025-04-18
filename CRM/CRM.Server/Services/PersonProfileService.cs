@@ -96,7 +96,14 @@ namespace CRM.Server.Services
             }
 
             var happenDate = rq.HappenDate.GetValueOrDefault(DateTimeOffset.UtcNow).ToUniversalTime();
-            var happenDateEnd = rq.HappenDateEnd.GetValueOrDefault(happenDate.AddHours(1)).ToUniversalTime();
+
+            // Add 1 hour default for schedule profile
+            var happenDateEnd = rq.Kind == PersonProfileKind.Schedule
+                ? rq.HappenDateEnd.GetValueOrDefault(happenDate.AddHours(1)).ToUniversalTime()
+                : rq.HappenDateEnd?.ToUniversalTime();
+
+            // Format content
+            var comment = rq.Comment;
 
             var profile = new PersonProfile
             {
@@ -105,7 +112,7 @@ namespace CRM.Server.Services
                 OrderId = rq.OrderId,
                 Kind = rq.Kind,
                 Title = rq.Title,
-                Comment = rq.Comment,
+                Comment = comment,
                 Location = rq.Location,
                 LocationId = rq.LocationId,
                 HappenDate = happenDate,
@@ -243,6 +250,44 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Create person profile link
+        /// 创建人员档案关联
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateLinkAsync(PersonProfileLinkCreateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Validate profiles
+            List<long> ids = [rq.ProfileId];
+            if (rq.TargetProfileId.HasValue)
+            {
+                ids.Add(rq.TargetProfileId.Value);
+            }
+
+            if (await _db.PersonProfiles.UserProfiles(User, ids).CountAsync(cancellationToken) != ids.Count)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Create link
+            var link = new PersonProfileLink
+            {
+                ProfileId = rq.ProfileId,
+                TargetProfileId = rq.TargetProfileId,
+                Kind = rq.Kind,
+                Content = rq.Content,
+                UserId = User.Oid
+            };
+
+            // Add
+            _db.PersonProfileLinks.Add(link);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(link.Id);
+        }
+
+        /// <summary>
         /// Delete attachment
         /// 删除附件
         /// </summary>
@@ -253,6 +298,29 @@ namespace CRM.Server.Services
         {
             var result = await _db.PersonProfileAttachments.AsNoTracking()
                 .CheckAttachmentEditable(User, id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            if (result == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+            else
+            {
+                return ActionResult.Succeed(id);
+            }
+        }
+
+        /// <summary>
+        /// Delete link
+        /// 删除链接
+        /// </summary>
+        /// <param name="id">Link id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteLinkAsync(long id, CancellationToken cancellationToken = default)
+        {
+            var result = await _db.PersonProfileLinks.AsNoTracking()
+                .CheckLinkEditable(User, id)
                 .ExecuteDeleteAsync(cancellationToken);
 
             if (result == 0)
@@ -280,7 +348,8 @@ namespace CRM.Server.Services
             await query.Select(p => new PersonProfileListData
             {
                 Id = p.Id,
-                Title = p.Title
+                Title = p.Title,
+                Creation = p.Creation
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -385,6 +454,7 @@ namespace CRM.Server.Services
                         FileSize = a.FileSize,
                         ContentType = a.ContentType,
                         Description = a.Description,
+                        Extension = Path.GetExtension(a.FileName),
                         UserId = a.UserId,
                         UserName = a.User.Name,
                         Creation = a.Creation,
@@ -442,6 +512,7 @@ namespace CRM.Server.Services
                         FileSize = a.FileSize,
                         ContentType = a.ContentType,
                         Description = a.Description,
+                        Extension = Path.GetExtension(a.FileName),
                         UserId = a.UserId,
                         UserName = a.User.Name,
                         Creation = a.Creation,
@@ -578,7 +649,7 @@ namespace CRM.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, profile.Title),
                 Changes = changes
             };
-            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProfileMessage, cancellationToken);
+            await _queueService.FirePushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProfileMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -605,6 +676,51 @@ namespace CRM.Server.Services
             {
                 return ActionResult.Succeed(rq.Id);
             }
+        }
+
+        /// <summary>
+        /// Update person profile link
+        /// 更新人员档案链接
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateLinkAsync(PersonProfileLinkUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            var link = await _db.PersonProfileLinks.CheckLinkEditable(User, rq.Id).FirstOrDefaultAsync(cancellationToken);
+            if (link == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (rq.IsModified(nameof(rq.ProfileId)) && rq.ProfileId.HasValue)
+            {
+                link.ProfileId = rq.ProfileId.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.TargetProfileId)))
+            {
+                link.TargetProfileId = rq.TargetProfileId;
+            }
+
+            if (rq.IsModified(nameof(rq.Kind)) && rq.Kind.HasValue)
+            {
+                link.Kind = rq.Kind.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Content)))
+            {
+                link.Content = rq.Content;
+            }
+
+            // Changes
+            // var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
         }
 
         /// <summary>

@@ -85,6 +85,20 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query person profiles by user
+        /// 通过用户查询人员档案
+        /// </summary>
+        /// <param name="profiles">Person profiles</param>
+        /// <param name="user">Current user</param>
+        /// <param name="ids">Ids</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user, List<long> ids)
+        {
+            return profiles.Where(p => ids.Contains(p.Id) && p.Person.OrgId == user.OrganizationInt
+                && (p.UserRole == null || p.UserRole <= user.Role));
+        }
+
+        /// <summary>
         /// Query person profile editable attachments by user
         /// 通过用户查询人员档案可编辑的附件
         /// </summary>
@@ -101,6 +115,25 @@ namespace PlatformShared.Extentions
             return attachments.Where(a => a.Id == id
                 && a.Profile.Person.OrgId == orgId
                 && (isAdmin || a.UserId == oid || a.Profile.UserId == oid));
+        }
+
+        /// <summary>
+        /// Query person profile editable links by user
+        /// 通过用户查询人员档案可编辑的链接
+        /// </summary>
+        /// <param name="attachments">Attachments</param>
+        /// <param name="user">Current user</param>
+        /// <param name="id">Attachment id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonProfileLink> CheckLinkEditable(this IQueryable<PersonProfileLink> links, CurrentUser user, long id)
+        {
+            var isAdmin = user.Role >= UserRole.Admin;
+            var oid = user.Oid;
+            var orgId = user.OrganizationInt;
+
+            return links.Where(l => l.Id == id
+                && l.Profile.Person.OrgId == orgId
+                && (isAdmin || l.UserId == oid || l.Profile.UserId == oid));
         }
 
         /// <summary>

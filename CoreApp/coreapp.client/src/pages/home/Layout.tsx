@@ -9,7 +9,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AppsIcon from "@mui/icons-material/Apps";
 import React from "react";
-import { Typography, useMediaQuery } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
 import {
@@ -26,6 +25,8 @@ import {
   AppSwitchPopover,
   OrgSwitchPopover
 } from "@etsoo/smarterp-core/components";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 function SidebarFooter({ mini }: SidebarFooterProps) {
   return (

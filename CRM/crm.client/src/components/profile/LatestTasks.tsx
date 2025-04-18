@@ -1,4 +1,3 @@
-import { app } from "../app/MyApp";
 import TodayIcon from "@mui/icons-material/Today";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -15,6 +14,7 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import { PersonProfileQueryData } from "@etsoo/smarterp-crm";
 import { getImportanceColor } from "@etsoo/smarterp-crm/components";
+import { app } from "../../app/MyApp";
 
 function removeHours(date: Date) {
   date.setHours(0, 0, 0, 0);

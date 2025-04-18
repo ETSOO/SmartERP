@@ -1,5 +1,5 @@
-import { EntityStatus } from "@etsoo/appscript";
-import { AppUrl, IdentityType } from "@etsoo/smarterp-core";
+import { EntityStatus, IdentityType } from "@etsoo/appscript";
+import { AppUrl } from "@etsoo/smarterp-core";
 
 /**
  * Read app data

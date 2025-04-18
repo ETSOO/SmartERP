@@ -1,9 +1,14 @@
-﻿using com.etsoo.CoreFramework.Application;
+﻿using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.ApiModel.RQ.SmartERP;
+using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.HtmlIO;
 using com.etsoo.HTTP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
@@ -200,6 +205,19 @@ namespace Platform.Server.Services
             }
 
             return Results.File(stream, data.ContentType, data.Description, enableRangeProcessing: true);
+        }
+
+        /// <summary>
+        /// Format HTML content
+        /// 格式化网页内容
+        /// </summary>
+        /// <param name="content">HTML content</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Result</returns>
+        public Task<string?> FormatHtmlContentAsync(string content, CancellationToken cancellationToken = default)
+        {
+            var path = $"/Resources/{DateTime.UtcNow:yyyyMM}/";
+            return HtmlIOUtils.FormatEditorContentAsync(_storage, path, content, Logger, cancellationToken);
         }
 
         /// <summary>
@@ -537,6 +555,32 @@ namespace Platform.Server.Services
             {
                 Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
+        }
+
+        /// <summary>
+        /// Send email
+        /// 发送邮件
+        /// </summary>
+        /// <param name="message">Email message</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IActionResult> SendEmailAsync(SendEmailMessage message, CancellationToken cancellationToken = default)
+        {
+            var messageId = await _queueService.PushAsync(message, ApiModelJsonSerializerContext.Default.SendEmailMessage, cancellationToken);
+            return ActionResult.Succeed(messageId);
+        }
+
+        /// <summary>
+        /// Send SMS
+        /// 发送短信
+        /// </summary>
+        /// <param name="message">SMS message</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task<IActionResult> SendSMSAsync(SendSMSMessage message, CancellationToken cancellationToken = default)
+        {
+            var messageId = await _queueService.PushAsync(message, ApiModelJsonSerializerContext.Default.SendSMSMessage, cancellationToken);
+            return ActionResult.Succeed(messageId);
         }
 
         /// <summary>

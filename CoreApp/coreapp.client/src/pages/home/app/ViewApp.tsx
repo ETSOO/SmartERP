@@ -10,7 +10,6 @@ import {
   TooltipClick,
   ViewPage
 } from "@etsoo/materialui";
-import { Button, Stack, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -19,6 +18,9 @@ import { AppReadDto, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
 import { AppUtils } from "../components/AppUtils";
 import { EntityStatus } from "@etsoo/appscript";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
 
 export default function ViewApp() {
   // Route

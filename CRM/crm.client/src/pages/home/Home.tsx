@@ -5,9 +5,10 @@ import HubIcon from "@mui/icons-material/Hub";
 import HistoryIcon from "@mui/icons-material/History";
 import "reactflow/dist/style.css";
 import { Flowchart } from "../../components/Flowchart";
-import { LatestTasks } from "../../components/LatestTasks";
 import { useNavigate } from "react-router-dom";
 import { TabBox } from "@etsoo/materialui";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { LatestTasks } from "../../components/profile/LatestTasks";
 
 export default function Home() {
   // Route
@@ -20,6 +21,7 @@ export default function Home() {
 
   return (
     <TabBox
+      {...DefaultUI.tabsProps(app.smDown)}
       tabs={[
         {
           children: <LatestTasks />,

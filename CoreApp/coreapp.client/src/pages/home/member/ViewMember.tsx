@@ -1,10 +1,10 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
-import { Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { app } from "../../../app/MyApp";
 import { MemberReadDto, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
+import Typography from "@mui/material/Typography";
 
 export default function ViewMember() {
   // Route

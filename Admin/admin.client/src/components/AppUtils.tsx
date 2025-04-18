@@ -1,15 +1,13 @@
 import { DomUtils } from "@etsoo/shared";
 import { HBox, VBox } from "@etsoo/materialui";
-import {
-  Button,
-  Checkbox,
-  FormControlLabel,
-  InputAdornment,
-  TextField
-} from "@mui/material";
 import React from "react";
 import { app } from "../app/MyApp";
 import { UserTiplist } from "./UserTiplist";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Button from "@mui/material/Button";
+import InputAdornment from "@mui/material/InputAdornment";
 
 /**
  * App utilities

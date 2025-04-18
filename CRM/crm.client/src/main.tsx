@@ -111,10 +111,10 @@ const router = createDynamicRouter([
           },
 
           {
-            path: "/home/org/profile",
+            path: "/home/org/data",
             lazy: async () => {
-              const OrgProfile = await import("./pages/home/org/OrgProfile");
-              return { Component: OrgProfile.default };
+              const OrgData = await import("./pages/home/org/OrgData");
+              return { Component: OrgData.default };
             }
           },
 
@@ -128,10 +128,28 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/org/profile/add",
+            lazy: async () => {
+              const AddProfile = await import(
+                "./pages/home/profile/AddProfile"
+              );
+              return { Component: AddProfile.default };
+            }
+          },
+          {
             path: "/home/org/profile/addTask",
             lazy: async () => {
               const AddTask = await import("./pages/home/profile/AddTask");
               return { Component: AddTask.default };
+            }
+          },
+          {
+            path: "/home/org/profile/edit/:id",
+            lazy: async () => {
+              const AddProfile = await import(
+                "./pages/home/profile/AddProfile"
+              );
+              return { Component: AddProfile.default };
             }
           },
           {

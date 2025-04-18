@@ -1,8 +1,8 @@
 import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
-import { Stack } from "@mui/material";
 import React from "react";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import Stack from "@mui/material/Stack";
 
 export default function UpdateAvatar() {
   // Labels

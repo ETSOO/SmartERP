@@ -1,10 +1,10 @@
 import { CommonPage, TextFieldEx, VBox } from "@etsoo/materialui";
 import { DomUtils } from "@etsoo/shared";
-import { Button } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import Button from "@mui/material/Button";
 
 // Change password
 // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill

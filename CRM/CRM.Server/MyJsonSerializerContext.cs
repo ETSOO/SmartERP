@@ -32,6 +32,8 @@ namespace CRM.Server
 
     [JsonSerializable(typeof(PersonProfileAttachmentUpdateRQ))]
     [JsonSerializable(typeof(PersonProfileCreateRQ))]
+    [JsonSerializable(typeof(PersonProfileLinkCreateRQ))]
+    [JsonSerializable(typeof(PersonProfileLinkUpdateRQ))]
     [JsonSerializable(typeof(PersonProfileListRQ))]
     [JsonSerializable(typeof(PersonProfileQueryRQ))]
     [JsonSerializable(typeof(PersonProfileUpdateRQ))]

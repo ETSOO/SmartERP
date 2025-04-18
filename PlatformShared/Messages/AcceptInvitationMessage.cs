@@ -1,4 +1,4 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.Utils.Serialization;
 using PlatformShared.Dto;
 using System.Text.Json;
 

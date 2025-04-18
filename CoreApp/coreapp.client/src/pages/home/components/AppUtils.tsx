@@ -4,9 +4,11 @@ import { DomUtils, IActionResult } from "@etsoo/shared";
 import { NavigateFunction } from "react-router-dom";
 import { BuyApp, BuyKind } from "./BuyApp";
 import { VBox } from "@etsoo/materialui";
-import { Button, InputAdornment, TextField } from "@mui/material";
 import React from "react";
 import { InviteMember } from "./InviteMember";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import InputAdornment from "@mui/material/InputAdornment";
 
 /**
  * App utilities
@@ -235,7 +237,7 @@ export namespace AppUtils {
 
         if (result.ok) {
           app.notifier.succeed(
-            labels.inviteResult.format(result.data?.msg ?? ""),
+            labels.inviteResult.format(result.data?.id ?? ""),
             undefined,
             () => callback()
           );

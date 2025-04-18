@@ -1,5 +1,4 @@
-import { EntityStatus } from "@etsoo/appscript";
-import { IdentityType } from "@etsoo/smarterp-core";
+import { EntityStatus, IdentityType } from "@etsoo/appscript";
 
 /**
  * Application query data

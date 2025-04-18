@@ -1,5 +1,5 @@
 import { useParamsEx } from "@etsoo/react";
-import { ViewPerson } from "../../../components/ViewPerson";
+import { ViewPerson } from "../../../components/person/ViewPerson";
 import { ErrorAlert } from "@etsoo/materialui";
 
 export default function ViewContact() {

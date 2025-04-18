@@ -1,4 +1,4 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.Utils.Serialization;
 
 namespace PlatformShared.Messages
 {

@@ -1,6 +1,5 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { ButtonLink, HBox, HBoxList, ViewPage } from "@etsoo/materialui";
-import { Button, Chip, Typography } from "@mui/material";
 import HistoryIcon from "@mui/icons-material/History";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { app } from "../../../app/MyApp";
@@ -8,6 +7,9 @@ import { usePageData } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadUserDto } from "../../../api/dto/query/ReadUserDto";
 import { DateUtils } from "@etsoo/shared";
+import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
 
 export default function ViewUser() {
   // Route

@@ -62,7 +62,7 @@ export default function AllContacts() {
 
   return (
     <ResponsivePage<PersonQueryData, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: <React.Fragment></React.Fragment>
       })}

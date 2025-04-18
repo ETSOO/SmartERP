@@ -1,9 +1,10 @@
-﻿using com.etsoo.MessageQueue;
+﻿using com.etsoo.Address;
+using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using com.etsoo.SMS;
 using com.etsoo.Utils.String;
-using PlatformShared;
-using PlatformShared.Messages;
 using System.Text.Json;
 
 namespace WorkerCenter.Main.Processors
@@ -17,7 +18,7 @@ namespace WorkerCenter.Main.Processors
         readonly ISMSClient _smsClient;
 
         public SendSMSProcessor(ILogger<SendSMSProcessor> logger, ISMSClient smsClient)
-            : base(logger, PlatformSharedContext.Default.SendSMSMessage)
+            : base(logger, ApiModelJsonSerializerContext.Default.SendSMSMessage)
         {
             _smsClient = smsClient;
         }
@@ -47,9 +48,11 @@ namespace WorkerCenter.Main.Processors
                 return;
             }
 
+            var phones = AddressRegion.CreatePhones(message.To.Distinct(), message.Region);
+
             if (kind == TemplateKind.Code || message.TemplateId == null)
             {
-                foreach (var phone in message.To)
+                foreach (var phone in phones)
                 {
                     var result = await _smsClient.SendCodeAsync(phone, message.Body, template, cancellationToken);
                     if (!result.Ok)
@@ -62,7 +65,7 @@ namespace WorkerCenter.Main.Processors
             else
             {
                 var vars = JsonSerializer.Deserialize<Dictionary<string, string>>(message.Body) ?? [];
-                var mobiles = message.To.Select(t => t.ToInternationalFormat());
+                var mobiles = phones.Select(t => t.ToInternationalFormat());
                 var result = await _smsClient.SendAsync(kind.Value, mobiles, vars, message.TemplateId, cancellationToken);
                 if (!result.Ok)
                 {

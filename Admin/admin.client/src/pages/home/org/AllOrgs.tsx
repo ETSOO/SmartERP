@@ -7,7 +7,6 @@ import {
   MUUtils,
   SelectBool
 } from "@etsoo/materialui";
-import { BoxProps, Fab, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
@@ -25,6 +24,9 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { AllOrgDto } from "../../../api/dto/query/AllOrgDto";
 import { OrgTiplist } from "../../../components/OrgTiplist";
 import { UserTiplist } from "../../../components/UserTiplist";
+import Fab from "@mui/material/Fab";
+import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   keyword: "string",
@@ -77,7 +79,7 @@ export default function AllOrgs() {
 
   return (
     <ResponsivePage<AllOrgDto, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: (
           <Fab

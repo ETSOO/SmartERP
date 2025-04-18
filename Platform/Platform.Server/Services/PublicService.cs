@@ -1,16 +1,18 @@
-﻿using com.etsoo.ApiModel.Dto.Maps;
+﻿using com.etsoo.Address.Validators;
+using com.etsoo.ApiModel.Dto.Maps;
+using com.etsoo.ApiModel.Dto.SmartERP;
 using com.etsoo.ApiModel.RQ.Maps;
+using com.etsoo.ApiModel.RQ.SmartERP;
 using com.etsoo.ApiProxy.Defs;
 using com.etsoo.BaiduApi.Maps;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
-using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.ImageUtils.Barcode;
 using com.etsoo.Localization;
-using com.etsoo.Localization.Country;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
+using com.etsoo.Utils.Serialization.Country;
 using com.etsoo.Utils.String;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -198,7 +200,7 @@ namespace Platform.Server.Services
                 App.Configuration.CacheHours,
                 () => $"{nameof(PublicService)}.{nameof(GetCurrenciesAsync)}.{CultureInfo.CurrentCulture.LCID}",
                 (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions().GetCurrencies()),
-                MyJsonSerializerContext.Default.IEnumerableCurrencyItem,
+                CommonJsonSerializerContext.Default.IEnumerableCurrencyItem,
                 null, cancellationToken);
 
             if (ids != null)
@@ -217,22 +219,14 @@ namespace Platform.Server.Services
         /// <param name="ids">Ids to include and sort by</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IEnumerable<RegionData>> GetRegionsAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<RegionItem>> GetRegionsAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default)
         {
             var regions = await CacheFactory.DoAsync(
                 _cache,
                 App.Configuration.CacheHours,
                 () => $"{nameof(PublicService)}.{nameof(GetRegionsAsync)}.{CultureInfo.CurrentCulture.LCID}",
-                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions().Values.Select(r => new RegionData
-                {
-                    Id = r.Id,
-                    Id3 = r.Id3,
-                    Name = r.Name,
-                    EnglishName = r.EnglishName,
-                    Currency = r.Currency.Id,
-                    Cultures = r.Cultures.Select(c => c.Id)
-                })),
-                MyJsonSerializerContext.Default.IEnumerableRegionData,
+                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions(ids).GetRegions().SortRegions(ids)),
+                CommonJsonSerializerContext.Default.IEnumerableRegionItem,
                 null, cancellationToken);
 
             if (ids != null)
@@ -326,6 +320,32 @@ namespace Platform.Server.Services
                 AppId = rq.AppId,
                 AppName = appName
             };
+        }
+
+        /// <summary>
+        /// Parse China Pin
+        /// 解析中国身份证
+        /// </summary>
+        /// <param name="pin">PIN</param>
+        /// <returns>Result</returns>
+        public ChinaPinData? ParseChinaPin(string pin)
+        {
+            var validator = new ChinaPinValidator(pin);
+            if (validator.Valid)
+            {
+                return new ChinaPinData
+                {
+                    StateNum = validator.StateNum,
+                    CityNum = validator.CityNum,
+                    DistrictNum = validator.DistrictNum,
+                    Birthday = validator.Birthday.Value,
+                    IsFemale = validator.IsFemale.Value
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

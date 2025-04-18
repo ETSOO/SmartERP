@@ -5,7 +5,6 @@ import HistoryIcon from "@mui/icons-material/History";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AppsIcon from "@mui/icons-material/Apps";
 import React from "react";
-import { Typography, useMediaQuery } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
 import {
@@ -19,6 +18,8 @@ import {
 import { AppProvider } from "@etsoo/toolpad/react-router-dom";
 import { CoreCulture } from "@etsoo/smarterp-core";
 import { AppSwitchPopover } from "@etsoo/smarterp-core/components";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 function SidebarFooter({ mini }: SidebarFooterProps) {
   return (

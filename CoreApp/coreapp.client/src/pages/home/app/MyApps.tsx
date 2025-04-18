@@ -9,7 +9,6 @@ import {
   IconButtonLink,
   Switch
 } from "@etsoo/materialui";
-import { BoxProps, Fab, IconButton, Typography } from "@mui/material";
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -26,6 +25,10 @@ import { AppPurchasedQueryData, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { AppUtils } from "../components/AppUtils";
+import Fab from "@mui/material/Fab";
+import { BoxProps } from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 
 const template = {
   keyword: "string",
@@ -81,7 +84,7 @@ export default function MyApps() {
 
   return (
     <ResponsivePage<AppPurchasedQueryData, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: (
           <Fab

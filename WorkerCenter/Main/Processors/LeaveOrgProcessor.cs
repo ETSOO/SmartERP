@@ -1,4 +1,6 @@
-﻿using com.etsoo.CoreFramework.Authentication;
+﻿using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.MessageQueue;
 using PlatformShared;
 using PlatformShared.Database;
@@ -87,7 +89,7 @@ namespace WorkerCenter.Main.Processors
                     Bcc = ownerEmails
                 };
 
-                await _producer.SendJsonAsync(email, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
+                await _producer.SendJsonAsync(email, ApiModelJsonSerializerContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
             }
         }
     }

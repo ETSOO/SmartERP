@@ -1,5 +1,4 @@
 import { ComboBox, EditPage, InputField, MaskInput } from "@etsoo/materialui";
-import { Grid2 } from "@mui/material";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -14,6 +13,7 @@ import {
   usePageData
 } from "@etsoo/smarterp-core";
 import { OrgTiplist } from "@etsoo/smarterp-core/components";
+import Grid from "@mui/material/Grid";
 
 export default function EditOrg() {
   // Route
@@ -128,7 +128,7 @@ export default function EditOrg() {
           : undefined
       }
     >
-      <Grid2 size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
           required
@@ -140,8 +140,8 @@ export default function EditOrg() {
           error={formik.touched.name && Boolean(formik.errors.name)}
           helperText={formik.touched.name && formik.errors.name}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 6 }}>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
           name="brand"
@@ -150,8 +150,8 @@ export default function EditOrg() {
           value={formik.values.brand ?? ""}
           onChange={formik.handleChange}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 6 }}>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <MaskInput
           mask={{ mask: tax?.mask ?? "" }}
           name="pin"
@@ -165,8 +165,8 @@ export default function EditOrg() {
           error={formik.touched.pin && Boolean(formik.errors.pin)}
           helperText={formik.touched.pin && formik.errors.pin}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 6 }}>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <OrgTiplist
           label={labels.parentOrg}
           name="parentId"
@@ -177,8 +177,8 @@ export default function EditOrg() {
           }
           inputHelperText={formik.touched.parentId && formik.errors.parentId}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 6, sm: 3 }}>
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
         <ComboBox
           name="status"
           label={labels.status}
@@ -187,7 +187,7 @@ export default function EditOrg() {
           inputOnChange={formik.handleChange}
           options={app.getStatusList()}
         />
-      </Grid2>
+      </Grid>
     </EditPage>
   );
 }

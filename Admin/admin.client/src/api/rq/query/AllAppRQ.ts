@@ -1,5 +1,4 @@
-import { QueryRQ } from "@etsoo/appscript";
-import { IdentityType } from "@etsoo/smarterp-core";
+import { IdentityType, QueryRQ } from "@etsoo/appscript";
 
 /**
  * All app request data

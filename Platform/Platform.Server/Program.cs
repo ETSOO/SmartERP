@@ -1,4 +1,5 @@
 using com.etsoo.AlipayApi;
+using com.etsoo.ApiModel;
 using com.etsoo.ApiProxy.Configs;
 using com.etsoo.ApiProxy.Defs;
 using com.etsoo.ApiProxy.Proxy;
@@ -250,6 +251,7 @@ services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
         CommonJsonSerializerContext.Default,
         ModelJsonSerializerContext.Default,
+        ApiModelJsonSerializerContext.Default,
         WeiXinJsonSerializerContext.Default,
         MyJsonSerializerContext.Default
     );

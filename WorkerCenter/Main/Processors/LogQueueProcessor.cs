@@ -1,6 +1,7 @@
 ﻿using com.etsoo.Localization;
 using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
+using com.etsoo.Utils.Serialization;
 using PlatformShared.Database;
 using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;

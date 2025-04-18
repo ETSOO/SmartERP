@@ -7,7 +7,6 @@ import {
   SelectBool,
   ComboBox
 } from "@etsoo/materialui";
-import { BoxProps } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import {
@@ -22,6 +21,7 @@ import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { AllUserDto } from "../../../api/dto/query/AllUserDto";
+import { BoxProps } from "@mui/material/Box";
 
 const template = {
   name: "string",
@@ -67,7 +67,7 @@ export default function AllUsers() {
 
   return (
     <ResponsivePage<AllUserDto, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData
       })}
       mRef={ref}

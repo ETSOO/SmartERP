@@ -1,4 +1,6 @@
 ﻿using com.etsoo.Address;
+using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -11,12 +13,10 @@ using Platform.Server.Application;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Endpoints.AuthCode.RQ;
 using Platform.Server.Templates;
-using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
-using PlatformShared.Messages;
 using System.Globalization;
 using System.Net;
 using System.Net.Mail;
@@ -234,7 +234,7 @@ namespace Platform.Server.Services
                         To = [emailAddress.ToString()]
                     };
 
-                    await _queueService.PushAsync(message, PlatformSharedContext.Default.SendEmailMessage, cancellationToken);
+                    await _queueService.PushAsync(message, ApiModelJsonSerializerContext.Default.SendEmailMessage, cancellationToken);
                 }
             }
             catch (Exception ex)
@@ -359,10 +359,10 @@ namespace Platform.Server.Services
                     Kind = SendSMSMessage.KindCode,
                     Culture = CultureInfo.CurrentCulture.Name,
                     Region = region,
-                    To = [mobile],
+                    To = [mobileString],
                     Body = code
                 };
-                await _queueService.PushAsync(message, PlatformSharedContext.Default.SendSMSMessage, cancellationToken);
+                await _queueService.PushAsync(message, ApiModelJsonSerializerContext.Default.SendSMSMessage, cancellationToken);
             }
 
             // Return

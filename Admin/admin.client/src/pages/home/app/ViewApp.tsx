@@ -1,12 +1,14 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { ButtonLink, HBox, ViewPage } from "@etsoo/materialui";
-import { Button, Stack, Typography } from "@mui/material";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import { app } from "../../../app/MyApp";
 import { usePageData } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadAppDto } from "../../../api/dto/query/ReadAppDto";
 import { AppUtils } from "../../../components/AppUtils";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
 
 export default function ViewApp() {
   // Route

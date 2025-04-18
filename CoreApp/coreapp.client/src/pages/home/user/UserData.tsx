@@ -1,15 +1,5 @@
 import { ButtonLink, CommonPage } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
-import {
-  Card,
-  CardActions,
-  CardContent,
-  Grid2,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText
-} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
@@ -17,6 +7,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import { UserIdentifierData } from "@etsoo/smarterp-core";
 import React from "react";
 import { UserIdentifierType } from "@etsoo/appscript";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import CardActions from "@mui/material/CardActions";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import IconButton from "@mui/material/IconButton";
+import ListItemText from "@mui/material/ListItemText";
 
 export default function UserData() {
   // Labels
@@ -60,19 +58,19 @@ export default function UserData() {
         <CardContent>
           <Context.Consumer>
             {({ state }) => (
-              <Grid2 container spacing={1}>
-                <Grid2 size={{ xs: 6, md: 4 }}>{state.name}</Grid2>
+              <Grid container spacing={1}>
+                <Grid size={{ xs: 6, md: 4 }}>{state.name}</Grid>
                 {(state.familyName || state.givenName) && (
-                  <Grid2 size={{ xs: 6, md: 4 }}>
+                  <Grid size={{ xs: 6, md: 4 }}>
                     {state.familyName} / {state.givenName}
-                  </Grid2>
+                  </Grid>
                 )}
                 {(state.latinFamilyName || state.latinGivenName) && (
-                  <Grid2 size={{ xs: 6, md: 4 }}>
+                  <Grid size={{ xs: 6, md: 4 }}>
                     {state.latinFamilyName} / {state.latinGivenName}
-                  </Grid2>
+                  </Grid>
                 )}
-              </Grid2>
+              </Grid>
             )}
           </Context.Consumer>
         </CardContent>

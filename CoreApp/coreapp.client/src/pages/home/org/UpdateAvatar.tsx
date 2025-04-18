@@ -1,10 +1,10 @@
 import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
-import { Stack } from "@mui/material";
 import React from "react";
 import { app } from "../../../app/MyApp";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
 import { usePageData } from "@etsoo/smarterp-core";
+import Stack from "@mui/material/Stack";
 
 export default function UpdateAvatar() {
   // Route

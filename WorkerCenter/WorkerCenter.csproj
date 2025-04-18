@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.Localization" Version="1.0.24" />
-    <PackageReference Include="com.etsoo.SMTP" Version="1.0.75" />
+    <PackageReference Include="com.etsoo.Localization" Version="1.0.27" />
+    <PackageReference Include="com.etsoo.SMTP" Version="1.0.77" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.11.2" />

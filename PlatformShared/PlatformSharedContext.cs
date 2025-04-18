@@ -19,8 +19,6 @@ namespace PlatformShared
     [JsonSerializable(typeof(AppUrl[]))]
 
     [JsonSerializable(typeof(CommonMessage))]
-    [JsonSerializable(typeof(SendEmailMessage))]
-    [JsonSerializable(typeof(SendSMSMessage))]
 
     [JsonSerializable(typeof(AcceptInvitationMessageData))]
     [JsonSerializable(typeof(AdjustReportToMessageData))]

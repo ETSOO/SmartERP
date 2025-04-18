@@ -2,12 +2,6 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { app, NotifierProvider } from "./app/MyApp";
-import {
-  createTheme,
-  CssBaseline,
-  LinearProgress,
-  ThemeProvider
-} from "@mui/material";
 import { RouterProvider, RouterProviderProps } from "react-router-dom";
 import { createDynamicRouter } from "@etsoo/react";
 import { zhCN, zhHK } from "@mui/material/locale";
@@ -16,6 +10,9 @@ import Index from "./pages/Index";
 import Home from "./pages/home/Home";
 import Layout from "./pages/home/Layout";
 import { ReactAppContext } from "@etsoo/materialui";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import LinearProgress from "@mui/material/LinearProgress";
 
 // Culture provider
 const CultureStateProvider = app.cultureState.provider;

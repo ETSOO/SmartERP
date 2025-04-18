@@ -1,5 +1,4 @@
 import { EditPage, InputField } from "@etsoo/materialui";
-import { Grid2 } from "@mui/material";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -11,6 +10,7 @@ import {
   UserUpdateReadDto,
   UserUpdateRQ
 } from "@etsoo/smarterp-core";
+import Grid from "@mui/material/Grid";
 
 export default function EditUser() {
   // Route
@@ -97,7 +97,7 @@ export default function EditUser() {
       }}
       onUpdate={reloadData}
     >
-      <Grid2 size={{ xs: 8, md: 6, lg: 4 }}>
+      <Grid size={{ xs: 8, md: 6, lg: 4 }}>
         <InputField
           fullWidth
           required
@@ -109,8 +109,8 @@ export default function EditUser() {
           error={formik.touched.name && Boolean(formik.errors.name)}
           helperText={formik.touched.name && formik.errors.name}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 4, md: 3 }}>
+      </Grid>
+      <Grid size={{ xs: 4, md: 3 }}>
         <InputField
           fullWidth
           name="familyName"
@@ -119,8 +119,8 @@ export default function EditUser() {
           value={formik.values.familyName ?? ""}
           onChange={formik.handleChange}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 4, md: 3 }}>
+      </Grid>
+      <Grid size={{ xs: 4, md: 3 }}>
         <InputField
           fullWidth
           name="givenName"
@@ -129,8 +129,8 @@ export default function EditUser() {
           value={formik.values.givenName ?? ""}
           onChange={formik.handleChange}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 8, md: 6, lg: 4 }}>
+      </Grid>
+      <Grid size={{ xs: 8, md: 6, lg: 4 }}>
         <InputField
           fullWidth
           name="preferredName"
@@ -139,8 +139,8 @@ export default function EditUser() {
           value={formik.values.preferredName ?? ""}
           onChange={formik.handleChange}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 4, md: 3 }}>
+      </Grid>
+      <Grid size={{ xs: 4, md: 3 }}>
         <InputField
           fullWidth
           name="latinFamilyName"
@@ -149,8 +149,8 @@ export default function EditUser() {
           value={formik.values.latinFamilyName ?? ""}
           onChange={formik.handleChange}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 4, md: 3 }}>
+      </Grid>
+      <Grid size={{ xs: 4, md: 3 }}>
         <InputField
           fullWidth
           name="latinGivenName"
@@ -159,7 +159,7 @@ export default function EditUser() {
           value={formik.values.latinGivenName ?? ""}
           onChange={formik.handleChange}
         />
-      </Grid2>
+      </Grid>
     </EditPage>
   );
 }

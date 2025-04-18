@@ -5,7 +5,6 @@ import {
   MobileListItemRenderer,
   MUUtils
 } from "@etsoo/materialui";
-import { BoxProps, Button, IconButton, Typography } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import OpenInBrowserIcon from "@mui/icons-material/OpenInBrowser";
@@ -17,7 +16,11 @@ import { AppQueryData, AppUrl, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { AppUtils } from "../components/AppUtils";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BuyKind } from "../components/BuyApp";
-import { DefaultUI, IdentityType } from "@etsoo/smarterp-core/components";
+import { DefaultUI, IdentityTypeList } from "@etsoo/smarterp-core/components";
+import { BoxProps } from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 
 const template = {
   keyword: "string",
@@ -63,7 +66,7 @@ export default function AllApps() {
 
   return (
     <ResponsivePage<AppQueryData, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData
       })}
       mRef={ref}
@@ -75,7 +78,7 @@ export default function AllApps() {
           name="keyword"
           defaultValue={data.keyword}
         />,
-        <IdentityType search value={data.identityType} />
+        <IdentityTypeList search value={data.identityType} />
       ]}
       loadData={(data, lastItem) =>
         app.core.appApi.query(

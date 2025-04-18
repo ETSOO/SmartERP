@@ -1,7 +1,8 @@
 import { ComboBox, EmailInput, VBox } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
 import { UserRole } from "@etsoo/appscript";
-import { TextField, Typography } from "@mui/material";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 export function InviteMember() {
   // Labels

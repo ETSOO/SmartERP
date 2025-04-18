@@ -7,7 +7,6 @@ import {
   MUUtils,
   IconButtonLink
 } from "@etsoo/materialui";
-import { BoxProps, Typography } from "@mui/material";
 import React from "react";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import {
@@ -19,11 +18,13 @@ import {
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { useNavigate } from "react-router-dom";
-import { DefaultUI, IdentityType } from "@etsoo/smarterp-core/components";
+import { DefaultUI, IdentityTypeList } from "@etsoo/smarterp-core/components";
 import { AllAppDto } from "../../../api/dto/query/AllAppDto";
 import ArticleIcon from "@mui/icons-material/Article";
 import { OrgTiplist } from "../../../components/OrgTiplist";
 import { AppTiplist } from "../../../components/AppTiplist";
+import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   orgId: "number",
@@ -69,7 +70,7 @@ export default function AllApps() {
 
   return (
     <ResponsivePage<AllAppDto, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData
       })}
       mRef={ref}
@@ -84,7 +85,7 @@ export default function AllApps() {
           defaultValue={data.keyword}
           slotProps={{ htmlInput: { maxLength: 128 } }}
         />,
-        <IdentityType value={data.identityType} search />,
+        <IdentityTypeList value={data.identityType} search />,
         <SearchField
           label={labels.expiry}
           name="expiry"

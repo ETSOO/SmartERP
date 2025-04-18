@@ -5,7 +5,8 @@ import { IActionResult } from "@etsoo/shared";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../app/MyApp";
 import React from "react";
-import { Box, LinearProgress } from "@mui/material";
+import Box from "@mui/material/Box";
+import LinearProgress from "@mui/material/LinearProgress";
 
 export default function AuthSuccess() {
   // Query params

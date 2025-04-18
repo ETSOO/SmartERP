@@ -31,6 +31,12 @@
         public required string Description { get; init; }
 
         /// <summary>
+        /// File extension
+        /// 文件扩展名
+        /// </summary>
+        public required string Extension { get; init; }
+
+        /// <summary>
         /// User id
         /// 用户编号
         /// </summary>

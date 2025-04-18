@@ -1,5 +1,7 @@
 ﻿using com.etsoo.Address;
 using com.etsoo.ApiModel.Auth;
+using com.etsoo.ApiModel.Dto.SmartERP;
+using com.etsoo.ApiModel.RQ.SmartERP;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;

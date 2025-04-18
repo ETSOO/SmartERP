@@ -1,7 +1,6 @@
 ﻿using com.etsoo.ApiModel.Dto.Maps;
 using com.etsoo.ApiModel.RQ.Maps;
 using com.etsoo.ImageUtils.Barcode;
-using com.etsoo.Localization.Country;
 using com.etsoo.SMS;
 using Microsoft.AspNetCore.Mvc;
 using Platform.Server.Dto.App;
@@ -90,8 +89,6 @@ namespace Platform.Server
 
     [JsonSerializable(typeof(BarcodeOptions))]
     [JsonSerializable(typeof(OrgPublicInfo))]
-    [JsonSerializable(typeof(IEnumerable<CurrencyItem>))]
-    [JsonSerializable(typeof(IEnumerable<RegionData>))]
     [JsonSerializable(typeof(IEnumerable<PlaceCommon>))]
 
     // User

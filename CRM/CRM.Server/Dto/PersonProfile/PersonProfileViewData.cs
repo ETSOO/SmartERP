@@ -19,7 +19,7 @@ namespace CRM.Server.Dto.PersonProfile
         /// Kind
         /// 类型
         /// </summary>
-        public PersonProfileKind? Kind { get; init; }
+        public PersonProfileKind Kind { get; init; }
 
         /// <summary>
         /// Title

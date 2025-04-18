@@ -138,7 +138,7 @@ export default function Home() {
         title: labels.org
       },
       {
-        segment: "home/org/profile",
+        segment: "home/org/data",
         title: labels.info,
         icon: <DescriptionIcon />,
         subs: ["/home/org/.*"]

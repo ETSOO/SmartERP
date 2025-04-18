@@ -9,7 +9,6 @@ import {
   HBox
 } from "@etsoo/materialui";
 import { DataTypes, DateUtils } from "@etsoo/shared";
-import { BoxProps, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import React from "react";
 import {
@@ -24,6 +23,8 @@ import {
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   keyword: "string",
@@ -57,7 +58,7 @@ export default function LoginHistory() {
 
   return (
     <ResponsivePage<AuditHistoryDto, typeof template>
-      {...DefaultUI.createProps({
+      {...DefaultUI.pageProps({
         onRefresh: reloadData
       })}
       mRef={ref}

@@ -5,13 +5,17 @@ import {
   FileUploadButton,
   HBox,
   HBoxList,
+  HtmlDiv,
+  IconButtonLink,
   LinkEx,
+  VBox,
   ViewContainer
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
+import AddIcon from "@mui/icons-material/Add";
 import { app } from "../../../app/MyApp";
 import { OrgDownloadKind, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
@@ -22,11 +26,15 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import IconButton from "@mui/material/IconButton";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
-import DOMPurify from "dompurify";
 import Link from "@mui/material/Link";
+import AccordionActions from "@mui/material/AccordionActions";
+import Chip from "@mui/material/Chip";
+import { Link as RouterLink } from "react-router";
+import { MoreLinkActions } from "../../../components/profile/MoreLinkActions";
+import { MoreAttachmentActions } from "../../../components/profile/MoreAttachmentActions";
+import { useAddLink } from "../../../components/profile/useAddLink";
 
 export default function ViewProfile() {
   // Route
@@ -44,6 +52,8 @@ export default function ViewProfile() {
 
   // Labels
   const labels = app.getLabels(
+    "add",
+    "addComment",
     "assignee",
     "attachments",
     "back",
@@ -56,6 +66,7 @@ export default function ViewProfile() {
     "editLogo",
     "leaveOrg",
     "logo",
+    "noChanges",
     "people",
     "profile",
     "view"
@@ -63,6 +74,9 @@ export default function ViewProfile() {
 
   // Page data hook
   usePageData(app, `${labels.view} (${labels.profile})`, [loadData]);
+
+  // Add link
+  const addLink = useAddLink(id, loadData);
 
   return (
     <CommonPage paddings={0} onRefresh={loadData}>
@@ -74,12 +88,13 @@ export default function ViewProfile() {
             <Typography textAlign="center" variant="h6">
               {data.title}
             </Typography>
-            <IconButton
+            <IconButtonLink
               title={labels.back}
               disabled={!data.isAdmin && !data.isSelf}
+              href={`./../../edit/${id}`}
             >
               <EditIcon />
-            </IconButton>
+            </IconButtonLink>
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
@@ -110,7 +125,7 @@ export default function ViewProfile() {
                       (item.persons == null ||
                         item.persons.length > 0) ? undefined : (
                         <HBoxList gap={0.5}>
-                          <Typography variant="body2">
+                          <Typography variant="caption">
                             {labels.people}:
                           </Typography>
                           {item.persons != null &&
@@ -181,11 +196,9 @@ export default function ViewProfile() {
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography component="span">{labels.description}</Typography>
             </AccordionSummary>
-            <AccordionDetails
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(data.comment)
-              }}
-            ></AccordionDetails>
+            <AccordionDetails>
+              <HtmlDiv>{data.comment}</HtmlDiv>
+            </AccordionDetails>
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -194,31 +207,45 @@ export default function ViewProfile() {
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <HBoxList gap={0.5} marginBottom={1} flexWrap="wrap">
-                {data.attachments.map((file) => (
-                  <Link
-                    key={file.id}
-                    title={file.userName + ", " + app.formatDate(file.creation)}
-                    variant="body2"
-                    underline="hover"
-                    href="#"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
+              <HBoxList
+                gap={0.5}
+                marginBottom={1}
+                flexWrap="wrap"
+                alignItems="center"
+              >
+                {data.attachments.map((file, index) => (
+                  <React.Fragment key={file.id}>
+                    <Link
+                      key={file.id}
+                      title={
+                        file.userName + ", " + app.formatDate(file.creation)
+                      }
+                      variant="body2"
+                      underline="hover"
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-                      app.core.orgApi.downloadFile(
-                        OrgDownloadKind.Profile,
-                        file.id
-                      );
-                    }}
-                  >
-                    {file.description}
-                  </Link>
+                        app.core.orgApi.downloadFile(
+                          OrgDownloadKind.Profile,
+                          file.id
+                        );
+                      }}
+                    >
+                      {index + 1} {file.description}
+                      {file.extension}
+                    </Link>
+                    {(data.isAdmin || data.isSelf || file.isSelf) && (
+                      <MoreAttachmentActions file={file} callback={loadData} />
+                    )}
+                  </React.Fragment>
                 ))}
               </HBoxList>
               <FileUploadButton
                 dropFilesLabel={labels.dropFilesLabel}
                 startIcon={<FileUploadIcon />}
+                maxFiles={10}
                 onUploadFiles={async (files) => {
                   const result = await app.core.orgApi.uploadProfileFiles(
                     id,
@@ -242,11 +269,52 @@ export default function ViewProfile() {
                 {labels.comments} ({data.links.length})
               </Typography>
             </AccordionSummary>
-            <AccordionDetails
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(data.comment)
-              }}
-            ></AccordionDetails>
+            <AccordionDetails>
+              {data.links.map((link, index) => (
+                <VBox key={`${link.id}${link.content}`}>
+                  <HBox
+                    gap={0.5}
+                    alignItems="center"
+                    padding={0.5}
+                    flexWrap="wrap"
+                    sx={{ fontSize: 14, backgroundColor: "#f3f3f3" }}
+                  >
+                    {index + 1}.
+                    <LinkEx to={`./../../../../contact/view/${link.userId}`}>
+                      {link.userName}
+                    </LinkEx>
+                    , {app.formatDate(link.creation)},{" "}
+                    {app.profile.getLinkKind(link.kind)}
+                    {(data.isAdmin || data.isSelf || link.isSelf) && (
+                      <MoreLinkActions
+                        link={link}
+                        callback={loadData}
+                        onEdit={() => addLink(link)}
+                      />
+                    )}
+                    {link.targetProfileTitle && (
+                      <Chip
+                        label={link.targetProfileTitle}
+                        component={RouterLink}
+                        to={`./../${link.targetProfileId}`}
+                        variant="outlined"
+                        clickable
+                      />
+                    )}
+                  </HBox>
+                  <HtmlDiv>{link.content}</HtmlDiv>
+                </VBox>
+              ))}
+            </AccordionDetails>
+            <AccordionActions>
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() => addLink()}
+              >
+                {labels.add}
+              </Button>
+            </AccordionActions>
           </Accordion>
         </React.Fragment>
       )}

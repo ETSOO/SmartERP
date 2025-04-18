@@ -17,5 +17,11 @@
         /// 标题
         /// </summary>
         public required string Title { get; init; }
+
+        /// <summary>
+        /// Creation
+        /// 登记时间
+        /// </summary>
+        public DateTimeOffset Creation { get; init; }
     }
 }

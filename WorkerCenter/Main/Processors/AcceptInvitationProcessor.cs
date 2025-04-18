@@ -1,4 +1,6 @@
-﻿using com.etsoo.CoreFramework.Authentication;
+﻿using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.Localization;
 using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
@@ -126,7 +128,7 @@ namespace WorkerCenter.Main.Processors
                     Cc = ownerEmails
                 };
 
-                await _producer.SendJsonAsync(email, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
+                await _producer.SendJsonAsync(email, ApiModelJsonSerializerContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
             }
 
             // Log
@@ -156,7 +158,7 @@ namespace WorkerCenter.Main.Processors
                     To = inviteeEmails
                 };
 
-                await _producer.SendJsonAsync(inviteeeEmail, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
+                await _producer.SendJsonAsync(inviteeeEmail, ApiModelJsonSerializerContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
             }
         }
     }

@@ -1,5 +1,4 @@
 import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
-import { Grid2 } from "@mui/material";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -14,6 +13,7 @@ import {
   usePageData
 } from "@etsoo/smarterp-core";
 import { UserTiplist } from "@etsoo/smarterp-core/components";
+import Grid from "@mui/material/Grid";
 
 export default function EditMember() {
   // Route
@@ -70,8 +70,16 @@ export default function EditMember() {
         rq,
         data,
         isNotSelf
-          ? ["id", "isSelf", "name"]
-          : ["id", "isSelf", "name", "expiry", "status", "userRole", "reportTo"]
+          ? ["id", "localName", "changedFields"]
+          : [
+              "id",
+              "localName",
+              "changedFields",
+              "expiry",
+              "status",
+              "reportTo",
+              "userRole"
+            ]
       );
 
       if (fields.length === 0) {
@@ -141,7 +149,7 @@ export default function EditMember() {
           : undefined
       }
     >
-      <Grid2 size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
           name="localName"
@@ -151,8 +159,8 @@ export default function EditMember() {
           onChange={formik.handleChange}
           helperText={`${labels.fullName}: ${data.name}`}
         />
-      </Grid2>
-      <Grid2 size={{ xs: 12, sm: 6 }}>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
           name="assignedId"
@@ -163,10 +171,10 @@ export default function EditMember() {
           value={formik.values.assignedId ?? ""}
           onChange={formik.handleChange}
         />
-      </Grid2>
+      </Grid>
       {isNotSelf && data.name !== "" && (
         <React.Fragment>
-          <Grid2 size={{ xs: 6, sm: 3 }}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <UserTiplist
               label={labels.reportTo}
               idValue={formik.values.reportTo}
@@ -177,8 +185,8 @@ export default function EditMember() {
                 formik.setFieldValue("reportTo", value?.id ?? null)
               }
             />
-          </Grid2>
-          <Grid2 size={{ xs: 6, sm: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <ComboBox
               name="userRole"
               label={labels.role}
@@ -187,8 +195,8 @@ export default function EditMember() {
               inputOnChange={formik.handleChange}
               options={app.getRoles()}
             />
-          </Grid2>
-          <Grid2 size={{ xs: 6, sm: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <InputField
               fullWidth
               name="expiry"
@@ -197,8 +205,8 @@ export default function EditMember() {
               value={DateUtils.formatForInput(formik.values.expiry) ?? ""}
               onChange={formik.handleChange}
             />
-          </Grid2>
-          <Grid2 size={{ xs: 6, sm: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <ComboBox
               name="status"
               label={labels.status}
@@ -207,7 +215,7 @@ export default function EditMember() {
               inputOnChange={formik.handleChange}
               options={app.getStatusList()}
             />
-          </Grid2>
+          </Grid>
         </React.Fragment>
       )}
     </EditPage>

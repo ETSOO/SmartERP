@@ -1,4 +1,6 @@
-﻿using com.etsoo.Localization;
+﻿using com.etsoo.ApiModel;
+using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.Localization;
 using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using Microsoft.EntityFrameworkCore;
@@ -108,7 +110,7 @@ namespace WorkerCenter.Main.Processors
                 Bcc = emails[2]
             };
 
-            await _producer.SendJsonAsync(inviteeeEmail, PlatformSharedContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
+            await _producer.SendJsonAsync(inviteeeEmail, ApiModelJsonSerializerContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
         }
     }
 }
