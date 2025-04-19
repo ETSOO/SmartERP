@@ -1,4 +1,5 @@
-﻿using com.etsoo.CoreFramework.Application;
+﻿using com.etsoo.ApiModel.RQ.SmartERP;
+using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
@@ -13,6 +14,12 @@ namespace CRM.Server.RQ.PersonProfile
     /// </summary>
     public record PersonTaskCreateRQ : IModelValidator
     {
+        /// <summary>
+        /// Token auth data
+        /// 令牌认证数据
+        /// </summary>
+        public required TokenAuthRQ Auth { get; init; }
+
         /// <summary>
         /// Other participants
         /// 其他参与者

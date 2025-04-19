@@ -20,6 +20,7 @@ namespace CRM.Server.RQ
         {
             return new PersonProfileCreateRQ
             {
+                Auth = task.Auth,
                 PersonId = personId,
                 Persons = task.Persons,
                 OrderId = task.OrderId,

@@ -78,6 +78,9 @@ export default function AddTask() {
         return;
       }
 
+      // Auth
+      var auth = app.getTokenAuthRQ();
+
       // Submit
       let result: IdActionResult | undefined;
       if (id > 0) {
@@ -95,13 +98,15 @@ export default function AddTask() {
           return;
         }
         rq.changedFields = fields;
+        rq.auth = auth;
 
         result = await app.profileApi.update(rq);
       } else {
         const rq: PersonTaskCreateRQ = {
           ...rest,
           comment: content,
-          persons: persons?.map((p) => p.id)
+          persons: persons?.map((p) => p.id),
+          auth
         };
 
         Utils.removeEmptyValues(rq);
@@ -219,7 +224,7 @@ export default function AddTask() {
         <EOEditorEx
           ref={editorRef}
           content={formik.values.comment ?? ""}
-          backupKey={`profile-${isEditing}`}
+          backupKey={`profile-task-${id}`}
           language={app.culture}
         />
       </Grid>

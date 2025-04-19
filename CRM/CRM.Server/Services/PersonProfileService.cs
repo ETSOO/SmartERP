@@ -1,4 +1,5 @@
-﻿using com.etsoo.CoreFramework.Application;
+﻿using com.etsoo.ApiProxy.Defs;
+using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
@@ -27,18 +28,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly IQueueService _queueService;
+        readonly ISmartERPProxy _core;
 
         public PersonProfileService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonService> logger,
-            IQueueService queueService
+            IQueueService queueService,
+            ISmartERPProxy core
         )
             : base(app, userAccessor.UserSafe, "person_profile", logger)
         {
             _db = db;
             _queueService = queueService;
+            _core = core;
         }
 
         /// <summary>
@@ -103,7 +107,7 @@ namespace CRM.Server.Services
                 : rq.HappenDateEnd?.ToUniversalTime();
 
             // Format content
-            var comment = rq.Comment;
+            var comment = await _core.Org.FormatHtmlContentAsync(rq.Auth, rq.Comment, cancellationToken);
 
             var profile = new PersonProfile
             {
@@ -270,13 +274,18 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            // Content
+            var content = string.IsNullOrEmpty(rq.Content)
+                ? null
+                : await _core.Org.FormatHtmlContentAsync(rq.Auth, rq.Content, cancellationToken);
+
             // Create link
             var link = new PersonProfileLink
             {
                 ProfileId = rq.ProfileId,
                 TargetProfileId = rq.TargetProfileId,
                 Kind = rq.Kind,
-                Content = rq.Content,
+                Content = content,
                 UserId = User.Oid
             };
 
@@ -579,7 +588,8 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Comment)) && !string.IsNullOrEmpty(rq.Comment))
             {
-                profile.Comment = rq.Comment;
+                var comment = await _core.Org.FormatHtmlContentAsync(rq.Auth, rq.Comment, cancellationToken);
+                profile.Comment = comment;
             }
 
             if (rq.IsModified(nameof(rq.Location)))
@@ -710,7 +720,11 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Content)))
             {
-                link.Content = rq.Content;
+                var content = string.IsNullOrEmpty(rq.Content)
+                    ? null
+                    : await _core.Org.FormatHtmlContentAsync(rq.Auth, rq.Content, cancellationToken);
+
+                link.Content = content;
             }
 
             // Changes

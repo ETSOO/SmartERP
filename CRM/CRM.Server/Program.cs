@@ -1,3 +1,6 @@
+using com.etsoo.ApiProxy.Defs;
+using com.etsoo.ApiProxy.Options;
+using com.etsoo.ApiProxy.Proxy;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
@@ -185,6 +188,18 @@ if (corsOptions.Required)
         options.AddDefaultPolicy(builder => builder.Setup(corsOptions));
     });
 }
+
+// SmartERP Core Proxy
+services.AddOptions<SmartERPOptions>().Bind(configuration.GetSection("SmartERPProxy")).ValidateOnStart();
+services.AddHttpClient<ISmartERPProxy, SmartERPProxy>(client =>
+{
+    var api = seApp.Configuration.ApiUrl;
+    if (!api.EndsWith('/'))
+    {
+        api += '/';
+    }
+    client.BaseAddress = new Uri(api);
+});
 
 // API services
 services.AddScoped<CurrentUserAccessor>();

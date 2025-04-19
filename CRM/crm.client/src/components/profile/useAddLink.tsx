@@ -47,13 +47,17 @@ export function useAddLink(id: number, loadData: () => Promise<void>) {
             return false;
           }
 
+          // Auth
+          var auth = app.getTokenAuthRQ();
+
           let result: IActionResult | undefined;
           if (data == null) {
             const rq: PersonProfileLinkCreateRQ = {
               profileId: id,
               kind,
               targetProfileId,
-              content
+              content,
+              auth
             };
 
             Utils.removeEmptyValues(rq);
@@ -76,6 +80,7 @@ export function useAddLink(id: number, loadData: () => Promise<void>) {
               return;
             }
             rq.changedFields = fields;
+            rq.auth = auth;
 
             result = await app.profileApi.updateLink(rq, {
               showLoading: false

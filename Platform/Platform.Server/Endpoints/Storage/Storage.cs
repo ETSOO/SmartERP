@@ -26,7 +26,7 @@ namespace Platform.Server.Endpoints.Storage
                     await stream.CopyToAsync(accessor.HttpContext.Response.Body, cancellationToken);
             }).WithDescription("Read organization user avatar / 读取机构用户头像").WithTags("Storage");
 
-            g.MapGet("Resources/{path}", async (IStorage storage, IHttpContextAccessor accessor, string path, CancellationToken cancellationToken) =>
+            g.MapGet("Resources/{*path}", async (IStorage storage, IHttpContextAccessor accessor, string path, CancellationToken cancellationToken) =>
             {
                 await using var stream = await storage.ReadAsync($"/Resources/{path}", cancellationToken);
                 if (stream != null && accessor.HttpContext != null)

@@ -18,9 +18,6 @@ export function ProfileLink(props: ProfileLinkProps) {
   // Labels
   const labels = app.getLabels("relatedProfile", "type");
 
-  // Is editing
-  const isEditing = data != null;
-
   React.useEffect(() => {
     if (editorRef.current) {
       editorRef.current.value = data?.content ?? "";
@@ -45,7 +42,7 @@ export function ProfileLink(props: ProfileLinkProps) {
       />
       <EOEditorEx
         ref={editorRef}
-        backupKey={`profile-comment${isEditing}`}
+        backupKey={`profile-comment${profileId}`}
         language={app.culture}
         height="345px"
       />

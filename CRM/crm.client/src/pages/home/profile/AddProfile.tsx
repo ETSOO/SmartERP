@@ -89,6 +89,9 @@ export default function AddProfile() {
         return;
       }
 
+      // Auth
+      var auth = app.getTokenAuthRQ();
+
       // Submit
       let result: IdActionResult | undefined;
       let redirectUrl: string;
@@ -107,6 +110,7 @@ export default function AddProfile() {
           return;
         }
         rq.changedFields = fields;
+        rq.auth = auth;
 
         redirectUrl = "./../../../../";
 
@@ -115,7 +119,8 @@ export default function AddProfile() {
         const rq: PersonProfileCreateRQ = {
           ...rest,
           comment: content,
-          persons: persons?.map((p) => p.id)
+          persons: persons?.map((p) => p.id),
+          auth
         };
 
         Utils.removeEmptyValues(rq);
@@ -255,7 +260,7 @@ export default function AddProfile() {
       <Grid size={{ xs: 12, sm: 12 }}>
         <EOEditorEx
           ref={editorRef}
-          backupKey={`profile-${isEditing}`}
+          backupKey={`profile-${id}`}
           language={app.culture}
         />
       </Grid>

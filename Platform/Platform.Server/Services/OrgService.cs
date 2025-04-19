@@ -216,7 +216,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public Task<string?> FormatHtmlContentAsync(string content, CancellationToken cancellationToken = default)
         {
-            var path = $"/Resources/{DateTime.UtcNow:yyyyMM}/";
+            var path = $"/Resources/Org{User.Organization}/{DateTime.UtcNow:yyyyMM}/";
             return HtmlIOUtils.FormatEditorContentAsync(_storage, path, content, Logger, cancellationToken);
         }
 
