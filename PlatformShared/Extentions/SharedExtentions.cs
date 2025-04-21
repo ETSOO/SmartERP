@@ -1,9 +1,11 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using PlatformShared.Messages;
 
 namespace PlatformShared.Extentions
@@ -137,6 +139,39 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Get related target
+        /// 获取关联对象
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <returns>Result</returns>
+        public static string GetRelatedTarget(this IdentityTypeData data)
+        {
+            var type = data.IdentityType;
+            var typeMappings = new (IdentityTypeFlags Flag, string Name)[]
+            {
+                (IdentityTypeFlags.User, Resources.User),
+                (IdentityTypeFlags.Customer, Resources.Customer),
+                (IdentityTypeFlags.Supplier, Resources.Supplier),
+                (IdentityTypeFlags.Contact, Resources.Contact),
+                (IdentityTypeFlags.Org, Resources.Org)
+            };
+
+            var types = typeMappings
+                .Where(m => type.HasFlag(m.Flag))
+                .Select(m => m.Name)
+                .ToList();
+
+            var label = $"[{string.Join(", ", types)}] {data.Name}";
+
+            if (type == IdentityTypeFlags.Contact && data.Owner != null)
+            {
+                label += $" / {data.Owner.Name}";
+            }
+
+            return label;
+        }
+
+        /// <summary>
         /// Query users from persons
         /// 从人员中查询用户
         /// </summary>
@@ -147,8 +182,7 @@ namespace PlatformShared.Extentions
         {
             return persons.Where(p => p.OrgId == orgId
                 && p.CoreUserId != null
-                && p.IdentityType.HasValue
-                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)
+                && p.IdentityType.HasFlag(IdentityTypeFlags.User)
             );
         }
 
@@ -162,8 +196,7 @@ namespace PlatformShared.Extentions
         public static IQueryable<Person> Customers(this IQueryable<Person> persons, int orgId)
         {
             return persons.Where(p => p.OrgId == orgId
-                && p.IdentityType.HasValue
-                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.Customer)
+                && p.IdentityType.HasFlag(IdentityTypeFlags.Customer)
             );
         }
 
@@ -177,8 +210,7 @@ namespace PlatformShared.Extentions
         public static IQueryable<Person> Suppliers(this IQueryable<Person> persons, int orgId)
         {
             return persons.Where(p => p.OrgId == orgId
-                && p.IdentityType.HasValue
-                && p.IdentityType.Value.HasFlag(IdentityTypeFlags.Supplier)
+                && p.IdentityType.HasFlag(IdentityTypeFlags.Supplier)
             );
         }
 
@@ -224,6 +256,78 @@ namespace PlatformShared.Extentions
                 .Where(ou => ou.UserRole >= role && ou.Status <= EntityStatus.Approved)
                 .Select(ou => ou.CoreUserId!.Value)
                 .ToListAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Query person identifiers by type and ids
+        /// 通过类型和编号查询成员唯一信息
+        /// </summary>
+        /// <param name="db">EF db</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="type">Type</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <param name="ids">Ids</param>
+        /// <returns>Result</returns>
+        public static async Task<string[][]> QueryPersonIdentifiersAsync(this MyDbContext db, int orgId, CoreUserIdentifierType type, CancellationToken cancellationToken = default, params IEnumerable<long>[] ids)
+        {
+            // Map CoreUserIdentifierType to PersonInfoKind
+            PersonInfoKind? kind = type switch
+            {
+                CoreUserIdentifierType.Email => PersonInfoKind.Email,
+                CoreUserIdentifierType.Mobile => PersonInfoKind.Mobile,
+                CoreUserIdentifierType.Wechat => PersonInfoKind.WeChat,
+                _ => null
+            };
+
+            // Flatten all ids into a single list to query the database in one go
+            var allIds = ids.SelectMany(i => i).Distinct().ToList();
+
+            // Query for all the ids in one go
+            var users = db.Persons.AsNoTracking()
+                .Where(p => p.OrgId == orgId && allIds.Contains(p.Id) && p.CoreUser != null)
+                .SelectMany(p => p.CoreUser!.CoreUserIdentifiers
+                            .Where(i => i.Type == type)
+                            .Select(i => new LongIdItem
+                            {
+                                Id = p.Id,
+                                Title = i.Value
+                            })
+                );
+
+            var contacts = db.Persons.AsNoTracking()
+                .Where(p => p.OrgId == orgId && allIds.Contains(p.Id) && p.CoreUser == null)
+                .SelectMany(p => p.Infos
+                            .Where(i => i.Kind == kind && i.IsDefault)
+                            .Select(i => new LongIdItem
+                            {
+                                Id = p.Id,
+                                Title = i.Identifier
+                            })
+                );
+
+            // Combine the two queries
+            var results = await users.Union(contacts)
+                .ToListAsync(cancellationToken);
+
+            // Initialize the result array
+            var result = new string[ids.Length][];
+
+            for (var i = 0; i < ids.Length; i++)
+            {
+                var currentIds = ids[i];
+
+                // Filter
+                var emails = results
+                    .Where(i => currentIds.Contains(i.Id))
+                    .Select(i => i.Title)
+                    .ToArray();
+
+                // Assign the filtered emails to the result array
+                result[i] = emails;
+            }
+
+            // Return
+            return result;
         }
 
         /// <summary>

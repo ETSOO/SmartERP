@@ -66,6 +66,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapPost("SendSMS", (IOrgService service, SendSMSMessage message, CancellationToken cancellationToken) => service.SendSMSAsync(message, cancellationToken))
                 .WithDescription("Send SMS / 发送短信").WithTags("Org");
 
+            g.MapPost("SendProfileEmail", (IOrgService service, SendProfileEmailRQ rq, CancellationToken cancellationToken) => service.SendProfileEmailAsync(rq, cancellationToken))
+                .WithDescription("Send profile email / 发送档案邮件").WithTags("Org");
+
             g.MapPut("Update", (IOrgService service, OrgUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update organization / 更新机构").WithTags("Org");
 

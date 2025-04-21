@@ -19,6 +19,7 @@ namespace PlatformShared
     [JsonSerializable(typeof(AppUrl[]))]
 
     [JsonSerializable(typeof(CommonMessage))]
+    [JsonSerializable(typeof(IEnumerable<ContactItem>))]
 
     [JsonSerializable(typeof(AcceptInvitationMessageData))]
     [JsonSerializable(typeof(AdjustReportToMessageData))]

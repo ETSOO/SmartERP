@@ -32,6 +32,12 @@
         public int Id { get; set; }
 
         /// <summary>
+        /// Person id
+        /// 人员编号
+        /// </summary>
+        public long PersonId { get; set; }
+
+        /// <summary>
         /// Kind
         /// 类型
         /// </summary>
@@ -71,6 +77,12 @@
         /// Is default or not
         /// 是否默认
         /// </summary>
-        public bool? IsDefault { get; set; }
+        public bool IsDefault { get; set; }
+
+        /// <summary>
+        /// Person belongs to
+        /// 所属人员
+        /// </summary>
+        public Person Person { get; set; } = null!;
     }
 }

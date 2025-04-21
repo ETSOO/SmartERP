@@ -17,5 +17,11 @@
         /// 名称 / 姓名
         /// </summary>
         public required string Name { get; init; }
+
+        /// <summary>
+        /// Job title
+        /// 职务
+        /// </summary>
+        public string? JobTitle { get; init; }
     }
 }

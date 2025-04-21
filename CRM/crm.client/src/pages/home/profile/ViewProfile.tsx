@@ -16,6 +16,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import AddIcon from "@mui/icons-material/Add";
+import EmailIcon from "@mui/icons-material/Email";
 import { app } from "../../../app/MyApp";
 import { OrgDownloadKind, usePageData } from "@etsoo/smarterp-core";
 import React from "react";
@@ -35,6 +36,8 @@ import { Link as RouterLink } from "react-router";
 import { MoreLinkActions } from "../../../components/profile/MoreLinkActions";
 import { MoreAttachmentActions } from "../../../components/profile/MoreAttachmentActions";
 import { useAddLink } from "../../../components/profile/useAddLink";
+import IconButton from "@mui/material/IconButton";
+import { useSendEmail } from "../../../components/profile/useSendEmail";
 
 export default function ViewProfile() {
   // Route
@@ -69,6 +72,7 @@ export default function ViewProfile() {
     "noChanges",
     "people",
     "profile",
+    "sendEmail",
     "view"
   );
 
@@ -78,6 +82,9 @@ export default function ViewProfile() {
   // Add link
   const addLink = useAddLink(id, loadData);
 
+  // Send email
+  const sendEmail = useSendEmail(data?.id ?? 0, data?.personId ?? 0);
+
   return (
     <CommonPage paddings={0} onRefresh={loadData}>
       {data == null ? (
@@ -86,8 +93,12 @@ export default function ViewProfile() {
         <React.Fragment>
           <HBox gap={1} alignItems="center" justifyContent="center">
             <Typography textAlign="center" variant="h6">
+              [{app.core.getIdentityFlagsLabel(data.personIdentityType)}]{" "}
               {data.title}
             </Typography>
+            <IconButton title={labels.sendEmail} onClick={sendEmail}>
+              <EmailIcon />
+            </IconButton>
             <IconButtonLink
               title={labels.back}
               disabled={!data.isAdmin && !data.isSelf}
@@ -176,6 +187,10 @@ export default function ViewProfile() {
                     data: (item) => app.getRoleLabel(item.userRole),
                     label: "profileRole",
                     horizontal: true
+                  },
+                  {
+                    data: "personName",
+                    label: "relatedTarget"
                   },
                   {
                     data: (item) => app.getStatusLabel(item.status),

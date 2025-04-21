@@ -23,7 +23,7 @@ public partial class PersonInfo
 
     public bool? Subscribed { get; set; }
 
-    public bool? IsDefault { get; set; }
+    public bool IsDefault { get; set; }
 
     public virtual CoreUser CoreUser { get; set; } = null!;
 

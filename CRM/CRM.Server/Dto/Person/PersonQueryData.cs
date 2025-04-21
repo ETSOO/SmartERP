@@ -16,12 +16,6 @@ namespace CRM.Server.Dto.Person
         public string? AssignedId { get; init; }
 
         /// <summary>
-        /// Job title
-        /// 工作头衔
-        /// </summary>
-        public string? JobTitle { get; init; }
-
-        /// <summary>
         /// Status
         /// 状况
         /// </summary>

@@ -168,10 +168,6 @@ export function PersonData(props: PersonDataProps) {
           data: (item) => (item.isLegalPerson ? labels.yes : labels.no),
           label: "isLegalPerson"
         },
-        {
-          data: (item) => (item.isOrg ? labels.yes : labels.no),
-          label: "isOrg"
-        },
         "queryKeyword",
         {
           data: (item) => app.getStatusLabel(item.status),

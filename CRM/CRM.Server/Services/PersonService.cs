@@ -1,14 +1,18 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
+using com.etsoo.Utils.Serialization;
 using CRM.Server.Dto.Person;
 using CRM.Server.RQ.Person;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
+using PlatformShared.Extentions;
 using System.Buffers;
 
 namespace CRM.Server.Services
@@ -30,6 +34,51 @@ namespace CRM.Server.Services
             : base(app, userAccessor.UserSafe, "person", logger)
         {
             _db = db;
+        }
+
+        /// <summary>
+        /// Choose persons
+        /// 选择人员
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<ChoosePersonsData> ChoosePersonsAsync(ChoosePersonsRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Max items
+            var maxItems = rq.MaxItems > 0 ? rq.MaxItems : 20;
+
+            // Users
+            var users = await _db.Persons.AsNoTracking().Users(User.OrganizationInt)
+                .OrderByDescending(p => p.RefreshTime)
+                .Take(maxItems)
+                .Select(p => new PersonListItem
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    JobTitle = p.JobTitle
+                })
+                .ToListAsync(cancellationToken);
+
+            // Contacts
+            var contacts = await _db.PersonRelations.AsNoTracking()
+                .Where(r => r.PersonId == rq.PersonId && r.Person.OrgId == User.OrganizationInt)
+                .OrderByDescending(r => r.Contact.RefreshTime)
+                .Take(maxItems)
+                .Select(r => new PersonListItem
+                {
+                    Id = r.Contact.Id,
+                    Name = r.Contact.Name,
+                    JobTitle = r.Contact.JobTitle
+                })
+                .ToListAsync(cancellationToken);
+
+            // Return
+            return new ChoosePersonsData
+            {
+                Users = users,
+                Contacts = contacts
+            };
         }
 
         private IQueryable<Person> CreateQuery(PersonListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
@@ -71,21 +120,71 @@ namespace CRM.Server.Services
         /// 人员列表JSON数据
         /// </summary>
         /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<ContactItem>> ListAsync(PersonListRQ rq, CancellationToken cancellationToken = default)
+        {
+            var query = CreateQuery(rq);
+
+            return await query.Select(p => new ContactItem
+            {
+                Id = p.Id,
+                Name = p.Name,
+                IdentityType = p.IdentityType,
+                Owner = p.IdentityType.HasFlag(IdentityTypeFlags.Contact) ? p.ContactOwners.Select(o => new IdentityTypeDataBase
+                {
+                    Name = o.Person.Name,
+                    IdentityType = o.Person.IdentityType
+                }).FirstOrDefault() : null,
+                JobTitle = p.JobTitle,
+                PreferredName = p.PreferredName
+            }).ToListAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// List person JSON data
+        /// 人员列表JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
         public async Task ListAsync(PersonListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = CreateQuery(rq);
+            var orgs = await ListAsync(rq, cancellationToken);
+            await writer.SerializeAsync(orgs, PlatformSharedContext.Default.IEnumerableContactItem);
+        }
 
-            await query.Select(p => new ContactItem
+        /// <summary>
+        /// Query person JSON data
+        /// 查询人员JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<PersonQueryData>> QueryAsync(PersonQueryRQ rq, CancellationToken cancellationToken = default)
+        {
+            var query = CreateQuery(rq, (q) =>
+            {
+                return q;
+            });
+
+            return await query.Select(p => new PersonQueryData
             {
                 Id = p.Id,
                 Name = p.Name,
-                IdentityType = p.IdentityType,
                 PreferredName = p.PreferredName,
-                IsOrg = p.OrgId == p.CoreOrganizationId
-            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+                AssignedId = p.AssignedId,
+                IdentityType = p.IdentityType,
+                Owner = p.IdentityType.HasFlag(IdentityTypeFlags.Contact) ? p.ContactOwners.Select(o => new IdentityTypeDataBase
+                {
+                    Name = o.Person.Name,
+                    IdentityType = o.Person.IdentityType
+                }).FirstOrDefault() : null,
+                JobTitle = p.JobTitle,
+                Status = p.Status,
+                Creation = p.Creation
+            }).ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -98,28 +197,8 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task QueryAsync(PersonQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = CreateQuery(rq, (q) =>
-            {
-                return q;
-            });
-
-            var (hasContent, commandText) = await query.Select(p => new PersonQueryData
-            {
-                Id = p.Id,
-                Name = p.Name,
-                PreferredName = p.PreferredName,
-                AssignedId = p.AssignedId,
-                IdentityType = p.IdentityType,
-                JobTitle = p.JobTitle,
-                IsOrg = p.OrgId == p.CoreOrganizationId,
-                Status = p.Status,
-                Creation = p.Creation
-            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
-
-            if (_db.IsSensitiveDataLoggingEnabled)
-            {
-                Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
-            }
+            var persons = await QueryAsync(rq, cancellationToken);
+            await writer.SerializeAsync(persons, MyJsonSerializerContext.Default.IEnumerablePersonQueryData);
         }
 
         /// <summary>
@@ -142,6 +221,11 @@ namespace CRM.Server.Services
                     Id = p.Id,
                     Uid = p.Uid,
                     IdentityType = p.IdentityType,
+                    Owner = p.IdentityType.HasFlag(IdentityTypeFlags.Contact) ? p.ContactOwners.Select(o => new IdentityTypeDataBase
+                    {
+                        Name = o.Person.Name,
+                        IdentityType = o.Person.IdentityType
+                    }).FirstOrDefault() : null,
                     IsLegalPerson = p.IsLegalPerson,
                     Name = p.Name,
                     GivenName = p.GivenName,
@@ -162,7 +246,6 @@ namespace CRM.Server.Services
                     Creation = p.Creation,
                     Status = p.Status,
                     QueryKeyword = p.QueryKeyword,
-                    IsOrg = p.OrgId == p.CoreOrganizationId,
                     Regions = p.Regions,
                     Currencies = p.Currencies,
                     Cultures = p.Cultures,

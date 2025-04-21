@@ -77,6 +77,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(OrgListRQ))]
     [JsonSerializable(typeof(OrgGetMyRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
+    [JsonSerializable(typeof(SendProfileEmailRQ))]
 
     [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]

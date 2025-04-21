@@ -77,7 +77,7 @@
         /// Creation
         /// 登记日期
         /// </summary>
-        public DateTime Creation { get; set; }
+        public DateTimeOffset Creation { get; set; }
 
         /// <summary>
         /// Profile

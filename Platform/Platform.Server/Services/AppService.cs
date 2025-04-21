@@ -215,7 +215,7 @@ namespace Platform.Server.Services
             var isUserValid = await _db.Persons.AsNoTracking()
                 .AnyAsync(u => u.OrgId == orgId
                     && u.CoreUserId == User.IdInt
-                    && (u.IdentityType.HasValue && u.IdentityType.Value.HasFlag(typeFlag))
+                    && u.IdentityType.HasFlag(typeFlag)
                     && u.Status <= EntityStatus.Approved
                     && (u.Expiry == null || u.Expiry >= DateTimeOffset.UtcNow), cancellationToken);
 

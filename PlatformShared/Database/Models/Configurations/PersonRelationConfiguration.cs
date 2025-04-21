@@ -26,12 +26,12 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
 
-            entity.HasOne(d => d.Contact).WithMany(p => p.Contacts)
+            entity.HasOne(d => d.Contact).WithMany(p => p.ContactOwners)
                 .HasForeignKey(d => d.ContactId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_relation_contact_id_fkey");
 
-            entity.HasOne(d => d.Person).WithMany(p => p.ContactOwners)
+            entity.HasOne(d => d.Person).WithMany(p => p.Contacts)
                 .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_relation_person_id_fkey");

@@ -311,7 +311,7 @@ namespace PlatformShared.Database.Models
         /// Identity type, employee, customer, or supplier
         /// 标识类型，员工、客户或供应商
         /// </summary>
-        public IdentityTypeFlags? IdentityType { get; set; }
+        public IdentityTypeFlags IdentityType { get; set; }
 
         /// <summary>
         /// Is legal person (enterprise)
@@ -576,6 +576,12 @@ namespace PlatformShared.Database.Models
         /// 联系人所有者
         /// </summary>
         public ICollection<PersonRelation> ContactOwners { get; } = default!;
+
+        /// <summary>
+        /// Information
+        /// 信息
+        /// </summary>
+        public ICollection<PersonInfo> Infos { get; } = default!;
 
         /// <summary>
         /// Orders

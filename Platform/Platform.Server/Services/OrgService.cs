@@ -10,6 +10,7 @@ using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.HtmlIO;
 using com.etsoo.HTTP;
+using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
@@ -25,6 +26,8 @@ using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Net;
+using System.Text;
 
 namespace Platform.Server.Services
 {
@@ -469,7 +472,7 @@ namespace Platform.Server.Services
                 ParentId = ou.Organization.ParentId,
                 Status = ou.Organization.Status,
                 Creation = ou.Organization.Creation,
-                Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
+                Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                 UserStatus = ou.Status,
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToListAsync(cancellationToken);
@@ -508,7 +511,7 @@ namespace Platform.Server.Services
                 Status = ou.Organization.Status,
                 Creation = ou.Organization.Creation,
                 UserStatus = ou.Status,
-                Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
+                Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
@@ -546,7 +549,7 @@ namespace Platform.Server.Services
                     ou.Organization.Status,
                     ou.Organization.QueryKeyword,
                     Persons = ou.Organization.Persons.Count,
-                    Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
+                    Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                     UserStatus = ou.Status,
                     UserExpiry = ou.Expiry
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
@@ -581,6 +584,195 @@ namespace Platform.Server.Services
         {
             var messageId = await _queueService.PushAsync(message, ApiModelJsonSerializerContext.Default.SendSMSMessage, cancellationToken);
             return ActionResult.Succeed(messageId);
+        }
+
+        /// <summary>
+        /// Send profile by email
+        /// 用邮件发送档案
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> SendProfileEmailAsync(SendProfileEmailRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Author
+            var author = await _db.Persons.AsNoTracking()
+                .Where(p => p.Id == User.Oid)
+                .Select(p => p.Name)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (string.IsNullOrEmpty(author))
+            {
+                return ApplicationErrors.NoUserFound.AsResult();
+            }
+
+            // Emails
+            var items = await _db.QueryPersonIdentifiersAsync(User.OrganizationInt, CoreUserIdentifierType.Email, cancellationToken, rq.Persons);
+            var emails = items[0];
+            if (emails.Length == 0)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Persons));
+            }
+
+            var profile = await _db.PersonProfiles
+                .UserProfiles(User, rq.Id)
+                .Select(p => new
+                {
+                    p.Title,
+                    p.Comment,
+                    p.Creation,
+                    Attachments = p.Attachments.Select(a => new { a.Id, a.Description, a.Creation, UserName = a.User.Name }),
+                    Links = p.Links.Select(l => new { l.Content, l.Creation, UserName = l.User.Name }),
+                    Data = new IdentityTypeData
+                    {
+                        Name = p.Person.Name,
+                        IdentityType = p.Person.IdentityType,
+                        Owner = p.Person.ContactOwners.Select(o => new IdentityTypeDataBase
+                        {
+                            Name = o.Person.Name,
+                            IdentityType = o.Person.IdentityType
+                        }).FirstOrDefault()
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (profile == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var subject = $"[{Resources.Profile}] {profile.Title}";
+            var relatedTarget = profile.Data.GetRelatedTarget();
+
+            var attachments = new StringBuilder();
+            var attachmentCount = profile.Attachments.Count();
+            if (attachmentCount > 0 && rq.IncludeAttachments is true)
+            {
+                var expiry = DateTime.UtcNow.AddHours(72);
+
+                attachments.Append($$"""<div class="title">{{Resources.Attachments}} ({{attachmentCount}}), <span class="small">{{Resources.Valid72Hours}}</span></div>""");
+                attachments.Append("""<hr class="line" />""");
+                attachments.Append($$"""<ol>""");
+                var timestamp = SharedUtils.UTCToJsMiliseconds(expiry).ToString();
+                foreach (var attachment in profile.Attachments)
+                {
+                    var key = await App.HashPasswordAsync(timestamp + attachment.Id);
+                    attachments.Append($$"""
+                        <li>
+                          <a href="{{App.Configuration.ApiUrl}}/Storage/ProfileAttachment/{{attachment.Id}}?timestamp={{timestamp}}&key={{WebUtility.UrlEncode(key)}}">{{attachment.Description}} ({{attachment.UserName}}, {{attachment.Creation:yyyy-MM-dd}})</a>
+                        </li>
+                        """);
+                }
+                attachments.Append($$"""</ol>""");
+            }
+
+            var comments = new StringBuilder();
+            var links = profile.Links.ToArray();
+            var commentCount = links.Length;
+            if (commentCount > 0 && rq.IncludeComments is true)
+            {
+                comments.Append($$"""<div class="title">{{Resources.Comments}} ({{commentCount}})</div>""");
+                comments.Append("""<hr class="line" />""");
+
+                for (var c = 0; c < commentCount; c++)
+                {
+                    var link = links[c];
+                    comments.Append($$"""
+                        <div>
+                        {{link.Content}}
+                        </div>
+                        <div class="auth">{{c + 1}}. <b>{{link.UserName}}</b>, {{link.Creation:yyyy-MM-dd}}</div>
+                        """);
+                }
+            }
+
+            var body = $$"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="UTF-8">
+                  <title>{{subject}}</title>
+                  <style>
+                    .field-label {
+                      width: 100px;
+                    }
+
+                    .field-value {
+                      font-weight: bold;
+                    }
+
+                    .title {
+                        padding: 8px 0px;
+                    }
+
+                    .line {
+                        width: 100%;
+                        background: none;
+                        border: none;
+                        border-top: 1px solid #d5d5d5;
+                        height: 1px;
+                        margin: 2px;
+                    }
+
+                    .small {
+                        font-size: 12px;
+                    }
+
+                    .auth {
+                        padding: 4px;
+                        margin-bottom: 6px;
+                        background-color:#f5f5f5;
+                        border-bottom: 1px solid #e5e5e5;
+                        border-radius: 4px;
+                        font-size: 12px;
+                    }
+                  </style>
+                </head>
+                <body>
+
+                <table width="100%" cellpadding="4" cellspacing="0" style="background-color:#f5f5f5; border-radius: 4px; font-size: 12px">
+                    <tr>
+                        <td class="field-label">{{Resources.RelatedTarget}}:</td>
+                        <td class="field-value">{{relatedTarget}}</td>
+                    </tr>
+                    <tr>
+                        <td class="field-label">{{Resources.Creation}}:</td>
+                        <td class="field-value">{{profile.Creation:yyyy-MM-dd}}, #{{rq.Id}}</td>
+                    </tr>
+                    <tr>
+                        <td class="field-label">{{Resources.Sender}}:</td>
+                        <td class="field-value">{{author}}</td>
+                    </tr>
+                    <tr>
+                        <td class="field-label">{{Resources.Message}}:</td>
+                        <td class="field-value">{{rq.Message}}</td>
+                    </tr>
+                </table>
+
+                {{profile.Comment}}
+
+                {{attachments}}
+
+                {{comments}}
+
+                </body>
+                </html>
+                """;
+
+            var message = new SendEmailMessage
+            {
+                Subject = subject,
+                Body = body,
+                To = emails
+            };
+
+            try
+            {
+                return await SendEmailAsync(message, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                return LogException(ex);
+            }
         }
 
         /// <summary>

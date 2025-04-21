@@ -24,6 +24,7 @@ namespace Platform.Server.Services
         Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> SendEmailAsync(SendEmailMessage message, CancellationToken cancellationToken = default);
         Task<IActionResult> SendSMSAsync(SendSMSMessage message, CancellationToken cancellationToken = default);
+        Task<IActionResult> SendProfileEmailAsync(SendProfileEmailRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(OrgUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default);
         Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);

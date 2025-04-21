@@ -7,6 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import ArticleIcon from "@mui/icons-material/Article";
+import EmailIcon from "@mui/icons-material/Email";
 import { app } from "../../app/MyApp";
 import {
   PersonProfileQueryData,
@@ -38,6 +39,8 @@ import { useAddLink } from "./useAddLink";
 import { MoreAttachmentActions } from "./MoreAttachmentActions";
 import Link from "@mui/material/Link";
 import { OrgDownloadKind } from "@etsoo/smarterp-core";
+import IconButton from "@mui/material/IconButton";
+import { useSendEmail } from "./useSendEmail";
 
 function isViewData(
   data: PersonProfileQueryData
@@ -82,6 +85,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
     "edit",
     "owner",
     "people",
+    "sendEmail",
     "view"
   );
 
@@ -122,6 +126,9 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
   // Add link
   const addLink = useAddLink(data?.id ?? 0, refreshData);
 
+  // Send email
+  const sendEmail = useSendEmail(data?.id ?? 0, data?.personId ?? 0);
+
   const persons: PersonType[] = [];
   if (data) {
     persons.push({ id: data.userId, name: data.userName!, role: 0 });
@@ -151,6 +158,14 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <IconButton
+              color="inherit"
+              title={labels.sendEmail}
+              onClick={sendEmail}
+              disabled={data == null}
+            >
+              <EmailIcon />
+            </IconButton>
             <IconButtonLink
               href={`./../../../org/profile/edit/${data?.id}`}
               color="inherit"

@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.25",
-    "@etsoo/materialui": "^1.5.31",
+    "@etsoo/appscript": "^1.6.26",
+    "@etsoo/materialui": "^1.5.32",
     "@etsoo/react": "^1.8.40",
-    "@etsoo/reacteditor": "^1.0.29",
+    "@etsoo/reacteditor": "^1.0.30",
     "@etsoo/shared": "^1.2.69",
-    "@etsoo/smarterp-core": "^1.0.45",
+    "@etsoo/smarterp-core": "^1.0.48",
     "@etsoo/smarterp-crm": "file:../../../../EtsooUI/SmartERP/crm",
     "@etsoo/toolpad": "^1.0.26",
     "@mui/icons-material": "^7.0.2",
@@ -30,7 +30,7 @@
     "@types/node": "^22.14.1",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
-    "@vitejs/plugin-react": "^4.4.0",
+    "@vitejs/plugin-react": "^4.4.1",
     "typescript": "^5.8.3",
     "vite": "^6.3.2"
   },

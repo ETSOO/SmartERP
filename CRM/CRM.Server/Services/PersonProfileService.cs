@@ -424,6 +424,7 @@ namespace CRM.Server.Services
                     Id = p.Id,
                     PersonId = p.PersonId,
                     PersonName = p.Person.Name,
+                    PersonIdentityType = p.Person.IdentityType,
                     Persons = p.Persons == null ? null : _db.Persons.Where(o => p.Person.OrgId == orgId && p.Persons.Contains(o.Id)).Select(o => new PersonListItem { Id = o.Id, Name = o.Name }).ToList(),
                     OrderId = p.OrderId,
                     OrderTitle = p.Order == null ? null : p.Order.Title,
@@ -491,6 +492,7 @@ namespace CRM.Server.Services
                 {
                     PersonId = p.PersonId,
                     PersonName = p.Person.Name,
+                    PersonIdentityType = p.Person.IdentityType,
                     Persons = p.Persons == null ? null : _db.Persons.Where(o => p.Person.OrgId == orgId && p.Persons.Contains(o.Id)).Select(o => new PersonListItem { Id = o.Id, Name = o.Name }).ToList(),
                     OrderId = p.OrderId,
                     OrderTitle = p.Order == null ? null : p.Order.Title,

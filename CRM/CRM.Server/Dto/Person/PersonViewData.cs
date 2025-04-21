@@ -127,12 +127,6 @@ namespace CRM.Server.Dto.Person
         public string? Avatar { get; init; }
 
         /// <summary>
-        /// Job title
-        /// 工作头衔
-        /// </summary>
-        public string? JobTitle { get; init; }
-
-        /// <summary>
         /// Assigned id
         /// 分配的编号
         /// </summary>

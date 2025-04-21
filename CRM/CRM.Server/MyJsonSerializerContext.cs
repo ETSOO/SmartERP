@@ -19,9 +19,11 @@ namespace CRM.Server
     )]
 
     // Person
-    [JsonSerializable(typeof(PersonQueryData))]
+    [JsonSerializable(typeof(ChoosePersonsData))]
+    [JsonSerializable(typeof(IEnumerable<PersonQueryData>))]
     [JsonSerializable(typeof(PersonViewData))]
 
+    [JsonSerializable(typeof(ChoosePersonsRQ))]
     [JsonSerializable(typeof(PersonListRQ))]
 
     // Person profile

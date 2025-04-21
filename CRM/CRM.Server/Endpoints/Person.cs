@@ -14,6 +14,9 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("Person");
 
+            g.MapPost("Choose", (IPersonService service, ChoosePersonsRQ rq, CancellationToken cancellationToken) => service.ChoosePersonsAsync(rq, cancellationToken))
+                .WithDescription("Person choose / 人员选择").WithTags("Person");
+
             g.MapPost("List", (IPersonService service, IHttpContextAccessor accessor, PersonListRQ rq, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Person list / 人员列表").WithTags("Person");
 

@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
 using CRM.Server.Dto.Person;
 
 namespace CRM.Server.Dto.PersonProfile
@@ -20,6 +21,12 @@ namespace CRM.Server.Dto.PersonProfile
         /// 人员名称 / 姓名
         /// </summary>
         public required string PersonName { get; init; }
+
+        /// <summary>
+        /// Person identity type
+        /// 人员身份类型
+        /// </summary>
+        public IdentityTypeFlags PersonIdentityType { get; init; }
 
         /// <summary>
         /// Other persons
