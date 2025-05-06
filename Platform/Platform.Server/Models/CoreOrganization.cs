@@ -35,6 +35,8 @@ public partial class CoreOrganization
 
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
+    public virtual ICollection<FeatureCulture> FeatureCultures { get; set; } = new List<FeatureCulture>();
+
     public virtual ICollection<FeatureKeyword> FeatureKeywords { get; set; } = new List<FeatureKeyword>();
 
     public virtual ICollection<CoreOrganization> InverseParent { get; set; } = new List<CoreOrganization>();
@@ -60,4 +62,6 @@ public partial class CoreOrganization
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 
     public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
+
+    public virtual SettingCrm? SettingCrm { get; set; }
 }

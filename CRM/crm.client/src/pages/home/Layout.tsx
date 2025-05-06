@@ -58,11 +58,16 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "addProfile",
+    "allProfiles",
     "app3",
     "contacts",
     "customers",
+    "editAvatar",
+    "editProfile",
     "info",
     "menuHome",
+    "newTask",
     "offerings",
     "orders",
     "org",
@@ -70,7 +75,9 @@ export default function Home() {
     "signoutSuccess",
     "system",
     "suppliers",
-    "users"
+    "updateSystemSettings",
+    "users",
+    "view"
   );
 
   // User context / state
@@ -92,43 +99,82 @@ export default function Home() {
       {
         segment: "home",
         title: labels.menuHome,
-        icon: <HomeIcon />
+        icon: <HomeIcon />,
+        pageHeader: false
       },
       {
-        segment: "home/contact/all",
+        segment: "home/contact",
         title: labels.contacts,
         icon: <ContactsIcon />,
-        subs: ["/home/contact/.*"]
+        children: [
+          {
+            segment: "view",
+            pattern: "view/:id",
+            title: labels.view,
+            hidden: true
+          },
+          {
+            segment: "avatar",
+            pattern: "avatar/:id",
+            title: labels.editAvatar,
+            hidden: true
+          }
+        ]
       },
       {
-        segment: "home/order/all",
+        segment: "home/order",
         title: labels.orders,
-        icon: <ShoppingCartIcon />,
-        subs: ["/home/order/.*"]
+        icon: <ShoppingCartIcon />
       },
       {
-        segment: "home/customer/all",
+        segment: "home/customer",
         title: labels.customers,
-        icon: <GroupsIcon />,
-        subs: ["/home/customer/.*"]
+        icon: <GroupsIcon />
       },
       {
-        segment: "home/product/all",
+        segment: "home/product",
         title: labels.offerings,
-        icon: <ShopIcon />,
-        subs: ["/home/product/.*"]
+        icon: <ShopIcon />
       },
       {
-        segment: "home/po/all",
+        segment: "home/po",
         title: labels.purchases,
-        icon: <InventoryIcon />,
-        subs: ["/home/po/.*"]
+        icon: <InventoryIcon />
       },
       {
-        segment: "home/supplier/all",
+        segment: "home/supplier",
         title: labels.suppliers,
-        icon: <HailIcon />,
-        subs: ["/home/supplier/.*"]
+        icon: <HailIcon />
+      },
+      {
+        segment: "home/profile",
+        title: labels.allProfiles,
+        icon: <GroupsIcon />,
+        hidden: true,
+        children: [
+          {
+            segment: "add",
+            title: labels.addProfile,
+            hidden: true
+          },
+          {
+            segment: "addTask",
+            title: labels.newTask,
+            hidden: true
+          },
+          {
+            segment: "view",
+            pattern: "view/:id",
+            title: labels.view,
+            hidden: true
+          },
+          {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.editProfile,
+            hidden: true
+          }
+        ]
       },
       {
         kind: "divider"
@@ -140,20 +186,24 @@ export default function Home() {
       {
         segment: "home/org/data",
         title: labels.info,
-        icon: <DescriptionIcon />,
-        subs: ["/home/org/.*"]
+        icon: <DescriptionIcon />
       },
       {
-        segment: "home/user/all",
+        segment: "home/user",
         title: labels.users,
-        icon: <GroupIcon />,
-        subs: ["/home/user/.*"]
+        icon: <GroupIcon />
       },
       {
-        segment: "home/system/all",
+        segment: "home/system",
         title: labels.system,
         icon: <SettingsIcon />,
-        subs: ["/home/system/.*"]
+        children: [
+          {
+            segment: "updateSettings",
+            title: labels.updateSystemSettings,
+            hidden: true
+          }
+        ]
       }
     ];
 
@@ -171,6 +221,9 @@ export default function Home() {
             showLoading: false
           });
           if (result == null || !result.ok) return false;
+
+          // Load organization custom resources
+          //app.core.authApi.loadCustomResources();
         }
       });
     } else {
@@ -217,7 +270,7 @@ export default function Home() {
         slots={{ sidebarFooter: SidebarFooter, toolbarActions: org }}
       >
         <PageDataContextProvider>
-          <PageContainer defaultTitle="">
+          <PageContainer titleBar={false}>
             <Outlet />
           </PageContainer>
         </PageDataContextProvider>

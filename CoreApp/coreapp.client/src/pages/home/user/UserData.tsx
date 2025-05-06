@@ -4,7 +4,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import EditIcon from "@mui/icons-material/Edit";
-import { UserIdentifierData } from "@etsoo/smarterp-core";
+import { usePageDataEmpty, UserIdentifierData } from "@etsoo/smarterp-core";
 import React from "react";
 import { UserIdentifierType } from "@etsoo/appscript";
 import Card from "@mui/material/Card";
@@ -51,6 +51,9 @@ export default function UserData() {
     },
     [items]
   );
+
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <CommonPage paddings={0} onRefresh={reloadData}>

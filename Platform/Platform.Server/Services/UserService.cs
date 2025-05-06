@@ -308,6 +308,31 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            // Update latest apps
+            var user = await _db.CoreUsers.Where(u => u.Id == User.IdInt).FirstOrDefaultAsync(cancellationToken);
+            if (user == null)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            if (user.LatestAppIds == null)
+            {
+                user.LatestAppIds = [id];
+            }
+            else
+            {
+                var ids = user.LatestAppIds;
+                ids.Remove(id);
+                if (ids.Count >= 10)
+                {
+                    ids.RemoveAt(ids.Count - 1);
+                }
+                user.LatestAppIds = [id, .. ids];
+            }
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
             // Push message
             var message = new CheckSessionMessage
             {

@@ -22,6 +22,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapPut("Create", (IOrgService service, OrgCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create organization / 创建新机构").WithTags("Org");
 
+            g.MapPost("CreateResource", (IOrgService service, OrgCreateResourceRQ rq, CancellationToken cancellationToken) => service.CreateResourceAsync(rq, cancellationToken))
+                .WithDescription("Create custom resource / 创建自定义资源").WithTags("Org");
+
             g.MapDelete("Delete/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete organization / 删除机构").WithTags("Org");
 
@@ -36,6 +39,9 @@ namespace Platform.Server.Endpoints.Org
                 return await service.FormatHtmlContentAsync(content, cancellationToken);
             }).WithDescription("Format HTML content / 格式化HTML内容").WithTags("Org");
 
+            g.MapGet("GetCustomResources/{culture}", (IOrgService service, string culture, CancellationToken cancellationToken) => service.GetCustomResourcesAsync(culture, cancellationToken))
+                .WithDescription("Get current organization's custom resources / 获取当前机构的自定义资源").WithTags("Org");
+
             g.MapPost("GetMy", (IOrgService service, OrgGetMyRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.GetMyAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get my organizations JSON data / 获取我的机构JSON数据").WithTags("Org");
 
@@ -47,6 +53,9 @@ namespace Platform.Server.Endpoints.Org
 
             g.MapPost("Query", (IOrgService service, OrgQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
+
+            g.MapPost("QueryResource", (IOrgService service, OrgQueryResourceRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryResourceAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Query custom resources JSON data / 查询自定义资源JSON数据").WithTags("Org");
 
             g.MapGet("Read/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read organizations JSON data / 浏览机构JSON数据").WithTags("Org");
@@ -82,6 +91,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapPost("UploadProfileFiles/{id:long}", (IOrgService service, long id, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadProfileFilesAsync(id, files, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Upload profile attachments / 上传档案附件").WithTags("Org");
+
+            g.MapGet("UpdateResourceRead/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.UpdateResourceReadAsync(id, cancellationToken))
+                .WithDescription("Read JSON data for upate resource / 浏览JSON数据用于更新资源").WithTags("Org");
 
             return builder;
         }

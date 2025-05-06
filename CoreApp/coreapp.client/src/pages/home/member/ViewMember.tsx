@@ -2,7 +2,11 @@ import { GridDataType, useParamsEx } from "@etsoo/react";
 import { HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import { app } from "../../../app/MyApp";
-import { MemberReadDto, usePageData } from "@etsoo/smarterp-core";
+import {
+  AvatarState,
+  MemberReadDto,
+  usePageDataEmpty
+} from "@etsoo/smarterp-core";
 import React from "react";
 import Typography from "@mui/material/Typography";
 
@@ -16,13 +20,13 @@ export default function ViewMember() {
   }, [id]);
 
   // Labels
-  const labels = app.getLabels("edit", "editAvatar", "logo", "view");
+  const labels = app.getLabels("edit", "editAvatar", "logo");
 
   // Permissions
   const editPermission = app.isAdminUser();
 
   // Page data hook
-  usePageData(app, labels.view, [loadData]);
+  usePageDataEmpty(app);
 
   return (
     <ViewPage<MemberReadDto>
@@ -56,9 +60,9 @@ export default function ViewMember() {
             }}
           />
           {editPermission && (
-            <IconButtonLink
+            <IconButtonLink<AvatarState>
               href={`./../../avatar/${item.id}`}
-              state={item.localAvatar}
+              state={{ title: item.name, avatar: item.localAvatar }}
               title={labels.editAvatar}
               size="small"
             >

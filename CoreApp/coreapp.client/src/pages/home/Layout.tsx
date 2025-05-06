@@ -57,12 +57,19 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "addEmail",
+    "addMobile",
+    "addResource",
     "allApps",
     "allMembers",
     "app1",
     "auditHistory",
     "changePassword",
     "currentOrg",
+    "customResources",
+    "edit",
+    "editAvatar",
+    "editResource",
     "joinedOrgs",
     "me",
     "menuHome",
@@ -70,7 +77,8 @@ export default function Home() {
     "purchasedApps",
     "signoutSuccess",
     "switchOrg",
-    "updateAvator"
+    "updateAvator",
+    "view"
   );
 
   // User context / state
@@ -95,13 +103,49 @@ export default function Home() {
         icon: <HomeIcon />
       },
       {
-        segment: "home/org/my",
+        segment: "home/org",
         title: labels.joinedOrgs,
         icon: <AccountTreeIcon />,
-        subs: ["/home/org/.*"]
+        children: [
+          {
+            segment: "my",
+            pattern: "my/:id",
+            title: labels.view,
+            hidden: true
+          },
+          {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
+            hidden: true
+          },
+          {
+            segment: "avatar",
+            pattern: "avatar/:id",
+            title: labels.editAvatar,
+            hidden: true
+          },
+          {
+            segment: "customresource",
+            pattern: "customresource/:id",
+            title: labels.customResources,
+            hidden: true
+          },
+          {
+            segment: "addcustomresource",
+            title: labels.addResource,
+            hidden: true
+          },
+          {
+            segment: "editcustomresource",
+            pattern: "editcustomresource/:id",
+            title: labels.editResource,
+            hidden: true
+          }
+        ]
       },
       {
-        segment: "home/app/all",
+        segment: "home/app",
         title: labels.allApps,
         icon: <AppsIcon />
       },
@@ -116,7 +160,23 @@ export default function Home() {
         segment: "home/user/data",
         title: labels.personalData,
         icon: <PortraitIcon />,
-        subs: ["/home/user/data/.*"]
+        children: [
+          {
+            segment: "edit",
+            title: labels.edit,
+            hidden: true
+          },
+          {
+            segment: "addemail",
+            title: labels.addEmail,
+            hidden: true
+          },
+          {
+            segment: "addmobile",
+            title: labels.addMobile,
+            hidden: true
+          }
+        ]
       },
       {
         segment: "home/user/updateavatar",
@@ -139,10 +199,29 @@ export default function Home() {
       let spliceIndex = 3;
       if (app.isManagerUser()) {
         items.splice(1, 0, {
-          segment: "home/member/all",
+          segment: "home/member",
           title: labels.allMembers,
           icon: <PeopleIcon />,
-          subs: ["/home/member/.*"]
+          children: [
+            {
+              segment: "view",
+              pattern: "view/:id",
+              title: labels.view,
+              hidden: true
+            },
+            {
+              segment: "edit",
+              pattern: "edit/:id",
+              title: labels.edit,
+              hidden: true
+            },
+            {
+              segment: "avatar",
+              pattern: "avatar/:id",
+              title: labels.editAvatar,
+              hidden: true
+            }
+          ]
         });
 
         spliceIndex++;
@@ -150,10 +229,23 @@ export default function Home() {
 
       if (app.isFinanceUser()) {
         items.splice(spliceIndex, 0, {
-          segment: "home/app/my",
+          segment: "home/myapp",
           title: labels.purchasedApps,
           icon: <PaidIcon />,
-          subs: ["/home/app/.*"]
+          children: [
+            {
+              segment: "view",
+              pattern: "view/:id",
+              title: labels.view,
+              hidden: true
+            },
+            {
+              segment: "edit",
+              pattern: "edit/:id",
+              title: labels.edit,
+              hidden: true
+            }
+          ]
         });
       }
     }
@@ -218,7 +310,7 @@ export default function Home() {
         slots={{ sidebarFooter: SidebarFooter, toolbarActions: org }}
       >
         <PageDataContextProvider>
-          <PageContainer defaultTitle="">
+          <PageContainer titleBar={false}>
             <Outlet />
           </PageContainer>
         </PageDataContextProvider>

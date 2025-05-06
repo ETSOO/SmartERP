@@ -38,8 +38,14 @@ namespace Platform.Server.Endpoints.Public
             }, cancellationToken))
                 .WithDescription("Create barcode image Base64 string with simple options / 使用简单选项创建条形码图片的Base64字符串").WithTags("Public");
 
+            g.MapPost("GetCultures", (IPublicService service, [FromBody] IEnumerable<string> ids, CancellationToken cancellationToken) => service.GetCulturesAsync(ids, cancellationToken))
+                .WithDescription("Get cultures / 获取语言列表").WithTags("Public");
+
             g.MapPost("GetCurrencies", (IPublicService service, [FromBody] IEnumerable<string>? ids, CancellationToken cancellationToken) => service.GetCurrenciesAsync(ids, cancellationToken))
                 .WithDescription("Get currencies / 获取货币列表").WithTags("Public");
+
+            g.MapGet("GetCustomResources/{culture}", (IPublicService service, string culture, CancellationToken cancellationToken) => service.GetCustomResourcesAsync(culture, cancellationToken))
+                .WithDescription("Get custom resources / 获取自定义资源").WithTags("Public");
 
             g.MapPost("GetRegions", (IPublicService service, [FromBody] IEnumerable<string>? ids, CancellationToken cancellationToken) => service.GetRegionsAsync(ids, cancellationToken))
                 .WithDescription("Get regions / 获取地区列表").WithTags("Public");

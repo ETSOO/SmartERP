@@ -6,7 +6,7 @@ import { DomUtils, Utils } from "@etsoo/shared";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import {
-  usePageData,
+  usePageDataEmpty,
   UserUpdateReadDto,
   UserUpdateRQ
 } from "@etsoo/smarterp-core";
@@ -18,7 +18,6 @@ export default function EditUser() {
 
   // Labels
   const labels = app.getLabels(
-    "edit",
     "familyName",
     "fullName",
     "givenName",
@@ -87,7 +86,7 @@ export default function EditUser() {
   }, []);
 
   // Page data hook
-  usePageData(app, labels.edit, []);
+  usePageDataEmpty(app);
 
   return (
     <EditPage

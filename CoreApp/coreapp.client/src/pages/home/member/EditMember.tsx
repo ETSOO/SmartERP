@@ -10,7 +10,7 @@ import { app } from "../../../app/MyApp";
 import {
   MemberUpdateReadDto,
   MemberUpdateRQ,
-  usePageData
+  usePageDataEmpty
 } from "@etsoo/smarterp-core";
 import { UserTiplist } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
@@ -27,7 +27,6 @@ export default function EditMember() {
   const labels = app.getLabels(
     "assignedId",
     "deleteConfirm",
-    "edit",
     "expiry",
     "fullName",
     "noChanges",
@@ -52,7 +51,7 @@ export default function EditMember() {
   });
 
   // Is not self
-  const isNotSelf = !data.isSelf && data.userRole < app.userData!.role;
+  const isNotSelf = !data.isSelf && data.userRole <= app.userData!.role;
 
   // Formik
   // https://formik.org/docs/examples/with-material-ui
@@ -109,7 +108,7 @@ export default function EditMember() {
   }, [id]);
 
   // Page data hook
-  usePageData(app, labels.edit, []);
+  usePageDataEmpty(app);
 
   return (
     <EditPage

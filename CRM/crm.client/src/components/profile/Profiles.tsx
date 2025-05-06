@@ -76,12 +76,14 @@ export function Profiles(props: ProfilesProps) {
   const mRef = React.useRef<ViewInnerRef>(null);
   const personIdRef = React.useRef(personId);
 
+  const rootUrl = personId === -1 ? "./../.." : "./../../..";
+
   React.useEffect(() => {
     personIdRef.current = personId;
   }, [personId]);
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
 
@@ -98,7 +100,7 @@ export function Profiles(props: ProfilesProps) {
             ? { onClick: (_event, data) => mRef.current?.setData(data) }
             : {
                 quickAction: (data) =>
-                  navigate(`./../../../org/profile/view/${data.id}`)
+                  navigate(`${rootUrl}/profile/view/${data.id}`)
               })}
           mRef={ref}
           defaultOrderBy={[{ field: "creation", desc: true }]}
@@ -186,7 +188,7 @@ export function Profiles(props: ProfilesProps) {
                     {loadedItems.toLocaleString() + (hasNextPage ? "+" : "")}
                   </React.Fragment>
                   <ButtonLink
-                    href={`./../../../org/profile/add?personId=${personId}`}
+                    href={`${rootUrl}/profile/add?personId=${personId}`}
                     variant="outlined"
                     startIcon={<AddIcon />}
                   >
@@ -196,9 +198,7 @@ export function Profiles(props: ProfilesProps) {
               );
             } else if (index === 1) {
               return (
-                <LinkEx
-                  to={`./../../../org/profile/all?participantId=${personId}`}
-                >
+                <LinkEx to={`${rootUrl}/profile?participantId=${personId}`}>
                   {labels.more1}
                 </LinkEx>
               );
@@ -214,7 +214,7 @@ export function Profiles(props: ProfilesProps) {
                   {
                     label: labels.view,
                     icon: <ArticleIcon />,
-                    action: `./../../../org/profile/view/${data.id}`
+                    action: `${rootUrl}/profile/view/${data.id}`
                   }
                 ],
                 <React.Fragment>

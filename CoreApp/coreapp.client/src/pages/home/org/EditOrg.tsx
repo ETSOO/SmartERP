@@ -10,7 +10,7 @@ import { app } from "../../../app/MyApp";
 import {
   OrgUpdateReadDto,
   OrgUpdateRQ,
-  usePageData
+  usePageDataEmpty
 } from "@etsoo/smarterp-core";
 import { OrgTiplist } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
@@ -27,7 +27,6 @@ export default function EditOrg() {
   const labels = app.getLabels(
     "brand",
     "deleteConfirm",
-    "edit",
     "noChanges",
     "orgName",
     "parentOrg",
@@ -92,7 +91,7 @@ export default function EditOrg() {
   const tax = BusinessTax.getById(app.region);
 
   // Page data hook
-  usePageData(app, labels.edit, []);
+  usePageDataEmpty(app);
 
   return (
     <EditPage

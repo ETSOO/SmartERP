@@ -60,7 +60,7 @@ export default function AllApps() {
   const ref = React.useRef<ScrollerListForwardRef<AllAppDto>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>();
@@ -75,7 +75,7 @@ export default function AllApps() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./../view/${data.id}`)}
+      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <OrgTiplist idValue={data.orgId} />,
@@ -203,10 +203,7 @@ export default function AllApps() {
 
             return (
               <React.Fragment>
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../view/${data.id}`}
-                >
+                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -223,7 +220,7 @@ export default function AllApps() {
             {
               label: labels.view,
               icon: <ArticleIcon />,
-              action: `./../view/${data.id}`
+              action: `./view/${data.id}`
             }
           ],
           <React.Fragment>

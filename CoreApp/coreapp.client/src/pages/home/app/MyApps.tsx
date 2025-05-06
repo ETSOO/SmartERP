@@ -73,9 +73,7 @@ export default function MyApps() {
   );
 
   // Load data
-  const reloadData = async () => {
-    ref.current?.reset();
-  };
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
 
@@ -92,7 +90,7 @@ export default function MyApps() {
             size="medium"
             color="primary"
             onClick={() =>
-              navigate("./../all", {
+              navigate("./../app", {
                 state: { kind: 2 }
               })
             }
@@ -103,7 +101,7 @@ export default function MyApps() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./${data.id}`)}
+      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -197,12 +195,12 @@ export default function MyApps() {
                 {editPermission && (
                   <IconButtonLink
                     title={labels.edit}
-                    href={`./../edit/${data.id}`}
+                    href={`./edit/${data.id}`}
                   >
                     <EditIcon />
                   </IconButtonLink>
                 )}
-                <IconButtonLink title={labels.view} href={`./${data.id}`}>
+                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -225,12 +223,12 @@ export default function MyApps() {
               {
                 label: labels.edit,
                 icon: <EditIcon />,
-                action: `./../edit/${data.id}`
+                action: `./edit/${data.id}`
               },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./${data.id}`
+                action: `./view/${data.id}`
               }
             ],
             <React.Fragment>

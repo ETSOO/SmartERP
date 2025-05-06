@@ -83,7 +83,7 @@ const router = createDynamicRouter([
             Component: Home
           },
           {
-            path: "/home/contact/all",
+            path: "/home/contact",
             lazy: async () => {
               const AllContacts = await import(
                 "./pages/home/contact/AllContacts"
@@ -119,7 +119,7 @@ const router = createDynamicRouter([
           },
 
           {
-            path: "/home/org/profile/all",
+            path: "/home/profile",
             lazy: async () => {
               const AllProfiles = await import(
                 "./pages/home/profile/AllProfiles"
@@ -128,7 +128,7 @@ const router = createDynamicRouter([
             }
           },
           {
-            path: "/home/org/profile/add",
+            path: "/home/profile/add",
             lazy: async () => {
               const AddProfile = await import(
                 "./pages/home/profile/AddProfile"
@@ -137,14 +137,14 @@ const router = createDynamicRouter([
             }
           },
           {
-            path: "/home/org/profile/addTask",
+            path: "/home/profile/addTask",
             lazy: async () => {
               const AddTask = await import("./pages/home/profile/AddTask");
               return { Component: AddTask.default };
             }
           },
           {
-            path: "/home/org/profile/edit/:id",
+            path: "/home/profile/edit/:id",
             lazy: async () => {
               const AddProfile = await import(
                 "./pages/home/profile/AddProfile"
@@ -153,12 +153,28 @@ const router = createDynamicRouter([
             }
           },
           {
-            path: "/home/org/profile/view/:id",
+            path: "/home/profile/view/:id",
             lazy: async () => {
               const ViewProfile = await import(
                 "./pages/home/profile/ViewProfile"
               );
               return { Component: ViewProfile.default };
+            }
+          },
+          {
+            path: "/home/system",
+            lazy: async () => {
+              const AllSystem = await import("./pages/home/system/AllSystem");
+              return { Component: AllSystem.default };
+            }
+          },
+          {
+            path: "/home/system/updateSettings",
+            lazy: async () => {
+              const UpdateSettings = await import(
+                "./pages/home/system/UpdateSettings"
+              );
+              return { Component: UpdateSettings.default };
             }
           }
         ]

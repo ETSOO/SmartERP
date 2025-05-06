@@ -138,7 +138,7 @@ export function LatestTasks() {
           variant="outlined"
           color="primary"
           startIcon={<AddIcon />}
-          href="org/profile/addTask"
+          href="profile/addTask"
         >
           {labels.newTask}
         </ButtonLink>
@@ -192,7 +192,7 @@ export function LatestTasks() {
                       {d.tasks?.map((task, index) => (
                         <LinkEx
                           key={task.id}
-                          to={`./org/profile/view/${task.id}`}
+                          to={`./profile/view/${task.id}`}
                           variant="caption"
                           color={getImportanceColor(task.importance)}
                         >

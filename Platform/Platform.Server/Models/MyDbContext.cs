@@ -32,6 +32,8 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<CoreUserIdentifier> CoreUserIdentifiers { get; set; }
 
+    public virtual DbSet<FeatureCulture> FeatureCultures { get; set; }
+
     public virtual DbSet<FeatureKeyword> FeatureKeywords { get; set; }
 
     public virtual DbSet<OrderHeader> OrderHeaders { get; set; }
@@ -68,6 +70,8 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<Promotion> Promotions { get; set; }
 
+    public virtual DbSet<SettingCrm> SettingCrms { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new Configurations.AddressConfiguration());
@@ -79,6 +83,7 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserDeviceConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserDeviceTokenConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserIdentifierConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.FeatureCultureConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.FeatureKeywordConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderLineConfiguration());
@@ -97,6 +102,7 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.ProductPriceConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductUnitConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PromotionConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.SettingCrmConfiguration());
 
         OnModelCreatingPartial(modelBuilder);
     }

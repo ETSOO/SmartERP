@@ -17,6 +17,7 @@ using com.etsoo.Utils.Storage;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.Org;
+using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Org.RQ;
 using PlatformShared;
 using PlatformShared.Database;
@@ -79,6 +80,164 @@ namespace Platform.Server.Services
             var (result, id) = await CreateWithIdAsync(rq, cancellationToken);
             if (id.HasValue) return ActionResult.Succeed(id.Value);
             return result;
+        }
+
+        /// <summary>
+        /// Create resource
+        /// 创建资源
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<IActionResult> CreateResourceAsync(OrgCreateResourceRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Is admin
+            var isAdmin = User.AppId == MyAppConstants.AdminAppId;
+
+            if (!isAdmin)
+            {
+                if (rq.OrgId.HasValue)
+                {
+                    // Check the organization id
+                    var ownOrg = await OwnsAsync(rq.OrgId.Value, cancellationToken: cancellationToken);
+                    if (!ownOrg)
+                    {
+                        return ApplicationErrors.AccessDenied.AsResult(nameof(rq.OrgId));
+                    }
+                }
+                else
+                {
+                    rq.OrgId = User.OrganizationInt;
+                }
+            }
+
+            if (rq.Id.HasValue)
+            {
+                var id = rq.Id.Value;
+
+                // Check the resource id
+                var resource = await _db.FeatureCultures.AsNoTracking()
+                    .Where(o => o.Id == id && (isAdmin || o.CoreOrganizationId == rq.OrgId))
+                    .Select(o => new { o.Key, o.CoreOrganizationId })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (resource == null)
+                {
+                    return ApplicationErrors.NoId.AsResult();
+                }
+
+                // Remove all items
+                if (rq.Items != null && !rq.Items.Any())
+                {
+                    await _db.FeatureCultures.Where(c => c.Key == resource.Key && c.CoreOrganizationId == resource.CoreOrganizationId)
+                        .ExecuteDeleteAsync(cancellationToken);
+                }
+                else
+                {
+                    if (rq.Items != null)
+                    {
+                        // Load all existing cultures with tracking
+                        var cultures = await _db.FeatureCultures
+                            .Where(c => c.Key == resource.Key && c.CoreOrganizationId == resource.CoreOrganizationId)
+                            .ToListAsync(cancellationToken);
+
+                        foreach (var item in rq.Items)
+                        {
+                            var culture = cultures.Find(c => c.Culture == item.Culture);
+
+                            if (culture == null)
+                            {
+                                // New culture
+                                if (!string.IsNullOrEmpty(item.Title))
+                                {
+                                    _db.FeatureCultures.Add(new FeatureCulture
+                                    {
+                                        Key = rq.Key ?? resource.Key,
+                                        CoreOrganizationId = rq.OrgId ?? resource.CoreOrganizationId,
+                                        Culture = item.Culture,
+                                        Title = item.Title,
+                                        Description = item.Description,
+                                        JsonData = item.JsonData
+                                    });
+                                }
+                            }
+                            else
+                            {
+                                if ((item.UpdatedFlag & 1) > 0 && !string.IsNullOrEmpty(item.Title))
+                                {
+                                    culture.Title = item.Title;
+                                }
+
+                                if ((item.UpdatedFlag & 2) > 0)
+                                {
+                                    culture.Description = item.Description;
+                                }
+
+                                if ((item.UpdatedFlag & 4) > 0)
+                                {
+                                    culture.JsonData = item.JsonData;
+                                }
+                            }
+                        }
+
+                        // Save changes
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        // Update the key
+                        if (!string.IsNullOrEmpty(rq.Key) && rq.Key != resource.Key)
+                        {
+                            await _db.FeatureCultures.Where(c => c.Key == resource.Key && c.CoreOrganizationId == resource.CoreOrganizationId)
+                                .ExecuteUpdateAsync(c => c.SetProperty(c => c.Key, rq.Key), cancellationToken);
+                        }
+
+                        // Update the organization id
+                        if (isAdmin && rq.OrgId != resource.CoreOrganizationId)
+                        {
+                            await _db.FeatureCultures.Where(c => c.Key == resource.Key && c.CoreOrganizationId == resource.CoreOrganizationId)
+                                .ExecuteUpdateAsync(c => c.SetProperty(c => c.CoreOrganizationId, rq.OrgId), cancellationToken);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(rq.Key) || rq.Key.StartsWith("etsoo", StringComparison.OrdinalIgnoreCase) || rq.Key.StartsWith("smarterp", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.Key));
+                }
+
+                if (rq.Items == null || rq.Items.Any(item => string.IsNullOrEmpty(item.Title)))
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.Items));
+                }
+
+                // Check the resource id
+                var hasKey = await _db.FeatureCultures.AsNoTracking()
+                    .Where(o => o.Key == rq.Key && o.CoreOrganizationId == rq.OrgId)
+                    .AnyAsync(cancellationToken);
+
+                if (hasKey)
+                {
+                    return ApplicationErrors.ItemExists.AsResult(nameof(rq.Key));
+                }
+
+                _db.FeatureCultures.AddRange(rq.Items.Select(item => new FeatureCulture
+                {
+                    Key = rq.Key,
+                    CoreOrganizationId = rq.OrgId,
+                    Culture = item.Culture,
+                    Title = item.Title!, // Validated above
+                    Description = item.Description,
+                    JsonData = item.JsonData
+                }));
+
+                // Save
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+
+            return ActionResult.Success;
         }
 
         /// <summary>
@@ -221,6 +380,29 @@ namespace Platform.Server.Services
         {
             var path = $"/Resources/Org{User.Organization}/{DateTime.UtcNow:yyyyMM}/";
             return HtmlIOUtils.FormatEditorContentAsync(_storage, path, content, Logger, cancellationToken);
+        }
+
+        /// <summary>
+        /// Get custom resources
+        /// 获取自定义资源
+        /// </summary>
+        /// <param name="culture">Culture</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<CustomResourceData>> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            return await _db.FeatureCultures.AsNoTracking()
+            .Where(c => c.Culture == culture && c.CoreOrganizationId == orgId)
+            .Select(c => new CustomResourceData
+            {
+                Key = c.Key,
+                OrgId = c.CoreOrganizationId,
+                Title = c.Title,
+                Description = c.Description,
+                JsonData = c.JsonData
+            }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
@@ -522,6 +704,66 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Query organization resource JSON data
+        /// 查询机构资源JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task QueryResourceAsync(OrgQueryResourceRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            // Is admin
+            var isAdmin = User.AppId == MyAppConstants.AdminAppId;
+
+            if (!isAdmin)
+            {
+                if (!rq.OrgId.HasValue || !await OwnsAsync(rq.OrgId.Value, cancellationToken: cancellationToken))
+                {
+                    rq.OrgId = User.OrganizationInt;
+                }
+            }
+
+            var (hasContent, commandText) = await _db.FeatureCultures
+                .AsNoTracking()
+                .QueryEtsoo(rq, (c) => c.Id, null, (q) =>
+                {
+                    if (rq.OrgId.HasValue)
+                    {
+                        q = q.Where(c => c.CoreOrganizationId == rq.OrgId);
+                    }
+
+                    if (!string.IsNullOrEmpty(rq.Culture))
+                    {
+                        q = q.Where(c => c.Culture == rq.Culture);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        q = q.Where(c => EF.Functions.ILike(c.Key, $"%{keyword}%")
+                        || EF.Functions.ILike(c.Title, $"%{keyword}%"));
+                    }
+
+                    return q;
+                }).Select(c => new OrgQueryResourceData
+                {
+                    Id = c.Id,
+                    Key = c.Key,
+                    Culture = c.Culture,
+                    OrgName = c.CoreOrganization == null ? null : c.CoreOrganization.Name,
+                    Title = c.Title,
+                    Description = c.Description
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        /// <summary>
         /// Read organization data for view
         /// 读取用于浏览的机构数据
         /// </summary>
@@ -691,6 +933,7 @@ namespace Platform.Server.Services
                 <head>
                   <meta charset="UTF-8">
                   <title>{{subject}}</title>
+                  <link rel="stylesheet" href="{{App.Configuration.ApiUrl}}/Storage/EditorStyles"/>
                   <style>
                     .field-label {
                       width: 100px;
@@ -938,6 +1181,54 @@ namespace Platform.Server.Services
                 o.Status,
                 o.QueryKeyword
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Read resource data for update
+        /// 读取用于更新的资源数据
+        /// </summary>
+        /// <param name="id">Resource id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<OrgUpdateResourceReadData?> UpdateResourceReadAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Is admin
+            var isAdmin = User.AppId == CurrentUser.ScopeToAppId("admin");
+
+            // Check the resource id
+            var resource = await _db.FeatureCultures.AsNoTracking()
+                .Where(o => o.Id == id)
+                .Select(o => new { o.Key, o.CoreOrganizationId })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (resource == null)
+            {
+                return null;
+            }
+
+            if (!isAdmin && (resource.CoreOrganizationId == null || !await OwnsAsync(resource.CoreOrganizationId.Value, cancellationToken: cancellationToken)))
+            {
+                return null;
+            }
+
+            var items = await _db.FeatureCultures.AsNoTracking()
+                .Where(o => o.Key == resource.Key && o.CoreOrganizationId == resource.CoreOrganizationId)
+                .Select(o => new OrgResourceItem
+                {
+                    Culture = o.Culture,
+                    Title = o.Title,
+                    Description = o.Description,
+                    JsonData = o.JsonData
+                })
+                .ToArrayAsync(cancellationToken);
+
+            return new OrgUpdateResourceReadData
+            {
+                Id = id,
+                Key = resource.Key,
+                OrgId = resource.CoreOrganizationId,
+                Items = items
+            };
         }
 
         /// <summary>

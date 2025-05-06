@@ -115,6 +115,22 @@ namespace CRM.Server.Services
             return query;
         }
 
+        private async ValueTask FormatListRQAsync(PersonListRQ rq, CancellationToken cancellationToken)
+        {
+            if (rq.Id == 0)
+            {
+                rq.Id = User.Oid;
+            }
+            else if (rq.Id == -1)
+            {
+                var orgId = User.OrganizationInt;
+                rq.Id = await _db.Persons
+                    .Where(p => p.OrgId == orgId && p.CoreOrganizationId == orgId)
+                    .Select(p => p.Id)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+        }
+
         /// <summary>
         /// List person JSON data
         /// 人员列表JSON数据
@@ -124,6 +140,8 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<ContactItem>> ListAsync(PersonListRQ rq, CancellationToken cancellationToken = default)
         {
+            await FormatListRQAsync(rq, cancellationToken);
+
             var query = CreateQuery(rq);
 
             return await query.Select(p => new ContactItem
@@ -164,6 +182,8 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<PersonQueryData>> QueryAsync(PersonQueryRQ rq, CancellationToken cancellationToken = default)
         {
+            await FormatListRQAsync(rq, cancellationToken);
+
             var query = CreateQuery(rq, (q) =>
             {
                 return q;
@@ -214,8 +234,14 @@ namespace CRM.Server.Services
             var userId = User.IdInt;
             var isPrivate = User.Role >= UserRole.Manager;
 
+            if (id == 0)
+            {
+                // Current user
+                id = User.Oid;
+            }
+
             return await _db.Persons.AsNoTracking()
-                .Where(p => p.Id == id && p.OrgId == orgId)
+                .Where(p => p.OrgId == orgId && ((id == -1 && p.CoreOrganizationId == orgId) || p.Id == id))
                 .Select(p => new PersonViewData
                 {
                     Id = p.Id,

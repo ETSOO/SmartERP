@@ -18,7 +18,7 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import AddIcon from "@mui/icons-material/Add";
 import EmailIcon from "@mui/icons-material/Email";
 import { app } from "../../../app/MyApp";
-import { OrgDownloadKind, usePageData } from "@etsoo/smarterp-core";
+import { OrgDownloadKind, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { PersonProfileViewData } from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
@@ -72,12 +72,11 @@ export default function ViewProfile() {
     "noChanges",
     "people",
     "profile",
-    "sendEmail",
-    "view"
+    "sendEmail"
   );
 
   // Page data hook
-  usePageData(app, `${labels.view} (${labels.profile})`, [loadData]);
+  usePageDataEmpty(app);
 
   // Add link
   const addLink = useAddLink(id, loadData);

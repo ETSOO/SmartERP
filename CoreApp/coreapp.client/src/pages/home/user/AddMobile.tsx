@@ -7,7 +7,7 @@ import {
   VBox
 } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
-import { AuthCodeAction, usePageData } from "@etsoo/smarterp-core";
+import { AuthCodeAction, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +17,6 @@ export default function AddMobile() {
 
   // Labels
   const labels = app.getLabels(
-    "addMobile",
     "confirmClear",
     "mobile",
     "nextStep",
@@ -110,7 +109,7 @@ export default function AddMobile() {
   };
 
   // Page data hook
-  usePageData(app, labels.addMobile, []);
+  usePageDataEmpty(app);
 
   return (
     <CommonPage maxWidth="xs">

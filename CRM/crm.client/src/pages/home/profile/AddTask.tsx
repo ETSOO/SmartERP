@@ -1,4 +1,4 @@
-import { usePageData } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
 import { useParamsEx } from "@etsoo/react";
@@ -118,7 +118,7 @@ export default function AddTask() {
 
       if (result.ok) {
         editorRef.current?.clearBackup();
-        navigate(`./../../../`);
+        navigate(`./../../`);
         return;
       }
 
@@ -135,7 +135,7 @@ export default function AddTask() {
   }, [id]);
 
   // Page data hook
-  usePageData(app, labels.newTask, []);
+  usePageDataEmpty(app);
 
   return (
     <EditPage

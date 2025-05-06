@@ -1,7 +1,11 @@
 import { IServiceAppSettings, MUGlobal, ServiceApp } from "@etsoo/materialui";
 import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, Utils } from "@etsoo/shared";
-import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
+import {
+  AddressUtils,
+  BusinessUtils,
+  ExternalSettings
+} from "@etsoo/appscript";
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
 
 class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
@@ -10,6 +14,18 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
    */
   override get coreName(): string {
     return "platform";
+  }
+
+  override async loadCustomResources(
+    resources: DataTypes.StringRecord,
+    culture: string
+  ) {
+    const items = await this.core.publicApi.getCustomResources(culture, {
+      showLoading: false
+    });
+    if (items == null) return;
+
+    BusinessUtils.mergeCustomResources(resources, items);
   }
 
   /**

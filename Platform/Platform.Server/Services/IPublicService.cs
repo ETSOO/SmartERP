@@ -15,7 +15,9 @@ namespace Platform.Server.Services
     {
         Task<IActionResult> AcceptInvitationAsync(AcceptInvitationRQ rq, CancellationToken cancellationToken = default);
         Task<string> CreateBarcodeAsync(BarcodeOptions rq, CancellationToken cancellationToken = default);
+        Task<IEnumerable<CultureItem>> GetCulturesAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default);
         Task<IEnumerable<CurrencyItem>> GetCurrenciesAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default);
+        Task<IEnumerable<CustomResourceData>> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default);
         Task<IEnumerable<RegionItem>> GetRegionsAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default);
         string GetPinyin(PinyinRQ rq);
         ValueTask<string> MobileQRCodeAsync(MobileQRCodeRQ rq, CancellationToken cancellationToken = default);

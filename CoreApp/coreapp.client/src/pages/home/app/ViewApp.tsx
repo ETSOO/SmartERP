@@ -14,7 +14,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { app } from "../../../app/MyApp";
-import { AppReadDto, usePageData } from "@etsoo/smarterp-core";
+import { AppReadDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { AppUtils } from "../components/AppUtils";
 import { EntityStatus } from "@etsoo/appscript";
@@ -43,12 +43,11 @@ export default function ViewApp() {
     "copy",
     "createApiKey",
     "edit",
-    "renew",
-    "view"
+    "renew"
   );
 
   // Page data hook
-  usePageData(app, labels.view, [loadData]);
+  usePageDataEmpty(app);
 
   return (
     <ViewPage<AppReadDto>

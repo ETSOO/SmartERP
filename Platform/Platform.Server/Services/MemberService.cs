@@ -414,13 +414,13 @@ namespace Platform.Server.Services
                 .FirstOrDefaultAsync(cancellationToken);
 
             // Is not self
-            var isNotSelf = ou.CoreUserId != User.IdInt && ou.UserRole < User.Role;
+            var isNotSelf = ou.CoreUserId != User.IdInt && ou.UserRole <= User.Role;
 
             // Update
             if (rq.IsModified(nameof(rq.UserRole)) && rq.UserRole.HasValue && isNotSelf)
             {
-                // Except the founder, the user role should be lower than the current user
-                if (User.Role != UserRole.Founder && rq.UserRole.Value >= User.Role)
+                // New user role should be lower or equal than the current user
+                if (rq.UserRole.Value > User.Role)
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(rq.UserRole));
                 }

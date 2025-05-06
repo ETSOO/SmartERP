@@ -5,7 +5,7 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import ArticleIcon from "@mui/icons-material/Article";
 import { app } from "../../app/MyApp";
 import React from "react";
-import { usePageData, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { PersonViewData } from "@etsoo/smarterp-crm";
 import LinearProgress from "@mui/material/LinearProgress";
 import { Profiles } from "../profile/Profiles";
@@ -50,8 +50,7 @@ export function ViewPerson(props: ViewPersonProps) {
   }, [personId]);
 
   // Page data hook
-  if (personId > 0) usePageData(app, data?.name ?? labels.view, [data]);
-  else usePageDataEmpty(app);
+  usePageDataEmpty(app);
 
   // Layout
   return (

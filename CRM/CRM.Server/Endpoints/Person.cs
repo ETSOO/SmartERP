@@ -8,7 +8,7 @@ namespace CRM.Server.Endpoints
     /// Person service APIs
     /// 人员服务API
     /// </summary>
-    public static class Person
+    internal static class Person
     {
         public static RouteGroupBuilder MapPerson(this RouteGroupBuilder builder)
         {

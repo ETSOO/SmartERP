@@ -1,46 +1,44 @@
-import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
+import { CommonPage, UserAvatarEditor, VBox } from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useParamsEx } from "@etsoo/react";
-import { usePageData } from "@etsoo/smarterp-core";
+import { useNavigate } from "react-router-dom";
+import { useLocationState, useParamsEx } from "@etsoo/react";
+import { AvatarState, usePageDataEmpty } from "@etsoo/smarterp-core";
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 export default function UpdateAvatar() {
   // Route
   const navigate = useNavigate();
   const { id = 0 } = useParamsEx({ id: "number" });
 
-  const location = useLocation();
-  const avatar: string | undefined = location.state;
+  const state = useLocationState<AvatarState>();
 
   // Labels
-  const labels = app.getLabels(
-    "avatar",
-    "editLogo",
-    "imageSizeTooSmall",
-    "logo"
-  );
+  const labels = app.getLabels("avatar", "imageSizeTooSmall", "logo");
 
   // Page data hook
-  usePageData(app, labels.editLogo, []);
+  usePageDataEmpty(app);
 
   return (
     <CommonPage sx={{ width: "fit-content" }}>
       <Stack direction={{ xs: "column", sm: "column", md: "row" }} spacing={1}>
-        {avatar == null ? (
-          <React.Fragment />
-        ) : (
-          <img
-            src={avatar}
-            alt={labels.logo}
-            style={{
-              width: "320px",
-              height: "160px",
-              border: "1px solid #666"
-            }}
-          />
-        )}
+        <VBox gap={1}>
+          {state.avatar == null ? (
+            <React.Fragment />
+          ) : (
+            <img
+              src={state.avatar}
+              alt={labels.logo}
+              style={{
+                width: "320px",
+                height: "160px",
+                border: "1px solid #666"
+              }}
+            />
+          )}
+          <Typography variant="caption">{state.title}</Typography>
+        </VBox>
         <UserAvatarEditor
           onDone={async (canvas, toBlob, type) => {
             // Check size

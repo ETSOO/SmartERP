@@ -177,7 +177,7 @@ namespace Admin.Server.Services
                     o.Name,
                     o.Brand,
                     Apps = o.Apps.Count,
-                    Users = o.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
+                    Users = o.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                     Persons = o.Persons.Count,
                     Owner = o.Owner.Name,
                     Pin = MyDbFunctions.HideData(o.Pin, default),
@@ -566,7 +566,7 @@ namespace Admin.Server.Services
                     o.Creation,
 
                     Apps = o.Apps.Count,
-                    Users = o.Persons.Where(p => p.CoreUserId != null && p.IdentityType != null && p.IdentityType.Value.HasFlag(IdentityTypeFlags.User)).Count(),
+                    Users = o.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                     Persons = o.Persons.Count,
                     Orders = o.Orders.Count
                 })

@@ -63,7 +63,7 @@ export default function AllOrgs() {
   const ref = React.useRef<ScrollerListForwardRef<OrgQueryDto>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
 
@@ -80,7 +80,7 @@ export default function AllOrgs() {
             size="medium"
             color="primary"
             onClick={() =>
-              navigate("./../../app/all", {
+              navigate("./../app/all", {
                 state: { kind: 2 }
               })
             }
@@ -91,7 +91,7 @@ export default function AllOrgs() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./${data.id}`)}
+      quickAction={(data) => navigate(`./my/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -192,7 +192,7 @@ export default function AllOrgs() {
                 {data.isOwner && (
                   <IconButtonLink
                     title={labels.edit}
-                    href={`./../edit/${data.id}`}
+                    href={`./edit/${data.id}`}
                   >
                     <EditIcon />
                   </IconButtonLink>
@@ -205,7 +205,7 @@ export default function AllOrgs() {
                     <AccountTreeIcon />
                   </IconButton>
                 )}
-                <IconButtonLink title={labels.view} href={`./${data.id}`}>
+                <IconButtonLink title={labels.view} href={`./my/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -223,7 +223,7 @@ export default function AllOrgs() {
               data.isOwner && {
                 label: labels.edit,
                 icon: <EditIcon />,
-                action: `./../edit/${data.id}`
+                action: `./edit/${data.id}`
               },
               data.id !== app.userData?.organization && {
                 label: labels.switchOrg,
@@ -233,7 +233,7 @@ export default function AllOrgs() {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./${data.id}`
+                action: `./my/${data.id}`
               }
             ],
             <React.Fragment>

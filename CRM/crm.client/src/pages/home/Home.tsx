@@ -1,5 +1,5 @@
 import { app } from "../../app/MyApp";
-import { usePageData } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import HubIcon from "@mui/icons-material/Hub";
 import HistoryIcon from "@mui/icons-material/History";
@@ -17,7 +17,7 @@ export default function Home() {
   // Labels
   const labels = app.getLabels("allProfiles", "flowchart", "latestTasks");
 
-  usePageData(app, { noPageHeader: true }, []);
+  usePageDataEmpty(app);
 
   return (
     <TabBox
@@ -36,7 +36,7 @@ export default function Home() {
           iconPosition: "start"
         },
         {
-          children: () => navigate(`./org/profile/all`),
+          children: () => navigate(`./profile`),
           label: `${labels.allProfiles}...`,
           icon: <HistoryIcon />,
           iconPosition: "start"

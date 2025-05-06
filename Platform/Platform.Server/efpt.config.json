@@ -51,6 +51,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.feature_culture",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.feature_keyword",
          "ObjectType": 0
       },
@@ -120,6 +124,10 @@
       },
       {
          "Name": "public.promotion",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.setting_crm",
          "ObjectType": 0
       }
    ],

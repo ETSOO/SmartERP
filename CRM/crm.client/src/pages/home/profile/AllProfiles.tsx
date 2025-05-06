@@ -27,9 +27,9 @@ import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import { ImportanceText } from "@etsoo/smarterp-crm/components";
 import { EntityStatus } from "@etsoo/appscript";
-import { usePageData } from "@etsoo/smarterp-core";
 import Fab from "@mui/material/Fab";
 import Typography from "@mui/material/Typography";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 
 const template = {
   importance: "number",
@@ -43,14 +43,6 @@ const template = {
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllProfiles() {
-  // Page data hook when no menu item matched
-  usePageData(app, app.get("allProfiles"), []);
-
-  //return <AllProfilesInner />;
-  return React.useMemo(() => <AllProfilesInner />, []);
-}
-
-function AllProfilesInner() {
   // Route
   const navigate = useNavigate();
 
@@ -76,9 +68,12 @@ function AllProfilesInner() {
   const ref = React.useRef<ScrollerListForwardRef<PersonProfileQueryData>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
+
+  // Page data hook
+  usePageDataEmpty(app);
 
   return (
     <ResponsivePage<PersonProfileQueryData, typeof template>
@@ -90,7 +85,7 @@ function AllProfilesInner() {
               title={labels.add}
               size="medium"
               color="primary"
-              onClick={() => navigate("./../add")}
+              onClick={() => navigate("./add")}
             >
               <AddIcon />
             </Fab>
@@ -99,7 +94,7 @@ function AllProfilesInner() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./../view/${data.id}`)}
+      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -251,16 +246,10 @@ function AllProfilesInner() {
 
             return (
               <React.Fragment>
-                <IconButtonLink
-                  title={labels.edit}
-                  href={`./../edit/${data.id}`}
-                >
+                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
                   <EditIcon />
                 </IconButtonLink>
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../view/${data.id}`}
-                >
+                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -278,12 +267,12 @@ function AllProfilesInner() {
               {
                 label: labels.edit,
                 icon: <EditIcon />,
-                action: `./../edit/${data.id}`
+                action: `./edit/${data.id}`
               },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../view/${data.id}`
+                action: `./view/${data.id}`
               }
             ],
             <React.Fragment>

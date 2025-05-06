@@ -14,13 +14,13 @@ namespace CRM.Server.RQ.PersonProfile
         /// Person id
         /// 人员编号
         /// </summary>
-        public long? PersonId { get; init; }
+        public long? PersonId { get; set; }
 
         /// <summary>
         /// Participant id, 0 for current user
         /// 参与者编号，0为当前用户
         /// </summary>
-        public long? ParticipantId { get; init; }
+        public long? ParticipantId { get; set; }
 
         /// <summary>
         /// Kind

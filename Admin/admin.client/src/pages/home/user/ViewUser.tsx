@@ -3,7 +3,7 @@ import { ButtonLink, HBox, HBoxList, ViewPage } from "@etsoo/materialui";
 import HistoryIcon from "@mui/icons-material/History";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { app } from "../../../app/MyApp";
-import { usePageData } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadUserDto } from "../../../api/dto/query/ReadUserDto";
 import { DateUtils } from "@etsoo/shared";
@@ -25,12 +25,11 @@ export default function ViewUser() {
     "auditHistory",
     "clearUserFrozen",
     "confirmAction",
-    "logo",
-    "view"
+    "logo"
   );
 
   // Page data hook
-  usePageData(app, labels.view, [loadData]);
+  usePageDataEmpty(app);
 
   return (
     <ViewPage<ReadUserDto>

@@ -7,7 +7,7 @@ import {
   VBox
 } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
-import { AuthCodeAction, usePageData } from "@etsoo/smarterp-core";
+import { AuthCodeAction, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +17,6 @@ export default function AddEmail() {
 
   // Labels
   const labels = app.getLabels(
-    "addEmail",
     "confirmClear",
     "email",
     "nextStep",
@@ -112,7 +111,7 @@ export default function AddEmail() {
   };
 
   // Page data hook
-  usePageData(app, labels.addEmail, []);
+  usePageDataEmpty(app);
 
   return (
     <CommonPage maxWidth="xs">

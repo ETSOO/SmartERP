@@ -69,6 +69,12 @@ namespace PlatformShared.Database
         public required DbSet<CoreUserIdentifier> CoreUserIdentifiers { get; set; }
 
         /// <summary>
+        /// Feature (custom) cultures
+        /// 特征（自定义）文化
+        /// </summary>
+        public required DbSet<FeatureCulture> FeatureCultures { get; set; }
+
+        /// <summary>
         /// Feature keywords
         /// 特征关键词
         /// </summary>
@@ -177,6 +183,12 @@ namespace PlatformShared.Database
         public required DbSet<Promotion> Promotions { get; set; }
 
         /// <summary>
+        /// CRM settings
+        /// 客户关系管理设置
+        /// </summary>
+        public required DbSet<SettingCrm> SettingCrms { get; set; }
+
+        /// <summary>
         /// Is sensitive data logging enabled
         /// 敏感数据日志是否启用
         /// </summary>
@@ -202,6 +214,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new CoreUserDeviceConfiguration());
             modelBuilder.ApplyConfiguration(new CoreUserDeviceTokenConfiguration());
             modelBuilder.ApplyConfiguration(new CoreUserIdentifierConfiguration());
+            modelBuilder.ApplyConfiguration(new FeatureCultureConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureKeywordConfiguration());
             modelBuilder.ApplyConfiguration(new OrderHeaderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderLineConfiguration());
@@ -220,6 +233,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new ProductPriceConfiguration());
             modelBuilder.ApplyConfiguration(new ProductUnitConfiguration());
             modelBuilder.ApplyConfiguration(new PromotionConfiguration());
+            modelBuilder.ApplyConfiguration(new SettingCrmConfiguration());
         }
     }
 }

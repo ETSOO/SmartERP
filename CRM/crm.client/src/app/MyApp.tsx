@@ -1,7 +1,11 @@
 import { IServiceAppSettings, MUGlobal, ServiceApp } from "@etsoo/materialui";
 import { MyUser } from "./MyUser";
 import { DataTypes, DomUtils, ExtendUtils, Utils } from "@etsoo/shared";
-import { AddressUtils, ExternalSettings } from "@etsoo/appscript";
+import {
+  AddressUtils,
+  BusinessUtils,
+  ExternalSettings
+} from "@etsoo/appscript";
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
 import { CrmApp, ICrmApp, CrmCulture } from "@etsoo/smarterp-crm";
 import { AppModule } from "./AppModule";
@@ -42,6 +46,33 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
    * Core application
    */
   readonly core = new CoreApp(this, this.coreApi);
+
+  override async loadCustomResources(
+    resources: DataTypes.StringRecord,
+    culture: string
+  ) {
+    const items = await this.core.publicApi.getCustomResources(culture, {
+      showLoading: false
+    });
+    if (items == null) return;
+
+    BusinessUtils.mergeCustomResources(resources, items);
+  }
+
+  /**
+   * On switch organization handler
+   * This method is called when the organization is switched successfully
+   */
+  protected override async onSwitchOrg() {
+    const items = await this.core.orgApi.getCustomResources(this.culture);
+    if (items == null) return;
+
+    const { resources } = this.settings.currentCulture;
+    if (typeof resources === "object") {
+      BusinessUtils.restoreResources(resources);
+      BusinessUtils.mergeCustomResources(resources, items);
+    }
+  }
 }
 ExtendUtils.applyMixins(MyApp, [CrmApp]);
 

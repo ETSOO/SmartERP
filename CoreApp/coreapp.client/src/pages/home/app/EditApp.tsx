@@ -10,7 +10,7 @@ import { app } from "../../../app/MyApp";
 import {
   AppUpdateReadDto,
   AppUpdateRQ,
-  usePageData
+  usePageDataEmpty
 } from "@etsoo/smarterp-core";
 import Grid from "@mui/material/Grid";
 
@@ -21,7 +21,6 @@ export default function EditApp() {
 
   // Labels
   const labels = app.getLabels(
-    "edit",
     "fullName",
     "localName",
     "localUrls",
@@ -117,7 +116,7 @@ export default function EditApp() {
   }, [id]);
 
   // Page data hook
-  usePageData(app, labels.edit, []);
+  usePageDataEmpty(app);
 
   return (
     <EditPage

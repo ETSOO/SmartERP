@@ -83,7 +83,7 @@ const router = createDynamicRouter([
             Component: Home
           },
           {
-            path: "/home/app/all",
+            path: "/home/app",
             lazy: async () => {
               const AllApps = await import("./pages/home/app/AllApps");
               return { Component: AllApps.default };
@@ -97,7 +97,7 @@ const router = createDynamicRouter([
             }
           },
           {
-            path: "/home/org/all",
+            path: "/home/org",
             lazy: async () => {
               const AllOrgs = await import("./pages/home/org/AllOrgs");
               return { Component: AllOrgs.default };
@@ -111,7 +111,7 @@ const router = createDynamicRouter([
             }
           },
           {
-            path: "/home/user/all",
+            path: "/home/user",
             lazy: async () => {
               const AllUsers = await import("./pages/home/user/AllUsers");
               return { Component: AllUsers.default };
@@ -131,6 +131,40 @@ const router = createDynamicRouter([
                 "./pages/home/system/AuditHistory"
               );
               return { Component: AuditHistory.default };
+            }
+          },
+          {
+            path: "/home/custom",
+            lazy: async () => {
+              const AllCustom = await import("./pages/home/custom/AllCustom");
+              return { Component: AllCustom.default };
+            }
+          },
+          {
+            path: "/home/custom/resources",
+            lazy: async () => {
+              const CustomResources = await import(
+                "./pages/home/custom/CustomResources"
+              );
+              return { Component: CustomResources.default };
+            }
+          },
+          {
+            path: "/home/custom/resources/add",
+            lazy: async () => {
+              const AddCustomResource = await import(
+                "./pages/home/custom/AddCustomResource"
+              );
+              return { Component: AddCustomResource.default };
+            }
+          },
+          {
+            path: "/home/custom/resources/edit/:id",
+            lazy: async () => {
+              const AddCustomResource = await import(
+                "./pages/home/custom/AddCustomResource"
+              );
+              return { Component: AddCustomResource.default };
             }
           }
         ]

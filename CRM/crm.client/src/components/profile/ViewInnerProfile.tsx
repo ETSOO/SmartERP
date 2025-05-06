@@ -167,7 +167,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
               <EmailIcon />
             </IconButton>
             <IconButtonLink
-              href={`./../../../org/profile/edit/${data?.id}`}
+              href={`./../../../profile/edit/${data?.id}`}
               color="inherit"
               title={labels.edit}
               disabled={data == null}
@@ -175,7 +175,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
               <EditIcon />
             </IconButtonLink>
             <IconButtonLink
-              href={`./../../../org/profile/view/${data?.id}`}
+              href={`./../../../profile/view/${data?.id}`}
               color="inherit"
               title={labels.view}
               disabled={data == null}
@@ -242,7 +242,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                     data: (item) =>
                       item.orderTitle ? (
                         <ButtonLink
-                          href={`./../${item.orderId}`}
+                          href={`./../../../order/view/${item.orderId}`}
                           size="small"
                           variant="outlined"
                         >

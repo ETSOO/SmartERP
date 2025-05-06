@@ -560,6 +560,12 @@ namespace PlatformShared.Database.Models
         public Person? ReportToUser { get; set; }
 
         /// <summary>
+        /// CRM setting
+        /// 客户关系管理设置
+        /// </summary>
+        public SettingCrm? SettingCrm { get; set; }
+
+        /// <summary>
         /// Direct reports
         /// 直接下属
         /// </summary>

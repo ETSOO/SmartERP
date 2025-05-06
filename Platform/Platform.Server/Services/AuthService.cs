@@ -44,6 +44,7 @@ namespace Platform.Server.Services
             public required int DeviceId { get; init; }
             public required int UserId { get; init; }
             public required string Culture { get; init; }
+            public int? AppId { get; init; }
             public required DeviceTokenData Data { get; init; }
         }
 
@@ -425,6 +426,7 @@ namespace Platform.Server.Services
                         DeviceId = d.DeviceId,
                         UserId = d.Device.CoreUserId,
                         Culture = d.Culture,
+                        AppId = d.AppId,
                         Data = d.Data
                     }
                 })
@@ -1787,6 +1789,7 @@ namespace Platform.Server.Services
                     DeviceId = d.DeviceId,
                     UserId = d.Device.CoreUserId,
                     Culture = d.Culture,
+                    AppId = d.AppId,
                     Data = d.Data
                 })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -1831,7 +1834,7 @@ namespace Platform.Server.Services
                     Status = d.u.Status,
                     FrozenTime = d.u.FrozenTime,
                     Step = d.u.Step,
-                    LatestAppId = d.u.LatestAppIds == null ? null : d.u.LatestAppIds.FirstOrDefault(),
+                    LatestAppId = data.AppId == null ? (d.u.LatestAppIds == null ? null : d.u.LatestAppIds.FirstOrDefault()) : data.AppId,
                     Oid = ou == null ? null : ou.Id,
                     OrgStatus = ou == null ? null : ou.Status,
                     OrgExpiry = ou == null ? null : ou.Expiry,

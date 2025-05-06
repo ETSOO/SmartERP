@@ -93,6 +93,12 @@ namespace PlatformShared.Database.Models
         public CoreOrganization? Parent { get; set; }
 
         /// <summary>
+        /// CRM setting
+        /// 客户关系管理设置
+        /// </summary>
+        public SettingCrm? SettingCrm { get; set; }
+
+        /// <summary>
         /// Core organization apps
         /// 核心机构应用
         /// </summary>
@@ -109,6 +115,12 @@ namespace PlatformShared.Database.Models
         /// 绑定的人员
         /// </summary>
         public ICollection<Person> BoundPersons { get; } = default!;
+
+        /// <summary>
+        /// Feature (custom) cultures
+        /// 特征（自定义）文化
+        /// </summary>
+        public ICollection<FeatureCulture> FeatureCultures { get; } = default!;
 
         /// <summary>
         /// Core organization persons

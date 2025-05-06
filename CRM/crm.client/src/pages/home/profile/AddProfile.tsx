@@ -1,4 +1,4 @@
-import { usePageData } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
 import { useParamsEx, useSearchParamsEx } from "@etsoo/react";
@@ -112,7 +112,7 @@ export default function AddProfile() {
         rq.changedFields = fields;
         rq.auth = auth;
 
-        redirectUrl = "./../../../../";
+        redirectUrl = "./../../../";
 
         result = await app.profileApi.update(rq);
       } else {
@@ -125,7 +125,7 @@ export default function AddProfile() {
 
         Utils.removeEmptyValues(rq);
 
-        redirectUrl = "./../../../";
+        redirectUrl = "./../../";
 
         result = await app.profileApi.create(rq);
       }
@@ -155,7 +155,7 @@ export default function AddProfile() {
   }, [data]);
 
   // Page data hook
-  usePageData(app, id > 0 ? labels.editProfile : labels.addProfile, []);
+  usePageDataEmpty(app);
 
   return (
     <EditPage

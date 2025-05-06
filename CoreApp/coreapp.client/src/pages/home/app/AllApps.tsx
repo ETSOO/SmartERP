@@ -57,7 +57,7 @@ export default function AllApps() {
   const ref = React.useRef<ScrollerListForwardRef<AppQueryData>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
 

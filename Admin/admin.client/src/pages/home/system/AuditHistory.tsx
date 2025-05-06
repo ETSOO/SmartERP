@@ -64,7 +64,7 @@ export default function LoginHistory() {
   const ref = React.useRef<ScrollerListForwardRef<AuditHistoryDto>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>();
@@ -215,6 +215,7 @@ export default function LoginHistory() {
                 <IconButtonLink
                   size="small"
                   href={`./../user/view/${data.userId}`}
+                  title={labels.user}
                 >
                   <PersonIcon />
                 </IconButtonLink>

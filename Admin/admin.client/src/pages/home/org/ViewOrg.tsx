@@ -3,7 +3,7 @@ import { BusinessTax } from "@etsoo/appscript";
 import { ButtonLink, HBox, ViewPage } from "@etsoo/materialui";
 import SupportIcon from "@mui/icons-material/Support";
 import { app } from "../../../app/MyApp";
-import { usePageData } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadOrgData } from "../../../api/dto/query/ReadOrgDto";
 import { AppUtils } from "../../../components/AppUtils";
@@ -20,13 +20,13 @@ export default function ViewOrg() {
   }, [id]);
 
   // Labels
-  const labels = app.getLabels("adminSupport", "logo", "view");
+  const labels = app.getLabels("adminSupport", "logo");
 
   // Tax
   const tax = BusinessTax.getById(app.region);
 
   // Page data hook
-  usePageData(app, labels.view, [loadData]);
+  usePageDataEmpty(app);
 
   return (
     <ViewPage<ReadOrgData>

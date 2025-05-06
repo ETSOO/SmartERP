@@ -73,14 +73,18 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<MemberQueryData>))]
 
     // Org
+    [JsonSerializable(typeof(OrgCreateResourceRQ))]
     [JsonSerializable(typeof(OrgCreateRQ))]
     [JsonSerializable(typeof(OrgListRQ))]
+    [JsonSerializable(typeof(OrgQueryResourceRQ))]
     [JsonSerializable(typeof(OrgGetMyRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
     [JsonSerializable(typeof(SendProfileEmailRQ))]
 
     [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]
+    [JsonSerializable(typeof(IEnumerable<OrgQueryResourceData>))]
+    [JsonSerializable(typeof(OrgUpdateResourceReadData))]
 
     // Public
     [JsonSerializable(typeof(AcceptInvitationRQ))]
@@ -91,6 +95,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(BarcodeOptions))]
     [JsonSerializable(typeof(OrgPublicInfo))]
     [JsonSerializable(typeof(IEnumerable<PlaceCommon>))]
+    [JsonSerializable(typeof(IEnumerable<CustomResourceData>))]
 
     // User
     [JsonSerializable(typeof(AuditHistoryRQ))]
@@ -103,6 +108,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(HttpValidationProblemDetails))]
     [JsonSerializable(typeof(IFormFile))]
     [JsonSerializable(typeof(ProblemDetails))]
+    [JsonSerializable(typeof(IResult))]
 
     public partial class MyJsonSerializerContext : JsonSerializerContext
     {

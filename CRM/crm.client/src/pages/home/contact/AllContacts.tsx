@@ -53,7 +53,7 @@ export default function AllContacts() {
   const ref = React.useRef<ScrollerListForwardRef<PersonQueryData>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
 
@@ -68,7 +68,7 @@ export default function AllContacts() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./../view/${data.id}`)}
+      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -131,16 +131,10 @@ export default function AllContacts() {
 
             return (
               <React.Fragment>
-                <IconButtonLink
-                  title={labels.edit}
-                  href={`./../edit/${data.id}`}
-                >
+                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
                   <EditIcon />
                 </IconButtonLink>
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../view/${data.id}`}
-                >
+                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -158,12 +152,12 @@ export default function AllContacts() {
               {
                 label: labels.edit,
                 icon: <EditIcon />,
-                action: `./../edit/${data.id}`
+                action: `./edit/${data.id}`
               },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../view/${data.id}`
+                action: `./view/${data.id}`
               }
             ],
             <React.Fragment>

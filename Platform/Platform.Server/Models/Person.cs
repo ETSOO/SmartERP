@@ -19,7 +19,7 @@ public partial class Person
 
     public short? UserRole { get; set; }
 
-    public short? IdentityType { get; set; }
+    public short IdentityType { get; set; }
 
     public bool IsLegalPerson { get; set; }
 
@@ -136,6 +136,8 @@ public partial class Person
     public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 
     public virtual Person? ReportToNavigation { get; set; }
+
+    public virtual ICollection<SettingCrm> SettingCrms { get; set; } = new List<SettingCrm>();
 
     public virtual CoreUser User { get; set; } = null!;
 }

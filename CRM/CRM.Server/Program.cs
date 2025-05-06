@@ -206,6 +206,7 @@ services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<ISEAuthService, SEAuthService>();
 services.AddScoped<IPersonService, PersonService>();
 services.AddScoped<IPersonProfileService, PersonProfileService>();
+services.AddScoped<ISystemService, SystemService>();
 
 var app = builder.Build();
 
@@ -265,6 +266,7 @@ var api = app.MapGroup("/api").WithOpenApi();
 api.MapAuth()
     .MapPerson()
     .MapPersonProfile()
+    .MapSystem()
     .AddModelValidators()
     .RequireAuthorization()
 ;

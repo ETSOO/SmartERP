@@ -7,7 +7,6 @@ import {
   MUUtils,
   SelectBool
 } from "@etsoo/materialui";
-import AddIcon from "@mui/icons-material/Add";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,6 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { AllOrgDto } from "../../../api/dto/query/AllOrgDto";
 import { OrgTiplist } from "../../../components/OrgTiplist";
 import { UserTiplist } from "../../../components/UserTiplist";
-import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
@@ -69,7 +67,7 @@ export default function AllOrgs() {
   const ref = React.useRef<ScrollerListForwardRef<AllOrgDto>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>();
@@ -80,25 +78,11 @@ export default function AllOrgs() {
   return (
     <ResponsivePage<AllOrgDto, typeof template>
       {...DefaultUI.pageProps({
-        onRefresh: reloadData,
-        fabButtons: (
-          <Fab
-            title={labels.createNewOrganization}
-            size="medium"
-            color="primary"
-            onClick={() =>
-              navigate("./../../app/all", {
-                state: { kind: 2 }
-              })
-            }
-          >
-            <AddIcon />
-          </Fab>
-        )
+        onRefresh: reloadData
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./../view/${data.id}`)}
+      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -234,10 +218,7 @@ export default function AllOrgs() {
 
             return (
               <React.Fragment>
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../view/${data.id}`}
-                >
+                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -255,7 +236,7 @@ export default function AllOrgs() {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./${data.id}`
+                action: `./view/${data.id}`
               }
             ],
             <React.Fragment>

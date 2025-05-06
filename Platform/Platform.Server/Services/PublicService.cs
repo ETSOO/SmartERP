@@ -123,6 +123,7 @@ namespace Platform.Server.Services
                     GivenName = User.GivenName,
                     UserRole = data.UserRole,
                     IdentityType = IdentityTypeFlags.User,
+                    QueryKeyword = ChineseUtils.GetPinyin(User.Name, true).ToInitials(),
                     InviterId = inviterId,
                     UserId = userId
                 });
@@ -187,6 +188,18 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Get cultures
+        /// 获取语言文化
+        /// </summary>
+        /// <param name="ids">Ids to include and sort by</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<CultureItem>> GetCulturesAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
+        {
+            return await Task.Run(() => LocalizationUtils.GetCultures(ids), cancellationToken);
+        }
+
+        /// <summary>
         /// Get currencies
         /// 获取货币定义
         /// </summary>
@@ -213,6 +226,35 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Get custom resources
+        /// 获取自定义资源
+        /// </summary>
+        /// <param name="culture">Culture</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<IEnumerable<CustomResourceData>> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default)
+        {
+            return CacheFactory.DoAsync(
+                _cache,
+                App.Configuration.CacheHours,
+                () => $"{nameof(PublicService)}.{nameof(GetCustomResourcesAsync)}.{CultureInfo.CurrentCulture.LCID}",
+                async (typeInfo) =>
+                {
+                    return await _db.FeatureCultures.AsNoTracking()
+                    .Where(c => c.Culture == culture && c.CoreOrganizationId == null)
+                    .Select(c => new CustomResourceData
+                    {
+                        Key = c.Key,
+                        Title = c.Title,
+                        Description = c.Description,
+                        JsonData = c.JsonData
+                    }).ToArrayAsync(cancellationToken);
+                },
+                MyJsonSerializerContext.Default.IEnumerableCustomResourceData,
+                null, cancellationToken);
+        }
+
+        /// <summary>
         /// Get regions
         /// 获取地区
         /// </summary>
@@ -225,7 +267,7 @@ namespace Platform.Server.Services
                 _cache,
                 App.Configuration.CacheHours,
                 () => $"{nameof(PublicService)}.{nameof(GetRegionsAsync)}.{CultureInfo.CurrentCulture.LCID}",
-                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions(ids).GetRegions().SortRegions(ids)),
+                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions().GetRegions()),
                 CommonJsonSerializerContext.Default.IEnumerableRegionItem,
                 null, cancellationToken);
 

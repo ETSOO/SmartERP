@@ -4,7 +4,11 @@ import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import { app } from "../../../app/MyApp";
-import { OrgReadDto, usePageData } from "@etsoo/smarterp-core";
+import {
+  AvatarState,
+  OrgReadDto,
+  usePageDataEmpty
+} from "@etsoo/smarterp-core";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
@@ -13,6 +17,9 @@ import Typography from "@mui/material/Typography";
 export default function ViewOrg() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
+
+  // Admin permission
+  const adminPermission = app.isAdminUser();
 
   // Route
   const navigate = useNavigate();
@@ -25,18 +32,18 @@ export default function ViewOrg() {
   // Labels
   const labels = app.getLabels(
     "confirmAction",
+    "customResources",
     "edit",
     "editLogo",
     "leaveOrg",
-    "logo",
-    "view"
+    "logo"
   );
 
   // Tax
   const tax = BusinessTax.getById(app.region);
 
   // Page data hook
-  usePageData(app, labels.view, [loadData]);
+  usePageDataEmpty(app);
 
   return (
     <ViewPage<OrgReadDto>
@@ -70,9 +77,9 @@ export default function ViewOrg() {
             }}
           />
           {item.isOwner && (
-            <IconButtonLink
+            <IconButtonLink<AvatarState>
               href={`./../../avatar/${item.id}`}
-              state={item.logo}
+              state={{ title: item.name, avatar: item.logo }}
               title={labels.editLogo}
               size="small"
             >
@@ -147,6 +154,14 @@ export default function ViewOrg() {
             >
               {labels.leaveOrg}
             </Button>
+          )}
+          {adminPermission && (
+            <ButtonLink
+              variant="outlined"
+              href={`./../../customresource/${id}`}
+            >
+              {labels.customResources}
+            </ButtonLink>
           )}
         </React.Fragment>
       )}

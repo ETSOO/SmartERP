@@ -166,11 +166,7 @@ namespace CRM.Server.Services
                     if (rq.ParticipantId.HasValue)
                     {
                         var participantId = rq.ParticipantId.Value;
-                        if (participantId == 0)
-                        {
-                            participantId = User.Oid;
-                        }
-                        q = q.Where(p => p.UserId == participantId || p.AssigneeId == participantId || (p.Persons != null && p.Persons.Contains(participantId)));
+                        q = q.Where(p => p.PersonId == participantId || p.UserId == participantId || p.AssigneeId == participantId || (p.Persons != null && p.Persons.Contains(participantId)));
                     }
 
                     if (rq.UserId.HasValue)
@@ -352,6 +348,8 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task ListAsync(PersonProfileListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            await FormatListRQAsync(rq, cancellationToken);
+
             var query = CreateQuery(rq);
 
             await query.Select(p => new PersonProfileListData
@@ -360,6 +358,37 @@ namespace CRM.Server.Services
                 Title = p.Title,
                 Creation = p.Creation
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        private async ValueTask FormatListRQAsync(PersonProfileListRQ rq, CancellationToken cancellationToken)
+        {
+            long orgPersonId = 0;
+            if (rq.ParticipantId == -1 || rq.PersonId == -1)
+            {
+                var orgId = User.OrganizationInt;
+                orgPersonId = await _db.Persons
+                    .Where(p => p.OrgId == orgId && p.CoreOrganizationId == orgId)
+                    .Select(p => p.Id)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
+            if (rq.ParticipantId == -1)
+            {
+                rq.ParticipantId = orgPersonId;
+            }
+            else if (rq.ParticipantId == 0)
+            {
+                rq.ParticipantId = User.Oid;
+            }
+
+            if (rq.PersonId == -1)
+            {
+                rq.PersonId = orgPersonId;
+            }
+            else if (rq.PersonId == 0)
+            {
+                rq.PersonId = User.Oid;
+            }
         }
 
         /// <summary>
@@ -372,6 +401,8 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task QueryAsync(PersonProfileQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            await FormatListRQAsync(rq, cancellationToken);
+
             var query = CreateQuery(rq, (q) =>
             {
                 if (!string.IsNullOrEmpty(rq.Location))

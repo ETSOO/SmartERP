@@ -57,7 +57,7 @@ export default function AllUsers() {
   const ref = React.useRef<ScrollerListForwardRef<AllUserDto>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>();
@@ -72,7 +72,7 @@ export default function AllUsers() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./../view/${data.id}`)}
+      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -191,10 +191,7 @@ export default function AllUsers() {
 
             return (
               <React.Fragment>
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../view/${data.id}`}
-                >
+                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -212,7 +209,7 @@ export default function AllUsers() {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../view/${data.id}`
+                action: `./view/${data.id}`
               }
             ],
             <React.Fragment></React.Fragment>

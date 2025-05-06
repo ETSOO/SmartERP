@@ -66,7 +66,7 @@ export default function AllMembers() {
   const ref = React.useRef<ScrollerListForwardRef<MemberQueryDto>>();
 
   // Load data
-  const reloadData = () => ref.current?.reset();
+  const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
 
@@ -94,7 +94,7 @@ export default function AllMembers() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./../view/${data.id}`)}
+      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
@@ -181,15 +181,12 @@ export default function AllMembers() {
                 {editPermission && data.isEditable && (
                   <IconButtonLink
                     title={labels.edit}
-                    href={`./../edit/${data.id}`}
+                    href={`./edit/${data.id}`}
                   >
                     <EditIcon />
                   </IconButtonLink>
                 )}
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../view/${data.id}`}
-                >
+                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -207,12 +204,12 @@ export default function AllMembers() {
               editPermission && {
                 label: labels.edit,
                 icon: <EditIcon />,
-                action: `./../edit/${data.id}`
+                action: `./edit/${data.id}`
               },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../view/${data.id}`
+                action: `./view/${data.id}`
               }
             ],
             <React.Fragment>

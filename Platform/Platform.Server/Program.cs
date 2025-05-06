@@ -409,6 +409,7 @@ services.AddScoped<IAuthCodeService, AuthCodeService>();
 services.AddScoped<IMemberService, MemberService>();
 services.AddScoped<IOrgService, OrgService>();
 services.AddScoped<IPublicService, PublicService>();
+services.AddScoped<IStorageService, StorageService>();
 services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();

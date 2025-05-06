@@ -4,6 +4,8 @@ import PeopleIcon from "@mui/icons-material/People";
 import HistoryIcon from "@mui/icons-material/History";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AppsIcon from "@mui/icons-material/Apps";
+import TuneIcon from "@mui/icons-material/Tune";
+import LanguageIcon from "@mui/icons-material/Language";
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
@@ -50,13 +52,18 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "addResource",
     "allApps",
     "allOrgs",
     "allUsers",
     "app2",
     "auditHistory",
+    "customize",
+    "customResources",
+    "editResource",
     "menuHome",
-    "signoutSuccess"
+    "signoutSuccess",
+    "view"
   );
 
   // User context / state
@@ -73,27 +80,73 @@ export default function Home() {
           icon: <HomeIcon />
         },
         {
-          segment: "home/user/all",
+          segment: "home/user",
           title: labels.allUsers,
           icon: <PeopleIcon />,
-          subs: ["/home/user/.*"]
+          children: [
+            {
+              segment: "view",
+              pattern: "view/:id",
+              title: labels.view,
+              hidden: true
+            }
+          ]
         },
         {
-          segment: "home/org/all",
+          segment: "home/org",
           title: labels.allOrgs,
           icon: <AccountTreeIcon />,
-          subs: ["/home/org/.*"]
+          children: [
+            {
+              segment: "view",
+              pattern: "view/:id",
+              title: labels.view,
+              hidden: true
+            }
+          ]
         },
         {
-          segment: "home/app/all",
+          segment: "home/app",
           title: labels.allApps,
           icon: <AppsIcon />,
-          subs: ["/home/app/.*"]
+          children: [
+            {
+              segment: "view",
+              pattern: "view/:id",
+              title: labels.view,
+              hidden: true
+            }
+          ]
         },
         {
           segment: "home/audithistory",
           title: labels.auditHistory,
           icon: <HistoryIcon />
+        },
+        {
+          segment: "home/custom",
+          title: labels.customize,
+          icon: <TuneIcon />,
+          children: [
+            {
+              segment: "resources",
+              title: labels.customResources,
+              icon: <LanguageIcon />,
+              children: [
+                {
+                  segment: "add",
+                  title: labels.addResource,
+                  hidden: true
+                },
+                {
+                  segment: "edit",
+                  pattern: "edit/:id",
+                  title: labels.editResource,
+                  hidden: true
+                }
+              ]
+            }
+          ]
         }
       ] as Navigation,
     []
@@ -156,7 +209,7 @@ export default function Home() {
         slots={{ sidebarFooter: SidebarFooter }}
       >
         <PageDataContextProvider>
-          <PageContainer defaultTitle="">
+          <PageContainer titleBar={false}>
             <Outlet />
           </PageContainer>
         </PageDataContextProvider>

@@ -1,6 +1,7 @@
 import {
   AddressUtils,
   AuthRequest,
+  BusinessUtils,
   ExternalSettings,
   LoginInputAuthResult
 } from "@etsoo/appscript";
@@ -115,6 +116,18 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
       // Navigate to main URL
       this.toMain();
     }
+  }
+
+  override async loadCustomResources(
+    resources: DataTypes.StringRecord,
+    culture: string
+  ) {
+    const items = await this.publicApi.getCustomResources(culture, {
+      showLoading: false
+    });
+    if (items == null) return;
+
+    BusinessUtils.mergeCustomResources(resources, items);
   }
 
   /**
