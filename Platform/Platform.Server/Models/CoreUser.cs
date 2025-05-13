@@ -43,6 +43,12 @@ public partial class CoreUser
 
     public List<int>? LatestAppIds { get; set; }
 
+    public List<int>? PermissionGroups { get; set; }
+
+    public List<short>? PermissionIncluded { get; set; }
+
+    public List<short>? PermissonExcluded { get; set; }
+
     public virtual ICollection<CoreAuthCode> CoreAuthCodes { get; set; } = new List<CoreAuthCode>();
 
     public virtual ICollection<CoreOrganization> CoreOrganizations { get; set; } = new List<CoreOrganization>();

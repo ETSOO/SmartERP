@@ -67,6 +67,14 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.permission_group",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.permission_item",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.person",
          "ObjectType": 0
       },
@@ -80,6 +88,10 @@
       },
       {
          "Name": "public.person_info",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_permission_item",
          "ObjectType": 0
       },
       {

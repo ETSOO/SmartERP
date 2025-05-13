@@ -140,4 +140,6 @@ public partial class Person
     public virtual ICollection<SettingCrm> SettingCrms { get; set; } = new List<SettingCrm>();
 
     public virtual CoreUser User { get; set; } = null!;
+
+    public virtual ICollection<PermissionItem> PermissionItems { get; set; } = new List<PermissionItem>();
 }

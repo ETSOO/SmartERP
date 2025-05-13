@@ -1,8 +1,8 @@
 import ReactFlow, { Node, Edge, MarkerType, Position } from "reactflow";
 import { app } from "../app/MyApp";
 import { useNavigate } from "react-router-dom";
-import { AppModule } from "../app/AppModule";
 import Container from "@mui/material/Container";
+import { Permissions } from "@etsoo/smarterp-crm";
 
 export function Flowchart({ visible }: { visible: boolean }) {
   // Route
@@ -35,7 +35,9 @@ export function Flowchart({ visible }: { visible: boolean }) {
       {
         id: "report",
         data: { label: labels.reports },
-        className: app.module[AppModule.Finance] ? undefined : "node-disabled",
+        className: app.owns(Permissions.Finance.All)
+          ? undefined
+          : "node-disabled",
         position: v ? { x: 90, y: 600 } : { x: 0, y: 0 }
       },
       {
@@ -48,45 +50,51 @@ export function Flowchart({ visible }: { visible: boolean }) {
         id: "org",
         data: { label: labels.org },
         targetPosition: Position.Left,
-        className: app.module[AppModule.Organization]
-          ? undefined
-          : "node-disabled",
+        className: app.owns(Permissions.Org.All) ? undefined : "node-disabled",
         position: v ? { x: 180, y: 0 } : { x: 500, y: 0 }
       },
       {
         id: "supplier",
         data: { label: labels.suppliers },
-        className: app.module[AppModule.Supplier] ? undefined : "node-disabled",
+        className: app.owns(Permissions.Supplier.All)
+          ? undefined
+          : "node-disabled",
         position: v ? { x: 0, y: 200 } : { x: 0, y: 136 }
       },
       {
         id: "user",
         data: { label: labels.employees },
-        className: app.module[AppModule.User] ? undefined : "node-disabled",
+        className: app.owns(Permissions.User.All) ? undefined : "node-disabled",
         position: v ? { x: 90, y: 140 } : { x: 250, y: 136 }
       },
       {
         id: "customer",
         data: { label: labels.customers },
-        className: app.module[AppModule.Customer] ? undefined : "node-disabled",
+        className: app.owns(Permissions.Customer.All)
+          ? undefined
+          : "node-disabled",
         position: v ? { x: 180, y: 200 } : { x: 500, y: 136 }
       },
       {
         id: "product",
         data: { label: labels.products },
-        className: app.module[AppModule.Product] ? undefined : "node-disabled",
+        className: app.owns(Permissions.Product.All)
+          ? undefined
+          : "node-disabled",
         position: v ? { x: 90, y: 300 } : { x: 250, y: 200 }
       },
       {
         id: "order",
         data: { label: labels.orders },
-        className: app.module[AppModule.Order] ? undefined : "node-disabled",
+        className: app.owns(Permissions.Order.All)
+          ? undefined
+          : "node-disabled",
         position: v ? { x: 180, y: 500 } : { x: 500, y: 300 }
       },
       {
         id: "po",
         data: { label: labels.purchases },
-        className: app.module[AppModule.PO] ? undefined : "node-disabled",
+        className: app.owns(Permissions.PO.All) ? undefined : "node-disabled",
         position: v ? { x: 0, y: 500 } : { x: 0, y: 300 }
       }
     ];
@@ -174,14 +182,14 @@ export function Flowchart({ visible }: { visible: boolean }) {
       }
     ];
 
-    const inventoryManagement = true;
+    const inventoryManagement = app.userData?.system?.hasInventory ?? false;
 
     if (inventoryManagement) {
       // Inventory nodes
       nodes.push({
         id: "sim",
         data: { label: labels.simpleInventory },
-        className: app.module[AppModule.Inventory]
+        className: app.owns(Permissions.Inventory.All)
           ? undefined
           : "node-disabled",
         position: v ? { x: 90, y: 400 } : { x: 250, y: 300 }

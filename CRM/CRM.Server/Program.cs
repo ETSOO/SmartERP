@@ -203,7 +203,8 @@ services.AddHttpClient<ISmartERPProxy, SmartERPProxy>(client =>
 
 // API services
 services.AddScoped<CurrentUserAccessor>();
-services.AddScoped<ISEAuthService, SEAuthService>();
+services.AddScoped<ICommonService, CommonService>();
+services.AddScoped<ISEAuthService, CrmAuthService>();
 services.AddScoped<IPersonService, PersonService>();
 services.AddScoped<IPersonProfileService, PersonProfileService>();
 services.AddScoped<ISystemService, SystemService>();

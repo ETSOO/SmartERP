@@ -1348,12 +1348,12 @@ namespace Platform.Server.Services
 
         private bool TokenDataEquals(DeviceTokenData source, DeviceTokenData data)
         {
-            return source.Scopes.Count == data.Scopes.Count && source.Scopes.Order().Equals(data.Scopes.Order())
+            return source.Scopes.Count == data.Scopes.Count && Enumerable.SequenceEqual(source.Scopes.Order(), data.Scopes.Order())
                 && source.Region == data.Region
                 && source.OrganizationId == data.OrganizationId
                 && source.ParentOrganizationId == data.ParentOrganizationId
                 && source.ChannelOrganizationId == data.ChannelOrganizationId
-                && ((source.RedirectUri == null && data.RedirectUri == null) || (source.RedirectUri == data.RedirectUri))
+                && ((source.RedirectUri == null && data.RedirectUri == null) || Uri.Compare(source.RedirectUri, data.RedirectUri, UriComponents.Host | UriComponents.PathAndQuery, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) == 0)
             ;
         }
 

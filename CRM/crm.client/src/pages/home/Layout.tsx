@@ -14,7 +14,7 @@ import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
 import {
   DashboardLayout,
-  Navigation,
+  NavigationItem,
   PageContainer,
   PageDataContextProvider,
   Session,
@@ -28,6 +28,7 @@ import {
 } from "@etsoo/smarterp-core/components";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { Permissions } from "@etsoo/smarterp-crm";
 
 function SidebarFooter({ mini }: SidebarFooterProps) {
   return (
@@ -84,18 +85,27 @@ export default function Home() {
   const { state } = React.useContext(app.userState.context);
   const { authorized, organization, organizationName } = state;
 
+  // Organization person id
+  const orgPersonId = app.userData?.system?.personId;
+  const appId = app.settings.appId;
+
   // Organization data
   const org = React.useCallback(
     () =>
       authorized ? (
-        <OrgSwitchPopover organizationName={organizationName} />
+        <OrgSwitchPopover organizationName={organizationName} appId={appId} />
       ) : undefined,
-    [authorized, organizationName]
+    [authorized, organizationName, appId]
   );
 
   // Navigation
   const NAVIGATION = React.useMemo(() => {
-    const items: Navigation = [
+    // Permissions
+    const viewOrg = app.owns(Permissions.Org.View);
+    const queryUser = app.owns(Permissions.User.Query);
+    const queryOrg = app.owns(Permissions.Org.Query);
+
+    const items: (NavigationItem | false)[] = [
       {
         segment: "home",
         title: labels.menuHome,
@@ -121,27 +131,27 @@ export default function Home() {
           }
         ]
       },
-      {
+      app.owns(Permissions.Order.Query) && {
         segment: "home/order",
         title: labels.orders,
         icon: <ShoppingCartIcon />
       },
-      {
+      app.owns(Permissions.Customer.Query) && {
         segment: "home/customer",
         title: labels.customers,
         icon: <GroupsIcon />
       },
-      {
+      app.owns(Permissions.Product.Query) && {
         segment: "home/product",
         title: labels.offerings,
         icon: <ShopIcon />
       },
-      {
+      app.owns(Permissions.PO.Query) && {
         segment: "home/po",
         title: labels.purchases,
         icon: <InventoryIcon />
       },
-      {
+      app.owns(Permissions.Supplier.Query) && {
         segment: "home/supplier",
         title: labels.suppliers,
         icon: <HailIcon />
@@ -175,25 +185,31 @@ export default function Home() {
             hidden: true
           }
         ]
-      },
-      {
-        kind: "divider"
-      },
-      {
-        kind: "header",
-        title: labels.org
-      },
-      {
+      }
+    ];
+
+    const allItems = items.filter((item) => item !== false);
+
+    const orgItems: NavigationItem[] = [];
+
+    if (viewOrg && orgPersonId != null && orgPersonId > 0) {
+      orgItems.push({
         segment: "home/org/data",
         title: labels.info,
         icon: <DescriptionIcon />
-      },
-      {
+      });
+    }
+
+    if (queryUser) {
+      orgItems.push({
         segment: "home/user",
         title: labels.users,
         icon: <GroupIcon />
-      },
-      {
+      });
+    }
+
+    if (queryOrg) {
+      orgItems.push({
         segment: "home/system",
         title: labels.system,
         icon: <SettingsIcon />,
@@ -204,11 +220,23 @@ export default function Home() {
             hidden: true
           }
         ]
-      }
-    ];
+      });
+    }
 
-    return items;
-  }, [organization]);
+    if (orgItems.length > 0) {
+      orgItems.unshift(
+        {
+          kind: "divider"
+        },
+        {
+          kind: "header",
+          title: labels.org
+        }
+      );
+    }
+
+    return [...allItems, ...orgItems];
+  }, [organization, orgPersonId]);
 
   // When unauthorized (by refresh)
   // Return blank and try login

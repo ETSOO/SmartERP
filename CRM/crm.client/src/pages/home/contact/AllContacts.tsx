@@ -20,12 +20,13 @@ import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { PersonQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
 const template = {
-  name: "string"
+  name: "string",
+  identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllContacts() {
@@ -57,6 +58,8 @@ export default function AllContacts() {
 
   const margin = MUGlobal.pagePaddings;
 
+  const baseIdentity = app.getPersonIdentityType();
+
   // Page data hook
   usePageDataEmpty(app);
 
@@ -75,6 +78,11 @@ export default function AllContacts() {
           label={labels.personName}
           name="keywords"
           defaultValue={data.name}
+        />,
+        <IdentityFlagsList
+          value={data.identityType}
+          baseIdentity={baseIdentity}
+          search
         />
       ]}
       loadData={async (data) => {

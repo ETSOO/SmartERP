@@ -419,35 +419,24 @@ namespace Platform.Server.Services
                 .Where(u => u.Id == User.IdInt)
                 .Select(u => u.LatestOrganizationIds).FirstOrDefaultAsync(cancellationToken) ?? [];
 
-            var query = _db.Persons
+            return await _db.Persons
                 .AsNoTracking()
-                .Where(ou => ou.CoreUserId == User.IdInt
-                    && ou.Status <= EntityStatus.Approved
-                    && (ou.Expiry == null || ou.Expiry >= DateTimeOffset.UtcNow)
-                    && ou.Organization.Status <= EntityStatus.Approved)
-                .Select(ou => new OrgGetMyData
+                .Where(p => p.CoreUserId == User.IdInt
+                    && p.Status <= EntityStatus.Approved
+                    && (p.Expiry == null || p.Expiry >= DateTimeOffset.UtcNow)
+                    && p.Organization.Status <= EntityStatus.Approved
+                    && (rq.AppId == null || p.Organization.Apps.Any(a => a.CoreAppId == rq.AppId))
+                )
+                .Select(p => new OrgGetMyData
                 {
-                    Id = ou.OrgId,
-                    Name = ou.Organization.Name,
-                    Brand = ou.Organization.Brand
+                    Id = p.OrgId,
+                    Name = p.Organization.Name,
+                    Brand = p.Organization.Brand
                 })
+                .OrderBy(m => ids.IndexOf(m.Id))
+                .Take(rq.MaxItems)
+                .ToArrayAsync(cancellationToken)
             ;
-
-            List<OrgGetMyData> orgs = [];
-
-            if (ids.Count > 0)
-            {
-                orgs.AddRange(await query.Where(ou => ids.Contains(ou.Id)).Take(rq.MaxItems).ToListAsync(cancellationToken));
-                orgs = [.. orgs.OrderBy(ou => ids.IndexOf(ou.Id))];
-            }
-
-            var left = rq.MaxItems - orgs.Count;
-            if (left > 0)
-            {
-                orgs.AddRange(await query.Where(ou => !ids.Contains(ou.Id)).OrderByDescending(ou => ou.Id).Take(left).ToListAsync(cancellationToken));
-            }
-
-            return orgs;
         }
 
         /// <summary>

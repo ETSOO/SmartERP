@@ -9,8 +9,8 @@ namespace CRM.Server.Dto.System
     public record SystemSettings
     {
         /// <summary>
-        /// Person ID
-        /// 人员编号
+        /// Organization person ID
+        /// 机构人员编号
         /// </summary>
         public long PersonId { get; init; }
 

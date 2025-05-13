@@ -103,6 +103,30 @@ namespace Platform.Server.Services
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
+            // CRM app
+            if (rq.Id == 3)
+            {
+                // Groups
+                var adminGroupIds = await _db.PermissionGroups
+                    .AsNoTracking()
+                    .Where(g => g.CoreOrganizationId == null && (g.Roles & UserRole.Admin) > 0)
+                    .Select(g => g.Id)
+                    .ToListAsync(cancellationToken)
+                ;
+
+                // Set admin and user permissions
+                if (adminGroupIds.Count > 0)
+                {
+                    await _db.Persons.AsNoTracking()
+                        .Where(p => (p.IdentityType & IdentityTypeFlags.User) == IdentityTypeFlags.User
+                            && p.OrgId == rq.OrganizationId
+                            && p.UserRole > UserRole.API
+                            && p.Status <= EntityStatus.Approved
+                            && (p.Expiry == null || p.Expiry >= DateTimeOffset.UtcNow))
+                        .ExecuteUpdateAsync(p => p.SetProperty(p => p.PermissionGroups, adminGroupIds), cancellationToken);
+                }
+            }
+
             // Push message
             var message = new BuyAppMessage
             {

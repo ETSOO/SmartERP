@@ -44,6 +44,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonTaskCreateRQ))]
 
     // System
+    [JsonSerializable(typeof(IEnumerable<PermissionItem>))]
     [JsonSerializable(typeof(SystemSettings))]
 
     [JsonSerializable(typeof(UpdateSettingsRQ))]

@@ -139,5 +139,11 @@ namespace PlatformShared.Database.Models
         /// 子机构
         /// </summary>
         public ICollection<CoreOrganization> Children { get; } = default!;
+
+        /// <summary>
+        /// Permission groups
+        /// 权限组
+        /// </summary>
+        public ICollection<PermissionGroup> PermissionGroups { get; set; } = default!;
     }
 }

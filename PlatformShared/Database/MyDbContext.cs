@@ -93,6 +93,18 @@ namespace PlatformShared.Database
         public required DbSet<OrderLine> OrderLines { get; set; }
 
         /// <summary>
+        /// Permission groups
+        /// 权限组
+        /// </summary>
+        public required DbSet<PermissionGroup> PermissionGroups { get; set; }
+
+        /// <summary>
+        /// Permission items
+        /// 权限项
+        /// </summary>
+        public required DbSet<PermissionItem> PermissionItems { get; set; }
+
+        /// <summary>
         /// Individuals or companies or contacts
         /// 个人或企业或联系人
         /// </summary>
@@ -218,6 +230,8 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new FeatureKeywordConfiguration());
             modelBuilder.ApplyConfiguration(new OrderHeaderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderLineConfiguration());
+            modelBuilder.ApplyConfiguration(new PermissionGroupConfiguration());
+            modelBuilder.ApplyConfiguration(new PermissionItemConfiguration());
             modelBuilder.ApplyConfiguration(new PersonConfiguration());
             modelBuilder.ApplyConfiguration(new PersonAssetConfiguration());
             modelBuilder.ApplyConfiguration(new PersonCategoryConfiguration());

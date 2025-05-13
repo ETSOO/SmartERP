@@ -61,7 +61,9 @@ export default function UpdateSettings() {
       if (result == null) return;
 
       if (result.ok) {
-        navigate("./../all");
+        // Refresh token to get the updated avatar
+        await app.refreshToken({ showLoading: true });
+        navigate("./../");
         return;
       }
 
@@ -118,7 +120,6 @@ export default function UpdateSettings() {
         <ButtonCurrencies
           label={labels.supplierCurrencies}
           fullWidth
-          required
           ids={formik.values.supplierCurrencies}
           onValueChange={(ids) =>
             formik.setFieldValue("supplierCurrencies", ids)

@@ -7,6 +7,12 @@
     public record OrgGetMyRQ
     {
         /// <summary>
+        /// Check if owns the application
+        /// 是否拥有应用
+        /// </summary>
+        public int? AppId { get; init; }
+
+        /// <summary>
         /// Max items
         /// 最大项数
         /// </summary>

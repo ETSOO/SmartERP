@@ -1,4 +1,5 @@
-﻿using PlatformShared.Database.Models;
+﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Database.Models;
 using System.Text.Json.Serialization;
 
 namespace CRM.Server.RQ.PersonProfile
@@ -10,6 +11,12 @@ namespace CRM.Server.RQ.PersonProfile
     [JsonDerivedType(typeof(PersonProfileQueryRQ))]
     public record PersonProfileListRQ : QueryLongRQ
     {
+        /// <summary>
+        /// Identity type
+        /// 识别类型
+        /// </summary>
+        public IdentityTypeFlags? IdentityType { get; set; }
+
         /// <summary>
         /// Person id
         /// 人员编号

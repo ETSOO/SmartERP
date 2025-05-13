@@ -47,6 +47,8 @@ public partial class CoreOrganization
 
     public virtual CoreOrganization? Parent { get; set; }
 
+    public virtual ICollection<PermissionGroup> PermissionGroups { get; set; } = new List<PermissionGroup>();
+
     public virtual ICollection<PersonAsset> PersonAssets { get; set; } = new List<PersonAsset>();
 
     public virtual ICollection<PersonCategory> PersonCategories { get; set; } = new List<PersonCategory>();

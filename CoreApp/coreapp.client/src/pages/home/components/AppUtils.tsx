@@ -85,7 +85,7 @@ export namespace AppUtils {
           // Succeed
           app.notifier.succeed(labels.operationSucceeded, undefined, () => {
             // New organization created
-            const url = formData.kind === 1 ? "./../my" : "./../../org/my";
+            const url = formData.kind === 1 ? "./../myapp" : "./../org";
             navigate(url);
           });
 

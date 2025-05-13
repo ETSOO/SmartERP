@@ -58,6 +58,83 @@ namespace PlatformShared.Extentions
             return count == ids.Count();
         }
 
+        private static short GetBaseId(this short permissionId)
+        {
+            return (short)(permissionId / 1000 * 1000);
+        }
+
+        /// <summary>
+        /// Check if the user has permission
+        /// 检查用户是否有权限
+        /// </summary>
+        /// <param name="db">Database</param>
+        /// <param name="personId">User person id</param>
+        /// <param name="permissionItemId">Permission item id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static async Task<bool> HasPermissionAsync(this MyDbContext db, long personId, short permissionItemId, CancellationToken cancellationToken = default)
+        {
+            // Check 'all' permission first
+            var allItemId = permissionItemId.GetBaseId();
+
+            if (await db.Persons.AsNoTracking()
+                .Where(p => p.Id == personId && p.PermissionItems.Any(i => i.Id == allItemId))
+                .AnyAsync(cancellationToken))
+            {
+                return true;
+            }
+
+            if (allItemId == permissionItemId)
+            {
+                // Directly return to avoid additional query
+                return false;
+            }
+
+            return await db.Persons.AsNoTracking()
+                .Where(p => p.Id == personId && p.PermissionItems.Any(i => i.Id == permissionItemId))
+                .AnyAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Check if the user has permission
+        /// 检查用户是否有权限
+        /// </summary>
+        /// <param name="db">Database</param>
+        /// <param name="personId">User person id</param>
+        /// <param name="permissionItemIds">Permission item ids</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static async Task<bool[]> HasPermissionsAsync(this MyDbContext db, long personId, IEnumerable<short> permissionItemIds, CancellationToken cancellationToken = default)
+        {
+            // All ids to check
+            var allIds = permissionItemIds
+                .SelectMany(i => new[] { i.GetBaseId(), i })
+                .Distinct()
+                .ToList();
+
+            // Query all permissions in one go
+            var permissions = await db.Persons.AsNoTracking()
+                .Where(p => p.Id == personId && p.PermissionItems.Any(i => allIds.Contains(i.Id)))
+                .SelectMany(p => p.PermissionItems)
+                .Select(i => i.Id)
+                .ToArrayAsync(cancellationToken);
+
+            // Check if all permissionItemIds are in permissions
+            return [.. permissionItemIds.Select(p => permissions.Contains(p.GetBaseId()) || permissions.Contains(p))];
+        }
+
+        /// <summary>
+        /// Query person profiles by user
+        /// 通过用户查询人员档案
+        /// </summary>
+        /// <param name="persons">Persons</param>
+        /// <param name="user">Current user</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Person> UserPersons(this IQueryable<Person> persons, CurrentUser user)
+        {
+            return persons.Where(p => p.OrgId == user.OrganizationInt);
+        }
+
         /// <summary>
         /// Query person profiles by user
         /// 通过用户查询人员档案
@@ -78,7 +155,7 @@ namespace PlatformShared.Extentions
         /// </summary>
         /// <param name="profiles">Person profiles</param>
         /// <param name="user">Current user</param>
-        /// <param name="id">Id</param>
+        /// <param name="id">Person id</param>
         /// <returns>Result</returns>
         public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user, long id)
         {
@@ -92,7 +169,7 @@ namespace PlatformShared.Extentions
         /// </summary>
         /// <param name="profiles">Person profiles</param>
         /// <param name="user">Current user</param>
-        /// <param name="ids">Ids</param>
+        /// <param name="ids">Perons ids</param>
         /// <returns>Result</returns>
         public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user, List<long> ids)
         {

@@ -14,8 +14,8 @@ export default function AllSystem() {
   // Route
   const navigate = useNavigate();
 
-  // Labels
-  const labels = app.getLabels("settings", "updateSystemSettings");
+  // System settings
+  const userSystemSettings = app.userData?.system;
 
   // State
   const [settings, setSettings] = React.useState<SystemSettings>();
@@ -25,7 +25,6 @@ export default function AllSystem() {
     const data = await app.systemApi.readSettings();
 
     if (data == null) {
-      navigate("./updateSettings");
       return;
     }
 
@@ -34,8 +33,19 @@ export default function AllSystem() {
 
   usePageDataEmpty(app);
 
+  React.useEffect(() => {
+    if (userSystemSettings == null) {
+      navigate("./updateSettings");
+    } else {
+      setSettings(userSystemSettings);
+    }
+  }, []);
+
+  // Labels
+  const labels = app.getLabels("settings", "updateSystemSettings");
+
   return (
-    <CommonPage paddings={0} onRefresh={reloadData}>
+    <CommonPage paddings={0}>
       {settings == null ? (
         <LinearProgress />
       ) : (

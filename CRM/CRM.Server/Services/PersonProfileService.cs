@@ -1,6 +1,7 @@
 ﻿using com.etsoo.ApiProxy.Defs;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -29,6 +30,7 @@ namespace CRM.Server.Services
         readonly MyDbContext _db;
         readonly IQueueService _queueService;
         readonly ISmartERPProxy _core;
+        readonly ICommonService _commonService;
 
         public PersonProfileService(
             MyDbContext db,
@@ -36,13 +38,15 @@ namespace CRM.Server.Services
             CurrentUserAccessor userAccessor,
             ILogger<PersonService> logger,
             IQueueService queueService,
-            ISmartERPProxy core
+            ISmartERPProxy core,
+            ICommonService commonService
         )
             : base(app, userAccessor.UserSafe, "person_profile", logger)
         {
             _db = db;
             _queueService = queueService;
             _core = core;
+            _commonService = commonService;
         }
 
         /// <summary>
@@ -97,6 +101,17 @@ namespace CRM.Server.Services
             if (sameTitle)
             {
                 return ApplicationErrors.ItemExists.AsResult(nameof(rq.Title));
+            }
+
+            // Person identity type
+            var identityType = await _db.Persons.AsNoTracking()
+                .Where(p => p.Id == rq.PersonId)
+                .Select(p => p.IdentityType)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (!await _commonService.HasIdentityPermissionAsync(identityType, nameof(Permissions.Org.AddProfile), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult(nameof(identityType));
             }
 
             var happenDate = rq.HappenDate.GetValueOrDefault(DateTimeOffset.UtcNow).ToUniversalTime();
@@ -158,6 +173,11 @@ namespace CRM.Server.Services
                 .UserProfiles(User)
                 .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
                 {
+                    if (rq.IdentityType.HasValue)
+                    {
+                        q = q.Where(p => (p.Person.IdentityType & rq.IdentityType.Value) > 0);
+                    }
+
                     if (rq.PersonId.HasValue)
                     {
                         q = q.Where(p => p.PersonId == rq.PersonId.Value);
@@ -270,6 +290,18 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            // Get identity type
+            var identityType = await _db.PersonProfiles.AsNoTracking()
+                .Where(p => p.Id == rq.ProfileId)
+                .Select(p => p.Person.IdentityType)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            // Check permission
+            if (!await _commonService.HasIdentityPermissionAsync(identityType, nameof(Permissions.Org.AddComment), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult(nameof(identityType));
+            }
+
             // Content
             var content = string.IsNullOrEmpty(rq.Content)
                 ? null
@@ -348,7 +380,19 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task ListAsync(PersonProfileListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await FormatListRQAsync(rq, cancellationToken);
+            var identityType = await _commonService.GetProfileIdentityTypeAsync(cancellationToken);
+            if (identityType == IdentityTypeFlags.None)
+            {
+                return;
+            }
+
+            rq.IdentityType = _commonService.MergeIdentityType(rq.IdentityType, identityType);
+            if (rq.IdentityType == IdentityTypeFlags.None)
+            {
+                return;
+            }
+
+            FormatListRQ(rq);
 
             var query = CreateQuery(rq);
 
@@ -360,32 +404,14 @@ namespace CRM.Server.Services
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
-        private async ValueTask FormatListRQAsync(PersonProfileListRQ rq, CancellationToken cancellationToken)
+        private void FormatListRQ(PersonProfileListRQ rq)
         {
-            long orgPersonId = 0;
-            if (rq.ParticipantId == -1 || rq.PersonId == -1)
-            {
-                var orgId = User.OrganizationInt;
-                orgPersonId = await _db.Persons
-                    .Where(p => p.OrgId == orgId && p.CoreOrganizationId == orgId)
-                    .Select(p => p.Id)
-                    .FirstOrDefaultAsync(cancellationToken);
-            }
-
-            if (rq.ParticipantId == -1)
-            {
-                rq.ParticipantId = orgPersonId;
-            }
-            else if (rq.ParticipantId == 0)
+            if (rq.ParticipantId == 0)
             {
                 rq.ParticipantId = User.Oid;
             }
 
-            if (rq.PersonId == -1)
-            {
-                rq.PersonId = orgPersonId;
-            }
-            else if (rq.PersonId == 0)
+            if (rq.PersonId == 0)
             {
                 rq.PersonId = User.Oid;
             }
@@ -401,7 +427,19 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task QueryAsync(PersonProfileQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await FormatListRQAsync(rq, cancellationToken);
+            var identityType = await _commonService.GetProfileIdentityTypeAsync(cancellationToken);
+            if (identityType == IdentityTypeFlags.None)
+            {
+                return;
+            }
+
+            rq.IdentityType = _commonService.MergeIdentityType(rq.IdentityType, identityType);
+            if (rq.IdentityType == IdentityTypeFlags.None)
+            {
+                return;
+            }
+
+            FormatListRQ(rq);
 
             var query = CreateQuery(rq, (q) =>
             {
@@ -444,6 +482,17 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<PersonProfileViewData?> ReadAsync(long id, CancellationToken cancellationToken = default)
         {
+            // Person identity type
+            var identityType = await _db.PersonProfiles.AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => p.Person.IdentityType)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (!await _commonService.HasIdentityPermissionAsync(identityType, nameof(Permissions.Org.ViewProfile), cancellationToken))
+            {
+                return null;
+            }
+
             var orgId = User.OrganizationInt;
             var oid = User.Oid;
             var isAdmin = User.Role >= UserRole.Admin;
@@ -513,6 +562,17 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<PersonProfileInnerViewData?> ReadInnerAsync(long id, CancellationToken cancellationToken = default)
         {
+            // Person identity type
+            var identityType = await _db.PersonProfiles.AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => p.Person.IdentityType)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (!await _commonService.HasIdentityPermissionAsync(identityType, nameof(Permissions.Org.ViewProfile), cancellationToken))
+            {
+                return null;
+            }
+
             var orgId = User.OrganizationInt;
             var oid = User.Oid;
             var isAdmin = User.Role >= UserRole.Admin;

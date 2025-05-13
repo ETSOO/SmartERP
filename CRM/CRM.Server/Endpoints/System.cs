@@ -15,6 +15,9 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("System");
 
+            g.MapGet("PermissionItems", (ISystemService service, CancellationToken cancellationToken) => service.PermissionItemsAsync(cancellationToken))
+                .WithDescription("Get all permission items / 获取所有权限项").WithTags("System");
+
             g.MapGet("ReadSettings", (ISystemService service, CancellationToken cancellationToken) => service.ReadSettingsAsync(cancellationToken))
                 .WithDescription("Read system settings / 读取系统设置").WithTags("System");
 

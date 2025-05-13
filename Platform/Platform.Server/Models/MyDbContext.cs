@@ -40,6 +40,10 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<OrderLine> OrderLines { get; set; }
 
+    public virtual DbSet<PermissionGroup> PermissionGroups { get; set; }
+
+    public virtual DbSet<PermissionItem> PermissionItems { get; set; }
+
     public virtual DbSet<Person> People { get; set; }
 
     public virtual DbSet<PersonAsset> PersonAssets { get; set; }
@@ -87,6 +91,8 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.FeatureKeywordConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderLineConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.PermissionGroupConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.PermissionItemConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonAssetConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonCategoryConfiguration());

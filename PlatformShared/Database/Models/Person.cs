@@ -530,6 +530,24 @@ namespace PlatformShared.Database.Models
         public required int UserId { get; set; }
 
         /// <summary>
+        /// Permission groups
+        /// 权限组
+        /// </summary>
+        public List<int>? PermissionGroups { get; set; }
+
+        /// <summary>
+        /// Permission item included
+        /// 包括的权限项
+        /// </summary>
+        public List<short>? PermissionIncluded { get; set; }
+
+        /// <summary>
+        /// Permission item excluded
+        /// 排除的权限项
+        /// </summary>
+        public List<short>? PermissionExcluded { get; set; }
+
+        /// <summary>
         /// Core user related
         /// 关联的核心用户
         /// </summary>
@@ -612,6 +630,12 @@ namespace PlatformShared.Database.Models
         /// 分配的档案
         /// </summary>
         public ICollection<PersonProfile> AssignedProfiles { get; } = default!;
+
+        /// <summary>
+        /// Permission items
+        /// 权限项
+        /// </summary>
+        public ICollection<PermissionItem> PermissionItems { get; } = default!;
 
         /// <summary>
         /// Profile attachments

@@ -1,5 +1,4 @@
-import { IServiceAppSettings, MUGlobal, ServiceApp } from "@etsoo/materialui";
-import { MyUser } from "./MyUser";
+import { IServiceAppSettings, MUGlobal } from "@etsoo/materialui";
 import { DataTypes, DomUtils, ExtendUtils, Utils } from "@etsoo/shared";
 import {
   AddressUtils,
@@ -7,19 +6,11 @@ import {
   ExternalSettings
 } from "@etsoo/appscript";
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
-import { CrmApp, ICrmApp, CrmCulture } from "@etsoo/smarterp-crm";
-import { AppModule } from "./AppModule";
+import { CrmApp, ICrmApp, CrmCulture, CrmAppBase } from "@etsoo/smarterp-crm";
 
 // Mixin, merge them together with the same name
 interface MyApp extends ICrmApp {}
-class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
-  /**
-   * Core name
-   */
-  override get coreName(): string {
-    return "platform";
-  }
-
+class MyApp extends CrmAppBase implements ICoreServiceApp {
   /**
    * App, for mixin
    */
@@ -28,26 +19,11 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   }
 
   /**
-   * Modules permission
-   */
-  readonly module: Record<AppModule, boolean> = {
-    [AppModule.Organization]: true,
-    [AppModule.User]: true,
-    [AppModule.Customer]: true,
-    [AppModule.Supplier]: true,
-    [AppModule.Product]: true,
-    [AppModule.Order]: true,
-    [AppModule.PO]: true,
-    [AppModule.Inventory]: true,
-    [AppModule.Finance]: true
-  };
-
-  /**
    * Core application
    */
   readonly core = new CoreApp(this, this.coreApi);
 
-  override async loadCustomResources(
+  protected override async loadCustomResources(
     resources: DataTypes.StringRecord,
     culture: string
   ) {
@@ -59,11 +35,7 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
     BusinessUtils.mergeCustomResources(resources, items);
   }
 
-  /**
-   * On switch organization handler
-   * This method is called when the organization is switched successfully
-   */
-  protected override async onSwitchOrg() {
+  protected override async onUserLogin() {
     const items = await this.core.orgApi.getCustomResources(this.culture);
     if (items == null) return;
 
