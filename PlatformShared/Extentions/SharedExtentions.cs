@@ -124,28 +124,28 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
-        /// Query person profiles by user
-        /// 通过用户查询人员档案
+        /// Query persons
+        /// 通过人员
         /// </summary>
-        /// <param name="persons">Persons</param>
-        /// <param name="user">Current user</param>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id belonged</param>
         /// <returns>Result</returns>
-        public static IQueryable<Person> UserPersons(this IQueryable<Person> persons, CurrentUser user)
+        public static IQueryable<Person> Persons(this MyDbContext db, int orgId)
         {
-            return persons.Where(p => p.OrgId == user.OrganizationInt);
+            return db.Persons.Where(p => p.OrgId == orgId);
         }
 
         /// <summary>
         /// Query person profiles by user
         /// 通过用户查询人员档案
         /// </summary>
-        /// <param name="profiles">Person profiles</param>
+        /// <param name="db">Database context</param>
         /// <param name="user">Current user</param>
         /// <returns>Result</returns>
-        public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user)
+        public static IQueryable<PersonProfile> UserProfiles(this MyDbContext db, CurrentUser user)
         {
             var oid = user.Oid;
-            return profiles.Where(p => p.Person.OrgId == user.OrganizationInt
+            return db.PersonProfiles.Where(p => p.Person.OrgId == user.OrganizationInt
                 && (p.UserId == oid || p.AssigneeId == oid || p.UserRole == null || p.UserRole <= user.Role));
         }
 
@@ -153,27 +153,27 @@ namespace PlatformShared.Extentions
         /// Query person profiles by user
         /// 通过用户查询人员档案
         /// </summary>
-        /// <param name="profiles">Person profiles</param>
+        /// <param name="db">Database context</param>
         /// <param name="user">Current user</param>
         /// <param name="id">Person id</param>
         /// <returns>Result</returns>
-        public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user, long id)
+        public static IQueryable<PersonProfile> UserProfiles(this MyDbContext db, CurrentUser user, long id)
         {
-            return profiles.Where(p => p.Id == id && p.Person.OrgId == user.OrganizationInt
+            return db.PersonProfiles.Where(p => p.Id == id && p.Person.OrgId == user.OrganizationInt
                 && (p.UserRole == null || p.UserRole <= user.Role));
         }
 
         /// <summary>
-        /// Query person profiles by user
+        /// Query person profiles by users
         /// 通过用户查询人员档案
         /// </summary>
-        /// <param name="profiles">Person profiles</param>
+        /// <param name="db">Database context</param>
         /// <param name="user">Current user</param>
         /// <param name="ids">Perons ids</param>
         /// <returns>Result</returns>
-        public static IQueryable<PersonProfile> UserProfiles(this IQueryable<PersonProfile> profiles, CurrentUser user, List<long> ids)
+        public static IQueryable<PersonProfile> UserProfiles(this MyDbContext db, CurrentUser user, List<long> ids)
         {
-            return profiles.Where(p => ids.Contains(p.Id) && p.Person.OrgId == user.OrganizationInt
+            return db.PersonProfiles.Where(p => ids.Contains(p.Id) && p.Person.OrgId == user.OrganizationInt
                 && (p.UserRole == null || p.UserRole <= user.Role));
         }
 
@@ -249,44 +249,98 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
-        /// Query users from persons
-        /// 从人员中查询用户
+        /// Query users
+        /// 查询用户
         /// </summary>
-        /// <param name="persons">Persons</param>
+        /// <param name="db">Database context</param>
         /// <param name="orgId">Organization id belonged</param>
         /// <returns>Result</returns>
-        public static IQueryable<Person> Users(this IQueryable<Person> persons, int orgId)
+        public static IQueryable<Person> Users(this MyDbContext db, int orgId)
         {
-            return persons.Where(p => p.OrgId == orgId
+            return db.Persons.Where(p => p.OrgId == orgId
                 && p.CoreUserId != null
                 && p.IdentityType.HasFlag(IdentityTypeFlags.User)
             );
         }
 
         /// <summary>
-        /// Query customers from persons
-        /// 从人员中查询客户
+        /// Query customers
+        /// 查询客户
         /// </summary>
-        /// <param name="persons">Persons</param>
+        /// <param name="db">Database context</param>
         /// <param name="orgId">Organization id belonged</param>
         /// <returns>Result</returns>
-        public static IQueryable<Person> Customers(this IQueryable<Person> persons, int orgId)
+        public static IQueryable<Person> Customers(this MyDbContext db, int orgId)
         {
-            return persons.Where(p => p.OrgId == orgId
+            return db.Persons.Where(p => p.OrgId == orgId
                 && p.IdentityType.HasFlag(IdentityTypeFlags.Customer)
             );
+        }
+
+        /// <summary>
+        /// Query department
+        /// 查询部门
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Person> Depts(this MyDbContext db, int orgId)
+        {
+            return db.Persons.Where(p => p.OrgId == orgId
+                && p.IdentityType.HasFlag(IdentityTypeFlags.Dept)
+            );
+        }
+
+        /// <summary>
+        /// Query orders
+        /// 查询订单
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="user">Current user</param>
+        /// <returns>Result</returns>
+        public static IQueryable<OrderHeader> Orders(this MyDbContext db, CurrentUser user)
+        {
+            return db.OrderHeaders.Where(p => p.CoreOrganizationId == user.OrganizationInt
+                && p.SellerId == user.Pid
+            );
+        }
+
+        /// <summary>
+        /// Query purchase orders
+        /// 查询采购
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="user">Current user</param>
+        /// <returns>Result</returns>
+        public static IQueryable<OrderHeader> POs(this MyDbContext db, CurrentUser user)
+        {
+            return db.OrderHeaders.Where(p => p.CoreOrganizationId == user.OrganizationInt
+                && p.BuyerId == user.Pid
+            );
+        }
+
+        /// <summary>
+        /// Query products
+        /// 查询产品
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Product> Products(this MyDbContext db, int orgId)
+        {
+            return db.Products.Where(p => p.CoreOrganizationId == orgId);
         }
 
         /// <summary>
         /// Query suppliers from persons
         /// 从人员中查询供应商
         /// </summary>
-        /// <param name="persons">Persons</param>
+        /// <param name="db">Database context</param>
         /// <param name="orgId">Organization id belonged</param>
         /// <returns>Result</returns>
-        public static IQueryable<Person> Suppliers(this IQueryable<Person> persons, int orgId)
+        public static IQueryable<Person> Suppliers(this MyDbContext db, int orgId)
         {
-            return persons.Where(p => p.OrgId == orgId
+            return db.Persons.Where(p => p.OrgId == orgId
                 && p.IdentityType.HasFlag(IdentityTypeFlags.Supplier)
             );
         }
@@ -328,8 +382,7 @@ namespace PlatformShared.Extentions
         /// <returns>Id array</returns>
         public static Task<List<int>> QueryUsersAsync(this MyDbContext db, int orgId, UserRole role, CancellationToken cancellationToken = default)
         {
-            return db.Persons.AsNoTracking()
-                .Users(orgId)
+            return db.Users(orgId).AsNoTracking()
                 .Where(ou => ou.UserRole >= role && ou.Status <= EntityStatus.Approved)
                 .Select(ou => ou.CoreUserId!.Value)
                 .ToListAsync(cancellationToken);

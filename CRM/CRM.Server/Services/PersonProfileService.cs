@@ -93,8 +93,7 @@ namespace CRM.Server.Services
             }
 
             // No same title in a month
-            var sameTitle = await _db.PersonProfiles.AsNoTracking()
-                .UserProfiles(User)
+            var sameTitle = await _db.UserProfiles(User).AsNoTracking()
                 .Where(p => p.Title == rq.Title && p.HappenDate >= DateTimeOffset.UtcNow.AddMonths(-1))
                 .AnyAsync(cancellationToken);
 
@@ -169,8 +168,7 @@ namespace CRM.Server.Services
 
         private IQueryable<PersonProfile> CreateQuery(PersonProfileListRQ rq, Func<IQueryable<PersonProfile>, IQueryable<PersonProfile>>? filters = null)
         {
-            var query = _db.PersonProfiles.AsNoTracking()
-                .UserProfiles(User)
+            var query = _db.UserProfiles(User).AsNoTracking()
                 .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
                 {
                     if (rq.IdentityType.HasValue)
@@ -285,7 +283,7 @@ namespace CRM.Server.Services
                 ids.Add(rq.TargetProfileId.Value);
             }
 
-            if (await _db.PersonProfiles.UserProfiles(User, ids).CountAsync(cancellationToken) != ids.Count)
+            if (await _db.UserProfiles(User, ids).AsNoTracking().CountAsync(cancellationToken) != ids.Count)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
@@ -497,8 +495,7 @@ namespace CRM.Server.Services
             var oid = User.Oid;
             var isAdmin = User.Role >= UserRole.Admin;
 
-            return await _db.PersonProfiles.AsNoTracking()
-                .UserProfiles(User, id)
+            return await _db.UserProfiles(User, id).AsNoTracking()
                 .Select(p => new PersonProfileViewData
                 {
                     Id = p.Id,
@@ -577,8 +574,7 @@ namespace CRM.Server.Services
             var oid = User.Oid;
             var isAdmin = User.Role >= UserRole.Admin;
 
-            return await _db.PersonProfiles.AsNoTracking()
-                .UserProfiles(User, id)
+            return await _db.UserProfiles(User, id).AsNoTracking()
                 .Select(p => new PersonProfileInnerViewData
                 {
                     PersonId = p.PersonId,
@@ -632,7 +628,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> UpdateAsync(PersonProfileUpdateRQ rq, CancellationToken cancellationToken = default)
         {
-            var profile = await _db.PersonProfiles.UserProfiles(User, rq.Id).FirstOrDefaultAsync(cancellationToken);
+            var profile = await _db.UserProfiles(User, rq.Id).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
             if (profile == null)
             {
                 return ApplicationErrors.NoId.AsResult();
@@ -840,8 +836,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _db.PersonProfiles.AsNoTracking()
-                .UserProfiles(User, id)
+            await _db.UserProfiles(User, id).AsNoTracking()
                 .Select(p => new
                 {
                     p.Id,

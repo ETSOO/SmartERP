@@ -64,6 +64,7 @@ export default function Home() {
     "app3",
     "contacts",
     "customers",
+    "depts",
     "editAvatar",
     "editProfile",
     "info",
@@ -72,6 +73,7 @@ export default function Home() {
     "offerings",
     "orders",
     "org",
+    "permissionGroups",
     "purchases",
     "signoutSuccess",
     "system",
@@ -196,7 +198,19 @@ export default function Home() {
       orgItems.push({
         segment: "home/org/data",
         title: labels.info,
-        icon: <DescriptionIcon />
+        icon: <DescriptionIcon />,
+        children: [
+          {
+            segment: "dept",
+            title: labels.depts,
+            hidden: true
+          },
+          {
+            segment: "group",
+            title: labels.permissionGroups,
+            hidden: true
+          }
+        ]
       });
     }
 
@@ -204,7 +218,15 @@ export default function Home() {
       orgItems.push({
         segment: "home/user",
         title: labels.users,
-        icon: <GroupIcon />
+        icon: <GroupIcon />,
+        children: [
+          {
+            segment: "view",
+            pattern: "view/:id",
+            title: labels.view,
+            hidden: true
+          }
+        ]
       });
     }
 

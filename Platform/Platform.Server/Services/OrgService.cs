@@ -845,8 +845,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.Persons));
             }
 
-            var profile = await _db.PersonProfiles
-                .UserProfiles(User, rq.Id)
+            var profile = await _db.UserProfiles(User, rq.Id).AsNoTracking()
                 .Select(p => new
                 {
                     p.Title,
@@ -1231,8 +1230,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
         {
             // Validate the profile id
-            var exists = await _db.PersonProfiles.AsNoTracking()
-               .UserProfiles(User, id)
+            var exists = await _db.UserProfiles(User, id).AsNoTracking()
                .AnyAsync(cancellationToken);
 
             if (!exists)

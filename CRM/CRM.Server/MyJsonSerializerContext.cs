@@ -1,9 +1,27 @@
-﻿using CRM.Server.Dto.Person;
+﻿using CRM.Server.Dto.Asset;
+using CRM.Server.Dto.Customer;
+using CRM.Server.Dto.Dept;
+using CRM.Server.Dto.Group;
+using CRM.Server.Dto.Order;
+using CRM.Server.Dto.Person;
 using CRM.Server.Dto.PersonProfile;
+using CRM.Server.Dto.PO;
+using CRM.Server.Dto.Product;
+using CRM.Server.Dto.Supplier;
 using CRM.Server.Dto.System;
+using CRM.Server.Dto.User;
+using CRM.Server.RQ.Asset;
+using CRM.Server.RQ.Customer;
+using CRM.Server.RQ.Dept;
+using CRM.Server.RQ.Group;
+using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Person;
 using CRM.Server.RQ.PersonProfile;
+using CRM.Server.RQ.PO;
+using CRM.Server.RQ.Product;
+using CRM.Server.RQ.Supplier;
 using CRM.Server.RQ.System;
+using CRM.Server.RQ.User;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
@@ -19,6 +37,36 @@ namespace CRM.Server
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
+
+    // Asset
+    [JsonSerializable(typeof(AssetListData))]
+    [JsonSerializable(typeof(AssetQueryData))]
+
+    [JsonSerializable(typeof(AssetListRQ))]
+
+    // Customer
+    [JsonSerializable(typeof(CustomerListData))]
+    [JsonSerializable(typeof(CustomerQueryData))]
+
+    [JsonSerializable(typeof(CustomerListRQ))]
+
+    // Dept
+    [JsonSerializable(typeof(DeptListData))]
+    [JsonSerializable(typeof(DeptQueryData))]
+
+    [JsonSerializable(typeof(DeptListRQ))]
+
+    // Group
+    [JsonSerializable(typeof(GroupListData))]
+    [JsonSerializable(typeof(GroupQueryData))]
+
+    [JsonSerializable(typeof(GroupListRQ))]
+
+    // Order
+    [JsonSerializable(typeof(OrderListData))]
+    [JsonSerializable(typeof(OrderQueryData))]
+
+    [JsonSerializable(typeof(OrderListRQ))]
 
     // Person
     [JsonSerializable(typeof(ChoosePersonsData))]
@@ -43,11 +91,35 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonProfileUpdateRQ))]
     [JsonSerializable(typeof(PersonTaskCreateRQ))]
 
+    // PO
+    [JsonSerializable(typeof(POListData))]
+    [JsonSerializable(typeof(POQueryData))]
+
+    [JsonSerializable(typeof(POListRQ))]
+
+    // Product
+    [JsonSerializable(typeof(ProductListData))]
+    [JsonSerializable(typeof(ProductQueryData))]
+
+    [JsonSerializable(typeof(ProductListRQ))]
+
+    // Supplier
+    [JsonSerializable(typeof(SupplierListData))]
+    [JsonSerializable(typeof(SupplierQueryData))]
+
+    [JsonSerializable(typeof(SupplierListRQ))]
+
     // System
     [JsonSerializable(typeof(IEnumerable<PermissionItem>))]
     [JsonSerializable(typeof(SystemSettings))]
 
     [JsonSerializable(typeof(UpdateSettingsRQ))]
+
+    // User
+    [JsonSerializable(typeof(UserListData))]
+    [JsonSerializable(typeof(UserQueryData))]
+
+    [JsonSerializable(typeof(UserListRQ))]
 
     // Results.ValidationProblem
     [JsonSerializable(typeof(HttpValidationProblemDetails))]

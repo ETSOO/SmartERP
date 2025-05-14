@@ -57,6 +57,12 @@ namespace Platform.Server.Dto.Auth
         public long? Oid { get; init; }
 
         /// <summary>
+        /// Person id (organization)
+        /// 人员编号（机构）
+        /// </summary>
+        public required long? Pid { get; init; }
+
+        /// <summary>
         /// User role
         /// 用户角色
         /// </summary>

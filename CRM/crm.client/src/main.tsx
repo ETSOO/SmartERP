@@ -117,6 +117,20 @@ const router = createDynamicRouter([
               return { Component: OrgData.default };
             }
           },
+          {
+            path: "/home/org/data/dept",
+            lazy: async () => {
+              const AllDepts = await import("./pages/home/dept/AllDepts");
+              return { Component: AllDepts.default };
+            }
+          },
+          {
+            path: "/home/org/data/groups",
+            lazy: async () => {
+              const AllGroups = await import("./pages/home/org/AllGroups");
+              return { Component: AllGroups.default };
+            }
+          },
 
           {
             path: "/home/profile",
@@ -159,6 +173,20 @@ const router = createDynamicRouter([
                 "./pages/home/profile/ViewProfile"
               );
               return { Component: ViewProfile.default };
+            }
+          },
+          {
+            path: "/home/user",
+            lazy: async () => {
+              const AllUsers = await import("./pages/home/user/AllUsers");
+              return { Component: AllUsers.default };
+            }
+          },
+          {
+            path: "/home/user/view/:id",
+            lazy: async () => {
+              const ViewUser = await import("./pages/home/user/ViewUser");
+              return { Component: ViewUser.default };
             }
           },
           {

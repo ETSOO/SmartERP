@@ -205,9 +205,18 @@ services.AddHttpClient<ISmartERPProxy, SmartERPProxy>(client =>
 services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<ICommonService, CommonService>();
 services.AddScoped<ISEAuthService, CrmAuthService>();
+services.AddScoped<IAssetService, AssetService>();
+services.AddScoped<ICustomerService, CustomerService>();
+services.AddScoped<IDeptService, DeptService>();
+services.AddScoped<IGroupService, GroupService>();
+services.AddScoped<IOrderService, OrderService>();
 services.AddScoped<IPersonService, PersonService>();
 services.AddScoped<IPersonProfileService, PersonProfileService>();
+services.AddScoped<IPOService, POService>();
+services.AddScoped<IProductService, ProductService>();
+services.AddScoped<ISupplierService, SupplierService>();
 services.AddScoped<ISystemService, SystemService>();
+services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -265,9 +274,18 @@ var api = app.MapGroup("/api").WithOpenApi();
 
 // Endpoints
 api.MapAuth()
+    .MapAsset()
+    .MapCustomer()
+    .MapDept()
+    .MapGroup()
+    .MapOrder()
     .MapPerson()
     .MapPersonProfile()
+    .MapPO()
+    .MapProduct()
+    .MapSupplier()
     .MapSystem()
+    .MapUser()
     .AddModelValidators()
     .RequireAuthorization()
 ;

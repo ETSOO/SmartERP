@@ -52,7 +52,7 @@ namespace CRM.Server.Services
             var maxItems = rq.MaxItems > 0 ? rq.MaxItems : 20;
 
             // Users
-            var users = await _db.Persons.AsNoTracking().Users(User.OrganizationInt)
+            var users = await _db.Users(User.OrganizationInt).AsNoTracking()
                 .OrderByDescending(p => p.RefreshTime)
                 .Take(maxItems)
                 .Select(p => new PersonListItem
@@ -86,8 +86,7 @@ namespace CRM.Server.Services
 
         private IQueryable<Person> CreateQuery(PersonListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
         {
-            var query = _db.Persons.AsNoTracking()
-                .UserPersons(User)
+            var query = _db.Persons(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
                 {
                     if (rq.IdentityType.HasValue)

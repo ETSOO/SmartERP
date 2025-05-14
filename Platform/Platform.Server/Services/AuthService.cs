@@ -449,7 +449,7 @@ namespace Platform.Server.Services
             var data = tokenData.Data;
 
             // User
-            var (result, user) = await CreateUserFromQueryDataAsync(data, timezone, cancellationToken);
+            var (result, user) = await CreateUserFromQueryDataAsync(data, appId, timezone, cancellationToken);
             if (user == null || !result.Ok)
             {
                 Logger.LogWarning("User not found with @{data}, @{result}", data, result);
@@ -1106,6 +1106,7 @@ namespace Platform.Server.Services
                 LatestAppId = user.LatestAppIds?.FirstOrDefault(),
                 OrganizationName = data.OrganizationName,
                 Oid = data.Oid,
+                Pid = data.Pid,
                 Role = data.UserRole
             }, timezone);
 
@@ -1808,7 +1809,7 @@ namespace Platform.Server.Services
             }
 
             // User
-            var (result, user) = await CreateUserFromQueryDataAsync(data, null, cancellationToken);
+            var (result, user) = await CreateUserFromQueryDataAsync(data, rq.AppId, null, cancellationToken);
             if (user == null)
             {
                 Logger.LogWarning("User not found with @{data}, @{result}", data, result);
@@ -1818,12 +1819,24 @@ namespace Platform.Server.Services
             return await CreateAppTokenDataAsync(user, rq.AppId, appData.AppSecret, data.Data.AccessType == AuthRequest.OfflineAccessType, data, cancellationToken);
         }
 
-        private async Task<(ActionResult, CurrentUser?)> CreateUserFromQueryDataAsync(TokenQueryData data, string? timezone, CancellationToken cancellationToken)
+        private async Task<(ActionResult, CurrentUser?)> CreateUserFromQueryDataAsync(TokenQueryData data, int appId, string? timezone, CancellationToken cancellationToken)
         {
+            var orgId = data.Data.OrganizationId;
+
+            long? pid = null;
+            if (appId == 3)
+            {
+                pid = await _db.Persons
+                    .AsNoTracking()
+                    .Where(p => p.OrgId == orgId && p.CoreOrganizationId == orgId)
+                    .Select(p => p.Id)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
             var userData = await _db.CoreUsers
                 .AsNoTracking()
                 .Where(u => u.Id == data.UserId)
-                .GroupJoin(_db.Persons.Users(data.Data.OrganizationId), u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
+                .GroupJoin(_db.Persons.Users(orgId), u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
                 .SelectMany(d => d.ou.DefaultIfEmpty(), (d, ou) => new TokenQueryUser
                 {
                     Id = d.u.Id,
@@ -1836,6 +1849,7 @@ namespace Platform.Server.Services
                     Step = d.u.Step,
                     LatestAppId = data.AppId == null ? (d.u.LatestAppIds == null ? null : d.u.LatestAppIds.FirstOrDefault()) : data.AppId,
                     Oid = ou == null ? null : ou.Id,
+                    Pid = pid,
                     OrgStatus = ou == null ? null : ou.Status,
                     OrgExpiry = ou == null ? null : ou.Expiry,
                     Name = ou == null ? d.u.Name : ou.Name,
