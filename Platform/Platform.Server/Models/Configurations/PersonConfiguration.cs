@@ -83,6 +83,9 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(128)
                 .HasColumnName("name");
             entity.Property(e => e.OrgId).HasColumnName("org_id");
+            entity.Property(e => e.PermissionGroups).HasColumnName("permission_groups");
+            entity.Property(e => e.PermissionIncluded).HasColumnName("permission_included");
+            entity.Property(e => e.PermissonExcluded).HasColumnName("permisson_excluded");
             entity.Property(e => e.PoliticalStatus)
                 .HasMaxLength(50)
                 .HasColumnName("political_status");
@@ -133,7 +136,7 @@ namespace Platform.Server.Models.Configurations
                 .HasForeignKey(d => d.ReportTo)
                 .HasConstraintName("person_report_to_fkey");
 
-            entity.HasOne(d => d.User).WithMany(p => p.PersonUsers)
+            entity.HasOne(d => d.User).WithMany(p => p.InverseUser)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_user_id_fkey");

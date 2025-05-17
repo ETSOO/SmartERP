@@ -59,12 +59,14 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "add",
     "addProfile",
     "allProfiles",
     "app3",
     "contacts",
     "customers",
     "depts",
+    "edit",
     "editAvatar",
     "editProfile",
     "info",
@@ -229,7 +231,20 @@ export default function Home() {
           {
             segment: "dept",
             title: labels.depts,
-            hidden: true
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              }
+            ]
           },
           {
             segment: "group",

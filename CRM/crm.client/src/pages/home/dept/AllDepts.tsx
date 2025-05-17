@@ -1,4 +1,3 @@
-import { EntityStatus } from "@etsoo/appscript";
 import {
   MUGlobal,
   ResponsivePage,
@@ -8,6 +7,7 @@ import {
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
+import AddIcon from "@mui/icons-material/Add";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -18,15 +18,17 @@ import {
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { PersonQueryData } from "@etsoo/smarterp-crm";
+import { DeptQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import { UserTiplist } from "@etsoo/smarterp-crm/components";
+import Fab from "@mui/material/Fab";
+import { Permissions } from "@etsoo/smarterp-crm";
 
 const template = {
-  name: "string",
-  identityType: "number"
+  keyword: "string",
+  leaderId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllDepts() {
@@ -36,38 +38,45 @@ export default function AllDepts() {
   // Labels
   const labels = app.getLabels(
     "actions",
-    "assignedId",
+    "add",
     "confirmAction",
     "creation",
     "edit",
-    "entityStatus",
-    "identityType",
-    "jobTitle",
-    "personName",
-    "reportTo",
-    "role",
-    "statusNormal",
+    "leader",
+    "nameB",
+    "staff",
     "view"
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<PersonQueryData>>();
+  const ref = React.useRef<ScrollerListForwardRef<DeptQueryData>>();
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
 
-  const baseIdentity = app.getPersonIdentityType();
-
   // Page data hook
   usePageDataEmpty(app);
 
   return (
-    <ResponsivePage<PersonQueryData, typeof template>
+    <ResponsivePage<DeptQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: <React.Fragment></React.Fragment>
+        fabButtons: (
+          <React.Fragment>
+            {app.owns(Permissions.Dept.Add) && (
+              <Fab
+                title={labels.add}
+                size="medium"
+                color="primary"
+                onClick={() => navigate("./add")}
+              >
+                <AddIcon />
+              </Fab>
+            )}
+          </React.Fragment>
+        )
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
@@ -75,45 +84,35 @@ export default function AllDepts() {
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
-          label={labels.personName}
-          name="keywords"
-          defaultValue={data.name}
+          label={labels.nameB}
+          name="keyword"
+          defaultValue={data.keyword}
         />,
-        <IdentityFlagsList
-          value={data.identityType}
-          baseIdentity={baseIdentity}
-          search
-        />
+        <UserTiplist label={labels.leader} name="leaderId" search />
       ]}
       loadData={async (data) => {
-        return await app.personApi.query(data, {
+        return await app.deptApi.query(data, {
           defaultValue: [],
           showLoading: false
         });
       }}
       columns={[
         {
-          field: "identityType",
-          width: 120,
-          header: labels.identityType,
-          valueFormatter: ({ data }) => app.person.getIdentityType(data)
-        },
-        {
           field: "name",
-          header: labels.personName,
+          header: labels.nameB,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
-          field: "jobTitle",
-          width: 120,
-          header: labels.jobTitle,
-          sortable: true
+          field: "staff",
+          width: 80,
+          header: labels.staff,
+          type: GridDataType.Number
         },
         {
-          field: "assignedId",
-          width: 142,
-          header: labels.assignedId
+          field: "leader",
+          header: labels.leader,
+          width: 120
         },
         {
           field: "creation",
@@ -129,7 +128,7 @@ export default function AllDepts() {
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<PersonQueryData, BoxProps>) => {
+          }: GridCellRendererProps<DeptQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -142,7 +141,10 @@ export default function AllDepts() {
                 <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
                   <EditIcon />
                 </IconButtonLink>
-                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
+                <IconButtonLink
+                  title={labels.view}
+                  href={`./../../contact/view/${data.id}`}
+                >
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -154,7 +156,7 @@ export default function AllDepts() {
       innerItemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            `[${app.person.getIdentityType(data)}] ${data.name}`,
+            data.name,
             app.formatDate(data.creation, "d"),
             [
               {
@@ -165,21 +167,13 @@ export default function AllDepts() {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./view/${data.id}`
+                action: `./../../contact/view/${data.id}`
               }
             ],
             <React.Fragment>
-              <Typography variant="caption">{data.jobTitle}</Typography>
-              {data.status >= EntityStatus.Inactivated && (
-                <React.Fragment>
-                  <Typography variant="caption">
-                    {labels.entityStatus + ": "}
-                  </Typography>
-                  <Typography variant="caption" color="error">
-                    {app.getStatusLabel(data?.status)}
-                  </Typography>
-                </React.Fragment>
-              )}
+              {labels.leader}: {data.leader}
+              <br />
+              {labels.staff}: {data.staff}
             </React.Fragment>
           ];
         })

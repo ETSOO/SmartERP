@@ -256,6 +256,20 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/system/dept/add",
+            lazy: async () => {
+              const AddDept = await import("./pages/home/dept/AddDept");
+              return { Component: AddDept.default };
+            }
+          },
+          {
+            path: "/home/system/dept/edit/:id",
+            lazy: async () => {
+              const AddDept = await import("./pages/home/dept/AddDept");
+              return { Component: AddDept.default };
+            }
+          },
+          {
             path: "/home/system/group",
             lazy: async () => {
               const AllGroups = await import("./pages/home/group/AllGroups");

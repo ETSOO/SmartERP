@@ -9,6 +9,10 @@ namespace CRM.Server.RQ.Dept
     [JsonDerivedType(typeof(DeptQueryRQ))]
     public record DeptListRQ : QueryLongRQ
     {
-
+        /// <summary>
+        /// Leader
+        /// 部门主管
+        /// </summary>
+        public long? LeaderId { get; init; }
     }
 }

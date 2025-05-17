@@ -527,7 +527,7 @@ namespace PlatformShared.Database.Models
         /// Registrant's User id
         /// 登记人的用户编号
         /// </summary>
-        public required int UserId { get; set; }
+        public required long UserId { get; set; }
 
         /// <summary>
         /// Permission groups
@@ -546,6 +546,12 @@ namespace PlatformShared.Database.Models
         /// 排除的权限项
         /// </summary>
         public List<short>? PermissionExcluded { get; set; }
+
+        /// <summary>
+        /// Owner user
+        /// 所有者用户
+        /// </summary>
+        public Person User { get; set; } = default!;
 
         /// <summary>
         /// Core user related
@@ -600,6 +606,12 @@ namespace PlatformShared.Database.Models
         /// 联系人所有者
         /// </summary>
         public ICollection<PersonRelation> ContactOwners { get; } = default!;
+
+        /// <summary>
+        /// Owned users
+        /// 拥有的用户
+        /// </summary>
+        public ICollection<Person> OwnedUsers { get; } = default!;
 
         /// <summary>
         /// Information

@@ -59,12 +59,6 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> CreateAsync(PersonProfileCreateRQ rq, string? indexKey = null, CancellationToken cancellationToken = default)
         {
-            // No oid
-            if (User.Oid < 1)
-            {
-                return ApplicationErrors.AccessDenied.AsResult(nameof(User.Oid));
-            }
-
             // Organization id
             var orgId = User.OrganizationInt;
 
@@ -628,7 +622,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> UpdateAsync(PersonProfileUpdateRQ rq, CancellationToken cancellationToken = default)
         {
-            var profile = await _db.UserProfiles(User, rq.Id).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+            var profile = await _db.UserProfiles(User, rq.Id).FirstOrDefaultAsync(cancellationToken);
             if (profile == null)
             {
                 return ApplicationErrors.NoId.AsResult();
@@ -834,9 +828,9 @@ namespace CRM.Server.Services
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _db.UserProfiles(User, id).AsNoTracking()
+            return _db.UserProfiles(User, id).AsNoTracking()
                 .Select(p => new
                 {
                     p.Id,

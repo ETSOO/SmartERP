@@ -190,7 +190,7 @@ export default function AddProfile() {
           name="title"
           slotProps={{ htmlInput: { maxLength: 256 } }}
           label={labels.profileTitle}
-          value={formik.values.title ?? ""}
+          value={formik.values.title}
           onChange={formik.handleChange}
         />
       </Grid>

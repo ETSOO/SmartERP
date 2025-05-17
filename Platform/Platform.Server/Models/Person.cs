@@ -91,13 +91,21 @@ public partial class Person
 
     public List<int>? Addresses { get; set; }
 
-    public int UserId { get; set; }
+    public long UserId { get; set; }
+
+    public List<int>? PermissionGroups { get; set; }
+
+    public List<short>? PermissionIncluded { get; set; }
+
+    public List<short>? PermissonExcluded { get; set; }
 
     public virtual CoreOrganization? CoreOrganization { get; set; }
 
     public virtual CoreUser? CoreUser { get; set; }
 
     public virtual ICollection<Person> InverseReportToNavigation { get; set; } = new List<Person>();
+
+    public virtual ICollection<Person> InverseUser { get; set; } = new List<Person>();
 
     public virtual CoreUser? Inviter { get; set; }
 
@@ -139,7 +147,7 @@ public partial class Person
 
     public virtual ICollection<SettingCrm> SettingCrms { get; set; } = new List<SettingCrm>();
 
-    public virtual CoreUser User { get; set; } = null!;
+    public virtual Person User { get; set; } = null!;
 
     public virtual ICollection<PermissionItem> PermissionItems { get; set; } = new List<PermissionItem>();
 }

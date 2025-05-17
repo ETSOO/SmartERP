@@ -47,9 +47,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Password)
                 .HasMaxLength(128)
                 .HasColumnName("password");
-            entity.Property(e => e.PermissionGroups).HasColumnName("permission_groups");
-            entity.Property(e => e.PermissionIncluded).HasColumnName("permission_included");
-            entity.Property(e => e.PermissonExcluded).HasColumnName("permisson_excluded");
             entity.Property(e => e.Pin)
                 .HasMaxLength(20)
                 .HasColumnName("pin");

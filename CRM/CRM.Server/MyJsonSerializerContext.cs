@@ -54,7 +54,9 @@ namespace CRM.Server
     [JsonSerializable(typeof(DeptListData))]
     [JsonSerializable(typeof(DeptQueryData[]))]
 
+    [JsonSerializable(typeof(DeptCreateRQ))]
     [JsonSerializable(typeof(DeptListRQ))]
+    [JsonSerializable(typeof(DeptUpdateRQ))]
 
     // Group
     [JsonSerializable(typeof(GroupListData))]

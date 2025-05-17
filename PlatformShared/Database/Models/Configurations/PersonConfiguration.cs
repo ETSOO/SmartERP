@@ -122,6 +122,11 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.PermissionIncluded).HasColumnName("permission_included");
             entity.Property(e => e.PermissionExcluded).HasColumnName("permisson_excluded");
 
+            entity.HasOne(d => d.User).WithMany(p => p.OwnedUsers)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_user_id_fkey");
+
             entity.HasOne(d => d.CoreUser).WithMany(u => u.BoundPersons)
                 .HasForeignKey(d => d.CoreUserId)
                 .HasConstraintName("person_core_user_id_fkey");
