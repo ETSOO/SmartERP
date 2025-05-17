@@ -111,24 +111,46 @@ const router = createDynamicRouter([
           },
 
           {
-            path: "/home/org/data",
+            path: "/home/customer",
             lazy: async () => {
-              const OrgData = await import("./pages/home/org/OrgData");
-              return { Component: OrgData.default };
+              const AllCustomers = await import(
+                "./pages/home/customer/AllCustomers"
+              );
+              return { Component: AllCustomers.default };
             }
           },
+
           {
-            path: "/home/org/data/dept",
+            path: "/home/order",
             lazy: async () => {
-              const AllDepts = await import("./pages/home/dept/AllDepts");
-              return { Component: AllDepts.default };
+              const AllOrders = await import("./pages/home/order/AllOrders");
+              return { Component: AllOrders.default };
             }
           },
+
           {
-            path: "/home/org/data/groups",
+            path: "/home/report",
             lazy: async () => {
-              const AllGroups = await import("./pages/home/org/AllGroups");
-              return { Component: AllGroups.default };
+              const AllReports = await import("./pages/home/report/AllReports");
+              return { Component: AllReports.default };
+            }
+          },
+
+          {
+            path: "/home/po",
+            lazy: async () => {
+              const AllPOs = await import("./pages/home/po/AllPOs");
+              return { Component: AllPOs.default };
+            }
+          },
+
+          {
+            path: "/home/product",
+            lazy: async () => {
+              const AllProducts = await import(
+                "./pages/home/product/AllProducts"
+              );
+              return { Component: AllProducts.default };
             }
           },
 
@@ -175,6 +197,27 @@ const router = createDynamicRouter([
               return { Component: ViewProfile.default };
             }
           },
+
+          {
+            path: "/home/supplier",
+            lazy: async () => {
+              const AllSuppliers = await import(
+                "./pages/home/supplier/AllSuppliers"
+              );
+              return { Component: AllSuppliers.default };
+            }
+          },
+
+          {
+            path: "/home/inventory",
+            lazy: async () => {
+              const AllInventory = await import(
+                "./pages/home/inventory/AllInventory"
+              );
+              return { Component: AllInventory.default };
+            }
+          },
+
           {
             path: "/home/user",
             lazy: async () => {
@@ -203,6 +246,20 @@ const router = createDynamicRouter([
                 "./pages/home/system/UpdateSettings"
               );
               return { Component: UpdateSettings.default };
+            }
+          },
+          {
+            path: "/home/system/dept",
+            lazy: async () => {
+              const AllDepts = await import("./pages/home/dept/AllDepts");
+              return { Component: AllDepts.default };
+            }
+          },
+          {
+            path: "/home/system/group",
+            lazy: async () => {
+              const AllGroups = await import("./pages/home/group/AllGroups");
+              return { Component: AllGroups.default };
             }
           }
         ]

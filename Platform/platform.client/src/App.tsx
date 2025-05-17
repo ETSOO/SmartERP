@@ -107,6 +107,11 @@ export default function App() {
       }, [params.auth])
     : app.storage.getData<AuthRequest>(Constants.AuthRequestField);
 
+  // Clear token
+  if (params.tryLogin === "false") {
+    app.clearCacheToken();
+  }
+
   // User login id, email or mobile, saved
   const userIdEncrypted = app.storage.getData<string>(
     CoreConstants.FieldUserIdSaved

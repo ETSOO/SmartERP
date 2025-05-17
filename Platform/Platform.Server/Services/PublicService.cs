@@ -111,7 +111,7 @@ namespace Platform.Server.Services
             var orgId = data.UserData.OrganizationId;
             var userId = User.IdInt;
             var inviterId = code.UserId.Value;
-            var exists = await _db.Persons.Users(orgId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
+            var exists = await _db.Users(orgId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
             if (!exists)
             {
                 _db.Persons.Add(new Person
@@ -434,7 +434,7 @@ namespace Platform.Server.Services
             if (userId > 0)
             {
                 userExists = true;
-                isAccepted = await _db.Persons.Users(data.UserData.OrganizationId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
+                isAccepted = await _db.Users(data.UserData.OrganizationId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
             }
 
             return new MemberInvitationData

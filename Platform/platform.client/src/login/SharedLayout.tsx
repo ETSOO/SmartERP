@@ -131,13 +131,13 @@ export function SharedLayout(props: SharedLayoutProps) {
             {(value) => (
               <VBox alignItems="flex-end">
                 <Typography variant="subtitle1">
-                  {value.get<string>("appName")}
+                  {value.get<string>("appName")} (AI+)
                 </Typography>
-                {appName && (
-                  <Typography variant="subtitle2" fontWeight="bold">
-                    {value.get<string>(appName) ?? appName}
-                  </Typography>
-                )}
+                <Typography variant="subtitle2" fontWeight="bold">
+                  {appName
+                    ? value.get<string>(appName) ?? appName
+                    : app.get("login")}
+                </Typography>
               </VBox>
             )}
           </Context.Consumer>

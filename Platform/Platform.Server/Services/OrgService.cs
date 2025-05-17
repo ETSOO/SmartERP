@@ -311,7 +311,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            var oid = await _db.Persons.Users(id).AsNoTracking()
+            var oid = await _db.Users(id).AsNoTracking()
                 .Where(ou => ou.CoreUserId != User.IdInt)
                 .Select(ou => ou.Id)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -485,7 +485,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> LeaveAsync(int id, CancellationToken cancellationToken = default)
         {
             // Read data
-            var ou = await _db.Persons.Users(id).AsNoTracking()
+            var ou = await _db.Users(id).AsNoTracking()
                 .Where(ou => ou.CoreUserId == User.IdInt)
                 .Select(ou => new { ou.Id, ou.InviterId, InviterName = ou.Inviter == null ? null : ou.Inviter.Name, ou.Organization.Name })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -496,7 +496,7 @@ namespace Platform.Server.Services
             }
 
             // Check direct reports
-            var hasDirectReports = await _db.Persons.Users(id).AsNoTracking()
+            var hasDirectReports = await _db.Users(id).AsNoTracking()
                 .AnyAsync(ou => ou.ReportTo == ou.Id, cancellationToken);
 
             if (hasDirectReports)
@@ -607,7 +607,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<bool> OwnsAsync(int id, UserRole userRole = UserRole.Guest, CancellationToken cancellationToken = default)
         {
-            return await _db.Persons.Users(id).AsNoTracking()
+            return await _db.Users(id).AsNoTracking()
                 .AnyAsync(ou => ou.CoreUserId == User.IdInt
                     && ou.Status <= EntityStatus.Approved
                     && ou.UserRole >= userRole
@@ -762,7 +762,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var (hasContent, commandText) = await _db.Persons.Users(id)
+            var (hasContent, commandText) = await _db.Users(id)
                 .AsNoTracking()
                 .Where(ou => ou.CoreUserId == User.IdInt)
                 .Select(ou => new

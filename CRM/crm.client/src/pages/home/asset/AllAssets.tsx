@@ -29,7 +29,7 @@ const template = {
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllGroups() {
+export default function AllDepts() {
   // Route
   const navigate = useNavigate();
 

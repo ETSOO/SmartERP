@@ -203,7 +203,7 @@ namespace Platform.Server.Services
                     org.OwnerId,
                     RequesterId = requester.Id,
                     RequesterName = requester.Name,
-                    Approver = _db.Persons.Users(User.OrganizationInt)
+                    Approver = _db.Users(User.OrganizationInt)
                         .Where(u => u.CoreUserId == rq.Approver && u.Status <= EntityStatus.Approved)
                         .Select(u => new { ApproverId = u.Id, ApproverName = u.Name })
                         .FirstOrDefault()
@@ -216,7 +216,7 @@ namespace Platform.Server.Services
             }
 
             // User data
-            var userData = await _db.Persons.Users(rq.OrgId).AsNoTracking()
+            var userData = await _db.Users(rq.OrgId).AsNoTracking()
                 .Where(u => u.CoreUserId == rq.Requester)
                 .Select(u => new
                 {
@@ -1836,7 +1836,7 @@ namespace Platform.Server.Services
             var userData = await _db.CoreUsers
                 .AsNoTracking()
                 .Where(u => u.Id == data.UserId)
-                .GroupJoin(_db.Persons.Users(orgId), u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
+                .GroupJoin(_db.Users(orgId), u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
                 .SelectMany(d => d.ou.DefaultIfEmpty(), (d, ou) => new TokenQueryUser
                 {
                     Id = d.u.Id,

@@ -17,7 +17,7 @@ namespace CRM.Server.Endpoints
             g.MapPost("List", (IUserService service, UserListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get user list / 获取用户列表").WithTags("User");
 
-            g.MapPost("Query", (IUserService service, UserQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+            g.MapPost("Query", (IUserService service, UserQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query user info / 查询用户信息").WithTags("User");
 
             return builder;

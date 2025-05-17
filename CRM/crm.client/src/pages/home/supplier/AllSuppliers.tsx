@@ -1,3 +1,4 @@
+import { EntityStatus } from "@etsoo/appscript";
 import {
   MUGlobal,
   ResponsivePage,
@@ -17,35 +18,40 @@ import {
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { UserQueryData } from "@etsoo/smarterp-crm";
+import { PersonQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   name: "string",
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllUsers() {
+export default function AllDepts() {
   // Route
   const navigate = useNavigate();
 
   // Labels
   const labels = app.getLabels(
     "actions",
+    "assignedId",
     "confirmAction",
     "creation",
-    "depts",
     "edit",
     "entityStatus",
-    "name",
+    "identityType",
+    "jobTitle",
+    "personName",
+    "reportTo",
     "role",
+    "statusNormal",
     "view"
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<UserQueryData>>();
+  const ref = React.useRef<ScrollerListForwardRef<PersonQueryData>>();
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
@@ -58,7 +64,7 @@ export default function AllUsers() {
   usePageDataEmpty(app);
 
   return (
-    <ResponsivePage<UserQueryData, typeof template>
+    <ResponsivePage<PersonQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: <React.Fragment></React.Fragment>
@@ -69,7 +75,7 @@ export default function AllUsers() {
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
-          label={labels.name}
+          label={labels.personName}
           name="keywords"
           defaultValue={data.name}
         />,
@@ -80,28 +86,34 @@ export default function AllUsers() {
         />
       ]}
       loadData={async (data) => {
-        return await app.userApi.query(data, {
+        return await app.personApi.query(data, {
           defaultValue: [],
           showLoading: false
         });
       }}
       columns={[
         {
+          field: "identityType",
+          width: 120,
+          header: labels.identityType,
+          valueFormatter: ({ data }) => app.person.getIdentityType(data)
+        },
+        {
           field: "name",
-          header: labels.name,
+          header: labels.personName,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
-          field: "depts",
+          field: "jobTitle",
           width: 120,
-          header: labels.depts,
+          header: labels.jobTitle,
           sortable: true
         },
         {
-          field: "userRole",
+          field: "assignedId",
           width: 142,
-          header: labels.role
+          header: labels.assignedId
         },
         {
           field: "creation",
@@ -117,7 +129,7 @@ export default function AllUsers() {
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<UserQueryData, BoxProps>) => {
+          }: GridCellRendererProps<PersonQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -142,7 +154,7 @@ export default function AllUsers() {
       innerItemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.name,
+            `[${app.person.getIdentityType(data)}] ${data.name}`,
             app.formatDate(data.creation, "d"),
             [
               {
@@ -156,7 +168,19 @@ export default function AllUsers() {
                 action: `./view/${data.id}`
               }
             ],
-            <React.Fragment></React.Fragment>
+            <React.Fragment>
+              <Typography variant="caption">{data.jobTitle}</Typography>
+              {data.status >= EntityStatus.Inactivated && (
+                <React.Fragment>
+                  <Typography variant="caption">
+                    {labels.entityStatus + ": "}
+                  </Typography>
+                  <Typography variant="caption" color="error">
+                    {app.getStatusLabel(data?.status)}
+                  </Typography>
+                </React.Fragment>
+              )}
+            </React.Fragment>
           ];
         })
       }

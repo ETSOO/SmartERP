@@ -67,7 +67,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> AdjustReportToAsync(MemberAdjustReportToRQ rq, CancellationToken cancellationToken = default)
         {
             // Check ids
-            var users = await _db.Persons.Users(User.OrganizationInt)
+            var users = await _db.Users(User.OrganizationInt)
                 .AsNoTracking()
                 .Where(ou => ou.Id == rq.OldId || ou.Id == rq.NewId)
                 .Select(ou => new { ou.Id, ou.CoreUserId, ou.Name })
@@ -114,7 +114,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            var ou = await _db.Persons.Users(User.OrganizationInt)
+            var ou = await _db.Users(User.OrganizationInt)
                 .AsNoTracking()
                 .Where(ou => ou.Id == id
                     && ou.Status == EntityStatus.Deleted
@@ -151,7 +151,7 @@ namespace Platform.Server.Services
 
         private IQueryable<Person> CreateQuery(MemberListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
         {
-            var query = _db.Persons.AsNoTracking().Users(User.OrganizationInt)
+            var query = _db.Users(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (ou) => ou.Id, (ou) => ou.Status, (q) =>
                 {
                     if (rq.ExcludeSelf is true)
@@ -244,7 +244,7 @@ namespace Platform.Server.Services
             await Parallel.ForEachAsync(rq.Emails.Distinct(), async (email, cancelToken) =>
             {
                 // User already exists
-                var userExists = await _db.Persons.Users(orgId)
+                var userExists = await _db.Users(orgId).AsNoTracking()
                     .AnyAsync(ou => ou.CoreUser != null && ou.CoreUser.CoreUserIdentifiers.Any(i => i.CoreUserId == ou.CoreUserId && i.Type == CoreUserIdentifierType.Email && i.Value == email), cancelToken);
 
                 if (userExists)
@@ -360,7 +360,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _db.Persons.Users(User.OrganizationInt)
+            await _db.Users(User.OrganizationInt)
                 .AsNoTracking()
                 .Where(ou => ou.Id == id)
                 .Select(ou => new
@@ -392,7 +392,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> UpdateAsync(MemberUpdateRQ rq, CancellationToken cancellationToken = default)
         {
-            var ou = await _db.Persons.Users(User.OrganizationInt).Where(o => o.Id == rq.Id
+            var ou = await _db.Users(User.OrganizationInt).Where(o => o.Id == rq.Id
                 && o.UserRole <= User.Role)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -401,7 +401,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            if (rq.ReportTo.HasValue && !await _db.Persons.Users(User.OrganizationInt).AnyAsync(o => o.Id == rq.ReportTo.Value, cancellationToken))
+            if (rq.ReportTo.HasValue && !await _db.Users(User.OrganizationInt).AnyAsync(o => o.Id == rq.ReportTo.Value, cancellationToken))
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.ReportTo));
             }
@@ -489,7 +489,7 @@ namespace Platform.Server.Services
             }
 
             // Check the avatar
-            var ou = await _db.Persons.Users(User.OrganizationInt).AsNoTracking()
+            var ou = await _db.Users(User.OrganizationInt).AsNoTracking()
                 .Where(ou => ou.Id == id)
                 .Select(ou => new { LocalAvatar = ou.Avatar, ou.Name })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -549,7 +549,7 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var query = _db.Persons.Users(User.OrganizationInt)
+            var query = _db.Users(User.OrganizationInt)
                 .AsNoTracking()
                 .Where(ou => ou.Id == id
                     && ou.UserRole <= User.Role);

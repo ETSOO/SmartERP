@@ -40,31 +40,31 @@ namespace CRM.Server
 
     // Asset
     [JsonSerializable(typeof(AssetListData))]
-    [JsonSerializable(typeof(AssetQueryData))]
+    [JsonSerializable(typeof(AssetQueryData[]))]
 
     [JsonSerializable(typeof(AssetListRQ))]
 
     // Customer
     [JsonSerializable(typeof(CustomerListData))]
-    [JsonSerializable(typeof(CustomerQueryData))]
+    [JsonSerializable(typeof(CustomerQueryData[]))]
 
     [JsonSerializable(typeof(CustomerListRQ))]
 
     // Dept
     [JsonSerializable(typeof(DeptListData))]
-    [JsonSerializable(typeof(DeptQueryData))]
+    [JsonSerializable(typeof(DeptQueryData[]))]
 
     [JsonSerializable(typeof(DeptListRQ))]
 
     // Group
     [JsonSerializable(typeof(GroupListData))]
-    [JsonSerializable(typeof(GroupQueryData))]
+    [JsonSerializable(typeof(GroupQueryData[]))]
 
     [JsonSerializable(typeof(GroupListRQ))]
 
     // Order
     [JsonSerializable(typeof(OrderListData))]
-    [JsonSerializable(typeof(OrderQueryData))]
+    [JsonSerializable(typeof(OrderQueryData[]))]
 
     [JsonSerializable(typeof(OrderListRQ))]
 
@@ -93,19 +93,19 @@ namespace CRM.Server
 
     // PO
     [JsonSerializable(typeof(POListData))]
-    [JsonSerializable(typeof(POQueryData))]
+    [JsonSerializable(typeof(POQueryData[]))]
 
     [JsonSerializable(typeof(POListRQ))]
 
     // Product
     [JsonSerializable(typeof(ProductListData))]
-    [JsonSerializable(typeof(ProductQueryData))]
+    [JsonSerializable(typeof(ProductQueryData[]))]
 
     [JsonSerializable(typeof(ProductListRQ))]
 
     // Supplier
     [JsonSerializable(typeof(SupplierListData))]
-    [JsonSerializable(typeof(SupplierQueryData))]
+    [JsonSerializable(typeof(SupplierQueryData[]))]
 
     [JsonSerializable(typeof(SupplierListRQ))]
 
@@ -117,7 +117,7 @@ namespace CRM.Server
 
     // User
     [JsonSerializable(typeof(UserListData))]
-    [JsonSerializable(typeof(UserQueryData))]
+    [JsonSerializable(typeof(UserQueryData[]))]
 
     [JsonSerializable(typeof(UserListRQ))]
 

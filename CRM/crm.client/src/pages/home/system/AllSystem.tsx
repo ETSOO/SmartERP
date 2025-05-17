@@ -1,4 +1,4 @@
-import { ButtonLink, CommonPage, ViewContainer } from "@etsoo/materialui";
+import { ButtonLink, CommonPage, VBox, ViewContainer } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
 import React from "react";
 import { SystemSettings } from "@etsoo/smarterp-crm";
@@ -9,6 +9,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import CardHeader from "@mui/material/CardHeader";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import Paper from "@mui/material/Paper";
 
 export default function AllSystem() {
   // Route
@@ -42,46 +43,57 @@ export default function AllSystem() {
   }, []);
 
   // Labels
-  const labels = app.getLabels("settings", "updateSystemSettings");
+  const labels = app.getLabels(
+    "depts",
+    "permissionGroups",
+    "settings",
+    "updateSystemSettings"
+  );
 
   return (
     <CommonPage paddings={0}>
       {settings == null ? (
         <LinearProgress />
       ) : (
-        <Card>
-          <CardHeader title={labels.settings} />
-          <CardContent>
-            <ViewContainer
-              refresh={reloadData}
-              data={settings}
-              fields={[
-                {
-                  data: (item) =>
-                    app.system.getCustomerType(item.mainCustomerType),
-                  label: "mainCustomerType"
-                },
-                {
-                  data: "currencies"
-                },
-                {
-                  data: "supplierCurrencies"
-                },
-                {
-                  data: "cultures"
-                },
-                {
-                  data: "hasInventory"
-                }
-              ]}
-            ></ViewContainer>
-          </CardContent>
-          <CardActions>
-            <ButtonLink href="./updateSettings" size="small">
-              {labels.updateSystemSettings}
-            </ButtonLink>
-          </CardActions>
-        </Card>
+        <VBox gap={2}>
+          <Paper sx={{ paddingY: 1 }}>
+            <ButtonLink href="./dept">{labels.depts}</ButtonLink>
+            <ButtonLink href="./group">{labels.permissionGroups}</ButtonLink>
+          </Paper>
+          <Card>
+            <CardHeader title={labels.settings} />
+            <CardContent>
+              <ViewContainer
+                refresh={reloadData}
+                data={settings}
+                fields={[
+                  {
+                    data: (item) =>
+                      app.system.getCustomerType(item.mainCustomerType),
+                    label: "mainCustomerType"
+                  },
+                  {
+                    data: "currencies"
+                  },
+                  {
+                    data: "supplierCurrencies"
+                  },
+                  {
+                    data: "cultures"
+                  },
+                  {
+                    data: "hasInventory"
+                  }
+                ]}
+              ></ViewContainer>
+            </CardContent>
+            <CardActions>
+              <ButtonLink href="./updateSettings" size="small">
+                {labels.updateSystemSettings}
+              </ButtonLink>
+            </CardActions>
+          </Card>
+        </VBox>
       )}
     </CommonPage>
   );

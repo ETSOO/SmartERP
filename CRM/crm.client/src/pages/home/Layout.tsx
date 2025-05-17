@@ -8,7 +8,7 @@ import HailIcon from "@mui/icons-material/Hail";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
-import DescriptionIcon from "@mui/icons-material/Description";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
@@ -76,6 +76,7 @@ export default function Home() {
     "permissionGroups",
     "purchases",
     "signoutSuccess",
+    "simpleInventory",
     "system",
     "suppliers",
     "updateSystemSettings",
@@ -103,9 +104,8 @@ export default function Home() {
   // Navigation
   const NAVIGATION = React.useMemo(() => {
     // Permissions
-    const viewOrg = app.owns(Permissions.Org.View);
     const queryUser = app.owns(Permissions.User.Query);
-    const queryOrg = app.owns(Permissions.Org.Query);
+    const queryOrg = app.owns(Permissions.Org.Manage);
 
     const items: (NavigationItem | false)[] = [
       {
@@ -158,6 +158,11 @@ export default function Home() {
         title: labels.suppliers,
         icon: <HailIcon />
       },
+      app.userData?.system?.hasInventory === true && {
+        segment: "home/inventory",
+        title: labels.simpleInventory,
+        icon: <LocalShippingIcon />
+      },
       {
         segment: "home/profile",
         title: labels.allProfiles,
@@ -194,26 +199,6 @@ export default function Home() {
 
     const orgItems: NavigationItem[] = [];
 
-    if (viewOrg && orgPersonId != null && orgPersonId > 0) {
-      orgItems.push({
-        segment: "home/org/data",
-        title: labels.info,
-        icon: <DescriptionIcon />,
-        children: [
-          {
-            segment: "dept",
-            title: labels.depts,
-            hidden: true
-          },
-          {
-            segment: "group",
-            title: labels.permissionGroups,
-            hidden: true
-          }
-        ]
-      });
-    }
-
     if (queryUser) {
       orgItems.push({
         segment: "home/user",
@@ -240,6 +225,16 @@ export default function Home() {
             segment: "updateSettings",
             title: labels.updateSystemSettings,
             hidden: true
+          },
+          {
+            segment: "dept",
+            title: labels.depts,
+            hidden: true
+          },
+          {
+            segment: "group",
+            title: labels.permissionGroups,
+            hidden: true
           }
         ]
       });
@@ -258,7 +253,7 @@ export default function Home() {
     }
 
     return [...allItems, ...orgItems];
-  }, [organization, orgPersonId]);
+  }, [organization, orgPersonId, state.permissionItems]);
 
   // When unauthorized (by refresh)
   // Return blank and try login

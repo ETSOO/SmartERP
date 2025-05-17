@@ -63,7 +63,7 @@ namespace Admin.Server.Services
                         OrgName = app.CoreOrganization.Name,
                         AppName = app.LocalName ?? app.CoreApp.Name,
                         RequesterId = requester.Id,
-                        Approver = _db.Persons.Users(User.OrganizationInt)
+                        Approver = _db.Users(User.OrganizationInt)
                             .Where(u => u.CoreUserId == rq.Approver && u.Status <= EntityStatus.Approved)
                             .Select(u => new { ApproverId = u.Id })
                             .FirstOrDefault()

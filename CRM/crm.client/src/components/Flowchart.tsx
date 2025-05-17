@@ -187,7 +187,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
     if (inventoryManagement) {
       // Inventory nodes
       nodes.push({
-        id: "sim",
+        id: "inventory",
         data: { label: labels.simpleInventory },
         className: app.owns(Permissions.Inventory.All)
           ? undefined
@@ -197,9 +197,9 @@ export function Flowchart({ visible }: { visible: boolean }) {
 
       edges.push(
         {
-          id: "poToSmi",
+          id: "poToInventory",
           source: "po",
-          target: "sim",
+          target: "inventory",
           label: labels.stockIn,
           animated: true,
           markerEnd: {
@@ -207,8 +207,8 @@ export function Flowchart({ visible }: { visible: boolean }) {
           }
         },
         {
-          id: "smiToOrder",
-          source: "sim",
+          id: "inventoryToOrder",
+          source: "inventory",
           target: "order",
           label: labels.stockOut,
           animated: true,
@@ -234,7 +234,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
           const ele = event.target as HTMLElement;
           if (ele.classList.contains("node-disabled")) return;
           const id = ele.dataset["id"];
-          if (id) navigate(`./${id}/all`);
+          if (id) navigate(`./${id}`);
         }}
       ></ReactFlow>
     </Container>

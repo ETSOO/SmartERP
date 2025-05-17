@@ -98,17 +98,22 @@ namespace CRM.Server.Services
         /// 查询人员JSON数据
         /// </summary>
         /// <param name="rq">Request data</param>
-        /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task QueryAsync(UserQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public Task<UserQueryData[]> QueryAsync(UserQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            await CreateQuery(rq)
-                .Select(ou => new UserQueryData
+            return CreateQuery(rq)
+                .Select(u => new UserQueryData
                 {
-                    Id = ou.Id,
-                    Name = ou.Name
-                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+                    Id = u.Id,
+                    Name = u.Name,
+                    UserRole = u.UserRole,
+                    Depts = u.ContactOwners
+                        .Where(o => (o.Person.IdentityType & IdentityTypeFlags.Dept) > 0)
+                        .Select(o => o.Person.Name),
+                    Status = u.Status,
+                    Creation = u.Creation
+                }).ToArrayAsync(cancellationToken);
         }
     }
 }

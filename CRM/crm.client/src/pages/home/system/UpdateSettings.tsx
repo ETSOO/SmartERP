@@ -63,7 +63,7 @@ export default function UpdateSettings() {
       if (result.ok) {
         // Refresh token to get the updated avatar
         await app.refreshToken({ showLoading: true });
-        navigate("./../");
+        navigate("./..");
         return;
       }
 

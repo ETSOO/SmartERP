@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.34",
-    "@etsoo/materialui": "^1.5.47",
+    "@etsoo/appscript": "^1.6.35",
+    "@etsoo/materialui": "^1.5.48",
     "@etsoo/react": "^1.8.44",
     "@etsoo/reacteditor": "^1.0.31",
     "@etsoo/shared": "^1.2.72",
@@ -27,7 +27,7 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
-    "@types/node": "^22.15.17",
+    "@types/node": "^22.15.18",
     "@types/react": "^18.3.21",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.4.1",

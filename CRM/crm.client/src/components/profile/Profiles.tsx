@@ -76,8 +76,6 @@ export function Profiles(props: ProfilesProps) {
   const mRef = React.useRef<ViewInnerRef>(null);
   const personIdRef = React.useRef(personId);
 
-  const rootUrl = personId === -1 ? "./../.." : "./../../..";
-
   React.useEffect(() => {
     personIdRef.current = personId;
   }, [personId]);
@@ -100,7 +98,7 @@ export function Profiles(props: ProfilesProps) {
             ? { onClick: (_event, data) => mRef.current?.setData(data) }
             : {
                 quickAction: (data) =>
-                  navigate(`${rootUrl}/profile/view/${data.id}`)
+                  navigate(`./../../../profile/view/${data.id}`)
               })}
           mRef={ref}
           defaultOrderBy={[{ field: "creation", desc: true }]}
@@ -188,7 +186,7 @@ export function Profiles(props: ProfilesProps) {
                     {loadedItems.toLocaleString() + (hasNextPage ? "+" : "")}
                   </React.Fragment>
                   <ButtonLink
-                    href={`${rootUrl}/profile/add?personId=${personId}`}
+                    href={`./../../../profile/add?personId=${personId}`}
                     variant="outlined"
                     startIcon={<AddIcon />}
                   >
@@ -198,7 +196,7 @@ export function Profiles(props: ProfilesProps) {
               );
             } else if (index === 1) {
               return (
-                <LinkEx to={`${rootUrl}/profile?participantId=${personId}`}>
+                <LinkEx to={`./../../../profile?participantId=${personId}`}>
                   {labels.more1}
                 </LinkEx>
               );
@@ -214,7 +212,7 @@ export function Profiles(props: ProfilesProps) {
                   {
                     label: labels.view,
                     icon: <ArticleIcon />,
-                    action: `${rootUrl}/profile/view/${data.id}`
+                    action: `./../../../profile/view/${data.id}`
                   }
                 ],
                 <React.Fragment>
