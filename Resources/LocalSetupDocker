@@ -5,6 +5,9 @@ FROM ubuntu:latest
 # Why the path is "Resources/LocalSetup.sh", not "LocalSetup.sh", is because the path is relative to the "context" of the build
 COPY Resources/LocalSetup.sh /app/LocalSetup.sh
 
+# Copy the entrypoint script into the image
+COPY Resources/LocalEntry.sh /app/LocalEntry.sh
+
 # Change to /app
 WORKDIR /app
 
@@ -13,3 +16,6 @@ WORKDIR /app
 
 # While RUN is executed during the build
 RUN ./LocalSetup.sh
+
+# This script will be executed when the container starts
+ENTRYPOINT ["/app/LocalEntry.sh"]

@@ -61,6 +61,7 @@ namespace CRM.Server
     // Group
     [JsonSerializable(typeof(GroupListData))]
     [JsonSerializable(typeof(GroupQueryData[]))]
+    [JsonSerializable(typeof(GroupViewData))]
 
     [JsonSerializable(typeof(GroupListRQ))]
 
@@ -120,8 +121,10 @@ namespace CRM.Server
     // User
     [JsonSerializable(typeof(UserListData))]
     [JsonSerializable(typeof(UserQueryData[]))]
+    [JsonSerializable(typeof(UserUpdateReadData))]
 
     [JsonSerializable(typeof(UserListRQ))]
+    [JsonSerializable(typeof(UserUpdateRQ))]
 
     // Results.ValidationProblem
     [JsonSerializable(typeof(HttpValidationProblemDetails))]

@@ -7,6 +7,7 @@ using CRM.Server.RQ.Group;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using System.Buffers;
 
 namespace CRM.Server.Services
@@ -96,8 +97,63 @@ namespace CRM.Server.Services
                 .Select(d => new GroupQueryData
                 {
                     Id = d.Id,
-                    Name = d.Name
+                    Name = d.Name,
+                    Roles = d.Roles,
+                    IsSystem = d.CoreOrganizationId == null
                 }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Query permission items JSON data
+        /// 查询权限项目JSON数据
+        /// </summary>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="module">Module belongs to</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task QueryItemsAsync(IBufferWriter<byte> writer, AppModule? module = null, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return;
+            }
+
+            await _db.PermissionItems.AsNoTracking()
+                .Where(i => module == null || i.Module == module)
+                .Select(i => new
+                {
+                    i.Id,
+                    i.Module,
+                    i.Name
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Read permission group data for view
+        /// 读取用于浏览的权限组数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<GroupViewData?> ReadAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return null;
+            }
+
+            return await _db.PermissionGroups.AsNoTracking()
+                .Where(g => g.Id == id && (g.CoreOrganizationId == null ||  g.CoreOrganizationId == User.OrganizationInt))
+                .Select(p => new GroupViewData
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Roles = p.Roles,
+                    Items = p.Items,
+                    OrgId = p.CoreOrganizationId
+                }).FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

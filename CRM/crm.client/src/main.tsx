@@ -226,10 +226,10 @@ const router = createDynamicRouter([
             }
           },
           {
-            path: "/home/user/view/:id",
+            path: "/home/user/edit/:id",
             lazy: async () => {
-              const ViewUser = await import("./pages/home/user/ViewUser");
-              return { Component: ViewUser.default };
+              const EditUser = await import("./pages/home/user/EditUser");
+              return { Component: EditUser.default };
             }
           },
           {
@@ -274,6 +274,13 @@ const router = createDynamicRouter([
             lazy: async () => {
               const AllGroups = await import("./pages/home/group/AllGroups");
               return { Component: AllGroups.default };
+            }
+          },
+          {
+            path: "/home/system/group/view/:id",
+            lazy: async () => {
+              const ViewGroup = await import("./pages/home/group/ViewGroup");
+              return { Component: ViewGroup.default };
             }
           }
         ]

@@ -20,6 +20,12 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IUserService service, UserQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query user info / 查询用户信息").WithTags("User");
 
+            g.MapPut("Update", (IUserService service, UserUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+                .WithDescription("Update user / 更新用户").WithTags("User");
+
+            g.MapGet("UpdateRead/{id:int}", (IUserService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Read JSON data for upate / 浏览JSON数据用于更新").WithTags("User");
+
             return builder;
         }
     }

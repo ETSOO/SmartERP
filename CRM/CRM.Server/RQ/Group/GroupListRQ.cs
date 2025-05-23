@@ -7,7 +7,7 @@ namespace CRM.Server.RQ.Group
     /// 权限组列表请求数据
     /// </summary>
     [JsonDerivedType(typeof(GroupQueryRQ))]
-    public record GroupListRQ : QueryLongRQ
+    public record GroupListRQ : QueryIntRQ
     {
 
     }

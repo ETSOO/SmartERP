@@ -23,16 +23,19 @@ namespace CRM.Server.Services
     public class DeptService : SEUserService, IDeptService
     {
         readonly MyDbContext _db;
+        readonly ICommonService _commonService;
 
         public DeptService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
-            ILogger<DeptService> logger
+            ILogger<DeptService> logger,
+            ICommonService commonService
         )
             : base(app, userAccessor.UserSafe, "dept", logger)
         {
             _db = db;
+            _commonService = commonService;
         }
 
         /// <summary>
@@ -44,6 +47,12 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> CreateAsync(DeptCreateRQ rq, CancellationToken cancellationToken = default)
         {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Dept.Add, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
             // Organization id
             var orgId = User.OrganizationInt;
 
@@ -127,6 +136,12 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task ListAsync(DeptListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Dept.List, cancellationToken))
+            {
+                return;
+            }
+
             await CreateQuery(rq)
                 .Select(d => new DeptListData
                 {
@@ -145,6 +160,12 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task QueryAsync(DeptQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Dept.Query, cancellationToken))
+            {
+                return;
+            }
+
             await CreateQuery(rq)
                 .Select(d => new DeptQueryData
                 {
@@ -166,6 +187,12 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> UpdateAsync(DeptUpdateRQ rq, CancellationToken cancellationToken = default)
         {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Dept.Edit, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
             // Organization id
             var orgId = User.OrganizationInt;
 
@@ -217,9 +244,15 @@ namespace CRM.Server.Services
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public async Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            return _db.Depts(User.OrganizationInt).AsNoTracking()
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Dept.Edit, cancellationToken))
+            {
+                return;
+            }
+
+            await _db.Depts(User.OrganizationInt).AsNoTracking()
                 .Where(d => d.Id == id)
                 .Select(d => new
                 {

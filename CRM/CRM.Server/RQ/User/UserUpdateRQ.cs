@@ -5,13 +5,13 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 
-namespace Platform.Server.Endpoints.Member.RQ
+namespace CRM.Server.RQ.User
 {
     /// <summary>
-    /// Update member request data
-    /// 更新成员请求数据
+    /// User update request data
+    /// 用户更新请求数据
     /// </summary>
-    public record MemberUpdateRQ : UpdateModel<long>, IModelValidator
+    public record UserUpdateRQ : UpdateModel<long>, IModelValidator
     {
         /// <summary>
         /// User role
@@ -20,10 +20,10 @@ namespace Platform.Server.Endpoints.Member.RQ
         public UserRole? UserRole { get; init; }
 
         /// <summary>
-        /// Local name
-        /// 本地名称
+        /// Name
+        /// 姓名
         /// </summary>
-        public string? LocalName { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Assigned id
@@ -50,15 +50,39 @@ namespace Platform.Server.Endpoints.Member.RQ
         public long? ReportTo { get; init; }
 
         /// <summary>
+        /// Department ids
+        /// 所属部门编号
+        /// </summary>
+        public IEnumerable<long>? Depts { get; init; }
+
+        /// <summary>
+        /// Permission group ids
+        /// 所属权限组编号
+        /// </summary>
+        public IEnumerable<int>? Groups { get; init; }
+
+        /// <summary>
+        /// Permission items included
+        /// 包含的权限项目
+        /// </summary>
+        public IEnumerable<short>? PermissionIncluded { get; init; }
+
+        /// <summary>
+        /// Permission items excluded
+        /// 排除的权限项目
+        /// </summary>
+        public IEnumerable<short>? PermissionExcluded { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (LocalName != null && LocalName.Length is not (>= 2 and <= 128))
+            if (Name != null && Name.Length is not (>= 2 and <= 128))
             {
-                return ApplicationErrors.NoValidData.AsResult(nameof(LocalName));
+                return ApplicationErrors.NoValidData.AsResult(nameof(Name));
             }
 
             if (AssignedId != null && AssignedId.Length is not (>= 1 and <= 20))

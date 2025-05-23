@@ -40,6 +40,12 @@ namespace CRM.Server.Dto.User
         public EntityStatus Status { get; init; }
 
         /// <summary>
+        /// Editable
+        /// 可编辑
+        /// </summary>
+        public bool Editable { get; init; }
+
+        /// <summary>
         /// Creation
         /// 创建时间
         /// </summary>

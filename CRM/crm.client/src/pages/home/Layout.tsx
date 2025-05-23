@@ -83,7 +83,8 @@ export default function Home() {
     "suppliers",
     "updateSystemSettings",
     "users",
-    "view"
+    "view",
+    "viewProfile"
   );
 
   // User context / state
@@ -184,7 +185,7 @@ export default function Home() {
           {
             segment: "view",
             pattern: "view/:id",
-            title: labels.view,
+            title: labels.viewProfile,
             hidden: true
           },
           {
@@ -208,9 +209,9 @@ export default function Home() {
         icon: <GroupIcon />,
         children: [
           {
-            segment: "view",
-            pattern: "view/:id",
-            title: labels.view,
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
             hidden: true
           }
         ]
@@ -249,7 +250,15 @@ export default function Home() {
           {
             segment: "group",
             title: labels.permissionGroups,
-            hidden: true
+            hidden: true,
+            children: [
+              {
+                segment: "view",
+                pattern: "view/:id",
+                title: labels.view,
+                hidden: true
+              }
+            ]
           }
         ]
       });

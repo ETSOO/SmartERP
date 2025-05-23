@@ -1,6 +1,7 @@
 ﻿using com.etsoo.WebUtils;
 using CRM.Server.RQ.Group;
 using CRM.Server.Services;
+using PlatformShared.Dto;
 
 namespace CRM.Server.Endpoints
 {
@@ -10,6 +11,16 @@ namespace CRM.Server.Endpoints
     /// </summary>
     internal static class Group
     {
+        private static AppModule? ParseModule(int? module)
+        {
+            if (module != null && Enum.TryParse<AppModule>(module.ToString(), out var m))
+            {
+                return m;
+            }
+
+            return null;
+        }
+
         public static RouteGroupBuilder MapGroup(this RouteGroupBuilder builder)
         {
             var g = builder.MapGroup("Group");
@@ -19,6 +30,12 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("Query", (IGroupService service, GroupQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query permission group info / 查询权限组信息").WithTags("Group");
+
+            g.MapGet("QueryItems/{module:int?}", (IGroupService service, int? module, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryItemsAsync(accessor.GetJsonWriter(), ParseModule(module), cancellationToken))
+                .WithDescription("Query permission items / 查询权限项目").WithTags("Group");
+
+            g.MapGet("Read/{id:int}", (IGroupService service, int id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
+                .WithDescription("Read permission group info / 读取权限组信息").WithTags("Group");
 
             return builder;
         }

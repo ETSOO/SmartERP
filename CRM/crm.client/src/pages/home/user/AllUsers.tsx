@@ -19,12 +19,14 @@ import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { UserQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
+import { DeptTiplist, GroupTiplist } from "@etsoo/smarterp-crm/components";
 
 const template = {
-  name: "string",
-  identityType: "number"
+  keyword: "string",
+  deptId: "number",
+  groupId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllUsers() {
@@ -36,9 +38,11 @@ export default function AllUsers() {
     "actions",
     "confirmAction",
     "creation",
+    "dept",
     "depts",
     "edit",
     "entityStatus",
+    "permissionGroup",
     "name",
     "role",
     "view"
@@ -52,8 +56,6 @@ export default function AllUsers() {
 
   const margin = MUGlobal.pagePaddings;
 
-  const baseIdentity = app.getPersonIdentityType();
-
   // Page data hook
   usePageDataEmpty(app);
 
@@ -65,19 +67,16 @@ export default function AllUsers() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./view/${data.id}`)}
+      quickAction={(data) => navigate(`./../contact/view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
           label={labels.name}
-          name="keywords"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
         />,
-        <IdentityFlagsList
-          value={data.identityType}
-          baseIdentity={baseIdentity}
-          search
-        />
+        <DeptTiplist label={labels.dept} search />,
+        <GroupTiplist label={labels.permissionGroup} search />
       ]}
       loadData={async (data) => {
         return await app.userApi.query(data, {
@@ -101,7 +100,8 @@ export default function AllUsers() {
         {
           field: "userRole",
           width: 142,
-          header: labels.role
+          header: labels.role,
+          valueFormatter: ({ data }) => app.getRoleLabel(data?.userRole)
         },
         {
           field: "creation",
@@ -127,10 +127,18 @@ export default function AllUsers() {
 
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
-                  <EditIcon />
-                </IconButtonLink>
-                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
+                {data.editable && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
+                <IconButtonLink
+                  title={labels.view}
+                  href={`./../contact/view/${data.id}`}
+                >
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>
@@ -145,7 +153,7 @@ export default function AllUsers() {
             data.name,
             app.formatDate(data.creation, "d"),
             [
-              {
+              data.editable && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./edit/${data.id}`
@@ -153,7 +161,7 @@ export default function AllUsers() {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./view/${data.id}`
+                action: `./../contact/view/${data.id}`
               }
             ],
             <React.Fragment></React.Fragment>

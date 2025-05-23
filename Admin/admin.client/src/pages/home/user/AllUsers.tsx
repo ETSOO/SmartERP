@@ -24,7 +24,7 @@ import { AllUserDto } from "../../../api/dto/query/AllUserDto";
 import { BoxProps } from "@mui/material/Box";
 
 const template = {
-  name: "string",
+  keyword: "string",
   pin: "string",
   identifier: "string",
   isFrozen: "boolean",
@@ -77,8 +77,8 @@ export default function AllUsers() {
       fields={(data) => [
         <SearchField
           label={labels.name}
-          name="keywords"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
           slotProps={{
             input: { sx: { width: "120px", htmlInput: { maxLength: 128 } } }
           }}

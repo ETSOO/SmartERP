@@ -1,8 +1,12 @@
-﻿using com.etsoo.CoreFramework.Business;
+﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
+using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Serialization;
 using CRM.Server.Dto.User;
 using CRM.Server.RQ.User;
 using Microsoft.EntityFrameworkCore;
@@ -20,16 +24,19 @@ namespace CRM.Server.Services
     public class UserService : SEUserService, IUserService
     {
         readonly MyDbContext _db;
+        readonly ICommonService _commonService;
 
         public UserService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
-            ILogger<UserService> logger
+            ILogger<UserService> logger,
+            ICommonService commonService
         )
             : base(app, userAccessor.UserSafe, "user", logger)
         {
             _db = db;
+            _commonService = commonService;
         }
 
         private IQueryable<Person> CreateQuery(UserListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
@@ -85,6 +92,12 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task ListAsync(UserListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.User.List, cancellationToken))
+            {
+                return;
+            }
+
             await CreateQuery(rq)
                 .Select(ou => new UserListData
                 {
@@ -100,9 +113,15 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task<UserQueryData[]> QueryAsync(UserQueryRQ rq, CancellationToken cancellationToken = default)
+        public async Task<UserQueryData[]> QueryAsync(UserQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            return CreateQuery(rq)
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.User.Query, cancellationToken))
+            {
+                return [];
+            }
+
+            return await CreateQuery(rq)
                 .Select(u => new UserQueryData
                 {
                     Id = u.Id,
@@ -112,8 +131,174 @@ namespace CRM.Server.Services
                         .Where(o => (o.Person.IdentityType & IdentityTypeFlags.Dept) > 0)
                         .Select(o => o.Person.Name),
                     Status = u.Status,
+                    Editable = u.Id != User.Oid && (u.UserRole == null || u.UserRole <= User.Role),
                     Creation = u.Creation
                 }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Update user
+        /// 更新用户
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateAsync(UserUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.User.Edit, cancellationToken)
+                || rq.Id == User.Oid)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var user = await _db.Users(orgId)
+                .Where(u => u.Id == rq.Id && (u.UserRole == null || u.UserRole <= User.Role))
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (user == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (rq.ReportTo.HasValue && !await _db.Users(orgId).AnyAsync(u => u.Id == rq.ReportTo.Value, cancellationToken))
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.ReportTo));
+            }
+
+            if (rq.Depts?.Any() is true && !await _db.Depts(orgId).AnyAsync(d => rq.Depts.Contains(d.Id), cancellationToken))
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.Depts));
+            }
+
+            if (rq.Groups?.Any() is true && !await _db.Groups(orgId).AnyAsync(g => rq.Groups.Contains(g.Id), cancellationToken))
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.Depts));
+            }
+
+            if (rq.IsModified(nameof(rq.Name)) && !string.IsNullOrEmpty(rq.Name))
+            {
+                user.Name = rq.Name;
+
+                var keyword = ChineseUtils.GetPinyin(rq.Name, true).ToInitials();
+                user.QueryKeyword = keyword;
+            }
+
+            if (rq.IsModified(nameof(rq.AssignedId)))
+            {
+                user.AssignedId = rq.AssignedId?.ToUpper();
+            }
+
+            if (rq.IsModified(nameof(rq.Expiry)))
+            {
+                user.Expiry = rq.Expiry?.ToUniversalTime();
+            }
+
+            if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
+            {
+                user.Status = rq.Status.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.ReportTo)))
+            {
+                user.ReportTo = rq.ReportTo;
+            }
+
+            if (rq.IsModified(nameof(rq.Depts)))
+            {
+                if (rq.Depts?.Any() is true)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+
+            if (rq.IsModified(nameof(rq.Groups)))
+            {
+                user.PermissionGroups = rq.Groups?.ToList();
+            }
+
+            if (rq.IsModified(nameof(rq.PermissionIncluded)))
+            {
+                user.PermissionIncluded = rq.PermissionIncluded?.ToList();
+            }
+
+            if (rq.IsModified(nameof(rq.PermissionExcluded)))
+            {
+                user.PermissionExcluded = rq.PermissionExcluded?.ToList();
+            }
+
+            // Changes
+            // var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Read user data for update
+        /// 读取用于更新的用户数据
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<UserUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.User.Edit, cancellationToken))
+            {
+                return null;
+            }
+
+            return await _db.Users(User.OrganizationInt).AsNoTracking()
+                .Where(u => u.Id == id)
+                .Select(u => new UserUpdateReadData
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    UserRole = u.UserRole,
+                    AssignedId = u.AssignedId,
+                    ReportTo = u.ReportTo,
+                    Expiry = u.Expiry,
+                    Status = u.Status,
+                    Groups = u.PermissionGroups,
+                    PermissionIncluded = u.PermissionIncluded,
+                    PermissionExcluded = u.PermissionExcluded,
+                    Depts = u.ContactOwners
+                        .Where(o => (o.Person.IdentityType & IdentityTypeFlags.Dept) > 0)
+                        .Select(o => new LongIdItem
+                        {
+                            Id = o.ContactId,
+                            Title = o.Contact.Name
+                        })
+                }).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read user data for update
+        /// 读取用于更新的用户数据
+        /// </summary>
+        /// <param name="id">User id</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var data = await UpdateReadAsync(id, cancellationToken);
+            if (data != null)
+            {
+                await writer.SerializeAsync(data, MyJsonSerializerContext.Default.UserUpdateReadData);
+            }
         }
     }
 }

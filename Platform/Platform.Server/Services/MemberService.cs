@@ -5,6 +5,7 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.HTTP;
+using com.etsoo.Localization;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -401,7 +402,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            if (rq.ReportTo.HasValue && !await _db.Users(User.OrganizationInt).AnyAsync(o => o.Id == rq.ReportTo.Value, cancellationToken))
+            if (rq.ReportTo.HasValue && !await _db.Users(User.OrganizationInt).AnyAsync(u => u.Id == rq.ReportTo.Value, cancellationToken))
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.ReportTo));
             }
@@ -431,6 +432,8 @@ namespace Platform.Server.Services
             if (rq.IsModified(nameof(rq.LocalName)) && !string.IsNullOrEmpty(rq.LocalName))
             {
                 ou.Name = rq.LocalName;
+                var keyword = ChineseUtils.GetPinyin(rq.LocalName, true).ToInitials();
+                ou.QueryKeyword = keyword;
             }
 
             if (rq.IsModified(nameof(rq.AssignedId)))

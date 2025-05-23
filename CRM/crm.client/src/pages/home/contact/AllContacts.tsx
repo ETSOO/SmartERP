@@ -25,7 +25,7 @@ import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
 const template = {
-  name: "string",
+  keyword: "string",
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -76,8 +76,8 @@ export default function AllContacts() {
       fields={(data) => [
         <SearchField
           label={labels.personName}
-          name="keywords"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
         />,
         <IdentityFlagsList
           value={data.identityType}

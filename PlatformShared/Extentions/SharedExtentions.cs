@@ -292,6 +292,20 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query permission groups
+        /// 查询权限组
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PermissionGroup> Groups(this MyDbContext db, int orgId)
+        {
+            return db.PermissionGroups.Where(g => g.CoreOrganizationId == null
+                || g.CoreOrganizationId == orgId
+            );
+        }
+
+        /// <summary>
         /// Query orders
         /// 查询订单
         /// </summary>

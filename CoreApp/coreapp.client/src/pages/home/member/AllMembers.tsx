@@ -29,7 +29,7 @@ import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
 const template = {
-  name: "string",
+  keyword: "string",
   userRole: "number",
   reportTo: "number",
   assignedId: "string",
@@ -99,8 +99,8 @@ export default function AllMembers() {
       fields={(data) => [
         <SearchField
           label={labels.name}
-          name="keywords"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
           slotProps={{ input: { sx: { width: "120px" } } }}
         />,
         <ComboBox

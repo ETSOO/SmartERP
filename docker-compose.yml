@@ -57,7 +57,7 @@ services:
     # 亿速思维本地设置
     localsetup:
         image: localsetup
-        tty: true # For infinite running
+        # tty: true # For infinite running
         # stdin_open: true
         build:
             context: .
@@ -65,6 +65,7 @@ services:
         container_name: localsetup
         volumes:
             - certs:/var/etsoo/certs
+            - ./data/certs:/var/etsoo/hostcerts
         networks:
             - etsoo
 
@@ -137,7 +138,11 @@ services:
             - etsoo
 
     # Platform site
+    # Use default dev certificate inside docker:
     # dotnet dev-certs https -ep "%USERPROFILE%\.aspnet\https\aspnetapp.pfx" -p etsoo --trust
+    # volumes: - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+    # - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
+    # - Kestrel__Certificates__Default__Password=etsoo
     etsoo-platform:
         depends_on:
             - postgres
@@ -152,11 +157,9 @@ services:
             - ASPNETCORE_HTTP_PORTS=8080;80
             - ASPNETCORE_HTTPS_PORTS=8081;443
             - ETSOO_ENVIRONMENT=Docker
-            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
-            - Kestrel__Certificates__Default__Password=etsoo
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+            - certs:/etc/etsoo/certs
         networks:
             - etsoo
 
@@ -190,11 +193,9 @@ services:
             - ASPNETCORE_HTTP_PORTS=8080;80
             - ASPNETCORE_HTTPS_PORTS=8081;443
             - ETSOO_ENVIRONMENT=Docker
-            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
-            - Kestrel__Certificates__Default__Password=etsoo
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+            - certs:/etc/etsoo/certs
         networks:
             - etsoo
 
@@ -212,11 +213,9 @@ services:
             - ASPNETCORE_HTTP_PORTS=8080;80
             - ASPNETCORE_HTTPS_PORTS=8081;443
             - ETSOO_ENVIRONMENT=Docker
-            - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
-            - Kestrel__Certificates__Default__Password=etsoo
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-            - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
+            - certs:/etc/etsoo/certs
         networks:
             - etsoo
 

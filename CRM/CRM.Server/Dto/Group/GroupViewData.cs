@@ -3,10 +3,10 @@
 namespace CRM.Server.Dto.Group
 {
     /// <summary>
-    /// Permission group query data
-    /// 权限组查询数据
+    /// Permission group view data
+    /// 权限组浏览数据
     /// </summary>
-    public record GroupQueryData
+    public record GroupViewData
     {
         /// <summary>
         /// Id
@@ -27,9 +27,15 @@ namespace CRM.Server.Dto.Group
         public UserRole Roles { get; init; }
 
         /// <summary>
-        /// Is system item
-        /// 是否为系统项目
+        /// Permission items
+        /// 权限项目
         /// </summary>
-        public bool IsSystem { get; init; }
+        public required IEnumerable<short> Items { get; init; }
+
+        /// <summary>
+        /// Organization id
+        /// 所属机构编号
+        /// </summary>
+        public int? OrgId { get; init; }
     }
 }
