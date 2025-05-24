@@ -3,30 +3,8 @@ import { defineConfig } from "vite";
 import plugin from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import fs from "fs";
-import path from "path";
-import child_process from "child_process";
-import { env } from "process";
-var baseFolder = env.APPDATA !== undefined && env.APPDATA !== ""
-    ? "".concat(env.APPDATA, "/ASP.NET/https")
-    : "".concat(env.HOME, "/.aspnet/https");
-fs.mkdirSync(baseFolder, { recursive: true });
-var certificateName = "platform.client";
-var certFilePath = path.join(baseFolder, "".concat(certificateName, ".pem"));
-var keyFilePath = path.join(baseFolder, "".concat(certificateName, ".key"));
-if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
-    if (0 !==
-        child_process.spawnSync("dotnet", [
-            "dev-certs",
-            "https",
-            "--export-path",
-            certFilePath,
-            "--format",
-            "Pem",
-            "--no-password"
-        ], { stdio: "inherit" }).status) {
-        throw new Error("Could not create certificate.");
-    }
-}
+var keyFilePath = process.env.HTTPS_KEY_FILE || "./../../data/certs/dev.key";
+var certFilePath = process.env.HTTPS_CERT_FILE || "./../../data/certs/dev.pem";
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [

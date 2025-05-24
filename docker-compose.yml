@@ -157,6 +157,8 @@ services:
             - ASPNETCORE_HTTP_PORTS=8080;80
             - ASPNETCORE_HTTPS_PORTS=8081;443
             - ETSOO_ENVIRONMENT=Docker
+        ports:
+            - "9702:8081"
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
             - certs:/etc/etsoo/certs
@@ -193,6 +195,8 @@ services:
             - ASPNETCORE_HTTP_PORTS=8080;80
             - ASPNETCORE_HTTPS_PORTS=8081;443
             - ETSOO_ENVIRONMENT=Docker
+        ports:
+            - "9705:8081"
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
             - certs:/etc/etsoo/certs
@@ -213,6 +217,8 @@ services:
             - ASPNETCORE_HTTP_PORTS=8080;80
             - ASPNETCORE_HTTPS_PORTS=8081;443
             - ETSOO_ENVIRONMENT=Docker
+        ports:
+            - "9708:8081"
         volumes:
             - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
             - certs:/etc/etsoo/certs
@@ -224,7 +230,7 @@ services:
     # Nginx 用于反向代理
     # 修改根目录下的 nginx.conf 文件以适应你的需求，确保(80, 443)端口没有被其他服务占用（如 IIS）
     nginx:
-        image: nginx:1.27-alpine
+        image: nginx:1.28-alpine
         container_name: nginx
         depends_on:
             - etsoo-coreapp

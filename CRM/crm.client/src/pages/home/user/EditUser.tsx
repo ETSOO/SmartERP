@@ -125,7 +125,7 @@ export default function EditUser() {
       <Grid size={{ xs: 12, sm: 12 }}>
         <ButtonGroups
           fullWidth
-          ids={formik.values.depts}
+          ids={formik.values.groups}
           onValueChange={(ids) => formik.setFieldValue("groups", ids)}
         />
       </Grid>
