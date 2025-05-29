@@ -275,6 +275,7 @@ namespace CRM.Server.Services
             }
 
             return await _db.Persons.AsNoTracking()
+                .Include(p => p.ContactOwners).ThenInclude(o => o.Person)
                 .Where(p => p.OrgId == orgId && p.Id == id && (p.IdentityType & identityType) > 0)
                 .Select(p => new PersonViewData
                 {
@@ -309,6 +310,13 @@ namespace CRM.Server.Services
                     Regions = p.Regions,
                     Currencies = p.Currencies,
                     Cultures = p.Cultures,
+
+                    // Groups
+                    ContactOwners = p.ContactOwners.Select(o => new LongIdItem
+                    {
+                        Id = o.PersonId,
+                        Title = o.Person.Name
+                    }),
 
                     /** Private **/
                     PrivateData = isPrivate || p.CoreUserId == userId || p.ReportTo == userId || p.UserId == userId ? new PersonPrivateData

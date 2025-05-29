@@ -265,6 +265,12 @@ namespace PlatformShared.Database.Models
         public string? Data { get; set; }
 
         /// <summary>
+        /// Tags (id)
+        /// 标签（编号）
+        /// </summary>
+        public List<int>? Tags { get; set; }
+
+        /// <summary>
         /// Buyer
         /// 购买方
         /// </summary>

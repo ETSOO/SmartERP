@@ -63,6 +63,7 @@ export default function Home() {
     "addProfile",
     "allProfiles",
     "app3",
+    "categories",
     "contacts",
     "customers",
     "depts",
@@ -79,6 +80,7 @@ export default function Home() {
     "purchases",
     "signoutSuccess",
     "simpleInventory",
+    "sortCategory",
     "system",
     "suppliers",
     "updateSystemSettings",
@@ -133,6 +135,29 @@ export default function Home() {
             pattern: "avatar/:id",
             title: labels.editAvatar,
             hidden: true
+          },
+          {
+            segment: "category",
+            title: labels.categories,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "sort",
+                title: labels.sortCategory,
+                hidden: true
+              }
+            ]
           }
         ]
       },

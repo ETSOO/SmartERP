@@ -3,8 +3,8 @@ import React from "react";
 import { app } from "../../../app/MyApp";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
-import { usePageData } from "@etsoo/smarterp-core";
 import Stack from "@mui/material/Stack";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 
 export default function ContactAvatar() {
   // Route
@@ -15,15 +15,10 @@ export default function ContactAvatar() {
   const avatar: string | undefined = location.state;
 
   // Labels
-  const labels = app.getLabels(
-    "avatar",
-    "editAvatar",
-    "imageSizeTooSmall",
-    "logo"
-  );
+  const labels = app.getLabels("avatar", "imageSizeTooSmall", "logo");
 
   // Page data hook
-  usePageData(app, labels.editAvatar, []);
+  usePageDataEmpty(app);
 
   return (
     <CommonPage sx={{ width: "fit-content" }}>

@@ -175,9 +175,9 @@ namespace PlatformShared.Database.Models
         public ProductInventoryWay InventoryWay { get; set; }
 
         /// <summary>
-        /// Keywords (id)
-        /// 关键词（编号）
+        /// Tags (id)
+        /// 标签（编号）
         /// </summary>
-        public List<int>? Keywords { get; set; }
+        public List<int>? Tags { get; set; }
     }
 }

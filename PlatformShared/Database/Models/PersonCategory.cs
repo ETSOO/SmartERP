@@ -1,4 +1,6 @@
-﻿namespace PlatformShared.Database.Models
+﻿using com.etsoo.CoreFramework.Business;
+
+namespace PlatformShared.Database.Models
 {
     /// <summary>
     /// Person category
@@ -17,6 +19,12 @@
         /// 核心机构编号
         /// </summary>
         public int CoreOrganizationId { get; set; }
+
+        /// <summary>
+        /// Identity type, employee, customer, or supplier
+        /// 标识类型，员工、客户或供应商
+        /// </summary>
+        public IdentityTypeFlags IdentityType { get; set; }
 
         /// <summary>
         /// Names

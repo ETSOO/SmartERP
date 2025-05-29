@@ -1,6 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
-using com.etsoo.CoreFramework.Models;
 
 namespace CRM.Server.Dto.User
 {
@@ -56,7 +55,7 @@ namespace CRM.Server.Dto.User
         /// Department ids
         /// 所属部门编号
         /// </summary>
-        public IEnumerable<LongIdItem>? Depts { get; init; }
+        public IEnumerable<long>? Depts { get; init; }
 
         /// <summary>
         /// Permission group ids

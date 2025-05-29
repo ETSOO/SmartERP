@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 
@@ -184,19 +185,25 @@ namespace CRM.Server.Dto.Person
         /// Regions
         /// 地区
         /// </summary>
-        public List<string>? Regions { get; init; }
+        public IEnumerable<string>? Regions { get; init; }
 
         /// <summary>
         /// Currencies
         /// 币种
         /// </summary>
-        public List<string>? Currencies { get; init; }
+        public IEnumerable<string>? Currencies { get; init; }
 
         /// <summary>
         /// Cultures
         /// 文化
         /// </summary>
-        public List<string>? Cultures { get; init; }
+        public IEnumerable<string>? Cultures { get; init; }
+
+        /// <summary>
+        /// Contact owners
+        /// 联系人所有者
+        /// </summary>
+        public IEnumerable<LongIdItem>? ContactOwners { get; init; }
 
         /// <summary>
         /// JSON data

@@ -30,6 +30,7 @@ const theme = createTheme({
       main: "#3f51b5"
     }
   },
+
   components: {
     MuiCardContent: {
       styleOverrides: {
@@ -109,7 +110,42 @@ const router = createDynamicRouter([
               return { Component: ContactAvatar.default };
             }
           },
-
+          {
+            path: "/home/contact/category",
+            lazy: async () => {
+              const AllCategories = await import(
+                "./pages/home/contact/AllCategories"
+              );
+              return { Component: AllCategories.default };
+            }
+          },
+          {
+            path: "/home/contact/category/add",
+            lazy: async () => {
+              const AddCategory = await import(
+                "./pages/home/contact/AddCategory"
+              );
+              return { Component: AddCategory.default };
+            }
+          },
+          {
+            path: "/home/contact/category/edit/:id",
+            lazy: async () => {
+              const EditCategory = await import(
+                "./pages/home/contact/AddCategory"
+              );
+              return { Component: EditCategory.default };
+            }
+          },
+          {
+            path: "/home/contact/category/sort",
+            lazy: async () => {
+              const SortCategories = await import(
+                "./pages/home/contact/SortCategories"
+              );
+              return { Component: SortCategories.default };
+            }
+          },
           {
             path: "/home/customer",
             lazy: async () => {

@@ -16,6 +16,9 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasIdentityOptions(1001L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+            entity.Property(e => e.IdentityType)
+                .HasConversion<byte>()
+                .HasColumnName("identity_type");
             entity.Property(e => e.Names)
                 .HasColumnType("character varying(128)[]")
                 .HasColumnName("names");

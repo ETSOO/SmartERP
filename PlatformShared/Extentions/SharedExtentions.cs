@@ -320,6 +320,28 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query person categories
+        /// 查询人员分类
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <param name="identityType">Identity type</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonCategory> PersonCategories(this MyDbContext db, int orgId, IdentityTypeFlags? identityType = null)
+        {
+            if (identityType.HasValue)
+            {
+                return db.PersonCategories.Where(p => p.CoreOrganizationId == orgId
+                    && (p.IdentityType & identityType) > 0
+                );
+            }
+            else
+            {
+                return db.PersonCategories.Where(p => p.CoreOrganizationId == orgId);
+            }
+        }
+
+        /// <summary>
         /// Query purchase orders
         /// 查询采购
         /// </summary>

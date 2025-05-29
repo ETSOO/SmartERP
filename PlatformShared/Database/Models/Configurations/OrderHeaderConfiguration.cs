@@ -86,6 +86,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
                 .HasColumnName("data");
+            entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");

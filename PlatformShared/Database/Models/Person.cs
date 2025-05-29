@@ -512,10 +512,10 @@ namespace PlatformShared.Database.Models
         public List<int>? CategoryIds { get; set; }
 
         /// <summary>
-        /// Keywords (id)
-        /// 关键词（编号）
+        /// Tags (id)
+        /// 标签（编号）
         /// </summary>
-        public List<int>? Keywords { get; set; }
+        public List<int>? Tags { get; set; }
 
         /// <summary>
         /// Addresses

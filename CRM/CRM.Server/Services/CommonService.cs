@@ -1,6 +1,9 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using PlatformShared.Database;
+using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 
 namespace CRM.Server.Services
@@ -48,6 +51,27 @@ namespace CRM.Server.Services
             }
 
             return type;
+        }
+
+        /// <summary>
+        /// Add tags
+        /// 添加标签
+        /// </summary>
+        /// <param name="kind">Kind</param>
+        /// <param name="tags">Tags</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Tag ids</returns>
+        public Task<int[]> AddTagsAsync(FeatureTagKind kind, IEnumerable<string> tags, CancellationToken cancellationToken = default)
+        {
+            var orgId = _userAccessor.UserSafe.OrganizationInt;
+
+            var orgIdSP = new NpgsqlParameter<int>("p_org_id", orgId);
+            var kindSP = new NpgsqlParameter<short>("p_kind", (short)kind);
+            var tagsSP = new NpgsqlParameter<IEnumerable<string>>("p_tags", tags);
+
+            return _db.Database
+                .SqlQuery<int>($"SELECT * FROM add_tags({orgIdSP}, {kindSP}, {tagsSP})")
+                .ToArrayAsync(cancellationToken);
         }
 
         /// <summary>

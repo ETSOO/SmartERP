@@ -4,10 +4,12 @@ import {
   ResponsivePage,
   SearchField,
   IconButtonLink,
-  MobileListItemRenderer
+  MobileListItemRenderer,
+  ButtonLink
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
+import CategoryIcon from "@mui/icons-material/Category";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -23,6 +25,7 @@ import { DataTypes } from "@etsoo/shared";
 import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { Permissions } from "@etsoo/smarterp-crm";
 
 const template = {
   keyword: "string",
@@ -37,7 +40,7 @@ export default function AllContacts() {
   const labels = app.getLabels(
     "actions",
     "assignedId",
-    "confirmAction",
+    "categories",
     "creation",
     "edit",
     "entityStatus",
@@ -67,7 +70,20 @@ export default function AllContacts() {
     <ResponsivePage<PersonQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: <React.Fragment></React.Fragment>
+        fabButtons: (
+          <React.Fragment>
+            {app.owns(Permissions.Org.Manage) && (
+              <ButtonLink
+                href="./category"
+                size="small"
+                variant="outlined"
+                startIcon={<CategoryIcon />}
+              >
+                {labels.categories}
+              </ButtonLink>
+            )}
+          </React.Fragment>
+        )
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}

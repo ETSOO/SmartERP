@@ -4,6 +4,10 @@ body {
     "微软雅黑";
 }
 
+.MuiChip-label {
+  text-transform: none;
+}
+
 #page-container {
   align-self: center;
 }

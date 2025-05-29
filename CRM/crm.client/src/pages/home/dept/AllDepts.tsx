@@ -39,7 +39,6 @@ export default function AllDepts() {
   const labels = app.getLabels(
     "actions",
     "add",
-    "confirmAction",
     "creation",
     "edit",
     "leader",
@@ -138,15 +137,22 @@ export default function AllDepts() {
 
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
-                  <EditIcon />
-                </IconButtonLink>
-                <IconButtonLink
-                  title={labels.view}
-                  href={`./../../contact/view/${data.id}`}
-                >
-                  <ArticleIcon />
-                </IconButtonLink>
+                {app.owns(Permissions.Dept.Edit) && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
+                {app.owns(Permissions.Dept.View) && (
+                  <IconButtonLink
+                    title={labels.view}
+                    href={`./../../contact/view/${data.id}`}
+                  >
+                    <ArticleIcon />
+                  </IconButtonLink>
+                )}
               </React.Fragment>
             );
           }
@@ -159,12 +165,12 @@ export default function AllDepts() {
             data.name,
             app.formatDate(data.creation, "d"),
             [
-              {
+              app.owns(Permissions.Dept.Edit) && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./edit/${data.id}`
               },
-              {
+              app.owns(Permissions.Dept.View) && {
                 label: labels.view,
                 icon: <ArticleIcon />,
                 action: `./../../contact/view/${data.id}`

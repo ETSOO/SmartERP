@@ -156,6 +156,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var user = await _db.Users(orgId)
+                .Include(u => u.ContactOwners).ThenInclude(o => o.Person)
                 .Where(u => u.Id == rq.Id && (u.UserRole == null || u.UserRole <= User.Role))
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -211,11 +212,23 @@ namespace CRM.Server.Services
             {
                 if (rq.Depts?.Any() is true)
                 {
+                    var itemsToAdd = rq.Depts.Where(d => !user.ContactOwners.Any(o => o.PersonId == d))
+                        .Select(d => new PersonRelation
+                        {
+                            PersonId = d,
+                            ContactId = rq.Id
+                        }).ToList();
 
+                    foreach (var item in itemsToAdd)
+                    {
+                        user.ContactOwners.Add(item);
+                    }
                 }
-                else
-                {
 
+                var itemsToRemove = user.ContactOwners.Where(d => d.Person != null && (d.Person.IdentityType & IdentityTypeFlags.Dept) > 0 && rq.Depts?.Contains(d.PersonId) is not true).ToList();
+                foreach (var item in itemsToRemove)
+                {
+                    user.ContactOwners.Remove(item);
                 }
             }
 
@@ -276,11 +289,7 @@ namespace CRM.Server.Services
                     PermissionExcluded = u.PermissionExcluded,
                     Depts = u.ContactOwners
                         .Where(o => (o.Person.IdentityType & IdentityTypeFlags.Dept) > 0)
-                        .Select(o => new LongIdItem
-                        {
-                            Id = o.ContactId,
-                            Title = o.Contact.Name
-                        })
+                        .Select(o => o.PersonId)
                 }).FirstOrDefaultAsync(cancellationToken);
         }
 

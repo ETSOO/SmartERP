@@ -105,6 +105,24 @@ export function PersonData(props: PersonDataProps) {
             ) : undefined,
           label: "reportTo"
         },
+        {
+          data: (item) =>
+            item.contactOwners != null && item.contactOwners.length > 0 ? (
+              <HBox gap={0.5} flexWrap="wrap">
+                {item.contactOwners.map((o) => (
+                  <ButtonLink
+                    key={o.id}
+                    href={`./../${o.id}`}
+                    size="small"
+                    variant="outlined"
+                  >
+                    {o.title}
+                  </ButtonLink>
+                ))}
+              </HBox>
+            ) : undefined,
+          label: "groups"
+        },
         "assignedId",
         "jobTitle",
         "regions",

@@ -75,10 +75,10 @@ namespace PlatformShared.Database
         public required DbSet<FeatureCulture> FeatureCultures { get; set; }
 
         /// <summary>
-        /// Feature keywords
-        /// 特征关键词
+        /// Feature tags
+        /// 特征标签
         /// </summary>
-        public required DbSet<FeatureKeyword> FeatureKeywords { get; set; }
+        public required DbSet<FeatureTag> FeatureTags { get; set; }
 
         /// <summary>
         /// Order, PO or transaction
@@ -227,7 +227,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new CoreUserDeviceTokenConfiguration());
             modelBuilder.ApplyConfiguration(new CoreUserIdentifierConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureCultureConfiguration());
-            modelBuilder.ApplyConfiguration(new FeatureKeywordConfiguration());
+            modelBuilder.ApplyConfiguration(new FeatureTagConfiguration());
             modelBuilder.ApplyConfiguration(new OrderHeaderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderLineConfiguration());
             modelBuilder.ApplyConfiguration(new PermissionGroupConfiguration());

@@ -7,7 +7,7 @@ namespace CRM.Server.RQ.Asset
     /// 资产列表请求数据
     /// </summary>
     [JsonDerivedType(typeof(AssetQueryRQ))]
-    public record AssetListRQ : QueryLongRQ
+    public record AssetListRQ : QueryIntRQ
     {
 
     }

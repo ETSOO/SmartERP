@@ -46,13 +46,13 @@ export default function EditUser() {
   // Formik
   // https://formik.org/docs/examples/with-material-ui
   // https://firxworx.com/blog/coding/react/integrating-formik-with-react-material-ui-and-typescript/
-  const formik = useFormik<UserUpdateRQ>({
+  const formik = useFormik<UserUpdateReadData>({
     initialValues: data,
     enableReinitialize: true,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       // Request data
-      const rq = { ...values };
+      const rq: UserUpdateRQ = { ...values };
 
       // Changed fields
       const fields = Utils.getDataChanges(rq, data);
@@ -68,7 +68,7 @@ export default function EditUser() {
       if (result == null) return;
 
       if (result.ok) {
-        navigate(`./../../view/${id}`);
+        navigate("./../..");
         return;
       }
 
@@ -93,6 +93,7 @@ export default function EditUser() {
         formik.handleSubmit(event);
       }}
       onUpdate={reloadData}
+      paddings={0}
     >
       <Grid size={{ xs: 12, sm: 6 }}>
         <InputField

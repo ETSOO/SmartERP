@@ -14,7 +14,8 @@ RUN apt-get install curl
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash
 RUN apt-get -y install nodejs
 
-
+# When no wwwroot is present, always caused by the client project's SDK version
+# <Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.3061438">
 FROM with-node AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src

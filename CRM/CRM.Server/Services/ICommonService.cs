@@ -1,10 +1,12 @@
 ﻿
 using com.etsoo.CoreFramework.Business;
+using PlatformShared.Database.Models;
 
 namespace CRM.Server.Services
 {
     public interface ICommonService
     {
+        Task<int[]> AddTagsAsync(FeatureTagKind kind, IEnumerable<string> tags, CancellationToken cancellationToken = default);
         Task<IdentityTypeFlags> GetPersonIdentityTypeAsync(CancellationToken cancellationToken = default);
         Task<IdentityTypeFlags> GetProfileIdentityTypeAsync(CancellationToken cancellationToken = default);
         ValueTask<bool> HasIdentityPermissionAsync(IdentityTypeFlags identityType, string name, CancellationToken cancellationToken);
