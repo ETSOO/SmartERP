@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
@@ -131,7 +132,7 @@ namespace CRM.Server.Services
                         .Where(o => (o.Person.IdentityType & IdentityTypeFlags.Dept) > 0)
                         .Select(o => o.Person.Name),
                     Status = u.Status,
-                    Editable = u.Id != User.Oid && (u.UserRole == null || u.UserRole <= User.Role),
+                    Editable = User.Role >= UserRole.Admin || (u.Id != User.Oid && (u.UserRole == null || u.UserRole <= User.Role)),
                     Creation = u.Creation
                 }).ToArrayAsync(cancellationToken);
         }
@@ -147,7 +148,7 @@ namespace CRM.Server.Services
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.User.Edit, cancellationToken)
-                || rq.Id == User.Oid)
+                || (rq.Id == User.Oid && User.Role < UserRole.Admin))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
@@ -262,7 +263,6 @@ namespace CRM.Server.Services
         /// 读取用于更新的用户数据
         /// </summary>
         /// <param name="id">User id</param>
-        /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
         public async Task<UserUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)

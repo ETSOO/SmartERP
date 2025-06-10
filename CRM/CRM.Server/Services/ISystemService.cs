@@ -1,7 +1,6 @@
 ﻿using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.System;
 using CRM.Server.RQ.System;
-using PlatformShared.Dto;
 
 namespace CRM.Server.Services
 {

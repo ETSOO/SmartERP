@@ -3,7 +3,7 @@ import React from "react";
 import { app } from "../../../app/MyApp";
 import { useNavigate } from "react-router-dom";
 import { useLocationState, useParamsEx } from "@etsoo/react";
-import { AvatarState, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { AvatarState, CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
@@ -30,11 +30,7 @@ export default function UpdateAvatar() {
             <img
               src={state.avatar}
               alt={labels.logo}
-              style={{
-                width: "320px",
-                height: "160px",
-                border: "1px solid #666"
-              }}
+              style={CoreUtils.avatarStyles(true)}
             />
           )}
           <Typography variant="caption">{state.title}</Typography>

@@ -26,6 +26,12 @@ namespace CRM.Server.Endpoints
             g.MapGet("Read/{id:long}", (IPersonService service, long id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
                 .WithDescription("Read person / 读取人员").WithTags("Person");
 
+            g.MapPut("Update", (IPersonService service, PersonUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+                .WithDescription("Update person / 更新人员").WithTags("Person");
+
+            g.MapGet("UpdateRead/{id:long}", (IPersonService service, long id, CancellationToken cancellationToken) => service.UpdateReadAsync(id, cancellationToken))
+                .WithDescription("Read person update data / 读取人员更新数据").WithTags("Person");
+
             return builder;
         }
     }

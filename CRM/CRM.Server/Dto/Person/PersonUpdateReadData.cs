@@ -1,28 +1,37 @@
-﻿using com.etsoo.CoreFramework.Authentication;
-using com.etsoo.CoreFramework.Business;
-using com.etsoo.CoreFramework.Models;
+﻿using com.etsoo.CoreFramework.Business;
 using PlatformShared.Database.Models;
-using PlatformShared.Dto;
 
 namespace CRM.Server.Dto.Person
 {
     /// <summary>
-    /// Person view data
-    /// 人员浏览数据
+    /// Person update read data
+    /// 人员更新读取数据
     /// </summary>
-    public record PersonViewData : ContactItem
+    public record PersonUpdateReadData
     {
         /// <summary>
-        /// Unique identifier
-        /// 唯一标识符
+        /// Id
+        /// 编号
         /// </summary>
-        public Guid Uid { get; init; }
+        public long Id { get; init; }
+
+        /// <summary>
+        /// Identity type
+        /// 识别类型
+        /// </summary>
+        public IdentityTypeFlags IdentityType { get; init; }
 
         /// <summary>
         /// Is legal person (enterprise)
         /// 是否为法人（企业）
         /// </summary>
         public bool IsLegalPerson { get; init; }
+
+        /// <summary>
+        /// Name
+        /// 姓名
+        /// </summary>
+        public required string Name { get; init; }
 
         /// <summary>
         /// Given name
@@ -49,6 +58,18 @@ namespace CRM.Server.Dto.Person
         public string? LatinFamilyName { get; init; }
 
         /// <summary>
+        /// Preferred name
+        /// 首先名
+        /// </summary>
+        public string? PreferredName { get; set; }
+
+        /// <summary>
+        /// Job title
+        /// 职务
+        /// </summary>
+        public string? JobTitle { get; init; }
+
+        /// <summary>
         /// Titles
         /// 称谓
         /// </summary>
@@ -61,22 +82,22 @@ namespace CRM.Server.Dto.Person
         public string? Description { get; init; }
 
         /// <summary>
-        /// Avatar
-        /// 头像
-        /// </summary>
-        public string? Avatar { get; init; }
-
-        /// <summary>
         /// Assigned id
         /// 分配的编号
         /// </summary>
         public string? AssignedId { get; init; }
 
         /// <summary>
+        /// Query keyword
+        /// 查询关键字
+        /// </summary>
+        public string? QueryKeyword { get; init; }
+
+        /// <summary>
         /// Categories
         /// 类目
         /// </summary>
-        public IEnumerable<CategoryItem>? Categories { get; init; }
+        public IEnumerable<int>? Categories { get; init; }
 
         /// <summary>
         /// Keywords
@@ -88,43 +109,13 @@ namespace CRM.Server.Dto.Person
         /// Addresses
         /// 地址
         /// </summary>
-        public IEnumerable<AddressItem>? Addresses { get; init; }
+        public IEnumerable<int>? Addresses { get; init; }
 
         /// <summary>
         /// Report to (person.id)
         /// 汇报对象
         /// </summary>
         public long? ReportTo { get; init; }
-
-        /// <summary>
-        /// Report to name
-        /// 汇报对象姓名
-        /// </summary>
-        public string? ReportToName { get; init; }
-
-        /// <summary>
-        /// Creation time
-        /// 创建时间
-        /// </summary>
-        public DateTimeOffset Creation { get; init; }
-
-        /// <summary>
-        /// Status
-        /// 状况
-        /// </summary>
-        public EntityStatus Status { get; init; }
-
-        /// <summary>
-        /// Is editable
-        /// 是否可编辑
-        /// </summary>
-        public bool Editable { get; set; }
-
-        /// <summary>
-        /// Query keyword
-        /// 查询关键字
-        /// </summary>
-        public string? QueryKeyword { get; init; }
 
         /// <summary>
         /// Regions
@@ -145,30 +136,10 @@ namespace CRM.Server.Dto.Person
         public IEnumerable<string>? Cultures { get; init; }
 
         /// <summary>
-        /// Contact owners
-        /// 联系人所有者
-        /// </summary>
-        public IEnumerable<LongIdItem>? ContactOwners { get; init; }
-
-        /// <summary>
         /// JSON data
         /// JSON 数据
         /// </summary>
         public string? Data { get; init; }
-
-        /** User **/
-
-        /// <summary>
-        /// User role, permission level
-        /// 用户角色，权限等级
-        /// </summary>
-        public UserRole? UserRole { get; init; }
-
-        /// <summary>
-        /// Inviter
-        /// 邀请人编号
-        /// </summary>
-        public string? InviterName { get; init; }
 
         /// <summary>
         /// Expiry time
@@ -177,10 +148,10 @@ namespace CRM.Server.Dto.Person
         public DateTimeOffset? Expiry { get; init; }
 
         /// <summary>
-        /// Refresh time
-        /// 刷新时间
+        /// Status
+        /// 状况
         /// </summary>
-        public DateTimeOffset RefreshTime { get; init; }
+        public EntityStatus Status { get; init; }
 
         /// <summary>
         /// Private data

@@ -10,6 +10,7 @@ import { PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
 import Divider from "@mui/material/Divider";
+import { CoreUtils } from "@etsoo/smarterp-core";
 
 type PersonDataProps = {
   data: PersonViewData;
@@ -22,6 +23,7 @@ export function PersonData(props: PersonDataProps) {
 
   // Labels
   const labels = app.getLabels(
+    "edit",
     "editAvatar",
     "familyName",
     "givenName",
@@ -29,9 +31,6 @@ export function PersonData(props: PersonDataProps) {
     "no",
     "yes"
   );
-
-  // Permission
-  const editPermission = app.isAdminUser();
 
   // Layout
   return (
@@ -43,22 +42,16 @@ export function PersonData(props: PersonDataProps) {
           <img
             src={item.avatar}
             alt={labels.logo}
-            style={{
-              width: "160px",
-              height: "160px",
-              border: "1px solid #666"
-            }}
+            style={CoreUtils.avatarStyles(item.isLegalPerson)}
           />
-          {editPermission && (
-            <IconButtonLink
-              href={`./../../avatar/${item.id}`}
-              state={item.avatar}
-              title={labels.editAvatar}
-              size="small"
-            >
-              <EditIcon />
-            </IconButtonLink>
-          )}
+          <IconButtonLink
+            href={`./../../avatar/${item.id}`}
+            state={item.avatar}
+            title={labels.editAvatar}
+            size="small"
+          >
+            <EditIcon />
+          </IconButtonLink>
         </HBox>
       )}
       fields={[
@@ -125,11 +118,39 @@ export function PersonData(props: PersonDataProps) {
         },
         "assignedId",
         "jobTitle",
+        {
+          data: (item) =>
+            item.categories?.map((c) => c.names.join(" -> ")).join(", "),
+          label: "categories",
+          singleRow: "medium",
+          horizontal: true
+        },
+        {
+          data: "tags",
+          singleRow: "medium",
+          horizontal: true
+        },
+        {
+          data: "description",
+          singleRow: true,
+          horizontal: true
+        },
         "regions",
         "currencies",
         "cultures",
         {
-          data: "description",
+          data: (item) =>
+            item.editable && (
+              <HBox gap={1} justifyContent="center" flexWrap="wrap">
+                <ButtonLink
+                  startIcon={<EditIcon />}
+                  variant="outlined"
+                  href={`./../../edit/${item.id}`}
+                >
+                  {labels.edit}
+                </ButtonLink>
+              </HBox>
+            ),
           singleRow: true
         },
         ...(data.privateData && Object.keys(data.privateData).length > 0

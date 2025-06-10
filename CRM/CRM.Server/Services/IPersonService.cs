@@ -1,4 +1,5 @@
-﻿using CRM.Server.Dto.Person;
+﻿using com.etsoo.Utils.Actions;
+using CRM.Server.Dto.Person;
 using CRM.Server.RQ.Person;
 using PlatformShared.Dto;
 using System.Buffers;
@@ -12,5 +13,7 @@ namespace CRM.Server.Services
         Task ListAsync(PersonListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task QueryAsync(PersonQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<PersonViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
+        Task<IActionResult> UpdateAsync(PersonUpdateRQ rq, CancellationToken cancellationToken = default);
+        Task<PersonUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default);
     }
 }

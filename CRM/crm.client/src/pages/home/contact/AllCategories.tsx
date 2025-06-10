@@ -112,9 +112,8 @@ export default function AllCategories() {
           </Typography>
           <OptionBool
             name="deleteSource"
-            variant="outlined"
             label={labels.mergeCategoryDelete}
-            defaultValue={"false"}
+            defaultValue={false}
           />
           <PersonCategoryTiplist
             label={labels.mergeTo}

@@ -3,7 +3,7 @@ import { ButtonLink, HBox, HBoxList, ViewPage } from "@etsoo/materialui";
 import HistoryIcon from "@mui/icons-material/History";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { app } from "../../../app/MyApp";
-import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadUserDto } from "../../../api/dto/query/ReadUserDto";
 import { DateUtils } from "@etsoo/shared";
@@ -49,11 +49,7 @@ export default function ViewUser() {
             <img
               src={item.avatar}
               alt={labels.logo}
-              style={{
-                width: "160px",
-                height: "160px",
-                border: "1px solid #666"
-              }}
+              style={CoreUtils.avatarStyles(false)}
             />
           </HBox>
         ) : undefined

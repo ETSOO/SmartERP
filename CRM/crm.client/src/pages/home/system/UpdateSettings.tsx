@@ -101,10 +101,9 @@ export default function UpdateSettings() {
         <OptionBool
           name="hasInventory"
           label={labels.hasInventory}
-          variant="outlined"
           required
           fullWidth
-          defaultValue={`${formik.values.hasInventory}`}
+          defaultValue={formik.values.hasInventory}
           onChange={formik.handleChange}
         />
       </Grid>
@@ -112,7 +111,7 @@ export default function UpdateSettings() {
         <ButtonCurrencies
           fullWidth
           required
-          ids={formik.values.currencies}
+          value={formik.values.currencies}
           onValueChange={(ids) => formik.setFieldValue("currencies", ids)}
         />
       </Grid>
@@ -120,7 +119,7 @@ export default function UpdateSettings() {
         <ButtonCurrencies
           label={labels.supplierCurrencies}
           fullWidth
-          ids={formik.values.supplierCurrencies}
+          value={formik.values.supplierCurrencies}
           onValueChange={(ids) =>
             formik.setFieldValue("supplierCurrencies", ids)
           }
@@ -130,7 +129,7 @@ export default function UpdateSettings() {
         <ButtonCultures
           fullWidth
           required
-          ids={formik.values.cultures}
+          value={formik.values.cultures}
           onValueChange={(ids) => formik.setFieldValue("cultures", ids)}
         />
       </Grid>

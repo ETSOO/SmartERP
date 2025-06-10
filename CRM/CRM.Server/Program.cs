@@ -217,6 +217,7 @@ services.AddScoped<IPOService, POService>();
 services.AddScoped<IProductService, ProductService>();
 services.AddScoped<ISupplierService, SupplierService>();
 services.AddScoped<ISystemService, SystemService>();
+services.AddScoped<ITagService, TagService>();
 services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
@@ -287,6 +288,7 @@ api.MapAuth()
     .MapProduct()
     .MapSupplier()
     .MapSystem()
+    .MapTag()
     .MapUser()
     .AddModelValidators()
     .RequireAuthorization()

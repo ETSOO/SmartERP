@@ -131,6 +131,12 @@ export default function Home() {
             hidden: true
           },
           {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
+            hidden: true
+          },
+          {
             segment: "avatar",
             pattern: "avatar/:id",
             title: labels.editAvatar,

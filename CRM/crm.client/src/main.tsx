@@ -102,6 +102,15 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/contact/edit/:id",
+            lazy: async () => {
+              const EditContact = await import(
+                "./pages/home/contact/EditContact"
+              );
+              return { Component: EditContact.default };
+            }
+          },
+          {
             path: "/home/contact/avatar/:id",
             lazy: async () => {
               const ContactAvatar = await import(

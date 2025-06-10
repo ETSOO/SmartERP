@@ -6,6 +6,7 @@ import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import { app } from "../../../app/MyApp";
 import {
   AvatarState,
+  CoreUtils,
   OrgReadDto,
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
@@ -70,11 +71,7 @@ export default function ViewOrg() {
           <img
             src={item.logo}
             alt={labels.logo}
-            style={{
-              width: "160px",
-              height: "80px",
-              border: "1px solid #666"
-            }}
+            style={CoreUtils.avatarStyles(true)}
           />
           {item.isOwner && (
             <IconButtonLink<AvatarState>

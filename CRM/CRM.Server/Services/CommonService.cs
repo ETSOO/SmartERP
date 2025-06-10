@@ -67,7 +67,7 @@ namespace CRM.Server.Services
 
             var orgIdSP = new NpgsqlParameter<int>("p_org_id", orgId);
             var kindSP = new NpgsqlParameter<short>("p_kind", (short)kind);
-            var tagsSP = new NpgsqlParameter<IEnumerable<string>>("p_tags", tags);
+            var tagsSP = new NpgsqlParameter<string[]>("p_tags", [.. tags]);
 
             return _db.Database
                 .SqlQuery<int>($"SELECT * FROM add_tags({orgIdSP}, {kindSP}, {tagsSP})")
@@ -114,6 +114,28 @@ namespace CRM.Server.Services
             var permissions = await HasPermissionsAsync(ids, cancellationToken);
 
             return GetIdentityType(permissions);
+        }
+
+        /// <summary>
+        /// Get tag kind from identity type
+        /// 从身份类型获取标签类型
+        /// </summary>
+        /// <param name="type">Identity type</param>
+        /// <returns>Tag kind</returns>
+        public FeatureTagKind GetTagKind(IdentityTypeFlags type)
+        {
+            if (type.HasFlag(IdentityTypeFlags.User))
+                return FeatureTagKind.User;
+            else if (type.HasFlag(IdentityTypeFlags.Customer))
+                return FeatureTagKind.Customer;
+            else if (type.HasFlag(IdentityTypeFlags.Supplier))
+                return FeatureTagKind.Supplier;
+            else if (type.HasFlag(IdentityTypeFlags.Org))
+                return FeatureTagKind.Org;
+            else if (type.HasFlag(IdentityTypeFlags.Dept))
+                return FeatureTagKind.Dept;
+            else
+                return FeatureTagKind.Contact;
         }
 
         /// <summary>

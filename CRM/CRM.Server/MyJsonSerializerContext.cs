@@ -10,6 +10,7 @@ using CRM.Server.Dto.PO;
 using CRM.Server.Dto.Product;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.Dto.System;
+using CRM.Server.Dto.Tag;
 using CRM.Server.Dto.User;
 using CRM.Server.RQ.Asset;
 using CRM.Server.RQ.Customer;
@@ -23,6 +24,7 @@ using CRM.Server.RQ.PO;
 using CRM.Server.RQ.Product;
 using CRM.Server.RQ.Supplier;
 using CRM.Server.RQ.System;
+using CRM.Server.RQ.Tag;
 using CRM.Server.RQ.User;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
@@ -76,10 +78,12 @@ namespace CRM.Server
     // Person
     [JsonSerializable(typeof(ChoosePersonsData))]
     [JsonSerializable(typeof(IEnumerable<PersonQueryData>))]
+    [JsonSerializable(typeof(PersonUpdateReadData))]
     [JsonSerializable(typeof(PersonViewData))]
 
     [JsonSerializable(typeof(ChoosePersonsRQ))]
     [JsonSerializable(typeof(PersonListRQ))]
+    [JsonSerializable(typeof(PersonUpdateRQ))]
 
     // Person category
     [JsonSerializable(typeof(PersonCategoryListData[]))]
@@ -128,6 +132,12 @@ namespace CRM.Server
     [JsonSerializable(typeof(SystemSettings))]
 
     [JsonSerializable(typeof(UpdateSettingsRQ))]
+
+    // Tag
+    [JsonSerializable(typeof(TagQueryData[]))]
+
+    [JsonSerializable(typeof(TagListRQ))]
+    [JsonSerializable(typeof(TagQueryRQ))]
 
     // User
     [JsonSerializable(typeof(UserListData))]

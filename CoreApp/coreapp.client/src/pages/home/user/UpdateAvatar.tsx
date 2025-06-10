@@ -1,7 +1,7 @@
 import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import Stack from "@mui/material/Stack";
 
 export default function UpdateAvatar() {
@@ -26,11 +26,7 @@ export default function UpdateAvatar() {
               <img
                 src={avatar}
                 alt={labels.avatar}
-                style={{
-                  width: "308px",
-                  height: "300px",
-                  border: "1px solid #666"
-                }}
+                style={CoreUtils.avatarStyles(false)}
               />
             );
           }}

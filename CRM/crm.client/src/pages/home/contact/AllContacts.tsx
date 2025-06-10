@@ -7,7 +7,6 @@ import {
   MobileListItemRenderer,
   ButtonLink
 } from "@etsoo/materialui";
-import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import CategoryIcon from "@mui/icons-material/Category";
 import React from "react";
@@ -42,7 +41,6 @@ export default function AllContacts() {
     "assignedId",
     "categories",
     "creation",
-    "edit",
     "entityStatus",
     "identityType",
     "jobTitle",
@@ -140,7 +138,7 @@ export default function AllContacts() {
           sortAsc: false
         },
         {
-          width: DefaultUI.Widths.icon2,
+          width: DefaultUI.Widths.icon1,
           header: labels.actions,
           cellRenderer: ({
             data,
@@ -155,9 +153,6 @@ export default function AllContacts() {
 
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
-                  <EditIcon />
-                </IconButtonLink>
                 <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
                   <ArticleIcon />
                 </IconButtonLink>
@@ -173,11 +168,6 @@ export default function AllContacts() {
             `[${app.person.getIdentityType(data)}] ${data.name}`,
             app.formatDate(data.creation, "d"),
             [
-              {
-                label: labels.edit,
-                icon: <EditIcon />,
-                action: `./edit/${data.id}`
-              },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,

@@ -3,7 +3,7 @@ import { BusinessTax } from "@etsoo/appscript";
 import { ButtonLink, HBox, ViewPage } from "@etsoo/materialui";
 import SupportIcon from "@mui/icons-material/Support";
 import { app } from "../../../app/MyApp";
-import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadOrgData } from "../../../api/dto/query/ReadOrgDto";
 import { AppUtils } from "../../../components/AppUtils";
@@ -45,11 +45,7 @@ export default function ViewOrg() {
             <img
               src={item.logo}
               alt={labels.logo}
-              style={{
-                width: "160px",
-                height: "80px",
-                border: "1px solid #666"
-              }}
+              style={CoreUtils.avatarStyles(true)}
             />
           </HBox>
         ) : undefined

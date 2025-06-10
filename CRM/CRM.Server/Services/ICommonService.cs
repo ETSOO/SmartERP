@@ -9,6 +9,7 @@ namespace CRM.Server.Services
         Task<int[]> AddTagsAsync(FeatureTagKind kind, IEnumerable<string> tags, CancellationToken cancellationToken = default);
         Task<IdentityTypeFlags> GetPersonIdentityTypeAsync(CancellationToken cancellationToken = default);
         Task<IdentityTypeFlags> GetProfileIdentityTypeAsync(CancellationToken cancellationToken = default);
+        FeatureTagKind GetTagKind(IdentityTypeFlags type);
         ValueTask<bool> HasIdentityPermissionAsync(IdentityTypeFlags identityType, string name, CancellationToken cancellationToken);
         Task<bool> HasPermissionAsync(short permissionItemId, CancellationToken cancellationToken = default);
         Task<bool[]> HasPermissionsAsync(IEnumerable<short> permissionItemIds, CancellationToken cancellationToken = default);

@@ -4,6 +4,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { app } from "../../../app/MyApp";
 import {
   AvatarState,
+  CoreUtils,
   MemberReadDto,
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
@@ -53,11 +54,7 @@ export default function ViewMember() {
           <img
             src={item.localAvatar ?? item.avatar}
             alt={labels.logo}
-            style={{
-              width: "160px",
-              height: "160px",
-              border: "1px solid #666"
-            }}
+            style={CoreUtils.avatarStyles(false)}
           />
           {editPermission && (
             <IconButtonLink<AvatarState>

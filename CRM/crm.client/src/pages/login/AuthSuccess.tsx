@@ -1,5 +1,5 @@
 import { useSearchParamsEx } from "@etsoo/react";
-import { IServiceUser, ServiceUserToken } from "@etsoo/materialui";
+import { ServiceUserToken } from "@etsoo/materialui";
 import { ApiRefreshTokenDto } from "@etsoo/appscript";
 import { IActionResult } from "@etsoo/shared";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import { app } from "../../app/MyApp";
 import React from "react";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import { CrmUser } from "@etsoo/smarterp-crm";
 
 export default function AuthSuccess() {
   // Query params
@@ -22,8 +23,9 @@ export default function AuthSuccess() {
     let pageResult: IActionResult;
     if (result) {
       try {
-        const resultObj: IActionResult<IServiceUser & ServiceUserToken> =
-          JSON.parse(decodeURIComponent(result));
+        const resultObj: IActionResult<CrmUser & ServiceUserToken> = JSON.parse(
+          decodeURIComponent(result)
+        );
 
         if (resultObj.ok && resultObj.data) {
           const userData = resultObj.data;
