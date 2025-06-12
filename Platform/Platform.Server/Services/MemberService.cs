@@ -359,7 +359,7 @@ namespace Platform.Server.Services
         /// <param name="writer">Writer</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public async Task ReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             await _db.Users(User.OrganizationInt)
                 .AsNoTracking()
@@ -475,15 +475,15 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
-        /// Update local avatar
-        /// 更新本地头像
+        /// Update local (person) avatar
+        /// 更新本地（人员）头像
         /// </summary>
         /// <param name="id">Organization id</param>
         /// <param name="avatarStream">Avatar stream</param>
         /// <param name="contentType">Cotent type</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>New URL</returns>
-        public async Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateAvatarAsync(long id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
         {
             // Check the stream
             if (avatarStream.Length is not > 10240 and < 102400000)
@@ -550,7 +550,7 @@ namespace Platform.Server.Services
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public async Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             var query = _db.Users(User.OrganizationInt)
                 .AsNoTracking()

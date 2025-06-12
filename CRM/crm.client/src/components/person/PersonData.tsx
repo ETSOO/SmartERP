@@ -44,14 +44,16 @@ export function PersonData(props: PersonDataProps) {
             alt={labels.logo}
             style={CoreUtils.avatarStyles(item.isLegalPerson)}
           />
-          <IconButtonLink
-            href={`./../../avatar/${item.id}`}
-            state={item.avatar}
-            title={labels.editAvatar}
-            size="small"
-          >
-            <EditIcon />
-          </IconButtonLink>
+          {item.editable && (
+            <IconButtonLink
+              href={`./../../avatar/${item.id}`}
+              state={item.avatar}
+              title={labels.editAvatar}
+              size="small"
+            >
+              <EditIcon />
+            </IconButtonLink>
+          )}
         </HBox>
       )}
       fields={[

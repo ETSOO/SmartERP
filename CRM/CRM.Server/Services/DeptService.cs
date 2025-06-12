@@ -72,6 +72,7 @@ namespace CRM.Server.Services
             {
                 OrgId = orgId,
                 IdentityType = IdentityTypeFlags.Dept,
+                IsLegalPerson = true,
                 Name = rq.Name,
                 QueryKeyword = keyword,
                 UserId = rq.LeaderId ?? User.Oid,

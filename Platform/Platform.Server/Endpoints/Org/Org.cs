@@ -1,4 +1,6 @@
 ﻿using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.WebUtils;
 using Microsoft.AspNetCore.Antiforgery;
@@ -22,10 +24,10 @@ namespace Platform.Server.Endpoints.Org
             g.MapPut("Create", (IOrgService service, OrgCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create organization / 创建新机构").WithTags("Org");
 
-            g.MapPost("CreateResource", (IOrgService service, OrgCreateResourceRQ rq, CancellationToken cancellationToken) => service.CreateResourceAsync(rq, cancellationToken))
+            g.MapPost("CreateResource", [Roles(Constants.AdminRoles)] (IOrgService service, OrgCreateResourceRQ rq, CancellationToken cancellationToken) => service.CreateResourceAsync(rq, cancellationToken))
                 .WithDescription("Create custom resource / 创建自定义资源").WithTags("Org");
 
-            g.MapDelete("Delete/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
+            g.MapDelete("Delete/{id:int}", [Roles(UserRole.Founder)] (IOrgService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete organization / 删除机构").WithTags("Org");
 
             g.MapGet("DownloadProfileFile/{id:long}", (IOrgService service, long id, CancellationToken cancellationToken) => service.DownloadFileAsync(OrgDownloadKind.Profile, id, cancellationToken))
@@ -78,21 +80,21 @@ namespace Platform.Server.Endpoints.Org
             g.MapPost("SendProfileEmail", (IOrgService service, SendProfileEmailRQ rq, CancellationToken cancellationToken) => service.SendProfileEmailAsync(rq, cancellationToken))
                 .WithDescription("Send profile email / 发送档案邮件").WithTags("Org");
 
-            g.MapPut("Update", (IOrgService service, OrgUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+            g.MapPut("Update", [Roles(Constants.AdminRoles)] (IOrgService service, OrgUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update organization / 更新机构").WithTags("Org");
 
-            g.MapPut("UpdateAvatar/{id:int}", (IOrgService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
+            g.MapPut("UpdateAvatar/{id:int}", [Roles(UserRole.Founder)] (IOrgService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Update organization avatar / 更新机构头像").WithTags("Org");
 
-            g.MapGet("UpdateRead/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
+            g.MapGet("UpdateRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read JSON data for upate / 浏览JSON数据用于更新").WithTags("Org");
 
             g.MapPost("UploadProfileFiles/{id:long}", (IOrgService service, long id, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadProfileFilesAsync(id, files, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Upload profile attachments / 上传档案附件").WithTags("Org");
 
-            g.MapGet("UpdateResourceRead/{id:int}", (IOrgService service, int id, CancellationToken cancellationToken) => service.UpdateResourceReadAsync(id, cancellationToken))
+            g.MapGet("UpdateResourceRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, CancellationToken cancellationToken) => service.UpdateResourceReadAsync(id, cancellationToken))
                 .WithDescription("Read JSON data for upate resource / 浏览JSON数据用于更新资源").WithTags("Org");
 
             return builder;

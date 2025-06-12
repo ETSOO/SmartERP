@@ -27,21 +27,21 @@
     <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.20" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
     <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.39" />
-    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.63" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.83" />
+    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.64" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.85" />
     <PackageReference Include="com.etsoo.Localization" Version="1.0.30" />
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.7" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
     <PackageReference Include="EfCore.SchemaCompare" Version="8.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.16" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>8.*-*</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
   </ItemGroup>
 
   <ItemGroup>

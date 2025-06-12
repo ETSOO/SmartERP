@@ -74,25 +74,8 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static async Task<bool> HasPermissionAsync(this MyDbContext db, long personId, short permissionItemId, CancellationToken cancellationToken = default)
         {
-            // Check 'all' permission first
-            var allItemId = permissionItemId.GetBaseId();
-
-            if (await db.Persons.AsNoTracking()
-                .Where(p => p.Id == personId && p.PermissionItems.Any(i => i.Id == allItemId))
-                .AnyAsync(cancellationToken))
-            {
-                return true;
-            }
-
-            if (allItemId == permissionItemId)
-            {
-                // Directly return to avoid additional query
-                return false;
-            }
-
-            return await db.Persons.AsNoTracking()
-                .Where(p => p.Id == personId && p.PermissionItems.Any(i => i.Id == permissionItemId))
-                .AnyAsync(cancellationToken);
+            var ps = await HasPermissionsAsync(db, personId, [permissionItemId], cancellationToken);
+            return ps[0];
         }
 
         /// <summary>

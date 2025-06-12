@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.39",
+    "@etsoo/appscript": "^1.6.40",
     "@etsoo/materialui": "^1.5.62",
     "@etsoo/react": "^1.8.49",
     "@etsoo/shared": "^1.2.75",

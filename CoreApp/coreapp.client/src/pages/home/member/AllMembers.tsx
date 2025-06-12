@@ -44,7 +44,7 @@ export default function AllMembers() {
   const roles = app.getRoles();
 
   // Edit permission
-  const editPermission = app.isAdminUser();
+  const editPermission = app.isHRUser();
 
   // Labels
   const labels = app.getLabels(
