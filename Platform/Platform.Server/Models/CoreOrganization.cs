@@ -33,11 +33,11 @@ public partial class CoreOrganization
 
     public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
+    public virtual ICollection<CoreApi> CoreApis { get; set; } = new List<CoreApi>();
+
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
     public virtual ICollection<FeatureCulture> FeatureCultures { get; set; } = new List<FeatureCulture>();
-
-    public virtual ICollection<FeatureKeyword> FeatureKeywords { get; set; } = new List<FeatureKeyword>();
 
     public virtual ICollection<CoreOrganization> InverseParent { get; set; } = new List<CoreOrganization>();
 

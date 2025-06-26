@@ -2,7 +2,12 @@ import { useParamsEx, useSearchParamsEx } from "@etsoo/react";
 import { OrgCreateResourceRQ, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { EditPage, ErrorAlert, InputField } from "@etsoo/materialui";
+import {
+  EditPage,
+  ErrorAlert,
+  InputField,
+  JsonDataInput
+} from "@etsoo/materialui";
 import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
 import { DomUtils } from "@etsoo/shared";
@@ -255,10 +260,8 @@ export default function AddCustomResource() {
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 12 }}>
-            <InputField
+            <JsonDataInput
               fullWidth
-              multiline
-              rows={3}
               name={`${c.name}-jsonData`}
               label={`${labels.jsonData} (JSON)`}
               value={

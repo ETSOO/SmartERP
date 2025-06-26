@@ -99,6 +99,12 @@ namespace PlatformShared.Database.Models
         public SettingCrm? SettingCrm { get; set; }
 
         /// <summary>
+        /// Core APIs
+        /// 核心接口
+        /// </summary>
+        public ICollection<CoreApi> Apis { get; } = default!;
+
+        /// <summary>
         /// Core organization apps
         /// 核心机构应用
         /// </summary>

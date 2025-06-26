@@ -49,7 +49,7 @@ public partial class Product
 
     public short InventoryWay { get; set; }
 
-    public List<int>? Keywords { get; set; }
+    public List<int>? Tags { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 

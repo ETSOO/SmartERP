@@ -143,14 +143,14 @@ export default function AllMembers() {
         },
         {
           field: "userRole",
-          width: 180,
+          width: 120,
           header: labels.role,
           valueFormatter: ({ data }) => app.getRoleLabel(data?.userRole),
           sortable: false
         },
         {
           field: "assignedId",
-          width: 150,
+          width: 136,
           header: labels.assignedId,
           sortable: true
         },

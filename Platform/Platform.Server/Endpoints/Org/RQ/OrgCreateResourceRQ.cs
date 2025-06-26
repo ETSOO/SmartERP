@@ -10,7 +10,7 @@ namespace Platform.Server.Endpoints.Org.RQ
     /// Create resource request data
     /// 创建资源请求数据
     /// </summary>
-    public record OrgCreateResourceRQ : IModelValidator
+    public record OrgCreateResourceRQ : IModelValidator, IOrgRQ
     {
         /// <summary>
         /// Id

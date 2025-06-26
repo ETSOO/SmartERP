@@ -111,6 +111,27 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/org/apis/:id",
+            lazy: async () => {
+              const AllApis = await import("./pages/home/org/AllApis");
+              return { Component: AllApis.default };
+            }
+          },
+          {
+            path: "/home/org/addapi",
+            lazy: async () => {
+              const AddApi = await import("./pages/home/org/AddApi");
+              return { Component: AddApi.default };
+            }
+          },
+          {
+            path: "/home/org/editapi/:id",
+            lazy: async () => {
+              const AddApi = await import("./pages/home/org/AddApi");
+              return { Component: AddApi.default };
+            }
+          },
+          {
             path: "/home/user",
             lazy: async () => {
               const AllUsers = await import("./pages/home/user/AllUsers");

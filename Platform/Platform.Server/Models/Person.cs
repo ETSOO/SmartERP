@@ -87,7 +87,7 @@ public partial class Person
 
     public List<int>? CategoryIds { get; set; }
 
-    public List<int>? Keywords { get; set; }
+    public List<int>? Tags { get; set; }
 
     public List<int>? Addresses { get; set; }
 

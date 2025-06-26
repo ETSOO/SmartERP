@@ -67,6 +67,8 @@ public partial class OrderHeader
 
     public long UserId { get; set; }
 
+    public List<int>? Tags { get; set; }
+
     public virtual Address? Address { get; set; }
 
     public virtual Person Buyer { get; set; } = null!;

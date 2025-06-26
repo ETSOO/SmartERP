@@ -71,7 +71,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.JobTitle)
                 .HasMaxLength(50)
                 .HasColumnName("job_title");
-            entity.Property(e => e.Keywords).HasColumnName("keywords");
             entity.Property(e => e.LatinFamilyName)
                 .HasMaxLength(50)
                 .HasColumnName("latin_family_name");
@@ -105,6 +104,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
+            entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.Title).HasColumnName("title");
             entity.Property(e => e.Uid)
                 .HasDefaultValueSql("gen_random_uuid()")

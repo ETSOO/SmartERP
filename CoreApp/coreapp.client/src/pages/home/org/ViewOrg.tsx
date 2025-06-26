@@ -2,7 +2,9 @@ import { GridDataType, useParamsEx } from "@etsoo/react";
 import { BusinessTax } from "@etsoo/appscript";
 import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
+import ApiIcon from "@mui/icons-material/Api";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
+import LabelIcon from "@mui/icons-material/Label";
 import { app } from "../../../app/MyApp";
 import {
   AvatarState,
@@ -36,6 +38,7 @@ export default function ViewOrg() {
     "customResources",
     "edit",
     "editLogo",
+    "externalApis",
     "leaveOrg",
     "logo"
   );
@@ -153,12 +156,22 @@ export default function ViewOrg() {
             </Button>
           )}
           {adminPermission && (
-            <ButtonLink
-              variant="outlined"
-              href={`./../../customresource/${id}`}
-            >
-              {labels.customResources}
-            </ButtonLink>
+            <React.Fragment>
+              <ButtonLink
+                variant="outlined"
+                href={`./../../customresource/${id}`}
+                startIcon={<LabelIcon />}
+              >
+                {labels.customResources}
+              </ButtonLink>
+              <ButtonLink
+                variant="outlined"
+                href={`./../../apis/${id}`}
+                startIcon={<ApiIcon />}
+              >
+                {labels.externalApis}
+              </ButtonLink>
+            </React.Fragment>
           )}
         </React.Fragment>
       )}

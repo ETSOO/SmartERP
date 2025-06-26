@@ -52,6 +52,7 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "addApi",
     "addResource",
     "allApps",
     "allOrgs",
@@ -60,7 +61,9 @@ export default function Home() {
     "auditHistory",
     "customize",
     "customResources",
+    "edit",
     "editResource",
+    "externalApis",
     "menuHome",
     "signoutSuccess",
     "view"
@@ -101,6 +104,23 @@ export default function Home() {
               segment: "view",
               pattern: "view/:id",
               title: labels.view,
+              hidden: true
+            },
+            {
+              segment: "apis",
+              pattern: "apis/:id",
+              title: labels.externalApis,
+              hidden: true
+            },
+            {
+              segment: "addapi",
+              title: labels.addApi,
+              hidden: true
+            },
+            {
+              segment: "editapi",
+              pattern: "editapi/:id",
+              title: labels.edit,
               hidden: true
             }
           ]

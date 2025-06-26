@@ -54,6 +54,7 @@ export default function AllOrgs() {
     "orgPin",
     "orgs",
     "parentOrg",
+    "role",
     "statusNormal",
     "switchOrg",
     "view"
@@ -145,6 +146,13 @@ export default function AllOrgs() {
                       : undefined
                 }
               : {}
+        },
+        {
+          field: "userRole",
+          width: 120,
+          header: labels.role,
+          valueFormatter: ({ data }) => app.getRoleLabel(data?.userRole),
+          sortable: false
         },
         {
           field: "pin",

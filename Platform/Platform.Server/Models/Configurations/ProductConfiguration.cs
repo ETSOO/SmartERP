@@ -43,7 +43,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.InventoryWay)
                 .HasDefaultValue((short)0)
                 .HasColumnName("inventory_way");
-            entity.Property(e => e.Keywords).HasColumnName("keywords");
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)
                 .HasColumnName("logo");
@@ -66,6 +65,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.StepQty)
                 .HasPrecision(6, 2)
                 .HasColumnName("step_qty");
+            entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.UnitId).HasColumnName("unit_id");
             entity.Property(e => e.Usage).HasColumnName("usage");
 

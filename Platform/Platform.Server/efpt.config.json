@@ -19,6 +19,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.core_api",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.core_app",
          "ObjectType": 0
       },
@@ -52,10 +56,6 @@
       },
       {
          "Name": "public.feature_culture",
-         "ObjectType": 0
-      },
-      {
-         "Name": "public.feature_keyword",
          "ObjectType": 0
       },
       {

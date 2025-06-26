@@ -73,12 +73,15 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<MemberQueryData>))]
 
     // Org
+    [JsonSerializable(typeof(OrgCreateApiRQ))]
     [JsonSerializable(typeof(OrgCreateResourceRQ))]
     [JsonSerializable(typeof(OrgCreateRQ))]
     [JsonSerializable(typeof(OrgListRQ))]
+    [JsonSerializable(typeof(OrgQueryApiRQ))]
     [JsonSerializable(typeof(OrgQueryResourceRQ))]
     [JsonSerializable(typeof(OrgGetMyRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
+    [JsonSerializable(typeof(OrgUpdateApiRQ))]
     [JsonSerializable(typeof(SendProfileEmailRQ))]
 
     [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.ApiModel" Version="1.0.72" />
+    <PackageReference Include="com.etsoo.ApiModel" Version="1.0.73" />
     <PackageReference Include="com.etsoo.DI" Version="1.0.22" />
     <PackageReference Include="com.etsoo.MessageQueue" Version="1.0.92" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.30" />
@@ -40,6 +40,10 @@
     <EmbeddedResource Update="Resources.zh-Hant.resx">
       <DependentUpon>Resources.resx</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

@@ -24,6 +24,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapPut("Create", (IOrgService service, OrgCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create organization / 创建新机构").WithTags("Org");
 
+            g.MapPost("CreateApi", [Roles(Constants.AdminRoles)] (IOrgService service, OrgCreateApiRQ rq, CancellationToken cancellationToken) => service.CreateApiAsync(rq, cancellationToken))
+                .WithDescription("Create API / 创建接口").WithTags("Org");
+
             g.MapPost("CreateResource", [Roles(Constants.AdminRoles)] (IOrgService service, OrgCreateResourceRQ rq, CancellationToken cancellationToken) => service.CreateResourceAsync(rq, cancellationToken))
                 .WithDescription("Create custom resource / 创建自定义资源").WithTags("Org");
 
@@ -56,11 +59,14 @@ namespace Platform.Server.Endpoints.Org
             g.MapPost("Query", (IOrgService service, OrgQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
 
+            g.MapPost("QueryApi", (IOrgService service, OrgQueryApiRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryApiAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Query APIs JSON data / 查询接口JSON数据").WithTags("Org");
+
             g.MapPost("QueryResource", (IOrgService service, OrgQueryResourceRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryResourceAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query custom resources JSON data / 查询自定义资源JSON数据").WithTags("Org");
 
             g.MapGet("Read/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
-                .WithDescription("Read organizations JSON data / 浏览机构JSON数据").WithTags("Org");
+                .WithDescription("Read organization JSON data / 浏览机构JSON数据").WithTags("Org");
 
             g.MapGet("RequestToken", (IAntiforgery forgeryService, IHttpContextAccessor accessor) =>
             {
@@ -83,12 +89,18 @@ namespace Platform.Server.Endpoints.Org
             g.MapPut("Update", [Roles(Constants.AdminRoles)] (IOrgService service, OrgUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update organization / 更新机构").WithTags("Org");
 
+            g.MapPut("UpdateApi", [Roles(Constants.AdminRoles)] (IOrgService service, OrgUpdateApiRQ rq, CancellationToken cancellationToken) => service.UpdateApiAsync(rq, cancellationToken))
+                .WithDescription("Update API / 更新接口").WithTags("Org");
+
             g.MapPut("UpdateAvatar/{id:int}", [Roles(UserRole.Founder)] (IOrgService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Update organization avatar / 更新机构头像").WithTags("Org");
 
             g.MapGet("UpdateRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read JSON data for upate / 浏览JSON数据用于更新").WithTags("Org");
+
+            g.MapGet("UpdateApiRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateApiReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Read JSON data for upate API / 浏览JSON数据用于更新API").WithTags("Org");
 
             g.MapPost("UploadProfileFiles/{id:long}", (IOrgService service, long id, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadProfileFilesAsync(id, files, cancellationToken))
                 .DisableAntiforgery()

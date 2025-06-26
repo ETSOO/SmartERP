@@ -21,6 +21,12 @@ namespace PlatformShared.Database
         public required DbSet<Address> Addresses { get; set; }
 
         /// <summary>
+        /// Core APIs
+        /// 核心接口
+        /// </summary>
+        public required DbSet<CoreApi> CoreApis { get; set; }
+
+        /// <summary>
         /// Core applications
         /// 核心应用
         /// </summary>
@@ -218,6 +224,7 @@ namespace PlatformShared.Database
             MyDbFunctions.Register(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new AddressConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreApiConfiguration());
             modelBuilder.ApplyConfiguration(new CoreAppConfiguration());
             modelBuilder.ApplyConfiguration(new CoreAuthCodeConfiguration());
             modelBuilder.ApplyConfiguration(new CoreOrganizationConfiguration());

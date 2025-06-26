@@ -83,6 +83,60 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Create API
+        /// 创建接口
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateApiAsync(OrgCreateApiRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Format request data
+            var result = await FormatRQAsync(rq, cancellationToken);
+            if (!result.Ok)
+            {
+                return result;
+            }
+            else if (rq.OrgId == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.OrgId));
+            }
+
+            // Existing
+            if (await _db.CoreApis.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == rq.OrgId && a.Service == rq.Service)
+                .AnyAsync(cancellationToken))
+            {
+                return ApplicationErrors.ItemExists.AsResult(nameof(rq.Service));
+            }
+
+            // Create API
+            var api = new CoreApi
+            {
+                CoreOrganizationId = rq.OrgId.Value,
+                Service = rq.Service,
+                Title = rq.Title,
+                Endpoint = rq.Endpoint,
+                AppId = rq.AppId,
+                AppSecret = EncryptAppSecret(rq.AppSecret),
+                Options = rq.Options,
+                RatePolicy = rq.RatePolicy,
+                Enabled = rq.Enabled.GetValueOrDefault(true),
+                Inheritance = rq.Inheritance.GetValueOrDefault(true)
+            };
+
+            _db.CoreApis.Add(api);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(api.Id);
+        }
+
+        private string EncryptAppSecret(string appSecret)
+        {
+            return App.EncriptData(appSecret, "AppSecret");
+        }
+
+        /// <summary>
         /// Create resource
         /// 创建资源
         /// </summary>
@@ -91,24 +145,11 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async ValueTask<IActionResult> CreateResourceAsync(OrgCreateResourceRQ rq, CancellationToken cancellationToken = default)
         {
-            // Is admin
-            var isAdmin = User.AppId == MyAppConstants.AdminAppId;
-
-            if (!isAdmin)
+            // Format request data
+            var result = await FormatRQAsync(rq, cancellationToken);
+            if (!result.Ok)
             {
-                if (rq.OrgId.HasValue)
-                {
-                    // Check the organization id
-                    var ownOrg = await OwnsAsync(rq.OrgId.Value, cancellationToken: cancellationToken);
-                    if (!ownOrg)
-                    {
-                        return ApplicationErrors.AccessDenied.AsResult(nameof(rq.OrgId));
-                    }
-                }
-                else
-                {
-                    rq.OrgId = User.OrganizationInt;
-                }
+                return result;
             }
 
             if (rq.Id.HasValue)
@@ -117,7 +158,7 @@ namespace Platform.Server.Services
 
                 // Check the resource id
                 var resource = await _db.FeatureCultures.AsNoTracking()
-                    .Where(o => o.Id == id && (isAdmin || o.CoreOrganizationId == rq.OrgId))
+                    .Where(o => o.Id == id && (rq.OrgId == null || o.CoreOrganizationId == rq.OrgId))
                     .Select(o => new { o.Key, o.CoreOrganizationId })
                     .FirstOrDefaultAsync(cancellationToken);
 
@@ -193,7 +234,7 @@ namespace Platform.Server.Services
                         }
 
                         // Update the organization id
-                        if (isAdmin && rq.OrgId != resource.CoreOrganizationId)
+                        if (rq.OrgId != resource.CoreOrganizationId)
                         {
                             await _db.FeatureCultures.Where(c => c.Key == resource.Key && c.CoreOrganizationId == resource.CoreOrganizationId)
                                 .ExecuteUpdateAsync(c => c.SetProperty(c => c.CoreOrganizationId, rq.OrgId), cancellationToken);
@@ -643,6 +684,7 @@ namespace Platform.Server.Services
                 ParentId = ou.Organization.ParentId,
                 Status = ou.Organization.Status,
                 Creation = ou.Organization.Creation,
+                UserRole = ou.UserRole,
                 Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                 UserStatus = ou.Status,
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
@@ -681,6 +723,7 @@ namespace Platform.Server.Services
                 ParentId = ou.Organization.ParentId,
                 Status = ou.Organization.Status,
                 Creation = ou.Organization.Creation,
+                UserRole = ou.UserRole,
                 UserStatus = ou.Status,
                 Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
@@ -689,6 +732,89 @@ namespace Platform.Server.Services
             if (_db.IsSensitiveDataLoggingEnabled)
             {
                 Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        private async Task<IActionResult> FormatRQAsync(IOrgRQ rq, CancellationToken cancellationToken)
+        {
+            // Is admin
+            var isAdmin = User.AppId == MyAppConstants.AdminAppId;
+
+            if (!isAdmin)
+            {
+                if (!rq.OrgId.HasValue)
+                {
+                    rq.OrgId = User.OrganizationInt;
+                }
+                else if (!await OwnsAsync(rq.OrgId.Value, cancellationToken: cancellationToken))
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.OrgId));
+                }
+            }
+
+            return ActionResult.Success;
+        }
+
+        /// <summary>
+        /// Query organization API JSON data
+        /// 查询机构接口JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task QueryApiAsync(OrgQueryApiRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            // Format request data
+            var result = await FormatRQAsync(rq, cancellationToken);
+            if (!result.Ok)
+            {
+                return;
+            }
+
+            var (hasContent, commandText) = await _db.CoreApis
+                .AsNoTracking()
+                .QueryEtsoo(rq, (a) => a.Id, null, (q) =>
+                {
+                    if (rq.OrgId.HasValue)
+                    {
+                        q = q.Where(a => a.CoreOrganizationId == rq.OrgId);
+                    }
+
+                    if (rq.Service.HasValue)
+                    {
+                        q = q.Where(a => a.Service == rq.Service);
+                    }
+
+                    if (rq.AppId?.Length > 1)
+                    {
+                        q = q.Where(a => a.AppId == rq.AppId);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        q = q.Where(a => EF.Functions.ILike(a.Title, $"%{keyword}%"));
+                    }
+
+                    return q;
+                }).Select(a => new
+                {
+                    a.Id,
+                    a.Service,
+                    a.Title,
+                    a.Endpoint,
+                    a.AppId,
+                    a.Enabled,
+                    a.Inheritance,
+                    a.Creation,
+                    a.UpdatedAt
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("{query} is {hasContent} with {commandText}", nameof(QueryApiAsync), hasContent, commandText);
             }
         }
 
@@ -702,15 +828,11 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task QueryResourceAsync(OrgQueryResourceRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            // Is admin
-            var isAdmin = User.AppId == MyAppConstants.AdminAppId;
-
-            if (!isAdmin)
+            // Format request data
+            var result = await FormatRQAsync(rq, cancellationToken);
+            if (!result.Ok)
             {
-                if (!rq.OrgId.HasValue || !await OwnsAsync(rq.OrgId.Value, cancellationToken: cancellationToken))
-                {
-                    rq.OrgId = User.OrganizationInt;
-                }
+                return;
             }
 
             var (hasContent, commandText) = await _db.FeatureCultures
@@ -748,7 +870,7 @@ namespace Platform.Server.Services
 
             if (_db.IsSensitiveDataLoggingEnabled)
             {
-                Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
+                Logger.LogInformation("{query} is {hasContent} with {commandText}", nameof(QueryAsSourceAsync), hasContent, commandText);
             }
         }
 
@@ -1078,6 +1200,97 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Update API
+        /// 更新接口
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateApiAsync(OrgUpdateApiRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Format request data
+            var result = await FormatRQAsync(rq, cancellationToken);
+            if (!result.Ok)
+            {
+                return result;
+            }
+
+            var api = await _db.CoreApis
+                .FirstOrDefaultAsync(o => o.Id == rq.Id && (rq.OrgId == null || o.CoreOrganizationId == rq.OrgId), cancellationToken);
+            if (api == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Update API
+            if (rq.IsModified(nameof(rq.Service)) && rq.Service.HasValue)
+            {
+                api.Service = rq.Service.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Title)) && !string.IsNullOrEmpty(rq.Title))
+            {
+                api.Title = rq.Title;
+            }
+
+            if (rq.IsModified(nameof(rq.Endpoint)))
+            {
+                api.Endpoint = rq.Endpoint;
+            }
+
+            if (rq.IsModified(nameof(rq.AppId)) && !string.IsNullOrEmpty(rq.AppId))
+            {
+                api.AppId = rq.AppId;
+            }
+
+            if (rq.IsModified(nameof(rq.AppSecret)) && !string.IsNullOrEmpty(rq.AppSecret))
+            {
+                api.AppSecret = EncryptAppSecret(rq.AppSecret);
+            }
+
+            if (rq.IsModified(nameof(rq.Options)))
+            {
+                api.Options = rq.Options;
+            }
+
+            if (rq.IsModified(nameof(rq.RatePolicy)))
+            {
+                api.RatePolicy = rq.RatePolicy;
+            }
+
+            if (rq.IsModified(nameof(rq.Enabled)) && rq.Enabled.HasValue)
+            {
+                api.Enabled = rq.Enabled.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Inheritance)) && rq.Inheritance.HasValue)
+            {
+                api.Inheritance = rq.Inheritance.Value;
+            }
+
+            api.UpdatedAt = DateTimeOffset.UtcNow;
+
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            /*
+            var message = new UpdateOrgMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, org.Name),
+                Changes = changes
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgMessage, cancellationToken);
+            */
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
         /// Update avatar
         /// 更新头像
         /// </summary>
@@ -1168,6 +1381,35 @@ namespace Platform.Server.Services
                 o.ParentId,
                 o.Status,
                 o.QueryKeyword
+            }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Read organization API data for update
+        /// 读取用于机构接口更新的数据
+        /// </summary>
+        /// <param name="id">API id</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task UpdateApiReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var query = _db.CoreApis
+                .AsNoTracking()
+                .Where(o => o.Id == id && o.CoreOrganizationId == User.OrganizationInt);
+
+            await query.Select(a => new
+            {
+                a.Id,
+                a.Service,
+                a.Title,
+                a.Endpoint,
+                a.AppId,
+                AppSecret = "******",
+                a.Options,
+                a.RatePolicy,
+                a.Enabled,
+                a.Inheritance
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 

@@ -2,6 +2,7 @@ import { GridDataType, useParamsEx } from "@etsoo/react";
 import { BusinessTax } from "@etsoo/appscript";
 import { ButtonLink, HBox, ViewPage } from "@etsoo/materialui";
 import SupportIcon from "@mui/icons-material/Support";
+import ApiIcon from "@mui/icons-material/Api";
 import { app } from "../../../app/MyApp";
 import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
@@ -20,7 +21,7 @@ export default function ViewOrg() {
   }, [id]);
 
   // Labels
-  const labels = app.getLabels("adminSupport", "logo");
+  const labels = app.getLabels("adminSupport", "externalApis", "logo");
 
   // Tax
   const tax = BusinessTax.getById(app.region);
@@ -104,6 +105,13 @@ export default function ViewOrg() {
           >
             {labels.adminSupport}
           </Button>
+          <ButtonLink
+            variant="outlined"
+            href={`./../../apis/${id}`}
+            startIcon={<ApiIcon />}
+          >
+            {labels.externalApis}
+          </ButtonLink>
         </React.Fragment>
       )}
     ></ViewPage>

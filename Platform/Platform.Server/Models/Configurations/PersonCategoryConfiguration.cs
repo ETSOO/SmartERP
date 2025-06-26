@@ -28,6 +28,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
                 .HasColumnName("data");
+            entity.Property(e => e.IdentityType).HasColumnName("identity_type");
             entity.Property(e => e.Names)
                 .HasColumnType("character varying(128)[]")
                 .HasColumnName("names");

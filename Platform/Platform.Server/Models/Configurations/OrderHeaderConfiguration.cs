@@ -83,6 +83,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)0)
                 .HasColumnName("status");
+            entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");

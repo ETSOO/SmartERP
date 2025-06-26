@@ -10,8 +10,14 @@ namespace Platform.Server.Endpoints.Org.RQ
     /// Update organization request data
     /// 更新组织请求数据
     /// </summary>
-    public record OrgUpdateRQ : UpdateModel<int>, IModelValidator
+    public record OrgUpdateRQ : UpdateModel<int>, IModelValidator, IOrgRQ
     {
+        /// <summary>
+        /// Organization id
+        /// 机构编号
+        /// </summary>
+        public int? OrgId { get; set; }
+
         /// <summary>
         /// Organization name
         /// 组织名称

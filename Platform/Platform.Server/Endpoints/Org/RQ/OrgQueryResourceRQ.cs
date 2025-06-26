@@ -4,7 +4,7 @@
     /// Organization query resource request data
     /// 机构查询资源请求数据
     /// </summary>
-    public record OrgQueryResourceRQ : QueryIntRQ
+    public record OrgQueryResourceRQ : QueryIntRQ, IOrgRQ
     {
         /// <summary>
         /// Organization id

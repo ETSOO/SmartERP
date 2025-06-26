@@ -16,6 +16,8 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<Address> Addresses { get; set; }
 
+    public virtual DbSet<CoreApi> CoreApis { get; set; }
+
     public virtual DbSet<CoreApp> CoreApps { get; set; }
 
     public virtual DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
@@ -33,8 +35,6 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<CoreUserIdentifier> CoreUserIdentifiers { get; set; }
 
     public virtual DbSet<FeatureCulture> FeatureCultures { get; set; }
-
-    public virtual DbSet<FeatureKeyword> FeatureKeywords { get; set; }
 
     public virtual DbSet<OrderHeader> OrderHeaders { get; set; }
 
@@ -79,6 +79,7 @@ public partial class MyDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new Configurations.AddressConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.CoreApiConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreAppConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreAuthCodeConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreOrganizationConfiguration());
@@ -88,7 +89,6 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserDeviceTokenConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserIdentifierConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.FeatureCultureConfiguration());
-        modelBuilder.ApplyConfiguration(new Configurations.FeatureKeywordConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderLineConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PermissionGroupConfiguration());
