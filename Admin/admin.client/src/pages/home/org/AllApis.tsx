@@ -19,7 +19,7 @@ import {
   useParamsEx
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { OrgQueryApiData, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { OrgQueryApiData, usePageData } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
@@ -44,6 +44,7 @@ export default function AllApis() {
     "appApiUrl",
     "appId",
     "edit",
+    "org",
     "title",
     "updatedAt"
   );
@@ -56,8 +57,19 @@ export default function AllApis() {
 
   const margin = MUGlobal.pagePaddings;
 
-  // Page data hook
-  usePageDataEmpty(app);
+  usePageData(
+    app,
+    {
+      breadcrumbs: (bc) => {
+        bc.splice(bc.length - 1, 0, {
+          title: labels.org,
+          path: `./../view/${id}`
+        });
+        return bc;
+      }
+    },
+    []
+  );
 
   return (
     <ResponsivePage<OrgQueryApiData, typeof template>

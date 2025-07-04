@@ -16,7 +16,7 @@ import {
   useParamsEx
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { OrgQueryResourceData, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { OrgQueryResourceData, usePageData } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { CultureList, DefaultUI } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
@@ -40,6 +40,7 @@ export default function CustomResource() {
     "description",
     "edit",
     "key",
+    "org",
     "title"
   );
 
@@ -51,8 +52,19 @@ export default function CustomResource() {
 
   const margin = MUGlobal.pagePaddings;
 
-  // Page data hook
-  usePageDataEmpty(app);
+  usePageData(
+    app,
+    {
+      breadcrumbs: (bc) => {
+        bc.splice(bc.length - 1, 0, {
+          title: labels.org,
+          path: `./../my/${id}`
+        });
+        return bc;
+      }
+    },
+    []
+  );
 
   return (
     <ResponsivePage<OrgQueryResourceData, typeof template>

@@ -53,7 +53,7 @@
         /// Endpoint URL
         /// 端点网址
         /// </summary>
-        public string? Endpoint { get; set; }
+        public Uri? Endpoint { get; set; }
 
         /// <summary>
         /// App or user ID

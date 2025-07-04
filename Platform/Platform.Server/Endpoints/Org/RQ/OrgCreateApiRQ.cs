@@ -34,7 +34,7 @@ namespace Platform.Server.Endpoints.Org.RQ
         /// Endpoint URL
         /// 端点网址
         /// </summary>
-        public string? Endpoint { get; init; }
+        public Uri? Endpoint { get; init; }
 
         /// <summary>
         /// App or user ID
@@ -82,11 +82,6 @@ namespace Platform.Server.Endpoints.Org.RQ
             if (Title.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Title));
-            }
-
-            if (Endpoint != null && Endpoint.Length is not (>= 1 and <= 256))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Endpoint));
             }
 
             if (AppId.Length is not (>= 1 and <= 64))

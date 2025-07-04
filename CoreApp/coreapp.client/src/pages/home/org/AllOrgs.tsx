@@ -81,7 +81,7 @@ export default function AllOrgs() {
             size="medium"
             color="primary"
             onClick={() =>
-              navigate("./../app/all", {
+              navigate("./../app", {
                 state: { kind: 2 }
               })
             }

@@ -5,6 +5,7 @@ using com.etsoo.MessageQueue.QueueProcessors;
 using com.etsoo.SMTP;
 using MimeKit;
 using MimeKit.Text;
+using PlatformShared.Database;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -14,11 +15,15 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class SendEmailProcessor : CommonQueueProcessor<SendEmailMessage>
     {
+        private readonly MyDbContext _db;
         readonly ISMTPClient _smtpClient;
 
-        public SendEmailProcessor(ILogger<SendEmailProcessor> logger, ISMTPClient smtpClient)
+        public SendEmailProcessor(ILogger<SendEmailProcessor> logger,
+            MyDbContext db,
+            ISMTPClient smtpClient)
             : base(logger, ApiModelJsonSerializerContext.Default.SendEmailMessage)
         {
+            _db = db;
             _smtpClient = smtpClient;
         }
 
@@ -33,6 +38,12 @@ namespace WorkerCenter.Main.Processors
 
         protected override async Task ProcessMessageAsync(SendEmailMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
+            // Check organization ID
+            if (message.OrgId > 0)
+            {
+
+            }
+
             // Email
             var email = new MimeMessage
             {

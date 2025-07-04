@@ -231,4 +231,16 @@
   <data name="AdminSupportDetail" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 同意您以其身份登录系统以便提供技术支持，并已获得 {1} 批准。更多细节：&lt;blockquote&gt;{2}&lt;/blockquote&gt;</value>
   </data>
+  <data name="CreateResource" xml:space="preserve">
+    <value>创建或更新资源</value>
+  </data>
+  <data name="CreateApi" xml:space="preserve">
+    <value>添加外部接口</value>
+  </data>
+  <data name="UpdateApi" xml:space="preserve">
+    <value>更新外部接口</value>
+  </data>
+  <data name="PlatformAdminOperation" xml:space="preserve">
+    <value>平台管理员操作</value>
+  </data>
 </root>

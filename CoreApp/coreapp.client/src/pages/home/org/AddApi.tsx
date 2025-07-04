@@ -215,7 +215,7 @@ export default function AddApi() {
           fullWidth
           name="endpoint"
           required
-          slotProps={{ htmlInput: { maxLength: 256 } }}
+          slotProps={{ htmlInput: { type: "url", maxLength: 256 } }}
           label={labels.appApiUrl}
           inputRef={refs.endpoint}
         />

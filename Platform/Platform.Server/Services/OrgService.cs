@@ -29,6 +29,7 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 namespace Platform.Server.Services
 {
@@ -127,6 +128,14 @@ namespace Platform.Server.Services
 
             _db.CoreApis.Add(api);
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new CreateApiMessage
+            {
+                Data = User.CreateMessageData(App.AppId, api.Id, rq.Title),
+                OrganizationId = api.CoreOrganizationId
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateApiMessage, cancellationToken);
 
             return ActionResult.Succeed(api.Id);
         }
@@ -277,6 +286,15 @@ namespace Platform.Server.Services
                 // Save
                 await _db.SaveChangesAsync(cancellationToken);
             }
+
+            // Push message
+            var message = new CreateResourceMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id ?? 0),
+                RequestData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrgCreateResourceRQ)
+            };
+
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateResourceMessage, cancellationToken);
 
             return ActionResult.Success;
         }
@@ -1277,14 +1295,13 @@ namespace Platform.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Push message
-            /*
-            var message = new UpdateOrgMessage
+            var message = new UpdateApiMessage
             {
-                Data = User.CreateMessageData(App.AppId, rq.Id, org.Name),
-                Changes = changes
+                Data = User.CreateMessageData(App.AppId, rq.Id, api.Title),
+                Changes = changes,
+                OrganizationId = api.CoreOrganizationId
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgMessage, cancellationToken);
-            */
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateApiMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);

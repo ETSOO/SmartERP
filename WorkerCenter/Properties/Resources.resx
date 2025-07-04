@@ -231,4 +231,16 @@
   <data name="AdminSupportDetail" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; has given you permission to log in as the user for the purpose of providing technical support, and has been approved by {1}. More details: &lt;blockquote&gt;{2}&lt;/blockquote&gt;</value>
   </data>
+  <data name="CreateResource" xml:space="preserve">
+    <value>Create or update resource</value>
+  </data>
+  <data name="CreateApi" xml:space="preserve">
+    <value>Add external API</value>
+  </data>
+  <data name="UpdateApi" xml:space="preserve">
+    <value>Update external API</value>
+  </data>
+  <data name="PlatformAdminOperation" xml:space="preserve">
+    <value>Platform administrator operation</value>
+  </data>
 </root>

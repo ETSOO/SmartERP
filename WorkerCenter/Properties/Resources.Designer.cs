@@ -196,6 +196,15 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add external API.
+        /// </summary>
+        internal static string CreateApi {
+            get {
+                return ResourceManager.GetString("CreateApi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create API Key.
         /// </summary>
         internal static string CreateApiKey {
@@ -210,6 +219,15 @@ namespace WorkerCenter.Properties {
         internal static string CreateOrg {
             get {
                 return ResourceManager.GetString("CreateOrg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create or update resource.
+        /// </summary>
+        internal static string CreateResource {
+            get {
+                return ResourceManager.GetString("CreateResource", resourceCulture);
             }
         }
         
@@ -313,6 +331,15 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Platform administrator operation.
+        /// </summary>
+        internal static string PlatformAdminOperation {
+            get {
+                return ResourceManager.GetString("PlatformAdminOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Renew Application.
         /// </summary>
         internal static string RenewApp {
@@ -336,6 +363,15 @@ namespace WorkerCenter.Properties {
         internal static string SwitchOrg {
             get {
                 return ResourceManager.GetString("SwitchOrg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update external API.
+        /// </summary>
+        internal static string UpdateApi {
+            get {
+                return ResourceManager.GetString("UpdateApi", resourceCulture);
             }
         }
         
