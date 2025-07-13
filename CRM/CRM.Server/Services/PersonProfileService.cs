@@ -17,6 +17,7 @@ using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
+using PlatformShared.Services;
 using System.Buffers;
 
 namespace CRM.Server.Services
@@ -850,6 +851,29 @@ namespace CRM.Server.Services
                     p.Importance,
                     p.AssigneeId
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Create upload files action data
+        /// 创建上传文件的动作数据
+        /// </summary>
+        /// <param name="id">Profile id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AppActionData?> UploadFilesActionAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // Person identity type
+            var identityType = await _db.PersonProfiles.AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => p.Person.IdentityType)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (!await _commonService.HasIdentityPermissionAsync(identityType, nameof(Permissions.Org.ViewProfile), cancellationToken))
+            {
+                return null;
+            }
+
+            return App.SignAction(ServiceConstants.ActionUploadProfileFiles, id);
         }
     }
 }

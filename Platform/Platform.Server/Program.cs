@@ -23,6 +23,7 @@ using com.etsoo.WeiXin;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -41,6 +42,7 @@ using Platform.Server.OAuth2;
 using Platform.Server.Services;
 using PlatformShared.Database;
 using PlatformShared.Extentions;
+using PlatformShared.Services;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -396,6 +398,14 @@ if (microsoftOptions != null)
 {
     services.AddMicrosoftAuthClient(microsoftOptions);
 }
+
+services.AddSingleton(Options.Create(new SmartERPCoordinatorOptions
+{
+    PrivateKey = erp.Configuration.PrivateKey
+}));
+services.AddScoped<ISmartERPCoordinator, SmartERPCoordinator>();
+
+services.AddScoped<IStorageFactory, StorageFactory>();
 
 // Local services
 services.Configure<WXClientOptions>(configuration.GetSection("WeiXin"));

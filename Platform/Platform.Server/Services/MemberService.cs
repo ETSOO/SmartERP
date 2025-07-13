@@ -31,7 +31,7 @@ namespace Platform.Server.Services
     public class MemberService : CommonUserService, IMemberService
     {
         readonly MyDbContext _db;
-        readonly IStorage _storage;
+        readonly IStorageFactory _storageFactory;
         readonly IAuthCodeService _authCodeService;
         readonly IQueueService _queueService;
 
@@ -43,17 +43,17 @@ namespace Platform.Server.Services
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
-        /// <param name="storage">Storage</param>
+        /// <param name="storageFactory">Storage factory</param>
         /// <param name="authCodeService">Auth code service</param>
         /// <param name="queueService">Queue service</param>
         /// 
         public MemberService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<MemberService> logger,
-            IStorage storage, IAuthCodeService authCodeService,
+            IStorageFactory storageFactory, IAuthCodeService authCodeService,
             IQueueService queueService)
             : base(app, userAccessor.UserSafe, "member", logger)
         {
             _db = db;
-            _storage=storage;
+            _storageFactory = storageFactory;
             _authCodeService = authCodeService;
             _queueService = queueService;
         }
@@ -492,7 +492,8 @@ namespace Platform.Server.Services
             }
 
             // Check the avatar
-            var ou = await _db.Users(User.OrganizationInt).AsNoTracking()
+            var orgId = User.OrganizationInt;
+            var ou = await _db.Users(orgId).AsNoTracking()
                 .Where(ou => ou.Id == id)
                 .Select(ou => new { LocalAvatar = ou.Avatar, ou.Name })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -508,22 +509,26 @@ namespace Platform.Server.Services
             }
 
             // File path
-            var path = "/OUAvatar/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
+            var folder = _storageFactory.GetOrgPath(orgId, "OUAvatars");
+            var path = folder + "/" + Path.GetRandomFileName() + extension;
+
+            // Storage
+            var storage = await _storageFactory.CreateAsync(orgId, cancellationToken);
 
             // Save the stream to file directly
-            var saveResult = await _storage.WriteAsync(path, avatarStream, WriteCase.CreateNew, cancellationToken: cancellationToken);
+            var saveResult = await storage.WriteAsync(path, avatarStream, WriteCase.CreateNew, cancellationToken: cancellationToken);
 
             if (saveResult)
             {
                 // New avatar URL
-                var url = _storage.GetUrl(path);
+                var url = storage.GetUrl(path);
 
                 // Update
                 await _db.Persons.Where(ou => ou.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Avatar, url), cancellationToken);
 
                 // Remove current avatar
                 if (!string.IsNullOrEmpty(ou.LocalAvatar))
-                    await _storage.DeleteUrlAsync(ou.LocalAvatar, cancellationToken);
+                    await storage.DeleteUrlAsync(ou.LocalAvatar, cancellationToken);
 
                 // Push message
                 var message = new UpdateMemberAvatarMessage

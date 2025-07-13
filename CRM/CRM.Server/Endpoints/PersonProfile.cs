@@ -53,6 +53,9 @@ namespace CRM.Server.Endpoints
             g.MapGet("UpdateRead/{id:long}", (IPersonProfileService service, IHttpContextAccessor accessor, long id, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read person profile for update / 读取人员档案用于更新").WithTags("PersonProfile");
 
+            g.MapPost("UploadFilesAction/{id:long}", (IPersonProfileService service, long id, CancellationToken cancellationToken) => service.UploadFilesActionAsync(id, cancellationToken))
+                .WithDescription("Upload files action / 上传文件操作").WithTags("PersonProfile");
+
             return builder;
         }
     }

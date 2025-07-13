@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using PlatformShared.Database;
+using PlatformShared.Services;
 using WorkerCenter.Main.Processors;
 using WorkerCenter.Periods;
 
@@ -86,6 +87,9 @@ services.AddDbContext<LogDbContext>((provider, options) =>
         options.EnableDetailedErrors();
     }
 }, ServiceLifetime.Singleton);
+
+services.Configure<SmartERPCoordinatorOptions>(configuration.GetSection("SmartERPCoordinator"));
+services.AddSingleton<ISmartERPCoordinator, SmartERPCoordinator>();
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
 services.AddSingleton<IMessageQueueProcessor, AcceptInvitationProcessor>();

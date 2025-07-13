@@ -25,9 +25,9 @@ using Platform.Server.Endpoints.AuthCode.RQ;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
-using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
+using PlatformShared.Services;
 using System.Globalization;
 using System.Net;
 using System.Net.Mail;
@@ -46,12 +46,6 @@ namespace Platform.Server.Services
             public required string Culture { get; init; }
             public int? AppId { get; init; }
             public required DeviceTokenData Data { get; init; }
-        }
-
-        private record AppData
-        {
-            public required string AppSecret { get; set; }
-            public required AppUrl[] Urls { get; init; }
         }
 
         private record MoreData
@@ -110,6 +104,7 @@ namespace Platform.Server.Services
         readonly IPublicService _publicService;
         readonly IAuthCodeService _authCodeService;
         readonly IQueueService _queueService;
+        readonly ISmartERPCoordinator _erp;
 
         /// <summary>
         /// Constructor
@@ -132,7 +127,8 @@ namespace Platform.Server.Services
             IHttpClientFactory httpClientFactory,
             IPublicService publicService,
             IAuthCodeService authCodeService,
-            IQueueService queueService)
+            IQueueService queueService,
+            ISmartERPCoordinator erp)
             : base(app, userAccessor.User, "auth", logger)
         {
             _db = db;
@@ -151,6 +147,7 @@ namespace Platform.Server.Services
             _publicService = publicService;
             _authCodeService = authCodeService;
             _queueService = queueService;
+            _erp = erp;
         }
 
         /// <summary>
@@ -302,7 +299,7 @@ namespace Platform.Server.Services
             };
 
             var appId = MyAppConstants.CoreAppId;
-            var appData = await AuthGetAppSecretAsync(appId, string.Empty, cancellationToken);
+            var appData = await _erp.GetAppSecretAsync(appId, string.Empty, cancellationToken);
             if (appData == null)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(appId));
@@ -389,27 +386,6 @@ namespace Platform.Server.Services
             var result = ActionResult.Success;
             result.Data[nameof(uri)] = uri.ToString();
             return result;
-        }
-
-        private async Task<AppData?> AuthGetAppSecretAsync(int appId, string appKey, CancellationToken cancellationToken)
-        {
-            AppData? data;
-
-            if (string.IsNullOrEmpty(appKey))
-            {
-                data = await _db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, Urls = a.Urls }).FirstOrDefaultAsync(cancellationToken);
-            }
-            else
-            {
-                data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey && oa.AppSecret != null).Select(oa => new AppData { AppSecret = oa.AppSecret!, Urls = oa.LocalUrls ?? oa.CoreApp.Urls }).FirstOrDefaultAsync(cancellationToken);
-            }
-
-            if (data != null)
-            {
-                data.AppSecret = App.DecriptData(data.AppSecret, "Token" + appId);
-            }
-
-            return data;
         }
 
         private async Task<AppTokenData?> CreateAppTokenDataAsync(int appId, string refreshToken, string? appSecret, string timezone, CancellationToken cancellationToken)
@@ -628,7 +604,7 @@ namespace Platform.Server.Services
             var url = new StringBuilder(redirectUri);
             url.Append('?');
 
-            var appData = await AuthGetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
+            var appData = await _erp.GetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
 
             if (appData == null)
             {
@@ -1766,7 +1742,7 @@ namespace Platform.Server.Services
             }
 
             // Check app secret
-            var appData = await AuthGetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
+            var appData = await _erp.GetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
 
             if (appData == null)
             {
@@ -1927,7 +1903,7 @@ namespace Platform.Server.Services
             }
 
             // Check app secret
-            var appData = await AuthGetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
+            var appData = await _erp.GetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
 
             if (appData == null)
             {
@@ -1963,7 +1939,7 @@ namespace Platform.Server.Services
             }
 
             // Check app secret
-            var appData = await AuthGetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
+            var appData = await _erp.GetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
 
             if (appData == null)
             {
@@ -2066,7 +2042,7 @@ namespace Platform.Server.Services
             }
 
             // Check app secret
-            var appData = await AuthGetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
+            var appData = await _erp.GetAppSecretAsync(rq.AppId, rq.AppKey, cancellationToken);
 
             if (appData == null)
             {

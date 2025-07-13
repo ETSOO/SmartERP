@@ -1,6 +1,5 @@
 ﻿using com.etsoo.CoreFramework.User;
 using com.etsoo.Utils;
-using com.etsoo.Utils.Storage;
 using com.etsoo.WebUtils;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
@@ -14,7 +13,7 @@ namespace Platform.Server.Services
     {
         readonly MyDbContext _db;
         readonly IHttpContextAccessor _accessor;
-        readonly IStorage _storage;
+        readonly IStorageFactory _storageFactory;
 
         /// <summary>
         /// Constructor
@@ -24,21 +23,19 @@ namespace Platform.Server.Services
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
-        /// <param name="cache">Cache</param>
         /// <param name="accessor">HttpContext accessor</param>
-        /// <param name="baidu">Baidu Map API</param>
-        /// <param name="proxy">Proxy API</param>
+        /// <param name="storageFactory">Storage factory</param>
         public StorageService(MyDbContext db,
             IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<StorageService> logger,
             IHttpContextAccessor accessor,
-            IStorage storage)
+            IStorageFactory storageFactory)
             : base(app, userAccessor.User, "storage", logger)
         {
             _db = db;
             _accessor = accessor;
-            _storage = storage;
+            _storageFactory = storageFactory;
         }
 
         /// <summary>
@@ -46,13 +43,43 @@ namespace Platform.Server.Services
         /// 下载文件
         /// </summary>
         /// <param name="path">File path</param>
+        /// <param name="orgId">Organization id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task DownloadFileAsync(string path, CancellationToken cancellationToken = default)
+        public async Task DownloadFileAsync(string path, int? orgId, CancellationToken cancellationToken = default)
         {
-            await using var stream = await _storage.ReadAsync(path, cancellationToken);
+            // Validate path to avoid directory traversal attack
+            if (path.Contains("..") || path.Contains("%2e%2e") || path.Contains("%252e%252e"))
+            {
+                await _accessor.SetStatusCodeAsync(HttpStatusCode.BadRequest, "Invalid path");
+                return;
+            }
+
+            // Storage
+            var storage = await _storageFactory.CreateAsync(orgId, cancellationToken);
+
+            await using var stream = await storage.ReadAsync(path, cancellationToken);
             if (stream != null && _accessor.HttpContext != null)
                 await stream.CopyToAsync(_accessor.HttpContext.Response.Body, cancellationToken);
+        }
+
+        /// <summary>
+        /// Download organization file
+        /// 下载机构文件
+        /// </summary>
+        /// <param name="path">File path</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task DownloadOrgFileAsync(string path, CancellationToken cancellationToken = default)
+        {
+            var orgId = _storageFactory.GetOrgIdFromPath(path);
+            if (orgId < 1)
+            {
+                await _accessor.SetStatusCodeAsync(HttpStatusCode.BadRequest, "Invalid org path");
+                return;
+            }
+
+            await DownloadFileAsync("Orgs/" + path, orgId, cancellationToken);
         }
 
         /// <summary>
@@ -113,19 +140,19 @@ namespace Platform.Server.Services
             }
 
             // Check id
-            var fileName = await _db.PersonProfileAttachments
+            var profile = await _db.PersonProfileAttachments
                 .AsNoTracking()
                 .Where(a => a.Id == id)
-                .Select(a => a.FileName)
+                .Select(a => new { a.Profile.Person.OrgId, a.FileName })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (string.IsNullOrEmpty(fileName))
+            if (profile == null)
             {
                 await _accessor.SetStatusCodeAsync(HttpStatusCode.BadRequest, "No ID");
                 return;
             }
 
-            await DownloadFileAsync(fileName, cancellationToken);
+            await DownloadFileAsync(profile.FileName, profile.OrgId, cancellationToken);
         }
     }
 }

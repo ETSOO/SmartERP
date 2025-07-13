@@ -30,7 +30,7 @@ namespace PlatformShared.Dto
         /// Endpoint
         /// 端点
         /// </summary>
-        public Uri? Endpoint { get; init; }
+        public required Uri Endpoint { get; init; }
 
         /// <summary>
         /// App or user ID
@@ -48,7 +48,7 @@ namespace PlatformShared.Dto
         /// JSON options
         /// JSON 选项
         /// </summary>
-        public string? JsonOptions { get; init; }
+        public required string JsonOptions { get; init; }
 
         /// <summary>
         /// Rate policy

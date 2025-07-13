@@ -34,7 +34,7 @@ namespace Platform.Server.Endpoints.Org.RQ
         /// Endpoint URL
         /// 端点网址
         /// </summary>
-        public Uri? Endpoint { get; init; }
+        public required Uri Endpoint { get; init; }
 
         /// <summary>
         /// App or user ID

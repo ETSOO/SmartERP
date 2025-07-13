@@ -5,6 +5,7 @@ using com.etsoo.ApiModel.RQ.SmartERP;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Json;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -14,22 +15,27 @@ using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
+using Json.Schema;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.Org;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Org.RQ;
+using Platform.Server.Schemas;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
+using PlatformShared.Services;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Platform.Server.Services
 {
@@ -39,10 +45,46 @@ namespace Platform.Server.Services
     /// </summary>
     public class OrgService : CommonUserService, IOrgService
     {
+        static readonly ConcurrentDictionary<CoreApiService, JsonSchemaCreator> apiSchemas = new()
+        {
+            [CoreApiService.SMTP] = CoreApiServiceSMTPSchema.Create,
+            [CoreApiService.Storage] = CoreApiServiceStorageSchema.Create
+        };
+
+        static bool ValidateApiServiceSchema(CoreApiService service, string? json, [NotNullWhen(false)] out ActionResult? result)
+        {
+            if (apiSchemas.TryGetValue(service, out var creator))
+            {
+                var schema = creator();
+                var sr = schema.Evaluate(JsonNode.Parse(json ?? "{}"));
+                if (sr.IsValid)
+                {
+                    result = null;
+                    return true;
+                }
+                else
+                {
+                    result = ApplicationErrors.NoValidData.AsResult("options");
+
+                    if (sr.Errors?.Count > 0)
+                    {
+                        result.Detail = string.Join("; ", sr.Errors.Select(e => e.ToString()));
+                    }
+
+                    return false;
+                }
+            }
+
+            result = ApplicationErrors.NoValidData.AsResult("schema");
+
+            return false;
+        }
+
         readonly MyDbContext _db;
         readonly IPublicService _publicService;
-        readonly IStorage _storage;
+        readonly IStorageFactory _storageFactory;
         readonly IQueueService _queueService;
+        readonly ISmartERPCoordinator _erp;
 
         /// <summary>
         /// Constructor
@@ -59,14 +101,16 @@ namespace Platform.Server.Services
             CurrentUserAccessor userAccessor,
             ILogger<OrgService> logger,
             IPublicService publicService,
-            IStorage storage,
-            IQueueService queueService)
+            IStorageFactory storageFactory,
+            IQueueService queueService,
+            ISmartERPCoordinator erp)
             : base(app, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
-            _publicService=publicService;
-            _storage=storage;
-            _queueService=queueService;
+            _publicService = publicService;
+            _storageFactory = storageFactory;
+            _queueService = queueService;
+            _erp = erp;
         }
 
         /// <summary>
@@ -101,6 +145,12 @@ namespace Platform.Server.Services
             else if (rq.OrgId == null)
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.OrgId));
+            }
+
+            // Validate the schema
+            if (!ValidateApiServiceSchema(rq.Service, rq.Options, out var schemaResult))
+            {
+                return schemaResult;
             }
 
             // Existing
@@ -142,7 +192,7 @@ namespace Platform.Server.Services
 
         private string EncryptAppSecret(string appSecret)
         {
-            return App.EncriptData(appSecret, "AppSecret");
+            return App.EncriptData(appSecret, ServiceConstants.CoreApiAppSecretEncryptionKey);
         }
 
         /// <summary>
@@ -418,14 +468,17 @@ namespace Platform.Server.Services
                 return Results.BadRequest("Invalid Id");
             }
 
-            var stream = await _storage.ReadAsync(data.FileName, cancellationToken);
+            var storage = await _storageFactory.CreateAsync(orgId, cancellationToken);
+            var stream = await storage.ReadAsync(data.FileName, cancellationToken);
 
             if (stream == null)
             {
                 return Results.BadRequest("No Stream");
             }
 
-            return Results.File(stream, data.ContentType, data.Description, enableRangeProcessing: true);
+            var fileName = data.Description + Path.GetExtension(data.FileName);
+
+            return Results.File(stream, data.ContentType, fileName, enableRangeProcessing: true);
         }
 
         /// <summary>
@@ -435,10 +488,15 @@ namespace Platform.Server.Services
         /// <param name="content">HTML content</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Result</returns>
-        public Task<string?> FormatHtmlContentAsync(string content, CancellationToken cancellationToken = default)
+        public async Task<string?> FormatHtmlContentAsync(string content, CancellationToken cancellationToken = default)
         {
-            var path = $"/Resources/Org{User.Organization}/{DateTime.UtcNow:yyyyMM}/";
-            return HtmlIOUtils.FormatEditorContentAsync(_storage, path, content, Logger, cancellationToken);
+            var orgId = User.OrganizationInt;
+
+            var storage = await _storageFactory.CreateAsync(orgId, cancellationToken);
+
+            var path = _storageFactory.GetOrgPath(orgId, "Resources");
+
+            return await HtmlIOUtils.FormatEditorContentAsync(storage, path, content, Logger, cancellationToken);
         }
 
         /// <summary>
@@ -932,6 +990,22 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Read API schema
+        /// 读取接口模式
+        /// </summary>
+        /// <param name="service">API service</param>
+        /// <returns>Result</returns>
+        public JsonSchema? ReadApiSchema(CoreApiService service)
+        {
+            if (apiSchemas.TryGetValue(service, out var creator))
+            {
+                return creator();
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Send email
         /// 发送邮件
         /// </summary>
@@ -977,8 +1051,11 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoUserFound.AsResult();
             }
 
+            // Organization id
+            var orgId = User.OrganizationInt;
+
             // Emails
-            var items = await _db.QueryPersonIdentifiersAsync(User.OrganizationInt, CoreUserIdentifierType.Email, cancellationToken, rq.Persons);
+            var items = await _db.QueryPersonIdentifiersAsync(orgId, CoreUserIdentifierType.Email, cancellationToken, rq.Persons);
             var emails = items[0];
             if (emails.Length == 0)
             {
@@ -1133,7 +1210,9 @@ namespace Platform.Server.Services
             {
                 Subject = subject,
                 Body = body,
-                To = emails
+                To = emails,
+
+                OrgId = orgId > 1 ? orgId : null,
             };
 
             try
@@ -1251,7 +1330,7 @@ namespace Platform.Server.Services
                 api.Title = rq.Title;
             }
 
-            if (rq.IsModified(nameof(rq.Endpoint)))
+            if (rq.IsModified(nameof(rq.Endpoint)) && rq.Endpoint != null)
             {
                 api.Endpoint = rq.Endpoint;
             }
@@ -1268,6 +1347,12 @@ namespace Platform.Server.Services
 
             if (rq.IsModified(nameof(rq.Options)))
             {
+                // Validate the schema
+                if (!ValidateApiServiceSchema(api.Service, rq.Options, out var schemaResult))
+                {
+                    return schemaResult;
+                }
+
                 api.Options = rq.Options;
             }
 
@@ -1343,20 +1428,23 @@ namespace Platform.Server.Services
             // File path
             var path = "/OrgAvatar/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
 
+            // Storage
+            var storage = await _storageFactory.CreateAsync(null, cancellationToken);
+
             // Save the stream to file directly
-            var saveResult = await _storage.WriteAsync(path, avatarStream, WriteCase.CreateNew, cancellationToken: cancellationToken);
+            var saveResult = await storage.WriteAsync(path, avatarStream, WriteCase.CreateNew, cancellationToken: cancellationToken);
 
             if (saveResult)
             {
                 // New avatar URL
-                var url = _storage.GetUrl(path);
+                var url = storage.GetUrl(path);
 
                 // Update
                 await _db.CoreOrganizations.Where(o => o.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Logo, url), cancellationToken);
 
                 // Remove current avatar
                 if (!string.IsNullOrEmpty(org.Logo))
-                    await _storage.DeleteUrlAsync(org.Logo, cancellationToken);
+                    await storage.DeleteUrlAsync(org.Logo, cancellationToken);
 
                 // Push message
                 var message = new UpdateOrgAvatarMessage
@@ -1484,17 +1572,16 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="id">Profile id</param>
         /// <param name="files">Attachment files</param>
+        /// <param name="action">Signed action</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, string action, CancellationToken cancellationToken = default)
         {
-            // Validate the profile id
-            var exists = await _db.UserProfiles(User, id).AsNoTracking()
-               .AnyAsync(cancellationToken);
-
-            if (!exists)
+            // Validate the action
+            var actionResult = await _erp.ValidateActionAsync(action, ServiceConstants.ActionUploadProfileFiles, id, cancellationToken);
+            if (!actionResult.Ok)
             {
-                return ApplicationErrors.NoId.AsResult();
+                return actionResult;
             }
 
             var oid = User.Oid;
@@ -1503,10 +1590,23 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(oid));
             }
 
+            // Validate the profile id
+            var orgId = User.OrganizationInt;
+            var exists = await _db.UserProfiles(User, id).AsNoTracking()
+               .AnyAsync(cancellationToken);
+
+            if (!exists)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
             var exceptions = new ConcurrentQueue<Exception>();
 
+            // Storage
+            var storage = await _storageFactory.CreateAsync(orgId, cancellationToken);
+
             // File path
-            var path = $"/Profile/Org{User.Organization}/{DateTime.UtcNow:yyyyMM}/";
+            var path = _storageFactory.GetOrgPath(orgId, "Profiles");
 
             await Parallel.ForEachAsync(files, cancellationToken, async (file, cancellationToken) =>
             {
@@ -1514,7 +1614,7 @@ namespace Platform.Server.Services
                 {
                     var filePath = path + Path.GetRandomFileName() + Path.GetExtension(file.FileName);
 
-                    var saveResult = await _storage.WriteAsync(filePath, file.OpenReadStream(), WriteCase.CreateNew, cancellationToken: cancellationToken);
+                    var saveResult = await storage.WriteAsync(filePath, file.OpenReadStream(), WriteCase.CreateNew, cancellationToken: cancellationToken);
 
                     if (saveResult)
                     {
@@ -1524,7 +1624,7 @@ namespace Platform.Server.Services
                             FileName = filePath,
                             FileSize = file.Length,
                             ContentType = file.ContentType,
-                            Description = file.FileName,
+                            Description = Path.GetFileNameWithoutExtension(file.FileName),
                             UserId = oid
                         });
                         await _db.SaveChangesAsync(cancellationToken);

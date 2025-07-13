@@ -16,6 +16,9 @@ namespace PlatformShared
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
 
+    [JsonSerializable(typeof(Services.ApiOptions.SMTPApiOptions))]
+    [JsonSerializable(typeof(Services.ApiOptions.StorageApiOptions))]
+
     [JsonSerializable(typeof(AppUrl[]))]
 
     [JsonSerializable(typeof(CommonMessage))]

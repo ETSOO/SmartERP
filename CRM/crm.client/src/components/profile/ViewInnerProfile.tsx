@@ -315,9 +315,15 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                 startIcon={<FileUploadIcon />}
                 maxFiles={10}
                 onUploadFiles={async (files) => {
+                  const action = await app.profileApi.uploadFilesAction(
+                    data.id
+                  );
+                  if (action == null) return;
+
                   const result = await app.core.orgApi.uploadProfileFiles(
                     data.id,
-                    files
+                    files,
+                    action
                   );
                   if (result == null) return;
                   if (result.ok) {

@@ -6,6 +6,7 @@ import {
 } from "@etsoo/react";
 import {
   CoreApiService,
+  CoreUtils,
   OrgCreateApiRQ,
   OrgUpdateApiRQ,
   usePageData
@@ -67,6 +68,8 @@ export default function AddApi() {
     inheritance: true
   });
 
+  const [schemaError, setSchemaError] = React.useState<string | null>(null);
+
   // Formik
   const formik = useFormik<OrgCreateApiRQ>({
     initialValues: data,
@@ -80,6 +83,30 @@ export default function AddApi() {
       if (v.options) {
         try {
           v.options = JSON.stringify(JSON.parse(v.options));
+
+          if (schemaRef.current) {
+            const [valid, errors] = await CoreUtils.validateJson(
+              schemaRef.current,
+              v.options ?? "{}"
+            );
+
+            if (!valid && errors?.length) {
+              setSchemaError(
+                errors
+                  .map(
+                    (e) =>
+                      `${e.instancePath ? `${e.instancePath}: ` : ""}${
+                        e.message
+                      }`
+                  )
+                  .join("; ")
+              );
+              DomUtils.setFocus("options");
+              return;
+            } else {
+              setSchemaError(null);
+            }
+          }
         } catch (e) {
           DomUtils.setFocus("options");
           return;
@@ -130,6 +157,9 @@ export default function AddApi() {
     }
   });
 
+  // Schema ref
+  const schemaRef = React.useRef<object>();
+
   // Input refs
   const refFields = [
     "appId",
@@ -153,7 +183,16 @@ export default function AddApi() {
 
     ReactUtils.updateRefs(refs, result);
     setData(result);
+
+    changeService(result.service);
   }, [id]);
+
+  // Change service
+  const changeService = React.useCallback((service: CoreApiService) => {
+    app.core.orgApi
+      .readApiSchema(service)
+      .then((schema) => (schemaRef.current = schema));
+  }, []);
 
   // Page data hook
   const urlPart = isEditing ? `./..` : `.`;
@@ -191,7 +230,10 @@ export default function AddApi() {
           fullWidth
           required
           value={formik.values.service}
-          onValueChange={(value) => formik.setFieldValue("service", value)}
+          onValueChange={(value) => {
+            formik.setFieldValue("service", value);
+            changeService(value);
+          }}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
@@ -218,7 +260,7 @@ export default function AddApi() {
           fullWidth
           name="endpoint"
           required
-          slotProps={{ htmlInput: { maxLength: 256 } }}
+          slotProps={{ htmlInput: { type: "url", maxLength: 256 } }}
           label={labels.appApiUrl}
           inputRef={refs.endpoint}
         />
@@ -250,6 +292,9 @@ export default function AddApi() {
           name="options"
           label={labels.options}
           inputRef={refs.options}
+          error={!!schemaError}
+          helperText={schemaError}
+          onChange={() => setSchemaError(null)}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>

@@ -1,4 +1,5 @@
-﻿using com.etsoo.Utils.Actions;
+﻿using com.etsoo.CoreFramework.Models;
+using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.RQ.PersonProfile;
 using System.Buffers;
@@ -20,5 +21,6 @@ namespace CRM.Server.Services
         Task<IActionResult> UpdateAttachmentAsync(PersonProfileAttachmentUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateLinkAsync(PersonProfileLinkUpdateRQ rq, CancellationToken cancellationToken = default);
         Task UpdateReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
+        Task<AppActionData?> UploadFilesActionAsync(long id, CancellationToken cancellationToken = default);
     }
 }

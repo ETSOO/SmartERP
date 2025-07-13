@@ -25,6 +25,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Endpoint)
                 .HasConversion<string>()
                 .HasMaxLength(256)
+                .IsRequired()
                 .HasColumnName("endpoint");
             entity.Property(e => e.AppId)
                 .HasMaxLength(64)

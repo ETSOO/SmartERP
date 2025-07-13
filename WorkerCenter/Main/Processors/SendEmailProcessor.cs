@@ -5,7 +5,7 @@ using com.etsoo.MessageQueue.QueueProcessors;
 using com.etsoo.SMTP;
 using MimeKit;
 using MimeKit.Text;
-using PlatformShared.Database;
+using PlatformShared.Services;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -15,15 +15,15 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class SendEmailProcessor : CommonQueueProcessor<SendEmailMessage>
     {
-        private readonly MyDbContext _db;
+        readonly ISmartERPCoordinator _erp;
         readonly ISMTPClient _smtpClient;
 
         public SendEmailProcessor(ILogger<SendEmailProcessor> logger,
-            MyDbContext db,
+            ISmartERPCoordinator erp,
             ISMTPClient smtpClient)
             : base(logger, ApiModelJsonSerializerContext.Default.SendEmailMessage)
         {
-            _db = db;
+            _erp = erp;
             _smtpClient = smtpClient;
         }
 
@@ -36,13 +36,38 @@ namespace WorkerCenter.Main.Processors
             }
         }
 
+        private async ValueTask<ISMTPClient> CreateClientAsync(int? orgId, CancellationToken cancellationToken)
+        {
+            if (orgId > 0)
+            {
+                var item = await _erp.GetSMTPApiAsync(orgId.Value, cancellationToken);
+                if (item != null)
+                {
+                    var appSecret = _erp.DecriptData(item.AppSecret, ServiceConstants.CoreApiAppSecretEncryptionKey);
+
+                    var options = new SMTPClientOptions(
+                        item.Endpoint.Host,
+                        item.Endpoint.Port,
+                        item.Endpoint.Scheme.Equals(Uri.UriSchemeHttps),
+                        item.Title,
+                        item.AppId,
+                        appSecret,
+                        null,
+                        item.Options.Cc,
+                        item.Options.Bcc
+                    );
+
+                    return new SMTPClient(options);
+                }
+            }
+
+            return _smtpClient;
+        }
+
         protected override async Task ProcessMessageAsync(SendEmailMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
-            // Check organization ID
-            if (message.OrgId > 0)
-            {
-
-            }
+            // Create SMTP client
+            var client = await CreateClientAsync(message.OrgId, cancellationToken);
 
             // Email
             var email = new MimeMessage
@@ -83,7 +108,7 @@ namespace WorkerCenter.Main.Processors
             }
 
             // Send
-            await _smtpClient.SendAsync(email, cancellationToken);
+            await client.SendAsync(email, cancellationToken);
         }
     }
 }

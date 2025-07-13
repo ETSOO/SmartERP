@@ -8,10 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="com.etsoo.ApiModel" Version="1.0.73" />
-    <PackageReference Include="com.etsoo.DI" Version="1.0.22" />
-    <PackageReference Include="com.etsoo.MessageQueue" Version="1.0.92" />
+    <PackageReference Include="com.etsoo.DI" Version="1.0.23" />
+    <PackageReference Include="com.etsoo.MessageQueue" Version="1.0.94" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.30" />
-    <PackageReference Include="com.etsoo.Web" Version="1.3.58" />
+    <PackageReference Include="com.etsoo.Web" Version="1.3.61" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 
@@ -40,10 +40,6 @@
     <EmbeddedResource Update="Resources.zh-Hant.resx">
       <DependentUpon>Resources.resx</DependentUpon>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

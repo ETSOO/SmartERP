@@ -261,9 +261,13 @@ export default function ViewProfile() {
                 startIcon={<FileUploadIcon />}
                 maxFiles={10}
                 onUploadFiles={async (files) => {
+                  const action = await app.profileApi.uploadFilesAction(id);
+                  if (action == null) return;
+
                   const result = await app.core.orgApi.uploadProfileFiles(
                     id,
-                    files
+                    files,
+                    action
                   );
                   if (result == null) return;
                   if (result.ok) {

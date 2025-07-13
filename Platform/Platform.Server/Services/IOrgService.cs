@@ -1,9 +1,11 @@
 ﻿using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.Utils.Actions;
+using Json.Schema;
 using Platform.Server.Dto.Org;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Org.RQ;
+using PlatformShared.Database.Models;
 using System.Buffers;
 
 namespace Platform.Server.Services
@@ -28,6 +30,7 @@ namespace Platform.Server.Services
         Task QueryApiAsync(OrgQueryApiRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task QueryResourceAsync(OrgQueryResourceRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task ReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
+        JsonSchema? ReadApiSchema(CoreApiService service);
         Task<IActionResult> SendEmailAsync(SendEmailMessage message, CancellationToken cancellationToken = default);
         Task<IActionResult> SendSMSAsync(SendSMSMessage message, CancellationToken cancellationToken = default);
         Task<IActionResult> SendProfileEmailAsync(SendProfileEmailRQ rq, CancellationToken cancellationToken = default);
@@ -36,7 +39,7 @@ namespace Platform.Server.Services
         Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default);
         Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task UpdateApiReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
-        Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, CancellationToken cancellationToken = default);
+        Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, string action, CancellationToken cancellationToken = default);
         Task<OrgUpdateResourceReadData?> UpdateResourceReadAsync(int id, CancellationToken cancellationToken = default);
     }
 }

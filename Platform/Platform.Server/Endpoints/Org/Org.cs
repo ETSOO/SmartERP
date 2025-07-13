@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Platform.Server.Dto.Org;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Services;
+using PlatformShared.Database.Models;
 
 namespace Platform.Server.Endpoints.Org
 {
@@ -68,6 +69,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapGet("Read/{id:int}", (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read organization JSON data / 浏览机构JSON数据").WithTags("Org");
 
+            g.MapGet("ReadApiSchema/{id}", (IOrgService service, CoreApiService id) => service.ReadApiSchema(id))
+                .WithDescription("Read API schema / 浏览接口模式").WithTags("Org");
+
             g.MapGet("RequestToken", (IAntiforgery forgeryService, IHttpContextAccessor accessor) =>
             {
                 // Create the token
@@ -102,7 +106,7 @@ namespace Platform.Server.Endpoints.Org
             g.MapGet("UpdateApiRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateApiReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read JSON data for upate API / 浏览JSON数据用于更新API").WithTags("Org");
 
-            g.MapPost("UploadProfileFiles/{id:long}", (IOrgService service, long id, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadProfileFilesAsync(id, files, cancellationToken))
+            g.MapPost("UploadProfileFiles/{id:long}", (IOrgService service, long id, [FromQuery] string action, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadProfileFilesAsync(id, files, action, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Upload profile attachments / 上传档案附件").WithTags("Org");
 
