@@ -89,8 +89,6 @@ public partial class Person
 
     public List<int>? Tags { get; set; }
 
-    public List<int>? Addresses { get; set; }
-
     public long UserId { get; set; }
 
     public List<int>? PermissionGroups { get; set; }
@@ -118,6 +116,8 @@ public partial class Person
     public virtual ICollection<OrderHeader> OrderHeaderUsers { get; set; } = new List<OrderHeader>();
 
     public virtual CoreOrganization Org { get; set; } = null!;
+
+    public virtual ICollection<PersonAddress> PersonAddresses { get; set; } = new List<PersonAddress>();
 
     public virtual ICollection<PersonAsset> PersonAssetPeople { get; set; } = new List<PersonAsset>();
 

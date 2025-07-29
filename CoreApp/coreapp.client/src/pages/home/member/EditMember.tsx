@@ -12,7 +12,7 @@ import {
   MemberUpdateRQ,
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
-import { UserTiplist } from "@etsoo/smarterp-core/components";
+import { StatusList, UserTiplist } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
 
 export default function EditMember() {
@@ -206,13 +206,11 @@ export default function EditMember() {
             />
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
-            <ComboBox
-              name="status"
-              label={labels.status}
+            <StatusList
+              fullWidth
               inputRequired
               idValue={formik.values.status}
               inputOnChange={formik.handleChange}
-              options={app.getStatusList()}
             />
           </Grid>
         </React.Fragment>

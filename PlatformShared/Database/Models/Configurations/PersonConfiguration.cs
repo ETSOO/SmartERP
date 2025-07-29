@@ -116,7 +116,6 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("political_status");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
             entity.Property(e => e.Tags).HasColumnName("tags");
-            entity.Property(e => e.Addresses).HasColumnName("addresses");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.PermissionGroups).HasColumnName("permission_groups");
             entity.Property(e => e.PermissionIncluded).HasColumnName("permission_included");

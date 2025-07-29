@@ -21,7 +21,6 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(1001L, null, null, null, null, null)
                 .HasColumnName("id");
-            entity.Property(e => e.Addresses).HasColumnName("addresses");
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)
                 .HasColumnName("assigned_id");

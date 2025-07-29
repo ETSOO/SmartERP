@@ -9,22 +9,21 @@ using System.Collections.Generic;
 
 namespace Platform.Server.Models.Configurations
 {
-    public partial class AddressConfiguration : IEntityTypeConfiguration<Address>
+    public partial class PersonAddressConfiguration : IEntityTypeConfiguration<PersonAddress>
     {
-        public void Configure(EntityTypeBuilder<Address> entity)
+        public void Configure(EntityTypeBuilder<PersonAddress> entity)
         {
-            entity.HasKey(e => e.Id).HasName("address_pkey");
+            entity.HasKey(e => e.Id).HasName("person_address_pkey");
 
-            entity.ToTable("address");
+            entity.ToTable("person_address");
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
-                .HasIdentityOptions(1001L, null, null, null, null, null)
+                .HasIdentityOptions(1000L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.City)
                 .HasMaxLength(50)
                 .HasColumnName("city");
-            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -39,32 +38,36 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Name)
                 .HasMaxLength(128)
                 .HasColumnName("name");
+            entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.PlaceId)
                 .HasMaxLength(30)
                 .HasColumnName("place_id");
-            entity.Property(e => e.Postcode)
+            entity.Property(e => e.PostalCode)
                 .HasMaxLength(10)
-                .HasColumnName("postcode");
+                .HasColumnName("postal_code");
             entity.Property(e => e.Provider).HasColumnName("provider");
             entity.Property(e => e.Region)
                 .HasMaxLength(2)
                 .IsFixedLength()
                 .HasColumnName("region");
+            entity.Property(e => e.Route)
+                .HasMaxLength(128)
+                .HasColumnName("route");
             entity.Property(e => e.State)
                 .HasMaxLength(50)
                 .HasColumnName("state");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Street)
+                .HasMaxLength(128)
+                .HasColumnName("street");
 
-            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.Addresses)
-                .HasForeignKey(d => d.CoreOrganizationId)
+            entity.HasOne(d => d.Person).WithMany(p => p.PersonAddresses)
+                .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("address_core_organization_id_fkey");
+                .HasConstraintName("person_address_person_id_fkey");
 
             OnConfigurePartial(entity);
         }
 
-        partial void OnConfigurePartial(EntityTypeBuilder<Address> entity);
+        partial void OnConfigurePartial(EntityTypeBuilder<PersonAddress> entity);
     }
 }

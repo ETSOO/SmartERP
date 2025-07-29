@@ -323,7 +323,7 @@ namespace PlatformShared.Database.Models
         /// Name
         /// 名称
         /// </summary>
-        public required string Name { get; set; }
+        public string Name { get; set; } = default!;
 
         /// <summary>
         /// Given name
@@ -518,16 +518,10 @@ namespace PlatformShared.Database.Models
         public List<int>? Tags { get; set; }
 
         /// <summary>
-        /// Addresses
-        /// 地址
-        /// </summary>
-        public List<int>? Addresses { get; set; }
-
-        /// <summary>
         /// Registrant's User id
         /// 登记人的用户编号
         /// </summary>
-        public required long UserId { get; set; }
+        public long UserId { get; set; }
 
         /// <summary>
         /// Permission groups
@@ -590,6 +584,12 @@ namespace PlatformShared.Database.Models
         public SettingCrm? SettingCrm { get; set; }
 
         /// <summary>
+        /// Addresses
+        /// 所有地址
+        /// </summary>
+        public ICollection<PersonAddress> Addresses { get; } = default!;
+
+        /// <summary>
         /// Direct reports
         /// 直接下属
         /// </summary>
@@ -617,7 +617,7 @@ namespace PlatformShared.Database.Models
         /// Information
         /// 信息
         /// </summary>
-        public ICollection<PersonInfo> Infos { get; } = default!;
+        public ICollection<PersonInfo> Infos { get; set; } = default!;
 
         /// <summary>
         /// Orders

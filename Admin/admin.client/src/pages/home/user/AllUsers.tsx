@@ -4,8 +4,7 @@ import {
   SearchField,
   IconButtonLink,
   MobileListItemRenderer,
-  SelectBool,
-  ComboBox
+  SelectBool
 } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
@@ -19,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes, DateUtils } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { AllUserDto } from "../../../api/dto/query/AllUserDto";
 import { BoxProps } from "@mui/material/Box";
 
@@ -103,13 +102,7 @@ export default function AllUsers() {
           label={labels.isFrozen}
           value={data.isFrozen?.toString()}
         />,
-        <ComboBox
-          name="status"
-          label={labels.status}
-          search
-          options={app.getStatusList()}
-          idValue={data.status}
-        />,
+        <StatusList search idValue={data.status} />,
         <SearchField
           label={labels.startDate}
           name="creationStart"

@@ -1,4 +1,4 @@
-import { ComboBox, EditPage, InputField, MaskInput } from "@etsoo/materialui";
+import { EditPage, InputField, MaskInput } from "@etsoo/materialui";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -12,7 +12,7 @@ import {
   OrgUpdateRQ,
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
-import { OrgTiplist } from "@etsoo/smarterp-core/components";
+import { OrgTiplist, StatusList } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
 
 export default function EditOrg() {
@@ -178,13 +178,11 @@ export default function EditOrg() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <ComboBox
-          name="status"
-          label={labels.status}
+        <StatusList
+          fullWidth
           inputRequired
           idValue={formik.values.status}
           inputOnChange={formik.handleChange}
-          options={app.getStatusList()}
         />
       </Grid>
     </EditPage>

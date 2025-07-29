@@ -64,6 +64,7 @@ export default function AddApi() {
     title: "",
     appId: "",
     appSecret: "",
+    endpoint: "",
     enabled: true,
     inheritance: true
   });

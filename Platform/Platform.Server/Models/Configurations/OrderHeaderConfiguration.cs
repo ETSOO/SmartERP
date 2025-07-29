@@ -89,10 +89,6 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("title");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Address).WithMany(p => p.OrderHeaders)
-                .HasForeignKey(d => d.AddressId)
-                .HasConstraintName("order_header_address_id_fkey");
-
             entity.HasOne(d => d.Buyer).WithMany(p => p.OrderHeaderBuyers)
                 .HasForeignKey(d => d.BuyerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

@@ -15,7 +15,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+            entity.Property(e => e.OrgId).HasColumnName("org_id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
@@ -52,7 +52,8 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.HealthCheckUrl)
                 .HasMaxLength(1280)
                 .HasColumnName("health_check_url");
-            entity.Property(e => e.HealthCheckSchedule).HasColumnName("health_check_schedule");
+            entity.Property(e => e.HealthCheckSchedule)
+                .HasColumnName("health_check_schedule");
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
                 .HasColumnName("data");

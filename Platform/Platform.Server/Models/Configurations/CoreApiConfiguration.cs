@@ -49,6 +49,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("updated_at");
 
             entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreApis)
                 .HasForeignKey(d => d.CoreOrganizationId)

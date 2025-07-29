@@ -15,10 +15,6 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "public.address",
-         "ObjectType": 0
-      },
-      {
          "Name": "public.core_api",
          "ObjectType": 0
       },
@@ -59,6 +55,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.order_address",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.order_header",
          "ObjectType": 0
       },
@@ -76,6 +76,10 @@
       },
       {
          "Name": "public.person",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.person_address",
          "ObjectType": 0
       },
       {

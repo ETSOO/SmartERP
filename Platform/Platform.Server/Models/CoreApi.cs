@@ -15,7 +15,7 @@ public partial class CoreApi
 
     public string Title { get; set; } = null!;
 
-    public string? Endpoint { get; set; }
+    public string Endpoint { get; set; } = null!;
 
     public string AppId { get; set; } = null!;
 
@@ -34,6 +34,8 @@ public partial class CoreApi
     public bool Inheritance { get; set; }
 
     public DateTime Creation { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 }

@@ -120,6 +120,24 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/contact/address/:id",
+            lazy: async () => {
+              const AddAddress = await import(
+                "./pages/home/contact/AddAddress"
+              );
+              return { Component: AddAddress.default };
+            }
+          },
+          {
+            path: "/home/contact/info/:id",
+            lazy: async () => {
+              const AddContactInfo = await import(
+                "./pages/home/contact/AddContactInfo"
+              );
+              return { Component: AddContactInfo.default };
+            }
+          },
+          {
             path: "/home/contact/category",
             lazy: async () => {
               const AllCategories = await import(

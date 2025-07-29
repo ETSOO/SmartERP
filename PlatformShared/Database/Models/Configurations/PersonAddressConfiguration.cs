@@ -1,21 +1,22 @@
-﻿using com.etsoo.CoreFramework.Business;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace PlatformShared.Database.Models.Configurations
 {
-    internal class AddressConfiguration : IEntityTypeConfiguration<Address>
+    internal class PersonAddressConfiguration : IEntityTypeConfiguration<PersonAddress>
     {
-        public void Configure(EntityTypeBuilder<Address> entity)
+        public void Configure(EntityTypeBuilder<PersonAddress> entity)
         {
-            entity.HasKey(e => e.Id).HasName("address_pkey");
+            entity.HasKey(e => e.Id).HasName("person_address_pkey");
 
-            entity.ToTable("address");
+            entity.ToTable("person_address");
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(1001L, null, null, null, null, null)
                 .HasColumnName("id");
+            entity.Property(e => e.PersonId)
+                .HasColumnName("person_id");
             entity.Property(e => e.Kind)
                 .HasConversion<byte>()
                 .HasColumnName("kind");
@@ -42,9 +43,15 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.District)
                 .HasMaxLength(50)
                 .HasColumnName("district");
-            entity.Property(e => e.Postcode)
+            entity.Property(e => e.Route)
+                .HasMaxLength(128)
+                .HasColumnName("route");
+            entity.Property(e => e.Street)
+                .HasMaxLength(128)
+                .HasColumnName("street");
+            entity.Property(e => e.PostalCode)
                 .HasMaxLength(10)
-                .HasColumnName("postcode");
+                .HasColumnName("postal_code");
             entity.Property(e => e.FormattedAddress)
                 .IsRequired()
                 .HasMaxLength(256)
@@ -56,11 +63,11 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
-            entity.Property(e => e.Status)
-                .HasConversion<byte>()
-                .HasDefaultValue(EntityStatus.Normal)
-                .HasColumnName("status");
-            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+
+            entity.HasOne(d => d.Person).WithMany(p => p.Addresses)
+                .HasForeignKey(d => d.PersonId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_address_person_id_fkey");
         }
     }
 }

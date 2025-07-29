@@ -18,7 +18,7 @@ namespace PlatformShared.Database.Models
         /// Core organization id
         /// 核心机构编号
         /// </summary>
-        public int CoreOrganizationId { get; set; }
+        public int OrgId { get; set; }
 
         /// <summary>
         /// Person id

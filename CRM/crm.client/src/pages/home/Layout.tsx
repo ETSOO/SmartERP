@@ -60,11 +60,12 @@ export default function Home() {
   // Labels
   const labels = app.getLabels(
     "add",
+    "addContactInfo",
     "addProfile",
+    "address",
     "allProfiles",
     "app3",
     "categories",
-    "contacts",
     "customers",
     "depts",
     "edit",
@@ -81,6 +82,7 @@ export default function Home() {
     "signoutSuccess",
     "simpleInventory",
     "sortCategory",
+    "stakeholders",
     "system",
     "suppliers",
     "updateSystemSettings",
@@ -121,7 +123,7 @@ export default function Home() {
       },
       {
         segment: "home/contact",
-        title: labels.contacts,
+        title: labels.stakeholders,
         icon: <ContactsIcon />,
         children: [
           {
@@ -140,6 +142,18 @@ export default function Home() {
             segment: "avatar",
             pattern: "avatar/:id",
             title: labels.editAvatar,
+            hidden: true
+          },
+          {
+            segment: "address",
+            pattern: "address/:id",
+            title: labels.address,
+            hidden: true
+          },
+          {
+            segment: "info",
+            pattern: "info/:id",
+            title: labels.addContactInfo,
             hidden: true
           },
           {

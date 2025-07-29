@@ -6,15 +6,15 @@ using NpgsqlTypes;
 
 namespace Platform.Server.Models;
 
-public partial class Address
+public partial class OrderAddress
 {
     public int Id { get; set; }
+
+    public long OrderId { get; set; }
 
     public short Kind { get; set; }
 
     public string Name { get; set; } = null!;
-
-    public string? PlaceId { get; set; }
 
     public string Region { get; set; } = null!;
 
@@ -24,7 +24,11 @@ public partial class Address
 
     public string? District { get; set; }
 
-    public string? Postcode { get; set; }
+    public string? Route { get; set; }
+
+    public string? Street { get; set; }
+
+    public string? PostalCode { get; set; }
 
     public string FormattedAddress { get; set; } = null!;
 
@@ -32,13 +36,7 @@ public partial class Address
 
     public short Provider { get; set; }
 
-    public DateTime Creation { get; set; }
+    public string? PlaceId { get; set; }
 
-    public short Status { get; set; }
-
-    public int CoreOrganizationId { get; set; }
-
-    public virtual CoreOrganization CoreOrganization { get; set; } = null!;
-
-    public virtual ICollection<OrderHeader> OrderHeaders { get; set; } = new List<OrderHeader>();
+    public virtual OrderHeader Order { get; set; } = null!;
 }

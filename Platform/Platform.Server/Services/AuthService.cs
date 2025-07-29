@@ -711,11 +711,18 @@ namespace Platform.Server.Services
             var password = await App.HashPasswordAsync(_regUser.Id + pasword);
 
             // Update the user
-            var user = await _db.CoreUsers.FirstOrDefaultAsync(u => u.Id == _regUser.IdInt, cancellationToken);
+            var user = await _db.CoreUsers
+                .Where(u => u.Id == _regUser.IdInt)
+                .Select(u => new CoreUser { Id = u.Id })
+                .FirstOrDefaultAsync(cancellationToken);
             if (user == null)
             {
                 return (ApplicationErrors.NoValidData.AsResult("User"), null);
             }
+
+            // Attach the user
+            // Brings an entity into the context without marking it as modified
+            _db.CoreUsers.Attach(user);
 
             user.Password = password;
             user.Name = rq.Name;
@@ -736,7 +743,6 @@ namespace Platform.Server.Services
             user.Region = rq.Region;
             user.Step = 0;
 
-            _db.CoreUsers.Update(user);
             await _db.SaveChangesAsync(cancellationToken);
 
             var (loginResult, refreshToken, _) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, null, null, rq.Auth, rq.Timezone, cancellationToken);
@@ -928,7 +934,7 @@ namespace Platform.Server.Services
 
             var deviceName = cd.Value.Parser.ToShortName();
 
-            var (loginResult, refreshToken, moreData) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, null, rq.Org, null, rq.Auth, rq.TimeZone, cancellationToken);
+            var (loginResult, refreshToken, moreData) = await CompleteLoginAsync(user, rq.DeviceId, deviceName, DeviceType.Web, rq.Region, culture, rq.Org, null, rq.Auth, rq.TimeZone, cancellationToken);
 
             if (loginResult.Ok)
             {
@@ -1101,7 +1107,9 @@ namespace Platform.Server.Services
         // Sign up from OAuth2 client - 从OAuth2客户端注册
         private async Task<(ActionResult result, string? refreshToken, MoreData? moreData)> CompleteLoginAsync(CoreUserLogin user, string clientId, string deviceName, DeviceType deviceType, string region, string? culture, int? organizationId, int? fromOrganizationId, AuthRequest? auth, string? timezone, CancellationToken cancellationToken)
         {
-            var (result, tokenUser, data) = await LoginAsync(user, clientId, deviceName, deviceType, region, culture ?? CultureInfo.CurrentCulture.Name, organizationId, fromOrganizationId, auth?.Scopes, timezone, auth?.RedirectUri, cancellationToken);
+            culture ??= CultureInfo.CurrentCulture.Name;
+
+            var (result, tokenUser, data) = await LoginAsync(user, clientId, deviceName, deviceType, region, culture, organizationId, fromOrganizationId, auth?.Scopes, timezone, auth?.RedirectUri, cancellationToken);
 
             if (!result.Ok || tokenUser == null || data == null)
             {
@@ -1339,7 +1347,7 @@ namespace Platform.Server.Services
             // Use the latest token to avoid huge creation of new one
             var tokenData = await _db.CoreUserDeviceTokens
                 .AsNoTracking()
-                .Where(t => t.DeviceId == deviceId && t.ResponseType == responseType && t.AppId == appId)
+                .Where(t => t.DeviceId == deviceId && t.ResponseType == responseType && t.AppId == appId && t.Culture == culture)
                 .OrderByDescending(t => t.Expiry)
                 .Select(t => new { t.Id, t.Token, t.Expiry, t.Data })
                 .FirstOrDefaultAsync(cancellationToken);

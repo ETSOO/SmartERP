@@ -69,13 +69,13 @@ public partial class OrderHeader
 
     public List<int>? Tags { get; set; }
 
-    public virtual Address? Address { get; set; }
-
     public virtual Person Buyer { get; set; } = null!;
 
     public virtual Person? Contact { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
+
+    public virtual ICollection<OrderAddress> OrderAddresses { get; set; } = new List<OrderAddress>();
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 

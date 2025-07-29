@@ -3,6 +3,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import ContactsIcon from "@mui/icons-material/Contacts";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import ArticleIcon from "@mui/icons-material/Article";
+import InfoIcon from "@mui/icons-material/Info";
 import { app } from "../../app/MyApp";
 import React from "react";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
@@ -11,6 +12,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import { Profiles } from "../profile/Profiles";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { PersonData } from "./PersonData";
+import { ContactInfos } from "../profile/ContactInfos";
 
 /**
  * View person component properties
@@ -35,6 +37,7 @@ export function ViewPerson(props: ViewPersonProps) {
   const labels = app.getLabels(
     "assets",
     "basicInfo",
+    "contactInfo",
     "contacts",
     "profiles",
     "view"
@@ -74,6 +77,13 @@ export function ViewPerson(props: ViewPersonProps) {
                 visible && <Profiles personId={personId} />,
               label: labels.profiles,
               icon: <HistoryIcon />,
+              iconPosition: "start"
+            },
+            {
+              children: (visible) =>
+                visible && <ContactInfos personId={personId} />,
+              label: labels.contactInfo,
+              icon: <InfoIcon />,
               iconPosition: "start"
             },
             {

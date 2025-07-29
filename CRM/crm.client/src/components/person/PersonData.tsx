@@ -2,15 +2,19 @@ import {
   ButtonLink,
   HBox,
   IconButtonLink,
+  VBox,
   ViewContainer,
   ViewPageFieldType
 } from "@etsoo/materialui";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import { PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
 import Divider from "@mui/material/Divider";
 import { CoreUtils } from "@etsoo/smarterp-core";
+import React from "react";
+import Chip from "@mui/material/Chip";
 
 type PersonDataProps = {
   data: PersonViewData;
@@ -23,6 +27,8 @@ export function PersonData(props: PersonDataProps) {
 
   // Labels
   const labels = app.getLabels(
+    "add",
+    "addresses",
     "edit",
     "editAvatar",
     "familyName",
@@ -119,6 +125,13 @@ export function PersonData(props: PersonDataProps) {
           label: "groups"
         },
         "assignedId",
+        {
+          data: (item) =>
+            item.isLegalPerson
+              ? app.formatDate(item.privateData?.birthday)
+              : undefined,
+          label: "personBirthdayB"
+        },
         "jobTitle",
         {
           data: (item) =>
@@ -141,6 +154,46 @@ export function PersonData(props: PersonDataProps) {
         "currencies",
         "cultures",
         {
+          data: (item) => {
+            return item.addresses?.length ? (
+              <VBox flexWrap="wrap" paddingTop={0.5}>
+                {item.addresses.map((a) => (
+                  <HBox key={a.id} alignItems="center">
+                    <Chip
+                      label={a.name + " - " + a.formattedAddress}
+                      size="small"
+                      title={app.person.getAddressKind(a.kind)}
+                    />
+                    <IconButtonLink
+                      href={`./../../address/${item.id}?id=${a.id}`}
+                      title={labels.edit}
+                      size="small"
+                    >
+                      <EditIcon />
+                    </IconButtonLink>
+                  </HBox>
+                ))}
+              </VBox>
+            ) : (
+              <React.Fragment />
+            );
+          },
+          label: () => (
+            <HBox gap={1} alignItems="center">
+              {labels.addresses}:
+              <ButtonLink
+                size="small"
+                variant="outlined"
+                startIcon={<AddIcon />}
+                href={`./../../address/${data.id}`}
+              >
+                {labels.add}
+              </ButtonLink>
+            </HBox>
+          ),
+          singleRow: true
+        },
+        {
           data: (item) =>
             item.editable && (
               <HBox gap={1} justifyContent="center" flexWrap="wrap">
@@ -155,7 +208,9 @@ export function PersonData(props: PersonDataProps) {
             ),
           singleRow: true
         },
-        ...(data.privateData && Object.keys(data.privateData).length > 0
+        ...(data.privateData &&
+        !data.isLegalPerson &&
+        Object.keys(data.privateData).length > 0
           ? ([
               {
                 data: () => <Divider />,

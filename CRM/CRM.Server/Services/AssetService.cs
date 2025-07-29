@@ -32,8 +32,9 @@ namespace CRM.Server.Services
 
         private IQueryable<PersonAsset> CreateQuery(AssetListRQ rq, Func<IQueryable<PersonAsset>, IQueryable<PersonAsset>>? filters = null)
         {
+            var orgId = User.OrganizationInt;
             var query = _db.PersonAssets.AsNoTracking()
-                .Where(a => a.CoreOrganizationId == User.OrganizationInt)
+                .Where(a => a.OrgId == orgId)
                 .QueryEtsoo(rq, (a) => a.Id, (a) => a.Status, (q) =>
                 {
                     if (rq.Keyword?.Length > 1)

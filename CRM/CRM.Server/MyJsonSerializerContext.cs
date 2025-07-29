@@ -76,12 +76,18 @@ namespace CRM.Server
     [JsonSerializable(typeof(OrderListRQ))]
 
     // Person
+    [JsonSerializable(typeof(AddressUpdateReadData))]
     [JsonSerializable(typeof(ChoosePersonsData))]
     [JsonSerializable(typeof(IEnumerable<PersonQueryData>))]
     [JsonSerializable(typeof(PersonUpdateReadData))]
     [JsonSerializable(typeof(PersonViewData))]
 
+    [JsonSerializable(typeof(AddressCreateRQ))]
+    [JsonSerializable(typeof(AddressUpdateRQ))]
     [JsonSerializable(typeof(ChoosePersonsRQ))]
+    [JsonSerializable(typeof(PersonInfoCreateRQ))]
+    [JsonSerializable(typeof(PersonInfoQueryRQ))]
+    [JsonSerializable(typeof(PersonInfoUpdateRQ))]
     [JsonSerializable(typeof(PersonListRQ))]
     [JsonSerializable(typeof(PersonUpdateRQ))]
 

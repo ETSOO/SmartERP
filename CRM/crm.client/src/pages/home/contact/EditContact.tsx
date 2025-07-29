@@ -1,14 +1,8 @@
-import {
-  ComboBox,
-  EditPage,
-  InputField,
-  OptionBool,
-  TagList
-} from "@etsoo/materialui";
+import { EditPage, InputField, OptionBool, TagList } from "@etsoo/materialui";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Utils } from "@etsoo/shared";
+import { DateUtils, Utils } from "@etsoo/shared";
 import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
 import { useNavigate } from "react-router-dom";
 import { ReactUtils, useParamsEx, useRefs } from "@etsoo/react";
@@ -19,6 +13,7 @@ import {
   ButtonCurrencies,
   ButtonIdentityTypes,
   ButtonRegions,
+  StatusList,
   UserTiplist
 } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
@@ -133,6 +128,18 @@ export default function EditContact() {
       }
       rq.changedFields = fields;
 
+      // Private data
+      if (
+        rq.privateData &&
+        privateData &&
+        rq.changedFields.includes("privateData")
+      ) {
+        rq.privateData.changedFields = Utils.getDataChanges(
+          rq.privateData,
+          privateData
+        );
+      }
+
       // Update
       const result = await app.personApi.update(rq);
 
@@ -211,6 +218,17 @@ export default function EditContact() {
             type="date"
             label={labels.personBirthdayB}
             inputRef={refs.birthday}
+            ref={() => {
+              const input = refs.birthday.current;
+              if (input) {
+                const birthday = DateUtils.formatForInput(
+                  data.privateData?.birthday
+                );
+                if (birthday) {
+                  input.value = birthday;
+                }
+              }
+            }}
           />
         </Grid>
       )}
@@ -375,13 +393,11 @@ export default function EditContact() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <ComboBox
-          name="status"
-          label={labels.status}
+        <StatusList
+          fullWidth
           inputRequired
           idValue={formik.values.status}
           inputOnChange={formik.handleChange}
-          options={app.getStatusList()}
         />
       </Grid>
       {!formik.values.isLegalPerson && (

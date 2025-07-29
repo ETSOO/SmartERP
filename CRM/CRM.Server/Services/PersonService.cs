@@ -1,4 +1,5 @@
-﻿using com.etsoo.CoreFramework.Application;
+﻿using com.etsoo.ApiModel.Dto.Maps;
+using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
@@ -10,6 +11,7 @@ using com.etsoo.Utils.Serialization;
 using CRM.Server.Dto.Person;
 using CRM.Server.RQ.Person;
 using Microsoft.EntityFrameworkCore;
+using NpgsqlTypes;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -86,6 +88,141 @@ namespace CRM.Server.Services
             };
         }
 
+        /// <summary>
+        /// Create address
+        /// 创建地址
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateAddressAsync(AddressCreateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var person = await _db.Persons
+               .Where(p => p.Id == rq.PersonId && p.OrgId == orgId)
+               .Select(p => new Person
+               {
+                   Id = p.Id,
+                   IdentityType = p.IdentityType
+               })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.PersonId));
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            // Find possible existing address
+            var addressId = await _db.PersonAddresses.AsNoTracking()
+                .Where(a => a.PersonId == person.Id && a.City == rq.City && a.FormattedAddress == rq.FormattedAddress)
+                .Select(a => a.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (addressId < 1)
+            {
+                // New address
+                var addr = new PersonAddress
+                {
+                    PersonId = person.Id,
+                    Kind = rq.Kind,
+                    Name = rq.Name,
+                    PlaceId = rq.PlaceId,
+                    Region = rq.Region,
+                    State = rq.State,
+                    City = rq.City,
+                    District = rq.District,
+                    Route = rq.Route,
+                    Street = rq.Street,
+                    PostalCode = rq.PostalCode,
+                    FormattedAddress = rq.FormattedAddress,
+                    Location = rq.Location == null ? null : new NpgsqlPoint(rq.Location.Lng, rq.Location.Lat),
+                    Provider = rq.Provider
+                };
+
+                // Add
+                _db.PersonAddresses.Add(addr);
+
+                // Save
+                await _db.SaveChangesAsync(cancellationToken);
+
+                // Get the id
+                addressId = addr.Id;
+            }
+
+            // Return
+            return ActionResult.Succeed(addressId);
+        }
+
+        /// <summary>
+        /// Create info
+        /// 创建信息
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateInfoAsync(PersonInfoCreateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var person = await _db.Persons
+               .Where(p => p.Id == rq.PersonId && p.OrgId == orgId)
+               .Select(p => new Person
+               {
+                   Id = p.Id,
+                   IdentityType = p.IdentityType,
+                   Infos = p.Infos
+               })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.PersonId));
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            _db.Persons.Attach(person);
+
+            // Create infos
+            foreach (var item in rq.Items)
+            {
+                // Check if the info already exists
+                if (person.Infos.Any(i => i.Kind == item.Kind && i.Identifier == item.Identifier))
+                {
+                    continue;
+                }
+
+                // Create new info
+                var info = new PersonInfo
+                {
+                    PersonId = person.Id,
+                    Kind = item.Kind,
+                    Identifier = item.Identifier,
+                    Description = item.Description,
+                    IsDefault = item.IsDefault ?? false
+                };
+
+                person.Infos.Add(info);
+            }
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.PersonId);
+        }
+
         private IQueryable<Person> CreateQuery(PersonListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
         {
             var query = _db.Persons(User.OrganizationInt).AsNoTracking()
@@ -127,6 +264,88 @@ namespace CRM.Server.Services
                 });
 
             return query;
+        }
+
+        /// <summary>
+        /// Delete address
+        /// 删除地址
+        /// </summary>
+        /// <param name="id">Address id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteAddressAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var addr = await _db.PersonAddresses
+               .Where(a => a.Id == id && a.Person.OrgId == orgId)
+               .Select(a => new { a.Person.IdentityType })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (addr == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(addr.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var result = await _db.PersonAddresses.AsNoTracking()
+                .Where(p => p.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            if (result == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+            else
+            {
+                return ActionResult.Succeed(id);
+            }
+        }
+
+        /// <summary>
+        /// Delete info
+        /// 删除信息
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteInfoAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var info = await _db.PersonInfos
+               .Where(i => i.Id == id && i.Person.OrgId == orgId)
+               .Select(i => new { i.Person.IdentityType })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (info == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(info.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var result = await _db.PersonInfos.AsNoTracking()
+                .Where(p => p.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            if (result == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+            else
+            {
+                return ActionResult.Succeed(id);
+            }
         }
 
         private void FormatListRQ(PersonListRQ rq)
@@ -252,6 +471,63 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Query person info JSON data
+        /// 查询人员信息JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task QueryInfoAsync(PersonInfoQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            return _db.PersonInfos.Where(i => i.PersonId == rq.PersonId && i.Person.OrgId == orgId)
+                .AsNoTracking()
+                .QueryEtsoo(rq, (i) => i.Id, null, (q) =>
+                {
+                    if (rq.Kind.HasValue)
+                    {
+                        q = q.Where(i => i.Kind == rq.Kind.Value);
+                    }
+
+                    if (rq.IsDefault.HasValue)
+                    {
+                        q = q.Where(i => i.IsDefault == rq.IsDefault);
+                    }
+
+                    if (rq.IsVerified.HasValue)
+                    {
+                        q = q.Where(i => i.IsVerified == rq.IsVerified);
+                    }
+
+                    if (rq.Subscribed.HasValue)
+                    {
+                        q = q.Where(i => i.Subscribed == rq.Subscribed);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        q = q.QueryEtsooKeywords(rq.Keyword, DbUtils.ILikeMethod, p => p.Description);
+                    }
+
+                    return q;
+                })
+                .Select(i => new
+                {
+                    i.Id,
+                    i.Kind,
+                    Identifier = MyDbFunctions.HideData(i.Identifier, '@'),
+                    i.Description,
+                    i.IsDefault,
+                    i.IsVerified,
+                    i.Subscribed,
+                    i.Creation
+                })
+                .ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
         /// Read person data for view
         /// 读取用于浏览的人员数据
         /// </summary>
@@ -303,7 +579,7 @@ namespace CRM.Server.Services
                     AssignedId = p.AssignedId,
                     Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
-                    Addresses = p.Addresses == null ? null : _db.Addresses.Where(a => p.CoreOrganizationId == orgId && p.Addresses.Contains(a.Id)).Select(a => new AddressItem { Id = a.Id, Kind = a.Kind, Name = a.Name, FormattedAddress = a.FormattedAddress }).ToList(),
+                    Addresses = p.Addresses.Select(a => new AddressItem { Id = a.Id, Kind = a.Kind, Name = a.Name, FormattedAddress = a.FormattedAddress }),
                     ReportTo = p.ReportTo,
                     ReportToName = p.ReportToUser == null ? null : p.ReportToUser.Name,
                     Creation = p.Creation,
@@ -351,6 +627,36 @@ namespace CRM.Server.Services
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// Read person info for view
+        /// 读取用于浏览的人员信息
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<string?> ReadInfoAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var info = await _db.PersonInfos
+               .Where(i => i.Id == id && i.Person.OrgId == orgId)
+               .Select(i => new { i.Identifier, i.Person.IdentityType })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (info == null)
+            {
+                return null;
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(info.IdentityType, nameof(Permissions.Customer.View), cancellationToken))
+            {
+                return null;
+            }
+
+            return info.Identifier;
         }
 
         /// <summary>
@@ -476,11 +782,6 @@ namespace CRM.Server.Services
                 }
             }
 
-            if (rq.IsModified(nameof(rq.Addresses)))
-            {
-                person.Addresses = rq.Addresses?.ToList();
-            }
-
             if (rq.IsModified(nameof(rq.ReportTo)))
             {
                 person.ReportTo = rq.ReportTo;
@@ -493,7 +794,7 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Currencies)))
             {
-                person.Regions = rq.Currencies?.ToList();
+                person.Currencies = rq.Currencies?.ToList();
             }
 
             if (rq.IsModified(nameof(rq.Cultures)))
@@ -578,11 +879,267 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Update address
+        /// 更新地址
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateAddressAsync(AddressUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var addr = await _db.PersonAddresses
+                .Where(a => a.Id == rq.Id && a.Person.OrgId == orgId)
+                .Include(a => a.Person)
+                .Select(a => new PersonAddress
+                {
+                    Id = a.Id,
+                    PersonId = a.PersonId,
+                    Kind = a.Kind,
+                    Name = a.Name,
+                    PlaceId = a.PlaceId,
+                    Region = a.Region,
+                    State = a.State,
+                    City = a.City,
+                    District = a.District,
+                    Route = a.Route,
+                    Street = a.Street,
+                    PostalCode = a.PostalCode,
+                    FormattedAddress = a.FormattedAddress,
+                    Location = a.Location,
+                    Provider = a.Provider,
+                    Person = new Person
+                    {
+                        Id = a.Person.Id,
+                        IdentityType = a.Person.IdentityType
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (addr == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(addr.Person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            _db.PersonAddresses.Attach(addr);
+
+            if (rq.IsModified(nameof(rq.PersonId)) && rq.PersonId.HasValue && rq.PersonId != addr.PersonId)
+            {
+                // Check if the person exists
+                var person = await _db.Persons
+                    .Where(p => p.Id == rq.PersonId && p.OrgId == orgId)
+                    .Select(p => new Person
+                    {
+                        Id = p.Id,
+                        IdentityType = p.IdentityType
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (person == null)
+                {
+                    return ApplicationErrors.NoId.AsResult(nameof(rq.PersonId));
+                }
+
+                if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+                {
+                    return ApplicationErrors.AccessDenied.AsResult(nameof(rq.PersonId));
+                }
+
+                addr.PersonId = person.Id;
+            }
+
+            if (rq.IsModified(nameof(rq.Kind)) && rq.Kind.HasValue)
+            {
+                addr.Kind = rq.Kind.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Name)) && !string.IsNullOrEmpty(rq.Name))
+            {
+                addr.Name = rq.Name;
+            }
+
+            if (rq.IsModified(nameof(rq.PlaceId)))
+            {
+                addr.PlaceId = rq.PlaceId;
+            }
+
+            if (rq.IsModified(nameof(rq.Region)) && !string.IsNullOrEmpty(rq.Region))
+            {
+                addr.Region = rq.Region;
+            }
+
+            if (rq.IsModified(nameof(rq.State)) && !string.IsNullOrEmpty(rq.State))
+            {
+                addr.State = rq.State;
+            }
+
+            if (rq.IsModified(nameof(rq.City)) && !string.IsNullOrEmpty(rq.City))
+            {
+                addr.City = rq.City;
+            }
+
+            if (rq.IsModified(nameof(rq.District)))
+            {
+                addr.District = rq.District;
+            }
+
+            if (rq.IsModified(nameof(rq.Route)))
+            {
+                addr.Route = rq.Route;
+            }
+
+            if (rq.IsModified(nameof(rq.Street)))
+            {
+                addr.Street = rq.Street;
+            }
+
+            if (rq.IsModified(nameof(rq.PostalCode)))
+            {
+                addr.PostalCode = rq.PostalCode;
+            }
+
+            if (rq.IsModified(nameof(rq.FormattedAddress)) && !string.IsNullOrEmpty(rq.FormattedAddress))
+            {
+                addr.FormattedAddress = rq.FormattedAddress;
+            }
+
+            if (rq.IsModified(nameof(rq.Location)))
+            {
+                addr.Location = rq.Location == null ? null : new NpgsqlPoint(rq.Location.Lng, rq.Location.Lat);
+            }
+
+            if (rq.IsModified(nameof(rq.Provider)) && rq.Provider.HasValue)
+            {
+                addr.Provider = rq.Provider.Value;
+            }
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Update info
+        /// 更新信息
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateInfoAsync(PersonInfoUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var info = await _db.PersonInfos
+                .Where(i => i.Id == rq.Id && i.Person.OrgId == orgId)
+                .Include(i => i.Person)
+                .Select(i => new PersonInfo
+                {
+                    Id = i.Id,
+                    Kind = i.Kind,
+                    Identifier = i.Identifier,
+                    Description = i.Description,
+                    IsDefault = i.IsDefault,
+                    Subscribed = i.Subscribed,
+                    Person = new Person
+                    {
+                        Id = i.Person.Id,
+                        IdentityType = i.Person.IdentityType
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (info == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(info.Person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            _db.PersonInfos.Attach(info);
+
+            if (rq.IsModified(nameof(rq.Kind)))
+            {
+                info.Kind = rq.Kind;
+            }
+
+            if (rq.IsModified(nameof(rq.Identifier)) && !string.IsNullOrEmpty(rq.Identifier))
+            {
+                info.Identifier = rq.Identifier;
+            }
+
+            if (rq.IsModified(nameof(rq.Description)))
+            {
+                info.Description = rq.Description;
+            }
+
+            if (rq.IsModified(nameof(rq.IsDefault)) && rq.IsDefault.HasValue)
+            {
+                info.IsDefault = rq.IsDefault.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Subscribed)))
+            {
+                info.Subscribed = rq.Subscribed;
+            }
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Read address data for update
+        /// 读取用于更新地址的数据
+        /// </summary>
+        /// <param name="id">Address id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AddressUpdateReadData?> UpdateAddressReadAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            return await _db.PersonAddresses.AsNoTracking()
+                .Where(a => a.Id == id)
+                .Select(a => new AddressUpdateReadData
+                {
+                    Id = a.Id,
+                    PersonId = a.PersonId,
+                    Kind = a.Kind,
+                    Provider = a.Provider,
+                    PlaceId = a.PlaceId,
+                    Name = a.Name,
+                    Region = a.Region,
+                    State = a.State,
+                    City = a.City,
+                    District = a.District,
+                    Route = a.Route,
+                    Street = a.Street,
+                    PostalCode = a.PostalCode,
+                    FormattedAddress = a.FormattedAddress,
+                    Location = a.Location == null ? null : new Location((float)a.Location.Value.X, (float)a.Location.Value.Y)
+                }).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Read data for update
         /// 读取用于更新的数据
         /// </summary>
-        /// <param name="id">User id</param>
-        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="id">Person id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
         public async Task<PersonUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
@@ -617,7 +1174,6 @@ namespace CRM.Server.Services
                     AssignedId = p.AssignedId,
                     Categories = p.CategoryIds,
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
-                    Addresses = p.Addresses,
                     ReportTo = p.ReportTo,
                     QueryKeyword = p.QueryKeyword,
                     Regions = p.Regions,

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { UserTiplist } from "@etsoo/smarterp-core/components";
+import { StatusList, UserTiplist } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
 import { UserUpdateReadData, UserUpdateRQ } from "@etsoo/smarterp-crm";
 import { ButtonDepts, ButtonGroups } from "@etsoo/smarterp-crm/components";
@@ -163,13 +163,11 @@ export default function EditUser() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <ComboBox
-          name="status"
-          label={labels.status}
+        <StatusList
+          fullWidth
           inputRequired
           idValue={formik.values.status}
           inputOnChange={formik.handleChange}
-          options={app.getStatusList()}
         />
       </Grid>
     </EditPage>

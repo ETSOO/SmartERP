@@ -28,9 +28,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
-            entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Subscribed).HasColumnName("subscribed");
             entity.Property(e => e.IsDefault).HasColumnName("is_default");
+            entity.Property(e => e.IsVerified).HasColumnName("is_verified");
 
             entity.HasOne(d => d.Person).WithMany(p => p.Infos)
                 .HasForeignKey(d => d.PersonId)

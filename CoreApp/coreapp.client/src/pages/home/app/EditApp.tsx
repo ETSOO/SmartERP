@@ -1,4 +1,4 @@
-import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
+import { EditPage, InputField } from "@etsoo/materialui";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -13,6 +13,7 @@ import {
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
 import Grid from "@mui/material/Grid";
+import { StatusList } from "@etsoo/smarterp-core/components";
 
 export default function EditApp() {
   // Route
@@ -137,13 +138,11 @@ export default function EditApp() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 6 }}>
-        <ComboBox
-          name="status"
-          label={labels.status}
+        <StatusList
+          fullWidth
           inputRequired
           idValue={formik.values.status}
           inputOnChange={formik.handleChange}
-          options={app.getStatusList()}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>

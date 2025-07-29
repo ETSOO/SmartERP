@@ -47,7 +47,7 @@
         /// Identifier
         /// 标识
         /// </summary>
-        public string Identifier { get; set; } = null!;
+        public string Identifier { get; set; } = default!;
 
         /// <summary>
         /// Description
@@ -62,12 +62,6 @@
         public DateTime Creation { get; set; }
 
         /// <summary>
-        /// Core user id
-        /// 核心用户编号
-        /// </summary>
-        public int CoreUserId { get; set; }
-
-        /// <summary>
         /// Subscribed or not
         /// 是否订阅
         /// </summary>
@@ -80,9 +74,15 @@
         public bool IsDefault { get; set; }
 
         /// <summary>
+        /// The info is verified or not
+        /// 信息是否已验证
+        /// </summary>
+        public bool? IsVerified { get; set; }
+
+        /// <summary>
         /// Person belongs to
         /// 所属人员
         /// </summary>
-        public Person Person { get; set; } = null!;
+        public Person Person { get; set; } = default!;
     }
 }

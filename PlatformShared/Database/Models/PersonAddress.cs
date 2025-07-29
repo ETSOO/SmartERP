@@ -1,32 +1,25 @@
 ﻿using com.etsoo.ApiModel.RQ.Maps;
-using com.etsoo.CoreFramework.Business;
 using NpgsqlTypes;
 
 namespace PlatformShared.Database.Models
 {
     /// <summary>
-    /// Address kind
-    /// 地址类型
+    /// Person address
+    /// 人员地址
     /// </summary>
-    public enum AddressKind : byte
-    {
-        Office = 1,
-        Home = 2,
-        Other = 9
-    }
-
-
-    /// <summary>
-    /// Address
-    /// 地址
-    /// </summary>
-    public class Address
+    public class PersonAddress
     {
         /// <summary>
         /// Id
         /// 编号
         /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// Person id
+        /// 人员编号
+        /// </summary>
+        public long PersonId { get; set; }
 
         /// <summary>
         /// Kind
@@ -71,10 +64,22 @@ namespace PlatformShared.Database.Models
         public string? District { get; set; }
 
         /// <summary>
-        /// Postcode
+        /// Route
+        /// 线路
+        /// </summary>
+        public string? Route { get; set; }
+
+        /// <summary>
+        /// Street and house number
+        /// 街道和门牌号
+        /// </summary>
+        public string? Street { get; set; }
+
+        /// <summary>
+        /// Postal code
         /// 邮编
         /// </summary>
-        public string? Postcode { get; set; }
+        public string? PostalCode { get; set; }
 
         /// <summary>
         /// Formatted address
@@ -101,15 +106,9 @@ namespace PlatformShared.Database.Models
         public DateTime Creation { get; set; }
 
         /// <summary>
-        /// Status
-        /// 状态
+        /// Person related
+        /// 关联人员
         /// </summary>
-        public EntityStatus Status { get; set; }
-
-        /// <summary>
-        /// Core organization Id
-        /// 核心机构（订单所属机构）编号
-        /// </summary>
-        public int CoreOrganizationId { get; set; }
+        public Person Person { get; set; } = default!;
     }
 }

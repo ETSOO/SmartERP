@@ -15,12 +15,6 @@ namespace PlatformShared.Database
     public partial class MyDbContext : DbContext
     {
         /// <summary>
-        /// Addresses
-        /// 地址
-        /// </summary>
-        public required DbSet<Address> Addresses { get; set; }
-
-        /// <summary>
         /// Core APIs
         /// 核心接口
         /// </summary>
@@ -115,6 +109,12 @@ namespace PlatformShared.Database
         /// 个人或企业或联系人
         /// </summary>
         public required DbSet<Person> Persons { get; set; }
+
+        /// <summary>
+        /// Person addresses
+        /// 人员地址
+        /// </summary>
+        public required DbSet<PersonAddress> PersonAddresses { get; set; }
 
         /// <summary>
         /// Person assets
@@ -223,7 +223,6 @@ namespace PlatformShared.Database
             // Register custom functions
             MyDbFunctions.Register(modelBuilder);
 
-            modelBuilder.ApplyConfiguration(new AddressConfiguration());
             modelBuilder.ApplyConfiguration(new CoreApiConfiguration());
             modelBuilder.ApplyConfiguration(new CoreAppConfiguration());
             modelBuilder.ApplyConfiguration(new CoreAuthCodeConfiguration());
@@ -240,6 +239,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new PermissionGroupConfiguration());
             modelBuilder.ApplyConfiguration(new PermissionItemConfiguration());
             modelBuilder.ApplyConfiguration(new PersonConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonAddressConfiguration());
             modelBuilder.ApplyConfiguration(new PersonAssetConfiguration());
             modelBuilder.ApplyConfiguration(new PersonCategoryConfiguration());
             modelBuilder.ApplyConfiguration(new PersonInfoConfiguration());

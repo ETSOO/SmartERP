@@ -23,10 +23,10 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
     <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.9" />
-    <PackageReference Include="com.etsoo.ApiProxy" Version="1.0.58" />
-    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.20" />
+    <PackageReference Include="com.etsoo.ApiProxy" Version="1.0.60" />
+    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.22" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.39" />
+    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.40" />
     <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.65" />
     <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.87" />
     <PackageReference Include="com.etsoo.Localization" Version="1.0.31" />

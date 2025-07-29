@@ -107,12 +107,6 @@ namespace CRM.Server.RQ.Person
         public IEnumerable<string>? Tags { get; init; }
 
         /// <summary>
-        /// Addresses
-        /// 地址
-        /// </summary>
-        public IEnumerable<int>? Addresses { get; init; }
-
-        /// <summary>
         /// Report to (person.id)
         /// 汇报对象
         /// </summary>
