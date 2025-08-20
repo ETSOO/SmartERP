@@ -57,13 +57,13 @@ export default function AllApps() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<AllAppDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<AllAppDto>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
-  const creationEndRef = React.useRef<HTMLInputElement>();
+  const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
   usePageDataEmpty(app);

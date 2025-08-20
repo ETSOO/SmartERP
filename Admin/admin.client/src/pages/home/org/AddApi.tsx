@@ -159,7 +159,7 @@ export default function AddApi() {
   });
 
   // Schema ref
-  const schemaRef = React.useRef<object>();
+  const schemaRef = React.useRef<object>(undefined);
 
   // Input refs
   const refFields = [

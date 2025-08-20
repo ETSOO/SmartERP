@@ -48,7 +48,7 @@ export default function AllDepts() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<DeptQueryData>>();
+  const ref = React.useRef<ScrollerListForwardRef<DeptQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

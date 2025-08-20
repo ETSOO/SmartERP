@@ -75,6 +75,11 @@ export default function ViewProfile() {
     "sendEmail"
   );
 
+  // Add comment permission
+  const canAddComment = data?.personIdentityType
+    ? app.ownsIdentity(data.personIdentityType, "AddComment")
+    : false;
+
   // Page data hook
   usePageDataEmpty(app);
 
@@ -99,7 +104,7 @@ export default function ViewProfile() {
               <EmailIcon />
             </IconButton>
             <IconButtonLink
-              title={labels.back}
+              title={labels.edit}
               disabled={!data.isAdmin && !data.isSelf}
               href={`./../../edit/${id}`}
             >
@@ -325,13 +330,15 @@ export default function ViewProfile() {
               ))}
             </AccordionDetails>
             <AccordionActions>
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => addLink()}
-              >
-                {labels.add}
-              </Button>
+              {canAddComment && (
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={() => addLink()}
+                >
+                  {labels.add}
+                </Button>
+              )}
             </AccordionActions>
           </Accordion>
         </React.Fragment>

@@ -108,7 +108,7 @@ namespace PlatformShared.Extentions
 
         /// <summary>
         /// Query persons
-        /// 通过人员
+        /// 查询人员
         /// </summary>
         /// <param name="db">Database context</param>
         /// <param name="orgId">Organization id belonged</param>
@@ -116,6 +116,21 @@ namespace PlatformShared.Extentions
         public static IQueryable<Person> Persons(this MyDbContext db, int orgId)
         {
             return db.Persons.Where(p => p.OrgId == orgId);
+        }
+
+        /// <summary>
+        /// Query person relations
+        /// 查询人员关系
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <param name="personId">Person id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonRelation> PersonRelations(this MyDbContext db, int orgId, long personId)
+        {
+            return db.PersonRelations
+                .Include(r => r.Contact)
+                .Where(r => r.PersonId == personId && r.Person.OrgId == orgId);
         }
 
         /// <summary>

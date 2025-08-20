@@ -28,10 +28,10 @@ export default function CallbackComplete() {
   );
 
   // Refs
-  const passwordRef = React.useRef<HTMLInputElement>();
+  const passwordRef = React.useRef<HTMLInputElement>(null);
   const passwordMethodRef = React.createRef<TextFieldExMethods>();
 
-  const repeatRef = React.useRef<HTMLInputElement>();
+  const repeatRef = React.useRef<HTMLInputElement>(null);
   const repeatMethodRef = React.createRef<TextFieldExMethods>();
 
   if (!username) {

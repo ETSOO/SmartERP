@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
+using CRM.Server.Dto.Person;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PlatformShared.Database;
@@ -242,6 +243,39 @@ namespace CRM.Server.Services
             else
             {
                 return current.Value & range;
+            }
+        }
+
+        /// <summary>
+        /// Read tag id by tag and organization id
+        /// 通过标签和机构编号读取标签编号
+        /// </summary>
+        /// <param name="tag">Tag</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<int> ReadTagIdAsync(string tag, int orgId, CancellationToken cancellationToken = default)
+        {
+            return _db.FeatureTags
+                .AsNoTracking()
+                .Where(t => t.CoreOrganizationId == orgId && t.Tag == tag)
+                .Select(t => t.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Update person tag
+        /// 更新人员标签
+        /// </summary>
+        /// <param name="tag">Tag data</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async ValueTask UpdatePersonTagAsync(IPersonTag tag, int orgId, CancellationToken cancellationToken = default)
+        {
+            if (tag.TagId == null && !string.IsNullOrEmpty(tag.Tag))
+            {
+                tag.TagId = await ReadTagIdAsync(tag.Tag, orgId, cancellationToken);
             }
         }
     }

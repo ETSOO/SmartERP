@@ -49,7 +49,7 @@ export default function AllUsers() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<UserQueryData>>();
+  const ref = React.useRef<ScrollerListForwardRef<UserQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

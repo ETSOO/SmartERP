@@ -54,7 +54,7 @@ export default function AllApps() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<AppQueryData>>();
+  const ref = React.useRef<ScrollerListForwardRef<AppQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

@@ -60,7 +60,8 @@ export default function AllCategories() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<PersonCategoryQueryData>>();
+  const ref =
+    React.useRef<ScrollerListForwardRef<PersonCategoryQueryData>>(undefined);
   const refs = React.useRef<{ identityType?: number }>({});
 
   // Load data

@@ -39,7 +39,7 @@ export default function AddCustomResource() {
 
   // State
   const [data, setData] = React.useState<OrgCreateResourceRQ>({});
-  const itemsRef = React.useRef<OrgCreateResourceRQ["items"]>();
+  const itemsRef = React.useRef<OrgCreateResourceRQ["items"]>(null);
 
   // Load data
   const reloadData = React.useCallback(async () => {

@@ -5,6 +5,7 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
@@ -161,6 +162,102 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Create contact
+        /// 创建联系人
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateContactAsync(ContactCreateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var person = await _db.Persons
+               .AsNoTracking()
+               .Where(p => p.Id == rq.PersonId && p.OrgId == orgId)
+               .Select(p => new
+               {
+                   p.Id,
+                   p.IdentityType
+               })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.PersonId));
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.AddContact), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            // Is contact exists with same name
+            var contactExists = await _db.PersonRelations.AsNoTracking()
+                .AnyAsync(r => r.PersonId == rq.PersonId && r.Contact.Name == rq.Name, cancellationToken);
+
+            if (contactExists)
+            {
+                return ApplicationErrors.ItemExists.AsResult(nameof(rq.Name));
+            }
+
+            // Create new contact
+            var contact = new Person
+            {
+                OrgId = orgId,
+                IdentityType = IdentityTypeFlags.Contact,
+                Name = rq.Name,
+                FamilyName = rq.FamilyName,
+                GivenName = rq.GivenName,
+                JobTitle = rq.JobTitle,
+                Description = rq.Description,
+                Title = rq.Title,
+                Gender = rq.Gender,
+                Birthday = rq.Birthday,
+                CategoryIds = rq.Categories?.ToList(),
+                Regions = rq.Regions?.ToList(),
+                Cultures = rq.Cultures?.ToList()
+            };
+
+            if (!string.IsNullOrEmpty(rq.FamilyName))
+            {
+                contact.LatinFamilyName = ChineseUtils.GetPinyin(rq.FamilyName, true).ToPinyin();
+            }
+
+            if (!string.IsNullOrEmpty(rq.GivenName))
+            {
+                contact.LatinGivenName = ChineseUtils.GetPinyin(rq.GivenName, true).ToPinyin();
+            }
+
+            if (rq.Tags?.Any() is true)
+            {
+                var tagKind = _commonService.GetTagKind(IdentityTypeFlags.Contact);
+                var tagIds = await _commonService.AddTagsAsync(tagKind, rq.Tags, cancellationToken);
+                contact.Tags = [.. tagIds];
+            }
+
+            _db.Persons.Add(contact);
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Add relation
+            var relation = new PersonRelation
+            {
+                PersonId = person.Id,
+                ContactId = contact.Id,
+                RelationType = rq.RelationType
+            };
+
+            _db.PersonRelations.Add(relation);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(contact.Id);
+        }
+
+        /// <summary>
         /// Create info
         /// 创建信息
         /// </summary>
@@ -217,7 +314,12 @@ namespace CRM.Server.Services
             }
 
             // Save changes
-            await _db.SaveChangesAsync(cancellationToken);
+            var affected = await _db.SaveChangesAsync(cancellationToken);
+
+            if (affected == 0)
+            {
+                return ApplicationErrors.ItemExists.AsResult();
+            }
 
             // Return
             return ActionResult.Succeed(rq.PersonId);
@@ -233,9 +335,28 @@ namespace CRM.Server.Services
                         q = q.Where(p => (p.IdentityType & rq.IdentityType.Value) > 0);
                     }
 
-                    if (!string.IsNullOrEmpty(rq.JobTitle))
+                    if (rq.TagId != null)
                     {
-                        q = q.Where(p => p.JobTitle != null && EF.Functions.ILike(p.JobTitle, $"%{rq.JobTitle}%"));
+                        q = q.Where(p => p.Tags != null && p.Tags.Contains(rq.TagId.Value));
+                    }
+
+                    if (rq.CategoryId.HasValue)
+                    {
+                        q = q.Where(p => p.CategoryIds != null && p.CategoryIds.Contains(rq.CategoryId.Value));
+                    }
+                    else if (rq.CategoryIds?.Any() is true)
+                    {
+                        q = q.Where(p => p.CategoryIds != null && rq.CategoryIds.Any(c => p.CategoryIds.Contains(c)));
+                    }
+
+                    if (rq.Education.HasValue)
+                    {
+                        q = q.Where(p => p.Education == rq.Education.Value);
+                    }
+
+                    if (!string.IsNullOrEmpty(rq.City))
+                    {
+                        q = q.Where(p => p.Addresses.Any(a => a.City == rq.City));
                     }
 
                     if (rq.Keyword?.Length > 1)
@@ -250,8 +371,63 @@ namespace CRM.Server.Services
                         {
                             q = q.Where(p => EF.Functions.ILike(p.Name, $"%{keyword}%")
                             || (p.QueryKeyword != null && EF.Functions.ILike(p.QueryKeyword, $"%{keyword}%"))
-                            || (p.PreferredName != null && EF.Functions.ILike(p.PreferredName, $"%{keyword}%"))
-                            || (p.AssignedId != null && EF.Functions.ILike(p.AssignedId, $"%{keyword}%")));
+                            || (p.PreferredName != null && EF.Functions.ILike(p.PreferredName, $"%{keyword}%")));
+                        }
+                    }
+
+                    if (filters != null)
+                    {
+                        q = filters(q);
+                    }
+
+                    return q;
+                });
+
+            return query;
+        }
+
+        private IQueryable<PersonRelation> CreateContactQuery(ContactListRQ rq, Func<IQueryable<PersonRelation>, IQueryable<PersonRelation>>? filters = null)
+        {
+            var query = _db.PersonRelations(User.OrganizationInt, rq.PersonId).AsNoTracking()
+                .QueryEtsoo(rq, (q) => q.ContactId, (q) => q.Contact.Status, (q) =>
+                {
+                    if (rq.RelationType.HasValue)
+                    {
+                        q = q.Where(r => r.RelationType == rq.RelationType.Value);
+                    }
+
+                    if (rq.TagId != null)
+                    {
+                        q = q.Where(p => p.Contact.Tags != null && p.Contact.Tags.Contains(rq.TagId.Value));
+                    }
+
+                    if (rq.CategoryId.HasValue)
+                    {
+                        q = q.Where(p => p.Contact.CategoryIds != null && p.Contact.CategoryIds.Contains(rq.CategoryId.Value));
+                    }
+                    else if (rq.CategoryIds?.Any() is true)
+                    {
+                        q = q.Where(p => p.Contact.CategoryIds != null && rq.CategoryIds.Any(c => p.Contact.CategoryIds.Contains(c)));
+                    }
+
+                    if (!string.IsNullOrEmpty(rq.City))
+                    {
+                        q = q.Where(p => p.Contact.Addresses.Any(a => a.City == rq.City));
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        if (keyword.IsComplexQueryKeywords())
+                        {
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, p => p.Contact.Name, p => p.Contact.PreferredName);
+                        }
+                        else
+                        {
+                            q = q.Where(p => EF.Functions.ILike(p.Contact.Name, $"%{keyword}%")
+                            || (p.Contact.QueryKeyword != null && EF.Functions.ILike(p.Contact.QueryKeyword, $"%{keyword}%"))
+                            || (p.Contact.PreferredName != null && EF.Functions.ILike(p.Contact.PreferredName, $"%{keyword}%")));
                         }
                     }
 
@@ -411,6 +587,27 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// List contacts
+        /// 联系人列表
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task ListContactAsync(ContactListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            await _commonService.UpdatePersonTagAsync(rq, User.OrganizationInt, cancellationToken);
+
+            await CreateContactQuery(rq)
+                .Select(c => new
+                {
+                    Id = c.ContactId,
+                    c.RelationType,
+                    c.Contact.Name
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
         /// Query person JSON data
         /// 查询人员JSON数据
         /// </summary>
@@ -431,10 +628,37 @@ namespace CRM.Server.Services
                 return [];
             }
 
+            await _commonService.UpdatePersonTagAsync(rq, User.OrganizationInt, cancellationToken);
+
             FormatListRQ(rq);
 
             var query = CreateQuery(rq, (q) =>
             {
+                if (!string.IsNullOrEmpty(rq.AssignedId))
+                {
+                    q = q.Where(p => p.AssignedId != null && EF.Functions.ILike(p.AssignedId, $"{rq.AssignedId}%"));
+                }
+
+                if (!string.IsNullOrEmpty(rq.JobTitle))
+                {
+                    q = q.Where(p => p.JobTitle != null && EF.Functions.ILike(p.JobTitle, $"%{rq.JobTitle}%"));
+                }
+
+                if (!string.IsNullOrEmpty(rq.Description))
+                {
+                    q = q.Where(p => p.Description != null && EF.Functions.ILike(p.Description, $"%{rq.Description}%"));
+                }
+
+                if (!string.IsNullOrEmpty(rq.Info))
+                {
+                    q = q.Where(p => p.Infos.Any(i => i.Identifier == rq.Info));
+                }
+
+                if (!string.IsNullOrEmpty(rq.Address))
+                {
+                    q = q.Where(p => p.Addresses.Any(a => EF.Functions.ILike(a.FormattedAddress, $"%{rq.Address}%")));
+                }
+
                 return q;
             });
 
@@ -471,6 +695,68 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Query contact JSON data
+        /// 查询联系人JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task QueryContactAsync(ContactQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            await _commonService.UpdatePersonTagAsync(rq, User.OrganizationInt, cancellationToken);
+
+            var query = CreateContactQuery(rq, (q) =>
+            {
+                if (!string.IsNullOrEmpty(rq.JobTitle))
+                {
+                    q = q.Where(r => r.Contact.JobTitle != null && EF.Functions.ILike(r.Contact.JobTitle, $"%{rq.JobTitle}%"));
+                }
+
+                if (rq.Description?.Length > 1)
+                {
+                    var description = rq.Description;
+
+                    if (description.IsComplexQueryKeywords())
+                    {
+                        q = q.QueryEtsooKeywords(description, DbUtils.ILikeMethod, r => r.Description, r => r.Contact.Description);
+                    }
+                    else
+                    {
+                        q = q.Where(r => (r.Description != null && EF.Functions.ILike(r.Description, $"%{description}%"))
+                        || (r.Contact.Description != null && EF.Functions.ILike(r.Contact.Description, $"%{description}%")));
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(rq.Info))
+                {
+                    q = q.Where(r => r.Contact.Infos.Any(i => i.Identifier == rq.Info));
+                }
+
+                if (!string.IsNullOrEmpty(rq.Address))
+                {
+                    q = q.Where(r => r.Contact.Addresses.Any(a => EF.Functions.ILike(a.FormattedAddress, $"%{rq.Address}%")));
+                }
+
+                return q;
+            });
+
+            var (hasContent, commandText) = await query.Select(r => new ContactQueryData
+            {
+                Id = r.ContactId,
+                RelationType = r.RelationType,
+                Name = r.Contact.Name,
+                Description = r.Description,
+                Creation = r.Creation
+            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+
+            if (_db.IsSensitiveDataLoggingEnabled)
+            {
+                Logger.LogInformation("QueryContactAsync is {hasContent} with {commandText}", hasContent, commandText);
+            }
+        }
+
+        /// <summary>
         /// Query person info JSON data
         /// 查询人员信息JSON数据
         /// </summary>
@@ -486,6 +772,11 @@ namespace CRM.Server.Services
                 .AsNoTracking()
                 .QueryEtsoo(rq, (i) => i.Id, null, (q) =>
                 {
+                    if (rq.Identifier?.Length > 1)
+                    {
+                        q = q.Where(i => i.Identifier == rq.Identifier);
+                    }
+
                     if (rq.Kind.HasValue)
                     {
                         q = q.Where(i => i.Kind == rq.Kind.Value);
@@ -1028,6 +1319,68 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Update contact relation
+        /// 更新联系人关系
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateContactRelationAsync(ContactRelationUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var relation = await _db.PersonRelations
+                .Where(r => r.PersonId == rq.PersonId && r.ContactId == rq.ContactId && r.Person.OrgId == orgId)
+                .Include(r => r.Person)
+                .Select(r => new PersonRelation
+                {
+                    RelationType = r.RelationType,
+                    Description = r.Description,
+                    Data = r.Data,
+                    Person = new Person
+                    {
+                        Id = r.Person.Id,
+                        IdentityType = r.Person.IdentityType
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (relation == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(relation.Person.IdentityType, nameof(Permissions.Customer.AddContact), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            _db.PersonRelations.Attach(relation);
+
+            if (rq.IsModified(nameof(rq.RelationType)) && rq.RelationType.HasValue)
+            {
+                relation.RelationType = rq.RelationType.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Description)))
+            {
+                relation.Description = rq.Description;
+            }
+
+            if (rq.IsModified(nameof(rq.Data)))
+            {
+                relation.Data = rq.Data;
+            }
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.PersonId);
+        }
+
+        /// <summary>
         /// Update info
         /// 更新信息
         /// </summary>
@@ -1133,6 +1486,30 @@ namespace CRM.Server.Services
                     FormattedAddress = a.FormattedAddress,
                     Location = a.Location == null ? null : new Location((float)a.Location.Value.X, (float)a.Location.Value.Y)
                 }).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read contact relation data for update
+        /// 读取用于更新联系人关系的数据
+        /// </summary>
+        /// <param name="personId">Person id</param>
+        /// <param name="contactId">Contact id</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task UpdateContactRelationReadAsync(long personId, long contactId, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            return _db.PersonRelations.AsNoTracking()
+                .Where(r => r.PersonId == personId && r.ContactId == contactId)
+                .Select(r => new ContactRelationUpdateReadData
+                {
+                    RelationType = r.RelationType,
+                    Description = r.Description,
+                    Data = r.Data,
+                    Creation = r.Creation
+                }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 
         /// <summary>

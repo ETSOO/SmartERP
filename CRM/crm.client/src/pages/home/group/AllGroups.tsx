@@ -29,7 +29,7 @@ export default function AllDepts() {
   const labels = app.getLabels("actions", "edit", "nameB", "role", "view");
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<GroupQueryData>>();
+  const ref = React.useRef<ScrollerListForwardRef<GroupQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

@@ -40,9 +40,9 @@ export default function Register20() {
   const [isReady, setReady] = React.useState(false);
 
   // Refs
-  const inputRef = React.useRef<HTMLInputElement>();
-  const codeRef = React.useRef<HTMLInputElement>();
-  const codeIdRef = React.useRef<string>();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const codeRef = React.useRef<HTMLInputElement>(null);
+  const codeIdRef = React.useRef<string>(undefined);
 
   // Send verification code
   const sendCode = React.useCallback(async () => {

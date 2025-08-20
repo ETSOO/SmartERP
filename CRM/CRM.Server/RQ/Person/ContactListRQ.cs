@@ -1,5 +1,4 @@
 ﻿using com.etsoo.CoreFramework.Application;
-using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Person;
 using PlatformShared.Database.Models;
@@ -8,17 +7,23 @@ using System.Text.Json.Serialization;
 namespace CRM.Server.RQ.Person
 {
     /// <summary>
-    /// Person list request data
-    /// 人员列表请求数据
+    /// Contact list request data
+    /// 联系人列表请求数据
     /// </summary>
-    [JsonDerivedType(typeof(PersonQueryRQ))]
-    public record PersonListRQ : QueryLongRQ, IPersonTag
+    [JsonDerivedType(typeof(ContactQueryRQ))]
+    public record ContactListRQ : QueryLongRQ, IPersonTag
     {
         /// <summary>
-        /// Identity type
-        /// 识别类型
+        /// Person ID
+        /// 相关人员编号
         /// </summary>
-        public IdentityTypeFlags? IdentityType { get; set; }
+        public long PersonId { get; init; }
+
+        /// <summary>
+        /// Relation type
+        /// 关系类型
+        /// </summary>
+        public PersonRelationType? RelationType { get; init; }
 
         /// <summary>
         /// Tag
@@ -43,12 +48,6 @@ namespace CRM.Server.RQ.Person
         /// 所属多个分类
         /// </summary>
         public IEnumerable<int>? CategoryIds { get; init; }
-
-        /// <summary>
-        /// Education
-        /// 受教育程度
-        /// </summary>
-        public PersonEducation? Education { get; init; }
 
         /// <summary>
         /// City

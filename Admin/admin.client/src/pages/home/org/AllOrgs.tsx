@@ -64,13 +64,13 @@ export default function AllOrgs() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<AllOrgDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<AllOrgDto>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
-  const creationEndRef = React.useRef<HTMLInputElement>();
+  const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
   usePageDataEmpty(app);
@@ -111,7 +111,7 @@ export default function AllOrgs() {
           search
           name="enabled"
           label={labels.statusNormal}
-          value={data.enabled?.toString()}
+          value={data.enabled}
         />,
         <SearchField
           label={labels.startDate}

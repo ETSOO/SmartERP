@@ -167,7 +167,7 @@ export default function App() {
   const isMounted = React.useRef(true);
 
   // Login id field
-  const loginRef = React.useRef<HTMLInputElement>();
+  const loginRef = React.useRef<HTMLInputElement>(null);
   const mRef = React.createRef<TextFieldExMethods>();
 
   // Next button click

@@ -60,7 +60,8 @@ export default function MyApps() {
   const editPermission = app.isAdminUser();
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<AppPurchasedQueryData>>();
+  const ref =
+    React.useRef<ScrollerListForwardRef<AppPurchasedQueryData>>(undefined);
 
   // Identities
   const identities = app.core.getIdentities();

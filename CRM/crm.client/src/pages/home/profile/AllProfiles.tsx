@@ -65,7 +65,8 @@ export default function AllProfiles() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<PersonProfileQueryData>>();
+  const ref =
+    React.useRef<ScrollerListForwardRef<PersonProfileQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
@@ -122,7 +123,7 @@ export default function AllProfiles() {
           search
           name="isTask"
           label={labels.isTask}
-          value={data.isTask?.toString()}
+          value={data.isTask}
         />,
         <UserTiplist
           name="participantId"

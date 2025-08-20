@@ -45,13 +45,13 @@ export default function LoginHistory() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<AuditHistoryDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<AuditHistoryDto>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
-  const creationEndRef = React.useRef<HTMLInputElement>();
+  const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
   usePageDataEmpty(app);

@@ -45,7 +45,8 @@ export default function CustomResource() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<OrgQueryResourceData>>();
+  const ref =
+    React.useRef<ScrollerListForwardRef<OrgQueryResourceData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

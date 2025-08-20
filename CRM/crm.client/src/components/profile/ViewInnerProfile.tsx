@@ -383,13 +383,15 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
               ))}
             </AccordionDetails>
             <AccordionActions>
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => addLink()}
-              >
-                {labels.add}
-              </Button>
+              {app.ownsIdentity(data.personIdentityType, "AddComment") && (
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={() => addLink()}
+                >
+                  {labels.add}
+                </Button>
+              )}
             </AccordionActions>
           </Accordion>
         )}

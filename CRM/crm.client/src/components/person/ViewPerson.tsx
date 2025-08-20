@@ -1,4 +1,4 @@
-import { CommonPage, TabBox } from "@etsoo/materialui";
+import { CommonPage, TabBox, TabBoxPanel } from "@etsoo/materialui";
 import HistoryIcon from "@mui/icons-material/History";
 import ContactsIcon from "@mui/icons-material/Contacts";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -72,16 +72,31 @@ export function ViewPerson(props: ViewPersonProps) {
               icon: <ArticleIcon />,
               iconPosition: "start"
             },
+            ...(app.ownsIdentity(data.identityType, "QueryProfile")
+              ? [
+                  {
+                    children: (visible) =>
+                      visible && (
+                        <Profiles
+                          personId={personId}
+                          identityType={data.identityType}
+                        />
+                      ),
+                    label: labels.profiles,
+                    icon: <HistoryIcon />,
+                    iconPosition: "start"
+                  } as TabBoxPanel
+                ]
+              : []),
             {
-              children: (visible) =>
-                visible && <Profiles personId={personId} />,
-              label: labels.profiles,
-              icon: <HistoryIcon />,
-              iconPosition: "start"
-            },
-            {
-              children: (visible) =>
-                visible && <ContactInfos personId={personId} />,
+              children: (visible, index) =>
+                visible && (
+                  <ContactInfos
+                    personId={personId}
+                    editable={data.editable}
+                    index={index}
+                  />
+                ),
               label: labels.contactInfo,
               icon: <InfoIcon />,
               iconPosition: "start"

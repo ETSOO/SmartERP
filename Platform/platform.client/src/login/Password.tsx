@@ -41,7 +41,7 @@ export default function Password() {
   );
 
   // Password ref
-  const passwordRef = React.useRef<HTMLInputElement>();
+  const passwordRef = React.useRef<HTMLInputElement>(null);
   const mRef = React.createRef<TextFieldExMethods>();
 
   // Button

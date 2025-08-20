@@ -63,7 +63,7 @@ export default function AllMembers() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<MemberQueryDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<MemberQueryDto>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

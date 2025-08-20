@@ -4,17 +4,11 @@ using com.etsoo.Utils.Actions;
 namespace CRM.Server.RQ.Person
 {
     /// <summary>
-    /// Person query request data
-    /// 人员查询请求数据
+    /// Contact query request data
+    /// 联系人查询请求数据
     /// </summary>
-    public record PersonQueryRQ : PersonListRQ
+    public record ContactQueryRQ : ContactListRQ
     {
-        /// <summary>
-        /// Assigned ID
-        /// 分配的编号
-        /// </summary>
-        public string? AssignedId { get; init; }
-
         /// <summary>
         /// Job title
         /// 职位
@@ -45,11 +39,6 @@ namespace CRM.Server.RQ.Person
 
             if (result != null)
                 return result;
-
-            if (AssignedId != null && AssignedId.Length is not (>= 1 and <= 20))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(AssignedId));
-            }
 
             if (JobTitle != null && JobTitle.Length is not (>= 1 and <= 50))
             {

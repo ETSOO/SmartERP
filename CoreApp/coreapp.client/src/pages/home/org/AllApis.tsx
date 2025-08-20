@@ -50,7 +50,7 @@ export default function AllApis() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<OrgQueryApiData>>();
+  const ref = React.useRef<ScrollerListForwardRef<OrgQueryApiData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

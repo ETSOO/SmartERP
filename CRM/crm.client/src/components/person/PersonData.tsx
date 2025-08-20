@@ -164,13 +164,15 @@ export function PersonData(props: PersonDataProps) {
                       size="small"
                       title={app.person.getAddressKind(a.kind)}
                     />
-                    <IconButtonLink
-                      href={`./../../address/${item.id}?id=${a.id}`}
-                      title={labels.edit}
-                      size="small"
-                    >
-                      <EditIcon />
-                    </IconButtonLink>
+                    {item.editable && (
+                      <IconButtonLink
+                        href={`./../../address/${item.id}?id=${a.id}`}
+                        title={labels.edit}
+                        size="small"
+                      >
+                        <EditIcon />
+                      </IconButtonLink>
+                    )}
                   </HBox>
                 ))}
               </VBox>
@@ -178,17 +180,19 @@ export function PersonData(props: PersonDataProps) {
               <React.Fragment />
             );
           },
-          label: () => (
+          label: (item) => (
             <HBox gap={1} alignItems="center">
               {labels.addresses}:
-              <ButtonLink
-                size="small"
-                variant="outlined"
-                startIcon={<AddIcon />}
-                href={`./../../address/${data.id}`}
-              >
-                {labels.add}
-              </ButtonLink>
+              {item.editable && (
+                <ButtonLink
+                  size="small"
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  href={`./../../address/${data.id}`}
+                >
+                  {labels.add}
+                </ButtonLink>
+              )}
             </HBox>
           ),
           singleRow: true

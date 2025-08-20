@@ -53,13 +53,13 @@ export default function AllUsers() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<AllUserDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<AllUserDto>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   const margin = MUGlobal.pagePaddings;
-  const creationEndRef = React.useRef<HTMLInputElement>();
+  const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
   usePageDataEmpty(app);
@@ -100,7 +100,7 @@ export default function AllUsers() {
           search
           name="isFrozen"
           label={labels.isFrozen}
-          value={data.isFrozen?.toString()}
+          value={data.isFrozen}
         />,
         <StatusList search idValue={data.status} />,
         <SearchField

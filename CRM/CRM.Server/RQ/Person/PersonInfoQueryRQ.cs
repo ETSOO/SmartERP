@@ -15,6 +15,12 @@ namespace CRM.Server.RQ.Person
         public long PersonId { get; init; }
 
         /// <summary>
+        /// Identifier
+        /// 标识
+        /// </summary>
+        public string? Identifier { get; init; }
+
+        /// <summary>
         /// Kind
         /// 类型
         /// </summary>

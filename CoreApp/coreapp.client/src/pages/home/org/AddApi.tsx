@@ -61,6 +61,7 @@ export default function AddApi() {
   const [data, setData] = React.useState<OrgCreateApiRQ>({
     service: CoreApiService.SMTP,
     title: "",
+    endpoint: "",
     appId: "",
     appSecret: "",
     enabled: true,
@@ -157,7 +158,7 @@ export default function AddApi() {
   });
 
   // Schema ref
-  const schemaRef = React.useRef<object>();
+  const schemaRef = React.useRef<object>(undefined);
 
   // Input refs
   const refFields = [

@@ -27,14 +27,14 @@ export default function RegisterPassword() {
   );
 
   // Refs
-  const nameRef = React.useRef<HTMLInputElement>();
-  const familyNameRef = React.useRef<HTMLInputElement>();
-  const givenNameRef = React.useRef<HTMLInputElement>();
+  const nameRef = React.useRef<HTMLInputElement>(null);
+  const familyNameRef = React.useRef<HTMLInputElement>(null);
+  const givenNameRef = React.useRef<HTMLInputElement>(null);
 
-  const passwordRef = React.useRef<HTMLInputElement>();
+  const passwordRef = React.useRef<HTMLInputElement>(null);
   const passwordMethodRef = React.createRef<TextFieldExMethods>();
 
-  const repeatRef = React.useRef<HTMLInputElement>();
+  const repeatRef = React.useRef<HTMLInputElement>(null);
   const repeatMethodRef = React.createRef<TextFieldExMethods>();
 
   // Repeat step

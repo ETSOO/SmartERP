@@ -61,7 +61,7 @@ export default function AllOrgs() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<OrgQueryDto>>();
+  const ref = React.useRef<ScrollerListForwardRef<OrgQueryDto>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);

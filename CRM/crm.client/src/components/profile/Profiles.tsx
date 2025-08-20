@@ -23,7 +23,7 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { BoxProps } from "@mui/material/Box";
-import { EntityStatus } from "@etsoo/appscript";
+import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
 import Typography from "@mui/material/Typography";
 import { ImportanceText } from "@etsoo/smarterp-crm/components";
 import AddIcon from "@mui/icons-material/Add";
@@ -42,6 +42,11 @@ const template = {
  */
 export type ProfilesProps = {
   /**
+   * Identity type
+   */
+  identityType: IdentityTypeFlags;
+
+  /**
    * Person ID
    */
   personId: number;
@@ -54,7 +59,7 @@ export type ProfilesProps = {
  */
 export function Profiles(props: ProfilesProps) {
   // Destruct
-  const { personId } = props;
+  const { identityType, personId } = props;
 
   // Route
   const navigate = useNavigate();
@@ -71,8 +76,13 @@ export function Profiles(props: ProfilesProps) {
     "view"
   );
 
+  // Add permission
+  const canAdd = app.ownsIdentity(identityType, "AddProfile");
+  const canView = app.ownsIdentity(identityType, "ViewProfile");
+
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<PersonProfileQueryData>>();
+  const ref =
+    React.useRef<ScrollerListForwardRef<PersonProfileQueryData>>(undefined);
   const mRef = React.useRef<ViewInnerRef>(null);
   const personIdRef = React.useRef(personId);
 
@@ -97,8 +107,9 @@ export function Profiles(props: ProfilesProps) {
           {...(app.mdUp
             ? { onClick: (_event, data) => mRef.current?.setData(data) }
             : {
-                quickAction: (data) =>
-                  navigate(`./../../../profile/view/${data.id}`)
+                quickAction: canView
+                  ? (data) => navigate(`./../../../profile/view/${data.id}`)
+                  : undefined
               })}
           mRef={ref}
           defaultOrderBy={[{ field: "creation", desc: true }]}
@@ -185,13 +196,15 @@ export function Profiles(props: ProfilesProps) {
                   <React.Fragment>
                     {loadedItems.toLocaleString() + (hasNextPage ? "+" : "")}
                   </React.Fragment>
-                  <ButtonLink
-                    href={`./../../../profile/add?personId=${personId}`}
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                  >
-                    {labels.add}
-                  </ButtonLink>
+                  {canAdd && (
+                    <ButtonLink
+                      href={`./../../../profile/add?personId=${personId}`}
+                      variant="outlined"
+                      startIcon={<AddIcon />}
+                    >
+                      {labels.add}
+                    </ButtonLink>
+                  )}
                 </HBox>
               );
             } else if (index === 1) {
@@ -209,7 +222,7 @@ export function Profiles(props: ProfilesProps) {
                 data.title,
                 app.formatDate(data.creation, "d"),
                 [
-                  {
+                  canView && {
                     label: labels.view,
                     icon: <ArticleIcon />,
                     action: `./../../../profile/view/${data.id}`

@@ -8,7 +8,7 @@ import { app } from "../../app/MyApp";
 export type ProfileLinkProps = {
   profileId: number;
   data?: PersonProfileLinkItem;
-  editorRef: React.RefObject<EOEditorElement>;
+  editorRef: React.RefObject<EOEditorElement | null>;
 };
 
 export function ProfileLink(props: ProfileLinkProps) {

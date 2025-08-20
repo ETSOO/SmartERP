@@ -33,7 +33,7 @@ export default function RegisterVerify() {
   );
 
   // Refs
-  const inputRef = React.useRef<HTMLInputElement>();
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const mRef = React.createRef<TextFieldExMethods>();
 
   if (!username) {
