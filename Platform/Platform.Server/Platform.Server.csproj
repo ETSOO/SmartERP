@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>82c1b486-7653-4980-93a1-7000968472fc</UserSecretsId>
@@ -27,21 +27,21 @@
     <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.22" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
     <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.40" />
-    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.65" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.87" />
-    <PackageReference Include="com.etsoo.Localization" Version="1.0.31" />
+    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.67" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.89" />
+    <PackageReference Include="com.etsoo.Localization" Version="1.0.33" />
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.8" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
-    <PackageReference Include="EfCore.SchemaCompare" Version="8.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.18" />
+    <PackageReference Include="EfCore.SchemaCompare" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>8.*-*</Version>
+      <Version>9.0.10</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.13.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.13.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,5 @@
 import { EntityStatus } from "@etsoo/appscript";
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
@@ -14,13 +13,13 @@ import {
   GridCellRendererProps,
   GridDataType,
   GridDeletedCellBoxStyle,
-  ScrollerListForwardRef
+  GridMethodRef
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { PersonQueryData } from "@etsoo/smarterp-crm";
-import { DataTypes } from "@etsoo/shared";
+import { DataTypes, Utils } from "@etsoo/shared";
 import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -52,12 +51,10 @@ export default function AllContacts() {
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<PersonQueryData>>(undefined);
+  const ref = React.useRef<GridMethodRef<PersonQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   const baseIdentity = app.getPersonIdentityType();
 
@@ -161,34 +158,34 @@ export default function AllContacts() {
           }
         }
       ]}
-      itemSize={[116, margin, "1px"]}
-      innerItemRenderer={(props) =>
-        MobileListItemRenderer(props, (data) => {
-          return [
-            `[${app.person.getIdentityType(data)}] ${data.name}`,
-            app.formatDate(data.creation, "d"),
-            [
-              {
-                label: labels.view,
-                icon: <ArticleIcon />,
-                action: `./view/${data.id}`
-              }
-            ],
-            <React.Fragment>
-              <Typography variant="caption">{data.jobTitle}</Typography>
-              {data.status >= EntityStatus.Inactivated && (
-                <React.Fragment>
-                  <Typography variant="caption">
-                    {labels.entityStatus + ": "}
-                  </Typography>
-                  <Typography variant="caption" color="error">
-                    {app.getStatusLabel(data?.status)}
-                  </Typography>
-                </React.Fragment>
-              )}
-            </React.Fragment>
-          ];
-        })
+      rowHeight={160}
+      itemRenderer={(props) =>
+        MobileListItemRenderer(props, (data) => [
+          `[${app.person.getIdentityType(data)}] ${data.name}`,
+          app.formatDate(data.creation, "d"),
+          [
+            {
+              label: labels.view,
+              icon: <ArticleIcon />,
+              action: `./view/${data.id}`
+            }
+          ],
+          <React.Fragment>
+            <Typography variant="body2">
+              {Utils.joinItems([data.jobTitle, data.assignedId], ", ")}
+            </Typography>
+            {data.status >= EntityStatus.Inactivated && (
+              <React.Fragment>
+                <Typography variant="caption">
+                  {labels.entityStatus + ": "}
+                </Typography>
+                <Typography variant="caption" color="error">
+                  {app.getStatusLabel(data?.status)}
+                </Typography>
+              </React.Fragment>
+            )}
+          </React.Fragment>
+        ])
       }
     />
   );

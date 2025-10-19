@@ -10,6 +10,7 @@ using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
 using CRM.Server.Dto.User;
 using CRM.Server.RQ.User;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -65,9 +66,9 @@ namespace CRM.Server.Services
                         }
                         else
                         {
-                            q = q.Where(ou => EF.Functions.ILike(ou.Name, $"%{keyword}%")
-                            || (ou.QueryKeyword != null && EF.Functions.ILike(ou.QueryKeyword, $"%{keyword}%"))
-                            || (ou.PreferredName != null && EF.Functions.ILike(ou.PreferredName, $"%{keyword}%"))
+                            q = q.Where(ou => EF.Functions.Like(ou.Name, $"%{keyword}%")
+                            || (ou.QueryKeyword != null && EF.Functions.Like(ou.QueryKeyword, $"%{keyword}%"))
+                            || (ou.PreferredName != null && EF.Functions.Like(ou.PreferredName, $"%{keyword}%"))
                             );
                         }
                     }
@@ -233,19 +234,63 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Track changes of permission items
+            var permissionChanged = false;
+
             if (rq.IsModified(nameof(rq.Groups)))
             {
                 user.PermissionGroups = rq.Groups?.ToList();
+                permissionChanged = true;
             }
 
             if (rq.IsModified(nameof(rq.PermissionIncluded)))
             {
                 user.PermissionIncluded = rq.PermissionIncluded?.ToList();
+                permissionChanged = true;
             }
 
             if (rq.IsModified(nameof(rq.PermissionExcluded)))
             {
                 user.PermissionExcluded = rq.PermissionExcluded?.ToList();
+                permissionChanged = true;
+            }
+
+            if (permissionChanged)
+            {
+                var groupIds = user.PermissionGroups ?? [];
+                var includedIds = user.PermissionIncluded ?? [];
+                var excludedIds = user.PermissionExcluded ?? [];
+
+                var queryFromGroups = _db.PermissionGroups.AsNoTracking()
+                    .Where(g => groupIds.Contains(g.Id))
+                    .SelectMany(g => g.Items);
+
+                var queryFromIncluded = _db.PermissionItems.AsNoTracking()
+                    .Where(i => includedIds.Contains(i.Id))
+                    .Select(i => i.Id);
+
+                var permissionIds = await queryFromGroups
+                    .Union(queryFromIncluded)
+                    .Where(id => !excludedIds.Contains(id))
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                // 清除旧权限
+                await _db.PersonPermissionItems.AsNoTracking()
+                    .Where(p => p.PersonId == user.Id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                // 批量插入新权限
+                var cacheRecords = permissionIds.Select(id => new PersonPermissionItem
+                {
+                    PersonId = user.Id,
+                    PermissionItemId = id
+                });
+
+                await _db.BulkInsertAsync(cacheRecords, new BulkConfig
+                {
+                    BatchSize = 1000
+                }, cancellationToken: cancellationToken);
             }
 
             // Changes

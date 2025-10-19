@@ -1,9 +1,7 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   MobileListItemRenderer,
-  MUUtils,
   IconButtonLink
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
@@ -21,6 +19,7 @@ import { DataTypes } from "@etsoo/shared";
 import { CultureList, DefaultUI } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -50,8 +49,6 @@ export default function CustomResource() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   usePageData(
     app,
@@ -96,7 +93,10 @@ export default function CustomResource() {
       ]}
       loadData={(data, lastItem) =>
         app.core.orgApi.queryResource(
-          { ...MUUtils.setupPagingKeysets(data, lastItem, "id"), orgId: id },
+          {
+            ...BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
+            orgId: id
+          },
           {
             defaultValue: [],
             showLoading: false
@@ -150,8 +150,7 @@ export default function CustomResource() {
           }
         }
       ]}
-      itemSize={[116, margin]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.title,

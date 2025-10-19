@@ -1,10 +1,8 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   SelectEx,
   MobileListItemRenderer,
-  MUUtils,
   IconButtonLink
 } from "@etsoo/materialui";
 import React from "react";
@@ -25,6 +23,7 @@ import { OrgTiplist } from "../../../components/OrgTiplist";
 import { AppTiplist } from "../../../components/AppTiplist";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   orgId: "number",
@@ -62,7 +61,6 @@ export default function AllApps() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
@@ -137,10 +135,13 @@ export default function AllApps() {
         />
       ]}
       loadData={(data, lastItem) =>
-        app.queryApi.allApps(MUUtils.setupPagingKeysets(data, lastItem, "id"), {
-          defaultValue: [],
-          showLoading: false
-        })
+        app.queryApi.allApps(
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        )
       }
       columns={[
         {
@@ -211,8 +212,8 @@ export default function AllApps() {
           }
         }
       ]}
-      itemSize={[134, margin]}
-      innerItemRenderer={(props) =>
+      rowHeight={160}
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => [
           data.name,
           data.orgName,

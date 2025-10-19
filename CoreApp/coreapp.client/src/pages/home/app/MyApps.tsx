@@ -1,11 +1,9 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   SelectEx,
   DateText,
   MobileListItemRenderer,
-  MUUtils,
   IconButtonLink,
   Switch
 } from "@etsoo/materialui";
@@ -29,6 +27,7 @@ import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -75,8 +74,6 @@ export default function MyApps() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   // Page data hook
   usePageDataEmpty(app);
@@ -125,7 +122,7 @@ export default function MyApps() {
       ]}
       loadData={async (data, lastItem) => {
         return await app.core.appApi.queryPurchased(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
             showLoading: false
@@ -209,8 +206,7 @@ export default function MyApps() {
           }
         }
       ]}
-      itemSize={[100, margin]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.name,

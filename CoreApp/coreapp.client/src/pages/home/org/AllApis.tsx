@@ -1,9 +1,7 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   MobileListItemRenderer,
-  MUUtils,
   IconButtonLink,
   HBox
 } from "@etsoo/materialui";
@@ -24,6 +22,7 @@ import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -54,8 +53,6 @@ export default function AllApis() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   usePageData(
     app,
@@ -103,7 +100,10 @@ export default function AllApis() {
       ]}
       loadData={(data, lastItem) =>
         app.core.orgApi.queryApi(
-          { ...MUUtils.setupPagingKeysets(data, lastItem, "id"), orgId: id },
+          {
+            ...BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
+            orgId: id
+          },
           {
             defaultValue: [],
             showLoading: false
@@ -180,8 +180,8 @@ export default function AllApis() {
           }
         }
       ]}
-      itemSize={[160, margin]}
-      innerItemRenderer={(props) =>
+      rowHeight={172}
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.title,

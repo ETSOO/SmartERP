@@ -54,6 +54,8 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<PersonInfo> PersonInfos { get; set; }
 
+    public virtual DbSet<PersonPermissionItem> PersonPermissionItems { get; set; }
+
     public virtual DbSet<PersonProduct> PersonProducts { get; set; }
 
     public virtual DbSet<PersonProfile> PersonProfiles { get; set; }
@@ -100,6 +102,7 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.PersonAssetConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonCategoryConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonInfoConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.PersonPermissionItemConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonProductConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonProfileConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonProfileAttachmentConfiguration());

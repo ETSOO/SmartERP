@@ -1,6 +1,5 @@
 import { EntityStatus } from "@etsoo/appscript";
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   ComboBox,
@@ -67,8 +66,6 @@ export default function AllMembers() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   // Page data hook
   usePageDataEmpty(app);
@@ -194,42 +191,45 @@ export default function AllMembers() {
           }
         }
       ]}
-      itemSize={[116, margin]}
-      innerItemRenderer={(props) =>
-        MobileListItemRenderer(props, (data) => {
-          return [
-            data.name,
-            app.formatDate(data.creation, "d"),
-            [
-              editPermission && {
-                label: labels.edit,
-                icon: <EditIcon />,
-                action: `./edit/${data.id}`
-              },
-              {
-                label: labels.view,
-                icon: <ArticleIcon />,
-                action: `./view/${data.id}`
-              }
-            ],
-            <React.Fragment>
-              <Typography variant="body2" noWrap>
-                {app.getRoleLabel(data.userRole) +
-                  (data.assignedId ? ", " + data.assignedId : "")}
-              </Typography>
-              {data.status >= EntityStatus.Inactivated && (
-                <React.Fragment>
-                  <Typography variant="caption">
-                    {labels.entityStatus + ": "}
-                  </Typography>
-                  <Typography variant="caption" color="error">
-                    {app.getStatusLabel(data?.status)}
-                  </Typography>
-                </React.Fragment>
-              )}
-            </React.Fragment>
-          ];
-        })
+      itemRenderer={(props) =>
+        MobileListItemRenderer(
+          props,
+          (data) => {
+            return [
+              data.name,
+              app.formatDate(data.creation, "d"),
+              [
+                editPermission && {
+                  label: labels.edit,
+                  icon: <EditIcon />,
+                  action: `./edit/${data.id}`
+                },
+                {
+                  label: labels.view,
+                  icon: <ArticleIcon />,
+                  action: `./view/${data.id}`
+                }
+              ],
+              <React.Fragment>
+                <Typography variant="body2" noWrap>
+                  {app.getRoleLabel(data.userRole) +
+                    (data.assignedId ? ", " + data.assignedId : "")}
+                </Typography>
+                {data.status >= EntityStatus.Inactivated && (
+                  <React.Fragment>
+                    <Typography variant="caption">
+                      {labels.entityStatus + ": "}
+                    </Typography>
+                    <Typography variant="caption" color="error">
+                      {app.getStatusLabel(data?.status)}
+                    </Typography>
+                  </React.Fragment>
+                )}
+              </React.Fragment>
+            ];
+          },
+          { marginTop: 1 }
+        )
       }
     />
   );

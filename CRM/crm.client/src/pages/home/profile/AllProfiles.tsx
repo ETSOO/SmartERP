@@ -1,12 +1,10 @@
 import {
-  MUGlobal,
   ResponsivePage,
   IconButtonLink,
   MobileListItemRenderer,
   ComboBox,
   SelectBool,
   SearchField,
-  MUUtils,
   DateText,
   HBox
 } from "@etsoo/materialui";
@@ -26,7 +24,7 @@ import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import { ImportanceText } from "@etsoo/smarterp-crm/components";
-import { EntityStatus } from "@etsoo/appscript";
+import { BusinessUtils, EntityStatus } from "@etsoo/appscript";
 import Fab from "@mui/material/Fab";
 import Typography from "@mui/material/Typography";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
@@ -70,8 +68,6 @@ export default function AllProfiles() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   // Page data hook
   usePageDataEmpty(app);
@@ -146,7 +142,7 @@ export default function AllProfiles() {
       ]}
       loadData={async (data, lastItem) => {
         return await app.profileApi.query(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
             showLoading: false
@@ -258,8 +254,8 @@ export default function AllProfiles() {
           }
         }
       ]}
-      itemSize={[116, margin, "1px"]}
-      innerItemRenderer={(props) =>
+      rowHeight={164}
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.title,
@@ -286,11 +282,15 @@ export default function AllProfiles() {
                   {data.userName}
                 </Typography>
               </HBox>
-              <HBox gap={1}>
+              <Typography variant="body2">
                 <DateText value={data.happenDate} />
                 <span> - </span>
-                <DateText value={data.happenDateEnd} />
-              </HBox>
+                {data.happenDateEnd ? (
+                  <DateText value={data.happenDateEnd} />
+                ) : (
+                  "n/a"
+                )}
+              </Typography>
             </React.Fragment>
           ];
         })

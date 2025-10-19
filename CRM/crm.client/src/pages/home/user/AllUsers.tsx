@@ -1,5 +1,4 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
@@ -22,6 +21,7 @@ import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import { DeptTiplist, GroupTiplist } from "@etsoo/smarterp-crm/components";
+import Typography from "@mui/material/Typography";
 
 const template = {
   keyword: "string",
@@ -53,8 +53,6 @@ export default function AllUsers() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   // Page data hook
   usePageDataEmpty(app);
@@ -146,27 +144,36 @@ export default function AllUsers() {
           }
         }
       ]}
-      itemSize={[116, margin, "1px"]}
-      innerItemRenderer={(props) =>
-        MobileListItemRenderer(props, (data) => {
-          return [
-            data.name,
-            app.formatDate(data.creation, "d"),
-            [
-              data.editable && {
-                label: labels.edit,
-                icon: <EditIcon />,
-                action: `./edit/${data.id}`
-              },
-              {
-                label: labels.view,
-                icon: <ArticleIcon />,
-                action: `./../contact/view/${data.id}`
-              }
-            ],
-            <React.Fragment></React.Fragment>
-          ];
-        })
+      rowHeight={160}
+      itemRenderer={(props) =>
+        MobileListItemRenderer(props, (data) => [
+          data.name,
+          app.formatDate(data.creation, "d"),
+          [
+            data.editable && {
+              label: labels.edit,
+              icon: <EditIcon />,
+              action: `./edit/${data.id}`
+            },
+            {
+              label: labels.view,
+              icon: <ArticleIcon />,
+              action: `./../contact/view/${data.id}`
+            }
+          ],
+          <React.Fragment>
+            {data.userRole && (
+              <Typography variant="body2" noWrap>
+                {labels.role}: {app.getRoleLabel(data.userRole)}
+              </Typography>
+            )}
+            {data.depts && (
+              <Typography variant="body2" noWrap>
+                {data.depts.join(", ")}
+              </Typography>
+            )}
+          </React.Fragment>
+        ])
       }
     />
   );

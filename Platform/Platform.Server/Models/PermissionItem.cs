@@ -13,5 +13,5 @@ public partial class PermissionItem
 
     public string Name { get; set; } = null!;
 
-    public virtual ICollection<Person> People { get; set; } = new List<Person>();
+    public virtual ICollection<PersonPermissionItem> PersonPermissionItems { get; set; } = new List<PersonPermissionItem>();
 }

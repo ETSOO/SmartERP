@@ -393,7 +393,7 @@ namespace Platform.Server.Services
                 {
                     if (rq.Keyword?.Length > 1)
                     {
-                        q = q.Where(d => EF.Functions.ILike(d.Name, $"%{rq.Keyword}%"));
+                        q = q.Where(d => EF.Functions.Like(d.Name, $"%{rq.Keyword}%"));
                     }
 
                     return q;

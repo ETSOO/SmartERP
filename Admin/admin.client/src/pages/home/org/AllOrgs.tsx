@@ -1,10 +1,8 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
   MobileListItemRenderer,
-  MUUtils,
   SelectBool
 } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -25,6 +23,7 @@ import { OrgTiplist } from "../../../components/OrgTiplist";
 import { UserTiplist } from "../../../components/UserTiplist";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -69,7 +68,6 @@ export default function AllOrgs() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
@@ -141,10 +139,13 @@ export default function AllOrgs() {
         />
       ]}
       loadData={(data, lastItem) =>
-        app.queryApi.allOrgs(MUUtils.setupPagingKeysets(data, lastItem, "id"), {
-          defaultValue: [],
-          showLoading: false
-        })
+        app.queryApi.allOrgs(
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        )
       }
       columns={[
         {
@@ -226,8 +227,8 @@ export default function AllOrgs() {
           }
         }
       ]}
-      itemSize={[116, margin]}
-      innerItemRenderer={(props) =>
+      rowHeight={160}
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.name,

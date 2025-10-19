@@ -20,7 +20,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -31,14 +30,10 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(256)
                 .HasColumnName("identifier");
             entity.Property(e => e.IsDefault).HasColumnName("is_default");
+            entity.Property(e => e.IsVerified).HasColumnName("is_verified");
             entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.Subscribed).HasColumnName("subscribed");
-
-            entity.HasOne(d => d.CoreUser).WithMany(p => p.PersonInfos)
-                .HasForeignKey(d => d.CoreUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("person_info_core_user_id_fkey");
 
             entity.HasOne(d => d.Person).WithMany(p => p.PersonInfos)
                 .HasForeignKey(d => d.PersonId)

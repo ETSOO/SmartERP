@@ -4,8 +4,6 @@ import {
   HBox,
   LinkEx,
   MobileListItemRenderer,
-  MUGlobal,
-  MUUtils,
   ResponsivePage,
   SearchField
 } from "@etsoo/materialui";
@@ -23,7 +21,11 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { BoxProps } from "@mui/material/Box";
-import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
+import {
+  BusinessUtils,
+  EntityStatus,
+  IdentityTypeFlags
+} from "@etsoo/appscript";
 import Typography from "@mui/material/Typography";
 import { ImportanceText } from "@etsoo/smarterp-crm/components";
 import AddIcon from "@mui/icons-material/Add";
@@ -93,8 +95,6 @@ export function Profiles(props: ProfilesProps) {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
-
   // Layout
   return (
     <Grid container spacing={1}>
@@ -131,7 +131,7 @@ export function Profiles(props: ProfilesProps) {
           ]}
           loadData={async (data, lastItem) => {
             const rq: PersonProfileQueryRQ = {
-              ...MUUtils.setupPagingKeysets(data, lastItem, "id"),
+              ...BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
               participantId: personIdRef.current
             };
             return await app.profileApi.query(rq, {
@@ -215,8 +215,8 @@ export function Profiles(props: ProfilesProps) {
               );
             }
           }}
-          itemSize={[116, margin, "1px"]}
-          innerItemRenderer={(props) =>
+          rowHeight={160}
+          itemRenderer={(props) =>
             MobileListItemRenderer(props, (data) => {
               return [
                 data.title,

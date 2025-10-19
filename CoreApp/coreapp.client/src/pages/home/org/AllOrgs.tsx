@@ -1,10 +1,8 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
   MobileListItemRenderer,
-  MUUtils,
   Switch
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,7 +21,7 @@ import { OrgQueryDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { AppUtils } from "../components/AppUtils";
 import { DefaultUI, OrgTiplist } from "@etsoo/smarterp-core/components";
-import { EntityStatus } from "@etsoo/appscript";
+import { BusinessUtils, EntityStatus } from "@etsoo/appscript";
 import Fab from "@mui/material/Fab";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
@@ -65,8 +63,6 @@ export default function AllOrgs() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   // Page data hook
   usePageDataEmpty(app);
@@ -120,7 +116,7 @@ export default function AllOrgs() {
       ]}
       loadData={(data, lastItem) =>
         app.core.orgApi.query(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
             showLoading: false
@@ -221,8 +217,8 @@ export default function AllOrgs() {
           }
         }
       ]}
-      itemSize={[116, margin]}
-      innerItemRenderer={(props) =>
+      rowHeight={160}
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.name,

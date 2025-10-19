@@ -145,7 +145,6 @@ export function ContactInfos(props: ContactInfosProps) {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField

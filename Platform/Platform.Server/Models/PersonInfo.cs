@@ -19,13 +19,11 @@ public partial class PersonInfo
 
     public DateTime Creation { get; set; }
 
-    public int CoreUserId { get; set; }
-
     public bool? Subscribed { get; set; }
 
     public bool IsDefault { get; set; }
 
-    public virtual CoreUser CoreUser { get; set; } = null!;
+    public bool? IsVerified { get; set; }
 
     public virtual Person Person { get; set; } = null!;
 }

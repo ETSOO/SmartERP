@@ -1,5 +1,4 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
@@ -33,8 +32,6 @@ export default function AllDepts() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   // Page data hook
   usePageDataEmpty(app);
@@ -105,8 +102,7 @@ export default function AllDepts() {
           }
         }
       ]}
-      itemSize={[116, margin, "1px"]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.name,

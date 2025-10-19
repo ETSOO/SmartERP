@@ -39,10 +39,9 @@ namespace CRM.Server.Services
 
             var userPersonId = user.Oid;
 
-            var permissionItems = await _db.Persons.AsNoTracking()
-                .Where(p => p.Id == userPersonId)
-                .SelectMany(p => p.PermissionItems)
-                .Select(p => p.Id)
+            var permissionItems = await _db.PersonPermissionItems.AsNoTracking()
+                .Where(p => p.PersonId == userPersonId)
+                .Select(p => p.PermissionItemId)
                 .ToArrayAsync(cancellationToken);
 
             // Add serialized data, as the result will be deserialized in the base class where lack of SystemSettings TypeInfo will cause an error

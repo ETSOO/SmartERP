@@ -135,6 +135,12 @@ namespace PlatformShared.Database
         public required DbSet<PersonInfo> PersonInfos { get; set; }
 
         /// <summary>
+        /// Permission items
+        /// 权限项目
+        /// </summary>
+        public required DbSet<PersonPermissionItem> PersonPermissionItems { get; set; }
+
+        /// <summary>
         /// Person products
         /// 个人产品
         /// </summary>
@@ -243,6 +249,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new PersonAssetConfiguration());
             modelBuilder.ApplyConfiguration(new PersonCategoryConfiguration());
             modelBuilder.ApplyConfiguration(new PersonInfoConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonPermissionItemConfiguration());
             modelBuilder.ApplyConfiguration(new PersonProductConfiguration());
             modelBuilder.ApplyConfiguration(new PersonProfileConfiguration());
             modelBuilder.ApplyConfiguration(new PersonProfileAttachmentConfiguration());

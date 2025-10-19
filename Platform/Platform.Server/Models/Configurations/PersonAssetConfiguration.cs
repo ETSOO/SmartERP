@@ -23,7 +23,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Amount)
                 .HasColumnType("money")
                 .HasColumnName("amount");
-            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
@@ -39,6 +38,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.HealthCheckUrl)
                 .HasMaxLength(1280)
                 .HasColumnName("health_check_url");
+            entity.Property(e => e.OrgId).HasColumnName("org_id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Qty)
@@ -59,15 +59,15 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(128)
                 .HasColumnName("title");
 
-            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.PersonAssets)
-                .HasForeignKey(d => d.CoreOrganizationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("person_asset_core_organization_id_fkey");
-
             entity.HasOne(d => d.CoreUser).WithMany(p => p.PersonAssets)
                 .HasForeignKey(d => d.CoreUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_asset_core_user_id_fkey");
+
+            entity.HasOne(d => d.Org).WithMany(p => p.PersonAssets)
+                .HasForeignKey(d => d.OrgId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_asset_org_id_fkey");
 
             entity.HasOne(d => d.Person).WithMany(p => p.PersonAssetPeople)
                 .HasForeignKey(d => d.PersonId)

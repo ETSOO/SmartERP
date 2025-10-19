@@ -13,6 +13,7 @@ import { Profiles } from "../profile/Profiles";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { PersonData } from "./PersonData";
 import { ContactInfos } from "../profile/ContactInfos";
+import { PersonContacts } from "../profile/PersonContacts";
 
 /**
  * View person component properties
@@ -101,12 +102,23 @@ export function ViewPerson(props: ViewPersonProps) {
               icon: <InfoIcon />,
               iconPosition: "start"
             },
-            {
-              children: <div>Item Three</div>,
-              label: labels.contacts,
-              icon: <ContactsIcon />,
-              iconPosition: "start"
-            },
+            ...(app.ownsIdentity(data.identityType, "QueryContact")
+              ? [
+                  {
+                    children: (visible, index) =>
+                      visible && (
+                        <PersonContacts
+                          personId={personId}
+                          identityType={data.identityType}
+                          index={index}
+                        />
+                      ),
+                    label: labels.contacts,
+                    icon: <ContactsIcon />,
+                    iconPosition: "start"
+                  } as TabBoxPanel
+                ]
+              : []),
             {
               children: <div>Item Four</div>,
               label: labels.assets,

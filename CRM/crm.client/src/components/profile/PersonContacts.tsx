@@ -1,7 +1,6 @@
 import {
   ResponsivePage,
   SearchField,
-  IconButtonLink,
   MobileListItemRenderer
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
@@ -15,22 +14,40 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
-import { app } from "../../../app/MyApp";
-import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { DeptQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
-import { UserTiplist } from "@etsoo/smarterp-crm/components";
 import Fab from "@mui/material/Fab";
-import { Permissions } from "@etsoo/smarterp-crm";
+import { ContactQueryData } from "@etsoo/smarterp-crm";
+import { app } from "../../app/MyApp";
+import IconButton from "@mui/material/IconButton";
+import { IdentityTypeFlags } from "@etsoo/appscript";
 
 const template = {
-  keyword: "string",
-  leaderId: "number"
+  keyword: "string"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export type PersonContactsProps = {
+  /**
+   * Tab index
+   */
+  index: number;
+
+  /**
+   * Person ID
+   */
+  personId: number;
+
+  /**
+   * Identity type
+   */
+  identityType: IdentityTypeFlags;
+};
+
+export function PersonContacts(props: PersonContactsProps) {
+  // Destruct
+  const { index, identityType, personId } = props;
+
   // Route
   const navigate = useNavigate();
 
@@ -39,34 +56,36 @@ export default function AllDepts() {
     "actions",
     "add",
     "creation",
+    "description",
     "edit",
-    "leader",
-    "nameB",
-    "staff",
+    "keywords",
+    "personName",
+    "relation",
     "view"
   );
 
+  const canAdd = app.ownsIdentity(identityType, "AddContact");
+
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<DeptQueryData>>(undefined);
+  const ref = React.useRef<ScrollerListForwardRef<ContactQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  // Page data hook
-  usePageDataEmpty(app);
-
   return (
-    <ResponsivePage<DeptQueryData, typeof template>
+    <ResponsivePage<ContactQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: (
           <React.Fragment>
-            {app.owns(Permissions.Dept.Add) && (
+            {canAdd && (
               <Fab
                 title={labels.add}
                 size="medium"
                 color="primary"
-                onClick={() => navigate("./add")}
+                onClick={() =>
+                  navigate(`./../../info/${personId}?index=${index}`)
+                }
               >
                 <AddIcon />
               </Fab>
@@ -76,39 +95,49 @@ export default function AllDepts() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
-          label={labels.nameB}
+          label={labels.description}
           name="keyword"
+          minChars={2}
           defaultValue={data.keyword}
-        />,
-        <UserTiplist label={labels.leader} name="leaderId" search />
+        />
       ]}
       loadData={async (data) => {
-        return await app.deptApi.query(data, {
-          defaultValue: [],
-          showLoading: false
-        });
+        if (data.queryPaging.orderBy) {
+          for (const f of data.queryPaging.orderBy) {
+            if (f.field === "name") {
+              f.field = "Contact.Name";
+            }
+          }
+        }
+
+        return await app.personApi.queryContact(
+          { personId, ...data },
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        );
       }}
       columns={[
         {
+          field: "relationType",
+          width: 120,
+          header: labels.relation,
+          valueFormatter: ({ data }) =>
+            app.person.getRelationType(data?.relationType)
+        },
+        {
           field: "name",
-          header: labels.nameB,
+          header: labels.personName,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
-          field: "staff",
-          width: 80,
-          header: labels.staff,
-          type: GridDataType.Number
-        },
-        {
-          field: "leader",
-          header: labels.leader,
-          width: 120
+          field: "description",
+          header: labels.description
         },
         {
           field: "creation",
@@ -124,7 +153,7 @@ export default function AllDepts() {
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<DeptQueryData, BoxProps>) => {
+          }: GridCellRendererProps<ContactQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -134,50 +163,35 @@ export default function AllDepts() {
 
             return (
               <React.Fragment>
-                {app.owns(Permissions.Dept.Edit) && (
-                  <IconButtonLink
-                    title={labels.edit}
-                    href={`./edit/${data.id}`}
-                  >
+                {canAdd && (
+                  <IconButton title={labels.edit}>
                     <EditIcon />
-                  </IconButtonLink>
+                  </IconButton>
                 )}
-                {app.owns(Permissions.Dept.View) && (
-                  <IconButtonLink
-                    title={labels.view}
-                    href={`./../../contact/view/${data.id}`}
-                  >
-                    <ArticleIcon />
-                  </IconButtonLink>
-                )}
+                <IconButton title={labels.view}>
+                  <ArticleIcon />
+                </IconButton>
               </React.Fragment>
             );
           }
         }
       ]}
-      rowHeight={164}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.name,
+            `[${app.person.getRelationType(data.relationType)}] ${data.name}`,
             app.formatDate(data.creation, "d"),
             [
-              app.owns(Permissions.Dept.Edit) && {
+              canAdd && {
                 label: labels.edit,
-                icon: <EditIcon />,
-                action: `./edit/${data.id}`
+                icon: <EditIcon />
               },
-              app.owns(Permissions.Dept.View) && {
+              {
                 label: labels.view,
-                icon: <ArticleIcon />,
-                action: `./../../contact/view/${data.id}`
+                icon: <ArticleIcon />
               }
             ],
-            <React.Fragment>
-              {labels.leader}: {data.leader}
-              <br />
-              {labels.staff}: {data.staff}
-            </React.Fragment>
+            <React.Fragment>{data.description}</React.Fragment>
           ];
         })
       }

@@ -1,9 +1,7 @@
 import {
   DialogButton,
-  MUGlobal,
   SearchField,
   MobileListItemRenderer,
-  MUUtils,
   ResponsivePage,
   IconButtonLink,
   HBox
@@ -27,6 +25,7 @@ import { OrgTiplist } from "../../../components/OrgTiplist";
 import { UserTiplist } from "../../../components/UserTiplist";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   id: "number",
@@ -66,7 +65,6 @@ export default function LoginHistory() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
@@ -149,7 +147,7 @@ export default function LoginHistory() {
       ]}
       loadData={async (data, lastItem) =>
         app.queryApi.auditHistory(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
             showLoading: false
@@ -224,8 +222,7 @@ export default function LoginHistory() {
           }
         }
       ]}
-      itemSize={[112, margin]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => [
           data.title,
           app.formatDate(data.creation, "ds"),

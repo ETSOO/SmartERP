@@ -43,13 +43,13 @@ public partial class PersonAsset
 
     public string? Data { get; set; }
 
-    public int CoreOrganizationId { get; set; }
-
-    public virtual CoreOrganization CoreOrganization { get; set; } = null!;
+    public int OrgId { get; set; }
 
     public virtual CoreUser CoreUser { get; set; } = null!;
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
+
+    public virtual CoreOrganization Org { get; set; } = null!;
 
     public virtual Person Person { get; set; } = null!;
 

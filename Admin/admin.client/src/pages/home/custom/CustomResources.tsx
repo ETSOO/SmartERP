@@ -1,9 +1,7 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   MobileListItemRenderer,
-  MUUtils,
   IconButtonLink
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
@@ -18,6 +16,8 @@ import { CultureList, DefaultUI } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
 import { OrgTiplist } from "../../../components/OrgTiplist";
+import { BusinessUtils } from "@etsoo/appscript";
+import Typography from "@mui/material/Typography";
 
 const template = {
   keyword: "string",
@@ -47,8 +47,6 @@ export default function CustomResource() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   // Page data hook
   usePageDataEmpty(app);
@@ -83,7 +81,7 @@ export default function CustomResource() {
       ]}
       loadData={(data, lastItem) =>
         app.core.orgApi.queryResource(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
             showLoading: false
@@ -139,11 +137,11 @@ export default function CustomResource() {
           }
         }
       ]}
-      itemSize={[116, margin]}
-      innerItemRenderer={(props) =>
+      rowHeight={160}
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.title,
+            `${data.title} (${data.culture})`,
             data.key,
             [
               {
@@ -152,7 +150,18 @@ export default function CustomResource() {
                 action: `./edit/${data.id}`
               }
             ],
-            <React.Fragment>{data.description}</React.Fragment>
+            <React.Fragment>
+              {data.orgName && (
+                <Typography variant="body2" noWrap>
+                  {data.orgName}
+                </Typography>
+              )}
+              {data.description && (
+                <Typography variant="body2" noWrap>
+                  {data.description}
+                </Typography>
+              )}
+            </React.Fragment>
           ];
         })
       }

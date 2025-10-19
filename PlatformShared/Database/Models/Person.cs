@@ -647,7 +647,7 @@ namespace PlatformShared.Database.Models
         /// Permission items
         /// 权限项
         /// </summary>
-        public ICollection<PermissionItem> PermissionItems { get; } = default!;
+        public ICollection<PersonPermissionItem> PermissionItems { get; } = default!;
 
         /// <summary>
         /// Profile attachments

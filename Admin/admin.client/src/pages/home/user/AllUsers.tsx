@@ -1,5 +1,4 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
@@ -21,6 +20,7 @@ import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { AllUserDto } from "../../../api/dto/query/AllUserDto";
 import { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const template = {
   keyword: "string",
@@ -58,7 +58,6 @@ export default function AllUsers() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
@@ -192,11 +191,10 @@ export default function AllUsers() {
           }
         }
       ]}
-      itemSize={[116, margin]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.name,
+            data.name + (data.preferredName ? ` (${data.preferredName})` : ""),
             app.formatDate(data.creation, "d"),
             [
               {
@@ -205,7 +203,13 @@ export default function AllUsers() {
                 action: `./view/${data.id}`
               }
             ],
-            <React.Fragment></React.Fragment>
+            <React.Fragment>
+              {data.pin && (
+                <Typography variant="body2" noWrap>
+                  {labels.pin}: {data.pin}
+                </Typography>
+              )}
+            </React.Fragment>
           ];
         })
       }

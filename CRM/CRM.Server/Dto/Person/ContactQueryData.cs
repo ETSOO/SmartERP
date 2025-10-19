@@ -1,4 +1,5 @@
-﻿using PlatformShared.Database.Models;
+﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Database.Models;
 
 namespace CRM.Server.Dto.Person
 {
@@ -37,5 +38,11 @@ namespace CRM.Server.Dto.Person
         /// 登记时间
         /// </summary>
         public DateTimeOffset Creation { get; init; }
+
+        /// <summary>
+        /// Status
+        /// 状态
+        /// </summary>
+        public EntityStatus Status { get; init; }
     }
 }

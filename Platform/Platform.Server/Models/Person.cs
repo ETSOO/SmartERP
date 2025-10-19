@@ -125,6 +125,8 @@ public partial class Person
 
     public virtual ICollection<PersonInfo> PersonInfos { get; set; } = new List<PersonInfo>();
 
+    public virtual ICollection<PersonPermissionItem> PersonPermissionItems { get; set; } = new List<PersonPermissionItem>();
+
     public virtual ICollection<PersonProduct> PersonProducts { get; set; } = new List<PersonProduct>();
 
     public virtual ICollection<PersonProfile> PersonProfileAssignees { get; set; } = new List<PersonProfile>();
@@ -148,6 +150,4 @@ public partial class Person
     public virtual ICollection<SettingCrm> SettingCrms { get; set; } = new List<SettingCrm>();
 
     public virtual Person User { get; set; } = null!;
-
-    public virtual ICollection<PermissionItem> PermissionItems { get; set; } = new List<PermissionItem>();
 }

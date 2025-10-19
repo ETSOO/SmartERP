@@ -96,10 +96,9 @@ namespace PlatformShared.Extentions
                 .ToList();
 
             // Query all permissions in one go
-            var permissions = await db.Persons.AsNoTracking()
-                .Where(p => p.Id == personId && p.PermissionItems.Any(i => allIds.Contains(i.Id)))
-                .SelectMany(p => p.PermissionItems)
-                .Select(i => i.Id)
+            var permissions = await db.PersonPermissionItems.AsNoTracking()
+                .Where(p => p.PersonId == personId && allIds.Contains(p.PermissionItemId))
+                .Select(p => p.PermissionItemId)
                 .ToArrayAsync(cancellationToken);
 
             // Check if all permissionItemIds are in permissions

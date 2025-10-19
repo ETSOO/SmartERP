@@ -1,10 +1,8 @@
 import {
   DialogButton,
-  MUGlobal,
   SearchField,
   MobileListItemRenderer,
   Tiplist,
-  MUUtils,
   ResponsivePage,
   HBox
 } from "@etsoo/materialui";
@@ -25,6 +23,7 @@ import {
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -50,7 +49,6 @@ export default function LoginHistory() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
   const creationEndRef = React.useRef<HTMLInputElement>(null);
 
   // Page data hook
@@ -62,6 +60,7 @@ export default function LoginHistory() {
         onRefresh: reloadData
       })}
       mRef={ref}
+      cacheKey="CoreApp-AuditHistory"
       defaultOrderBy={[{ field: "creation", desc: true }]}
       fieldTemplate={template}
       fields={(data) => [
@@ -113,7 +112,7 @@ export default function LoginHistory() {
       ]}
       loadData={async (data, lastItem) =>
         app.core.userApi.auditHistory(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
             showLoading: false
@@ -161,8 +160,7 @@ export default function LoginHistory() {
           }
         }
       ]}
-      itemSize={[112, margin]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.title,

@@ -1,9 +1,7 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
-  MobileListItemRenderer,
-  MUUtils
+  MobileListItemRenderer
 } from "@etsoo/materialui";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
@@ -21,6 +19,7 @@ import { BoxProps } from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -59,8 +58,6 @@ export default function AllApps() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
-
   // Page data hook
   usePageDataEmpty(app);
 
@@ -82,7 +79,7 @@ export default function AllApps() {
       ]}
       loadData={(data, lastItem) =>
         app.core.appApi.query(
-          MUUtils.setupPagingKeysets(data, lastItem, "id"),
+          BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
             showLoading: false
@@ -159,8 +156,8 @@ export default function AllApps() {
           }
         }
       ]}
-      itemSize={[134, margin]}
-      innerItemRenderer={(props) =>
+      rowHeight={172}
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           const webUrl = getWebUrl(data.urls);
           const helpUrl = getHelpUrl(data.urls);

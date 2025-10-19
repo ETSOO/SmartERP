@@ -1,5 +1,4 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
@@ -66,8 +65,6 @@ export default function AllCategories() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const margin = MUGlobal.pagePaddings;
 
   const mergeCategory = (data: PersonCategoryQueryData) => {
     app.showInputDialog({
@@ -236,8 +233,7 @@ export default function AllCategories() {
           }
         }
       ]}
-      itemSize={[116, margin, "1px"]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             data.names.join(" -> "),
@@ -254,7 +250,9 @@ export default function AllCategories() {
                 action: `./edit/${data.id}`
               }
             ],
-            <React.Fragment></React.Fragment>
+            <React.Fragment>
+              {app.person.getIdentityType(data.identityType)}
+            </React.Fragment>
           ];
         })
       }

@@ -27,9 +27,9 @@ namespace PlatformShared.Database.Models
         public string Name { get; set; } = default!;
 
         /// <summary>
-        /// Persons
-        /// 人员
+        /// Permission items
+        /// 权限项
         /// </summary>
-        public ICollection<Person> Persons { get; set; } = default!;
+        public ICollection<PersonPermissionItem> PersonPermissionItems { get; } = default!;
     }
 }

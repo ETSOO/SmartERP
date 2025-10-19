@@ -55,7 +55,5 @@ public partial class CoreUser
 
     public virtual ICollection<Person> PersonCoreUsers { get; set; } = new List<Person>();
 
-    public virtual ICollection<PersonInfo> PersonInfos { get; set; } = new List<PersonInfo>();
-
     public virtual ICollection<Person> PersonInviters { get; set; } = new List<Person>();
 }

@@ -704,7 +704,30 @@ namespace CRM.Server.Services
         /// <returns>Task</returns>
         public async Task QueryContactAsync(ContactQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _commonService.UpdatePersonTagAsync(rq, User.OrganizationInt, cancellationToken);
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var person = await _db.Persons
+               .AsNoTracking()
+               .Where(p => p.Id == rq.PersonId && p.OrgId == orgId)
+               .Select(p => new
+               {
+                   p.Id,
+                   p.IdentityType
+               })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return;
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.QueryContact), cancellationToken))
+            {
+                return;
+            }
+
+            await _commonService.UpdatePersonTagAsync(rq, orgId, cancellationToken);
 
             var query = CreateContactQuery(rq, (q) =>
             {
@@ -747,7 +770,8 @@ namespace CRM.Server.Services
                 RelationType = r.RelationType,
                 Name = r.Contact.Name,
                 Description = r.Description,
-                Creation = r.Creation
+                Creation = r.Creation,
+                Status = r.Contact.Status
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
             if (_db.IsSensitiveDataLoggingEnabled)

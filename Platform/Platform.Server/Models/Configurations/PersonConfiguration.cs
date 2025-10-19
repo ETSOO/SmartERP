@@ -140,25 +140,6 @@ namespace Platform.Server.Models.Configurations
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("person_user_id_fkey");
 
-            entity.HasMany(d => d.PermissionItems).WithMany(p => p.People)
-                .UsingEntity<Dictionary<string, object>>(
-                    "PersonPermissionItem",
-                    r => r.HasOne<PermissionItem>().WithMany()
-                        .HasForeignKey("PermissionItemId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_permission_item_permission_item_id_fkey"),
-                    l => l.HasOne<Person>().WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("person_permission_item_person_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("PersonId", "PermissionItemId").HasName("person_permission_item_pkey");
-                        j.ToTable("person_permission_item");
-                        j.IndexerProperty<long>("PersonId").HasColumnName("person_id");
-                        j.IndexerProperty<short>("PermissionItemId").HasColumnName("permission_item_id");
-                    });
-
             OnConfigurePartial(entity);
         }
 
