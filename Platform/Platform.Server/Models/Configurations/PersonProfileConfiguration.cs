@@ -42,9 +42,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.Persons).HasColumnName("persons");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Title)
                 .HasMaxLength(256)
                 .HasColumnName("title");

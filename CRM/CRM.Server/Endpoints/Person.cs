@@ -14,6 +14,9 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("Person");
 
+            g.MapPost("AddContact", (IPersonService service, ContactRelationAddRQ rq, CancellationToken cancellationToken) => service.AddContactAsync(rq, cancellationToken))
+                .WithDescription("Add contact / 添加联系人").WithTags("Person");
+
             g.MapPost("Choose", (IPersonService service, ChoosePersonsRQ rq, CancellationToken cancellationToken) => service.ChoosePersonsAsync(rq, cancellationToken))
                 .WithDescription("Person choose / 人员选择").WithTags("Person");
 
@@ -26,11 +29,23 @@ namespace CRM.Server.Endpoints
             g.MapPost("CreateInfo", (IPersonService service, PersonInfoCreateRQ rq, CancellationToken cancellationToken) => service.CreateInfoAsync(rq, cancellationToken))
                 .WithDescription("Create person info / 创建人员信息").WithTags("Person");
 
+            g.MapDelete("Delete/{id:long}", (IPersonService service, long id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
+                .WithDescription("Delete person / 删除人员").WithTags("Person");
+
             g.MapDelete("DeleteAddress/{id:int}", (IPersonService service, int id, CancellationToken cancellationToken) => service.DeleteAddressAsync(id, cancellationToken))
                 .WithDescription("Delete address / 删除地址").WithTags("Person");
 
+            g.MapDelete("DeleteContact/{id:long}", (IPersonService service, long id, CancellationToken cancellationToken) => service.DeleteContactAsync(id, cancellationToken))
+                .WithDescription("Delete contact / 删除联系人").WithTags("Person");
+
             g.MapDelete("DeleteInfo/{id:int}", (IPersonService service, int id, CancellationToken cancellationToken) => service.DeleteInfoAsync(id, cancellationToken))
                 .WithDescription("Delete person info / 删除人员信息").WithTags("Person");
+
+            g.MapPost("DuplicateTest", (IPersonService service, PersonDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))
+                .WithDescription("Person duplicate test / 人员重复测试").WithTags("Person");
+
+            g.MapGet("IsDeletable/{id:long}", (IPersonService service, long id, CancellationToken cancellationToken) => service.IsDeletableAsync(id, cancellationToken))
+                .WithDescription("Is person deletable / 人员是否可删除").WithTags("Person");
 
             g.MapPost("List", (IPersonService service, IHttpContextAccessor accessor, PersonListRQ rq, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Person list / 人员列表").WithTags("Person");
@@ -65,7 +80,7 @@ namespace CRM.Server.Endpoints
             g.MapPut("UpdateContactRelation", (IPersonService service, ContactRelationUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateContactRelationAsync(rq, cancellationToken))
                 .WithDescription("Update contact relation / 更新联系人关系").WithTags("Person");
 
-            g.MapGet("UpdateContactRelationRead/{personId:long}/{contactId:long}", (IPersonService service, long personId, long contactId, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateContactRelationReadAsync(personId, contactId, accessor.GetJsonWriter(), cancellationToken))
+            g.MapGet("UpdateContactRelationRead/{id:long}", (IPersonService service, long id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateContactRelationReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read contact relation update data / 读取联系人关系更新数据").WithTags("Person");
 
             g.MapPut("UpdateInfo", (IPersonService service, PersonInfoUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateInfoAsync(rq, cancellationToken))

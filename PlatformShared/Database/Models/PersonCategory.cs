@@ -55,5 +55,11 @@ namespace PlatformShared.Database.Models
         /// 排序数
         /// </summary>
         public short OrderIndex { get; set; }
+
+        /// <summary>
+        /// Assigned id
+        /// 分配的编号
+        /// </summary>
+        public string? AssignedId { get; set; }
     }
 }

@@ -31,6 +31,12 @@ namespace CRM.Server.RQ.PersonCategory
         public required string Name { get; init; }
 
         /// <summary>
+        /// Assigned ID
+        /// 分配编号
+        /// </summary>
+        public string? AssignedId { get; init; }
+
+        /// <summary>
         /// Order index
         /// 排序索引
         /// </summary>
@@ -52,6 +58,11 @@ namespace CRM.Server.RQ.PersonCategory
             if (Name.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Name));
+            }
+
+            if (AssignedId !=null && AssignedId.Length is not (>= 1 and <= 20))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(AssignedId));
             }
 
             if (Data != null && !Data.IsJson())

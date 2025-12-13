@@ -40,7 +40,7 @@ namespace Platform.Server.Endpoints.Org
             g.MapPost("FormatHtmlContent", async (IOrgService service, IHttpContextAccessor accessor, CancellationToken cancellationToken) =>
             {
                 // [FromBody] way only works for JSON content type, not plain text
-                var content = await accessor.GetBodyAsync(cancellationToken: cancellationToken);
+                var content = await accessor.GetBodyAsync();
                 if (string.IsNullOrEmpty(content)) return null;
                 return await service.FormatHtmlContentAsync(content, cancellationToken);
             }).WithDescription("Format HTML content / 格式化HTML内容").WithTags("Org");
@@ -96,7 +96,7 @@ namespace Platform.Server.Endpoints.Org
             g.MapPut("UpdateApi", [Roles(Constants.AdminRoles)] (IOrgService service, OrgUpdateApiRQ rq, CancellationToken cancellationToken) => service.UpdateApiAsync(rq, cancellationToken))
                 .WithDescription("Update API / 更新接口").WithTags("Org");
 
-            g.MapPut("UpdateAvatar/{id:int}", [Roles(UserRole.Founder)] (IOrgService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
+            g.MapPut("UpdateAvatar/{id:int}", [Roles(UserRole.Founder)] (IOrgService service, [FromRoute] int id, IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Update organization avatar / 更新机构头像").WithTags("Org");
 

@@ -32,6 +32,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.OrderIndex)
                 .HasDefaultValue((short)0)
                 .HasColumnName("order_index");
+            entity.Property(e => e.AssignedId).HasColumnName("assigned_id");
         }
     }
 }

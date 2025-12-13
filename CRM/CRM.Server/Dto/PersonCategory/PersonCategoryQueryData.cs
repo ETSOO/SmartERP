@@ -27,6 +27,12 @@ namespace CRM.Server.Dto.PersonCategory
         public required IdentityTypeFlags IdentityType { get; init; }
 
         /// <summary>
+        /// Assigned ID
+        /// 分配编号
+        /// </summary>
+        public string? AssignedId { get; init; }
+
+        /// <summary>
         /// Creation
         /// 登记时间
         /// </summary>

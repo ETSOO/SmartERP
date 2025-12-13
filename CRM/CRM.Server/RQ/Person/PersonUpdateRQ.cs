@@ -196,7 +196,7 @@ namespace CRM.Server.RQ.Person
                 return ApplicationErrors.NoValidData.AsResult(nameof(JobTitle));
             }
 
-            if (PrivateData?.Gender != null && PrivateData.Gender is not "F" or "M")
+            if (PrivateData?.Gender != null && PrivateData.Gender is not ("F" or "M"))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(PrivateData.Gender));
             }

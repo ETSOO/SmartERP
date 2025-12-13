@@ -38,9 +38,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.LocalUrls)
                 .HasColumnType("jsonb")
                 .HasColumnName("local_urls");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
 
             entity.HasOne(d => d.CoreApp).WithMany(p => p.CoreOrganizationApps)
                 .HasForeignKey(d => d.CoreAppId)

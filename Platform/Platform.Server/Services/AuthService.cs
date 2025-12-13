@@ -724,22 +724,16 @@ namespace Platform.Server.Services
             // Brings an entity into the context without marking it as modified
             _db.CoreUsers.Attach(user);
 
+            // Parse name
+            var nd = _publicService.ParseName(rq.Name, rq.FamilyName, rq.GivenName);
+
             user.Password = password;
             user.Name = rq.Name;
-            user.QueryKeyword = _publicService.GetPinyin(new PinyinRQ { Input = rq.Name, Format = PinyinFormatType.Initial });
-
-            user.FamilyName = rq.FamilyName;
-            if (!string.IsNullOrEmpty(rq.FamilyName))
-            {
-                user.LatinFamilyName = _publicService.GetPinyin(new PinyinRQ { Input = rq.FamilyName, Format = PinyinFormatType.Full });
-            }
-
-            user.GivenName = rq.GivenName;
-            if (!string.IsNullOrEmpty(rq.GivenName))
-            {
-                user.LatinGivenName = _publicService.GetPinyin(new PinyinRQ { Input = rq.GivenName, Format = PinyinFormatType.Full });
-            }
-
+            user.QueryKeyword = nd.PinyinInitials;
+            user.FamilyName = nd.FamilyName;
+            user.GivenName = nd.GivenName;
+            user.LatinFamilyName = nd.LatinFamilyName;
+            user.LatinGivenName = nd.LatinGivenName;
             user.Region = rq.Region;
             user.Step = 0;
 

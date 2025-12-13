@@ -56,7 +56,7 @@ namespace Platform.Server.Services
             if (apiSchemas.TryGetValue(service, out var creator))
             {
                 var schema = creator();
-                var sr = schema.Evaluate(JsonNode.Parse(json ?? "{}"));
+                var sr = schema.Evaluate(JsonElement.Parse(json ?? "{}"));
                 if (sr.IsValid)
                 {
                     result = null;

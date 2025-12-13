@@ -38,6 +38,7 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.Discount)
+                .HasDefaultValueSql("0")
                 .HasColumnType("money")
                 .HasColumnName("discount");
             entity.Property(e => e.EndTime).HasColumnName("end_time");
@@ -59,9 +60,7 @@ namespace Platform.Server.Models.Configurations
                 .HasPrecision(12, 2)
                 .HasColumnName("qty");
             entity.Property(e => e.StartTime).HasColumnName("start_time");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Title)
                 .HasMaxLength(256)
                 .HasColumnName("title");

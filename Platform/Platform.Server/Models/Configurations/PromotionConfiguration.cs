@@ -35,17 +35,13 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.MinAmount)
                 .HasColumnType("money")
                 .HasColumnName("min_amount");
-            entity.Property(e => e.OrderIndex)
-                .HasDefaultValue((short)0)
-                .HasColumnName("order_index");
+            entity.Property(e => e.OrderIndex).HasColumnName("order_index");
             entity.Property(e => e.PersonCategoryId).HasColumnName("person_category_id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ProductCategoryId).HasColumnName("product_category_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Stackable).HasColumnName("stackable");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");

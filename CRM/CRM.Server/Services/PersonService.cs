@@ -11,6 +11,7 @@ using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
 using CRM.Server.Dto.Person;
 using CRM.Server.RQ.Person;
+using Google.Api;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
 using PlatformShared;
@@ -42,6 +43,53 @@ namespace CRM.Server.Services
         {
             _db = db;
             _commonService = commonService;
+        }
+
+        /// <summary>
+        /// Add a new contact relation
+        /// 添加一个新的联系人关系
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> AddContactAsync(ContactRelationAddRQ rq, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+            var personId = rq.PersonId;
+            var contactId = rq.ContactId;
+
+            var result = await _db.Persons.AsNoTracking()
+                .Where(p => p.Id == contactId && p.OrgId == orgId)
+                .Select(p => new
+                {
+                    IdValid = true,
+                    RelationExists = p.ContactOwners.Any(co => co.PersonId == personId)
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (result?.IdValid is not true)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.ContactId));
+            }
+
+            if (result.RelationExists)
+            {
+                return ApplicationErrors.ItemExists.AsResult(nameof(rq.ContactId));
+            }
+
+            var cr = new PersonRelation
+            {
+                PersonId = personId,
+                ContactId = contactId,
+                RelationType = rq.RelationType,
+                Description = rq.Description,
+                Data = rq.Data
+            };
+
+            _db.PersonRelations.Add(cr);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(cr.Id);
         }
 
         /// <summary>
@@ -195,23 +243,57 @@ namespace CRM.Server.Services
 
             // Is contact exists with same name
             var contactExists = await _db.PersonRelations.AsNoTracking()
-                .AnyAsync(r => r.PersonId == rq.PersonId && r.Contact.Name == rq.Name, cancellationToken);
+                .AnyAsync(r => r.PersonId == rq.PersonId && r.Contact.Name.ToUpper() == rq.Name.ToUpper(), cancellationToken);
 
             if (contactExists)
             {
                 return ApplicationErrors.ItemExists.AsResult(nameof(rq.Name));
             }
 
+            // Organization scope duplicate check
+            var duplicateItems = new List<(PersonInfoKind, string)>();
+
+            if (!string.IsNullOrEmpty(rq.Mobile))
+            {
+                duplicateItems.Add((PersonInfoKind.Mobile, rq.Mobile.Trim().ToLower()));
+            }
+
+            if (!string.IsNullOrEmpty(rq.Email))
+            {
+                duplicateItems.Add((PersonInfoKind.Email, rq.Email.Trim().ToLower()));
+            }
+
+            if (!string.IsNullOrEmpty(rq.Phone))
+            {
+                duplicateItems.Add((PersonInfoKind.Phone, rq.Phone.Trim().ToLower()));
+            }
+
+            if (duplicateItems.Count > 0)
+            {
+                var duplicateResult = await _db.PersonInfoDuplicateAsync(orgId, null, duplicateItems, cancellationToken);
+                if (!duplicateResult.Ok)
+                {
+                    return duplicateResult;
+                }
+            }
+
+            // Parse name
+            var nd = LocalizationUtils.ParseName(rq.Name, rq.FamilyName, rq.GivenName);
+
             // Create new contact
             var contact = new Person
             {
                 OrgId = orgId,
-                IdentityType = IdentityTypeFlags.Contact,
+                UserId = User.Oid,
+                IdentityType = IdentityTypeFlags.Contact | person.IdentityType,
                 Name = rq.Name,
-                FamilyName = rq.FamilyName,
-                GivenName = rq.GivenName,
+                QueryKeyword = nd.PinyinInitials,
+                FamilyName = nd.FamilyName,
+                GivenName = nd.GivenName,
+                LatinGivenName = nd.LatinGivenName,
+                LatinFamilyName = nd.LatinFamilyName,
+                PreferredName = rq.PreferredName,
                 JobTitle = rq.JobTitle,
-                Description = rq.Description,
                 Title = rq.Title,
                 Gender = rq.Gender,
                 Birthday = rq.Birthday,
@@ -219,16 +301,6 @@ namespace CRM.Server.Services
                 Regions = rq.Regions?.ToList(),
                 Cultures = rq.Cultures?.ToList()
             };
-
-            if (!string.IsNullOrEmpty(rq.FamilyName))
-            {
-                contact.LatinFamilyName = ChineseUtils.GetPinyin(rq.FamilyName, true).ToPinyin();
-            }
-
-            if (!string.IsNullOrEmpty(rq.GivenName))
-            {
-                contact.LatinGivenName = ChineseUtils.GetPinyin(rq.GivenName, true).ToPinyin();
-            }
 
             if (rq.Tags?.Any() is true)
             {
@@ -241,12 +313,26 @@ namespace CRM.Server.Services
 
             await _db.SaveChangesAsync(cancellationToken);
 
+            // Contact info
+            foreach (var item in duplicateItems)
+            {
+                var info = new PersonInfo
+                {
+                    PersonId = contact.Id,
+                    Kind = item.Item1,
+                    Identifier = item.Item2,
+                    IsDefault = true
+                };
+                _db.PersonInfos.Add(info);
+            }
+
             // Add relation
             var relation = new PersonRelation
             {
                 PersonId = person.Id,
                 ContactId = contact.Id,
-                RelationType = rq.RelationType
+                RelationType = rq.RelationType,
+                Description = rq.Description
             };
 
             _db.PersonRelations.Add(relation);
@@ -294,8 +380,11 @@ namespace CRM.Server.Services
             // Create infos
             foreach (var item in rq.Items)
             {
+                // Format identifier
+                var identifier = item.Identifier.Trim().ToLower();
+
                 // Check if the info already exists
-                if (person.Infos.Any(i => i.Kind == item.Kind && i.Identifier == item.Identifier))
+                if (person.Infos.Any(i => i.Kind == item.Kind && i.Identifier == identifier))
                 {
                     continue;
                 }
@@ -305,7 +394,7 @@ namespace CRM.Server.Services
                 {
                     PersonId = person.Id,
                     Kind = item.Kind,
-                    Identifier = item.Identifier,
+                    Identifier = identifier,
                     Description = item.Description,
                     IsDefault = item.IsDefault ?? false
                 };
@@ -443,6 +532,89 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Is person deletable
+        /// 人员是否可删除
+        /// </summary>
+        /// <param name="id">Person id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<bool> IsDeletableAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var person = await _db.Persons
+               .Where(p => p.Id == id
+                    && p.OrgId == orgId
+                    && !p.OwnedUsers.Any()
+                    && !p.Profiles.Any()
+                    && !p.Contacts.Any()
+                    && !p.ContactOwners.Any()
+                    && !p.Orders.Any())
+               .Select(p => new
+               {
+                   p.IdentityType
+               })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return false;
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.Delete), cancellationToken))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Delete person
+        /// 删除人员
+        /// </summary>
+        /// <param name="id">Person id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
+        {
+            var isDeletable = await IsDeletableAsync(id, cancellationToken);
+            if (!isDeletable)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // Remove infos
+                await _db.PersonInfos.Where(pi => pi.PersonId == id).ExecuteDeleteAsync(cancellationToken);
+
+                // More safe deletes
+                // ...
+
+                // Remove
+                await _db.Persons.Where(p => p.Id == id).ExecuteDeleteAsync(cancellationToken);
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log and return the result
+                return LogException(ex);
+            }
+            
+
+            return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
         /// Delete address
         /// 删除地址
         /// </summary>
@@ -481,6 +653,46 @@ namespace CRM.Server.Services
             {
                 return ActionResult.Succeed(id);
             }
+        }
+
+        /// <summary>
+        /// Delete contact
+        /// 删除联系人
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteContactAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var relation = await _db.PersonRelations
+                .Where(r => r.Id == id && r.Person.OrgId == orgId && (r.Contact.IdentityType & IdentityTypeFlags.Contact) > 0)
+                .Include(r => r.Person)
+                .Select(r => new
+                {
+                    r.Person.IdentityType
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (relation == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(relation.IdentityType, nameof(Permissions.Customer.AddContact), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            // Delete
+            await _db.PersonRelations.AsNoTracking()
+                .Where(r => r.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -530,6 +742,60 @@ namespace CRM.Server.Services
             {
                 rq.Id = User.Oid;
             }
+        }
+
+        /// <summary>
+        /// Duplicate test
+        /// 重复测试
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<PersonDuplicateTestData[]?> DuplicateTestAsync(PersonDuplicateTestRQ rq, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            var q = _db.Persons.AsNoTracking().Where(p => p.OrgId == orgId);
+            var hasFilter = false;
+
+            if (rq.ExcludedId.HasValue)
+            {
+                q = q.Where(p => p.Id != rq.ExcludedId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(rq.Name))
+            {
+                q = q.Where(p => p.Name.ToLower() == rq.Name.ToLower());
+                hasFilter = true;
+            }
+
+            if (!string.IsNullOrEmpty(rq.Identifier))
+            {
+                var identifier = rq.Identifier.Trim().ToLower();
+                q = q.Where(p => p.Infos.Any(i => i.Identifier == identifier && (!rq.InfoKind.HasValue || i.Kind == rq.InfoKind)));
+                hasFilter = true;
+            }
+
+            if (!string.IsNullOrEmpty(rq.Address))
+            {
+                q = q.Where(p => p.Addresses.Any(a => a.FormattedAddress.ToLower() == rq.Address.ToLower()));
+                hasFilter = true;
+            }
+
+            if (!hasFilter) return null;
+
+            var identityType = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
+            if (identityType == IdentityTypeFlags.None)
+            {
+                return null;
+            }
+
+            return await q.Select(p => new PersonDuplicateTestData
+            {
+                Id = p.Id,
+                Name = MyDbFunctions.HideData(p.Name, default),
+                IdentityType = p.IdentityType
+            }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
@@ -651,7 +917,8 @@ namespace CRM.Server.Services
 
                 if (!string.IsNullOrEmpty(rq.Info))
                 {
-                    q = q.Where(p => p.Infos.Any(i => i.Identifier == rq.Info));
+                    var info = rq.Info.Trim().ToLower();
+                    q = q.Where(p => p.Infos.Any(i => i.Identifier == info));
                 }
 
                 if (!string.IsNullOrEmpty(rq.Address))
@@ -753,7 +1020,8 @@ namespace CRM.Server.Services
 
                 if (!string.IsNullOrEmpty(rq.Info))
                 {
-                    q = q.Where(r => r.Contact.Infos.Any(i => i.Identifier == rq.Info));
+                    var info = rq.Info.Trim().ToLower();
+                    q = q.Where(r => r.Contact.Infos.Any(i => i.Identifier == info));
                 }
 
                 if (!string.IsNullOrEmpty(rq.Address))
@@ -766,7 +1034,8 @@ namespace CRM.Server.Services
 
             var (hasContent, commandText) = await query.Select(r => new ContactQueryData
             {
-                Id = r.ContactId,
+                Id = r.Id,
+                ContactId = r.ContactId,
                 RelationType = r.RelationType,
                 Name = r.Contact.Name,
                 Description = r.Description,
@@ -798,7 +1067,8 @@ namespace CRM.Server.Services
                 {
                     if (rq.Identifier?.Length > 1)
                     {
-                        q = q.Where(i => i.Identifier == rq.Identifier);
+                        var identifier = rq.Identifier.Trim().ToLower();
+                        q = q.Where(i => i.Identifier == identifier);
                     }
 
                     if (rq.Kind.HasValue)
@@ -935,11 +1205,6 @@ namespace CRM.Server.Services
                     RefreshTime = p.RefreshTime
 
                 }).FirstOrDefaultAsync(cancellationToken);
-
-            if (data != null)
-            {
-                data.Editable = await _commonService.HasIdentityPermissionAsync(data.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken);
-            }
 
             return data;
         }
@@ -1355,16 +1620,18 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var relation = await _db.PersonRelations
-                .Where(r => r.PersonId == rq.PersonId && r.ContactId == rq.ContactId && r.Person.OrgId == orgId)
+                .Where(r => r.Id == rq.Id && r.Person.OrgId == orgId && (r.Contact.IdentityType & IdentityTypeFlags.Contact) > 0)
                 .Include(r => r.Person)
                 .Select(r => new PersonRelation
                 {
+                    Id = r.Id,
+                    ContactId = r.ContactId,
                     RelationType = r.RelationType,
                     Description = r.Description,
                     Data = r.Data,
                     Person = new Person
                     {
-                        Id = r.Person.Id,
+                        Id = r.Id,
                         IdentityType = r.Person.IdentityType
                     }
                 })
@@ -1380,7 +1647,18 @@ namespace CRM.Server.Services
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
-            _db.PersonRelations.Attach(relation);
+            var data = _db.PersonRelations.Attach(relation);
+
+            if (rq.IsModified(nameof(rq.ContactId)) && rq.ContactId.HasValue && rq.ContactId != relation.ContactId)
+            {
+                // Check if the contact id exists
+                if (await _db.Persons(orgId).AnyAsync(c => c.Id == rq.ContactId, cancellationToken) is false)
+                {
+                    return ApplicationErrors.NoId.AsResult(nameof(rq.ContactId));
+                }
+
+                relation.ContactId = rq.ContactId.Value;
+            }
 
             if (rq.IsModified(nameof(rq.RelationType)) && rq.RelationType.HasValue)
             {
@@ -1401,7 +1679,7 @@ namespace CRM.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Return
-            return ActionResult.Succeed(rq.PersonId);
+            return ActionResult.Succeed(rq.Id);
         }
 
         /// <summary>
@@ -1516,19 +1794,20 @@ namespace CRM.Server.Services
         /// Read contact relation data for update
         /// 读取用于更新联系人关系的数据
         /// </summary>
-        /// <param name="personId">Person id</param>
-        /// <param name="contactId">Contact id</param>
+        /// <param name="id">Relation id</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task UpdateContactRelationReadAsync(long personId, long contactId, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public Task UpdateContactRelationReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
 
             return _db.PersonRelations.AsNoTracking()
-                .Where(r => r.PersonId == personId && r.ContactId == contactId)
+                .Where(r => r.Id == id && r.Person.OrgId == orgId)
                 .Select(r => new ContactRelationUpdateReadData
                 {
+                    Id = r.Id,
+                    ContactId = r.ContactId,
                     RelationType = r.RelationType,
                     Description = r.Description,
                     Data = r.Data,

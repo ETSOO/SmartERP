@@ -125,7 +125,7 @@ namespace Platform.Server.Services
                     IdentityType = IdentityTypeFlags.User,
                     QueryKeyword = ChineseUtils.GetPinyin(User.Name, true).ToInitials(),
                     InviterId = inviterId,
-                    UserId = userId
+                    UserId = User.Oid
                 });
 
                 var user = await _db.CoreUsers.FindAsync([userId], cancellationToken: cancellationToken);
@@ -388,6 +388,30 @@ namespace Platform.Server.Services
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Parse name
+        /// 解析姓名
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <returns>Result</returns>
+        public NameData ParseName(ParseNameRQ rq)
+        {
+            return ParseName(rq.Name, rq.FamilyName, rq.GivenName);
+        }
+
+        /// <summary>
+        /// Parse name
+        /// 解析姓名
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="familyName">Family name</param>
+        /// <param name="givenName">Given name</param>
+        /// <returns>Result</returns>
+        public NameData ParseName(string name, string? familyName, string? givenName)
+        {
+            return LocalizationUtils.ParseName(name, familyName, givenName);
         }
 
         /// <summary>

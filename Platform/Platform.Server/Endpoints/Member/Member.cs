@@ -38,7 +38,7 @@ namespace Platform.Server.Endpoints.Member
             g.MapPut("Update", [Roles(Constants.ManagerRoles)] (IMemberService service, MemberUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update member / 更新成员").WithTags("Member");
 
-            g.MapPut("UpdateAvatar/{id:int}", [Roles(Constants.HRRoles)] (IMemberService service, [FromRoute] int id, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
+            g.MapPut("UpdateAvatar/{id:int}", [Roles(Constants.HRRoles)] (IMemberService service, [FromRoute] int id, IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(id, avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Update member avatar / 更新成员头像").WithTags("Member");
 

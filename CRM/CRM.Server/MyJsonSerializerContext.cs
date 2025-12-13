@@ -79,6 +79,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(AddressUpdateReadData))]
     [JsonSerializable(typeof(ChoosePersonsData))]
     [JsonSerializable(typeof(IEnumerable<ContactQueryData>))]
+    [JsonSerializable(typeof(PersonDuplicateTestData[]))]
     [JsonSerializable(typeof(IEnumerable<PersonQueryData>))]
     [JsonSerializable(typeof(PersonUpdateReadData))]
     [JsonSerializable(typeof(PersonViewData))]
@@ -88,7 +89,9 @@ namespace CRM.Server
     [JsonSerializable(typeof(ChoosePersonsRQ))]
     [JsonSerializable(typeof(ContactCreateRQ))]
     [JsonSerializable(typeof(ContactListRQ))]
+    [JsonSerializable(typeof(ContactRelationAddRQ))]
     [JsonSerializable(typeof(ContactRelationUpdateRQ))]
+    [JsonSerializable(typeof(PersonDuplicateTestRQ))]
     [JsonSerializable(typeof(PersonInfoCreateRQ))]
     [JsonSerializable(typeof(PersonInfoQueryRQ))]
     [JsonSerializable(typeof(PersonInfoUpdateRQ))]
@@ -138,7 +141,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(SupplierListRQ))]
 
     // System
-    [JsonSerializable(typeof(IEnumerable<PermissionItem>))]
+    [JsonSerializable(typeof(PermissionItem[]))]
     [JsonSerializable(typeof(SystemSettings))]
 
     [JsonSerializable(typeof(UpdateSettingsRQ))]

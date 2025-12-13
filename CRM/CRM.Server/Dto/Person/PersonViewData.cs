@@ -115,12 +115,6 @@ namespace CRM.Server.Dto.Person
         public EntityStatus Status { get; init; }
 
         /// <summary>
-        /// Is editable
-        /// 是否可编辑
-        /// </summary>
-        public bool Editable { get; set; }
-
-        /// <summary>
         /// Query keyword
         /// 查询关键字
         /// </summary>

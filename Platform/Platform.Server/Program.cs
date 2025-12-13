@@ -24,7 +24,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -260,37 +260,8 @@ services.ConfigureHttpJsonOptions(options =>
 });
 
 // Add services to the container.
-services.AddAntiforgery();
-services.AddEndpointsApiExplorer();
-services.AddSwaggerGen(options =>
-{
-    // Avoid "InvalidOperationException: Can't use schemaId for type ..."
-    options.CustomSchemaIds(type => type.ToString());
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
-                }
-            },
-            []
-        }
-    });
-});
+services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
+services.AddOpenApi();
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 
@@ -448,8 +419,11 @@ app.UseAntiforgery();
 if (isDevelopment)
 {
     app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
 }
 else
 {
@@ -481,7 +455,7 @@ app.UseRateLimiter();
 app.MapHealthChecks("/healthz");
 
 // APIs
-var api = app.MapGroup("/api").WithOpenApi();
+var api = app.MapGroup("/api");
 
 // OAuth2 integration
 var oauth = api.MapGroup("OAuth2").AllowAnonymous();

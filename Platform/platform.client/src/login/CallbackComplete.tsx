@@ -116,7 +116,7 @@ export default function CallbackComplete() {
         autoComplete="new-password"
         autoFocus
         inputRef={passwordRef}
-        ref={passwordMethodRef}
+        mRef={passwordMethodRef}
         onEnter={(e) => {
           repeatStep();
           e.preventDefault();
@@ -126,7 +126,7 @@ export default function CallbackComplete() {
         label={labels.repeatPassword}
         showPassword
         inputRef={repeatRef}
-        ref={repeatMethodRef}
+        mRef={repeatMethodRef}
         onEnter={(e) => {
           submitClick();
           e.preventDefault();

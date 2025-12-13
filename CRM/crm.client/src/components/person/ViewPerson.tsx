@@ -13,7 +13,7 @@ import { Profiles } from "../profile/Profiles";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { PersonData } from "./PersonData";
 import { ContactInfos } from "../profile/ContactInfos";
-import { PersonContacts } from "../profile/PersonContacts";
+import { PersonContacts } from "./PersonContacts";
 
 /**
  * View person component properties
@@ -94,7 +94,7 @@ export function ViewPerson(props: ViewPersonProps) {
                 visible && (
                   <ContactInfos
                     personId={personId}
-                    editable={data.editable}
+                    editable={app.ownsIdentity(data.identityType, "Edit")}
                     index={index}
                   />
                 ),
@@ -110,6 +110,7 @@ export function ViewPerson(props: ViewPersonProps) {
                         <PersonContacts
                           personId={personId}
                           identityType={data.identityType}
+                          isLegalPerson={data.isLegalPerson}
                           index={index}
                         />
                       ),

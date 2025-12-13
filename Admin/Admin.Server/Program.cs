@@ -177,8 +177,7 @@ services.AddHealthChecks();
 
 // Add services to the container.
 // services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
-services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+services.AddOpenApi();
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 services.ConfigureHttpJsonOptions(options =>
@@ -260,8 +259,11 @@ app.UseAuthorization();
 if (isDevelopment)
 {
     app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
 }
 else
 {
@@ -293,7 +295,7 @@ app.UseRateLimiter();
 app.MapHealthChecks("/healthz");
 
 // APIs
-var api = app.MapGroup("/api").WithOpenApi();
+var api = app.MapGroup("/api");
 
 // Endpoints
 api.MapAuth()

@@ -23,6 +23,8 @@ public partial class ProductCategory
 
     public int CoreOrganizationId { get; set; }
 
+    public string? AssignedId { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<ProductCategory> InverseParent { get; set; } = new List<ProductCategory>();

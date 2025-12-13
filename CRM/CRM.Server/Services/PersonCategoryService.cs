@@ -93,6 +93,7 @@ namespace CRM.Server.Services
                 IdentityType = rq.IdentityType,
                 ParentId = parentId,
                 Names = names,
+                AssignedId = rq.AssignedId?.ToUpper(),
                 Data = rq.Data,
                 OrderIndex = rq.OrderIndex ?? 0,
             };
@@ -129,6 +130,11 @@ namespace CRM.Server.Services
                         }
                     }
 
+                    if (!string.IsNullOrEmpty(rq.AssignedId))
+                    {
+                        q = q.Where(c => c.AssignedId != null && EF.Functions.ILike(c.AssignedId, $"{rq.AssignedId}%"));
+                    }
+
                     if (rq.Keyword?.Length > 0)
                     {
                         var keyword = rq.Keyword;
@@ -162,7 +168,8 @@ namespace CRM.Server.Services
                 .Select(c => new PersonCategoryListData
                 {
                     Id = c.Id,
-                    Name = string.Join(" -> ", c.Names)
+                    Name = string.Join(" -> ", c.Names),
+                    AssignedId = c.AssignedId
                 }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }
 
@@ -248,6 +255,7 @@ namespace CRM.Server.Services
                     Id = c.Id,
                     Names = c.Names,
                     IdentityType = c.IdentityType,
+                    AssignedId = c.AssignedId,
                     Creation = c.Creation
                 }).ToArrayAsync(cancellationToken);
         }
@@ -350,6 +358,11 @@ namespace CRM.Server.Services
                 category.Names = parent == null ? [rq.Name] : [.. parent, rq.Name];
             }
 
+            if (rq.IsModified(nameof(rq.AssignedId)))
+            {
+                category.AssignedId = rq.AssignedId?.ToUpper();
+            }
+
             if (rq.IsModified(nameof(rq.OrderIndex)) && rq.OrderIndex.HasValue)
             {
                 category.OrderIndex = rq.OrderIndex.Value;
@@ -411,6 +424,7 @@ namespace CRM.Server.Services
                     IdentityType = c.IdentityType,
                     ParentId = c.ParentId,
                     Names = c.Names,
+                    AssignedId = c.AssignedId,
                     Data = c.Data
                 })
                 .FirstOrDefaultAsync(cancellationToken);

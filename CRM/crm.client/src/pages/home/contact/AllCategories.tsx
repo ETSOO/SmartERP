@@ -32,7 +32,8 @@ import { Typography } from "@mui/material";
 const template = {
   keyword: "string",
   identityType: "number",
-  parentId: "number"
+  parentId: "number",
+  assignedId: "string"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllCategories() {
@@ -43,6 +44,7 @@ export default function AllCategories() {
   const labels = app.getLabels(
     "actions",
     "add",
+    "assignedId",
     "category",
     "changeCaution",
     "confirmAction",
@@ -166,6 +168,11 @@ export default function AllCategories() {
           name="keyword"
           defaultValue={data.keyword}
         />,
+        <SearchField
+          label={labels.assignedId}
+          name="assignedId"
+          defaultValue={data.assignedId}
+        />,
         <PersonCategoryTiplist
           label={labels.parentCategory}
           name="parentId"
@@ -195,12 +202,15 @@ export default function AllCategories() {
           valueFormatter: ({ data }) => data?.names.join(" -> ")
         },
         {
+          field: "assignedId",
+          width: 136,
+          header: labels.assignedId
+        },
+        {
           field: "creation",
           type: GridDataType.Date,
           width: 116,
-          header: labels.creation,
-          sortable: true,
-          sortAsc: false
+          header: labels.creation
         },
         {
           width: DefaultUI.Widths.icon2,
@@ -251,7 +261,10 @@ export default function AllCategories() {
               }
             ],
             <React.Fragment>
-              {app.person.getIdentityType(data.identityType)}
+              <Typography variant="body2">
+                {app.person.getIdentityType(data.identityType)}
+                {data.assignedId ? ", " + data.assignedId : ""}
+              </Typography>
             </React.Fragment>
           ];
         })

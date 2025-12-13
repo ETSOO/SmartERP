@@ -1,6 +1,5 @@
 import { EntityStatus } from "@etsoo/appscript";
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   IconButtonLink,
@@ -56,8 +55,6 @@ export default function AllDepts() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const margin = MUGlobal.pagePaddings;
-
   const baseIdentity = app.getPersonIdentityType();
 
   // Page data hook
@@ -85,12 +82,12 @@ export default function AllDepts() {
           search
         />
       ]}
-      loadData={async (data) => {
-        return await app.personApi.query(data, {
+      loadData={(data) =>
+        app.personApi.query(data, {
           defaultValue: [],
           showLoading: false
-        });
-      }}
+        })
+      }
       columns={[
         {
           field: "identityType",
@@ -150,8 +147,7 @@ export default function AllDepts() {
           }
         }
       ]}
-      itemSize={[116, margin, "1px"]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             `[${app.person.getIdentityType(data)}] ${data.name}`,

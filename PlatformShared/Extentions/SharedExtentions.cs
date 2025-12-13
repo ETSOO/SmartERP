@@ -1,7 +1,9 @@
-﻿using com.etsoo.CoreFramework.Authentication;
+﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
+using com.etsoo.Utils.Actions;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -402,6 +404,36 @@ namespace PlatformShared.Extentions
                 TargetId = targetId,
                 TargetName = targetName
             };
+        }
+
+        /// <summary>
+        /// Check duplicate for multiple kind/identifier pairs
+        /// 支持多个 (Kind, Identifier) 组合检查
+        /// </summary>
+        /// <param name="db">Database</param>
+        /// <param name="orgId">Organization</param>
+        /// <param name="excludedId">Excluded person id</param>
+        /// <param name="items">Kind/Identifier pairs</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static async ValueTask<IActionResult> PersonInfoDuplicateAsync(this MyDbContext db, int orgId, long? excludedId, IEnumerable<(PersonInfoKind kind, string identifier)> items, CancellationToken cancellationToken = default)
+        {
+            if (!items.Any())
+                return ActionResult.Success;
+
+            var kinds = items.Select(i => i.kind).Distinct();
+            var identifiers = items.Select(i => i.identifier.ToLower()).Distinct();
+
+            var mayItems = await db.PersonInfos.AsNoTracking()
+                .Where(pi => pi.Person.OrgId == orgId && (excludedId == null || pi.PersonId != excludedId)
+                    && kinds.Contains(pi.Kind) && identifiers.Contains(pi.Identifier))
+                .Select(pi => new { pi.Kind, pi.Identifier })
+                .ToArrayAsync(cancellationToken);
+
+            if (mayItems.Any(m => items.Any(i => i.kind == m.Kind && i.identifier.Equals(m.Identifier, StringComparison.OrdinalIgnoreCase))))
+                return ApplicationErrors.ItemExists.AsResult(string.Join(',', kinds));
+            else
+                return ActionResult.Success;
         }
 
         /// <summary>

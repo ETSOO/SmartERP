@@ -21,5 +21,11 @@ namespace CRM.Server.RQ.PersonCategory
         /// 父级分类编号
         /// </summary>
         public int? ParentId { get; init; }
+
+        /// <summary>
+        /// Assigned ID
+        /// 分配的编号
+        /// </summary>
+        public string? AssignedId { get; init; }
     }
 }

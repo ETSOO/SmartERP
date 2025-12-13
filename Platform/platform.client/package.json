@@ -9,29 +9,29 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.45",
-    "@etsoo/materialui": "^1.5.80",
-    "@etsoo/react": "^1.8.60",
-    "@etsoo/shared": "^1.2.76",
-    "@etsoo/smarterp-core": "^1.0.97",
-    "@mui/icons-material": "^7.3.4",
-    "@mui/material": "^7.3.4",
-    "formik": "^2.4.6",
+    "@etsoo/appscript": "^1.6.48",
+    "@etsoo/materialui": "^1.5.88",
+    "@etsoo/react": "^1.8.63",
+    "@etsoo/shared": "^1.2.80",
+    "@etsoo/smarterp-core": "^1.1.1",
+    "@mui/icons-material": "^7.3.5",
+    "@mui/material": "^7.3.5",
+    "formik": "^2.4.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.4",
+    "react-router-dom": "^7.9.6",
     "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@types/node": "^24.8.1",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "@vitejs/plugin-react": "^5.0.4",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
     "typescript": "^5.9.3",
-    "vite": "^7.1.10",
+    "vite": "^7.2.2",
     "vite-plugin-svgr": "^4.5.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.52.5"
+    "@rollup/rollup-linux-x64-gnu": "^4.53.2"
   }
 }

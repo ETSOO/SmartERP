@@ -25,7 +25,12 @@ export default function AddCategory() {
   const isEditing = id > 0;
 
   // Labels
-  const labels = app.getLabels("nameB", "noChanges", "parentCategory");
+  const labels = app.getLabels(
+    "assignedId",
+    "nameB",
+    "noChanges",
+    "parentCategory"
+  );
 
   // Type
   type DataType = PersonCategoryCreateRQ;
@@ -125,6 +130,18 @@ export default function AddCategory() {
           inputOnChange={formik.handleChange}
           name="parentId"
           rq={{ identityType: formik.values.identityType }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <InputField
+          fullWidth
+          name="assignedId"
+          slotProps={{
+            htmlInput: { maxLength: 20, style: { textTransform: "uppercase" } }
+          }}
+          onChange={formik.handleChange}
+          label={labels.assignedId}
+          value={formik.values.assignedId ?? ""}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>

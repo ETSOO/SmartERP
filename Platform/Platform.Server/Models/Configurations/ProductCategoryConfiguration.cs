@@ -21,6 +21,9 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(2001L, null, null, null, null, null)
                 .HasColumnName("id");
+            entity.Property(e => e.AssignedId)
+                .HasMaxLength(20)
+                .HasColumnName("assigned_id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
@@ -34,9 +37,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Names)
                 .HasColumnType("character varying(128)[]")
                 .HasColumnName("names");
-            entity.Property(e => e.OrderIndex)
-                .HasDefaultValue((short)0)
-                .HasColumnName("order_index");
+            entity.Property(e => e.OrderIndex).HasColumnName("order_index");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
 
             entity.HasOne(d => d.CoreOrganization).WithMany(p => p.ProductCategories)

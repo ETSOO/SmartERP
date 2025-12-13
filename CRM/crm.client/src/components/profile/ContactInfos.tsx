@@ -1,5 +1,4 @@
 import {
-  MUGlobal,
   ResponsivePage,
   SearchField,
   MobileListItemRenderer,
@@ -119,8 +118,6 @@ export function ContactInfos(props: ContactInfosProps) {
 
   // Edit contact
   const editContact = useEditContactInfo(personId, reloadData);
-
-  const margin = MUGlobal.pagePaddings;
 
   return (
     <ResponsivePage<PersonInfoQueryData, typeof template>
@@ -248,8 +245,7 @@ export function ContactInfos(props: ContactInfosProps) {
           }
         }
       ]}
-      itemSize={[116, margin, "1px"]}
-      innerItemRenderer={(props) =>
+      itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
             `[${app.person.getInfoKind(data.kind)}] ${data.identifier}`,

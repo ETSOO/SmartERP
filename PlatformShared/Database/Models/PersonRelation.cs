@@ -92,6 +92,12 @@
     public class PersonRelation
     {
         /// <summary>
+        /// Id
+        /// 编号
+        /// </summary>
+        public long Id { get; set; }
+
+        /// <summary>
         /// Person id
         /// 人员编号
         /// </summary>

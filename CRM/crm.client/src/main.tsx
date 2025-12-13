@@ -174,6 +174,15 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/contact/relation/add/:id",
+            lazy: async () => {
+              const AddRelation = await import(
+                "./pages/home/contact/AddRelation"
+              );
+              return { Component: AddRelation.default };
+            }
+          },
+          {
             path: "/home/customer",
             lazy: async () => {
               const AllCustomers = await import(

@@ -7,6 +7,7 @@ import { AuthRequest } from "@etsoo/appscript";
 import { Constants } from "../app/Constants";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { Utils } from "@etsoo/shared";
 
 export default function RegisterPassword() {
   // Router
@@ -133,14 +134,9 @@ export default function RegisterPassword() {
         onChange={(event) => {
           const value = event.target.value.trim();
           if (value) {
-            const parts = value.split(" ");
-            if (parts.length > 1) {
-              familyNameRef.current!.value = parts.pop()!;
-              givenNameRef.current!.value = parts.join(" ");
-            } else {
-              familyNameRef.current!.value = value[0];
-              givenNameRef.current!.value = value.substring(1);
-            }
+            const nd = Utils.parseName(value);
+            familyNameRef.current!.value = nd.familyName ?? "";
+            givenNameRef.current!.value = nd.givenName ?? "";
           } else {
             familyNameRef.current!.value = "";
             givenNameRef.current!.value = "";
@@ -173,7 +169,7 @@ export default function RegisterPassword() {
         autoComplete="new-password"
         required
         inputRef={passwordRef}
-        ref={passwordMethodRef}
+        mRef={passwordMethodRef}
         onEnter={(e) => {
           repeatStep();
           e.preventDefault();
@@ -184,7 +180,7 @@ export default function RegisterPassword() {
         showPassword
         required
         inputRef={repeatRef}
-        ref={repeatMethodRef}
+        mRef={repeatMethodRef}
         onEnter={(e) => {
           completeClick();
           e.preventDefault();

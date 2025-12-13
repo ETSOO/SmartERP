@@ -1,6 +1,7 @@
 ﻿using com.etsoo.ApiModel.Dto.Maps;
 using com.etsoo.ApiModel.RQ.Maps;
 using com.etsoo.ImageUtils.Barcode;
+using com.etsoo.Localization;
 using com.etsoo.SMS;
 using Microsoft.AspNetCore.Mvc;
 using Platform.Server.Dto.App;
@@ -93,9 +94,11 @@ namespace Platform.Server
     [JsonSerializable(typeof(AcceptInvitationRQ))]
     [JsonSerializable(typeof(MobileQRCodeRQ))]
     [JsonSerializable(typeof(OrgInfoRQ))]
+    [JsonSerializable(typeof(ParseNameRQ))]
     [JsonSerializable(typeof(PlaceQueryRQ))]
 
     [JsonSerializable(typeof(BarcodeOptions))]
+    [JsonSerializable(typeof(NameData))]
     [JsonSerializable(typeof(OrgPublicInfo))]
     [JsonSerializable(typeof(IEnumerable<PlaceCommon>))]
     [JsonSerializable(typeof(IEnumerable<CustomResourceData>))]

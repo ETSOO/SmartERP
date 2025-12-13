@@ -122,7 +122,7 @@ export default function AddMobile() {
           autoCapitalize="none"
           autoComplete="mobile"
           type="tel"
-          slotProps={{ input: { inputMode: "tel" } }}
+          slotProps={{ htmlInput: { maxLength: 18, inputMode: "tel" } }}
           required
           showClear
           onChange={() => setReady(false)}

@@ -52,6 +52,7 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.Discount)
+                .HasDefaultValueSql("0")
                 .HasColumnType("money")
                 .HasColumnName("discount");
             entity.Property(e => e.EndDate).HasColumnName("end_date");
@@ -59,10 +60,12 @@ namespace Platform.Server.Models.Configurations
                 .HasPrecision(12, 2)
                 .HasColumnName("items");
             entity.Property(e => e.LineDiscount)
+                .HasDefaultValueSql("0")
                 .HasColumnType("money")
                 .HasColumnName("line_discount");
             entity.Property(e => e.Lines).HasColumnName("lines");
             entity.Property(e => e.PaidAmount)
+                .HasDefaultValueSql("0")
                 .HasColumnType("money")
                 .HasColumnName("paid_amount");
             entity.Property(e => e.PaymentId).HasColumnName("payment_id");
@@ -80,9 +83,7 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(50)
                 .HasColumnName("source_id");
             entity.Property(e => e.StartDate).HasColumnName("start_date");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.Title)
                 .HasMaxLength(128)

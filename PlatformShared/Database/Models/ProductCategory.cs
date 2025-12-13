@@ -53,5 +53,11 @@
         /// 核心机构编号
         /// </summary>
         public int CoreOrganizationId { get; set; }
+
+        /// <summary>
+        /// Assigned id
+        /// 分配的编号
+        /// </summary>
+        public string? AssignedId { get; set; }
     }
 }

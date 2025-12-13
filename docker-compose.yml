@@ -4,9 +4,10 @@
 services:
     # Postgres database for SmartERP
     # name: 'etsoo', db: 'smarterp', user: 'smarterp'
+    # for 17, volumes, ./data/postgres:/var/lib/postgresql/data
     # 司友云ERP(SmartERP)的 Postgres 数据库
     postgres:
-        image: postgres:17.4-alpine
+        image: postgres:18.0-alpine
         container_name: postgres.app.local
         restart: unless-stopped
         environment:
@@ -16,7 +17,7 @@ services:
         ports:
             - "5432:5432"
         volumes:
-            - ./data/postgres:/var/lib/postgresql/data
+            - ./data/postgres:/var/lib/postgresql
         networks:
             - etsoo
 
@@ -42,7 +43,7 @@ services:
     # RabbitMQ for message queue
     # 消息队列的 RabbitMQ
     rabbitmq:
-        image: rabbitmq:4.0.8-management-alpine
+        image: rabbitmq:4.2.0-management-alpine
         container_name: rabbitmq.app.local
         restart: unless-stopped
         ports:
@@ -230,7 +231,7 @@ services:
     # Nginx 用于反向代理
     # 修改根目录下的 nginx.conf 文件以适应你的需求，确保(80, 443)端口没有被其他服务占用（如 IIS）
     nginx:
-        image: nginx:1.28-alpine
+        image: nginx:1.29.3-alpine
         container_name: nginx
         depends_on:
             - etsoo-coreapp

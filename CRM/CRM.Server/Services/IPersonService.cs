@@ -8,12 +8,17 @@ namespace CRM.Server.Services
 {
     public interface IPersonService
     {
+        Task<IActionResult> AddContactAsync(ContactRelationAddRQ rq, CancellationToken cancellationToken = default);
         Task<ChoosePersonsData> ChoosePersonsAsync(ChoosePersonsRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> CreateAddressAsync(AddressCreateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> CreateContactAsync(ContactCreateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> CreateInfoAsync(PersonInfoCreateRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAddressAsync(int id, CancellationToken cancellationToken = default);
+        Task<IActionResult> DeleteContactAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteInfoAsync(int id, CancellationToken cancellationToken = default);
+        ValueTask<PersonDuplicateTestData[]?> DuplicateTestAsync(PersonDuplicateTestRQ rq, CancellationToken cancellationToken = default);
+        Task<bool> IsDeletableAsync(long id, CancellationToken cancellationToken = default);
         Task<IEnumerable<ContactItem>> ListAsync(PersonListRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(PersonListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task ListContactAsync(ContactListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
@@ -25,7 +30,7 @@ namespace CRM.Server.Services
         Task<IActionResult> UpdateAsync(PersonUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAddressAsync(AddressUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateContactRelationAsync(ContactRelationUpdateRQ rq, CancellationToken cancellationToken = default);
-        Task UpdateContactRelationReadAsync(long personId, long contactId, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
+        Task UpdateContactRelationReadAsync(long id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateInfoAsync(PersonInfoUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<AddressUpdateReadData?> UpdateAddressReadAsync(int id, CancellationToken cancellationToken = default);
         Task<PersonUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default);

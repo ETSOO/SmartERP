@@ -23,6 +23,8 @@ public partial class PersonCategory
 
     public short IdentityType { get; set; }
 
+    public string? AssignedId { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<PersonCategory> InverseParent { get; set; } = new List<PersonCategory>();

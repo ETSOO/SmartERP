@@ -144,8 +144,8 @@ export default function RegisterVerify() {
         label={labels.enterCode}
         autoCorrect="off"
         autoCapitalize="none"
-        inputProps={{ inputMode: "numeric" }}
-        ref={mRef}
+        slotProps={{ htmlInput: { inputMode: "numeric" } }}
+        mRef={mRef}
         inputRef={inputRef}
         showClear
         onEnter={(e) => {

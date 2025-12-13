@@ -64,9 +64,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Height).HasColumnName("height");
             entity.Property(e => e.IdentityType).HasColumnName("identity_type");
             entity.Property(e => e.InviterId).HasColumnName("inviter_id");
-            entity.Property(e => e.IsLegalPerson)
-                .HasDefaultValue(false)
-                .HasColumnName("is_legal_person");
+            entity.Property(e => e.IsLegalPerson).HasColumnName("is_legal_person");
             entity.Property(e => e.JobTitle)
                 .HasMaxLength(50)
                 .HasColumnName("job_title");
@@ -100,9 +98,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnType("character(2)[]")
                 .HasColumnName("regions");
             entity.Property(e => e.ReportTo).HasColumnName("report_to");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.Title).HasColumnName("title");
             entity.Property(e => e.Uid)

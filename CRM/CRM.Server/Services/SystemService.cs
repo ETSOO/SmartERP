@@ -134,7 +134,7 @@ namespace CRM.Server.Services
                         IsLegalPerson = true,
                         Name = name,
                         QueryKeyword = ChineseUtils.GetPinyin(name, true).ToInitials(),
-                        UserId = User.IdInt
+                        UserId = User.Oid
                     };
                     _db.Persons.Add(person);
 

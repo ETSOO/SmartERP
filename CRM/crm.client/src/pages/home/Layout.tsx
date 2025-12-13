@@ -60,11 +60,13 @@ export default function Home() {
   // Labels
   const labels = app.getLabels(
     "add",
+    "addContact",
     "addContactInfo",
     "addProfile",
     "address",
     "allProfiles",
     "app3",
+    "contacts",
     "categories",
     "customers",
     "depts",
@@ -178,6 +180,12 @@ export default function Home() {
                 hidden: true
               }
             ]
+          },
+          {
+            segment: "relation/add",
+            pattern: "relation/add/:id",
+            title: labels.addContact,
+            hidden: true
           }
         ]
       },

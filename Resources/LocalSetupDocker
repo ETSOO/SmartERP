@@ -1,5 +1,5 @@
 # Base image, alpine is a lightweight linux distribution while scratch is an empty image
-FROM ubuntu:latest
+FROM mcr.microsoft.com/azurelinux/base/core:3.0
 
 # Copy your source file directory into /app
 # Why the path is "Resources/LocalSetup.sh", not "LocalSetup.sh", is because the path is relative to the "context" of the build

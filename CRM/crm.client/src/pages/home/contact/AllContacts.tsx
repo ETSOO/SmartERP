@@ -27,6 +27,7 @@ import { Permissions } from "@etsoo/smarterp-crm";
 
 const template = {
   keyword: "string",
+  info: "string",
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -39,11 +40,12 @@ export default function AllContacts() {
     "actions",
     "assignedId",
     "categories",
+    "contactInfo",
     "creation",
     "entityStatus",
     "identityType",
     "jobTitle",
-    "personName",
+    "name",
     "reportTo",
     "role",
     "statusNormal",
@@ -86,9 +88,15 @@ export default function AllContacts() {
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
-          label={labels.personName}
+          label={labels.name}
           name="keyword"
           defaultValue={data.keyword}
+        />,
+        <SearchField
+          label={labels.contactInfo}
+          name="info"
+          minChars={2}
+          defaultValue={data.info}
         />,
         <IdentityFlagsList
           value={data.identityType}
@@ -111,7 +119,7 @@ export default function AllContacts() {
         },
         {
           field: "name",
-          header: labels.personName,
+          header: labels.name,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
         },

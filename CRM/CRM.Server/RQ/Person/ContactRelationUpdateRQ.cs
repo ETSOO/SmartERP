@@ -1,5 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
-using com.etsoo.Database;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using com.etsoo.Utils.String;
@@ -11,19 +11,13 @@ namespace CRM.Server.RQ.Person
     /// Update contact relation request data
     /// 更新联系人关系请求数据
     /// </summary>
-    public record ContactRelationUpdateRQ : IUpdateModel, IModelValidator
+    public record ContactRelationUpdateRQ : UpdateModel<long>, IModelValidator
     {
         /// <summary>
-        /// Person id
-        /// 人员编号
+        /// Contact's person id
+        /// 联系人的人员编号
         /// </summary>
-        public long PersonId { get; init; }
-
-        /// <summary>
-        /// Contact id
-        /// 联系人编号
-        /// </summary>
-        public long ContactId { get; init; }
+        public long? ContactId { get; init; }
 
         /// <summary>
         /// Relation type
@@ -42,12 +36,6 @@ namespace CRM.Server.RQ.Person
         /// JSON 数据
         /// </summary>
         public string? Data { get; init; }
-
-        /// <summary>
-        /// Changed fields
-        /// 更改的字段
-        /// </summary>
-        public IEnumerable<string>? ChangedFields { get; set; }
 
         /// <summary>
         /// Validate the model

@@ -60,7 +60,7 @@ export function useEditContactInfo(personId: number, onSuccess: () => void) {
           rq.changedFields = fields;
 
           // Update
-          const result = await await app.personApi.updateInfo(rq);
+          const result = await app.personApi.updateInfo(rq);
           if (result == null) return;
 
           if (result.ok) {
@@ -71,7 +71,7 @@ export function useEditContactInfo(personId: number, onSuccess: () => void) {
           app.alertResult(result);
         },
         inputs: (
-          <VBox gap={2} marginTop={1} id={`${undefined}`}>
+          <VBox gap={2} marginTop={1}>
             <HBox gap={1}>
               <InfoKindList value={data.kind} />
               <SelectBool

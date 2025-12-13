@@ -7,10 +7,13 @@ namespace PlatformShared.Database.Models.Configurations
     {
         public void Configure(EntityTypeBuilder<PersonRelation> entity)
         {
-            entity.HasKey(e => new { e.PersonId, e.ContactId }).HasName("person_relation_pkey");
+            entity.HasKey(e => e.Id).HasName("person_relation_pkey");
 
             entity.ToTable("person_relation");
 
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ContactId).HasColumnName("contact_id");
             entity.Property(e => e.RelationType)

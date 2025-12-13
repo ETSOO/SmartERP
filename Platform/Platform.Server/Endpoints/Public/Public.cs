@@ -59,7 +59,7 @@ namespace Platform.Server.Endpoints.Public
             g.MapPost("OrgInfo", async (IPublicService service, IHttpContextAccessor accessor, OrgInfoRQ rq, CancellationToken cancellationToken) =>
             {
                 // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out _))
+                if (!service.CheckDevice(accessor.UserAgent, rq.DeviceId, out var checkResult, out _))
                 {
                     return null;
                 }
@@ -72,6 +72,9 @@ namespace Platform.Server.Endpoints.Public
 
             g.MapGet("ParseChinaPin/{pin}", (IPublicService service, string pin) => service.ParseChinaPin(pin))
                 .WithDescription("Parse China PIN / 解析中国身份证").WithTags("Public");
+
+            g.MapPost("ParseName", (IPublicService service, ParseNameRQ rq) => service.ParseName(rq))
+                .WithDescription("Parse personal name / 解析人名").WithTags("Public");
 
             g.MapGet("ReadInvitation/{id:guid}", (IPublicService service, Guid id, CancellationToken cancellationToken) => service.ReadInvitationAsync(id, cancellationToken))
                 .WithDescription("Read member invitation / 读取成员邀请").WithTags("Public");

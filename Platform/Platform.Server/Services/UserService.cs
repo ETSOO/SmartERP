@@ -272,7 +272,7 @@ namespace Platform.Server.Services
                 })
                 .ToJsonAsync(writer, cancellationToken: cancellationToken);
 
-            if (_db.IsSensitiveDataLoggingEnabled)
+            if (_db.IsSensitiveDataLoggingEnabled && Logger.IsEnabled(LogLevel.Information))
             {
                 Logger.LogInformation("AuditHistoryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
@@ -466,12 +466,7 @@ namespace Platform.Server.Services
                     Urls = (oa == null || oa.LocalUrls == null) ? t.a.Urls : oa.LocalUrls,
                     Logo = t.a.Logo
                 })
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (app == null)
-            {
-                // Extreme case, get the core app url
-                app = await _db.CoreApps.AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken) ?? await _db.CoreApps.AsNoTracking()
                     .Where(a => a.Id == MyAppConstants.CoreAppId)
                     .Select(a => new AppData
                     {
@@ -481,7 +476,6 @@ namespace Platform.Server.Services
                         Logo = a.Logo
                     })
                     .FirstAsync(cancellationToken);
-            }
 
             return app;
         }
@@ -604,7 +598,11 @@ namespace Platform.Server.Services
             }
             else
             {
-                Logger.LogError("Avatar write path is {path}", path);
+                if (Logger.IsEnabled(LogLevel.Error))
+                {
+                    Logger.LogError("Avatar write path is {path}", path);
+                }
+                
                 return ApplicationErrors.DataProcessingFailed.AsResult();
             }
         }

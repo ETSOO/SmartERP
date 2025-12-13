@@ -16,10 +16,10 @@ namespace Platform.Server.Endpoints.User
         {
             var g = builder.MapGroup("User");
 
-            g.MapPost("AddEmail", (IUserService service, CodeValidateRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.AddEmailAsync(rq, accessor.UserAgent(), cancellationToken))
+            g.MapPost("AddEmail", (IUserService service, CodeValidateRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.AddEmailAsync(rq, accessor.UserAgent, cancellationToken))
                 .WithDescription("Add user email / 添加用户邮箱").WithTags("User");
 
-            g.MapPost("AddMobile", (IUserService service, CodeValidateRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.AddMobileAsync(rq, accessor.UserAgent(), cancellationToken))
+            g.MapPost("AddMobile", (IUserService service, CodeValidateRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.AddMobileAsync(rq, accessor.UserAgent, cancellationToken))
                 .WithDescription("Add user mobile / 添加用户手机").WithTags("User");
 
             g.MapPost("AllIdentifiers", (IUserService service, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.AllIdentifiersAsync(accessor.GetJsonWriter(), cancellationToken))
@@ -46,7 +46,7 @@ namespace Platform.Server.Endpoints.User
             g.MapPut("Update", (IUserService service, [FromBody] UserUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update user / 更新用户").WithTags("User");
 
-            g.MapPut("UpdateAvatar", (IUserService service, [FromForm] IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
+            g.MapPut("UpdateAvatar", (IUserService service, IFormFile avatar, CancellationToken cancellationToken) => service.UpdateAvatarAsync(avatar.OpenReadStream(), avatar.ContentType, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Update user avatar / 更新用户头像").WithTags("User");
 

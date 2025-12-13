@@ -16,6 +16,12 @@ namespace CRM.Server.Dto.Person
         public long Id { get; init; }
 
         /// <summary>
+        /// Contact person id
+        /// 联系人人员编号
+        /// </summary>
+        public long ContactId { get; init; }
+
+        /// <summary>
         /// Relation type
         /// 关系类型
         /// </summary>

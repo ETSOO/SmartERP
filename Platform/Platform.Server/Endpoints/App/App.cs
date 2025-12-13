@@ -26,7 +26,7 @@ namespace Platform.Server.Endpoints.App
             g.MapPut("CreateApiKey", [Roles(Constants.AdminRoles)] async (IAppService service, IHttpContextAccessor accessor, AppCreateApiKeyRQ rq, CancellationToken cancellationToken) =>
             {
                 // Check device
-                if (!service.CheckDevice(accessor.UserAgent(), rq.DeviceId, out var checkResult, out var cd))
+                if (!service.CheckDevice(accessor.UserAgent, rq.DeviceId, out var checkResult, out var cd))
                 {
                     return checkResult;
                 }

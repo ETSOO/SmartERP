@@ -43,6 +43,12 @@ namespace CRM.Server.RQ.Person
         public string? FamilyName { get; init; }
 
         /// <summary>
+        /// Preferred name
+        /// 首先名
+        /// </summary>
+        public string? PreferredName { get; set; }
+
+        /// <summary>
         /// Job title
         /// 职务
         /// </summary>
@@ -134,6 +140,11 @@ namespace CRM.Server.RQ.Person
             if (FamilyName != null && FamilyName.Length is not (>= 1 and <= 50))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(FamilyName));
+            }
+
+            if (PreferredName != null && PreferredName.Length is not (>= 1 and <= 128))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(PreferredName));
             }
 
             if (JobTitle != null && JobTitle.Length is not (>= 1 and <= 50))

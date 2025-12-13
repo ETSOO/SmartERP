@@ -38,9 +38,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Openid)
                 .HasMaxLength(256)
                 .HasColumnName("openid");
-            entity.Property(e => e.Times)
-                .HasDefaultValue((short)0)
-                .HasColumnName("times");
+            entity.Property(e => e.Times).HasColumnName("times");
 
             entity.HasOne(d => d.CoreUser).WithMany(p => p.CoreAuthCodes)
                 .HasForeignKey(d => d.CoreUserId)

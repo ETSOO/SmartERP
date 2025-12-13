@@ -1,7 +1,8 @@
 import {
   ResponsivePage,
   SearchField,
-  MobileListItemRenderer
+  MobileListItemRenderer,
+  IconButtonLink
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -22,9 +23,14 @@ import { ContactQueryData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import IconButton from "@mui/material/IconButton";
 import { IdentityTypeFlags } from "@etsoo/appscript";
+import { ContactRelationList } from "@etsoo/smarterp-crm/components";
+import { useEditContactRelation } from "./useEditContactRelation";
+import Button from "@mui/material/Button";
 
 const template = {
-  keyword: "string"
+  relationType: "number",
+  keyword: "string",
+  info: "string"
 } as const satisfies DataTypes.BasicTemplate;
 
 export type PersonContactsProps = {
@@ -42,11 +48,16 @@ export type PersonContactsProps = {
    * Identity type
    */
   identityType: IdentityTypeFlags;
+
+  /**
+   * Is legal person
+   */
+  isLegalPerson?: boolean | null;
 };
 
 export function PersonContacts(props: PersonContactsProps) {
   // Destruct
-  const { index, identityType, personId } = props;
+  const { index, identityType, isLegalPerson, personId } = props;
 
   // Route
   const navigate = useNavigate();
@@ -55,6 +66,8 @@ export function PersonContacts(props: PersonContactsProps) {
   const labels = app.getLabels(
     "actions",
     "add",
+    "addExistingContact",
+    "contactInfo",
     "creation",
     "description",
     "edit",
@@ -72,19 +85,31 @@ export function PersonContacts(props: PersonContactsProps) {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
+  // Edit relation
+  const editRelation = useEditContactRelation(
+    personId,
+    isLegalPerson,
+    reloadData
+  );
+
   return (
     <ResponsivePage<ContactQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: (
           <React.Fragment>
+            <Button variant="outlined" onClick={() => editRelation()}>
+              {labels.addExistingContact}
+            </Button>
             {canAdd && (
               <Fab
                 title={labels.add}
                 size="medium"
                 color="primary"
                 onClick={() =>
-                  navigate(`./../../info/${personId}?index=${index}`)
+                  navigate(
+                    `./../../relation/add/${personId}?isLegalPerson=${isLegalPerson}&index=${index}`
+                  )
                 }
               >
                 <AddIcon />
@@ -95,13 +120,21 @@ export function PersonContacts(props: PersonContactsProps) {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
+      quickAction={(data) => navigate(`./../../view/${data.id}?index=0`)}
       fieldTemplate={template}
       fields={(data) => [
+        <ContactRelationList search isLegalPerson={isLegalPerson} />,
         <SearchField
-          label={labels.description}
+          label={labels.keywords}
           name="keyword"
           minChars={2}
           defaultValue={data.keyword}
+        />,
+        <SearchField
+          label={labels.contactInfo}
+          name="info"
+          minChars={2}
+          defaultValue={data.info}
         />
       ]}
       loadData={async (data) => {
@@ -164,13 +197,19 @@ export function PersonContacts(props: PersonContactsProps) {
             return (
               <React.Fragment>
                 {canAdd && (
-                  <IconButton title={labels.edit}>
+                  <IconButton
+                    title={labels.edit}
+                    onClick={() => editRelation(data.id)}
+                  >
                     <EditIcon />
                   </IconButton>
                 )}
-                <IconButton title={labels.view}>
+                <IconButtonLink
+                  title={labels.view}
+                  href={`./../../view/${data.contactId}?index=0`}
+                >
                   <ArticleIcon />
-                </IconButton>
+                </IconButtonLink>
               </React.Fragment>
             );
           }
@@ -184,11 +223,13 @@ export function PersonContacts(props: PersonContactsProps) {
             [
               canAdd && {
                 label: labels.edit,
-                icon: <EditIcon />
+                icon: <EditIcon />,
+                action: () => editRelation(data.id)
               },
               {
                 label: labels.view,
-                icon: <ArticleIcon />
+                icon: <ArticleIcon />,
+                action: `./../../view/${data.id}?index=0`
               }
             ],
             <React.Fragment>{data.description}</React.Fragment>

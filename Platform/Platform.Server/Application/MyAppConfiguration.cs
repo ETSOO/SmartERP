@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using System.ComponentModel.DataAnnotations;
 
 namespace Platform.Server.Application
 {
@@ -12,30 +13,34 @@ namespace Platform.Server.Application
         /// Authentication failure URL
         /// 失败认证URL
         /// </summary>
-        public required string AuthFailureUrl { get; set; }
+        [Url]
+        public string AuthFailureUrl { get; set; } = default!;
 
         /// <summary>
         /// Authentication registration URL
         /// 成功注册URL
         /// </summary>
-        public required string AuthRegistrationUrl { get; set; }
+        [Url]
+        public string AuthRegistrationUrl { get; set; } = default!;
 
         /// <summary>
         /// Authentication success URL
         /// 成功认证URL
         /// </summary>
-        public required string AuthSuccessUrl { get; set; }
+        [Url]
+        public string AuthSuccessUrl { get; set; } = default!;
 
         /// <summary>
         /// Super admin organization ID
         /// 超级管理员机构编号
         /// </summary>
-        public required int SuperAdminOrganizationId { get; set; }
+        public int SuperAdminOrganizationId { get; set; }
 
         /// <summary>
         /// Core app auth API URL
         /// 中心应用授权接口URL
         /// </summary>
-        public required string CoreAppAuthApiUrl { get; set; }
+        [Url]
+        public string CoreAppAuthApiUrl { get; set; } = default!;
     }
 }

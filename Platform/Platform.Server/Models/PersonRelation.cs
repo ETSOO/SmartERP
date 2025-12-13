@@ -7,6 +7,8 @@ namespace Platform.Server.Models;
 
 public partial class PersonRelation
 {
+    public long Id { get; set; }
+
     public long PersonId { get; set; }
 
     public long ContactId { get; set; }

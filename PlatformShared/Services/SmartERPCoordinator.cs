@@ -71,10 +71,7 @@ namespace PlatformShared.Services
                 data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey && oa.AppSecret != null).Select(oa => new AppData { AppSecret = oa.AppSecret!, Urls = oa.LocalUrls ?? oa.CoreApp.Urls }).FirstOrDefaultAsync(cancellationToken);
             }
 
-            if (data != null)
-            {
-                data.AppSecret = DecriptData(data.AppSecret, "Token" + appId);
-            }
+            data?.AppSecret = DecriptData(data.AppSecret, "Token" + appId);
 
             return data;
         }

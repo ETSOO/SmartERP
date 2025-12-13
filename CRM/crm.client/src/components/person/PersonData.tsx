@@ -7,6 +7,7 @@ import {
   ViewPageFieldType
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
@@ -15,6 +16,8 @@ import Divider from "@mui/material/Divider";
 import { CoreUtils } from "@etsoo/smarterp-core";
 import React from "react";
 import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import { useNavigate } from "react-router-dom";
 
 type PersonDataProps = {
   data: PersonViewData;
@@ -25,10 +28,21 @@ export function PersonData(props: PersonDataProps) {
   // Destruct
   const { data, refresh } = props;
 
+  // Route
+  const navigate = useNavigate();
+
+  // Editable
+  const editable = app.ownsIdentity(data.identityType, "Edit");
+
+  // Deletable
+  const [deletable, setDeletable] = React.useState(false);
+
   // Labels
   const labels = app.getLabels(
     "add",
     "addresses",
+    "delete",
+    "deleteConfirm",
     "edit",
     "editAvatar",
     "familyName",
@@ -37,6 +51,15 @@ export function PersonData(props: PersonDataProps) {
     "no",
     "yes"
   );
+
+  React.useEffect(() => {
+    app.personApi
+      .isDeletable(data.id, { showLoading: false, onError: () => {} })
+      .then((result) => {
+        if (result == null) return;
+        setDeletable(result);
+      });
+  }, [data.id]);
 
   // Layout
   return (
@@ -50,7 +73,7 @@ export function PersonData(props: PersonDataProps) {
             alt={labels.logo}
             style={CoreUtils.avatarStyles(item.isLegalPerson)}
           />
-          {item.editable && (
+          {editable && (
             <IconButtonLink
               href={`./../../avatar/${item.id}`}
               state={item.avatar}
@@ -164,7 +187,7 @@ export function PersonData(props: PersonDataProps) {
                       size="small"
                       title={app.person.getAddressKind(a.kind)}
                     />
-                    {item.editable && (
+                    {editable && (
                       <IconButtonLink
                         href={`./../../address/${item.id}?id=${a.id}`}
                         title={labels.edit}
@@ -176,14 +199,14 @@ export function PersonData(props: PersonDataProps) {
                   </HBox>
                 ))}
               </VBox>
-            ) : (
+            ) : editable ? (
               <React.Fragment />
-            );
+            ) : undefined;
           },
-          label: (item) => (
+          label: () => (
             <HBox gap={1} alignItems="center">
               {labels.addresses}:
-              {item.editable && (
+              {editable && (
                 <ButtonLink
                   size="small"
                   variant="outlined"
@@ -199,15 +222,39 @@ export function PersonData(props: PersonDataProps) {
         },
         {
           data: (item) =>
-            item.editable && (
+            (editable || deletable) && (
               <HBox gap={1} justifyContent="center" flexWrap="wrap">
-                <ButtonLink
-                  startIcon={<EditIcon />}
-                  variant="outlined"
-                  href={`./../../edit/${item.id}`}
-                >
-                  {labels.edit}
-                </ButtonLink>
+                {deletable && (
+                  <Button
+                    startIcon={<DeleteIcon />}
+                    variant="outlined"
+                    onClick={() => {
+                      app.notifier.confirm(
+                        labels.deleteConfirm.format(data.name),
+                        undefined,
+                        async (ok) => {
+                          if (!ok) return;
+
+                          const result = await app.personApi.delete(item.id);
+                          if (result == null) return;
+
+                          navigate("./../../");
+                        }
+                      );
+                    }}
+                  >
+                    {labels.delete}
+                  </Button>
+                )}
+                {editable && (
+                  <ButtonLink
+                    startIcon={<EditIcon />}
+                    variant="outlined"
+                    href={`./../../edit/${item.id}`}
+                  >
+                    {labels.edit}
+                  </ButtonLink>
+                )}
               </HBox>
             ),
           singleRow: true

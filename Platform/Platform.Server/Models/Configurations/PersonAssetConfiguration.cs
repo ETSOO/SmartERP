@@ -50,9 +50,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Sn)
                 .HasMaxLength(256)
                 .HasColumnName("sn");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((short)0)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.Times).HasColumnName("times");
             entity.Property(e => e.Title)

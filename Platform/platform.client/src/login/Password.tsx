@@ -168,7 +168,7 @@ export default function Password() {
             showPassword
             autoComplete="current-password"
             inputRef={passwordRef}
-            ref={mRef}
+            mRef={mRef}
             autoFocus
             onEnter={(e) => {
               submit();
