@@ -243,4 +243,22 @@
   <data name="PlatformAdminOperation" xml:space="preserve">
     <value>Platform administrator operation</value>
   </data>
+  <data name="UserCallbackEmailCode" xml:space="preserve">
+    <value>User email password callback code</value>
+  </data>
+  <data name="UserCallbackSMSCode" xml:space="preserve">
+    <value>User SMS password callback code</value>
+  </data>
+  <data name="UserRegistrationEmailCode" xml:space="preserve">
+    <value>User email registration code</value>
+  </data>
+  <data name="UserRegistrationSMSCode" xml:space="preserve">
+    <value>User SMS registration code</value>
+  </data>
+  <data name="UserVerificationEmailCode" xml:space="preserve">
+    <value>User email address verification code</value>
+  </data>
+  <data name="UserVerificationSMSCode" xml:space="preserve">
+    <value>User mobile phone number verification code</value>
+  </data>
 </root>

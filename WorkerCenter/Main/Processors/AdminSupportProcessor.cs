@@ -92,7 +92,7 @@ namespace WorkerCenter.Main.Processors
                 string.Format(detail, message.RequesterName, message.ApproverName, message.Comment)
             );
 
-            var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
+            var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data, cancellationToken);
 
             // Send email notice
             var inviteeeEmail = new SendEmailMessage

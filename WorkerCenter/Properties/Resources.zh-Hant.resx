@@ -243,4 +243,22 @@
   <data name="PlatformAdminOperation" xml:space="preserve">
     <value>平台管理员操作</value>
   </data>
+  <data name="UserCallbackEmailCode" xml:space="preserve">
+    <value>用戶郵箱找回密碼驗證碼</value>
+  </data>
+  <data name="UserCallbackSMSCode" xml:space="preserve">
+    <value>用戶短信找回密碼驗證碼</value>
+  </data>
+  <data name="UserRegistrationEmailCode" xml:space="preserve">
+    <value>用戶郵箱註冊驗證碼</value>
+  </data>
+  <data name="UserRegistrationSMSCode" xml:space="preserve">
+    <value>用戶短信註冊驗證碼</value>
+  </data>
+  <data name="UserVerificationEmailCode" xml:space="preserve">
+    <value>用戶郵箱認證驗證碼</value>
+  </data>
+  <data name="UserVerificationSMSCode" xml:space="preserve">
+    <value>用戶手機號碼認證驗證碼</value>
+  </data>
 </root>

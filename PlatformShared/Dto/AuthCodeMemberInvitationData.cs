@@ -1,7 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
-using PlatformShared.Dto;
 
-namespace Platform.Server.Dto.AuthCode
+namespace PlatformShared.Dto
 {
     /// <summary>
     /// Member invitation auth code data

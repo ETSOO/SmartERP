@@ -1,7 +1,6 @@
-﻿using Platform.Server.Dto.AuthCode;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Platform.Server.Templates
+namespace PlatformShared.Dto
 {
     /// <summary>
     /// Authorization code email template view model

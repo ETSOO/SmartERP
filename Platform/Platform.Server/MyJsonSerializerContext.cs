@@ -59,8 +59,6 @@ namespace Platform.Server
     [JsonSerializable(typeof(EmailCodeRQ))]
     [JsonSerializable(typeof(SMSCodeRQ))]
 
-    [JsonSerializable(typeof(AuthCodeActionItem))]
-    [JsonSerializable(typeof(AuthCodeData))]
     [JsonSerializable(typeof(SendEmailData))]
     [JsonSerializable(typeof(SendSMSData))]
 

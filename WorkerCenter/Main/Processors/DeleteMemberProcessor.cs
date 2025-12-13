@@ -75,7 +75,7 @@ namespace WorkerCenter.Main.Processors
                     string.Format(detail, userName, orgName, inviteeName, inviterName)
                 );
 
-                var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
+                var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data, cancellationToken);
 
                 // Send email notice
                 var email = new SendEmailMessage

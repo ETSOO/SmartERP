@@ -30,6 +30,8 @@ namespace PlatformShared
     [JsonSerializable(typeof(AdminRenewAppMessageData))]
     [JsonSerializable(typeof(AdminSupportMessageData))]
     [JsonSerializable(typeof(AddUserIdentifierMessageData))]
+    [JsonSerializable(typeof(AuthCodeActionItem))]
+    [JsonSerializable(typeof(AuthCodeData))]
     [JsonSerializable(typeof(BuyAppMessageData))]
     [JsonSerializable(typeof(CommonUpdateMessageData))]
     [JsonSerializable(typeof(DeleteMemberMessageData))]
@@ -37,6 +39,7 @@ namespace PlatformShared
     [JsonSerializable(typeof(LoginFailedMessageData))]
     [JsonSerializable(typeof(LoginSuccessMessageData))]
     [JsonSerializable(typeof(RenewAppMessageData))]
+    [JsonSerializable(typeof(SendAuthCodeEmailMessage))]
     [JsonSerializable(typeof(SwitchOrgMessageData))]
 
     [JsonSerializable(typeof(JsonElement))]

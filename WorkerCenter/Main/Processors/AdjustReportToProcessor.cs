@@ -54,7 +54,7 @@ namespace WorkerCenter.Main.Processors
                     string.Format(detail, message.Data.TargetName, message.Count, message.NewReportToName)
                 );
 
-                var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
+                var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data, cancellationToken);
 
                 // Send email notice
                 var email = new SendEmailMessage

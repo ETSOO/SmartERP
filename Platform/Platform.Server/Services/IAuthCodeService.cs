@@ -1,8 +1,8 @@
 ﻿using com.etsoo.Utils.Actions;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Endpoints.AuthCode.RQ;
-using Platform.Server.Templates;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using System.Text.Json.Serialization.Metadata;
 
 namespace Platform.Server.Services

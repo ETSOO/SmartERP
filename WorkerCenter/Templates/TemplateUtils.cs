@@ -1,4 +1,4 @@
-﻿using com.etsoo.Web;
+﻿using RazorEngineCore;
 
 namespace WorkerCenter.Templates
 {
@@ -21,12 +21,44 @@ namespace WorkerCenter.Templates
         /// <typeparam name="M">Generic template model</typeparam>
         /// <param name="file">File</param>
         /// <param name="model">Data model</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Content</returns>
-        public static Task<string> BuildTemplateAsync<M>(string file, M model) where M : class
+        public static Task<string> BuildTemplateAsync<M>(string file, M model, CancellationToken cancellationToken = default) where M : class
+        {
+            return BuildTemplateAsync<M>(file, model, [], cancellationToken);
+        }
+
+        /// <summary>
+        /// Build template
+        /// 创建模板
+        /// </summary>
+        /// <typeparam name="M">Generic template model</typeparam>
+        /// <param name="file">File</param>
+        /// <param name="model">Data model</param>
+        /// <param name="references">Additional references</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Content</returns>
+        public static async Task<string> BuildTemplateAsync<M>(string file, M model, Type[] references, CancellationToken cancellationToken = default) where M : class
         {
             // File should not starts with '/'
-            var filePath = Path.Combine(AppContext.BaseDirectory, file);
-            return RazorUtils.RenderAsync(filePath, model);
+            var templateFile = Path.Combine(AppContext.BaseDirectory, file);
+
+            var template = await File.ReadAllTextAsync(templateFile, cancellationToken);
+
+            // Engine
+            var razorEngine = new RazorEngine();
+
+            // Compile
+            var compiledTemplate = await razorEngine.CompileAsync<M>(template, builder =>
+            {
+                foreach (var reference in references)
+                {
+                    builder.AddAssemblyReference(reference);
+                }
+            }, cancellationToken);
+
+            // Execute
+            return await compiledTemplate.RunAsync(model);
         }
 
         /// <summary>

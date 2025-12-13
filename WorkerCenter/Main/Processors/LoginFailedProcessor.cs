@@ -66,7 +66,7 @@ namespace WorkerCenter.Main.Processors
                             detail
                         );
 
-                        var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
+                        var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data, cancellationToken);
 
                         // Send email notice
                         var email = new SendEmailMessage

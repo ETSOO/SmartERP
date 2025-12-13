@@ -126,25 +126,7 @@
   <data name="PasswordLengthInvalid" xml:space="preserve">
     <value>密碼不能少於4個字符，也不能多於30個字符</value>
   </data>
-  <data name="UserCallbackEmailCode" xml:space="preserve">
-    <value>用戶郵箱找回密碼驗證碼</value>
-  </data>
-  <data name="UserCallbackSMSCode" xml:space="preserve">
-    <value>用戶短信找回密碼驗證碼</value>
-  </data>
   <data name="UserIdInvalid" xml:space="preserve">
     <value>僅支持郵箱和手機號碼</value>
-  </data>
-  <data name="UserRegistrationEmailCode" xml:space="preserve">
-    <value>用戶郵箱註冊驗證碼</value>
-  </data>
-  <data name="UserRegistrationSMSCode" xml:space="preserve">
-    <value>用戶短信註冊驗證碼</value>
-  </data>
-  <data name="UserVerificationEmailCode" xml:space="preserve">
-    <value>用戶郵箱認證驗證碼</value>
-  </data>
-  <data name="UserVerificationSMSCode" xml:space="preserve">
-    <value>用戶手機號碼認證驗證碼</value>
   </data>
 </root>

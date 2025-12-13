@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Platform.Server.Dto.AuthCode
+namespace PlatformShared.Dto
 {
     /// <summary>
     /// Auth code data

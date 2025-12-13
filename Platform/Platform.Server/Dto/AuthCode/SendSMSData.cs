@@ -1,4 +1,5 @@
 ﻿using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 
 namespace Platform.Server.Dto.AuthCode
 {

@@ -112,6 +112,7 @@ services.AddSingleton<IMessageQueueProcessor, LoginFailedProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginSuccessProcessor>();
 services.AddSingleton<IMessageQueueProcessor, RenewAppProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ResetPasswordProcessor>();
+services.AddSingleton<IMessageQueueProcessor, SendAuthCodeEmailProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendEmailProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendSMSProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SwitchOrgProcessor>();

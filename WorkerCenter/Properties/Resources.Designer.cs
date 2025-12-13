@@ -19,7 +19,7 @@ namespace WorkerCenter.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -435,6 +435,60 @@ namespace WorkerCenter.Properties {
         internal static string UpdateUserSelf {
             get {
                 return ResourceManager.GetString("UpdateUserSelf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User email password callback code.
+        /// </summary>
+        internal static string UserCallbackEmailCode {
+            get {
+                return ResourceManager.GetString("UserCallbackEmailCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User SMS password callback code.
+        /// </summary>
+        internal static string UserCallbackSMSCode {
+            get {
+                return ResourceManager.GetString("UserCallbackSMSCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User email registration code.
+        /// </summary>
+        internal static string UserRegistrationEmailCode {
+            get {
+                return ResourceManager.GetString("UserRegistrationEmailCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User SMS registration code.
+        /// </summary>
+        internal static string UserRegistrationSMSCode {
+            get {
+                return ResourceManager.GetString("UserRegistrationSMSCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User email address verification code.
+        /// </summary>
+        internal static string UserVerificationEmailCode {
+            get {
+                return ResourceManager.GetString("UserVerificationEmailCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User mobile phone number verification code.
+        /// </summary>
+        internal static string UserVerificationSMSCode {
+            get {
+                return ResourceManager.GetString("UserVerificationSMSCode", resourceCulture);
             }
         }
     }

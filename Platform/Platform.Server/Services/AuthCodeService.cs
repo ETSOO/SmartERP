@@ -12,11 +12,12 @@ using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Endpoints.AuthCode.RQ;
-using Platform.Server.Templates;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using System.Globalization;
 using System.Net;
 using System.Net.Mail;
@@ -31,24 +32,7 @@ namespace Platform.Server.Services
     /// </summary>
     public class AuthCodeService : CommonService, IAuthCodeService
     {
-        // Code actions
-        static List<AuthCodeActionItem> Actions =>
-        [
-            new(AuthCodeAction.UserRegistrationSMSCode, Properties.Resources.UserRegistrationSMSCode, 10, RandStringKind.Digit, 6),
-            new(AuthCodeAction.UserRegistrationEmailCode, Properties.Resources.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailRegistration.cshtml"),
-            new(AuthCodeAction.UserCallbackSMSCode, Properties.Resources.UserCallbackSMSCode, 10, RandStringKind.Digit, 6),
-            new(AuthCodeAction.UserCallbackEmailCode, Properties.Resources.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailCallback.cshtml"),
-            new(AuthCodeAction.UserVerificationSMSCode, Properties.Resources.UserVerificationSMSCode, 10, RandStringKind.Digit, 6, true),
-            new(AuthCodeAction.UserVerificationEmailCode, Properties.Resources.UserVerificationEmailCode, 30, RandStringKind.Digit, 6, true, "/Templates/EmailVerification.cshtml"),
-
-            // Member invitation, 3 days = 72 hours = 4320 minutes
-            new(AuthCodeAction.MemberInvitationEmailCode, Properties.Resources.MemberInvitationEmailCode, 4320, RandStringKind.DigitAndLetter, 16, true, "/Templates/EmailMemberInvitation.cshtml")
-        ];
-
-        static readonly Type CodeUserDataType = typeof(CodeUserData);
-
         readonly MyDbContext _db;
-        readonly string _root;
         readonly IPAddress _ip;
         readonly IQueueService _queueService;
 
@@ -60,15 +44,12 @@ namespace Platform.Server.Services
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
-        /// <param name="smsClient">SMS client</param>
-        /// <param name="host">Host environment</param>
         /// <param name="queueService">Queue service</param>
         public AuthCodeService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthCodeService> logger,
-            IWebHostEnvironment host, IQueueService queueService)
+            IQueueService queueService)
             : base(app, userAccessor.User, "auth_code", logger)
         {
             _db = db;
-            _root = host.ContentRootPath;
             _ip = userAccessor.Ip;
             _queueService = queueService;
         }
@@ -172,7 +153,7 @@ namespace Platform.Server.Services
             }
 
             // Action
-            var action = Actions.Find(a => a.Id == data.Action);
+            var action = AuthCodeActionItem.Actions.FirstOrDefault(a => a.Id == data.Action);
             if (action == null || action.Template == null)
             {
                 return ApplicationErrors.NoValidData.AsResult("Action");
@@ -222,26 +203,21 @@ namespace Platform.Server.Services
 
                 if (result.Ok)
                 {
-                    // Template
-                    var file = Path.Join(_root, action.Template);
-                    var template = await RazorUtils.RenderAsync(file, dataModel, [CodeUserDataType], cancellationToken);
-
                     // Message
-                    var message = new SendEmailMessage
+                    var message = new SendAuthCodeEmailMessage
                     {
-                        Subject = dataModel.Subject ?? action.Name,
-                        Body = template,
+                        Model = dataModel,
                         To = [emailAddress.ToString()]
                     };
 
-                    await _queueService.PushAsync(message, ApiModelJsonSerializerContext.Default.SendEmailMessage, cancellationToken);
+                    await _queueService.PushAsync(message, PlatformSharedContext.Default.SendAuthCodeEmailMessage, cancellationToken);
                 }
             }
             catch (Exception ex)
             {
                 // Log for trace
                 ex.Data.Add("Model", JsonSerializer.Serialize(data, MyJsonSerializerContext.Default.SendEmailData));
-                ex.Data.Add("Action", JsonSerializer.Serialize(action, MyJsonSerializerContext.Default.AuthCodeActionItem));
+                ex.Data.Add("Action", JsonSerializer.Serialize(action, PlatformSharedContext.Default.AuthCodeActionItem));
 
                 LogException(ex);
 
@@ -321,7 +297,7 @@ namespace Platform.Server.Services
             }
 
             // Action
-            var action = Actions.Find(a => a.Id == data.Action);
+            var action = AuthCodeActionItem.Actions.FirstOrDefault(a => a.Id == data.Action);
             if (action == null)
             {
                 return ApplicationErrors.NoValidData.AsResult("Action");

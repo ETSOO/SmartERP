@@ -52,7 +52,7 @@ namespace WorkerCenter.Main.Processors
                     string.Format(detail, message.IdentifierType.ToString(), StringUtils.HideEmail(message.IdentifierValue))
                 );
 
-                var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data);
+                var body = await TemplateUtils.BuildTemplateAsync(TemplateUtils.ActionNoticeTemplate, data, cancellationToken);
 
                 // Send email notice
                 var email = new SendEmailMessage

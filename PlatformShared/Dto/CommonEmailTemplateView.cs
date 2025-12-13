@@ -1,4 +1,4 @@
-﻿namespace Platform.Server.Templates
+﻿namespace PlatformShared.Dto
 {
     /// <summary>
     /// Common Email template view

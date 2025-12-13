@@ -126,25 +126,7 @@
   <data name="PasswordLengthInvalid" xml:space="preserve">
     <value>The password cannot be less than 4 characters or more than 30 characters</value>
   </data>
-  <data name="UserCallbackEmailCode" xml:space="preserve">
-    <value>User email password callback code</value>
-  </data>
-  <data name="UserCallbackSMSCode" xml:space="preserve">
-    <value>User SMS password callback code</value>
-  </data>
   <data name="UserIdInvalid" xml:space="preserve">
     <value>Only supports email and mobile number</value>
-  </data>
-  <data name="UserRegistrationEmailCode" xml:space="preserve">
-    <value>User email registration code</value>
-  </data>
-  <data name="UserRegistrationSMSCode" xml:space="preserve">
-    <value>User SMS registration code</value>
-  </data>
-  <data name="UserVerificationEmailCode" xml:space="preserve">
-    <value>User email address verification code</value>
-  </data>
-  <data name="UserVerificationSMSCode" xml:space="preserve">
-    <value>User mobile phone number verification code</value>
   </data>
 </root>

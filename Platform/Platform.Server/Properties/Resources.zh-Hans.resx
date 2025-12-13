@@ -126,25 +126,7 @@
   <data name="PasswordLengthInvalid" xml:space="preserve">
     <value>密码不能少于4个字符，也不能多于30个字符</value>
   </data>
-  <data name="UserCallbackEmailCode" xml:space="preserve">
-    <value>用户邮箱找回密码验证码</value>
-  </data>
-  <data name="UserCallbackSMSCode" xml:space="preserve">
-    <value>用户短信找回密码验证码</value>
-  </data>
   <data name="UserIdInvalid" xml:space="preserve">
     <value>仅支持邮箱和手机号码</value>
-  </data>
-  <data name="UserRegistrationEmailCode" xml:space="preserve">
-    <value>用户邮箱注册验证码</value>
-  </data>
-  <data name="UserRegistrationSMSCode" xml:space="preserve">
-    <value>用户短信注册验证码</value>
-  </data>
-  <data name="UserVerificationEmailCode" xml:space="preserve">
-    <value>用户邮箱认证验证码</value>
-  </data>
-  <data name="UserVerificationSMSCode" xml:space="preserve">
-    <value>用户手机号码认证验证码</value>
   </data>
 </root>
