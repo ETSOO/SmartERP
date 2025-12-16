@@ -165,6 +165,8 @@ namespace CRM.Server
     [JsonSerializable(typeof(IFormFile))]
     [JsonSerializable(typeof(ProblemDetails))]
 
+    [JsonSerializable(typeof(com.etsoo.Utils.Actions.ActionResult))]
+
     public partial class MyJsonSerializerContext : JsonSerializerContext
     {
     }

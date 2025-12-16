@@ -3,7 +3,7 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
-using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace CRM.Server.Services
 {
@@ -13,6 +13,8 @@ namespace CRM.Server.Services
     /// </summary>
     public class CrmAuthService : SEAuthService
     {
+        protected override JsonTypeInfo<ActionResult> ActionResultTypeInfo => MyJsonSerializerContext.Default.ActionResult;
+
         readonly MyDbContext _db;
 
         public CrmAuthService(ISEServiceApp app,
@@ -24,11 +26,6 @@ namespace CRM.Server.Services
             : base(app, userAccessor, logger, clientFactory)
         {
             _db = db;
-        }
-
-        protected override string SerializeUser(ActionResult result)
-        {
-            return JsonSerializer.Serialize(result, App.DefaultJsonSerializerOptions);
         }
 
         protected override async Task EnrichUserResultAsync(IActionResult result, ICurrentUser user, CancellationToken cancellationToken)
