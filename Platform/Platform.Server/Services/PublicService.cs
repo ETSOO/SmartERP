@@ -102,7 +102,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.CodeExpired.AsResult();
             }
 
-            var data = code.DeserializeData(MyJsonSerializerContext.Default.AuthCodeMemberInvitationData);
+            var data = code.DeserializeData(PlatformSharedContext.Default.AuthCodeMemberInvitationData);
             if (data == null)
             {
                 return ApplicationErrors.NoValidData.AsResult();
@@ -445,7 +445,7 @@ namespace Platform.Server.Services
             var code = await _authCodeService.ReadAsync(id, AuthCodeAction.MemberInvitationEmailCode, cancellationToken);
             if (code == null) return null;
 
-            var data = code.DeserializeData(MyJsonSerializerContext.Default.AuthCodeMemberInvitationData);
+            var data = code.DeserializeData(PlatformSharedContext.Default.AuthCodeMemberInvitationData);
             if (data == null) return null;
 
             var userId = await _db.CoreUserIdentifiers.Where(ui => ui.Type == CoreUserIdentifierType.Email

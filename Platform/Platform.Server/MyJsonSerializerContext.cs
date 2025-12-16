@@ -111,6 +111,7 @@ namespace Platform.Server
     // Results.ValidationProblem
     [JsonSerializable(typeof(HttpValidationProblemDetails))]
     [JsonSerializable(typeof(IFormFile))]
+    [JsonSerializable(typeof(IFormFileCollection))]
     [JsonSerializable(typeof(ProblemDetails))]
     [JsonSerializable(typeof(IResult))]
 

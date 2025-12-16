@@ -285,7 +285,7 @@ namespace CRM.Server.Services
                 {
                     PersonId = user.Id,
                     PermissionItemId = id
-                });
+                }).ToList();
 
                 await _db.BulkInsertAsync(cacheRecords, new BulkConfig
                 {

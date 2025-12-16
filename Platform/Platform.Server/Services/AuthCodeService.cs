@@ -5,10 +5,12 @@ using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Database.Converters;
+using com.etsoo.MessageQueue;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
 using com.etsoo.Web;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Platform.Server.Application;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Endpoints.AuthCode.RQ;
@@ -120,20 +122,31 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
-        /// Send Email code
-        /// 发送邮件验证码
+        /// Send Auth Code Member Invitation Email
+        /// 发送会员邀请邮件验证码
+        /// </summary>
+        /// <param name="data">Email data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public ValueTask<IActionResult> SendAuthCodeMemberEmailAsync(SendEmailData<AuthCodeMemberInvitationData> data, CancellationToken cancellationToken = default)
+        {
+            return SendEmailAsync(data, PlatformSharedContext.Default.AuthCodeMemberInvitationData, cancellationToken);
+        }
+
+        /// <summary>
+        /// When adding a new type 'D' to the email verification code sending function, please also add the corresponding processing logic to the WorkerCenter.Main.Processors.SendAuthCodeEmailProcessor.
+        /// 发送邮件验证码，新增一个D的类型时，请同时新增对应的 WorkerCenter.Main.Processors.SendAuthCodeEmailProcessor 的处理逻辑
         /// </summary>
         /// <typeparam name="D">Generic json data type</typeparam>
         /// <param name="data">Data</param>
         /// <param name="typeInfo">JSON type info</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async ValueTask<IActionResult> SendEmailAsync<D>(SendEmailData<D> data, JsonTypeInfo<D> typeInfo, CancellationToken cancellationToken = default) where D : AuthCodeData
+        protected async ValueTask<IActionResult> SendEmailAsync<D>(SendEmailData<D> data, JsonTypeInfo<D> typeInfo, CancellationToken cancellationToken = default) where D : AuthCodeData
         {
             var json = JsonSerializer.Serialize(data.Data, typeInfo);
-            return await SendEmailAsync(data,
-                (view) => (new AuthCodeEmailTemplateView<D>(view, data.Data), JsonSerializer.Serialize(data.Data, typeInfo)),
-                cancellationToken);
+
+            return await SendEmailAsync(data, (json, typeof(D).Name), cancellationToken);
         }
 
         /// <summary>
@@ -141,10 +154,10 @@ namespace Platform.Server.Services
         /// 发送邮件验证码
         /// </summary>
         /// <param name="data">Data</param>
-        /// <param name="enhancer">Data enhancer</param>
+        /// <param name="additionalData">Additional data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async ValueTask<IActionResult> SendEmailAsync(SendEmailData data, Func<AuthCodeEmailTemplateView, (AuthCodeEmailTemplateView, string?)>? enhancer = null, CancellationToken cancellationToken = default)
+        public async ValueTask<IActionResult> SendEmailAsync(SendEmailData data, (string Json, string Type)? additionalData = null, CancellationToken cancellationToken = default)
         {
             var email = data.Email;
             if (!MailAddress.TryCreate(email, out var emailAddress))
@@ -185,16 +198,10 @@ namespace Platform.Server.Services
                 Action = action,
                 Code = code,
                 Language = CultureInfo.CurrentCulture.Name,
-                TimeZone = tz,
-                LocalExpiry = authCode.Expiry.UtcToLocal(tz)
+                TimeZoneId = tz.Id,
+                LocalExpiry = authCode.Expiry.UtcToLocal(tz),
+                Data = additionalData?.Json
             };
-
-            if (enhancer != null)
-            {
-                var (enhancedModel, json) = enhancer(dataModel);
-                dataModel = enhancedModel;
-                authCode.Data = json;
-            }
 
             try
             {
@@ -210,7 +217,7 @@ namespace Platform.Server.Services
                         To = [emailAddress.ToString()]
                     };
 
-                    await _queueService.PushAsync(message, PlatformSharedContext.Default.SendAuthCodeEmailMessage, cancellationToken);
+                    await _queueService.PushAsync(message, PlatformSharedContext.Default.SendAuthCodeEmailMessage, new MessageProperties { ContentType = additionalData?.Type }, cancellationToken);
                 }
             }
             catch (Exception ex)

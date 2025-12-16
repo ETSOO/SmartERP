@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.Subject</title>
+</head>
+<body>
+    <p>Dear <b>@Model.UserName</b>,</p>
+    <p>At <b>@Model.FormatDateTime()</b>, <b>@Model.Action</b>.</p>
+    @if (!string.IsNullOrEmpty(Model.Detail))
+    {
+        <p>@Model.Detail</p>
+    }
+    <p>If this is not your operation, please contact us immediately for intervention!</p>
+    <p>IP address: <b>@Model.IP</b></p>
+    <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+    <table border="0" width="100%">
+        <tr>
+            <td valign="middle"><a href="https://www.etsoo.com/"><img src="https://cn.etsoo.com/etsoo.png" alt="ETSOO Logo" height="42" /></a></td>
+            <td valign="middle" align="right"><small>ETSOO - SmartERP<br /><b>E</b>mpowering <b>T</b>echnology for <b>S</b>MEs</small></td>
+        </tr>
+    </table>
+</body>
+</html>

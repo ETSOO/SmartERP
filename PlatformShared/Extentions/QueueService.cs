@@ -61,5 +61,21 @@ namespace PlatformShared.Extentions
         {
             return _queueProducer.SendJsonAsync(message, typeInfo, T.Type, cancellationToken);
         }
+
+        /// <summary>
+        /// Push message to queue
+        /// 推送消息到队列
+        /// </summary>
+        /// <typeparam name="T">Generic data type</typeparam>
+        /// <param name="message">Message</param>
+        /// <param name="typeInfo">JSON type info</param>
+        /// <param name="properties">Properties</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public Task<string> PushAsync<T>(T message, JsonTypeInfo<T> typeInfo, MessageProperties properties, CancellationToken cancellationToken = default) where T : IMessageQueueMessage
+        {
+            properties.Type ??= T.Type;
+            return _queueProducer.SendJsonAsync(message, typeInfo, properties, cancellationToken);
+        }
     }
 }

@@ -264,12 +264,12 @@ namespace Platform.Server.Services
                         UserData = data,
                         WebUrl = App.Configuration.WebUrl,
                         UserRole = userRole,
-                        Message = rq.Message,
+                        Message = rq.Message
                     }
                 };
 
                 // Send email
-                var result = await _authCodeService.SendEmailAsync(view, MyJsonSerializerContext.Default.AuthCodeMemberInvitationData, cancelToken);
+                var result = await _authCodeService.SendAuthCodeMemberEmailAsync(view, cancelToken);
                 if (result.Ok)
                 {
                     items.Add(email);

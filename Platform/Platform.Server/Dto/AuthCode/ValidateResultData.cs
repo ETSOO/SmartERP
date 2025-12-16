@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using PlatformShared.Dto;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 namespace Platform.Server.Dto.AuthCode

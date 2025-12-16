@@ -13,8 +13,8 @@ namespace Platform.Server.Services
         Task<ValidateResultData?> ReadAsync(Guid id, AuthCodeAction action, CancellationToken cancellationToken = default);
 
         ValueTask<IActionResult> SendEmailAsync(EmailCodeRQ rq, string? userAgent, CancellationToken cancellationToken = default);
-        ValueTask<IActionResult> SendEmailAsync(SendEmailData data, Func<AuthCodeEmailTemplateView, (AuthCodeEmailTemplateView, string?)>? enhancer = null, CancellationToken cancellationToken = default);
-        ValueTask<IActionResult> SendEmailAsync<D>(SendEmailData<D> data, JsonTypeInfo<D> typeInfo, CancellationToken cancellationToken = default) where D : AuthCodeData;
+        ValueTask<IActionResult> SendEmailAsync(SendEmailData data, (string Json, string Type)? additionalData = null, CancellationToken cancellationToken = default);
+        ValueTask<IActionResult> SendAuthCodeMemberEmailAsync(SendEmailData<AuthCodeMemberInvitationData> data, CancellationToken cancellationToken = default);
 
         ValueTask<IActionResult> SendSMSAsync(SMSCodeRQ rq, string? userAgent, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> SendSMSAsync<D>(SendSMSData<D> data, JsonTypeInfo<D> typeInfo, CancellationToken cancellationToken = default) where D : AuthCodeData;

@@ -1,0 +1,25 @@
+﻿@{
+    Model.Subject = "[司有云ERP] 用户邮箱认证验证码";
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@data.Subject</title>
+</head>
+<body>
+    <p>尊敬的用户：</p>
+    <p>我们收到您认证邮箱地址的请求，请使用下面的验证码继续操作。<font color="#ff0000">如果不是您本人的操作，请直接忽略。</font></p>
+    <p>
+        您的验证码为：<strong style="font-size: 15pt;">@data.Code</strong>，<strong>@data.Action.Minutes</strong>分钟内有效 - 请勿告知任何人。
+    </p>
+    <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+    <table border="0" width="100%">
+        <tr>
+            <td valign="middle"><a href="https://www.etsoo.com/"><img src="https://cn.etsoo.com/etsoo.png" alt="ETSOO Logo" height="42" /></a></td>
+            <td valign="middle" align="right"><small>亿速思维 - 司友云ERP<br />为中小企业技术赋能</small></td>
+        </tr>
+    </table>
+</body>
+</html>

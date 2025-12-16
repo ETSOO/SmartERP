@@ -99,6 +99,7 @@ namespace PlatformShared.Messages
     [JsonDerivedType(typeof(LoginSuccessMessage))]
     [JsonDerivedType(typeof(RenewAppMessage))]
     [JsonDerivedType(typeof(ResetPasswordMessage))]
+    [JsonDerivedType(typeof(SendAuthCodeEmailMessage))]
     [JsonDerivedType(typeof(SwitchOrgMessage))]
     [JsonDerivedType(typeof(UpdateApiMessage))]
     [JsonDerivedType(typeof(UpdateAppMessage))]

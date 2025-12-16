@@ -29,14 +29,14 @@ namespace PlatformShared.Dto
         public static AuthCodeActionItem[] Actions =>
         [
             new(AuthCodeAction.UserRegistrationSMSCode, 10, RandStringKind.Digit, 6),
-            new(AuthCodeAction.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailRegistration.cshtml"),
+            new(AuthCodeAction.UserRegistrationEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailRegistration_{culture}.cshtml"),
             new(AuthCodeAction.UserCallbackSMSCode, 10, RandStringKind.Digit, 6),
-            new(AuthCodeAction.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailCallback.cshtml"),
+            new(AuthCodeAction.UserCallbackEmailCode, 30, RandStringKind.Digit, 6, false, "/Templates/EmailCallback_{culture}.cshtml"),
             new(AuthCodeAction.UserVerificationSMSCode, 10, RandStringKind.Digit, 6, true),
-            new(AuthCodeAction.UserVerificationEmailCode, 30, RandStringKind.Digit, 6, true, "/Templates/EmailVerification.cshtml"),
+            new(AuthCodeAction.UserVerificationEmailCode, 30, RandStringKind.Digit, 6, true, "/Templates/EmailVerification_{culture}.cshtml"),
 
             // Member invitation, 3 days = 72 hours = 4320 minutes
-            new(AuthCodeAction.MemberInvitationEmailCode, 4320, RandStringKind.DigitAndLetter, 16, true, "/Templates/EmailMemberInvitation.cshtml")
+            new(AuthCodeAction.MemberInvitationEmailCode, 4320, RandStringKind.DigitAndLetter, 16, true, "/Templates/EmailMemberInvitation_{culture}.cshtml")
         ];
     }
 }

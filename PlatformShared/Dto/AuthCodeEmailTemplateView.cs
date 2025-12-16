@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Text.Json.Serialization;
 
 namespace PlatformShared.Dto
 {
@@ -27,34 +27,31 @@ namespace PlatformShared.Dto
         public required string Code { get; init; }
 
         /// <summary>
+        /// Time zone ID
+        /// 时区编号
+        /// </summary>
+        public required string TimeZoneId { get; init; }
+
+        /// <summary>
         /// Time zone
         /// 时区
         /// </summary>
-        public required TimeZoneInfo TimeZone { get; init; }
+        [JsonIgnore]
+        public TimeZoneInfo TimeZone
+        {
+            get => TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId);
+        }
 
         /// <summary>
         /// Local expiry
         /// 本地过期时间
         /// </summary>
         public required DateTime LocalExpiry { get; init; }
-    }
 
-    /// <summary>
-    /// Authorization code email template view model
-    /// 验证码邮件模板浏览模型
-    /// </summary>
-    public record AuthCodeEmailTemplateView<D> : AuthCodeEmailTemplateView where D : AuthCodeData
-    {
         /// <summary>
-        /// JSON data
+        /// JSON Data
         /// JSON 数据
         /// </summary>
-        public virtual required D Data { get; init; }
-
-        [SetsRequiredMembers]
-        public AuthCodeEmailTemplateView(AuthCodeEmailTemplateView view, D data) : base(view)
-        {
-            Data = data;
-        }
+        public string? Data { get; init; }
     }
 }
