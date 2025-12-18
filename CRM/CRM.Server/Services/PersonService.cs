@@ -10,8 +10,8 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
 using CRM.Server.Dto.Person;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Person;
-using Google.Api;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
 using PlatformShared;
@@ -177,23 +177,7 @@ namespace CRM.Server.Services
             if (addressId < 1)
             {
                 // New address
-                var addr = new PersonAddress
-                {
-                    PersonId = person.Id,
-                    Kind = rq.Kind,
-                    Name = rq.Name,
-                    PlaceId = rq.PlaceId,
-                    Region = rq.Region,
-                    State = rq.State,
-                    City = rq.City,
-                    District = rq.District,
-                    Route = rq.Route,
-                    Street = rq.Street,
-                    PostalCode = rq.PostalCode,
-                    FormattedAddress = rq.FormattedAddress,
-                    Location = rq.Location == null ? null : new NpgsqlPoint(rq.Location.Lng, rq.Location.Lat),
-                    Provider = rq.Provider
-                };
+                var addr = rq.CreateAddressFromRQ(person.Id);
 
                 // Add
                 _db.PersonAddresses.Add(addr);
@@ -1043,7 +1027,7 @@ namespace CRM.Server.Services
                 Status = r.Contact.Status
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
-            if (_db.IsSensitiveDataLoggingEnabled)
+            if (_db.IsSensitiveDataLoggingEnabled && Logger.IsEnabled(LogLevel.Information))
             {
                 Logger.LogInformation("QueryContactAsync is {hasContent} with {commandText}", hasContent, commandText);
             }

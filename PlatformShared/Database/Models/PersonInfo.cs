@@ -8,6 +8,7 @@
     {
         Email = 1,
         Mobile = 5,
+        Pin = 8,
         Phone = 9,
         QQ = 13,
         WeChat = 17,

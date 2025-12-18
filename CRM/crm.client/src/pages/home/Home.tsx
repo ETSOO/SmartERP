@@ -3,6 +3,7 @@ import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import HubIcon from "@mui/icons-material/Hub";
 import HistoryIcon from "@mui/icons-material/History";
+import ContactsIcon from "@mui/icons-material/Contacts";
 import "reactflow/dist/style.css";
 import { Flowchart } from "../../components/Flowchart";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +16,12 @@ export default function Home() {
   const navigate = useNavigate();
 
   // Labels
-  const labels = app.getLabels("allProfiles", "flowchart", "latestTasks");
+  const labels = app.getLabels(
+    "allProfiles",
+    "flowchart",
+    "latestTasks",
+    "stakeholders"
+  );
 
   usePageDataEmpty(app);
 
@@ -39,6 +45,12 @@ export default function Home() {
           children: () => navigate(`./profile`),
           label: `${labels.allProfiles}...`,
           icon: <HistoryIcon />,
+          iconPosition: "start"
+        },
+        {
+          children: () => navigate(`./contact`),
+          label: `${labels.stakeholders}...`,
+          icon: <ContactsIcon />,
           iconPosition: "start"
         }
       ]}

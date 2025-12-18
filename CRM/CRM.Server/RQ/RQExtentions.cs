@@ -1,7 +1,10 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.Utils.Actions;
 using com.etsoo.WebUtils.Attributes;
+using CRM.Server.Endpoints;
+using CRM.Server.RQ.Person;
 using CRM.Server.RQ.PersonProfile;
+using NpgsqlTypes;
 using PlatformShared.Database.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
@@ -44,6 +47,41 @@ namespace CRM.Server.RQ
             };
         }
 
+        /// <summary>
+        /// Create address from request data
+        /// 从请求数据创建地址对象
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="personId">Person id</param>
+        /// <returns>Result</returns>
+        public static PersonAddress CreateAddressFromRQ(this AddressCreateRQ rq, long personId)
+        {
+            return new PersonAddress
+            {
+                PersonId = personId,
+                Kind = rq.Kind,
+                Name = rq.Name,
+                PlaceId = rq.PlaceId,
+                Region = rq.Region,
+                State = rq.State,
+                City = rq.City,
+                District = rq.District,
+                Route = rq.Route,
+                Street = rq.Street,
+                PostalCode = rq.PostalCode,
+                FormattedAddress = rq.FormattedAddress,
+                Location = rq.Location == null ? null : new NpgsqlPoint(rq.Location.Lng, rq.Location.Lat),
+                Provider = rq.Provider
+            };
+        }
+
+        /// <summary>
+        /// Validate person info
+        /// 验证人员信息
+        /// </summary>
+        /// <param name="kind">Kind</param>
+        /// <param name="identifier">Identifier</param>
+        /// <returns>Result</returns>
         public static IActionResult? ValidatePersonInfo(PersonInfoKind kind, string identifier)
         {
             if (identifier.Length is not (>= 1 and <= 256))

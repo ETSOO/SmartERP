@@ -127,6 +127,7 @@ export default function Home() {
         segment: "home/contact",
         title: labels.stakeholders,
         icon: <ContactsIcon />,
+        hidden: true,
         children: [
           {
             segment: "view",

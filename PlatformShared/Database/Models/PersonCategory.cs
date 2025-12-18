@@ -51,6 +51,12 @@ namespace PlatformShared.Database.Models
         public int? ParentId { get; set; }
 
         /// <summary>
+        /// Parent Ids
+        /// 所有父类编号
+        /// </summary>
+        public List<int>? ParentIds { get; set; }
+
+        /// <summary>
         /// Order index
         /// 排序数
         /// </summary>

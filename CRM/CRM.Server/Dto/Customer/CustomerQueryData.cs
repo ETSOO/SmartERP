@@ -1,4 +1,6 @@
-﻿namespace CRM.Server.Dto.Customer
+﻿using PlatformShared.Dto;
+
+namespace CRM.Server.Dto.Customer
 {
     /// <summary>
     /// Customer query data
@@ -17,5 +19,29 @@
         /// 名称
         /// </summary>
         public required string Name { get; init; }
+
+        /// <summary>
+        /// Categories
+        /// 类目
+        /// </summary>
+        public IEnumerable<CategoryItem>? Categories { get; init; }
+
+        /// <summary>
+        /// Preferred Name
+        /// 首选名称
+        /// </summary>
+        public string? PreferredName { get; init; }
+
+        /// <summary>
+        /// Description
+        /// 描述
+        /// </summary>
+        public string? Description { get; init; }
+
+        /// <summary>
+        /// Creation
+        /// 登记时间
+        /// </summary>
+        public DateTimeOffset Creation { get; init; }
     }
 }

@@ -14,11 +14,20 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("Customer");
 
+            g.MapPut("Create", (ICustomerService service, CustomerCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+                .WithDescription("Create customer / 创建客户").WithTags("Customer");
+
             g.MapPost("List", (ICustomerService service, CustomerListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get customer list / 获取客户列表").WithTags("Customer");
 
             g.MapPost("Query", (ICustomerService service, CustomerQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query customer info / 查询客户信息").WithTags("Customer");
+
+            g.MapPut("Update", (ICustomerService service, CustomerUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+                .WithDescription("Update customer / 更新客户").WithTags("Customer");
+
+            g.MapGet("UpdateRead/{id:long}", (ICustomerService service, long id, CancellationToken cancellationToken) => service.UpdateReadAsync(id, cancellationToken))
+                .WithDescription("Get customer update data / 获取客户更新数据").WithTags("Customer");
 
             return builder;
         }

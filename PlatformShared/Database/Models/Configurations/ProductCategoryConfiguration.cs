@@ -28,6 +28,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
+            entity.Property(e => e.ParentIds).HasColumnName("parent_ids");
             entity.Property(e => e.OrderIndex)
                 .HasDefaultValue((short)0)
                 .HasColumnName("order_index");

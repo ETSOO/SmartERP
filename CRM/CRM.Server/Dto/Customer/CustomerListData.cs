@@ -17,5 +17,11 @@
         /// 名称
         /// </summary>
         public required string Name { get; init; }
+
+        /// <summary>
+        /// Preferred Name
+        /// 首选名称
+        /// </summary>
+        public string? PreferredName { get; init; }
     }
 }

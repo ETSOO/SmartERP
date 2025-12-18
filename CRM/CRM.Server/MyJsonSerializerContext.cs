@@ -51,8 +51,11 @@ namespace CRM.Server
     // Customer
     [JsonSerializable(typeof(CustomerListData))]
     [JsonSerializable(typeof(CustomerQueryData[]))]
+    [JsonSerializable(typeof(CustomerUpdateReadData))]
 
+    [JsonSerializable(typeof(CustomerCreateRQ))]
     [JsonSerializable(typeof(CustomerListRQ))]
+    [JsonSerializable(typeof(CustomerUpdateRQ))]
 
     // Dept
     [JsonSerializable(typeof(DeptListData))]
@@ -137,8 +140,11 @@ namespace CRM.Server
     // Supplier
     [JsonSerializable(typeof(SupplierListData))]
     [JsonSerializable(typeof(SupplierQueryData[]))]
+    [JsonSerializable(typeof(SupplierUpdateReadData))]
 
+    [JsonSerializable(typeof(SupplierCreateRQ))]
     [JsonSerializable(typeof(SupplierListRQ))]
+    [JsonSerializable(typeof(SupplierUpdateRQ))]
 
     // System
     [JsonSerializable(typeof(PermissionItem[]))]

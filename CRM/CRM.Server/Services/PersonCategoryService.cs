@@ -67,11 +67,12 @@ namespace CRM.Server.Services
 
             // Validate the parent category
             List<string> names;
+            List<int>? parentIds;
             if (parentId.HasValue)
             {
                 var parent = await _db.PersonCategories(orgId).AsNoTracking()
                     .Where(c => c.Id == parentId.Value)
-                    .Select(c => c.Names)
+                    .Select(c => new { c.Names, c.ParentIds })
                     .FirstOrDefaultAsync(cancellationToken);
 
                 if (parent == null)
@@ -79,12 +80,14 @@ namespace CRM.Server.Services
                     return ApplicationErrors.NoId.AsResult(nameof(rq.ParentId));
                 }
 
-                names = parent;
+                names = parent.Names;
                 names.Add(rq.Name);
+                parentIds = parent.ParentIds == null ? [parentId.Value] : [.. parent.ParentIds, parentId.Value];
             }
             else
             {
                 names = [rq.Name];
+                parentIds = null;
             }
 
             var category = new PersonCategory
@@ -92,6 +95,7 @@ namespace CRM.Server.Services
                 CoreOrganizationId = orgId,
                 IdentityType = rq.IdentityType,
                 ParentId = parentId,
+                ParentIds = parentIds,
                 Names = names,
                 AssignedId = rq.AssignedId?.ToUpper(),
                 Data = rq.Data,
@@ -128,6 +132,11 @@ namespace CRM.Server.Services
                         {
                             q = q.Where(c => c.ParentId == rq.ParentId.Value);
                         }
+                    }
+
+                    if (rq.ParentIdAll.HasValue)
+                    {
+                        q = q.Where(c => c.ParentIds != null && c.ParentIds.Contains(rq.ParentIdAll.Value));
                     }
 
                     if (!string.IsNullOrEmpty(rq.AssignedId))
@@ -323,18 +332,22 @@ namespace CRM.Server.Services
 
             var parentId = rq.ParentId;
             List<string>? parent = null;
+            List<int>? parentIds = null;
 
             if (parentId.HasValue)
             {
-                parent = await _db.PersonCategories(orgId).AsNoTracking()
+                var parentItem = await _db.PersonCategories(orgId).AsNoTracking()
                     .Where(c => c.Id == parentId.Value)
-                    .Select(c => c.Names)
+                    .Select(c => new { c.Names, c.ParentIds })
                     .FirstOrDefaultAsync(cancellationToken);
 
-                if (parent == null)
+                if (parentItem == null)
                 {
                     return ApplicationErrors.NoId.AsResult(nameof(rq.ParentId));
                 }
+
+                parent = parentItem.Names;
+                parentIds = parentItem.ParentIds;
 
                 category.Names = [.. parent, category.Names.Last()];
             }
@@ -350,6 +363,11 @@ namespace CRM.Server.Services
                 if (parentId == null)
                 {
                     category.Names = [category.Names.Last()];
+                    category.ParentIds = null;
+                }
+                else
+                {
+                    category.ParentIds = parentIds == null ? [parentId.Value] : [.. parentIds, parentId.Value];
                 }
             }
 
@@ -374,9 +392,11 @@ namespace CRM.Server.Services
             }
 
             // Dynamic SQL update
+            // Update all descendants' names and parent_ids
             if (!originalNames.SequenceEqual(category.Names))
             {
                 var nextItems = originalNames.Length + 1;
+                var nextParent = category.ParentIds?.Count ?? 0;
                 await _db.Database.ExecuteSqlAsync($"""
                     WITH RECURSIVE descendants AS (
                         SELECT "id" FROM "person_category" WHERE "id" = {rq.Id}
@@ -385,7 +405,8 @@ namespace CRM.Server.Services
                             INNER JOIN descendants d ON c."parent_id" = d."id"
                     )
                     UPDATE "person_category" t
-                        SET "names" = {category.Names} || "names"[{nextItems}:]
+                        SET "names" = {category.Names} || "names"[{nextItems}:],
+                            "category_ids" = {category.ParentIds} || "category_ids"[{nextItems}:]
                     FROM descendants d
                     WHERE t."id" = d."id" AND t."id" <> {rq.Id};
                 """, cancellationToken);

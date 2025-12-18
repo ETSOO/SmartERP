@@ -23,6 +23,12 @@ namespace CRM.Server.RQ.PersonCategory
         public int? ParentId { get; init; }
 
         /// <summary>
+        /// Parent and all descendant category ids
+        /// 父级及所有下级子类编号
+        /// </summary>
+        public int? ParentIdAll { get; init; }
+
+        /// <summary>
         /// Assigned ID
         /// 分配的编号
         /// </summary>
