@@ -1,4 +1,5 @@
 ﻿using com.etsoo.Address.Validators;
+using com.etsoo.AliAmapApi;
 using com.etsoo.ApiModel.Dto.Maps;
 using com.etsoo.ApiModel.Dto.SmartERP;
 using com.etsoo.ApiModel.RQ.Maps;
@@ -40,6 +41,7 @@ namespace Platform.Server.Services
         readonly IDistributedCache _cache;
         readonly IHttpContextAccessor _accessor;
         readonly IMapPlaceService _baidu;
+        readonly IAmapService _amap;
         readonly IBridgeProxy _proxy;
         readonly IAuthCodeService _authCodeService;
         readonly IQueueService _queueService;
@@ -55,7 +57,10 @@ namespace Platform.Server.Services
         /// <param name="cache">Cache</param>
         /// <param name="accessor">HttpContext accessor</param>
         /// <param name="baidu">Baidu Map API</param>
+        /// <param name="amap">Amap API</param>
         /// <param name="proxy">Proxy API</param>
+        /// <param name="authCodeService">Authcode service</param>
+        /// <param name="queueService">Queue service</param>
         public PublicService(MyDbContext db,
             IMyApp app,
             CurrentUserAccessor userAccessor,
@@ -63,6 +68,7 @@ namespace Platform.Server.Services
             IDistributedCache cache,
             IHttpContextAccessor accessor,
             IMapPlaceService baidu,
+            IAmapService amap,
             IBridgeProxy proxy,
             IAuthCodeService authCodeService,
             IQueueService queueService)
@@ -72,6 +78,7 @@ namespace Platform.Server.Services
             _cache = cache;
             _accessor = accessor;
             _baidu = baidu;
+            _amap = amap;
             _proxy = proxy;
             _authCodeService = authCodeService;
             _queueService = queueService;
@@ -422,7 +429,12 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<PlaceCommon>?> QueryPlaceAsync(PlaceQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            if (rq.Provider == ApiProvider.Baidu || (rq.Provider == null && rq.Region?.Equals("CN") is true))
+            if (rq.Provider == ApiProvider.Amap)
+            {
+                // 高德地图
+                return await _amap.SearchCommonPlaceAsync(com.etsoo.AliAmapApi.RQ.SearchPlaceRQ.CreateFrom(rq), cancellationToken);
+            }
+            else if (rq.Provider == ApiProvider.Baidu)
             {
                 // Baidu
                 return await _baidu.SearchCommonPlaceAsync(com.etsoo.BaiduApi.Maps.Place.RQ.SearchPlaceRQ.CreateFrom(rq), cancellationToken);

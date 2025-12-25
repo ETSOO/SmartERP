@@ -198,7 +198,20 @@ export default function Home() {
       app.owns(Permissions.Customer.Query) && {
         segment: "home/customer",
         title: labels.customers,
-        icon: <GroupsIcon />
+        icon: <GroupsIcon />,
+        children: [
+          {
+            segment: "add",
+            title: labels.add,
+            hidden: true
+          },
+          {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
+            hidden: true
+          }
+        ]
       },
       app.owns(Permissions.Product.Query) && {
         segment: "home/product",

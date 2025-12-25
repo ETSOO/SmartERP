@@ -48,6 +48,8 @@ export function PersonData(props: PersonDataProps) {
     "familyName",
     "givenName",
     "logo",
+    "name",
+    "nameB",
     "no",
     "yes"
   );
@@ -100,6 +102,11 @@ export function PersonData(props: PersonDataProps) {
               ? [item.familyName, item.givenName].join(" / ")
               : undefined,
           label: labels.familyName + " / " + labels.givenName
+        },
+        {
+          data: "name",
+          label: (item) => (item.isLegalPerson ? labels.nameB : labels.name),
+          singleRow: (item) => (item.isLegalPerson ? "medium" : "default")
         },
         "preferredName",
         {

@@ -191,7 +191,24 @@ const router = createDynamicRouter([
               return { Component: AllCustomers.default };
             }
           },
-
+          {
+            path: "/home/customer/add",
+            lazy: async () => {
+              const AddCustomer = await import(
+                "./pages/home/customer/AddCustomer"
+              );
+              return { Component: AddCustomer.default };
+            }
+          },
+          {
+            path: "/home/customer/edit/:id",
+            lazy: async () => {
+              const AddCustomer = await import(
+                "./pages/home/customer/AddCustomer"
+              );
+              return { Component: AddCustomer.default };
+            }
+          },
           {
             path: "/home/order",
             lazy: async () => {

@@ -23,11 +23,12 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.9" />
+    <PackageReference Include="com.etsoo.AliAmapApi" Version="1.0.1" />
+    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.10" />
     <PackageReference Include="com.etsoo.ApiProxy" Version="1.0.61" />
-    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.22" />
+    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.25" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.40" />
+    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.42" />
     <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.71" />
     <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.91" />
     <PackageReference Include="com.etsoo.Localization" Version="1.0.39" />
@@ -42,7 +43,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0-preview.4" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.14.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
   </ItemGroup>
 
   <ItemGroup>

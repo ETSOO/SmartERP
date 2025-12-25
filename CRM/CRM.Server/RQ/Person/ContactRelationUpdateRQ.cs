@@ -26,6 +26,12 @@ namespace CRM.Server.RQ.Person
         public PersonRelationType? RelationType { get; init; }
 
         /// <summary>
+        /// Is default relation
+        /// 是否为默认关系
+        /// </summary>
+        public bool? IsDefault { get; init; }
+
+        /// <summary>
         /// Description
         /// 描述
         /// </summary>

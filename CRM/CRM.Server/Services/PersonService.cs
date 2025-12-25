@@ -82,12 +82,20 @@ namespace CRM.Server.Services
                 PersonId = personId,
                 ContactId = contactId,
                 RelationType = rq.RelationType,
+                IsDefault = rq.IsDefault,
                 Description = rq.Description,
                 Data = rq.Data
             };
 
             _db.PersonRelations.Add(cr);
             await _db.SaveChangesAsync(cancellationToken);
+
+            if (rq.IsDefault is true)
+            {
+                await _db.PersonRelations.AsNoTracking()
+                    .Where(r => r.PersonId == personId && r.RelationType == rq.RelationType && r.IsDefault == true && r.ContactId != contactId)
+                    .ExecuteUpdateAsync(r => r.SetProperty(r => r.IsDefault, false), cancellationToken);
+            }
 
             return ActionResult.Succeed(cr.Id);
         }
@@ -1657,6 +1665,18 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.Data)))
             {
                 relation.Data = rq.Data;
+            }
+
+            if (rq.IsModified(nameof(rq.IsDefault)))
+            {
+                relation.IsDefault = rq.IsDefault;
+
+                if (rq.IsDefault is true)
+                {
+                    await _db.PersonRelations.AsNoTracking()
+                        .Where(r => r.PersonId == relation.PersonId && r.RelationType == relation.RelationType && r.IsDefault == true && r.ContactId != relation.Id)
+                        .ExecuteUpdateAsync(r => r.SetProperty(r => r.IsDefault, false), cancellationToken);
+                }
             }
 
             // Save

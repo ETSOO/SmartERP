@@ -6,6 +6,7 @@ using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
+using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Customer;
 using CRM.Server.RQ;
@@ -80,6 +81,11 @@ namespace CRM.Server.Services
                 duplicateItems.Add((PersonInfoKind.Pin, rq.Pin.Trim().ToLower()));
             }
 
+            if (!string.IsNullOrEmpty(rq.TaxId))
+            {
+                duplicateItems.Add((PersonInfoKind.TaxId, rq.TaxId.Trim().ToLower()));
+            }
+
             if (duplicateItems.Count > 0)
             {
                 var duplicateResult = await _db.PersonInfoDuplicateAsync(orgId, null, duplicateItems, cancellationToken);
@@ -87,6 +93,41 @@ namespace CRM.Server.Services
                 {
                     return duplicateResult;
                 }
+            }
+
+            // Contact
+            var contactItems = duplicateItems.RemoveAndReturn(d => d.Item1 == PersonInfoKind.Mobile || d.Item1 == PersonInfoKind.Email);
+            long? contactId = null;
+
+            if (!string.IsNullOrEmpty(rq.Contact) && contactItems.Count > 0)
+            {
+                var cnd = LocalizationUtils.ParseName(rq.Contact);
+
+                var cc = new Person
+                {
+                    OrgId = orgId,
+                    UserId = User.IdInt,
+                    IdentityType = IdentityTypeFlags.Contact | IdentityTypeFlags.Customer,
+                    Name = rq.Contact,
+                    QueryKeyword = cnd.PinyinInitials,
+                    FamilyName = cnd.FamilyName,
+                    GivenName = cnd.GivenName,
+                    LatinGivenName = cnd.LatinGivenName,
+                    LatinFamilyName = cnd.LatinFamilyName,
+
+                    Infos = [.. duplicateItems.Select(d => new PersonInfo
+                    {
+                        Kind = d.Item1,
+                        Identifier = d.Item2,
+                        IsDefault = true
+                    })]
+                };
+
+                _db.Persons.Add(cc);
+
+                await _db.SaveChangesAsync(cancellationToken);
+
+                contactId = cc.Id;
             }
 
             // Parse name
@@ -110,7 +151,14 @@ namespace CRM.Server.Services
                 Description = rq.Description,
                 Birthday = rq.Birthday,
                 Status = rq.Status ?? EntityStatus.Normal,
-                CategoryIds = rq.Categories?.ToList()
+                CategoryIds = rq.Categories?.ToList(),
+
+                Infos = [.. duplicateItems.Select(d => new PersonInfo
+                    {
+                        Kind = d.Item1,
+                        Identifier = d.Item2,
+                        IsDefault = true
+                    })]
             };
 
             if (rq.Tags?.Any() is true)
@@ -120,29 +168,22 @@ namespace CRM.Server.Services
                 customer.Tags = [.. tagIds];
             }
 
-            _db.Persons.Add(customer);
-
-            await _db.SaveChangesAsync(cancellationToken);
-
-            // Contact info
-            foreach (var item in duplicateItems)
-            {
-                var info = new PersonInfo
-                {
-                    PersonId = customer.Id,
-                    Kind = item.Item1,
-                    Identifier = item.Item2,
-                    IsDefault = true
-                };
-                _db.PersonInfos.Add(info);
-            }
-
-            // Address
             if (rq.Address != null)
             {
                 var addr = rq.Address.CreateAddressFromRQ(customer.Id);
-                _db.PersonAddresses.Add(addr);
+                customer.Addresses = [addr];
             }
+
+            if (contactId != null)
+            {
+                customer.Contacts = [new PersonRelation { 
+                    RelationType = PersonRelationType.Unknown,
+                    ContactId = contactId.Value,
+                    IsDefault = true
+                }];
+            }
+
+            _db.Persons.Add(customer);
 
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
@@ -262,6 +303,7 @@ namespace CRM.Server.Services
                 {
                     Id = p.Id,
                     Name = p.Name,
+                    AssignedId = p.AssignedId,
                     Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
                     PreferredName = p.PreferredName,
                     Description = p.Description,

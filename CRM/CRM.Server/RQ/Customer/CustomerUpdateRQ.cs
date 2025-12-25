@@ -44,9 +44,15 @@ namespace CRM.Server.RQ.Customer
 
         /// <summary>
         /// PIN
-        /// 身份证号码
+        /// 身份编号
         /// </summary>
         public string? Pin { get; init; }
+
+        /// <summary>
+        /// Tax ID
+        /// 税号
+        /// </summary>
+        public string? TaxId { get; init; }
 
         /// <summary>
         /// Birthday

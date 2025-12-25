@@ -1,3 +1,4 @@
+using com.etsoo.AliAmapApi;
 using com.etsoo.AlipayApi;
 using com.etsoo.ApiModel;
 using com.etsoo.ApiProxy.Configs;
@@ -236,6 +237,10 @@ services.AddHttpClient<IBridgeProxy, BridgeProxy>();
 // Baidu APIs
 services.Configure<MapsOptions>(configuration.GetSection("BaiduMaps"));
 services.AddHttpClient<IMapPlaceService, MapPlaceService>();
+
+// Amap APIs
+services.Configure<AmapOptions>(configuration.GetSection("Amap"));
+services.AddHttpClient<IAmapService, AmapService>();
 
 // Authentication is the process of determining a user's identity.
 // Authorization is the process of determining whether a user has access to a resource.

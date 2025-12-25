@@ -28,6 +28,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+            entity.Property(e => e.IsDefault).HasColumnName("is_default");
 
             entity.HasOne(d => d.Contact).WithMany(p => p.ContactOwners)
                 .HasForeignKey(d => d.ContactId)

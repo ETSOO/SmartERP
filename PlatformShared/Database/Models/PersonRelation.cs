@@ -134,6 +134,12 @@
         public DateTimeOffset Creation { get; set; }
 
         /// <summary>
+        /// Is default relation
+        /// 是否为默认关系
+        /// </summary>
+        public bool? IsDefault {  get; set; }
+
+        /// <summary>
         /// Contact person
         /// 联系人
         /// </summary>

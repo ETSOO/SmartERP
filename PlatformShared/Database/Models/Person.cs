@@ -587,7 +587,7 @@ namespace PlatformShared.Database.Models
         /// Addresses
         /// 所有地址
         /// </summary>
-        public ICollection<PersonAddress> Addresses { get; } = default!;
+        public ICollection<PersonAddress> Addresses { get; set; } = default!;
 
         /// <summary>
         /// Direct reports
@@ -599,7 +599,7 @@ namespace PlatformShared.Database.Models
         /// Contacts
         /// 联系人
         /// </summary>
-        public ICollection<PersonRelation> Contacts { get; } = default!;
+        public ICollection<PersonRelation> Contacts { get; set; } = default!;
 
         /// <summary>
         /// Contact owners

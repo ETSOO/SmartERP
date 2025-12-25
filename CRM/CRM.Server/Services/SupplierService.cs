@@ -262,6 +262,7 @@ namespace CRM.Server.Services
                 {
                     Id = p.Id,
                     Name = p.Name,
+                    AssignedId = p.AssignedId,
                     Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
                     PreferredName = p.PreferredName,
                     Description = p.Description,

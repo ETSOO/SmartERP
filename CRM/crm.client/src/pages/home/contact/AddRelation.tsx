@@ -1,11 +1,6 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
-import {
-  EditPage,
-  InputField,
-  InputTipField,
-  TagList
-} from "@etsoo/materialui";
+import { EditPage, InputField, TagList } from "@etsoo/materialui";
 import {
   ReactUtils,
   useParamsEx,
@@ -16,7 +11,6 @@ import { useFormik } from "formik";
 import Grid from "@mui/material/Grid";
 import {
   ContactCreateRQ,
-  PersonDuplicateTestData,
   PersonInfoKind,
   PersonRelationType
 } from "@etsoo/smarterp-crm";
@@ -24,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ButtonPersonCategories,
   ButtonRadioContactRelations,
+  EntityDuplicateTest,
   PersonGenderList,
   PersonTitleList
 } from "@etsoo/smarterp-crm/components";
@@ -104,23 +99,6 @@ export default function AddRelation() {
     }
   });
 
-  // Duplicate test helper
-  const duplicateTestHelper = async (
-    identifier: string,
-    infoKind?: PersonInfoKind
-  ): Promise<[PersonDuplicateTestData[]?, string?]> => {
-    const result = await app.personApi.duplicateTest(
-      { infoKind, identifier },
-      { showLoading: false }
-    );
-    if (result == null || result.length === 0) return [];
-    return [result, result.length.toString()];
-  };
-
-  function itemLabel(item: PersonDuplicateTestData) {
-    return `[${app.person.getIdentityType(item.identityType)}] ${item.name}`;
-  }
-
   // Page data hook
   usePageDataEmpty(app);
 
@@ -140,12 +118,7 @@ export default function AddRelation() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <InputTipField<PersonDuplicateTestData>
-          componentProps={{
-            loadData: (value) => duplicateTestHelper(value),
-            itemLabel
-          }}
-          name="name"
+        <EntityDuplicateTest
           slotProps={{ htmlInput: { maxLength: 128 } }}
           label={labels.name}
           inputRef={refs.name}
@@ -173,35 +146,20 @@ export default function AddRelation() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <InputTipField<PersonDuplicateTestData>
-          component="mobile"
-          componentProps={{
-            loadData: (value) =>
-              duplicateTestHelper(value, PersonInfoKind.Mobile),
-            itemLabel
-          }}
+        <EntityDuplicateTest
+          infoKind={PersonInfoKind.Mobile}
           inputRef={refs.mobile}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
-        <InputTipField<PersonDuplicateTestData>
-          component="email"
-          componentProps={{
-            loadData: (value) =>
-              duplicateTestHelper(value, PersonInfoKind.Email),
-            itemLabel
-          }}
+        <EntityDuplicateTest
+          infoKind={PersonInfoKind.Email}
           inputRef={refs.email}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <InputTipField<PersonDuplicateTestData>
-          component="phone"
-          componentProps={{
-            loadData: (value) =>
-              duplicateTestHelper(value, PersonInfoKind.Phone),
-            itemLabel
-          }}
+        <EntityDuplicateTest
+          infoKind={PersonInfoKind.Phone}
           inputRef={refs.phone}
         />
       </Grid>

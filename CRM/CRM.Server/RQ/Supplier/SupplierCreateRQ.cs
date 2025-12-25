@@ -55,22 +55,16 @@ namespace CRM.Server.RQ.Supplier
         public string? Phone { get; init; }
 
         /// <summary>
-        /// Mobile
-        /// 手机
-        /// </summary>
-        public string? Mobile { get; init; }
-
-        /// <summary>
-        /// Email
-        /// 电子邮箱
-        /// </summary>
-        public string? Email { get; init; }
-
-        /// <summary>
         /// PIN
-        /// 身份证号码
+        /// 身份编号
         /// </summary>
         public string? Pin { get; init; }
+
+        /// <summary>
+        /// Tax ID
+        /// 税号
+        /// </summary>
+        public string? TaxId { get; init; }
 
         /// <summary>
         /// Address
@@ -89,6 +83,24 @@ namespace CRM.Server.RQ.Supplier
         /// 关键词
         /// </summary>
         public IEnumerable<string>? Tags { get; init; }
+
+        /// <summary>
+        /// Contact
+        /// 联系人
+        /// </summary>
+        public string? Contact { get; init; }
+
+        /// <summary>
+        /// Contact mobile
+        /// 联系人手机
+        /// </summary>
+        public string? Mobile { get; init; }
+
+        /// <summary>
+        /// Contact email
+        /// 联系人电子邮箱
+        /// </summary>
+        public string? Email { get; init; }
 
         /// <summary>
         /// Status
@@ -128,6 +140,11 @@ namespace CRM.Server.RQ.Supplier
                 return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
+            if (Contact != null && Contact.Length is not (>= 1 and <= 128))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Description));
+            }
+
             if (Phone != null)
             {
                 if (Phone.Length is < 1 or > 20)
@@ -162,6 +179,11 @@ namespace CRM.Server.RQ.Supplier
                 var emailResult = RQExtentions.ValidatePersonInfo(PersonInfoKind.Email, Email);
                 if (emailResult != null)
                     return emailResult;
+            }
+
+            if ((Mobile != null || Email != null) && Contact == null)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Contact));
             }
 
             if (Address != null)

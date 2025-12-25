@@ -1,4 +1,5 @@
-﻿using PlatformShared.Dto;
+﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Dto;
 
 namespace CRM.Server.Dto.Supplier
 {
@@ -21,6 +22,12 @@ namespace CRM.Server.Dto.Supplier
         public required string Name { get; init; }
 
         /// <summary>
+        /// Assigend id
+        /// 分配的编号
+        /// </summary>
+        public string? AssignedId { get; init; }
+
+        /// <summary>
         /// Categories
         /// 类目
         /// </summary>
@@ -37,6 +44,12 @@ namespace CRM.Server.Dto.Supplier
         /// 描述
         /// </summary>
         public string? Description { get; init; }
+
+        /// <summary>
+        /// Status
+        /// 状况
+        /// </summary>
+        public EntityStatus Status { get; init; }
 
         /// <summary>
         /// Creation
