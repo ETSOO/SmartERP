@@ -8,11 +8,10 @@ import Grid from "@mui/material/Grid";
 import { StatusList } from "@etsoo/smarterp-core/components";
 import { IdActionResult, Utils } from "@etsoo/shared";
 import {
-  CustomerCreateRQ,
-  CustomerType,
-  CustomerUpdateRQ,
   FeatureTagKind,
-  PersonInfoKind
+  PersonInfoKind,
+  SupplierCreateRQ,
+  SupplierUpdateRQ
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
 import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
@@ -24,7 +23,7 @@ import {
 } from "@etsoo/smarterp-crm/components";
 import { AddressCreator } from "../../../components/person/AddressCreator";
 
-export default function AddCustomer() {
+export default function AddSupplier() {
   // Route
   const navigate = useNavigate();
   const { id } = useParamsEx({
@@ -50,12 +49,11 @@ export default function AddCustomer() {
   );
 
   // Type
-  type DataType = CustomerCreateRQ;
+  type DataType = SupplierCreateRQ;
 
   // State
   const [data, setData] = React.useState<DataType>({
-    isLegalPerson:
-      app.userData?.system?.mainCustomerType !== CustomerType.Individual,
+    isLegalPerson: true,
     name: ""
   });
 
@@ -88,7 +86,7 @@ export default function AddCustomer() {
       let result: IdActionResult | undefined;
       let redirectUrl: string;
       if (id) {
-        const rq: CustomerUpdateRQ = {
+        const rq: SupplierUpdateRQ = {
           ...c,
           id
         };
@@ -103,9 +101,9 @@ export default function AddCustomer() {
 
         redirectUrl = "./../..";
 
-        result = await app.customerApi.update(rq);
+        result = await app.supplierApi.update(rq);
       } else {
-        const rq: CustomerCreateRQ = {
+        const rq: SupplierCreateRQ = {
           ...c
         };
 
@@ -118,7 +116,7 @@ export default function AddCustomer() {
 
         redirectUrl = "./..";
 
-        result = await app.customerApi.create(rq);
+        result = await app.supplierApi.create(rq);
       }
 
       if (result == null) return;
@@ -135,7 +133,7 @@ export default function AddCustomer() {
   // Load data
   const reloadData = React.useCallback(async () => {
     if (!id) return;
-    const result = await app.customerApi.updateRead(id);
+    const result = await app.supplierApi.updateRead(id);
     if (result == null) return;
 
     ReactUtils.updateRefs(refs, result);
@@ -257,7 +255,7 @@ export default function AddCustomer() {
         <ButtonPersonCategories
           fullWidth
           value={formik.values.categories ?? []}
-          identityType={IdentityTypeFlags.Customer}
+          identityType={IdentityTypeFlags.Supplier}
           onValueChange={(ids) => formik.setFieldValue("categories", ids)}
         />
       </Grid>
@@ -271,7 +269,7 @@ export default function AddCustomer() {
           loadData={(keyword, maxItems) =>
             app.tagApi.list(
               {
-                kind: FeatureTagKind.Customer,
+                kind: FeatureTagKind.Supplier,
                 keyword,
                 queryPaging: maxItems
               },

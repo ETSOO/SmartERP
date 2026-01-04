@@ -25,14 +25,15 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import { Permissions } from "@etsoo/smarterp-crm";
+import { IdentityTypeFlags } from "@etsoo/appscript";
 
 const template = {
-  name: "string",
+  keyword: "string",
   info: "string",
   city: "string"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export default function AllSuppliers() {
   // Route
   const navigate = useNavigate();
 
@@ -46,14 +47,9 @@ export default function AllDepts() {
     "confirmAction",
     "contactInfo",
     "creation",
+    "description",
     "edit",
-    "entityStatus",
-    "identityType",
-    "jobTitle",
     "personName",
-    "reportTo",
-    "role",
-    "statusNormal",
     "view"
   );
 
@@ -75,7 +71,7 @@ export default function AllDepts() {
           <React.Fragment>
             {app.owns(Permissions.Org.Manage) && (
               <ButtonLink
-                href="./category"
+                href={`./../contact/category?identityType=${IdentityTypeFlags.Supplier}`}
                 size="small"
                 variant="outlined"
                 startIcon={<CategoryIcon />}
@@ -96,13 +92,13 @@ export default function AllDepts() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./view/${data.id}`)}
+      quickAction={(data) => navigate(`./../contact/view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
           label={labels.personName}
-          name="keywords"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
         />,
         <SearchField
           label={labels.contactInfo}
@@ -128,7 +124,18 @@ export default function AllDepts() {
           field: "name",
           header: labels.personName,
           sortable: true,
+          width: 240,
           cellBoxStyle: GridDeletedCellBoxStyle
+        },
+        {
+          header: labels.categories,
+          width: 160,
+          valueFormatter: ({ data }) =>
+            data?.categories?.map((c) => c.names.join(" -> ")).join(", ")
+        },
+        {
+          field: "description",
+          header: labels.description
         },
         {
           field: "assignedId",
@@ -162,7 +169,10 @@ export default function AllDepts() {
                 <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
                   <EditIcon />
                 </IconButtonLink>
-                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
+                <IconButtonLink
+                  title={labels.view}
+                  href={`./../contact/view/${data.id}`}
+                >
                   <ArticleIcon />
                 </IconButtonLink>
               </React.Fragment>

@@ -5,10 +5,12 @@ using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
+using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Dto.Customer;
+using CRM.Server.Dto.Person;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.RQ;
-using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Supplier;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
@@ -80,6 +82,11 @@ namespace CRM.Server.Services
                 duplicateItems.Add((PersonInfoKind.Pin, rq.Pin.Trim().ToLower()));
             }
 
+            if (!string.IsNullOrEmpty(rq.TaxId))
+            {
+                duplicateItems.Add((PersonInfoKind.TaxId, rq.TaxId.Trim().ToLower()));
+            }
+
             if (duplicateItems.Count > 0)
             {
                 var duplicateResult = await _db.PersonInfoDuplicateAsync(orgId, null, duplicateItems, cancellationToken);
@@ -89,28 +96,71 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Contact
+            var contactItems = duplicateItems.RemoveAndReturn(d => d.Item1 == PersonInfoKind.Mobile || d.Item1 == PersonInfoKind.Email);
+            long? contactId = null;
+
+            if (!string.IsNullOrEmpty(rq.Contact) && contactItems.Count > 0)
+            {
+                var cnd = LocalizationUtils.ParseName(rq.Contact);
+
+                var cc = new Person
+                {
+                    OrgId = orgId,
+                    UserId = User.Oid,
+                    IdentityType = IdentityTypeFlags.None,
+                    Name = rq.Contact,
+                    QueryKeyword = cnd.PinyinInitials,
+                    FamilyName = cnd.FamilyName,
+                    GivenName = cnd.GivenName,
+                    LatinGivenName = cnd.LatinGivenName,
+                    LatinFamilyName = cnd.LatinFamilyName,
+
+                    Infos = [.. contactItems.Select(d => new PersonInfo
+                    {
+                        Kind = d.Item1,
+                        Identifier = d.Item2,
+                        IsDefault = true
+                    })]
+                };
+
+                _db.Persons.Add(cc);
+
+                await _db.SaveChangesAsync(cancellationToken);
+
+                contactId = cc.Id;
+            }
+
             // Parse name
             var nd = LocalizationUtils.ParseName(rq.Name);
 
             // Create supplier
+            var lp = rq.IsLegalPerson;
             var supplier = new Person
             {
                 OrgId = orgId,
                 UserId = User.Oid,
                 IdentityType = IdentityTypeFlags.Supplier,
-                IsLegalPerson = rq.IsLegalPerson,
+                IsLegalPerson = lp,
                 Name = rq.Name,
                 QueryKeyword = nd.PinyinInitials,
-                FamilyName = nd.FamilyName,
-                GivenName = nd.GivenName,
-                LatinGivenName = nd.LatinGivenName,
-                LatinFamilyName = nd.LatinFamilyName,
+                FamilyName = lp ? null : nd.FamilyName,
+                GivenName = lp ? null : nd.GivenName,
+                LatinGivenName = lp ? null : nd.LatinGivenName,
+                LatinFamilyName = lp ? null : nd.LatinFamilyName,
                 PreferredName = rq.PreferredName,
                 AssignedId = rq.AssignedId,
                 Description = rq.Description,
                 Birthday = rq.Birthday,
                 Status = rq.Status ?? EntityStatus.Normal,
-                CategoryIds = rq.Categories?.ToList()
+                CategoryIds = rq.Categories?.ToList(),
+
+                Infos = [.. duplicateItems.Select(d => new PersonInfo
+                    {
+                        Kind = d.Item1,
+                        Identifier = d.Item2,
+                        IsDefault = true
+                    })]
             };
 
             if (rq.Tags?.Any() is true)
@@ -120,29 +170,22 @@ namespace CRM.Server.Services
                 supplier.Tags = [.. tagIds];
             }
 
-            _db.Persons.Add(supplier);
-
-            await _db.SaveChangesAsync(cancellationToken);
-
-            // Contact info
-            foreach (var item in duplicateItems)
-            {
-                var info = new PersonInfo
-                {
-                    PersonId = supplier.Id,
-                    Kind = item.Item1,
-                    Identifier = item.Item2,
-                    IsDefault = true
-                };
-                _db.PersonInfos.Add(info);
-            }
-
-            // Address
             if (rq.Address != null)
             {
                 var addr = rq.Address.CreateAddressFromRQ(supplier.Id);
-                _db.PersonAddresses.Add(addr);
+                supplier.Addresses = [addr];
             }
+
+            if (contactId != null)
+            {
+                supplier.Contacts = [new PersonRelation {
+                    RelationType = PersonRelationType.Unknown,
+                    ContactId = contactId.Value,
+                    IsDefault = true
+                }];
+            }
+
+            _db.Persons.Add(supplier);
 
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
@@ -231,20 +274,19 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Query supplier JSON data
-        /// 查询供应商JSON数据
+        /// Query supplier
+        /// 查询供应商
         /// </summary>
         /// <param name="rq">Request data</param>
-        /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task QueryAsync(SupplierQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public async Task<SupplierQueryData[]> QueryAsync(SupplierQueryRQ rq, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
 
             await _commonService.UpdatePersonTagAsync(rq, orgId, cancellationToken);
 
-            await CreateQuery(rq, (q) =>
+            return await CreateQuery(rq, (q) =>
             {
                 if (!string.IsNullOrEmpty(rq.AssignedId))
                 {
@@ -259,15 +301,15 @@ namespace CRM.Server.Services
 
                 return q;
             }).Select(p => new SupplierQueryData
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    AssignedId = p.AssignedId,
-                    Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
-                    PreferredName = p.PreferredName,
-                    Description = p.Description,
-                    Creation = p.Creation
-                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+            {
+                Id = p.Id,
+                Name = p.Name,
+                AssignedId = p.AssignedId,
+                Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
+                PreferredName = p.PreferredName,
+                Description = p.Description,
+                Creation = p.Creation
+            }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
@@ -288,86 +330,63 @@ namespace CRM.Server.Services
             // Organization id
             var orgId = User.OrganizationInt;
 
-            var customer = await _db.Suppliers(orgId)
+            var supplier = await _db.Suppliers(orgId)
                 .Where(p => p.Id == rq.Id)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (customer == null)
+            if (supplier == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
 
             if (rq.IsModified(nameof(rq.IsLegalPerson)) && rq.IsLegalPerson.HasValue)
             {
-                customer.IsLegalPerson = rq.IsLegalPerson.Value;
+                supplier.IsLegalPerson = rq.IsLegalPerson.Value;
             }
 
             if (rq.IsModified(nameof(rq.Name)) && !string.IsNullOrEmpty(rq.Name))
             {
-                customer.Name = rq.Name;
+                supplier.Name = rq.Name;
             }
 
             if (rq.IsModified(nameof(rq.PreferredName)))
             {
-                customer.PreferredName = rq.PreferredName;
+                supplier.PreferredName = rq.PreferredName;
             }
 
             if (rq.IsModified(nameof(rq.AssignedId)))
             {
-                customer.AssignedId = rq.AssignedId?.ToUpper();
+                supplier.AssignedId = rq.AssignedId?.ToUpper();
             }
 
             if (rq.IsModified(nameof(rq.Description)))
             {
-                customer.Description = rq.Description;
+                supplier.Description = rq.Description;
             }
 
             if (rq.IsModified(nameof(rq.Birthday)))
             {
-                customer.Birthday = rq.Birthday;
+                supplier.Birthday = rq.Birthday;
             }
 
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
             {
-                customer.Status = rq.Status.Value;
+                supplier.Status = rq.Status.Value;
             }
 
             if (rq.IsModified(nameof(rq.Categories)))
             {
-                customer.CategoryIds = rq.Categories?.ToList();
+                supplier.CategoryIds = rq.Categories?.ToList();
             }
 
             if (rq.IsModified(nameof(rq.Pin)))
             {
-                var pinInfo = await _db.PersonInfos
-                    .Where(i => i.PersonId == rq.Id && i.Kind == PersonInfoKind.Pin)
-                    .FirstOrDefaultAsync(cancellationToken);
+                await _commonService.AddOrUpdatePersonInfoAsync(rq.Id, PersonInfoKind.Pin, rq.Pin, cancellationToken);
+            }
 
-                if (string.IsNullOrEmpty(rq.Pin))
-                {
-                    if (pinInfo != null)
-                    {
-                        _db.PersonInfos.Remove(pinInfo);
-                    }
-                }
-                else
-                {
-                    if (pinInfo != null)
-                    {
-                        pinInfo.Identifier = rq.Pin.Trim().ToLower();
-                    }
-                    else
-                    {
-                        pinInfo = new PersonInfo
-                        {
-                            PersonId = rq.Id,
-                            Kind = PersonInfoKind.Pin,
-                            Identifier = rq.Pin.Trim().ToLower(),
-                            IsDefault = true
-                        };
-                        _db.PersonInfos.Add(pinInfo);
-                    }
-                }
+            if (rq.IsModified(nameof(rq.TaxId)))
+            {
+                await _commonService.AddOrUpdatePersonInfoAsync(rq.Id, PersonInfoKind.TaxId, rq.TaxId, cancellationToken);
             }
 
             if (rq.IsModified(nameof(rq.Tags)))
@@ -376,11 +395,11 @@ namespace CRM.Server.Services
                 {
                     var tagKind = _commonService.GetTagKind(IdentityTypeFlags.Supplier);
                     var tagIds = await _commonService.AddTagsAsync(tagKind, rq.Tags, cancellationToken);
-                    customer.Tags = [.. tagIds];
+                    supplier.Tags = [.. tagIds];
                 }
                 else
                 {
-                    customer.Tags = null;
+                    supplier.Tags = null;
                 }
             }
 
@@ -400,7 +419,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<SupplierUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
         {
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Customer.Edit, cancellationToken))
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Supplier.Edit, cancellationToken))
             {
                 return null;
             }
@@ -421,7 +440,15 @@ namespace CRM.Server.Services
                     Status = p.Status,
                     Categories = p.CategoryIds,
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
-                    Pin = p.Infos.Where(i => i.PersonId == p.Id && i.Kind == PersonInfoKind.Pin).Select(i => i.Identifier).FirstOrDefault()
+                    Infos = p.Infos
+                        .Where(i => i.PersonId == p.Id && (i.Kind == PersonInfoKind.Pin || i.Kind == PersonInfoKind.TaxId))
+                        .Select(i => new PersonInfoUpdateItem
+                        {
+                            Kind = i.Kind,
+                            Identifier = MyDbFunctions.HideData(i.Identifier, default),
+                            IsDefault = i.IsDefault
+                        })
+                        .ToList()
                 }).FirstOrDefaultAsync(cancellationToken);
         }
     }

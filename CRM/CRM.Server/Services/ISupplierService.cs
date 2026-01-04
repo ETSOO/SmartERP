@@ -9,7 +9,7 @@ namespace CRM.Server.Services
     {
         Task<IActionResult> CreateAsync(SupplierCreateRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(SupplierListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
-        Task QueryAsync(SupplierQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
+        Task<SupplierQueryData[]> QueryAsync(SupplierQueryRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(SupplierUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<SupplierUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default);
     }

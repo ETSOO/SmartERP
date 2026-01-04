@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using CRM.Server.Dto.Person;
 
 namespace CRM.Server.Dto.Supplier
 {
@@ -67,6 +68,12 @@ namespace CRM.Server.Dto.Supplier
         /// 关键词
         /// </summary>
         public IEnumerable<string>? Tags { get; init; }
+
+        /// <summary>
+        /// Infos
+        /// 信息项目
+        /// </summary>
+        public required IEnumerable<PersonInfoUpdateItem> Infos { get; init; }
 
         /// <summary>
         /// Status

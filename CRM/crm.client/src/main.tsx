@@ -296,6 +296,24 @@ const router = createDynamicRouter([
               return { Component: AllSuppliers.default };
             }
           },
+          {
+            path: "/home/supplier/add",
+            lazy: async () => {
+              const AddSupplier = await import(
+                "./pages/home/supplier/AddSupplier"
+              );
+              return { Component: AddSupplier.default };
+            }
+          },
+          {
+            path: "/home/supplier/edit/:id",
+            lazy: async () => {
+              const AddSupplier = await import(
+                "./pages/home/supplier/AddSupplier"
+              );
+              return { Component: AddSupplier.default };
+            }
+          },
 
           {
             path: "/home/inventory",

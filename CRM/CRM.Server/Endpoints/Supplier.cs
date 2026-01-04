@@ -20,7 +20,7 @@ namespace CRM.Server.Endpoints
             g.MapPost("List", (ISupplierService service, SupplierListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get supplier list / 获取供应商列表").WithTags("Supplier");
 
-            g.MapPost("Query", (ISupplierService service, SupplierQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+            g.MapPost("Query", (ISupplierService service, SupplierQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query supplier info / 查询供应商信息").WithTags("Supplier");
 
             g.MapPut("Update", (ISupplierService service, SupplierUpdateRQ rq,  CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))

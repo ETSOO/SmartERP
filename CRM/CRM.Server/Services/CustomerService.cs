@@ -1,5 +1,4 @@
 ﻿using com.etsoo.CoreFramework.Application;
-using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
@@ -274,8 +273,8 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Query customer JSON data
-        /// 查询客户JSON数据
+        /// Query customer
+        /// 查询客户
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>

@@ -28,12 +28,12 @@ import { Permissions } from "@etsoo/smarterp-crm";
 import { IdentityTypeFlags } from "@etsoo/appscript";
 
 const template = {
-  name: "string",
+  keyword: "string",
   info: "string",
   city: "string"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export default function AllCustomers() {
   // Route
   const navigate = useNavigate();
 
@@ -97,8 +97,8 @@ export default function AllDepts() {
       fields={(data) => [
         <SearchField
           label={labels.personName}
-          name="keywords"
-          defaultValue={data.name}
+          name="keyword"
+          defaultValue={data.keyword}
         />,
         <SearchField
           label={labels.contactInfo}
