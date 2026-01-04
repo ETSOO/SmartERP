@@ -161,14 +161,22 @@ namespace CRM.Server.Services
             return CreateAsync(rq.ProfileFromTask(User.Oid), null, cancellationToken);
         }
 
-        private IQueryable<PersonProfile> CreateQuery(PersonProfileListRQ rq, Func<IQueryable<PersonProfile>, IQueryable<PersonProfile>>? filters = null)
+        private IQueryable<PersonProfile> CreateQuery(PersonProfileListRQ rq, IdentityTypeFlags identity, bool all, Func<IQueryable<PersonProfile>, IQueryable<PersonProfile>>? filters = null)
         {
             var query = _db.UserProfiles(User).AsNoTracking()
                 .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
                 {
                     if (rq.IdentityType.HasValue)
                     {
-                        q = q.Where(p => (p.Person.IdentityType & rq.IdentityType.Value) > 0);
+                        var value = rq.IdentityType.Value;
+                        if (value == IdentityTypeFlags.None)
+                            q = q.Where(p => p.Person.IdentityType == IdentityTypeFlags.None);
+                        else
+                            q = q.Where(p => (p.Person.IdentityType & value) == value);
+                    }
+                    else if (!all)
+                    {
+                        q = q.Where(p => (p.Person.IdentityType & identity) > 0);
                     }
 
                     if (rq.PersonId.HasValue)
@@ -373,21 +381,20 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task ListAsync(PersonProfileListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var identityType = await _commonService.GetProfileIdentityTypeAsync(cancellationToken);
+            var (identityType, all) = await _commonService.GetProfileIdentityTypeAsync(cancellationToken);
             if (identityType == IdentityTypeFlags.None)
             {
                 return;
             }
 
-            rq.IdentityType = _commonService.MergeIdentityType(rq.IdentityType, identityType);
-            if (rq.IdentityType == IdentityTypeFlags.None)
+            if (rq.IdentityType.HasValue && (identityType & rq.IdentityType.Value) == 0)
             {
                 return;
             }
 
             FormatListRQ(rq);
 
-            var query = CreateQuery(rq);
+            var query = CreateQuery(rq, identityType, all);
 
             await query.Select(p => new PersonProfileListData
             {
@@ -420,21 +427,20 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task QueryAsync(PersonProfileQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            var identityType = await _commonService.GetProfileIdentityTypeAsync(cancellationToken);
+            var (identityType, all) = await _commonService.GetProfileIdentityTypeAsync(cancellationToken);
             if (identityType == IdentityTypeFlags.None)
             {
                 return;
             }
 
-            rq.IdentityType = _commonService.MergeIdentityType(rq.IdentityType, identityType);
-            if (rq.IdentityType == IdentityTypeFlags.None)
+            if (rq.IdentityType.HasValue && rq.IdentityType.Value != IdentityTypeFlags.None && (identityType & rq.IdentityType.Value) == 0)
             {
                 return;
             }
 
             FormatListRQ(rq);
 
-            var query = CreateQuery(rq, (q) =>
+            var query = CreateQuery(rq, identityType, all, (q) =>
             {
                 if (!string.IsNullOrEmpty(rq.Location))
                 {

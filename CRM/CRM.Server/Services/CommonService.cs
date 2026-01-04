@@ -6,6 +6,7 @@ using Npgsql;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
+using System.Threading;
 
 namespace CRM.Server.Services
 {
@@ -27,31 +28,82 @@ namespace CRM.Server.Services
             _userAccessor = userAccessor;
         }
 
-        private static IdentityTypeFlags GetIdentityType(bool[] permissions)
+        private static (IdentityTypeFlags, bool) GetIdentityType(bool[] permissions)
         {
             var type = IdentityTypeFlags.None;
+            var count = 0;
 
             if (permissions[0])
-                type |= IdentityTypeFlags.User;
-
-            if (permissions[1])
-                type |= IdentityTypeFlags.Customer;
-
-            if (permissions[2])
-                type |= IdentityTypeFlags.Supplier;
-
-            if (permissions[3])
-                type |= IdentityTypeFlags.Org;
-
-            if (permissions[4])
-                type |= IdentityTypeFlags.Dept;
-
-            if (type != IdentityTypeFlags.None)
             {
-                type |= IdentityTypeFlags.Contact;
+                type |= IdentityTypeFlags.User;
+                count++;
             }
 
-            return type;
+            if (permissions[1])
+            {
+                type |= IdentityTypeFlags.Customer;
+                count++;
+            }
+
+            if (permissions[2])
+            {
+                type |= IdentityTypeFlags.Supplier;
+                count++;
+            }
+
+            if (permissions[3])
+            {
+                type |= IdentityTypeFlags.Org;
+                count++;
+            }
+
+            if (permissions[4])
+            {
+                type |= IdentityTypeFlags.Dept;
+                count++;
+            }
+
+            return (type, count == permissions.Length);
+        }
+
+        public async Task AddOrUpdatePersonInfoAsync(long personId, PersonInfoKind kind, string? identifier, CancellationToken cancellationToken = default)
+        {
+            var pinInfo = await _db.PersonInfos
+                .Where(i => i.PersonId == personId && i.Kind == kind)
+                .OrderByDescending(i => i.IsDefault)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            identifier = identifier?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(identifier))
+            {
+                if (pinInfo != null)
+                {
+                    _db.PersonInfos.Remove(pinInfo);
+                }
+            }
+            else
+            {
+                if (pinInfo != null)
+                {
+                    pinInfo.Identifier = identifier;
+
+                    // Remove verification status
+                    pinInfo.IsVerified = null;
+                }
+                else
+                {
+                    pinInfo = new PersonInfo
+                    {
+                        PersonId = personId,
+                        Kind = kind,
+                        Identifier = identifier,
+                        IsDefault = true
+                    };
+
+                    _db.PersonInfos.Add(pinInfo);
+                }
+            }
         }
 
         /// <summary>
@@ -81,7 +133,7 @@ namespace CRM.Server.Services
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IdentityTypeFlags> GetPersonIdentityTypeAsync(CancellationToken cancellationToken = default)
+        public async Task<(IdentityTypeFlags, bool)> GetPersonIdentityTypeAsync(CancellationToken cancellationToken = default)
         {
             short[] ids = [
                 (short)Permissions.User.Query,
@@ -102,7 +154,7 @@ namespace CRM.Server.Services
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IdentityTypeFlags> GetProfileIdentityTypeAsync(CancellationToken cancellationToken = default)
+        public async Task<(IdentityTypeFlags, bool)> GetProfileIdentityTypeAsync(CancellationToken cancellationToken = default)
         {
             short[] ids = [
                 (short)Permissions.User.QueryProfile,
@@ -225,25 +277,6 @@ namespace CRM.Server.Services
         public Task<bool[]> HasPermissionsAsync(IEnumerable<short> permissionItemIds, CancellationToken cancellationToken = default)
         {
             return _db.HasPermissionsAsync(_userAccessor.UserSafe.Oid, permissionItemIds, cancellationToken);
-        }
-
-        /// <summary>
-        /// Merge identity type
-        /// 合并身份类型
-        /// </summary>
-        /// <param name="current">Current type</param>
-        /// <param name="range">Max range type</param>
-        /// <returns>Result</returns>
-        public IdentityTypeFlags MergeIdentityType(IdentityTypeFlags? current, IdentityTypeFlags range)
-        {
-            if (current == null)
-            {
-                return range;
-            }
-            else
-            {
-                return current.Value & range;
-            }
         }
 
         /// <summary>

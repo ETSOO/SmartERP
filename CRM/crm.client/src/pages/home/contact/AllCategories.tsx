@@ -15,7 +15,8 @@ import React from "react";
 import {
   GridCellRendererProps,
   GridDataType,
-  ScrollerListForwardRef
+  ScrollerListForwardRef,
+  useSearchParamsEx
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
@@ -28,6 +29,7 @@ import { PersonCategoryTiplist } from "@etsoo/smarterp-crm/components";
 import Fab from "@mui/material/Fab";
 import IconButton from "@mui/material/IconButton";
 import { Typography } from "@mui/material";
+import { IdentityTypeFlags } from "@etsoo/appscript";
 
 const template = {
   keyword: "string",
@@ -39,6 +41,12 @@ const template = {
 export default function AllCategories() {
   // Route
   const navigate = useNavigate();
+
+  // Parameters
+  const { identityType = -1 } = useSearchParamsEx({
+    identityType: "number"
+  });
+  const it = DataTypes.getEnumByValue(IdentityTypeFlags, identityType);
 
   // Labels
   const labels = app.getLabels(
@@ -135,7 +143,7 @@ export default function AllCategories() {
         fabButtons: (
           <React.Fragment>
             <ButtonLink
-              href="./sort"
+              href={`./sort?identityType=${identityType}`}
               size="small"
               variant="outlined"
               startIcon={<SortIcon />}
@@ -146,7 +154,7 @@ export default function AllCategories() {
               title={labels.add}
               size="medium"
               color="primary"
-              onClick={() => navigate("./add")}
+              onClick={() => navigate(`./add?identityType=${identityType}`)}
             >
               <AddIcon />
             </Fab>
@@ -158,11 +166,15 @@ export default function AllCategories() {
       quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
-        <IdentityFlagsList
-          value={data.identityType}
-          onItemChange={(item) => (refs.current.identityType = item?.id)}
-          search
-        />,
+        ...(it
+          ? []
+          : [
+              <IdentityFlagsList
+                value={data.identityType}
+                onItemChange={(item) => (refs.current.identityType = item?.id)}
+                search
+              />
+            ]),
         <SearchField
           label={labels.nameB}
           name="keyword"
@@ -177,16 +189,19 @@ export default function AllCategories() {
           label={labels.parentCategory}
           name="parentId"
           onLoadData={(rq) =>
-            Object.assign(rq, { identityType: refs.current.identityType })
+            Object.assign(rq, { identityType: it ?? refs.current.identityType })
           }
           search
         />
       ]}
       loadData={async (data) => {
-        return await app.personCategoryApi.query(data, {
-          defaultValue: [],
-          showLoading: false
-        });
+        return await app.personCategoryApi.query(
+          { identityType: it, ...data },
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        );
       }}
       columns={[
         {

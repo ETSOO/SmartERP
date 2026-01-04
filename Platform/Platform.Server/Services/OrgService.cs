@@ -805,7 +805,7 @@ namespace Platform.Server.Services
                 IsUserExpired = ou.Expiry < DateTimeOffset.UtcNow
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
-            if (_db.IsSensitiveDataLoggingEnabled)
+            if (_db.IsSensitiveDataLoggingEnabled && Logger.IsEnabled(LogLevel.Information))
             {
                 Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }
@@ -1404,7 +1404,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
         {
             // Check the stream
-            if (avatarStream.Length is not > 10240 and < 102400000)
+            if (avatarStream.Length is not (> 10240 and < 102400000))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(avatarStream));
             }

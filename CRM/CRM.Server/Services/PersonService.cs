@@ -277,7 +277,7 @@ namespace CRM.Server.Services
             {
                 OrgId = orgId,
                 UserId = User.Oid,
-                IdentityType = IdentityTypeFlags.Contact | person.IdentityType,
+                IdentityType = IdentityTypeFlags.None,
                 Name = rq.Name,
                 QueryKeyword = nd.PinyinInitials,
                 FamilyName = nd.FamilyName,
@@ -296,7 +296,7 @@ namespace CRM.Server.Services
 
             if (rq.Tags?.Any() is true)
             {
-                var tagKind = _commonService.GetTagKind(IdentityTypeFlags.Contact);
+                var tagKind = _commonService.GetTagKind(IdentityTypeFlags.None);
                 var tagIds = await _commonService.AddTagsAsync(tagKind, rq.Tags, cancellationToken);
                 contact.Tags = [.. tagIds];
             }
@@ -406,14 +406,22 @@ namespace CRM.Server.Services
             return ActionResult.Succeed(rq.PersonId);
         }
 
-        private IQueryable<Person> CreateQuery(PersonListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
+        private IQueryable<Person> CreateQuery(PersonListRQ rq, IdentityTypeFlags identity, bool all, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
         {
             var query = _db.Persons(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
                 {
                     if (rq.IdentityType.HasValue)
                     {
-                        q = q.Where(p => (p.IdentityType & rq.IdentityType.Value) > 0);
+                        var value = rq.IdentityType.Value;
+                        if (value == IdentityTypeFlags.None)
+                            q = q.Where(p => p.IdentityType == IdentityTypeFlags.None);
+                        else
+                            q = q.Where(p => (p.IdentityType & value) == value);
+                    }
+                    else if (!all)
+                    {
+                        q = q.Where(p => (p.IdentityType & identity) > 0);
                     }
 
                     if (rq.TagId != null)
@@ -660,7 +668,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var relation = await _db.PersonRelations
-                .Where(r => r.Id == id && r.Person.OrgId == orgId && (r.Contact.IdentityType & IdentityTypeFlags.Contact) > 0)
+                .Where(r => r.Id == id && r.Person.OrgId == orgId)
                 .Include(r => r.Person)
                 .Select(r => new
                 {
@@ -774,9 +782,15 @@ namespace CRM.Server.Services
                 hasFilter = true;
             }
 
+            if (!string.IsNullOrEmpty(rq.AssignedId))
+            {
+                q = q.Where(p => p.AssignedId != null && p.AssignedId == rq.AssignedId.ToUpper());
+                hasFilter = true;
+            }
+
             if (!hasFilter) return null;
 
-            var identityType = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
+            var (identityType, all) = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
             if (identityType == IdentityTypeFlags.None)
             {
                 return null;
@@ -799,28 +813,27 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<ContactItem>> ListAsync(PersonListRQ rq, CancellationToken cancellationToken = default)
         {
-            var identityType = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
+            var (identityType, all) = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
             if (identityType == IdentityTypeFlags.None)
             {
                 return [];
             }
 
-            rq.IdentityType = _commonService.MergeIdentityType(rq.IdentityType, identityType);
-            if (rq.IdentityType == IdentityTypeFlags.None)
+            if (rq.IdentityType.HasValue && rq.IdentityType.Value != IdentityTypeFlags.None && (identityType & rq.IdentityType.Value) == 0)
             {
                 return [];
             }
 
             FormatListRQ(rq);
 
-            var query = CreateQuery(rq);
+            var query = CreateQuery(rq, identityType, all);
 
             return await query.Select(p => new ContactItem
             {
                 Id = p.Id,
                 Name = p.Name,
                 IdentityType = p.IdentityType,
-                Owner = p.IdentityType.HasFlag(IdentityTypeFlags.Contact) ? p.ContactOwners.Select(o => new IdentityTypeDataBase
+                Owner = p.IdentityType == IdentityTypeFlags.None ? p.ContactOwners.Select(o => new IdentityTypeDataBase
                 {
                     Name = o.Person.Name,
                     IdentityType = o.Person.IdentityType
@@ -874,14 +887,13 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<PersonQueryData>> QueryAsync(PersonQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            var identityType = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
+            var (identityType, all) = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
             if (identityType == IdentityTypeFlags.None)
             {
                 return [];
             }
 
-            rq.IdentityType = _commonService.MergeIdentityType(rq.IdentityType, identityType);
-            if (rq.IdentityType == IdentityTypeFlags.None)
+            if (rq.IdentityType.HasValue && rq.IdentityType.Value != IdentityTypeFlags.None && (identityType & rq.IdentityType.Value) == 0)
             {
                 return [];
             }
@@ -890,7 +902,7 @@ namespace CRM.Server.Services
 
             FormatListRQ(rq);
 
-            var query = CreateQuery(rq, (q) =>
+            var query = CreateQuery(rq, identityType, all, (q) =>
             {
                 if (!string.IsNullOrEmpty(rq.AssignedId))
                 {
@@ -928,7 +940,7 @@ namespace CRM.Server.Services
                 PreferredName = p.PreferredName,
                 AssignedId = p.AssignedId,
                 IdentityType = p.IdentityType,
-                Owner = p.IdentityType.HasFlag(IdentityTypeFlags.Contact) ? p.ContactOwners.Select(o => new IdentityTypeDataBase
+                Owner = p.IdentityType == IdentityTypeFlags.None ? p.ContactOwners.Select(o => new IdentityTypeDataBase
                 {
                     Name = o.Person.Name,
                     IdentityType = o.Person.IdentityType
@@ -1113,7 +1125,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<PersonViewData?> ReadAsync(long id, CancellationToken cancellationToken = default)
         {
-            var identityType = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
+            var (identityType, all) = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
             if (identityType == IdentityTypeFlags.None)
             {
                 return null;
@@ -1131,13 +1143,13 @@ namespace CRM.Server.Services
 
             var data = await _db.Persons.AsNoTracking()
                 .Include(p => p.ContactOwners).ThenInclude(o => o.Person)
-                .Where(p => p.OrgId == orgId && p.Id == id && (p.IdentityType & identityType) > 0)
+                .Where(p => p.OrgId == orgId && p.Id == id && (all || (p.IdentityType & identityType) > 0))
                 .Select(p => new PersonViewData
                 {
                     Id = p.Id,
                     Uid = p.Uid,
                     IdentityType = p.IdentityType,
-                    Owner = p.IdentityType.HasFlag(IdentityTypeFlags.Contact) ? p.ContactOwners.Select(o => new IdentityTypeDataBase
+                    Owner = p.IdentityType == IdentityTypeFlags.None ? p.ContactOwners.Select(o => new IdentityTypeDataBase
                     {
                         Name = o.Person.Name,
                         IdentityType = o.Person.IdentityType
@@ -1612,7 +1624,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var relation = await _db.PersonRelations
-                .Where(r => r.Id == rq.Id && r.Person.OrgId == orgId && (r.Contact.IdentityType & IdentityTypeFlags.Contact) > 0)
+                .Where(r => r.Id == rq.Id && r.Person.OrgId == orgId)
                 .Include(r => r.Person)
                 .Select(r => new PersonRelation
                 {
@@ -1828,7 +1840,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<PersonUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
         {
-            var identityType = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
+            var (identityType, all) = await _commonService.GetPersonIdentityTypeAsync(cancellationToken);
             if (identityType == IdentityTypeFlags.None)
             {
                 return null;

@@ -1,43 +1,55 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import { EditPage, InputField } from "@etsoo/materialui";
-import { useParamsEx } from "@etsoo/react";
+import {
+  ReactUtils,
+  useParamsEx,
+  useRefs,
+  useSearchParamsEx
+} from "@etsoo/react";
 import { useFormik } from "formik";
 import React from "react";
 import Grid from "@mui/material/Grid";
-import { IdActionResult, Utils } from "@etsoo/shared";
+import { DataTypes, IdActionResult, Utils } from "@etsoo/shared";
 import {
   PersonCategoryCreateRQ,
   PersonCategoryUpdateRQ
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
-import { PersonCategoryTiplist } from "@etsoo/smarterp-crm/components";
+import {
+  PersonCategoryAssignedIdDuplicateTest,
+  PersonCategoryTiplist
+} from "@etsoo/smarterp-crm/components";
 import { IdentityTypeFlags } from "@etsoo/appscript";
 import { ButtonIdentityTypes } from "@etsoo/smarterp-core/components";
 
 export default function AddCategory() {
   // Route
   const navigate = useNavigate();
-  const { id = 0 } = useParamsEx({
+  const { id } = useParamsEx({
     id: "number"
   });
 
-  const isEditing = id > 0;
+  const { identityType = -1 } = useSearchParamsEx({
+    identityType: "number"
+  });
+  const it = DataTypes.getEnumByValue(IdentityTypeFlags, identityType);
+
+  const isEditing = (id ?? 0) > 0;
 
   // Labels
-  const labels = app.getLabels(
-    "assignedId",
-    "nameB",
-    "noChanges",
-    "parentCategory"
-  );
+  const labels = app.getLabels("nameB", "noChanges", "parentCategory");
+
+  // Input refs
+  const refFields = ["assignedId", "name"] as const;
+  const refs = useRefs(refFields);
 
   // Type
   type DataType = PersonCategoryCreateRQ;
 
   // State
   const [data, setData] = React.useState<DataType>({
-    identityType: IdentityTypeFlags.None,
+    identityType: it ?? IdentityTypeFlags.None,
     name: ""
   });
 
@@ -52,12 +64,16 @@ export default function AddCategory() {
         return;
       }
 
+      // Get updated values
+      const c = { ...v };
+      ReactUtils.updateRefValues(refs, c);
+
       // Submit
       let result: IdActionResult | undefined;
       let redirectUrl: string;
-      if (id > 0) {
+      if (id) {
         const rq: PersonCategoryUpdateRQ = {
-          ...v,
+          ...c,
           id
         };
 
@@ -74,7 +90,7 @@ export default function AddCategory() {
         result = await app.personCategoryApi.update(rq);
       } else {
         const rq: PersonCategoryCreateRQ = {
-          ...v
+          ...c
         };
 
         Utils.removeEmptyValues(rq);
@@ -87,7 +103,7 @@ export default function AddCategory() {
       if (result == null) return;
 
       if (result.ok) {
-        navigate(redirectUrl);
+        navigate(redirectUrl + "?identityType=" + v.identityType);
         return;
       }
 
@@ -97,9 +113,10 @@ export default function AddCategory() {
 
   // Load data
   const reloadData = React.useCallback(async () => {
-    if (id < 1) return;
+    if (!id) return;
     const result = await app.personCategoryApi.updateRead(id);
     if (result == null) return;
+    ReactUtils.updateRefs(refs, result);
     setData(result);
   }, [id]);
 
@@ -133,15 +150,10 @@ export default function AddCategory() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
-        <InputField
+        <PersonCategoryAssignedIdDuplicateTest
           fullWidth
-          name="assignedId"
-          slotProps={{
-            htmlInput: { maxLength: 20, style: { textTransform: "uppercase" } }
-          }}
-          onChange={formik.handleChange}
-          label={labels.assignedId}
-          value={formik.values.assignedId ?? ""}
+          inputRef={refs.assignedId}
+          excludedId={id}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
@@ -151,8 +163,7 @@ export default function AddCategory() {
           name="name"
           slotProps={{ htmlInput: { maxLength: 128 } }}
           label={labels.nameB}
-          value={formik.values.name}
-          onChange={formik.handleChange}
+          inputRef={refs.name}
         />
       </Grid>
     </EditPage>

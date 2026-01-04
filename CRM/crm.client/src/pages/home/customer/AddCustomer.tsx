@@ -1,7 +1,7 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import { EditPage, InputField, OptionBool, TagList } from "@etsoo/materialui";
-import { useParamsEx, useRefs } from "@etsoo/react";
+import { ReactUtils, useParamsEx, useRefs } from "@etsoo/react";
 import { useFormik } from "formik";
 import React from "react";
 import Grid from "@mui/material/Grid";
@@ -17,23 +17,24 @@ import {
 import { useNavigate } from "react-router-dom";
 import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
 import {
+  AssignedIdDuplicateTest,
   ButtonPersonCategories,
-  EntityDuplicateTest
+  InfoDuplicateTest,
+  NameDuplicateTest
 } from "@etsoo/smarterp-crm/components";
 import { AddressCreator } from "../../../components/person/AddressCreator";
 
 export default function AddCustomer() {
   // Route
   const navigate = useNavigate();
-  const { id = 0 } = useParamsEx({
+  const { id } = useParamsEx({
     id: "number"
   });
 
-  const isEditing = id > 0;
+  const isEditing = (id ?? 0) > 0;
 
   // Labels
   const labels = app.getLabels(
-    "assignedId",
     "contact",
     "categories",
     "description",
@@ -79,10 +80,13 @@ export default function AddCustomer() {
     enableReinitialize: true,
     validateOnChange: false,
     onSubmit: async (v) => {
+      // Get updated values
+      ReactUtils.updateRefValues(refs, v);
+
       // Submit
       let result: IdActionResult | undefined;
       let redirectUrl: string;
-      if (id > 0) {
+      if (id) {
         const rq: CustomerUpdateRQ = {
           ...v,
           id
@@ -129,9 +133,17 @@ export default function AddCustomer() {
 
   // Load data
   const reloadData = React.useCallback(async () => {
-    if (id < 1) return;
+    if (!id) return;
     const result = await app.customerApi.updateRead(id);
     if (result == null) return;
+
+    ReactUtils.updateRefs(refs, result);
+
+    if (refs.taxId.current)
+      refs.taxId.current.value =
+        app.person.getInfo(result.infos, PersonInfoKind.TaxId)?.toUpperCase() ??
+        "";
+
     setData(result);
   }, [id]);
 
@@ -159,10 +171,10 @@ export default function AddCustomer() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
-        <EntityDuplicateTest
+        <NameDuplicateTest
           fullWidth
           required
-          slotProps={{ htmlInput: { maxLength: 128 } }}
+          excludedId={id}
           label={formik.values.isLegalPerson ? labels.nameB : labels.name}
           inputRef={refs.name}
         />
@@ -177,53 +189,69 @@ export default function AddCustomer() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
+        <InfoDuplicateTest
           infoKind={PersonInfoKind.TaxId}
           inputRef={refs.taxId}
+          excludedId={id}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
-          infoKind={PersonInfoKind.Phone}
-          inputRef={refs.phone}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <AddressCreator />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
-          fullWidth
-          name="contact"
-          label={labels.contact}
-          slotProps={{ htmlInput: { maxLength: 128 } }}
-          inputRef={refs.name}
-          onChange={(event) => {
-            const value = event.target.value.trim();
-            if (value) {
-              refs.mobile.current!.disabled = false;
-              refs.email.current!.disabled = false;
-            } else {
-              refs.mobile.current!.disabled = true;
-              refs.email.current!.disabled = true;
-            }
-          }}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
-          infoKind={PersonInfoKind.Mobile}
-          inputRef={refs.mobile}
-          slotProps={{ htmlInput: { disabled: true } }}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
-          infoKind={PersonInfoKind.Email}
-          inputRef={refs.email}
-          slotProps={{ htmlInput: { disabled: true } }}
-        />
-      </Grid>
+      {!isEditing && (
+        <React.Fragment>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <InfoDuplicateTest
+              infoKind={PersonInfoKind.Phone}
+              inputRef={refs.phone}
+              excludedId={id}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 12 }}>
+            <AddressCreator
+              isLegalPerson={formik.values.isLegalPerson}
+              onAddressChange={(data) => {
+                if (refs.name.current?.value === "" && data) {
+                  ReactUtils.triggerChange(refs.name.current, data.name);
+                }
+                formik.setFieldValue("address", data);
+              }}
+            />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <NameDuplicateTest
+              fullWidth
+              name="contact"
+              excludedId={id}
+              label={labels.contact}
+              inputRef={refs.contact}
+              onChange={(event) => {
+                const value = event.target.value.trim();
+                if (value) {
+                  refs.mobile.current!.disabled = false;
+                  refs.email.current!.disabled = false;
+                } else {
+                  refs.mobile.current!.disabled = true;
+                  refs.email.current!.disabled = true;
+                }
+              }}
+            />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <InfoDuplicateTest
+              infoKind={PersonInfoKind.Mobile}
+              excludedId={id}
+              inputRef={refs.mobile}
+              slotProps={{ htmlInput: { disabled: true } }}
+            />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <InfoDuplicateTest
+              infoKind={PersonInfoKind.Email}
+              excludedId={id}
+              inputRef={refs.email}
+              slotProps={{ htmlInput: { disabled: true } }}
+            />
+          </Grid>
+        </React.Fragment>
+      )}
       <Grid size={{ xs: 12, sm: 12 }}>
         <ButtonPersonCategories
           fullWidth
@@ -278,15 +306,7 @@ export default function AddCustomer() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <InputField
-          fullWidth
-          name="assignedId"
-          slotProps={{
-            htmlInput: { maxLength: 20, style: { textTransform: "uppercase" } }
-          }}
-          label={labels.assignedId}
-          inputRef={refs.assignedId}
-        />
+        <AssignedIdDuplicateTest fullWidth inputRef={refs.assignedId} />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
         <StatusList

@@ -102,11 +102,13 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonUpdateRQ))]
 
     // Person category
+    [JsonSerializable(typeof(PersonCategoryDuplicateTestData[]))]
     [JsonSerializable(typeof(PersonCategoryListData[]))]
     [JsonSerializable(typeof(PersonCategoryQueryData[]))]
     [JsonSerializable(typeof(PersonCategoryUpdateReadData))]
 
     [JsonSerializable(typeof(PersonCategoryCreateRQ))]
+    [JsonSerializable(typeof(PersonCategoryDuplicateTestRQ))]
     [JsonSerializable(typeof(PersonCategoryListRQ))]
     [JsonSerializable(typeof(PersonCategoryUpdateRQ))]
 

@@ -228,8 +228,8 @@ namespace PlatformShared.Extentions
                 (IdentityTypeFlags.User, Resources.User),
                 (IdentityTypeFlags.Customer, Resources.Customer),
                 (IdentityTypeFlags.Supplier, Resources.Supplier),
-                (IdentityTypeFlags.Contact, Resources.Contact),
-                (IdentityTypeFlags.Org, Resources.Org)
+                (IdentityTypeFlags.Org, Resources.Org),
+                (IdentityTypeFlags.None, Resources.Contact)
             };
 
             var types = typeMappings
@@ -239,7 +239,7 @@ namespace PlatformShared.Extentions
 
             var label = $"[{string.Join(", ", types)}] {data.Name}";
 
-            if (type == IdentityTypeFlags.Contact && data.Owner != null)
+            if (type == IdentityTypeFlags.None && data.Owner != null)
             {
                 label += $" / {data.Owner.Name}";
             }

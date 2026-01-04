@@ -9,14 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.49",
-    "@etsoo/materialui": "^1.5.92",
-    "@etsoo/react": "^1.8.65",
+    "@etsoo/appscript": "^1.6.51",
+    "@etsoo/materialui": "^1.5.98",
+    "@etsoo/react": "^1.8.68",
     "@etsoo/reacteditor": "^1.0.32",
     "@etsoo/shared": "^1.2.80",
-    "@etsoo/smarterp-core": "^1.1.4",
+    "@etsoo/smarterp-core": "^1.1.11",
     "@etsoo/smarterp-crm": "file:../../../../EtsooUI/SmartERP/crm",
-    "@etsoo/toolpad": "^1.0.42",
+    "@etsoo/toolpad": "^1.0.44",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
     "formik": "^2.4.9",
@@ -25,6 +25,10 @@
     "react-router-dom": "^7.11.0",
     "reactflow": "^11.11.4",
     "yup": "^1.7.1"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

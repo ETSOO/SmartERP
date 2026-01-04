@@ -18,7 +18,8 @@ import { useNavigate } from "react-router-dom";
 import {
   ButtonPersonCategories,
   ButtonRadioContactRelations,
-  EntityDuplicateTest,
+  InfoDuplicateTest,
+  NameDuplicateTest,
   PersonGenderList,
   PersonTitleList
 } from "@etsoo/smarterp-crm/components";
@@ -69,7 +70,7 @@ export default function AddRelation() {
   // Type
   type DataType = ContactCreateRQ;
 
-  const identityType = IdentityTypeFlags.Contact;
+  const identityType = IdentityTypeFlags.None;
 
   // Formik
   const formik = useFormik<DataType>({
@@ -118,8 +119,7 @@ export default function AddRelation() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
-          slotProps={{ htmlInput: { maxLength: 128 } }}
+        <NameDuplicateTest
           label={labels.name}
           inputRef={refs.name}
           onChange={(event) => {
@@ -146,19 +146,19 @@ export default function AddRelation() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
+        <InfoDuplicateTest
           infoKind={PersonInfoKind.Mobile}
           inputRef={refs.mobile}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
-        <EntityDuplicateTest
+        <InfoDuplicateTest
           infoKind={PersonInfoKind.Email}
           inputRef={refs.email}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <EntityDuplicateTest
+        <InfoDuplicateTest
           infoKind={PersonInfoKind.Phone}
           inputRef={refs.phone}
         />

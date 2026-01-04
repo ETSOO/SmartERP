@@ -1,4 +1,4 @@
-import { ApiProvider, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
 import {
@@ -22,6 +22,8 @@ import SpellcheckIcon from "@mui/icons-material/Spellcheck";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import { IdActionResult, Utils } from "@etsoo/shared";
+import { MapApiProvider } from "@etsoo/appscript";
+import { AddressDuplicateTest } from "@etsoo/smarterp-crm/components";
 
 export default function AddAddress() {
   // Route
@@ -37,7 +39,6 @@ export default function AddAddress() {
   const labels = app.getLabels(
     "addressCity",
     "addressDistrict",
-    "addressFormatted",
     "addressPostalCode",
     "addressRaw",
     "addressRawTip",
@@ -77,7 +78,7 @@ export default function AddAddress() {
   // State
   const [data, setData] = React.useState<DataType>({
     personId,
-    provider: ApiProvider.Google,
+    provider: MapApiProvider.Google,
     name: "",
     region: "",
     state: "",
@@ -155,28 +156,14 @@ export default function AddAddress() {
       return;
     }
 
-    const isChinese = rawAddress.containChinese();
-    let provider = isChinese ? ApiProvider.Baidu : ApiProvider.Google;
-
-    let items = await app.core.publicApi.queryPlace(
+    let [provider, items] = await app.core.publicApi.queryPlace(
       {
         query: rawAddress,
-        language: isChinese ? "zh-CN" : app.culture,
-        region: formik.values.region,
-        provider: provider
+        language: app.culture,
+        region: formik.values.region
       },
       { onError: () => false }
     );
-
-    if ((items == null || items.length === 0) && isChinese) {
-      provider = ApiProvider.Google;
-      items = await app.core.publicApi.queryPlace({
-        query: rawAddress,
-        language: isChinese ? "zh-CN" : app.culture,
-        region: formik.values.region,
-        provider
-      });
-    }
 
     if (items != null && items.length > 0) {
       const addr = items[0];
@@ -316,12 +303,9 @@ export default function AddAddress() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
-        <InputField
-          name="formattedAddress"
-          label={labels.addressFormatted}
+        <AddressDuplicateTest
           multiline
           rows={2}
-          slotProps={{ htmlInput: { maxLength: 256 } }}
           fullWidth
           required
           inputRef={refs.formattedAddress}

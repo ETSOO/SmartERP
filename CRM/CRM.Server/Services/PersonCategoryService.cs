@@ -1,10 +1,13 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Dto.Person;
 using CRM.Server.Dto.PersonCategory;
+using CRM.Server.RQ.Person;
 using CRM.Server.RQ.PersonCategory;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
@@ -119,7 +122,11 @@ namespace CRM.Server.Services
                 {
                     if (rq.IdentityType.HasValue)
                     {
-                        q = q.Where(c => (c.IdentityType & rq.IdentityType.Value) > 0);
+                        var value = rq.IdentityType.Value;
+                        if (value == IdentityTypeFlags.None)
+                            q = q.Where(c => c.IdentityType == IdentityTypeFlags.None);
+                        else
+                            q = q.Where(c => (c.IdentityType & value) == value);
                     }
 
                     if (rq.ParentId.HasValue)
@@ -159,6 +166,54 @@ namespace CRM.Server.Services
                 });
 
             return query;
+        }
+
+        /// <summary>
+        /// Duplicate test
+        /// 重复测试
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<PersonCategoryDuplicateTestData[]?> DuplicateTestAsync(PersonCategoryDuplicateTestRQ rq, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            var q = _db.PersonCategories(orgId).AsNoTracking();
+
+            var hasFilter = false;
+
+            if (rq.ExcludedId.HasValue)
+            {
+                q = q.Where(p => p.Id != rq.ExcludedId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(rq.Name))
+            {
+                q = q.Where(p => p.Names.Last().ToLower() == rq.Name.ToLower());
+                hasFilter = true;
+            }
+
+            if (!string.IsNullOrEmpty(rq.AssignedId))
+            {
+                q = q.Where(p => p.AssignedId != null && p.AssignedId == rq.AssignedId.ToUpper());
+                hasFilter = true;
+            }
+
+            if (!hasFilter) return null;
+
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return null;
+            }
+
+            return await q.Select(p => new PersonCategoryDuplicateTestData
+            {
+                Id = p.Id,
+                Names = p.Names,
+                IdentityType = p.IdentityType
+            }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>

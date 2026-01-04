@@ -9,6 +9,7 @@ namespace CRM.Server.Services
     public interface IPersonCategoryService
     {
         Task<IActionResult> CreateAsync(PersonCategoryCreateRQ rq, CancellationToken cancellationToken = default);
+        ValueTask<PersonCategoryDuplicateTestData[]?> DuplicateTestAsync(PersonCategoryDuplicateTestRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(PersonCategoryListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> MergeAsync(MergeRQ rq, CancellationToken cancellationToken = default);
         Task<PersonCategoryQueryData[]> QueryAsync(PersonCategoryQueryRQ rq, CancellationToken cancellationToken = default);

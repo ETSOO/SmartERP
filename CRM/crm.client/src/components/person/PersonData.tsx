@@ -70,11 +70,13 @@ export function PersonData(props: PersonDataProps) {
       leftContainerLines={3}
       leftContainer={(item) => (
         <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
-          <img
-            src={item.avatar}
-            alt={labels.logo}
-            style={CoreUtils.avatarStyles(item.isLegalPerson)}
-          />
+          {item.avatar && (
+            <img
+              src={item.avatar}
+              alt={labels.logo}
+              style={CoreUtils.avatarStyles(item.isLegalPerson)}
+            />
+          )}
           {editable && (
             <IconButtonLink
               href={`./../../avatar/${item.id}`}
@@ -152,7 +154,8 @@ export function PersonData(props: PersonDataProps) {
                 ))}
               </HBox>
             ) : undefined,
-          label: "groups"
+          label: "groups",
+          singleRow: "large"
         },
         "assignedId",
         {

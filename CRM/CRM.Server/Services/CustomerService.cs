@@ -9,6 +9,7 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Customer;
+using CRM.Server.Dto.Person;
 using CRM.Server.RQ;
 using CRM.Server.RQ.Customer;
 using Microsoft.EntityFrameworkCore;
@@ -106,8 +107,8 @@ namespace CRM.Server.Services
                 var cc = new Person
                 {
                     OrgId = orgId,
-                    UserId = User.IdInt,
-                    IdentityType = IdentityTypeFlags.Contact | IdentityTypeFlags.Customer,
+                    UserId = User.Oid,
+                    IdentityType = IdentityTypeFlags.None,
                     Name = rq.Contact,
                     QueryKeyword = cnd.PinyinInitials,
                     FamilyName = cnd.FamilyName,
@@ -115,7 +116,7 @@ namespace CRM.Server.Services
                     LatinGivenName = cnd.LatinGivenName,
                     LatinFamilyName = cnd.LatinFamilyName,
 
-                    Infos = [.. duplicateItems.Select(d => new PersonInfo
+                    Infos = [.. contactItems.Select(d => new PersonInfo
                     {
                         Kind = d.Item1,
                         Identifier = d.Item2,
@@ -134,18 +135,19 @@ namespace CRM.Server.Services
             var nd = LocalizationUtils.ParseName(rq.Name);
 
             // Create customer
+            var lp = rq.IsLegalPerson;
             var customer = new Person
             {
                 OrgId = orgId,
                 UserId = User.Oid,
                 IdentityType = IdentityTypeFlags.Customer,
-                IsLegalPerson = rq.IsLegalPerson,
+                IsLegalPerson = lp,
                 Name = rq.Name,
                 QueryKeyword = nd.PinyinInitials,
-                FamilyName = nd.FamilyName,
-                GivenName = nd.GivenName,
-                LatinGivenName = nd.LatinGivenName,
-                LatinFamilyName = nd.LatinFamilyName,
+                FamilyName = lp ? null : nd.FamilyName,
+                GivenName = lp ? null : nd.GivenName,
+                LatinGivenName = lp ? null : nd.LatinGivenName,
+                LatinFamilyName = lp ? null : nd.LatinFamilyName,
                 PreferredName = rq.PreferredName,
                 AssignedId = rq.AssignedId,
                 Description = rq.Description,
@@ -276,16 +278,15 @@ namespace CRM.Server.Services
         /// 查询客户JSON数据
         /// </summary>
         /// <param name="rq">Request data</param>
-        /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task QueryAsync(CustomerQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public async Task<CustomerQueryData[]> QueryAsync(CustomerQueryRQ rq, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
 
             await _commonService.UpdatePersonTagAsync(rq, orgId, cancellationToken);
 
-            await CreateQuery(rq, (q) =>
+            return await CreateQuery(rq, (q) =>
             {
                 if (!string.IsNullOrEmpty(rq.AssignedId))
                 {
@@ -300,15 +301,15 @@ namespace CRM.Server.Services
 
                 return q;
             }).Select(p => new CustomerQueryData
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    AssignedId = p.AssignedId,
-                    Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
-                    PreferredName = p.PreferredName,
-                    Description = p.Description,
-                    Creation = p.Creation
-                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+            {
+                Id = p.Id,
+                Name = p.Name,
+                AssignedId = p.AssignedId,
+                Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
+                PreferredName = p.PreferredName,
+                Description = p.Description,
+                Creation = p.Creation
+            }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
@@ -380,35 +381,12 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Pin)))
             {
-                var pinInfo = await _db.PersonInfos
-                    .Where(i => i.PersonId == rq.Id && i.Kind == PersonInfoKind.Pin)
-                    .FirstOrDefaultAsync(cancellationToken);
+                await _commonService.AddOrUpdatePersonInfoAsync(rq.Id, PersonInfoKind.Pin, rq.Pin, cancellationToken);
+            }
 
-                if (string.IsNullOrEmpty(rq.Pin))
-                {
-                    if (pinInfo != null)
-                    {
-                        _db.PersonInfos.Remove(pinInfo);
-                    }
-                }
-                else
-                {
-                    if (pinInfo != null)
-                    {
-                        pinInfo.Identifier = rq.Pin.Trim().ToLower();
-                    }
-                    else
-                    {
-                        pinInfo = new PersonInfo
-                        {
-                            PersonId = rq.Id,
-                            Kind = PersonInfoKind.Pin,
-                            Identifier = rq.Pin.Trim().ToLower(),
-                            IsDefault = true
-                        };
-                        _db.PersonInfos.Add(pinInfo);
-                    }
-                }
+            if (rq.IsModified(nameof(rq.TaxId)))
+            {
+                await _commonService.AddOrUpdatePersonInfoAsync(rq.Id, PersonInfoKind.TaxId, rq.TaxId, cancellationToken);
             }
 
             if (rq.IsModified(nameof(rq.Tags)))
@@ -462,7 +440,15 @@ namespace CRM.Server.Services
                     Status = p.Status,
                     Categories = p.CategoryIds,
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
-                    Pin = p.Infos.Where(i => i.PersonId == p.Id && i.Kind == PersonInfoKind.Pin).Select(i => i.Identifier).FirstOrDefault()
+                    Infos = p.Infos
+                        .Where(i => i.PersonId == p.Id && (i.Kind == PersonInfoKind.Pin || i.Kind == PersonInfoKind.TaxId))
+                        .Select(i => new PersonInfoUpdateItem
+                        {
+                            Kind = i.Kind,
+                            Identifier = MyDbFunctions.HideData(i.Identifier, default),
+                            IsDefault = i.IsDefault
+                        })
+                        .ToList()
                 }).FirstOrDefaultAsync(cancellationToken);
         }
     }

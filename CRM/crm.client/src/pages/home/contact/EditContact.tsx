@@ -20,9 +20,11 @@ import Grid from "@mui/material/Grid";
 import { PersonUpdateReadData, PersonUpdateRQ } from "@etsoo/smarterp-crm";
 import Divider from "@mui/material/Divider";
 import {
+  AssignedIdDuplicateTest,
   ButtonEducations,
   ButtonPersonCategories,
   MaritalStatusList,
+  NameDuplicateTest,
   PersonDegreeList,
   PersonGenderList,
   PersonTitleList
@@ -36,7 +38,6 @@ export default function EditContact() {
 
   // Labels
   const labels = app.getLabels(
-    "assignedId",
     "cultures",
     "currencies",
     "description",
@@ -193,10 +194,10 @@ export default function EditContact() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
-        <InputField
+        <NameDuplicateTest
           fullWidth
-          name="name"
-          slotProps={{ htmlInput: { maxLength: 128 } }}
+          required
+          excludedId={id}
           label={formik.values.isLegalPerson ? labels.nameB : labels.name}
           inputRef={refs.name}
         />
@@ -352,15 +353,7 @@ export default function EditContact() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <InputField
-          fullWidth
-          name="assignedId"
-          slotProps={{
-            htmlInput: { maxLength: 20, style: { textTransform: "uppercase" } }
-          }}
-          label={labels.assignedId}
-          inputRef={refs.assignedId}
-        />
+        <AssignedIdDuplicateTest fullWidth inputRef={refs.assignedId} />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
         <UserTiplist

@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using CRM.Server.Dto.Person;
 
 namespace CRM.Server.Dto.Customer
 {
@@ -45,12 +46,6 @@ namespace CRM.Server.Dto.Customer
         public string? Description { get; init; }
 
         /// <summary>
-        /// PIN
-        /// 身份证号码
-        /// </summary>
-        public string? Pin { get; init; }
-
-        /// <summary>
         /// Birthday
         /// 生日
         /// </summary>
@@ -67,6 +62,12 @@ namespace CRM.Server.Dto.Customer
         /// 关键词
         /// </summary>
         public IEnumerable<string>? Tags { get; init; }
+
+        /// <summary>
+        /// Infos
+        /// 信息项目
+        /// </summary>
+        public required IEnumerable<PersonInfoUpdateItem> Infos { get; init; }
 
         /// <summary>
         /// Status

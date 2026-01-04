@@ -12,8 +12,17 @@ import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import { IdentityFlagsList } from "@etsoo/smarterp-core/components";
+import { useSearchParamsEx } from "@etsoo/react";
+import { DataTypes } from "@etsoo/shared";
+import { IdentityTypeFlags } from "@etsoo/appscript";
 
 export default function SortCategories() {
+  // Parameters
+  const { identityType = -1 } = useSearchParamsEx({
+    identityType: "number"
+  });
+  const it = DataTypes.getEnumByValue(IdentityTypeFlags, identityType);
+
   // State
   const [items, setItems] = React.useState<PersonCategoryListData[]>([]);
 
@@ -21,7 +30,9 @@ export default function SortCategories() {
   const labels = app.getLabels("sortTip", "parentCategory", "dragIndicator");
 
   // Refs
-  const refs = React.useRef<{ identityType?: number; parentId?: number }>({});
+  const refs = React.useRef<{ identityType?: number; parentId?: number }>({
+    identityType: it
+  });
 
   const loadData = React.useCallback(() => {
     const { identityType, parentId } = refs.current;
@@ -40,23 +51,25 @@ export default function SortCategories() {
   return (
     <CommonPage>
       <HBox marginBottom={2} gap={1} justifyContent="center">
-        <IdentityFlagsList
-          search
-          onItemChange={(item, userAction) => {
-            if (!userAction) return;
-            const identityType = item?.id;
-            if (identityType === refs.current.identityType) return;
-            refs.current.identityType = identityType;
-            loadData();
-          }}
-        />
+        {it == null && (
+          <IdentityFlagsList
+            search
+            onItemChange={(item, userAction) => {
+              if (!userAction) return;
+              const identityType = item?.id;
+              if (identityType === refs.current.identityType) return;
+              refs.current.identityType = identityType;
+              loadData();
+            }}
+          />
+        )}
         <PersonCategoryTiplist
           label={labels.parentCategory}
           name="parentId"
           search
           width={300}
           onLoadData={(rq) =>
-            Object.assign(rq, { identityType: refs.current.identityType })
+            Object.assign(rq, { identityType: it ?? refs.current.identityType })
           }
           onValueChange={(value) => {
             const parentId = value?.id;
