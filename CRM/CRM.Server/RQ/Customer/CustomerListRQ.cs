@@ -1,4 +1,4 @@
-﻿using CRM.Server.Dto.Person;
+﻿using CRM.Server.Dto;
 using System.Text.Json.Serialization;
 
 namespace CRM.Server.RQ.Customer
@@ -8,7 +8,7 @@ namespace CRM.Server.RQ.Customer
     /// 客户列表请求数据
     /// </summary>
     [JsonDerivedType(typeof(CustomerQueryRQ))]
-    public record CustomerListRQ : QueryLongRQ, IPersonTag
+    public record CustomerListRQ : QueryLongRQ, IQueryTag
     {
         /// <summary>
         /// Tag

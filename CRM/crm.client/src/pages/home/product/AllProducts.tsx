@@ -3,29 +3,34 @@ import {
   ResponsivePage,
   SearchField,
   IconButtonLink,
-  MobileListItemRenderer
+  MobileListItemRenderer,
+  ButtonLink
 } from "@etsoo/materialui";
+import AddIcon from "@mui/icons-material/Add";
+import CategoryIcon from "@mui/icons-material/Category";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import {
   GridCellRendererProps,
-  GridDataType,
   GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { PersonQueryData } from "@etsoo/smarterp-crm";
+import { ProductQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
+import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Fab from "@mui/material/Fab";
+import { Permissions } from "@etsoo/smarterp-crm";
 
 const template = {
   name: "string",
-  identityType: "number"
+  assignedId: "string",
+  status: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllDepts() {
@@ -35,77 +40,71 @@ export default function AllDepts() {
   // Labels
   const labels = app.getLabels(
     "actions",
+    "add",
     "assignedId",
+    "categories",
     "confirmAction",
-    "creation",
     "edit",
     "entityStatus",
-    "identityType",
-    "jobTitle",
-    "personName",
-    "reportTo",
-    "role",
-    "statusNormal",
+    "name",
     "view"
   );
 
   // Refs
-  const ref = React.useRef<ScrollerListForwardRef<PersonQueryData>>(undefined);
+  const ref = React.useRef<ScrollerListForwardRef<ProductQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const baseIdentity = app.getPersonIdentityType();
 
   // Page data hook
   usePageDataEmpty(app);
 
   return (
-    <ResponsivePage<PersonQueryData, typeof template>
+    <ResponsivePage<ProductQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: <React.Fragment></React.Fragment>
+        fabButtons: (
+          <React.Fragment>
+            {app.owns(Permissions.Org.Manage) && (
+              <ButtonLink
+                href={`./`}
+                size="small"
+                variant="outlined"
+                startIcon={<CategoryIcon />}
+              >
+                {labels.categories}
+              </ButtonLink>
+            )}
+            <Fab
+              title={labels.add}
+              size="medium"
+              color="primary"
+              onClick={() => navigate("./add")}
+            >
+              <AddIcon />
+            </Fab>
+          </React.Fragment>
+        )
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
       quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
-        <SearchField
-          label={labels.personName}
-          name="keywords"
-          defaultValue={data.name}
-        />,
-        <IdentityFlagsList
-          value={data.identityType}
-          baseIdentity={baseIdentity}
-          search
-        />
+        <SearchField label={labels.name} name="name" defaultValue={data.name} />
       ]}
       loadData={(data) =>
-        app.personApi.query(data, {
+        app.ProductApi.query(data, {
           defaultValue: [],
           showLoading: false
         })
       }
       columns={[
         {
-          field: "identityType",
-          width: 120,
-          header: labels.identityType,
-          valueFormatter: ({ data }) => app.person.getIdentityType(data)
-        },
-        {
           field: "name",
-          header: labels.personName,
+          header: labels.name,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
-        },
-        {
-          field: "jobTitle",
-          width: 120,
-          header: labels.jobTitle,
-          sortable: true
         },
         {
           field: "assignedId",
@@ -113,20 +112,12 @@ export default function AllDepts() {
           header: labels.assignedId
         },
         {
-          field: "creation",
-          type: GridDataType.Date,
-          width: 116,
-          header: labels.creation,
-          sortable: true,
-          sortAsc: false
-        },
-        {
           width: DefaultUI.Widths.icon2,
           header: labels.actions,
           cellRenderer: ({
             data,
             cellProps
-          }: GridCellRendererProps<PersonQueryData, BoxProps>) => {
+          }: GridCellRendererProps<ProductQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
             cellProps.sx = {
@@ -150,8 +141,8 @@ export default function AllDepts() {
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            `[${app.person.getIdentityType(data)}] ${data.name}`,
-            app.formatDate(data.creation, "d"),
+            data.name,
+            data.assignedId,
             [
               {
                 label: labels.edit,
@@ -165,7 +156,9 @@ export default function AllDepts() {
               }
             ],
             <React.Fragment>
-              <Typography variant="caption">{data.jobTitle}</Typography>
+              <Typography variant="caption">
+                {data.categories?.map((c) => c.names.join(" -> ")).join(", ")}
+              </Typography>
               {data.status >= EntityStatus.Inactivated && (
                 <React.Fragment>
                   <Typography variant="caption">

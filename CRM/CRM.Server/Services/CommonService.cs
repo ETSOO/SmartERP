@@ -1,12 +1,11 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
-using CRM.Server.Dto.Person;
+using CRM.Server.Dto;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
-using System.Threading;
 
 namespace CRM.Server.Services
 {
@@ -297,14 +296,14 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Update person tag
-        /// 更新人员标签
+        /// Update tag
+        /// 更新标签
         /// </summary>
         /// <param name="tag">Tag data</param>
         /// <param name="orgId">Organization id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async ValueTask UpdatePersonTagAsync(IPersonTag tag, int orgId, CancellationToken cancellationToken = default)
+        public async ValueTask UpdateTagAsync(IQueryTag tag, int orgId, CancellationToken cancellationToken = default)
         {
             if (tag.TagId == null && !string.IsNullOrEmpty(tag.Tag))
             {

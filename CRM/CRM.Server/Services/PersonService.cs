@@ -867,7 +867,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task ListContactAsync(ContactListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _commonService.UpdatePersonTagAsync(rq, User.OrganizationInt, cancellationToken);
+            await _commonService.UpdateTagAsync(rq, User.OrganizationInt, cancellationToken);
 
             await CreateContactQuery(rq)
                 .Select(c => new
@@ -898,7 +898,7 @@ namespace CRM.Server.Services
                 return [];
             }
 
-            await _commonService.UpdatePersonTagAsync(rq, User.OrganizationInt, cancellationToken);
+            await _commonService.UpdateTagAsync(rq, User.OrganizationInt, cancellationToken);
 
             FormatListRQ(rq);
 
@@ -998,7 +998,7 @@ namespace CRM.Server.Services
                 return;
             }
 
-            await _commonService.UpdatePersonTagAsync(rq, orgId, cancellationToken);
+            await _commonService.UpdateTagAsync(rq, orgId, cancellationToken);
 
             var query = CreateContactQuery(rq, (q) =>
             {

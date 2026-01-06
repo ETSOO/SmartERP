@@ -1,10 +1,10 @@
-﻿namespace CRM.Server.Dto.Person
+﻿namespace CRM.Server.Dto
 {
     /// <summary>
-    /// Person tag interface
-    /// 人员标签接口
+    /// Query tag interface
+    /// 查询标签接口
     /// </summary>
-    public interface IPersonTag
+    public interface IQueryTag
     {
         /// <summary>
         /// Tag

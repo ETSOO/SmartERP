@@ -183,12 +183,6 @@ namespace PlatformShared.Database
         public required DbSet<ProductCategory> ProductCategories { get; set; }
 
         /// <summary>
-        /// Product cultures
-        /// 产品文化
-        /// </summary>
-        public required DbSet<ProductCulture> ProductCultures { get; set; }
-
-        /// <summary>
         /// Product prices
         /// 产品价格
         /// </summary>
@@ -257,7 +251,6 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new PersonRelationConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
             modelBuilder.ApplyConfiguration(new ProductCategoryConfiguration());
-            modelBuilder.ApplyConfiguration(new ProductCultureConfiguration());
             modelBuilder.ApplyConfiguration(new ProductPriceConfiguration());
             modelBuilder.ApplyConfiguration(new ProductUnitConfiguration());
             modelBuilder.ApplyConfiguration(new PromotionConfiguration());

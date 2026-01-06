@@ -17,5 +17,11 @@
         /// 名称
         /// </summary>
         public required string Name { get; init; }
+
+        /// <summary>
+        /// Assigned id
+        /// 分配的编号
+        /// </summary>
+        public string? AssignedId { get; init; }
     }
 }

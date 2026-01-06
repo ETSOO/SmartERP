@@ -262,7 +262,7 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task ListAsync(SupplierListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
-            await _commonService.UpdatePersonTagAsync(rq, User.OrganizationInt, cancellationToken);
+            await _commonService.UpdateTagAsync(rq, User.OrganizationInt, cancellationToken);
 
             await CreateQuery(rq)
                 .Select(p => new SupplierListData
@@ -284,7 +284,7 @@ namespace CRM.Server.Services
         {
             var orgId = User.OrganizationInt;
 
-            await _commonService.UpdatePersonTagAsync(rq, orgId, cancellationToken);
+            await _commonService.UpdateTagAsync(rq, orgId, cancellationToken);
 
             return await CreateQuery(rq, (q) =>
             {

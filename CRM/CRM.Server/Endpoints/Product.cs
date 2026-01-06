@@ -17,7 +17,7 @@ namespace CRM.Server.Endpoints
             g.MapPost("List", (IProductService service, ProductListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get product list / 获取产品列表").WithTags("Product");
 
-            g.MapPost("Query", (IProductService service, ProductQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+            g.MapPost("Query", (IProductService service, ProductQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query product info / 查询产品信息").WithTags("Product");
 
             return builder;

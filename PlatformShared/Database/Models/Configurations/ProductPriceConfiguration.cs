@@ -31,6 +31,11 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Prices)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("product_price_product_id_fkey");
         }
     }
 }

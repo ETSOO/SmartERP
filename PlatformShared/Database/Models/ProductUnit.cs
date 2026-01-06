@@ -25,9 +25,27 @@
         public string Name { get; set; } = default!;
 
         /// <summary>
+        /// Base unit
+        /// 基础单位
+        /// </summary>
+        public com.etsoo.CoreFramework.Business.ProductUnit BaseUnit { get; set; } = default!;
+
+        /// <summary>
         /// Order index
         /// 排序数
         /// </summary>
         public short OrderIndex { get; set; }
+
+        /// <summary>
+        /// Organization
+        /// 所属机构
+        /// </summary>
+        public CoreOrganization? CoreOrganization { get; set; }
+
+        /// <summary>
+        /// Products
+        /// 关联产品
+        /// </summary>
+        public ICollection<Product> Products { get; set; } = default!;
     }
 }

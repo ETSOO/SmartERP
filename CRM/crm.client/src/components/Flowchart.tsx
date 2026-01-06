@@ -12,7 +12,6 @@ export function Flowchart({ visible }: { visible: boolean }) {
 
   // Labels
   const labels = app.getLabels(
-    "contacts",
     "customers",
     "orders",
     "org",
@@ -20,6 +19,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
     "purchases",
     "reports",
     "simpleInventory",
+    "stakeholders",
     "stockIn",
     "stockOut",
     "suppliers",
@@ -43,7 +43,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
       {
         id: "contact",
         type: "input",
-        data: { label: labels.contacts },
+        data: { label: labels.stakeholders },
         position: v ? { x: 0, y: 0 } : { x: 250, y: 0 }
       },
       {

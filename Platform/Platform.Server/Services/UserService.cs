@@ -432,13 +432,12 @@ namespace Platform.Server.Services
 
             // Private apps
             var apps = await _db.CoreApps.AsNoTracking()
-                .GroupJoin(_db.CoreOrganizationApps, a => a.Id, oa => oa.CoreAppId, (a, oa) => new { a, oa })
-                .SelectMany(t => t.oa.Where(oa => oa.CoreOrganizationId == User.OrganizationInt).DefaultIfEmpty(), (t, oa) => new AppData
+                .LeftJoin(_db.CoreOrganizationApps, a => a.Id, oa => oa.CoreAppId, (a, oa) => new AppData
                 {
-                    Id = t.a.Id,
-                    Name = (oa == null || oa.LocalName == null) ? t.a.Name : oa.LocalName,
-                    Urls = (oa == null || oa.LocalUrls == null) ? t.a.Urls : oa.LocalUrls,
-                    Logo = t.a.Logo
+                    Id = a.Id,
+                    Name = (oa == null || oa.LocalName == null) ? a.Name : oa.LocalName,
+                    Urls = (oa == null || oa.LocalUrls == null) ? a.Urls : oa.LocalUrls,
+                    Logo = a.Logo
                 })
                .ToArrayAsync(cancellationToken);
 
@@ -458,13 +457,12 @@ namespace Platform.Server.Services
 
             var app = await _db.CoreApps.AsNoTracking()
                 .Where(a => a.Id == appId)
-                .GroupJoin(_db.CoreOrganizationApps, a => a.Id, oa => oa.CoreAppId, (a, oa) => new { a, oa })
-                .SelectMany(t => t.oa.Where(oa => oa.CoreOrganizationId == User.OrganizationInt).DefaultIfEmpty(), (t, oa) => new AppData
+                .LeftJoin(_db.CoreOrganizationApps.Where(oa => oa.CoreOrganizationId == User.OrganizationInt), a => a.Id, oa => oa.CoreAppId, (a, oa) => new AppData
                 {
-                    Id = t.a.Id,
-                    Name = (oa == null || oa.LocalName == null) ? t.a.Name : oa.LocalName,
-                    Urls = (oa == null || oa.LocalUrls == null) ? t.a.Urls : oa.LocalUrls,
-                    Logo = t.a.Logo
+                    Id = a.Id,
+                    Name = (oa == null || oa.LocalName == null) ? a.Name : oa.LocalName,
+                    Urls = (oa == null || oa.LocalUrls == null) ? a.Urls : oa.LocalUrls,
+                    Logo = a.Logo
                 })
                 .FirstOrDefaultAsync(cancellationToken) ?? await _db.CoreApps.AsNoTracking()
                     .Where(a => a.Id == MyAppConstants.CoreAppId)

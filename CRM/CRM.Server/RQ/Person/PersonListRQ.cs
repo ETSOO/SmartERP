@@ -1,7 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
-using CRM.Server.Dto.Person;
+using CRM.Server.Dto;
 using PlatformShared.Database.Models;
 using System.Text.Json.Serialization;
 
@@ -12,7 +12,7 @@ namespace CRM.Server.RQ.Person
     /// 人员列表请求数据
     /// </summary>
     [JsonDerivedType(typeof(PersonQueryRQ))]
-    public record PersonListRQ : QueryLongRQ, IPersonTag
+    public record PersonListRQ : QueryLongRQ, IQueryTag
     {
         /// <summary>
         /// Identity type

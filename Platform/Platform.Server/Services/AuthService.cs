@@ -1814,24 +1814,23 @@ namespace Platform.Server.Services
             var userData = await _db.CoreUsers
                 .AsNoTracking()
                 .Where(u => u.Id == data.UserId)
-                .GroupJoin(_db.Users(orgId), u => u.Id, ou => ou.CoreUserId, (u, ou) => new { u, ou })
-                .SelectMany(d => d.ou.DefaultIfEmpty(), (d, ou) => new TokenQueryUser
+                .LeftJoin(_db.Users(orgId), u => u.Id, ou => ou.CoreUserId, (u, ou) => new TokenQueryUser
                 {
-                    Id = d.u.Id,
-                    GivenName = d.u.GivenName,
-                    FamilyName = d.u.FamilyName,
-                    LatinGivenName = d.u.LatinGivenName,
-                    LatinFamilyName = d.u.LatinFamilyName,
-                    Status = d.u.Status,
-                    FrozenTime = d.u.FrozenTime,
-                    Step = d.u.Step,
-                    LatestAppId = data.AppId == null ? (d.u.LatestAppIds == null ? null : d.u.LatestAppIds.FirstOrDefault()) : data.AppId,
+                    Id = u.Id,
+                    GivenName = u.GivenName,
+                    FamilyName = u.FamilyName,
+                    LatinGivenName = u.LatinGivenName,
+                    LatinFamilyName = u.LatinFamilyName,
+                    Status = u.Status,
+                    FrozenTime = u.FrozenTime,
+                    Step = u.Step,
+                    LatestAppId = data.AppId == null ? (u.LatestAppIds == null ? null : u.LatestAppIds.FirstOrDefault()) : data.AppId,
                     Oid = ou == null ? null : ou.Id,
                     Pid = pid,
                     OrgStatus = ou == null ? null : ou.Status,
                     OrgExpiry = ou == null ? null : ou.Expiry,
-                    Name = ou == null ? d.u.Name : ou.Name,
-                    Avatar = ou == null ? d.u.Avatar : (ou.Avatar ?? d.u.Avatar),
+                    Name = ou == null ? u.Name : ou.Name,
+                    Avatar = ou == null ? u.Avatar : (ou.Avatar ?? u.Avatar),
                     Role = ou == null ? null : ou.UserRole,
                     OrganizationName = ou == null ? null : ou.Organization.Name
                 })

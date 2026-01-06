@@ -41,8 +41,8 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.CapQty)
                 .HasPrecision(12, 2)
                 .HasColumnName("cap_qty");
-            entity.Property(e => e.AssetUnit).HasColumnName("asset_unit");
             entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
+            entity.Property(e => e.AssignedId).HasColumnName("assigned_id");
             entity.Property(e => e.OrderIndex)
                 .HasDefaultValue((short)0)
                 .HasColumnName("order_index");
@@ -70,6 +70,16 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValue(ProductInventoryWay.None)
                 .HasColumnName("inventory_way");
             entity.Property(e => e.Tags).HasColumnName("tags");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.Products)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("product_core_organization_id_fkey");
+
+            entity.HasOne(d => d.Unit).WithMany(p => p.Products)
+                .HasForeignKey(d => d.UnitId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("product_unit_id_fkey");
         }
     }
 }

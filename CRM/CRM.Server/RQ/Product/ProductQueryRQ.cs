@@ -1,4 +1,6 @@
-﻿namespace CRM.Server.RQ.Product
+﻿using PlatformShared.Database.Models;
+
+namespace CRM.Server.RQ.Product
 {
     /// <summary>
     /// Product query request data
@@ -6,5 +8,22 @@
     /// </summary>
     public record ProductQueryRQ : ProductListRQ
     {
+        /// <summary>
+        /// Currency
+        /// 币种
+        /// </summary>
+        public string? Currency { get; init; }
+
+        /// <summary>
+        /// Sale scope
+        /// 销售范围
+        /// </summary>
+        public ProductScope? Scope { get; init; }
+
+        /// <summary>
+        /// Unit id
+        /// 单位编号
+        /// </summary>
+        public int? UnitId { get; init; }
     }
 }

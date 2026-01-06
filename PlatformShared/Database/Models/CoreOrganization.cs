@@ -141,6 +141,12 @@ namespace PlatformShared.Database.Models
         public ICollection<Product> Products { get; } = default!;
 
         /// <summary>
+        /// Product units
+        /// 产品单位
+        /// </summary>
+        public ICollection<ProductUnit> ProductUnits { get; set; } = default!;
+
+        /// <summary>
         /// Children organizations
         /// 子机构
         /// </summary>

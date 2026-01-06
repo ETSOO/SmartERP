@@ -18,9 +18,16 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Name)
                 .HasMaxLength(20)
                 .HasColumnName("name");
+            entity.Property(e => e.BaseUnit)
+                .HasConversion<byte>()
+                .HasColumnName("base_unit");
             entity.Property(e => e.OrderIndex)
                 .HasDefaultValue((short)0)
                 .HasColumnName("order_index");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.ProductUnits)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .HasConstraintName("product_unit_core_organization_id_fkey");
         }
     }
 }

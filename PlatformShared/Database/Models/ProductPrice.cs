@@ -47,5 +47,11 @@
         /// 登记时间
         /// </summary>
         public DateTimeOffset Creation { get; set; }
+
+        /// <summary>
+        /// Product
+        /// 所属产品
+        /// </summary>
+        public Product Product { get; set; } = default!;
     }
 }

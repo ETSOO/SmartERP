@@ -8,7 +8,23 @@ namespace PlatformShared.Database.Models
     /// </summary>
     public enum ProductUsage : byte
     {
+        /// <summary>
+        /// Raw material
+        /// 原材料
+        /// </summary>
+        RawMaterial = 1,
 
+        /// <summary>
+        /// Work-in-progress
+        /// 半成品
+        /// </summary>
+        WIP = 4,
+
+        /// <summary>
+        /// Finished product
+        /// 成品
+        /// </summary>
+        FinishedProduct = 9
     }
 
     /// <summary>
@@ -17,6 +33,23 @@ namespace PlatformShared.Database.Models
     /// </summary>
     public enum ProductScope : byte
     {
+        /// <summary>
+        /// None
+        /// 无
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Internal
+        /// 仅内部
+        /// </summary>
+        Internal = 1,
+
+        /// <summary>
+        /// Public
+        /// 仅对外
+        /// </summary>
+        Public = 16
     }
 
     /// <summary>
@@ -87,6 +120,12 @@ namespace PlatformShared.Database.Models
         public string? Description { get; set; }
 
         /// <summary>
+        /// Foreign description
+        /// 外文描述
+        /// </summary>
+        public string? ForeignDescription { get; set; }
+
+        /// <summary>
         /// Logo
         /// 图标
         /// </summary>
@@ -117,16 +156,16 @@ namespace PlatformShared.Database.Models
         public decimal? CapQty { get; set; }
 
         /// <summary>
-        /// Asset unit
-        /// 资产单位
-        /// </summary>
-        public AssetUnit? AssetUnit { get; set; }
-
-        /// <summary>
         /// Asset qty
         /// 资产数量
         /// </summary>
         public int? AssetQty { get; set; }
+
+        /// <summary>
+        /// Assigned id
+        /// 分配编号
+        /// </summary>
+        public string? AssignedId { get; set;  }
 
         /// <summary>
         /// Order index
@@ -147,12 +186,14 @@ namespace PlatformShared.Database.Models
         public EntityStatus Status { get; set; }
 
         /// <summary>
-        /// 
+        /// Usage
+        /// 使用范围
         /// </summary>
         public ProductUsage Usage { get; set; }
 
         /// <summary>
-        /// 
+        /// Sale scope
+        /// 销售范围
         /// </summary>
         public ProductScope Scope { get; set; }
 
@@ -179,5 +220,23 @@ namespace PlatformShared.Database.Models
         /// 标签（编号）
         /// </summary>
         public List<int>? Tags { get; set; }
+
+        /// <summary>
+        /// Organization
+        /// 所属机构
+        /// </summary>
+        public CoreOrganization CoreOrganization { get; set; } = null!;
+
+        /// <summary>
+        /// Product unit
+        /// 产品单位
+        /// </summary>
+        public ProductUnit Unit { get; set; } = null!;
+
+        /// <summary>
+        /// Prices
+        /// 价格
+        /// </summary>
+        public ICollection<ProductPrice> Prices { get; set; } = default!;
     }
 }
