@@ -80,6 +80,7 @@ export default function Home() {
     "orders",
     "org",
     "permissionGroups",
+    "productUnits",
     "purchases",
     "signoutSuccess",
     "simpleInventory",
@@ -216,7 +217,25 @@ export default function Home() {
       app.owns(Permissions.Product.Query) && {
         segment: "home/product",
         title: labels.offerings,
-        icon: <ShopIcon />
+        icon: <ShopIcon />,
+        children: [
+          {
+            segment: "add",
+            title: labels.add,
+            hidden: true
+          },
+          {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
+            hidden: true
+          },
+          {
+            segment: "unit",
+            title: labels.productUnits,
+            hidden: true
+          }
+        ]
       },
       app.owns(Permissions.PO.Query) && {
         segment: "home/po",
@@ -226,7 +245,20 @@ export default function Home() {
       app.owns(Permissions.Supplier.Query) && {
         segment: "home/supplier",
         title: labels.suppliers,
-        icon: <HailIcon />
+        icon: <HailIcon />,
+        children: [
+          {
+            segment: "add",
+            title: labels.add,
+            hidden: true
+          },
+          {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
+            hidden: true
+          }
+        ]
       },
       app.userData?.system?.hasInventory === true && {
         segment: "home/inventory",

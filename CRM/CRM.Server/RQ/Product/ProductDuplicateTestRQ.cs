@@ -2,13 +2,13 @@
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 
-namespace CRM.Server.RQ.PersonCategory
+namespace CRM.Server.RQ.Product
 {
     /// <summary>
-    /// Person category duplicate test request data
-    /// 人员分类重复测试请求数据
+    /// Product duplicate test request data
+    /// 产品重复测试请求数据
     /// </summary>
-    public record PersonCategoryDuplicateTestRQ : IModelValidator
+    public record ProductDuplicateTestRQ : IModelValidator
     {
         /// <summary>
         /// Excluded id
@@ -35,7 +35,7 @@ namespace CRM.Server.RQ.PersonCategory
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (Name != null && Name.Length is not (>= 2 and <= 128))
+            if (Name != null && Name.Length is not (>= 2 and <= 256))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Name));
             }

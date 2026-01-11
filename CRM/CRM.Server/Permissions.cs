@@ -50,7 +50,9 @@
         QueryProfile = 2091,
         ViewProfile = 2092,
         AddProfile = 2093,
-        AddComment = 2097
+        AddComment = 2097,
+
+        Manage = 2200
     }
 
     /// <summary>
@@ -76,7 +78,9 @@
         QueryProfile = 3091,
         ViewProfile = 3092,
         AddProfile = 3093,
-        AddComment = 3097
+        AddComment = 3097,
+
+        Manage = 3200
     }
 
     /// <summary>
@@ -102,7 +106,9 @@
         QueryProfile = 6091,
         ViewProfile = 6092,
         AddProfile = 6093,
-        AddComment = 6097
+        AddComment = 6097,
+
+        Manage = 6200
     }
 
     /// <summary>
@@ -128,7 +134,9 @@
         QueryProfile = 7091,
         ViewProfile = 7092,
         AddProfile = 7093,
-        AddComment = 7097
+        AddComment = 7097,
+
+        Manage = 7200
     }
 
     /// <summary>
@@ -143,7 +151,9 @@
         View = 8003,
         Add = 8011,
         Edit = 8012,
-        Delete = 8013
+        Delete = 8013,
+
+        Manage = 8200
     }
 
     /// <summary>
@@ -158,7 +168,9 @@
         View = 9003,
         Add = 9011,
         Edit = 9012,
-        Delete = 9013
+        Delete = 9013,
+
+        Manage = 9200
     }
 
     /// <summary>
@@ -173,7 +185,9 @@
         View = 10003,
         Add = 10011,
         Edit = 10012,
-        Delete = 10013
+        Delete = 10013,
+
+        Manage = 10200
     }
 
     /// <summary>
@@ -183,7 +197,9 @@
     {
         All = 11000,
 
-        Query = 11002
+        Query = 11002,
+
+        Manage = 11200
     }
 
     /// <summary>
@@ -193,6 +209,8 @@
     {
         All = 18000,
 
-        Query = 18002
+        Query = 18002,
+
+        Manage = 18200
     }
 }

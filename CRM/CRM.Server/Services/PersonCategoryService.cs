@@ -202,12 +202,6 @@ namespace CRM.Server.Services
 
             if (!hasFilter) return null;
 
-            // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
-            {
-                return null;
-            }
-
             return await q.Select(p => new PersonCategoryDuplicateTestData
             {
                 Id = p.Id,

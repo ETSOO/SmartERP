@@ -127,6 +127,22 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Get default currency
+        /// 获得默认货币
+        /// </summary>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<string?> GetDefaultCurrency(int orgId, CancellationToken cancellationToken = default)
+        {
+            return _db.SettingCrms
+                .AsNoTracking()
+                .Where(s => s.Id == orgId)
+                .Select(s => s.Currencies.FirstOrDefault())
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Get person's permission identity type
         /// 获取个人的权限身份类型
         /// </summary>

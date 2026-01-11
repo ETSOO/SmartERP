@@ -111,7 +111,7 @@ namespace PlatformShared.Database.Models
         /// Category ids
         /// 所属类目编号数组
         /// </summary>
-        public List<int> CategoryIds { get; set; } = default!;
+        public List<int>? CategoryIds { get; set; }
 
         /// <summary>
         /// Description

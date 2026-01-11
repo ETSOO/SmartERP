@@ -21,7 +21,7 @@ import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { CustomerQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import { Permissions } from "@etsoo/smarterp-crm";
@@ -30,7 +30,8 @@ import { IdentityTypeFlags } from "@etsoo/appscript";
 const template = {
   keyword: "string",
   info: "string",
-  city: "string"
+  city: "string",
+  status: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllCustomers() {
@@ -111,7 +112,8 @@ export default function AllCustomers() {
           name="city"
           minChars={2}
           defaultValue={data.city}
-        />
+        />,
+        <StatusList search idValue={data.status} />
       ]}
       loadData={(data) =>
         app.customerApi.query(data, {

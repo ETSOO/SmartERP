@@ -134,10 +134,17 @@ namespace CRM.Server
     [JsonSerializable(typeof(POListRQ))]
 
     // Product
+    [JsonSerializable(typeof(ProductDuplicateTestData[]))]
     [JsonSerializable(typeof(ProductListData))]
     [JsonSerializable(typeof(ProductQueryData[]))]
+    [JsonSerializable(typeof(ProductUnitItem[]))]
+    [JsonSerializable(typeof(ProductUpdateReadData))]
 
+    [JsonSerializable(typeof(ProductCreateRQ))]
+    [JsonSerializable(typeof(ProductDuplicateTestRQ))]
     [JsonSerializable(typeof(ProductListRQ))]
+    [JsonSerializable(typeof(ProductUnitUpdateRQ))]
+    [JsonSerializable(typeof(ProductUpdateRQ))]
 
     // Supplier
     [JsonSerializable(typeof(SupplierListData))]

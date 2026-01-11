@@ -9,6 +9,7 @@ namespace CRM.Server.Services
     {
         Task AddOrUpdatePersonInfoAsync(long personId, PersonInfoKind kind, string? identifier, CancellationToken cancellationToken = default);
         Task<int[]> AddTagsAsync(FeatureTagKind kind, IEnumerable<string> tags, CancellationToken cancellationToken = default);
+        Task<string?> GetDefaultCurrency(int orgId, CancellationToken cancellationToken = default);
         Task<(IdentityTypeFlags, bool)> GetPersonIdentityTypeAsync(CancellationToken cancellationToken = default);
         Task<(IdentityTypeFlags, bool)> GetProfileIdentityTypeAsync(CancellationToken cancellationToken = default);
         FeatureTagKind GetTagKind(IdentityTypeFlags type);

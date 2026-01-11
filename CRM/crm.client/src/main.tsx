@@ -242,6 +242,33 @@ const router = createDynamicRouter([
               return { Component: AllProducts.default };
             }
           },
+          {
+            path: "/home/product/add",
+            lazy: async () => {
+              const AddProduct = await import(
+                "./pages/home/product/AddProduct"
+              );
+              return { Component: AddProduct.default };
+            }
+          },
+          {
+            path: "/home/product/edit/:id",
+            lazy: async () => {
+              const AddProduct = await import(
+                "./pages/home/product/AddProduct"
+              );
+              return { Component: AddProduct.default };
+            }
+          },
+          {
+            path: "/home/product/unit",
+            lazy: async () => {
+              const ProductUnits = await import(
+                "./pages/home/product/ProductUnits"
+              );
+              return { Component: ProductUnits.default };
+            }
+          },
 
           {
             path: "/home/profile",

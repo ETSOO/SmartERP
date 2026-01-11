@@ -6,6 +6,7 @@
   "dropFilesLabel": "Drop files here, or",
   "flowchart": "Flowchart",
   "latestTasks": "Latest tasks",
+  "productUnitTip": "If no products are using this product unit, clearing the base unit will delete this item",
   "smarterpCRM": "SmartERP Business Management",
   "updateSystemSettings": "Update system settings"
 }

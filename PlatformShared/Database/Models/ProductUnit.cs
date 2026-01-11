@@ -25,6 +25,12 @@
         public string Name { get; set; } = default!;
 
         /// <summary>
+        /// Foreign name
+        /// 外文名称
+        /// </summary>
+        public string? ForeignName { get; set; }
+
+        /// <summary>
         /// Base unit
         /// 基础单位
         /// </summary>

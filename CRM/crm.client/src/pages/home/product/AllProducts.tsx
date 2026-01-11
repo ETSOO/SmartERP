@@ -10,6 +10,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CategoryIcon from "@mui/icons-material/Category";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
+import FlagIcon from "@mui/icons-material/Flag";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -21,16 +22,18 @@ import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { ProductQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import { Permissions } from "@etsoo/smarterp-crm";
+import { ProductUnitList } from "@etsoo/smarterp-crm/components";
 
 const template = {
   name: "string",
   assignedId: "string",
-  status: "number"
+  status: "number",
+  unitId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllDepts() {
@@ -46,7 +49,8 @@ export default function AllDepts() {
     "confirmAction",
     "edit",
     "entityStatus",
-    "name",
+    "productName",
+    "productUnits",
     "view"
   );
 
@@ -65,24 +69,36 @@ export default function AllDepts() {
         onRefresh: reloadData,
         fabButtons: (
           <React.Fragment>
-            {app.owns(Permissions.Org.Manage) && (
-              <ButtonLink
-                href={`./`}
-                size="small"
-                variant="outlined"
-                startIcon={<CategoryIcon />}
-              >
-                {labels.categories}
-              </ButtonLink>
+            {app.owns(Permissions.Product.Manage) && (
+              <React.Fragment>
+                <ButtonLink
+                  href={`./`}
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CategoryIcon />}
+                >
+                  {labels.categories}
+                </ButtonLink>
+                <ButtonLink
+                  href={`./unit`}
+                  size="small"
+                  variant="outlined"
+                  startIcon={<FlagIcon />}
+                >
+                  {labels.productUnits}
+                </ButtonLink>
+              </React.Fragment>
             )}
-            <Fab
-              title={labels.add}
-              size="medium"
-              color="primary"
-              onClick={() => navigate("./add")}
-            >
-              <AddIcon />
-            </Fab>
+            {app.owns(Permissions.Product.Add) && (
+              <Fab
+                title={labels.add}
+                size="medium"
+                color="primary"
+                onClick={() => navigate("./add")}
+              >
+                <AddIcon />
+              </Fab>
+            )}
           </React.Fragment>
         )
       })}
@@ -91,10 +107,22 @@ export default function AllDepts() {
       quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
-        <SearchField label={labels.name} name="name" defaultValue={data.name} />
+        <SearchField
+          label={labels.productName}
+          name="name"
+          defaultValue={data.name}
+        />,
+        <SearchField
+          label={labels.assignedId}
+          name="assignedId"
+          minChars={3}
+          defaultValue={data.assignedId}
+        />,
+        <ProductUnitList search value={data.unitId} />,
+        <StatusList search idValue={data.status} />
       ]}
       loadData={(data) =>
-        app.ProductApi.query(data, {
+        app.productApi.query(data, {
           defaultValue: [],
           showLoading: false
         })
@@ -102,7 +130,7 @@ export default function AllDepts() {
       columns={[
         {
           field: "name",
-          header: labels.name,
+          header: labels.productName,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
         },

@@ -28,6 +28,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Description)
                 .HasMaxLength(2560)
                 .HasColumnName("description");
+            entity.Property(e => e.ForeignDescription)
+                .HasMaxLength(2560)
+                .HasColumnName("foreign_description");
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)
                 .HasColumnName("logo");

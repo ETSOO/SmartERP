@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Models;
 using CRM.Server.RQ.Person;
 using PlatformShared.Database.Models;
 
@@ -10,7 +11,7 @@ namespace CRM.Server.RQ.Supplier
     /// Create supplier request data
     /// 创建供应商请求数据
     /// </summary>
-    public record SupplierCreateRQ
+    public record SupplierCreateRQ : IModelValidator
     {
         /// <summary>
         /// Is legal person (enterprise)

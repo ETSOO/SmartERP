@@ -6,6 +6,7 @@
   "dropFilesLabel": "拖放文件到这里，或者",
   "flowchart": "流程图",
   "latestTasks": "最近的任务",
+  "productUnitTip": "如果没有产品使用该产品单位，清除基础单位可删除该项目",
   "smarterpCRM": "司友云ERP业务管理",
   "updateSystemSettings": "更新系统设置"
 }
