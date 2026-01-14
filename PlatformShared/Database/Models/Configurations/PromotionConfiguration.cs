@@ -18,19 +18,19 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasIdentityOptions(2001L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-            entity.Property(e => e.Title)
+            entity.Property(e => e.Name)
                 .HasMaxLength(128)
                 .IsRequired()
-                .HasColumnName("title");
+                .HasColumnName("name");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
                 .IsFixedLength()
                 .IsRequired()
                 .HasColumnName("currency");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.ProductCategoryId).HasColumnName("product_category_id");
-            entity.Property(e => e.PersonId).HasColumnName("person_id");
-            entity.Property(e => e.PersonCategoryId).HasColumnName("person_category_id");
+            entity.Property(e => e.ProductIds).HasColumnName("product_ids");
+            entity.Property(e => e.ProductCategoryIds).HasColumnName("product_category_ids");
+            entity.Property(e => e.PersonIds).HasColumnName("person_ids");
+            entity.Property(e => e.PersonCategoryIds).HasColumnName("person_category_ids");
             entity.Property(e => e.Code)
                 .HasConversion<PromotionCodeConverter>()
                 .HasColumnName("code");
@@ -41,6 +41,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.ValidStart).HasColumnName("valid_start");
             entity.Property(e => e.ValidEnd).HasColumnName("valid_end");
             entity.Property(e => e.Coupons).HasColumnName("coupons");
+            entity.Property(e => e.CouponsApplied)
+                .HasDefaultValue(0)
+                .HasColumnName("coupons_applied");
             entity.Property(e => e.Stackable).HasColumnName("stackable");
             entity.Property(e => e.OrderIndex)
                 .HasDefaultValue((short)0)

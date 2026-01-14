@@ -24,6 +24,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { BusinessUtils, EntityStatus } from "@etsoo/appscript";
 import {
+  ButtonProductCategories,
   ProductAssignedIdDuplicateTest,
   ProductInventoryWayList,
   ProductNameDuplicateTest,
@@ -49,8 +50,6 @@ export default function AddProduct() {
     "channelPrice",
     "costPrice",
     "description",
-    "foreignDescription",
-    "foreignName",
     "minQty",
     "noChanges",
     "productName",
@@ -92,8 +91,6 @@ export default function AddProduct() {
     "channelPrice",
     "costPrice",
     "description",
-    "foreignDescription",
-    "foreignName",
     "minQty",
     "name",
     "queryKeyword",
@@ -315,7 +312,13 @@ export default function AddProduct() {
           inputRef={refs.costPrice}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}></Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <ButtonProductCategories
+          fullWidth
+          value={formik.values.categories ?? []}
+          onValueChange={(ids) => formik.setFieldValue("categories", ids)}
+        />
+      </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
         <TagList
           value={formik.values.tags ?? []}
@@ -348,36 +351,6 @@ export default function AddProduct() {
           rows={2}
         />
       </Grid>
-      {(app.userData?.system?.cultures.length ?? 0) > 1 && (
-        <React.Fragment>
-          <Grid size={{ xs: 12, sm: 12 }}>
-            <InputField
-              fullWidth
-              name="foreignName"
-              slotProps={{
-                htmlInput: { maxLength: 256 }
-              }}
-              label={labels.foreignName}
-              inputRef={refs.foreignName}
-              multiline
-              rows={2}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 12 }}>
-            <InputField
-              fullWidth
-              name="foreignDescription"
-              slotProps={{
-                htmlInput: { maxLength: 2560 }
-              }}
-              label={labels.foreignDescription}
-              inputRef={refs.foreignDescription}
-              multiline
-              rows={2}
-            />
-          </Grid>
-        </React.Fragment>
-      )}
       <Grid size={{ xs: 6, sm: 3 }}>
         <ProductAssignedIdDuplicateTest fullWidth inputRef={refs.assignedId} />
       </Grid>

@@ -1,12 +1,12 @@
 ﻿using com.etsoo.CoreFramework.Business;
 
-namespace CRM.Server.Dto.PersonCategory
+namespace CRM.Server.Dto.ProductCategory
 {
     /// <summary>
-    /// Person category duplicate test data
-    /// 人员分类重复测试数据
+    /// Product category duplicate test data
+    /// 产品分类重复测试数据
     /// </summary>
-    public record PersonCategoryDuplicateTestData
+    public record ProductCategoryDuplicateTestData
     {
         /// <summary>
         /// Id
@@ -19,11 +19,5 @@ namespace CRM.Server.Dto.PersonCategory
         /// 名称数组
         /// </summary>
         public required IEnumerable<string> Names { get; init; }
-
-        /// <summary>
-        /// Identity type
-        /// 识别类型
-        /// </summary>
-        public IdentityTypeFlags IdentityType { get; init; }
     }
 }

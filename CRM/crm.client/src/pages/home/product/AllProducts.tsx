@@ -14,6 +14,7 @@ import FlagIcon from "@mui/icons-material/Flag";
 import React from "react";
 import {
   GridCellRendererProps,
+  GridDataType,
   GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
@@ -27,13 +28,17 @@ import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import { Permissions } from "@etsoo/smarterp-crm";
-import { ProductUnitList } from "@etsoo/smarterp-crm/components";
+import {
+  ProductCategoryTiplist,
+  ProductUnitList
+} from "@etsoo/smarterp-crm/components";
 
 const template = {
   name: "string",
   assignedId: "string",
   status: "number",
-  unitId: "number"
+  unitId: "number",
+  categoryId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllDepts() {
@@ -45,12 +50,16 @@ export default function AllDepts() {
     "actions",
     "add",
     "assignedId",
+    "category",
     "categories",
     "confirmAction",
     "edit",
     "entityStatus",
     "productName",
+    "productUnit",
     "productUnits",
+    "promotionPrice",
+    "retailPrice",
     "view"
   );
 
@@ -72,7 +81,7 @@ export default function AllDepts() {
             {app.owns(Permissions.Product.Manage) && (
               <React.Fragment>
                 <ButtonLink
-                  href={`./`}
+                  href={`./category`}
                   size="small"
                   variant="outlined"
                   startIcon={<CategoryIcon />}
@@ -118,6 +127,11 @@ export default function AllDepts() {
           minChars={3}
           defaultValue={data.assignedId}
         />,
+        <ProductCategoryTiplist
+          label={labels.category}
+          name="categoryId"
+          search
+        />,
         <ProductUnitList search value={data.unitId} />,
         <StatusList search idValue={data.status} />
       ]}
@@ -133,6 +147,37 @@ export default function AllDepts() {
           header: labels.productName,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
+        },
+        {
+          field: "retailPrice",
+          type: GridDataType.Money,
+          width: 120,
+          header: labels.retailPrice,
+          renderProps: (data) => app.getMoneyFormatProps(data?.currency)
+        },
+        {
+          field: "promotionPrice",
+          type: GridDataType.Money,
+          width: 120,
+          header: labels.promotionPrice,
+          renderProps: app.getMoneyFormatProps()
+        },
+        {
+          field: "unitName",
+          header: labels.productUnit,
+          width: 100,
+          valueFormatter: ({ data }) => {
+            if (data == null) return undefined;
+            if (data.assetQty) return `${data.unitName} (${data.assetQty})`;
+            else return data.unitName;
+          }
+        },
+        {
+          field: "categories",
+          header: labels.categories,
+          width: 200,
+          valueFormatter: ({ data }) =>
+            data?.categories?.map((c) => c.names.join(" -> ")).join(", ")
         },
         {
           field: "assignedId",

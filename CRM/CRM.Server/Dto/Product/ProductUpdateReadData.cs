@@ -34,18 +34,6 @@ namespace CRM.Server.Dto.Product
         public string? Description { get; init; }
 
         /// <summary>
-        /// Foreign name
-        /// 外文名称
-        /// </summary>
-        public string? ForeignName { get; init; }
-
-        /// <summary>
-        /// Foreign description
-        /// 外文描述
-        /// </summary>
-        public string? ForeignDescription { get; init; }
-
-        /// <summary>
         /// Unit id
         /// 产品单位编号
         /// </summary>

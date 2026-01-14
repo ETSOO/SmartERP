@@ -102,12 +102,6 @@ namespace PlatformShared.Database.Models
         public string Name { get; set; } = default!;
 
         /// <summary>
-        /// Foreign name
-        /// 外文名称
-        /// </summary>
-        public string? ForeignName { get; set; }
-
-        /// <summary>
         /// Category ids
         /// 所属类目编号数组
         /// </summary>
@@ -118,12 +112,6 @@ namespace PlatformShared.Database.Models
         /// 描述
         /// </summary>
         public string? Description { get; set; }
-
-        /// <summary>
-        /// Foreign description
-        /// 外文描述
-        /// </summary>
-        public string? ForeignDescription { get; set; }
 
         /// <summary>
         /// Logo

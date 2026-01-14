@@ -303,7 +303,7 @@ namespace Platform.Server.Services
             }
             else
             {
-                if (string.IsNullOrEmpty(rq.Key) || rq.Key.StartsWith("etsoo", StringComparison.OrdinalIgnoreCase) || rq.Key.StartsWith("smarterp", StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrEmpty(rq.Key) || rq.Key.StartsWith("etsoo", StringComparison.OrdinalIgnoreCase))
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(rq.Key));
                 }
@@ -913,6 +913,7 @@ namespace Platform.Server.Services
 
             var (hasContent, commandText) = await _db.FeatureCultures
                 .AsNoTracking()
+                .Where(c => !c.Key.StartsWith("etsoo"))
                 .QueryEtsoo(rq, (c) => c.Id, null, (q) =>
                 {
                     if (rq.OrgId.HasValue)
@@ -983,7 +984,7 @@ namespace Platform.Server.Services
                     UserExpiry = ou.Expiry
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
 
-            if (_db.IsSensitiveDataLoggingEnabled)
+            if (_db.IsSensitiveDataLoggingEnabled && Logger.IsEnabled(LogLevel.Information))
             {
                 Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }

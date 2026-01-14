@@ -22,10 +22,10 @@ namespace PlatformShared.Database.Models
         public int CoreOrganizationId { get; set; }
 
         /// <summary>
-        /// Title
-        /// 标题
+        /// Name
+        /// 名称
         /// </summary>
-        public string Title { get; set; } = default!;
+        public string Name { get; set; } = default!;
 
         /// <summary>
         /// Currency
@@ -34,28 +34,28 @@ namespace PlatformShared.Database.Models
         public string Currency { get; set; } = default!;
 
         /// <summary>
-        /// Related product id
+        /// Related product ids
         /// 关联的产品编号
         /// </summary>
-        public int? ProductId { get; set; }
+        public List<int>? ProductIds { get; set; }
 
         /// <summary>
-        /// Related product category id
+        /// Related product category ids
         /// 关联的产品类目编号
         /// </summary>
-        public int? ProductCategoryId { get; set; }
+        public List<int>? ProductCategoryIds { get; set; }
 
         /// <summary>
-        /// Related person (customer) id
+        /// Related person (customer) ids
         /// 关联的人员（客户）编号
         /// </summary>
-        public long? PersonId { get; set; }
+        public List<long>? PersonIds { get; set; }
 
         /// <summary>
-        /// Related person category id
+        /// Related person category ids
         /// 关联的人员类目编号
         /// </summary>
-        public int? PersonCategoryId { get; set; }
+        public List<int>? PersonCategoryIds { get; set; }
 
         /// <summary>
         /// Promotion code
@@ -91,7 +91,13 @@ namespace PlatformShared.Database.Models
         /// Number of coupons
         /// 优惠券数量
         /// </summary>
-        public int Coupons { get; set; }
+        public int? Coupons { get; set; }
+
+        /// <summary>
+        /// Number of coupons applied
+        /// 已使用优惠券数量
+        /// </summary>
+        public int CouponsApplied {  get; set; }
 
         /// <summary>
         /// Whether the promotion is stackable

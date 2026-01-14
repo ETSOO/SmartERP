@@ -14,8 +14,6 @@ using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
-using System.Threading;
-using ProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
 {
@@ -124,10 +122,8 @@ namespace CRM.Server.Services
             {
                 CoreOrganizationId = orgId,
                 Name = rq.Name,
-                ForeignName = rq.ForeignName,
                 CategoryIds = rq.Categories?.ToList(),
                 Description = rq.Description,
-                ForeignDescription = rq.ForeignDescription,
                 UnitId = unitId,
                 MinQty = rq.MinQty,
                 StepQty = rq.StepQty,
@@ -211,13 +207,12 @@ namespace CRM.Server.Services
 
                         if (keyword.IsComplexQueryKeywords())
                         {
-                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, a => a.Name, a => a.ForeignName, a => a.Description);
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, a => a.Name, a => a.Description);
                         }
                         else
                         {
                             q = q.Where(ou => EF.Functions.ILike(ou.Name, $"%{keyword}%")
                             || (ou.QueryKeyword != null && EF.Functions.ILike(ou.QueryKeyword, $"%{keyword}%"))
-                            || (ou.ForeignName != null && EF.Functions.ILike(ou.ForeignName, $"%{keyword}%"))
                             || (ou.Description != null && EF.Functions.ILike(ou.Description, $"%{keyword}%"))
                             || (ou.AssignedId != null && EF.Functions.ILike(ou.AssignedId, $"%{keyword}%"))
                             );
@@ -340,7 +335,7 @@ namespace CRM.Server.Services
                 Currency = pp == null ? null : pp.Currency,
                 RetailPrice = pp == null ? null : pp.RetailPrice,
                 PromotionPrice = pp == null ? null : pp.PromotionPrice,
-                Categories = _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds != null && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds!.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList()
+                Categories = _db.ProductCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds != null && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds!.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList()
             })
             .ToArrayAsync(cancellationToken);
         }
@@ -362,7 +357,6 @@ namespace CRM.Server.Services
                 {
                     Id = u.Id,
                     Name = u.Name,
-                    ForeignName = u.ForeignName,
                     BaseUnit = u.BaseUnit,
                     IsSystem = u.CoreOrganizationId == null
                 }).ToArrayAsync(cancellationToken);
@@ -409,16 +403,6 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.Description)))
             {
                 product.Description = rq.Description;
-            }
-
-            if (rq.IsModified(nameof(rq.ForeignName)))
-            {
-                product.ForeignName = rq.ForeignName;
-            }
-
-            if (rq.IsModified(nameof(rq.ForeignDescription)))
-            {
-                product.ForeignDescription = rq.ForeignDescription;
             }
 
             if (rq.IsModified(nameof(rq.UnitId)) && rq.UnitId.HasValue)
@@ -552,8 +536,6 @@ namespace CRM.Server.Services
                     Name = p.Name,
                     AssignedId = p.AssignedId,
                     Description = p.Description,
-                    ForeignName = p.ForeignName,
-                    ForeignDescription = p.ForeignDescription,
                     UnitId = p.UnitId,
                     MinQty = p.MinQty,
                     StepQty = p.StepQty,
@@ -620,7 +602,6 @@ namespace CRM.Server.Services
                 }
 
                 entity.Name = unit.Name;
-                entity.ForeignName = unit.ForeignName;
                 entity.BaseUnit = unit.BaseUnit;
                 entity.OrderIndex = (short)(index + 2);
 

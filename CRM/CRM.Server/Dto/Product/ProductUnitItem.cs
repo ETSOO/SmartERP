@@ -27,12 +27,6 @@ namespace CRM.Server.Dto.Product
         public required string Name { get; init; }
 
         /// <summary>
-        /// Foreign name
-        /// 外文名称
-        /// </summary>
-        public string? ForeignName { get; init; }
-
-        /// <summary>
         /// Is system item
         /// 是否为系统项
         /// </summary>

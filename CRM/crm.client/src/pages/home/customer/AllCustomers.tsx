@@ -26,11 +26,13 @@ import { BoxProps } from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import { Permissions } from "@etsoo/smarterp-crm";
 import { IdentityTypeFlags } from "@etsoo/appscript";
+import { PersonCategoryTiplist } from "@etsoo/smarterp-crm/components";
 
 const template = {
   keyword: "string",
   info: "string",
   city: "string",
+  categoryId: "number",
   status: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -43,6 +45,7 @@ export default function AllCustomers() {
     "actions",
     "add",
     "assignedId",
+    "category",
     "categories",
     "city",
     "confirmAction",
@@ -50,6 +53,7 @@ export default function AllCustomers() {
     "creation",
     "description",
     "edit",
+    "keywords",
     "personName",
     "view"
   );
@@ -97,7 +101,7 @@ export default function AllCustomers() {
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
-          label={labels.personName}
+          label={labels.keywords}
           name="keyword"
           defaultValue={data.keyword}
         />,
@@ -112,6 +116,14 @@ export default function AllCustomers() {
           name="city"
           minChars={2}
           defaultValue={data.city}
+        />,
+        <PersonCategoryTiplist
+          label={labels.category}
+          name="categoryId"
+          onLoadData={(rq) =>
+            Object.assign(rq, { identityType: IdentityTypeFlags.Customer })
+          }
+          search
         />,
         <StatusList search idValue={data.status} />
       ]}

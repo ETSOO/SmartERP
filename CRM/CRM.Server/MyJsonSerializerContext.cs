@@ -8,6 +8,7 @@ using CRM.Server.Dto.PersonCategory;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.PO;
 using CRM.Server.Dto.Product;
+using CRM.Server.Dto.ProductCategory;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.Dto.System;
 using CRM.Server.Dto.Tag;
@@ -22,6 +23,7 @@ using CRM.Server.RQ.PersonCategory;
 using CRM.Server.RQ.PersonProfile;
 using CRM.Server.RQ.PO;
 using CRM.Server.RQ.Product;
+using CRM.Server.RQ.ProductCategory;
 using CRM.Server.RQ.Supplier;
 using CRM.Server.RQ.System;
 using CRM.Server.RQ.Tag;
@@ -145,6 +147,16 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProductListRQ))]
     [JsonSerializable(typeof(ProductUnitUpdateRQ))]
     [JsonSerializable(typeof(ProductUpdateRQ))]
+
+    // Product category
+    [JsonSerializable(typeof(ProductCategoryDuplicateTestData[]))]
+    [JsonSerializable(typeof(ProductCategoryListData[]))]
+    [JsonSerializable(typeof(ProductCategoryQueryData[]))]
+    [JsonSerializable(typeof(ProductCategoryUpdateReadData))]
+    [JsonSerializable(typeof(ProductCategoryCreateRQ))]
+    [JsonSerializable(typeof(ProductCategoryDuplicateTestRQ))]
+    [JsonSerializable(typeof(ProductCategoryListRQ))]
+    [JsonSerializable(typeof(ProductCategoryUpdateRQ))]
 
     // Supplier
     [JsonSerializable(typeof(SupplierListData))]

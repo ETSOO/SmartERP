@@ -21,16 +21,10 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(256)
                 .IsRequired()
                 .HasColumnName("name");
-            entity.Property(e => e.ForeignName)
-                .HasMaxLength(256)
-                .HasColumnName("foreign_name");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
             entity.Property(e => e.Description)
                 .HasMaxLength(2560)
                 .HasColumnName("description");
-            entity.Property(e => e.ForeignDescription)
-                .HasMaxLength(2560)
-                .HasColumnName("foreign_description");
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)
                 .HasColumnName("logo");

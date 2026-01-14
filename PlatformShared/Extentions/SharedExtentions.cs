@@ -367,6 +367,18 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query product categories
+        /// 查询产品分类
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <returns>Result</returns>
+        public static IQueryable<ProductCategory> ProductCategories(this MyDbContext db, int orgId)
+        {
+            return db.ProductCategories.Where(p => p.CoreOrganizationId == orgId);
+        }
+
+        /// <summary>
         /// Query suppliers from persons
         /// 从人员中查询供应商
         /// </summary>

@@ -31,18 +31,6 @@ namespace CRM.Server.RQ.Product
         public string? Description { get; init; }
 
         /// <summary>
-        /// Foreign name
-        /// 外文名称
-        /// </summary>
-        public string? ForeignName { get; init; }
-
-        /// <summary>
-        /// Foreign description
-        /// 外文描述
-        /// </summary>
-        public string? ForeignDescription { get; init; }
-
-        /// <summary>
         /// Unit id
         /// 产品单位编号
         /// </summary>
@@ -140,16 +128,6 @@ namespace CRM.Server.RQ.Product
             if (Description != null && Description.Length is not (>= 1 and <= 2560))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Description));
-            }
-
-            if (ForeignName != null && ForeignName.Length is not (>= 1 and <= 256))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(ForeignName));
-            }
-
-            if (ForeignDescription != null && ForeignDescription.Length is not (>= 1 and <= 2560))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(ForeignDescription));
             }
 
             if (MinQty != null && MinQty is not (> 0 and < 9999))

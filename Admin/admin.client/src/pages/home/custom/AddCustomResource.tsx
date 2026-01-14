@@ -82,7 +82,7 @@ export default function AddCustomResource() {
         const formData = new FormData(form);
 
         const key = formData.get("key")?.toString().trim();
-        if (!key || key.startsWith("etsoo") || key.startsWith("smarterp")) {
+        if (!key || key.startsWith("etsoo")) {
           DomUtils.setFocus("key");
           return;
         }

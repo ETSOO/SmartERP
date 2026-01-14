@@ -18,9 +18,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Name)
                 .HasMaxLength(30)
                 .HasColumnName("name");
-            entity.Property(e => e.ForeignName)
-                .HasMaxLength(30)
-                .HasColumnName("foreign_name");
             entity.Property(e => e.BaseUnit)
                 .HasConversion<byte>()
                 .HasColumnName("base_unit");

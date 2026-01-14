@@ -234,6 +234,29 @@ export default function Home() {
             segment: "unit",
             title: labels.productUnits,
             hidden: true
+          },
+          {
+            segment: "category",
+            title: labels.categories,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "sort",
+                title: labels.sortCategory,
+                hidden: true
+              }
+            ]
           }
         ]
       },

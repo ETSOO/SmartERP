@@ -214,6 +214,7 @@ services.AddScoped<IPersonCategoryService, PersonCategoryService>();
 services.AddScoped<IPersonProfileService, PersonProfileService>();
 services.AddScoped<IPOService, POService>();
 services.AddScoped<IProductService, ProductService>();
+services.AddScoped<IProductCategoryService, ProductCategoryService>();
 services.AddScoped<ISupplierService, SupplierService>();
 services.AddScoped<ISystemService, SystemService>();
 services.AddScoped<ITagService, TagService>();
@@ -288,6 +289,7 @@ api.MapAuth()
     .MapPersonProfile()
     .MapPO()
     .MapProduct()
+    .MapProductCategory()
     .MapSupplier()
     .MapSystem()
     .MapTag()

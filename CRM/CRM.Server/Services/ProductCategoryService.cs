@@ -1,12 +1,11 @@
 ﻿using com.etsoo.CoreFramework.Application;
-using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
-using CRM.Server.Dto.PersonCategory;
-using CRM.Server.RQ.PersonCategory;
+using CRM.Server.Dto.ProductCategory;
+using CRM.Server.RQ.ProductCategory;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -16,22 +15,22 @@ using System.Buffers;
 namespace CRM.Server.Services
 {
     /// <summary>
-    /// Person category service
-    /// 人员分类服务
+    /// Product category service
+    /// 产品分类服务
     /// </summary>
-    public class PersonCategoryService : SEUserService, IPersonCategoryService
+    public class ProductCategoryService : SEUserService, IProductCategoryService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
 
-        public PersonCategoryService(
+        public ProductCategoryService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
-            ILogger<PersonCategoryService> logger,
+            ILogger<ProductCategoryService> logger,
             ICommonService commonService
         )
-            : base(app, userAccessor.UserSafe, "person_category", logger)
+            : base(app, userAccessor.UserSafe, "product_category", logger)
         {
             _db = db;
             _commonService = commonService;
@@ -44,10 +43,10 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> CreateAsync(PersonCategoryCreateRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateAsync(ProductCategoryCreateRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
@@ -57,7 +56,7 @@ namespace CRM.Server.Services
             var parentId = rq.ParentId;
 
             // No same name
-            var sameTitle = await _db.PersonCategories(orgId).AsNoTracking()
+            var sameTitle = await _db.ProductCategories(orgId).AsNoTracking()
                 .Where(p => (parentId == null || p.ParentId == parentId) && p.Names[p.Names.Count() - 1] == rq.Name)
                 .AnyAsync(cancellationToken);
 
@@ -71,7 +70,7 @@ namespace CRM.Server.Services
             List<int>? parentIds;
             if (parentId.HasValue)
             {
-                var parent = await _db.PersonCategories(orgId).AsNoTracking()
+                var parent = await _db.ProductCategories(orgId).AsNoTracking()
                     .Where(c => c.Id == parentId.Value)
                     .Select(c => new { c.Names, c.ParentIds })
                     .FirstOrDefaultAsync(cancellationToken);
@@ -91,10 +90,9 @@ namespace CRM.Server.Services
                 parentIds = null;
             }
 
-            var category = new PersonCategory
+            var category = new ProductCategory
             {
                 CoreOrganizationId = orgId,
-                IdentityType = rq.IdentityType,
                 ParentId = parentId,
                 ParentIds = parentIds,
                 Names = names,
@@ -104,7 +102,7 @@ namespace CRM.Server.Services
             };
 
             // Add
-            _db.PersonCategories.Add(category);
+            _db.ProductCategories.Add(category);
 
             // Save
             await _db.SaveChangesAsync(cancellationToken);
@@ -113,20 +111,11 @@ namespace CRM.Server.Services
             return ActionResult.Succeed(category.Id);
         }
 
-        private IQueryable<PersonCategory> CreateQuery(PersonCategoryListRQ rq, Func<IQueryable<PersonCategory>, IQueryable<PersonCategory>>? filters = null)
+        private IQueryable<ProductCategory> CreateQuery(ProductCategoryListRQ rq, Func<IQueryable<ProductCategory>, IQueryable<ProductCategory>>? filters = null)
         {
-            var query = _db.PersonCategories(User.OrganizationInt).AsNoTracking()
+            var query = _db.ProductCategories(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (c) => c.Id, null, (q) =>
                 {
-                    if (rq.IdentityType.HasValue)
-                    {
-                        var value = rq.IdentityType.Value;
-                        if (value == IdentityTypeFlags.None)
-                            q = q.Where(c => c.IdentityType == IdentityTypeFlags.None);
-                        else
-                            q = q.Where(c => (c.IdentityType & value) == value);
-                    }
-
                     if (rq.ParentId.HasValue)
                     {
                         if (rq.ParentId == 0)
@@ -173,11 +162,11 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async ValueTask<PersonCategoryDuplicateTestData[]?> DuplicateTestAsync(PersonCategoryDuplicateTestRQ rq, CancellationToken cancellationToken = default)
+        public async ValueTask<ProductCategoryDuplicateTestData[]?> DuplicateTestAsync(ProductCategoryDuplicateTestRQ rq, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
 
-            var q = _db.PersonCategories(orgId).AsNoTracking();
+            var q = _db.ProductCategories(orgId).AsNoTracking();
 
             var hasFilter = false;
 
@@ -200,28 +189,27 @@ namespace CRM.Server.Services
 
             if (!hasFilter) return null;
 
-            return await q.Select(p => new PersonCategoryDuplicateTestData
+            return await q.Select(p => new ProductCategoryDuplicateTestData
             {
                 Id = p.Id,
-                Names = p.Names,
-                IdentityType = p.IdentityType
+                Names = p.Names
             }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
-        /// List person category
-        /// 人员分类列表
+        /// List product category
+        /// 产品分类列表
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task ListAsync(PersonCategoryListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public Task ListAsync(ProductCategoryListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             return CreateQuery(rq)
                 .OrderBy(c => c.OrderIndex)
                 .ThenBy(c => c.Names)
-                .Select(c => new PersonCategoryListData
+                .Select(c => new ProductCategoryListData
                 {
                     Id = c.Id,
                     Name = string.Join(" -> ", c.Names),
@@ -239,7 +227,7 @@ namespace CRM.Server.Services
         public async Task<IActionResult> MergeAsync(MergeRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
@@ -248,12 +236,12 @@ namespace CRM.Server.Services
 
             // Validate
             // Two ids are unique and have the same identity type
-            var categories = await _db.PersonCategories(orgId).AsNoTracking()
+            var categories = await _db.ProductCategories(orgId).AsNoTracking()
                 .Where(c => c.Id == rq.SourceId || c.Id == rq.TargetId)
-                .Select(c => new { c.Id, c.IdentityType, c.Names })
+                .Select(c => new { c.Id, c.Names })
                 .ToArrayAsync(cancellationToken);
 
-            if (categories.Length != 2 || (categories[0].IdentityType & categories[1].IdentityType) == 0)
+            if (categories.Length != 2)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.TargetId));
             }
@@ -266,12 +254,12 @@ namespace CRM.Server.Services
             // Replace the source id with the target id
             await _db.Database.ExecuteSqlAsync($"""
                 WITH RECURSIVE descendants AS (
-                    SELECT "id" FROM "person_category" WHERE "id" = {source.Id}
+                    SELECT "id" FROM "product_category" WHERE "id" = {source.Id}
                         UNION ALL
-                    SELECT c."id" FROM "person_category" c
+                    SELECT c."id" FROM "product_category" c
                         INNER JOIN descendants d ON c."parent_id" = d."id"
                 )
-                UPDATE "person_category" t
+                UPDATE "product_category" t
                     SET "names" = {target.Names} || "names"[{nextItems}:],
                         "parent_id" = {target.Id}
                 FROM descendants d
@@ -279,13 +267,13 @@ namespace CRM.Server.Services
 
                 UPDATE "person"
                     SET "category_ids" = array_replace("category_ids", {source.Id}, {target.Id})
-                WHERE "org_id" = {orgId} AND ("identity_type" & {source.IdentityType}) > 0;
+                WHERE "org_id" = {orgId};
             """, cancellationToken);
 
             // Delete the source category
             if (rq.DeleteSource is true)
             {
-                await _db.PersonCategories(orgId).AsNoTracking()
+                await _db.ProductCategories(orgId).AsNoTracking()
                     .Where(c => c.Id == rq.SourceId)
                     .ExecuteDeleteAsync(cancellationToken);
             }
@@ -294,23 +282,21 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Query person category
-        /// 查询人员分类
+        /// Query product category
+        /// 查询产品分类
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task<PersonCategoryQueryData[]> QueryAsync(PersonCategoryQueryRQ rq, CancellationToken cancellationToken = default)
+        public Task<ProductCategoryQueryData[]> QueryAsync(ProductCategoryQueryRQ rq, CancellationToken cancellationToken = default)
         {
             return CreateQuery(rq)
-                .OrderBy(c => c.IdentityType)
-                .ThenBy(c => c.OrderIndex)
+                .OrderBy(c => c.OrderIndex)
                 .ThenBy(c => c.Names)
-                .Select(c => new PersonCategoryQueryData
+                .Select(c => new ProductCategoryQueryData
                 {
                     Id = c.Id,
                     Names = c.Names,
-                    IdentityType = c.IdentityType,
                     AssignedId = c.AssignedId,
                     Creation = c.Creation
                 }).ToArrayAsync(cancellationToken);
@@ -339,7 +325,7 @@ namespace CRM.Server.Services
 
 #pragma warning disable EF1002 // No risk of vulnerability to SQL injection.
             return await _db.Database.ExecuteSqlRawAsync($"""
-                UPDATE "person_category"
+                UPDATE "product_category"
                     SET "order_index" = t."sorder_index"
                 FROM (VALUES {string.Join(", ", ids.Select((id, i) => $"({id}, {indices[i]})"))}) AS t("sid", "sorder_index")
                 WHERE "core_organization_id" = {orgId} AND "id" = t."sid";
@@ -354,10 +340,10 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> UpdateAsync(PersonCategoryUpdateRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateAsync(ProductCategoryUpdateRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
@@ -365,7 +351,7 @@ namespace CRM.Server.Services
             // Organization id
             var orgId = User.OrganizationInt;
 
-            var category = await _db.PersonCategories(orgId)
+            var category = await _db.ProductCategories(orgId)
                 .Where(c => c.Id == rq.Id)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -383,7 +369,7 @@ namespace CRM.Server.Services
 
             if (parentId.HasValue)
             {
-                var parentItem = await _db.PersonCategories(orgId).AsNoTracking()
+                var parentItem = await _db.ProductCategories(orgId).AsNoTracking()
                     .Where(c => c.Id == parentId.Value)
                     .Select(c => new { c.Names, c.ParentIds })
                     .FirstOrDefaultAsync(cancellationToken);
@@ -397,11 +383,6 @@ namespace CRM.Server.Services
                 parentIds = parentItem.ParentIds;
 
                 category.Names = [.. parent, category.Names.Last()];
-            }
-
-            if (rq.IsModified(nameof(rq.IdentityType)) && rq.IdentityType.HasValue)
-            {
-                category.IdentityType = rq.IdentityType.Value;
             }
 
             if (rq.IsModified(nameof(rq.ParentId)))
@@ -446,12 +427,12 @@ namespace CRM.Server.Services
                 var nextParent = category.ParentIds?.Count ?? 0;
                 await _db.Database.ExecuteSqlAsync($"""
                     WITH RECURSIVE descendants AS (
-                        SELECT "id" FROM "person_category" WHERE "id" = {rq.Id}
+                        SELECT "id" FROM "product_category" WHERE "id" = {rq.Id}
                             UNION ALL
-                        SELECT c."id" FROM "person_category" c
+                        SELECT c."id" FROM "product_category" c
                             INNER JOIN descendants d ON c."parent_id" = d."id"
                     )
-                    UPDATE "person_category" t
+                    UPDATE "product_category" t
                         SET "names" = {category.Names} || "names"[{nextItems}:],
                             "category_ids" = {category.ParentIds} || "category_ids"[{nextItems}:]
                     FROM descendants d
@@ -476,7 +457,7 @@ namespace CRM.Server.Services
         /// <param name="id">Id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<PersonCategoryUpdateReadData?> UpdateReadAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<ProductCategoryUpdateReadData?> UpdateReadAsync(int id, CancellationToken cancellationToken = default)
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
@@ -484,12 +465,11 @@ namespace CRM.Server.Services
                 return null;
             }
 
-            return await _db.PersonCategories(User.OrganizationInt).AsNoTracking()
+            return await _db.ProductCategories(User.OrganizationInt).AsNoTracking()
                 .Where(c => c.Id == id)
-                .Select(c => new PersonCategoryUpdateReadData
+                .Select(c => new ProductCategoryUpdateReadData
                 {
                     Id = c.Id,
-                    IdentityType = c.IdentityType,
                     ParentId = c.ParentId,
                     Names = c.Names,
                     AssignedId = c.AssignedId,

@@ -27,12 +27,7 @@ export default function ProductUnits() {
   usePageDataEmpty(app);
 
   // Labels
-  const labels = app.getLabels(
-    "foreignName",
-    "nameB",
-    "noChanges",
-    "productUnitTip"
-  );
+  const labels = app.getLabels("nameB", "noChanges", "productUnitTip");
 
   const systemLen = units.filter((unit) => unit.isSystem).length;
   const newLen = 3;
@@ -133,12 +128,7 @@ export default function ProductUnits() {
               `input[name="name"]`
             );
 
-          const foreignNameInput =
-            container.nextElementSibling?.nextElementSibling?.querySelector<HTMLInputElement>(
-              `input[name="foreignName"]`
-            );
-
-          if (nameInput == null || foreignNameInput == null) return;
+          if (nameInput == null) return;
 
           const id = idInput ? parseInt(idInput.value) : undefined;
           const baseUnit = parseInt(baseUnitInput.value);
@@ -154,7 +144,6 @@ export default function ProductUnits() {
           }
 
           const name = nameInput.value.trim();
-          const foreignName = foreignNameInput.value.trim();
 
           if (baseUnitValue && name === "") {
             nameInput.focus();
@@ -165,7 +154,6 @@ export default function ProductUnits() {
             id,
             baseUnit: baseUnitValue,
             name,
-            foreignName: foreignName || undefined,
             isSystem: false
           });
         });
@@ -217,18 +205,7 @@ export default function ProductUnits() {
               defaultValue={unit.name}
             />
           </Grid>
-          <Grid size={{ xs: 6, sm: 4 }}>
-            <InputField
-              fullWidth
-              slotProps={{
-                htmlInput: { maxLength: 30 }
-              }}
-              disabled={unit.isSystem}
-              label={labels.foreignName}
-              name={`foreignName`}
-              defaultValue={unit.foreignName ?? ""}
-            />
-          </Grid>
+          <Grid size={{ xs: 6, sm: 4 }}></Grid>
         </React.Fragment>
       ))}
       {[...Array(newLen)].map((_, index) => (
@@ -267,16 +244,7 @@ export default function ProductUnits() {
               name={`name`}
             />
           </Grid>
-          <Grid size={{ xs: 6, sm: 4 }}>
-            <InputField
-              fullWidth
-              slotProps={{
-                htmlInput: { maxLength: 30 }
-              }}
-              label={labels.foreignName}
-              name={`foreignName`}
-            />
-          </Grid>
+          <Grid size={{ xs: 6, sm: 4 }}></Grid>
         </React.Fragment>
       ))}
     </EditPage>
