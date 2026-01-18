@@ -59,6 +59,7 @@ export default function AddPromotion() {
     "endDate",
     "minAmount",
     "noChanges",
+    "orderIndex",
     "products",
     "promotionCode",
     "stackable",
@@ -71,6 +72,7 @@ export default function AddPromotion() {
     "coupons",
     "discount",
     "minAmount",
+    "orderIndex",
     "title",
     "validEnd",
     "validStart"
@@ -101,6 +103,8 @@ export default function AddPromotion() {
       // Get updated values
       const c = { ...v };
       ReactUtils.updateRefValues(refs, c);
+
+      Utils.correctTypes(c, { stackable: "boolean" });
 
       // Submit
       let result: IdActionResult | undefined;
@@ -162,6 +166,24 @@ export default function AddPromotion() {
     return promotionCodes;
   }, []);
 
+  const productIds = formik.values.productIds;
+  const loadProductIdsValue = React.useCallback(
+    () =>
+      !productIds?.length
+        ? Promise.resolve(undefined)
+        : app.productApi.list({ ids: productIds }, { showLoading: false }),
+    [productIds]
+  );
+
+  const personIds = formik.values.personIds;
+  const loadPersonIdsValue = React.useCallback(
+    () =>
+      !personIds?.length
+        ? Promise.resolve(undefined)
+        : app.personApi.list({ ids: personIds }, { showLoading: false }),
+    [personIds]
+  );
+
   // Page data hook
   usePageDataEmpty(app);
 
@@ -192,55 +214,18 @@ export default function AddPromotion() {
           }}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 6, sm: 3 }}>
         <CurrencyList
           value={formik.values.currency}
           onChange={formik.handleChange}
           fullWidth
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <InputField
-          fullWidth
-          required
-          name="title"
-          slotProps={{ htmlInput: { maxLength: 128 } }}
-          label={labels.title}
-          inputRef={refs.title}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <ProductsList
-          label={labels.products}
-          onChange={(_event, value) =>
-            formik.setFieldValue("productIds", value)
-          }
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <ButtonProductCategories
-          fullWidth
-          value={formik.values.productCategoryIds ?? []}
-          onValueChange={(ids) =>
-            formik.setFieldValue("productCategoryIds", ids)
-          }
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <PersonsList
-          label={labels.customers}
-          rq={{ identityType: IdentityTypeFlags.Customer }}
-          onChange={(_event, value) => formik.setFieldValue("personIds", value)}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <ButtonPersonCategories
-          fullWidth
-          value={formik.values.personCategoryIds ?? []}
-          identityType={IdentityTypeFlags.Customer}
-          onValueChange={(ids) =>
-            formik.setFieldValue("personCategoryIds", ids)
-          }
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <StatusList
+          inputRequired
+          idValue={formik.values.status ?? EntityStatus.Normal}
+          inputOnChange={formik.handleChange}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
@@ -266,7 +251,6 @@ export default function AddPromotion() {
         <IntInputField
           fullWidth
           name="coupons"
-          required
           label={labels.coupons}
           inputRef={refs.coupons}
         />
@@ -302,10 +286,75 @@ export default function AddPromotion() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <StatusList
-          inputRequired
-          idValue={formik.values.status ?? EntityStatus.Normal}
-          inputOnChange={formik.handleChange}
+        <IntInputField
+          fullWidth
+          name="orderIndex"
+          label={labels.orderIndex}
+          inputRef={refs.orderIndex}
+          max={65000}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <InputField
+          fullWidth
+          required
+          name="title"
+          slotProps={{ htmlInput: { maxLength: 128 } }}
+          label={labels.title}
+          inputRef={refs.title}
+          onFocus={() => {
+            if (refs.title.current) {
+              let title = refs.title.current.value;
+              const minAmount = refs.minAmount.current?.value ?? "";
+              const discount = refs.discount.current?.value ?? "";
+              title = title.replace("{m}", minAmount).replace("{n}", discount);
+              refs.title.current.value = title;
+            }
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <ProductsList
+          label={labels.products}
+          onChange={(_event, value) =>
+            formik.setFieldValue(
+              "productIds",
+              value.map((item) => item.id)
+            )
+          }
+          loadIdValue={loadProductIdsValue}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <ButtonProductCategories
+          fullWidth
+          value={formik.values.productCategoryIds ?? []}
+          onValueChange={(ids) =>
+            formik.setFieldValue("productCategoryIds", ids)
+          }
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <PersonsList
+          label={labels.customers}
+          rq={{ identityType: IdentityTypeFlags.Customer }}
+          onChange={(_event, value) =>
+            formik.setFieldValue(
+              "personIds",
+              value.map((item) => item.id)
+            )
+          }
+          loadIdValue={loadPersonIdsValue}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <ButtonPersonCategories
+          fullWidth
+          value={formik.values.personCategoryIds ?? []}
+          identityType={IdentityTypeFlags.Customer}
+          onValueChange={(ids) =>
+            formik.setFieldValue("personCategoryIds", ids)
+          }
         />
       </Grid>
       {canManageCultures && (

@@ -110,7 +110,7 @@ export default function AddProduct() {
       const c = structuredClone(v);
       ReactUtils.updateRefValues(refs, c);
 
-      if (c.isAsset && (c.assetQty == null || c.assetQty < 1)) {
+      if (c.isAsset && (c.assetQty == null || c.assetQty < 0)) {
         refs.assetQty.current?.focus();
         return;
       }

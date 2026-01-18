@@ -2,7 +2,8 @@ import {
   ResponsivePage,
   SearchField,
   IconButtonLink,
-  MobileListItemRenderer
+  MobileListItemRenderer,
+  SelectBool
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +11,7 @@ import React from "react";
 import {
   GridCellRendererProps,
   GridDataType,
+  GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
@@ -17,13 +19,18 @@ import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { PromotionQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import { Typography } from "@mui/material";
+import { CustomerList, ProductList } from "@etsoo/smarterp-crm/components";
 
 const template = {
-  keyword: "string"
+  keyword: "string",
+  isValid: "boolean",
+  productId: "number",
+  personId: "number",
+  status: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function Promotions() {
@@ -34,9 +41,14 @@ export default function Promotions() {
   const labels = app.getLabels(
     "actions",
     "add",
+    "couponsApplied",
     "creation",
+    "discount",
     "edit",
     "keywords",
+    "enabled",
+    "isAvailable",
+    "minAmount",
     "title"
   );
 
@@ -76,7 +88,16 @@ export default function Promotions() {
           label={labels.keywords}
           name="keyword"
           defaultValue={data.keyword}
-        />
+        />,
+        <SelectBool
+          search
+          name="isValid"
+          label={labels.isAvailable}
+          value={data.isValid}
+        />,
+        <ProductList search idValue={data.productId} />,
+        <CustomerList search idValue={data.personId} />,
+        <StatusList search idValue={data.status} />
       ]}
       loadData={async (data) => {
         return await app.promotionApi.query(data, {
@@ -87,7 +108,36 @@ export default function Promotions() {
       columns={[
         {
           field: "title",
-          header: labels.title
+          header: labels.title,
+          cellBoxStyle: GridDeletedCellBoxStyle
+        },
+        {
+          field: "minAmount",
+          type: GridDataType.IntMoney,
+          width: 120,
+          header: labels.minAmount,
+          renderProps: (data) => app.getMoneyFormatProps(data?.currency)
+        },
+        {
+          field: "discount",
+          type: GridDataType.Int,
+          width: 100,
+          header: labels.discount
+        },
+        {
+          field: "couponsApplied",
+          type: GridDataType.Int,
+          width: 132,
+          header: labels.couponsApplied,
+          valueFormatter: ({ data }) => {
+            if (data == null) return undefined;
+
+            if (data.coupons)
+              return `${app.formatNumber(
+                data.couponsApplied
+              )} / ${app.formatNumber(data.coupons)}`;
+            else return app.formatNumber(data.couponsApplied);
+          }
         },
         {
           field: "creation",

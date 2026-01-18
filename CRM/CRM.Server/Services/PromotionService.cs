@@ -59,11 +59,11 @@ namespace CRM.Server.Services
                         var now = DateTimeOffset.UtcNow;
                         if (rq.IsValid.Value)
                         {
-                            q = q.Where(p => p.ValidStart <= now && p.ValidEnd >= now);
+                            q = q.Where(p => p.ValidStart <= now && p.ValidEnd >= now && p.Status < EntityStatus.Inactivated);
                         }
                         else
                         {
-                            q = q.Where(p => p.ValidStart > now || p.ValidEnd < now);
+                            q = q.Where(p => p.ValidStart > now || p.ValidEnd < now || p.Status >= EntityStatus.Inactivated);
                         }
                     }
 
@@ -131,25 +131,25 @@ namespace CRM.Server.Services
 
             // Check
             var productIds = rq.ProductIds?.ToList();
-            if (productIds?.Count is > 0 && await _db.Products(orgId).AnyAsync(p => !productIds.Contains(p.Id), cancellationToken))
+            if (productIds?.Count is > 0 && await _db.Products(orgId).CountAsync(p => productIds.Contains(p.Id), cancellationToken) != productIds.Count)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductIds));
             }
 
             var productCategoryIds = rq.ProductCategoryIds?.ToList();
-            if (productCategoryIds?.Count is > 0 && await _db.ProductCategories(orgId).AnyAsync(p => !productCategoryIds.Contains(p.Id), cancellationToken))
+            if (productCategoryIds?.Count is > 0 && await _db.ProductCategories(orgId).CountAsync(p => productCategoryIds.Contains(p.Id), cancellationToken) != productCategoryIds.Count)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductCategoryIds));
             }
 
             var personIds = rq.PersonIds?.ToList();
-            if (personIds?.Count is > 0 && await _db.Persons(orgId).AnyAsync(p => !personIds.Contains(p.Id), cancellationToken))
+            if (personIds?.Count is > 0 && await _db.Persons(orgId).CountAsync(p => personIds.Contains(p.Id), cancellationToken) != personIds.Count)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonIds));
             }
 
             var personCategoryIds = rq.PersonCategoryIds?.ToList();
-            if (personCategoryIds?.Count is > 0 && await _db.PersonCategories(orgId).AnyAsync(p => !personCategoryIds.Contains(p.Id), cancellationToken))
+            if (personCategoryIds?.Count is > 0 && await _db.PersonCategories(orgId).CountAsync(p => personCategoryIds.Contains(p.Id), cancellationToken) != personCategoryIds.Count)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonCategoryIds));
             }
@@ -170,7 +170,8 @@ namespace CRM.Server.Services
                 ValidEnd = rq.ValidEnd,
                 Coupons = rq.Coupons,
                 Stackable = rq.Stackable.GetValueOrDefault(true),
-                Status = rq.Status ?? EntityStatus.Normal
+                Status = rq.Status ?? EntityStatus.Normal,
+                OrderIndex = rq.OrderIndex.GetValueOrDefault()
             };
 
             _db.Promotions.Add(promotion);
@@ -285,10 +286,12 @@ namespace CRM.Server.Services
                 var productIds = rq.ProductIds?.ToList();
                 if (productIds?.Count is > 0)
                 {
-                    if (await _db.Products(orgId).AnyAsync(p => !productIds.Contains(p.Id), cancellationToken))
+                    if (await _db.Products(orgId).CountAsync(p => productIds.Contains(p.Id), cancellationToken) != productIds.Count)
                     {
                         return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductIds));
                     }
+
+                    promotion.ProductIds = productIds;
                 }
                 else
                 {
@@ -301,10 +304,12 @@ namespace CRM.Server.Services
                 var productCategoryIds = rq.ProductCategoryIds?.ToList();
                 if (productCategoryIds?.Count is > 0)
                 {
-                    if (await _db.ProductCategories(orgId).AnyAsync(p => !productCategoryIds.Contains(p.Id), cancellationToken))
+                    if (await _db.ProductCategories(orgId).CountAsync(p => productCategoryIds.Contains(p.Id), cancellationToken) != productCategoryIds.Count)
                     {
                         return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductCategoryIds));
                     }
+
+                    promotion.ProductCategoryIds = productCategoryIds;
                 }
                 else
                 {
@@ -317,10 +322,12 @@ namespace CRM.Server.Services
                 var personIds = rq.PersonIds?.ToList();
                 if (personIds?.Count is > 0)
                 {
-                    if (await _db.Persons(orgId).AnyAsync(p => !personIds.Contains(p.Id), cancellationToken))
+                    if (await _db.Persons(orgId).CountAsync(p => personIds.Contains(p.Id), cancellationToken) != personIds.Count)
                     {
                         return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonIds));
                     }
+
+                    promotion.PersonIds = personIds;
                 }
                 else
                 {
@@ -333,10 +340,12 @@ namespace CRM.Server.Services
                 var personCategoryIds = rq.PersonCategoryIds?.ToList();
                 if (personCategoryIds?.Count is > 0)
                 {
-                    if (await _db.PersonCategories(orgId).AnyAsync(p => !personCategoryIds.Contains(p.Id), cancellationToken))
+                    if (await _db.PersonCategories(orgId).CountAsync(p => personCategoryIds.Contains(p.Id), cancellationToken) != personCategoryIds.Count)
                     {
                         return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonCategoryIds));
                     }
+
+                    promotion.PersonCategoryIds = personCategoryIds;
                 }
                 else
                 {
@@ -379,6 +388,11 @@ namespace CRM.Server.Services
                 promotion.Status = rq.Status.Value;
             }
 
+            if (rq.IsModified(nameof(rq.OrderIndex)) && rq.OrderIndex.HasValue)
+            {
+                promotion.OrderIndex = rq.OrderIndex.Value;
+            }
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -410,11 +424,18 @@ namespace CRM.Server.Services
                      Code = p.Code,
                      Title = p.Title,
                      Currency = p.Currency,
+                     ProductIds = p.ProductIds,
+                     ProductCategoryIds = p.ProductCategoryIds,
+                     PersonIds = p.PersonIds,
+                     PersonCategoryIds = p.PersonCategoryIds,
+                     MinAmount = p.MinAmount,
+                     Discount = p.Discount,
                      ValidStart = p.ValidStart,
                      ValidEnd = p.ValidEnd,
                      Coupons = p.Coupons,
                      Stackable = p.Stackable,
-                     Status = p.Status
+                     Status = p.Status,
+                     OrderIndex = p.OrderIndex
                  }).FirstOrDefaultAsync(cancellationToken);
         }
     }

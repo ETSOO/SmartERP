@@ -101,6 +101,12 @@ namespace CRM.Server.RQ.Promotion
         public EntityStatus? Status { get; init; }
 
         /// <summary>
+        /// Order index
+        /// 排序数
+        /// </summary>
+        public short? OrderIndex { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>

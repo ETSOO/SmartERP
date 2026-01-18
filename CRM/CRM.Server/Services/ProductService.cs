@@ -54,7 +54,7 @@ namespace CRM.Server.Services
                 }
                 else if (Constants.IsAssetUnit(bu.BaseUnit))
                 {
-                    if (!assetQty.HasValue)
+                    if (!assetQty.HasValue || assetQty.Value < 0)
                     {
                         return ApplicationErrors.NoValidData.AsResult("AssetQty");
                     }
@@ -117,6 +117,11 @@ namespace CRM.Server.Services
 
             var unitId = rq.UnitId ?? 1;
 
+            var assetQty = rq.AssetQty;
+
+            // When 0 means the unit is an asset unit but don't want to manage it as an asset
+            if (assetQty < 1) assetQty = null;
+
             // Product
             var product = new Product
             {
@@ -128,7 +133,7 @@ namespace CRM.Server.Services
                 MinQty = rq.MinQty,
                 StepQty = rq.StepQty,
                 CapQty = rq.CapQty,
-                AssetQty = rq.AssetQty,
+                AssetQty = assetQty,
                 AssignedId = assignedId,
                 Status = rq.Status ?? EntityStatus.Normal,
                 Usage = rq.Usage ?? ProductUsage.FinishedProduct,
@@ -427,7 +432,10 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.AssetQty)))
             {
-                product.AssetQty = rq.AssetQty;
+                var assetQty = rq.AssetQty;
+                if (assetQty.HasValue && assetQty.Value < 1) assetQty = null;
+
+                product.AssetQty = assetQty;
             }
 
             if (rq.IsModified(nameof(rq.Usage)) && rq.Usage.HasValue)

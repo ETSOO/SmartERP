@@ -39,12 +39,6 @@ namespace PlatformShared.Database.Models
         public long? SupplierId { get; set; }
 
         /// <summary>
-        /// Title
-        /// 标题
-        /// </summary>
-        public string Title { get; set; } = default!;
-
-        /// <summary>
         /// Serial number
         /// 序列号
         /// </summary>
@@ -73,12 +67,6 @@ namespace PlatformShared.Database.Models
         /// 剩余金额
         /// </summary>
         public decimal? Amount { get; set; }
-
-        /// <summary>
-        /// Quantity
-        /// 数量
-        /// </summary>
-        public short Qty { get; set; }
 
         /// <summary>
         /// Sensitive data

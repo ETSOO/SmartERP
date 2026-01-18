@@ -49,7 +49,7 @@ namespace CRM.Server.RQ.Promotion
         /// Max coupons
         /// 最大优惠券
         /// </summary>
-        public int Coupons { get; init; }
+        public int? Coupons { get; init; }
 
         /// <summary>
         /// Stackable
@@ -62,6 +62,12 @@ namespace CRM.Server.RQ.Promotion
         /// 状态
         /// </summary>
         public EntityStatus? Status { get; init; }
+
+        /// <summary>
+        /// Order index
+        /// 排序数
+        /// </summary>
+        public short? OrderIndex { get; init; }
 
         /// <summary>
         /// Validate the model

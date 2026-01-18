@@ -1,7 +1,6 @@
 import { CommonPage, TabBox, TabBoxPanel } from "@etsoo/materialui";
 import HistoryIcon from "@mui/icons-material/History";
 import ContactsIcon from "@mui/icons-material/Contacts";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
 import ArticleIcon from "@mui/icons-material/Article";
 import InfoIcon from "@mui/icons-material/Info";
 import { app } from "../../app/MyApp";
@@ -36,7 +35,6 @@ export function ViewPerson(props: ViewPersonProps) {
 
   // Labels
   const labels = app.getLabels(
-    "assets",
     "basicInfo",
     "contactInfo",
     "contacts",
@@ -120,13 +118,7 @@ export function ViewPerson(props: ViewPersonProps) {
                     iconPosition: "start"
                   } as TabBoxPanel
                 ]
-              : []),
-            {
-              children: <div>Item Four</div>,
-              label: labels.assets,
-              icon: <CreditCardIcon />,
-              iconPosition: "start"
-            }
+              : [])
           ]}
         />
       )}

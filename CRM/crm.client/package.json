@@ -14,7 +14,7 @@
     "@etsoo/react": "^1.8.71",
     "@etsoo/reacteditor": "^1.0.32",
     "@etsoo/shared": "^1.2.80",
-    "@etsoo/smarterp-core": "^1.1.13",
+    "@etsoo/smarterp-core": "^1.1.14",
     "@etsoo/smarterp-crm": "file:../../../../EtsooUI/SmartERP/crm",
     "@etsoo/toolpad": "^1.0.44",
     "@mui/icons-material": "^7.3.7",

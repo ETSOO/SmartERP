@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Dto;
 
 namespace CRM.Server.Dto.Promotion
 {
@@ -6,7 +7,7 @@ namespace CRM.Server.Dto.Promotion
     /// Promotion update read data
     /// 更新促销读取数据
     /// </summary>
-    public record PromotionUpdateReadData
+    public record PromotionUpdateReadData : PromotionCodeData
     {
         /// <summary>
         /// Id
@@ -61,5 +62,11 @@ namespace CRM.Server.Dto.Promotion
         /// 状态
         /// </summary>
         public EntityStatus Status { get; init; }
+
+        /// <summary>
+        /// Order index
+        /// 排序数
+        /// </summary>
+        public short OrderIndex { get; init; }
     }
 }

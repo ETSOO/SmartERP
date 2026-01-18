@@ -19,10 +19,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
-            entity.Property(e => e.Title)
-                .HasMaxLength(128)
-                .IsRequired()
-                .HasColumnName("title");
             entity.Property(e => e.Sn)
                 .HasMaxLength(256)
                 .IsRequired()
@@ -35,9 +31,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Amount)
                 .HasColumnType("money")
                 .HasColumnName("amount");
-            entity.Property(e => e.Qty)
-                .HasDefaultValue((short)1)
-                .HasColumnName("qty");
             entity.Property(e => e.SensitiveData)
                 .HasMaxLength(1280)
                 .HasColumnName("sensitive_data");
