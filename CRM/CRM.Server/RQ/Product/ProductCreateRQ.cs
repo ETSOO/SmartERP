@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Models;
 using CRM.Server.Dto.Product;
 using PlatformShared.Database.Models;
 
@@ -10,7 +11,7 @@ namespace CRM.Server.RQ.Product
     /// Create product request data
     /// 创建产品请求数据
     /// </summary>
-    public record ProductCreateRQ
+    public record ProductCreateRQ : IModelValidator
     {
         /// <summary>
         /// Name

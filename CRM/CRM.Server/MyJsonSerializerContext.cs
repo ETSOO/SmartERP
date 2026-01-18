@@ -9,6 +9,7 @@ using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.PO;
 using CRM.Server.Dto.Product;
 using CRM.Server.Dto.ProductCategory;
+using CRM.Server.Dto.Promotion;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.Dto.System;
 using CRM.Server.Dto.Tag;
@@ -24,6 +25,7 @@ using CRM.Server.RQ.PersonProfile;
 using CRM.Server.RQ.PO;
 using CRM.Server.RQ.Product;
 using CRM.Server.RQ.ProductCategory;
+using CRM.Server.RQ.Promotion;
 using CRM.Server.RQ.Supplier;
 using CRM.Server.RQ.System;
 using CRM.Server.RQ.Tag;
@@ -158,6 +160,14 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProductCategoryListRQ))]
     [JsonSerializable(typeof(ProductCategoryUpdateRQ))]
 
+    // Promotion
+    [JsonSerializable(typeof(PromotionListData[]))]
+    [JsonSerializable(typeof(PromotionQueryData[]))]
+    [JsonSerializable(typeof(PromotionUpdateReadData))]
+    [JsonSerializable(typeof(PromotionCreateRQ))]
+    [JsonSerializable(typeof(PromotionListRQ))]
+    [JsonSerializable(typeof(PromotionUpdateRQ))]
+
     // Supplier
     [JsonSerializable(typeof(SupplierListData))]
     [JsonSerializable(typeof(SupplierQueryData[]))]
@@ -168,9 +178,12 @@ namespace CRM.Server
     [JsonSerializable(typeof(SupplierUpdateRQ))]
 
     // System
+    [JsonSerializable(typeof(CustomCultureItem))]
     [JsonSerializable(typeof(PermissionItem[]))]
     [JsonSerializable(typeof(SystemSettings))]
 
+    [JsonSerializable(typeof(ReadCultureRQ))]
+    [JsonSerializable(typeof(UpdateCultureRQ))]
     [JsonSerializable(typeof(UpdateSettingsRQ))]
 
     // Tag

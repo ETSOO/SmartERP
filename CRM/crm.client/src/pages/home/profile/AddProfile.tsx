@@ -28,9 +28,11 @@ export default function AddProfile() {
   const { id = 0 } = useParamsEx({
     id: "number"
   });
-  const { personId = 0 } = useSearchParamsEx({
-    personId: "number"
+  const { personId = 0, index } = useSearchParamsEx({
+    personId: "number",
+    index: "number"
   });
+  const isTask = location.pathname.includes("/addTask");
   const isEditing = id > 0;
 
   // Labels
@@ -57,7 +59,7 @@ export default function AddProfile() {
   // State
   const [data, setData] = React.useState<DataType>({
     personId,
-    kind: PersonProfileKind.Normal,
+    kind: isTask ? PersonProfileKind.Schedule : PersonProfileKind.Normal,
     status: EntityStatus.Normal,
     title: "",
     comment: "",
@@ -80,9 +82,6 @@ export default function AddProfile() {
         return;
       }
 
-      // Request data
-      const { persons, ...rest } = v;
-
       // Validate happenDate
       if (v.happenDate && v.happenDateEnd && v.happenDateEnd <= v.happenDate) {
         DomUtils.setFocus("happenDateEnd");
@@ -97,10 +96,9 @@ export default function AddProfile() {
       let redirectUrl: string;
       if (id > 0) {
         const rq: PersonProfileUpdateRQ = {
-          ...rest,
+          ...v,
           id,
-          comment: content,
-          persons: persons?.map((p) => p.id)
+          comment: content
         };
 
         // Changed fields
@@ -115,26 +113,31 @@ export default function AddProfile() {
         redirectUrl = "./../../../";
 
         result = await app.profileApi.update(rq);
+
+        redirectUrl = index
+          ? `./../../../contact/view/${v.personId}?id=${id}&index=${index}`
+          : `./../../view/${id}`;
       } else {
         const rq: PersonProfileCreateRQ = {
-          ...rest,
+          ...v,
           comment: content,
-          persons: persons?.map((p) => p.id),
           auth
         };
 
         Utils.removeEmptyValues(rq);
 
-        redirectUrl = "./../../";
-
         result = await app.profileApi.create(rq);
+
+        redirectUrl = index
+          ? `./../../contact/view/${v.personId}?id=${result?.data?.id}&index=${index}`
+          : `./../view/${id}`;
       }
 
       if (result == null) return;
 
       if (result.ok) {
         editorRef.current?.clearBackup();
-        navigate(`${redirectUrl}contact/view/${v.personId}?index=1`);
+        navigate(redirectUrl);
         return;
       }
 
@@ -153,6 +156,15 @@ export default function AddProfile() {
   React.useEffect(() => {
     if (editorRef.current) editorRef.current.value = data.comment ?? "";
   }, [data]);
+
+  const persons = formik.values.persons;
+  const loadIdValue = React.useCallback(
+    () =>
+      !persons?.length
+        ? Promise.resolve(undefined)
+        : app.personApi.list({ ids: persons }, { showLoading: false }),
+    [persons]
+  );
 
   // Page data hook
   usePageDataEmpty(app);
@@ -254,7 +266,13 @@ export default function AddProfile() {
       <Grid size={{ xs: 12, sm: 12 }}>
         <PersonsList
           label={labels.otherParticipants}
-          onChange={(_event, value) => formik.setFieldValue("persons", value)}
+          onChange={(_event, value) =>
+            formik.setFieldValue(
+              "persons",
+              value.map((p) => p.id)
+            )
+          }
+          loadIdValue={loadIdValue}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>

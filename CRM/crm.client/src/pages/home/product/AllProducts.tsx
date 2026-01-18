@@ -8,6 +8,7 @@ import {
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
 import CategoryIcon from "@mui/icons-material/Category";
+import CelebrationIcon from "@mui/icons-material/Celebration";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import FlagIcon from "@mui/icons-material/Flag";
@@ -59,6 +60,7 @@ export default function AllDepts() {
     "productUnit",
     "productUnits",
     "promotionPrice",
+    "promotions",
     "retailPrice",
     "view"
   );
@@ -80,6 +82,14 @@ export default function AllDepts() {
           <React.Fragment>
             {app.owns(Permissions.Product.Manage) && (
               <React.Fragment>
+                <ButtonLink
+                  href={`./promotion`}
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CelebrationIcon />}
+                >
+                  {labels.promotions}
+                </ButtonLink>
                 <ButtonLink
                   href={`./category`}
                   size="small"

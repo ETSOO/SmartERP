@@ -379,6 +379,18 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query promotions
+        /// 查询促销
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<Promotion> Promotions(this MyDbContext db, int orgId)
+        {
+            return db.Promotions.Where(p => p.CoreOrganizationId == orgId);
+        }
+
+        /// <summary>
         /// Query suppliers from persons
         /// 从人员中查询供应商
         /// </summary>

@@ -1,7 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PlatformShared.Dto;
 
 namespace PlatformShared.Database.Models.Configurations
 {
@@ -18,10 +17,10 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasIdentityOptions(2001L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
-            entity.Property(e => e.Name)
+            entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .IsRequired()
-                .HasColumnName("name");
+                .HasColumnName("title");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
                 .IsFixedLength()
@@ -31,9 +30,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.ProductCategoryIds).HasColumnName("product_category_ids");
             entity.Property(e => e.PersonIds).HasColumnName("person_ids");
             entity.Property(e => e.PersonCategoryIds).HasColumnName("person_category_ids");
-            entity.Property(e => e.Code)
-                .HasConversion<PromotionCodeConverter>()
-                .HasColumnName("code");
+            entity.Property(e => e.Code).HasColumnName("code");
             entity.Property(e => e.MinAmount)
                 .HasColumnType("money")
                 .HasColumnName("min_amount");

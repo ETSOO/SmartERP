@@ -17,39 +17,11 @@ namespace PlatformShared.Dto
     }
 
     /// <summary>
-    /// Promotion sale item
-    /// 销售促销项目
-    /// </summary>
-    public record PromotionSaleItem
-    {
-        /// <summary>
-        /// Id
-        /// 编号
-        /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Title
-        /// 标题
-        /// </summary>
-        public string Title { get; set; } = default!;
-
-        /// <summary>
-        /// Amount
-        /// 金额
-        /// </summary>
-        public decimal Amount { get; set; }
-    }
-
-    /// <summary>
     /// Data format
     /// 数据格式
     /// </summary>
     public abstract class PromotionCode : Enumeration<short>
     {
-        public static implicit operator short(PromotionCode pc) => pc.Value;
-        public static explicit operator PromotionCode(short value) => null!;
-
         /// <summary>
         /// 订单满{m}减{n}
         /// </summary>
@@ -192,14 +164,16 @@ namespace PlatformShared.Dto
             public override string? Check(PromotionCodeData data)
             {
                 if (data.MinAmount < 1)
-                    return "minAmount";
-                if (data.ProductId == null && data.ProductCategoryId == null)
-                    return "categoryIdInput";
+                    return nameof(data.MinAmount);
+
+                if (data.ProductIds?.Any() is not true && data.ProductCategoryIds?.Any() is not true)
+                    return nameof(data.ProductIds);
+
                 if (
                   data.Discount < 1 ||
                   data.Discount >= data.MinAmount
                 )
-                    return "discount";
+                    return nameof(data.Discount);
 
                 return null;
             }
@@ -245,9 +219,11 @@ namespace PlatformShared.Dto
 
             public override string? Check(PromotionCodeData data)
             {
-                if (data.ProductId == null && data.ProductCategoryId == null)
-                    return "categoryIdInput";
-                if (data.Discount < 1) return "discount";
+                if (data.ProductIds?.Any() is not true && data.ProductCategoryIds?.Any() is not true)
+                    return nameof(data.ProductIds);
+
+                if (data.Discount < 1) return nameof(data.Discount);
+
                 return null;
             }
         }
@@ -296,10 +272,12 @@ namespace PlatformShared.Dto
 
             public override string? Check(PromotionCodeData data)
             {
-                if (data.ProductId == null && data.ProductCategoryId == null)
-                    return "categoryIdInput";
+                if (data.ProductIds?.Any() is not true && data.ProductCategoryIds?.Any() is not true)
+                    return nameof(data.ProductIds);
+
                 if (data.Discount < 10 || data.Discount >= 100)
-                    return "discount";
+                    return nameof(data.Discount);
+
                 return null;
             }
         }
@@ -339,14 +317,16 @@ namespace PlatformShared.Dto
             public override string? Check(PromotionCodeData data)
             {
                 if (data.MinAmount < 0)
-                    return "minAmount";
-                if (data.ProductId == null && data.ProductCategoryId == null)
-                    return "categoryIdInput";
+                    return nameof(data.MinAmount);
+
+                if (data.ProductIds?.Any() is not true && data.ProductCategoryIds?.Any() is not true)
+                    return nameof(data.ProductIds);
+
                 if (
                   data.Discount < 1 ||
                   data.Discount >= 100
                 )
-                    return "discount";
+                    return nameof(data.Discount);
 
                 return null;
             }
@@ -386,11 +366,13 @@ namespace PlatformShared.Dto
             public override string? Check(PromotionCodeData data)
             {
                 if (data.MinAmount < 0.01M)
-                    return "minAmount";
-                if (data.ProductId == null && data.ProductCategoryId == null)
-                    return "categoryIdInput";
+                    return nameof(data.MinAmount);
+
+                if (data.ProductIds?.Any() is not true && data.ProductCategoryIds?.Any() is not true)
+                    return nameof(data.ProductIds);
+
                 if (data.Discount < 2)
-                    return "discount";
+                    return nameof(data.Discount);
 
                 return null;
             }
@@ -439,9 +421,11 @@ namespace PlatformShared.Dto
 
             public override string? Check(PromotionCodeData data)
             {
-                if (data.PersonId == null) return "customerIdInput";
+                if (data.PersonIds?.Any() is not true) return nameof(data.PersonIds);
+
                 if (data.Discount < 10 || data.Discount >= 100)
-                    return "discount";
+                    return nameof(data.Discount);
+
                 return null;
             }
         }
@@ -489,9 +473,12 @@ namespace PlatformShared.Dto
 
             public override string? Check(PromotionCodeData data)
             {
-                if (data.PersonCategoryId == null) return "customerKindInput";
+                if (data.PersonCategoryIds?.Any() is not true)
+                    return nameof(data.PersonCategoryIds);
+
                 if (data.Discount < 10 || data.Discount >= 100)
-                    return "discount";
+                    return nameof(data.Discount);
+
                 return null;
             }
         }

@@ -7,6 +7,7 @@ import React from "react";
 import Grid from "@mui/material/Grid";
 import { IdActionResult, Utils } from "@etsoo/shared";
 import {
+  CustomCultureKind,
   ProductCategoryCreateRQ,
   ProductCategoryUpdateRQ
 } from "@etsoo/smarterp-crm";
@@ -15,6 +16,8 @@ import {
   ProductCategoryAssignedIdDuplicateTest,
   ProductCategoryTiplist
 } from "@etsoo/smarterp-crm/components";
+import { Permissions } from "@etsoo/smarterp-crm";
+import { NameCulture } from "../../../components/NameCulture";
 
 export default function AddProductCategory() {
   // Route
@@ -24,6 +27,12 @@ export default function AddProductCategory() {
   });
 
   const isEditing = (id ?? 0) > 0;
+
+  // Culture permission
+  const canManageCultures =
+    isEditing &&
+    app.owns(Permissions.Org.Manage) &&
+    (app.userData?.system?.cultures.length ?? 0) > 1;
 
   // Labels
   const labels = app.getLabels("nameB", "noChanges", "parentCategory");
@@ -139,6 +148,11 @@ export default function AddProductCategory() {
           inputRef={refs.name}
         />
       </Grid>
+      {canManageCultures && (
+        <Grid size={{ xs: 6, sm: 3 }}>
+          <NameCulture id={id ?? 0} kind={CustomCultureKind.ProductCategory} />
+        </Grid>
+      )}
     </EditPage>
   );
 }

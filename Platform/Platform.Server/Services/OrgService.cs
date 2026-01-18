@@ -45,6 +45,8 @@ namespace Platform.Server.Services
     /// </summary>
     public class OrgService : CommonUserService, IOrgService
     {
+        const string SysResourceKeyPrefix = "etsoo";
+
         static readonly ConcurrentDictionary<CoreApiService, JsonSchemaCreator> apiSchemas = new()
         {
             [CoreApiService.SMTP] = CoreApiServiceSMTPSchema.Create,
@@ -303,7 +305,7 @@ namespace Platform.Server.Services
             }
             else
             {
-                if (string.IsNullOrEmpty(rq.Key) || rq.Key.StartsWith("etsoo", StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrEmpty(rq.Key) || rq.Key.StartsWith(SysResourceKeyPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(rq.Key));
                 }
@@ -511,7 +513,7 @@ namespace Platform.Server.Services
             var orgId = User.OrganizationInt;
 
             return await _db.FeatureCultures.AsNoTracking()
-            .Where(c => c.Culture == culture && c.CoreOrganizationId == orgId)
+            .Where(c => c.CoreOrganizationId == orgId && c.Culture == culture && !c.Key.StartsWith(SysResourceKeyPrefix))
             .Select(c => new CustomResourceData
             {
                 Key = c.Key,
@@ -913,7 +915,7 @@ namespace Platform.Server.Services
 
             var (hasContent, commandText) = await _db.FeatureCultures
                 .AsNoTracking()
-                .Where(c => !c.Key.StartsWith("etsoo"))
+                .Where(c => !c.Key.StartsWith(SysResourceKeyPrefix))
                 .QueryEtsoo(rq, (c) => c.Id, null, (q) =>
                 {
                     if (rq.OrgId.HasValue)

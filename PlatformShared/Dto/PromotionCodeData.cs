@@ -7,28 +7,28 @@
     public record PromotionCodeData
     {
         /// <summary>
-        /// Related product id
+        /// Related product ids
         /// 关联的产品编号
         /// </summary>
-        public int? ProductId { get; set; }
+        public IEnumerable<int>? ProductIds { get; set; }
 
         /// <summary>
-        /// Related product category id
+        /// Related product category ids
         /// 关联的产品类目编号
         /// </summary>
-        public int? ProductCategoryId { get; set; }
+        public IEnumerable<int>? ProductCategoryIds { get; set; }
 
         /// <summary>
-        /// Related person (customer) id
+        /// Related person (customer) ids
         /// 关联的人员（客户）编号
         /// </summary>
-        public long? PersonId { get; set; }
+        public IEnumerable<long>? PersonIds { get; set; }
 
         /// <summary>
-        /// Related person category id
+        /// Related person category ids
         /// 关联的人员类目编号
         /// </summary>
-        public int? PersonCategoryId { get; set; }
+        public IEnumerable<int>? PersonCategoryIds { get; set; }
 
         /// <summary>
         /// Minimum spending amount

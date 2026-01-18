@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
 using CRM.Server.Dto;
+using CRM.Server.Dto.System;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PlatformShared.Database;
@@ -124,6 +125,18 @@ namespace CRM.Server.Services
             return _db.Database
                 .SqlQuery<int>($"SELECT * FROM add_tags({orgIdSP}, {kindSP}, {tagsSP})")
                 .ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Get culture key
+        /// 获取文化键
+        /// </summary>
+        /// <param name="id">Related id</param>
+        /// <param name="kind">Kind</param>
+        /// <returns>Result</returns>
+        public string GetCultureKey(long id, CustomCultureKind kind)
+        {
+            return $"etsoo{kind}{id}";
         }
 
         /// <summary>

@@ -12,6 +12,7 @@ import React from "react";
 import Grid from "@mui/material/Grid";
 import { DataTypes, IdActionResult, Utils } from "@etsoo/shared";
 import {
+  CustomCultureKind,
   PersonCategoryCreateRQ,
   PersonCategoryUpdateRQ
 } from "@etsoo/smarterp-crm";
@@ -22,6 +23,8 @@ import {
 } from "@etsoo/smarterp-crm/components";
 import { IdentityTypeFlags } from "@etsoo/appscript";
 import { ButtonIdentityTypes } from "@etsoo/smarterp-core/components";
+import { Permissions } from "@etsoo/smarterp-crm";
+import { NameCulture } from "../../../components/NameCulture";
 
 export default function AddCategory() {
   // Route
@@ -36,6 +39,12 @@ export default function AddCategory() {
   const it = DataTypes.getEnumByValue(IdentityTypeFlags, identityType);
 
   const isEditing = (id ?? 0) > 0;
+
+  // Culture permission
+  const canManageCultures =
+    isEditing &&
+    app.owns(Permissions.Org.Manage) &&
+    (app.userData?.system?.cultures.length ?? 0) > 1;
 
   // Labels
   const labels = app.getLabels("nameB", "noChanges", "parentCategory");
@@ -166,6 +175,11 @@ export default function AddCategory() {
           inputRef={refs.name}
         />
       </Grid>
+      {canManageCultures && (
+        <Grid size={{ xs: 6, sm: 3 }}>
+          <NameCulture id={id ?? 0} kind={CustomCultureKind.PersonCategory} />
+        </Grid>
+      )}
     </EditPage>
   );
 }

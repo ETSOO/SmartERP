@@ -305,6 +305,33 @@ const router = createDynamicRouter([
               return { Component: SortCategories.default };
             }
           },
+          {
+            path: "/home/product/promotion",
+            lazy: async () => {
+              const Promotions = await import(
+                "./pages/home/product/Promotions"
+              );
+              return { Component: Promotions.default };
+            }
+          },
+          {
+            path: "/home/product/promotion/add",
+            lazy: async () => {
+              const AddPromotion = await import(
+                "./pages/home/product/AddPromotion"
+              );
+              return { Component: AddPromotion.default };
+            }
+          },
+          {
+            path: "/home/product/promotion/edit/:id",
+            lazy: async () => {
+              const EditPromotion = await import(
+                "./pages/home/product/AddPromotion"
+              );
+              return { Component: EditPromotion.default };
+            }
+          },
 
           {
             path: "/home/profile",
@@ -327,7 +354,7 @@ const router = createDynamicRouter([
           {
             path: "/home/profile/addTask",
             lazy: async () => {
-              const AddTask = await import("./pages/home/profile/AddTask");
+              const AddTask = await import("./pages/home/profile/AddProfile");
               return { Component: AddTask.default };
             }
           },

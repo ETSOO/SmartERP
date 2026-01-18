@@ -76,11 +76,12 @@ export function ViewPerson(props: ViewPersonProps) {
             ...(app.ownsIdentity(data.identityType, "QueryProfile")
               ? [
                   {
-                    children: (visible) =>
+                    children: (visible, index) =>
                       visible && (
                         <Profiles
                           personId={personId}
                           identityType={data.identityType}
+                          index={index}
                         />
                       ),
                     label: labels.profiles,

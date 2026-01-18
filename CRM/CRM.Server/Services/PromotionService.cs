@@ -1,0 +1,421 @@
+﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
+using com.etsoo.CoreFramework.User;
+using com.etsoo.Database;
+using com.etsoo.ServiceApp.SmartERP;
+using com.etsoo.Utils.Actions;
+using CRM.Server.Dto.Promotion;
+using CRM.Server.RQ.Promotion;
+using Microsoft.EntityFrameworkCore;
+using PlatformShared.Database;
+using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using System.Buffers;
+
+namespace CRM.Server.Services
+{
+    /// <summary>
+    /// Promotion Service
+    /// 促销服务
+    /// </summary>
+    public class PromotionService : SEUserService, IPromotionService
+    {
+        readonly MyDbContext _db;
+        readonly ICommonService _commonService;
+
+        public PromotionService(
+            MyDbContext db,
+            ISEServiceApp app,
+            CurrentUserAccessor userAccessor,
+            ILogger<PromotionService> logger,
+            ICommonService commonService
+        )
+            : base(app, userAccessor.UserSafe, "promotion", logger)
+        {
+            _db = db;
+            _commonService = commonService;
+        }
+
+        private IQueryable<Promotion> CreateQuery(PromotionListRQ rq, Func<IQueryable<Promotion>, IQueryable<Promotion>>? filters = null)
+        {
+            var orgId = User.OrganizationInt;
+
+            var query = _db.Promotions(orgId).AsNoTracking()
+                .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
+                {
+                    if (rq.Code.HasValue)
+                    {
+                        q = q.Where(p => p.Code == rq.Code.Value);
+                    }
+
+                    if (!string.IsNullOrEmpty(rq.Currency))
+                    {
+                        q = q.Where(p => p.Currency == rq.Currency);
+                    }
+
+                    if (rq.IsValid.HasValue)
+                    {
+                        var now = DateTimeOffset.UtcNow;
+                        if (rq.IsValid.Value)
+                        {
+                            q = q.Where(p => p.ValidStart <= now && p.ValidEnd >= now);
+                        }
+                        else
+                        {
+                            q = q.Where(p => p.ValidStart > now || p.ValidEnd < now);
+                        }
+                    }
+
+                    if (rq.PersonId.HasValue)
+                    {
+                        var personId = rq.PersonId.Value;
+                        q = q.Where(p => (p.PersonIds != null && p.PersonIds.Contains(personId))
+                            || (p.PersonCategoryIds != null && _db.Persons(orgId).Where(pt => pt.Id == personId && pt.CategoryIds != null && pt.CategoryIds.Any(ci => p.PersonCategoryIds.Contains(ci))).Any())
+                        );
+                    }
+
+                    if (rq.ProductId.HasValue)
+                    {
+                        var productId = rq.ProductId.Value;
+                        q = q.Where(p => (p.ProductIds != null && p.ProductIds.Contains(productId))
+                            || (p.ProductCategoryIds != null && _db.Products(orgId).Where(pt => pt.Id == productId && pt.CategoryIds != null && pt.CategoryIds.Any(ci => p.ProductCategoryIds.Contains(ci))).Any())
+                        );
+                    }
+
+                    if (rq.Stackable.HasValue)
+                    {
+                        q = q.Where(p => p.Stackable == rq.Stackable.Value);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        if (keyword.IsComplexQueryKeywords())
+                        {
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, a => a.Title);
+                        }
+                        else
+                        {
+                            q = q.Where(ou => EF.Functions.ILike(ou.Title, $"%{keyword}%"));
+                        }
+                    }
+
+                    if (filters != null)
+                    {
+                        q = filters(q);
+                    }
+
+                    return q;
+                });
+
+            return query;
+        }
+
+        /// <summary>
+        /// Create
+        /// 创建
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateAsync(PromotionCreateRQ rq, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            // Check
+            var productIds = rq.ProductIds?.ToList();
+            if (productIds?.Count is > 0 && await _db.Products(orgId).AnyAsync(p => !productIds.Contains(p.Id), cancellationToken))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductIds));
+            }
+
+            var productCategoryIds = rq.ProductCategoryIds?.ToList();
+            if (productCategoryIds?.Count is > 0 && await _db.ProductCategories(orgId).AnyAsync(p => !productCategoryIds.Contains(p.Id), cancellationToken))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductCategoryIds));
+            }
+
+            var personIds = rq.PersonIds?.ToList();
+            if (personIds?.Count is > 0 && await _db.Persons(orgId).AnyAsync(p => !personIds.Contains(p.Id), cancellationToken))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonIds));
+            }
+
+            var personCategoryIds = rq.PersonCategoryIds?.ToList();
+            if (personCategoryIds?.Count is > 0 && await _db.PersonCategories(orgId).AnyAsync(p => !personCategoryIds.Contains(p.Id), cancellationToken))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonCategoryIds));
+            }
+
+            var promotion = new Promotion
+            {
+                CoreOrganizationId = orgId,
+                Title = rq.Title,
+                Currency = rq.Currency,
+                ProductIds = productIds,
+                ProductCategoryIds = productCategoryIds,
+                PersonIds = personIds,
+                PersonCategoryIds = personCategoryIds,
+                Code = rq.Code.Value,
+                MinAmount = rq.MinAmount,
+                Discount = rq.Discount,
+                ValidStart = rq.ValidStart,
+                ValidEnd = rq.ValidEnd,
+                Coupons = rq.Coupons,
+                Stackable = rq.Stackable.GetValueOrDefault(true),
+                Status = rq.Status ?? EntityStatus.Normal
+            };
+
+            _db.Promotions.Add(promotion);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(promotion.Id);
+        }
+
+        /// <summary>
+        /// List product JSON data
+        /// 产品列表JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task ListAsync(PromotionListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            return CreateQuery(rq)
+                .Select(p => new PromotionListData
+                {
+                    Id = p.Id,
+                    Title = p.Title
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Query promotion
+        /// 查询促销
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<PromotionQueryData[]> QueryAsync(PromotionQueryRQ rq, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            return CreateQuery(rq, q =>
+            {
+                if (rq.CouponsAppliedStart.HasValue)
+                {
+                    q = q.Where(p => p.CouponsApplied >= rq.CouponsAppliedStart.Value);
+                }
+
+                if (rq.CouponsAppliedEnd.HasValue)
+                {
+                    q = q.Where(p => p.CouponsApplied <= rq.CouponsAppliedEnd.Value);
+                }
+
+                return q;
+            })
+            .TagWith(nameof(QueryAsync))
+            .Select(p => new PromotionQueryData
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Currency = p.Currency,
+                MinAmount = p.MinAmount,
+                Discount = p.Discount,
+                Coupons = p.Coupons,
+                CouponsApplied = p.CouponsApplied,
+                Status = p.Status,
+                Creation = p.Creation
+            })
+            .ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Update
+        /// 更新
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateAsync(PromotionUpdateRQ rq, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var promotion = await _db.Promotions(orgId)
+                .Where(p => p.Id == rq.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (promotion == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (rq.IsModified(nameof(rq.Code)) && rq.Code != null)
+            {
+                promotion.Code = rq.Code.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Title)) && rq.Title != null)
+            {
+                promotion.Title = rq.Title;
+            }
+
+            if (rq.IsModified(nameof(rq.Currency)) && rq.Currency != null)
+            {
+                promotion.Currency = rq.Currency;
+            }
+
+            if (rq.IsModified(nameof(rq.ProductIds)))
+            {
+                var productIds = rq.ProductIds?.ToList();
+                if (productIds?.Count is > 0)
+                {
+                    if (await _db.Products(orgId).AnyAsync(p => !productIds.Contains(p.Id), cancellationToken))
+                    {
+                        return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductIds));
+                    }
+                }
+                else
+                {
+                    promotion.ProductIds = null;
+                }
+            }
+
+            if (rq.IsModified(nameof(rq.ProductCategoryIds)))
+            {
+                var productCategoryIds = rq.ProductCategoryIds?.ToList();
+                if (productCategoryIds?.Count is > 0)
+                {
+                    if (await _db.ProductCategories(orgId).AnyAsync(p => !productCategoryIds.Contains(p.Id), cancellationToken))
+                    {
+                        return ApplicationErrors.NoValidData.AsResult(nameof(rq.ProductCategoryIds));
+                    }
+                }
+                else
+                {
+                    promotion.ProductCategoryIds = null;
+                }
+            }
+
+            if (rq.IsModified(nameof(rq.PersonIds)))
+            {
+                var personIds = rq.PersonIds?.ToList();
+                if (personIds?.Count is > 0)
+                {
+                    if (await _db.Persons(orgId).AnyAsync(p => !personIds.Contains(p.Id), cancellationToken))
+                    {
+                        return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonIds));
+                    }
+                }
+                else
+                {
+                    promotion.PersonIds = null;
+                }
+            }
+
+            if (rq.IsModified(nameof(rq.PersonCategoryIds)))
+            {
+                var personCategoryIds = rq.PersonCategoryIds?.ToList();
+                if (personCategoryIds?.Count is > 0)
+                {
+                    if (await _db.PersonCategories(orgId).AnyAsync(p => !personCategoryIds.Contains(p.Id), cancellationToken))
+                    {
+                        return ApplicationErrors.NoValidData.AsResult(nameof(rq.PersonCategoryIds));
+                    }
+                }
+                else
+                {
+                    promotion.PersonCategoryIds = null;
+                }
+            }
+
+            if (rq.IsModified(nameof(rq.MinAmount)) && rq.MinAmount.HasValue)
+            {
+                promotion.MinAmount = rq.MinAmount.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Discount)) && rq.Discount.HasValue)
+            {
+                promotion.Discount = rq.Discount.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.ValidStart)) && rq.ValidStart.HasValue)
+            {
+                promotion.ValidStart = rq.ValidStart.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.ValidEnd)) && rq.ValidEnd.HasValue)
+            {
+                promotion.ValidEnd = rq.ValidEnd.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Coupons)))
+            {
+                promotion.Coupons = rq.Coupons;
+            }
+
+            if (rq.IsModified(nameof(rq.Stackable)) && rq.Stackable.HasValue)
+            {
+                promotion.Stackable = rq.Stackable.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
+            {
+                promotion.Status = rq.Status.Value;
+            }
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Read data for update
+        /// 读取用于更新的数据
+        /// </summary>
+        /// <param name="id">Person id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<PromotionUpdateReadData?> UpdateReadAsync(int id, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            return await _db.Promotions(orgId).AsNoTracking()
+                 .Where(p => p.Id == id)
+                 .Select(p => new PromotionUpdateReadData
+                 {
+                     Id = p.Id,
+                     Code = p.Code,
+                     Title = p.Title,
+                     Currency = p.Currency,
+                     ValidStart = p.ValidStart,
+                     ValidEnd = p.ValidEnd,
+                     Coupons = p.Coupons,
+                     Stackable = p.Stackable,
+                     Status = p.Status
+                 }).FirstOrDefaultAsync(cancellationToken);
+        }
+    }
+}

@@ -79,6 +79,36 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Read culture
+        /// 读取文化
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<CustomCultureItem?> ReadCultureAsync(ReadCultureRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+            var key = _commonService.GetCultureKey(rq.Id, rq.Kind);
+
+            return await _db.FeatureCultures.AsNoTracking()
+                .Where(c => c.CoreOrganizationId == orgId && c.Culture == rq.Culture && c.Key == key)
+                .Select(c => new CustomCultureItem
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Description = c.Description,
+                    JsonData = c.JsonData
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Read system settings
         /// 读取系统设置
         /// </summary>
@@ -87,6 +117,54 @@ namespace CRM.Server.Services
         public Task<SystemSettings?> ReadSettingsAsync(CancellationToken cancellationToken = default)
         {
             return ReadSystemSettingsAsync(_db, User.OrganizationInt, cancellationToken);
+        }
+
+        /// <summary>
+        /// update culture
+        /// 更新文化
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateCultureAsync(UpdateCultureRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var key = _commonService.GetCultureKey(rq.Id, rq.Kind);
+
+            var culture = await _db.FeatureCultures
+                .Where(c => c.CoreOrganizationId == orgId && c.Culture == rq.Culture && c.Key == key)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (culture == null)
+            {
+                culture = new FeatureCulture
+                {
+                    CoreOrganizationId = orgId,
+                    Key = key,
+                    Culture = rq.Culture,
+                    Title = rq.Title,
+                    Description = rq.Description,
+                    JsonData = rq.JsonData
+                };
+
+                _db.FeatureCultures.Add(culture);
+            }
+            else
+            {
+                culture.Title = rq.Title;
+                culture.Description = rq.Description;
+                culture.JsonData = rq.JsonData;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(culture.Id);
         }
 
         /// <summary>

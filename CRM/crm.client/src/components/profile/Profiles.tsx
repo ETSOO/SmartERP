@@ -18,7 +18,8 @@ import { app } from "../../app/MyApp";
 import {
   GridCellRendererProps,
   GridDataType,
-  ScrollerListForwardRef
+  ScrollerListForwardRef,
+  useSearchParamsEx
 } from "@etsoo/react";
 import { BoxProps } from "@mui/material/Box";
 import {
@@ -49,6 +50,11 @@ export type ProfilesProps = {
   identityType: IdentityTypeFlags;
 
   /**
+   * Current tab index
+   */
+  index: number;
+
+  /**
    * Person ID
    */
   personId: number;
@@ -61,10 +67,14 @@ export type ProfilesProps = {
  */
 export function Profiles(props: ProfilesProps) {
   // Destruct
-  const { identityType, personId } = props;
+  const { identityType, index: tabIndex, personId } = props;
 
   // Route
   const navigate = useNavigate();
+
+  const { id } = useSearchParamsEx({
+    id: "number"
+  });
 
   // Labels
   const labels = app.getLabels(
@@ -87,6 +97,7 @@ export function Profiles(props: ProfilesProps) {
     React.useRef<ScrollerListForwardRef<PersonProfileQueryData>>(undefined);
   const mRef = React.useRef<ViewInnerRef>(null);
   const personIdRef = React.useRef(personId);
+  const idRef = React.useRef(id);
 
   React.useEffect(() => {
     personIdRef.current = personId;
@@ -132,12 +143,28 @@ export function Profiles(props: ProfilesProps) {
           loadData={async (data, lastItem) => {
             const rq: PersonProfileQueryRQ = {
               ...BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
-              participantId: personIdRef.current
+              participantId: personIdRef.current,
+              id: idRef.current
             };
-            return await app.profileApi.query(rq, {
+
+            const items = await app.profileApi.query(rq, {
               defaultValue: [],
               showLoading: false
             });
+
+            if (items && idRef.current) {
+              const selectedItem = items.find(
+                (item) => item.id === idRef.current
+              );
+              if (selectedItem) {
+                mRef.current?.setData(selectedItem);
+              }
+
+              // One time use
+              idRef.current = undefined;
+            }
+
+            return items;
           }}
           columns={[
             {
@@ -198,7 +225,7 @@ export function Profiles(props: ProfilesProps) {
                   </React.Fragment>
                   {canAdd && (
                     <ButtonLink
-                      href={`./../../../profile/add?personId=${personId}`}
+                      href={`./../../../profile/add?index=${tabIndex}&personId=${personId}`}
                       variant="outlined"
                       startIcon={<AddIcon />}
                     >
@@ -246,7 +273,7 @@ export function Profiles(props: ProfilesProps) {
       </Grid>
       {app.mdUp && (
         <Grid size={{ md: 6, lg: 7, xl: 8 }}>
-          <ViewInnerProfile mRef={mRef} />
+          <ViewInnerProfile mRef={mRef} index={tabIndex} />
         </Grid>
       )}
     </Grid>

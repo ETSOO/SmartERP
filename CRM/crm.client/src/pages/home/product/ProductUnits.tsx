@@ -3,12 +3,14 @@ import { app } from "../../../app/MyApp";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { ProductUnitItem } from "@etsoo/smarterp-crm";
+import { CustomCultureKind, ProductUnitItem } from "@etsoo/smarterp-crm";
 import Grid from "@mui/material/Grid";
 import { ProductBaseUnits } from "@etsoo/smarterp-core/components";
 import Alert from "@mui/material/Alert";
 import { DataTypes } from "@etsoo/shared";
 import { ProductUnit } from "@etsoo/appscript";
+import { Permissions } from "@etsoo/smarterp-crm";
+import { NameCulture } from "../../../components/NameCulture";
 
 export default function ProductUnits() {
   // Route
@@ -25,6 +27,11 @@ export default function ProductUnits() {
   }, []);
 
   usePageDataEmpty(app);
+
+  // Culture permission
+  const canManageCultures =
+    app.owns(Permissions.Org.Manage) &&
+    (app.userData?.system?.cultures.length ?? 0) > 1;
 
   // Labels
   const labels = app.getLabels("nameB", "noChanges", "productUnitTip");
@@ -205,7 +212,11 @@ export default function ProductUnits() {
               defaultValue={unit.name}
             />
           </Grid>
-          <Grid size={{ xs: 6, sm: 4 }}></Grid>
+          <Grid size={{ xs: 6, sm: 4 }}>
+            {!unit.isSystem && canManageCultures && unit.id && (
+              <NameCulture id={unit.id} kind={CustomCultureKind.ProductUnit} />
+            )}
+          </Grid>
         </React.Fragment>
       ))}
       {[...Array(newLen)].map((_, index) => (

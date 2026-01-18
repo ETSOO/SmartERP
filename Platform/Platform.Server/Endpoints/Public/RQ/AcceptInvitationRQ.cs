@@ -29,7 +29,7 @@ namespace Platform.Server.Endpoints.Public.RQ
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (Code.Length is not >= 8 and <= 128)
+            if (Code.Length is not (>= 8 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Code));
             }

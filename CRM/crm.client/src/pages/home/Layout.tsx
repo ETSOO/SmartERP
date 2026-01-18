@@ -81,6 +81,7 @@ export default function Home() {
     "org",
     "permissionGroups",
     "productUnits",
+    "promotions",
     "purchases",
     "signoutSuccess",
     "simpleInventory",
@@ -254,6 +255,24 @@ export default function Home() {
               {
                 segment: "sort",
                 title: labels.sortCategory,
+                hidden: true
+              }
+            ]
+          },
+          {
+            segment: "promotion",
+            title: labels.promotions,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
                 hidden: true
               }
             ]

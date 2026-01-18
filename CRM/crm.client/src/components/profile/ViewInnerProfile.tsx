@@ -65,11 +65,16 @@ type ViewInnerProfileProps = {
    * Methods reference
    */
   mRef: React.Ref<ViewInnerRef>;
+
+  /**
+   * Current tab index
+   */
+  index: number;
 };
 
 export function ViewInnerProfile(props: ViewInnerProfileProps) {
   // Destruct
-  const { mRef } = props;
+  const { mRef, index } = props;
 
   // Labels
   const labels = app.getLabels(
@@ -167,7 +172,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
               <EmailIcon />
             </IconButton>
             <IconButtonLink
-              href={`./../../../profile/edit/${data?.id}`}
+              href={`./../../../profile/edit/${data?.id}?index=${index}`}
               color="inherit"
               title={labels.edit}
               disabled={data == null}

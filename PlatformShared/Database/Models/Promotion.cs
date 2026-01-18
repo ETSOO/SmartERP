@@ -1,5 +1,4 @@
 ﻿using com.etsoo.CoreFramework.Business;
-using PlatformShared.Dto;
 
 namespace PlatformShared.Database.Models
 {
@@ -22,10 +21,10 @@ namespace PlatformShared.Database.Models
         public int CoreOrganizationId { get; set; }
 
         /// <summary>
-        /// Name
-        /// 名称
+        /// Title
+        /// 标题
         /// </summary>
-        public string Name { get; set; } = default!;
+        public string Title { get; set; } = default!;
 
         /// <summary>
         /// Currency
@@ -61,7 +60,7 @@ namespace PlatformShared.Database.Models
         /// Promotion code
         /// 促销码
         /// </summary>
-        public PromotionCode Code { get; set; } = default!;
+        public short Code { get; set; } = default!;
 
         /// <summary>
         /// Minimum spending amount

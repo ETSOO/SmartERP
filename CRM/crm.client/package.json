@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.53",
-    "@etsoo/materialui": "^1.6.3",
-    "@etsoo/react": "^1.8.70",
+    "@etsoo/materialui": "^1.6.7",
+    "@etsoo/react": "^1.8.71",
     "@etsoo/reacteditor": "^1.0.32",
     "@etsoo/shared": "^1.2.80",
     "@etsoo/smarterp-core": "^1.1.13",
@@ -31,7 +31,7 @@
     "react-dom": "$react-dom"
   },
   "devDependencies": {
-    "@types/node": "^25.0.6",
+    "@types/node": "^25.0.9",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
