@@ -222,6 +222,12 @@ namespace PlatformShared.Database.Models
         public ProductUnit Unit { get; set; } = null!;
 
         /// <summary>
+        /// Assets
+        /// 资产
+        /// </summary>
+        public ICollection<PersonAsset> Assets { get; set; } = default!;
+
+        /// <summary>
         /// Prices
         /// 价格
         /// </summary>

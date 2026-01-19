@@ -81,12 +81,12 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> CreateAsync(ProductCreateRQ rq, CancellationToken cancellationToken = default)
         {
-            var orgId = User.OrganizationInt;
-
             if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Add, cancellationToken))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
+
+            var orgId = User.OrganizationInt;
 
             var assetQtyResult = await ValidateAssetQtyAsync(orgId, rq.UnitId, rq.AssetQty, cancellationToken);
             if (!assetQtyResult.Ok)

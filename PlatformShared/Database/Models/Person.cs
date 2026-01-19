@@ -584,6 +584,18 @@ namespace PlatformShared.Database.Models
         public SettingCrm? SettingCrm { get; set; }
 
         /// <summary>
+        /// Owned assets
+        /// 拥有的资产
+        /// </summary>
+        public ICollection<PersonAsset> OwnedAssets { get; set; } = default!;
+
+        /// <summary>
+        /// Supplied assets
+        /// 提供的资产
+        /// </summary>
+        public ICollection<PersonAsset> SuppliedAssets { get; set; } = default!;
+
+        /// <summary>
         /// Addresses
         /// 所有地址
         /// </summary>

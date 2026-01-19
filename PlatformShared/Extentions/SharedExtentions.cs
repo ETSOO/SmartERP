@@ -108,6 +108,18 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query assets
+        /// 查询资产
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonAsset> Assets(this MyDbContext db, int orgId)
+        {
+            return db.PersonAssets.Where(p => p.OrgId == orgId);
+        }
+
+        /// <summary>
         /// Query persons
         /// 查询人员
         /// </summary>

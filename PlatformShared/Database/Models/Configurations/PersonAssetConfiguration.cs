@@ -50,6 +50,20 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
                 .HasColumnName("data");
+
+            entity.HasOne(d => d.Person).WithMany(p => p.OwnedAssets)
+                .HasForeignKey(d => d.PersonId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_asset_person_id_fkey");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Assets)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_asset_product_id_fkey");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.SuppliedAssets)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("person_asset_supplier_id_fkey");
         }
     }
 }

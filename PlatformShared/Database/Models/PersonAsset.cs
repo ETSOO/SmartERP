@@ -21,7 +21,7 @@ namespace PlatformShared.Database.Models
         public int OrgId { get; set; }
 
         /// <summary>
-        /// Person id
+        /// Person (owner) id
         /// 所有者编号
         /// </summary>
         public long PersonId { get; set; }
@@ -109,5 +109,23 @@ namespace PlatformShared.Database.Models
         /// JSON 数据
         /// </summary>
         public string? Data { get; set; }
+
+        /// <summary>
+        /// Person (owner)
+        /// 所有者
+        /// </summary>
+        public Person Person { get; set; } = default!;
+
+        /// <summary>
+        /// Product
+        /// 产品
+        /// </summary>
+        public Product Product { get; set; } = default!;
+
+        /// <summary>
+        /// Supplier
+        /// 供应商
+        /// </summary>
+        public Person? Supplier { get; set; }
     }
 }

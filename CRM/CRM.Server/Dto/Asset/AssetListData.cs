@@ -13,9 +13,21 @@
         public int Id { get; init; }
 
         /// <summary>
+        /// Product name
+        /// 产品名称
+        /// </summary>
+        public required string Product { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>
-        public required string Title { get; init; }
+        public required string Sn { get; init; }
+
+        /// <summary>
+        /// Expiry
+        /// 到期时间
+        /// </summary>
+        public DateTimeOffset Expiry { get; init; }
     }
 }

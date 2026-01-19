@@ -6,5 +6,10 @@
     /// </summary>
     public record AssetQueryRQ : AssetListRQ
     {
+        /// <summary>
+        /// Operator's core user id
+        /// 操作员的核心用户编号
+        /// </summary>
+        public int? UserId { get; init; }
     }
 }

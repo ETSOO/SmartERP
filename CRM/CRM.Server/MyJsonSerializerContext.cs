@@ -49,8 +49,11 @@ namespace CRM.Server
     // Asset
     [JsonSerializable(typeof(AssetListData))]
     [JsonSerializable(typeof(AssetQueryData[]))]
+    [JsonSerializable(typeof(AssetUpdateReadData))]
 
+    [JsonSerializable(typeof(AssetCreateRQ))]
     [JsonSerializable(typeof(AssetListRQ))]
+    [JsonSerializable(typeof(AssetUpdateRQ))]
 
     // Customer
     [JsonSerializable(typeof(CustomerListData))]

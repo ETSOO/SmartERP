@@ -3,10 +3,10 @@
 namespace CRM.Server.Dto.Asset
 {
     /// <summary>
-    /// Asset query data
-    /// 资产查询数据
+    /// Asset update read data
+    /// 更新资产读取数据
     /// </summary>
-    public record AssetQueryData
+    public class AssetUpdateReadData
     {
         /// <summary>
         /// Id
@@ -15,14 +15,26 @@ namespace CRM.Server.Dto.Asset
         public int Id { get; init; }
 
         /// <summary>
-        /// Product name
-        /// 产品名称
+        /// Person (owner) id
+        /// 所有者编号
         /// </summary>
-        public required string Product {  get; init; }
+        public long PersonId { get; init; }
 
         /// <summary>
-        /// Title
-        /// 标题
+        /// Product id
+        /// 产品编号
+        /// </summary>
+        public int ProductId { get; init; }
+
+        /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
+
+        /// <summary>
+        /// Serial number
+        /// 序列号
         /// </summary>
         public required string Sn { get; init; }
 
@@ -51,15 +63,27 @@ namespace CRM.Server.Dto.Asset
         public decimal? Amount { get; init; }
 
         /// <summary>
-        /// Status
-        /// 状况
+        /// Sensitive data
+        /// 敏感数据
         /// </summary>
-        public EntityStatus Status { get; init; }
+        public string? SensitiveData { get; init; }
 
         /// <summary>
-        /// Creation
-        /// 登记时间
+        /// Health check URL
+        /// 健康检查网址
         /// </summary>
-        public DateTimeOffset Creation { get; init; }
+        public string? HealthCheckUrl { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public string? Data { get; init; }
+
+        /// <summary>
+        /// Status
+        /// 状态
+        /// </summary>
+        public EntityStatus Status { get; init; }
     }
 }
