@@ -4,7 +4,7 @@ using com.etsoo.Utils.Models;
 using com.etsoo.WebUtils.Attributes;
 using PlatformShared.Database.Models;
 
-namespace CRM.Server.RQ.Person
+namespace CRM.Server.RQ.PersonContact
 {
     /// <summary>
     /// Contact create request data

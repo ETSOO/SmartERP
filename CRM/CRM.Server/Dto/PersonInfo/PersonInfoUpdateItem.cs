@@ -1,6 +1,6 @@
 ﻿using PlatformShared.Database.Models;
 
-namespace CRM.Server.Dto.Person
+namespace CRM.Server.Dto.PersonInfo
 {
     /// <summary>
     /// Person info update item

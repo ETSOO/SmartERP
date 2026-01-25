@@ -6,13 +6,18 @@ using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Asset;
+using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.Product;
+using CRM.Server.Properties;
 using CRM.Server.RQ.Asset;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
+using System.Web;
+using BusinessProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
 {
@@ -48,6 +53,44 @@ namespace CRM.Server.Services
             return App.EncriptData(sensitiveData, GetEncryptionKey(productId));
         }
 
+        private ActionResult CheckProductUnit(BusinessProductUnit unit, decimal? amount, short? times, bool isUpdating = false)
+        {
+            if (unit == BusinessProductUnit.TIME)
+            {
+                if (!isUpdating && !times.HasValue)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(times));
+                }
+                else if (amount.HasValue)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(amount));
+                }
+
+                return ActionResult.Success;
+            }
+
+            if (unit == BusinessProductUnit.MONEY)
+            {
+                if (!isUpdating && !amount.HasValue)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(amount));
+                }
+                else if (times.HasValue)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(times));
+                }
+
+                return ActionResult.Success;
+            }
+
+            if (amount.HasValue || times.HasValue)
+            {
+                return ApplicationErrors.NoValidData.AsResult();
+            }
+
+            return ActionResult.Success;
+        }
+
         /// <summary>
         /// Create
         /// 创建
@@ -73,9 +116,22 @@ namespace CRM.Server.Services
 
             // Check product
             var productId = rq.ProductId;
-            if (!await _db.Products(orgId).Where(p => p.Id == productId).AnyAsync(cancellationToken))
+            var product = await _db.Products(orgId)
+                .Where(p => p.Id == productId)
+                .Select(p => new
+                {
+                    p.Unit.BaseUnit
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (product == null)
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.ProductId));
+            }
+
+            var unitResult = CheckProductUnit(product.BaseUnit, rq.Amount, rq.Times);
+            if (!unitResult.Ok)
+            {
+                return unitResult;
             }
 
             // Check supplier
@@ -203,12 +259,11 @@ namespace CRM.Server.Services
         /// 查询资产JSON数据
         /// </summary>
         /// <param name="rq">Request data</param>
-        /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task QueryAsync(AssetQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public Task<AssetQueryData[]> QueryAsync(AssetQueryRQ rq, CancellationToken cancellationToken = default)
         {
-            await CreateQuery(rq, (q) =>
+            return CreateQuery(rq, (q) =>
             {
                 if (rq.UserId.HasValue)
                 {
@@ -228,7 +283,7 @@ namespace CRM.Server.Services
                 Amount = a.Amount,
                 Status = a.Status,
                 Creation = a.Creation
-            }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+            }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
@@ -249,6 +304,15 @@ namespace CRM.Server.Services
             // Organization id
             var orgId = User.OrganizationInt;
 
+            var asset = await _db.Assets(orgId)
+                .Where(p => p.Id == rq.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (asset == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
             // Check owner
             var personId = rq.PersonId;
             if (personId.HasValue && !await _db.Persons(orgId).Where(p => p.Id == personId).AnyAsync(cancellationToken))
@@ -258,9 +322,30 @@ namespace CRM.Server.Services
 
             // Check product
             var productId = rq.ProductId;
-            if (productId.HasValue && !await _db.Products(orgId).Where(p => p.Id == productId).AnyAsync(cancellationToken))
+            var productQueryId = productId ?? asset.ProductId;
+            var product = await _db.Products(orgId)
+                .Where(p => p.Id == productQueryId)
+                .Select(p => new ProductListData
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    BaseUnit = p.Unit.BaseUnit,
+                    AssignedId = p.AssignedId
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (product == null)
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.ProductId));
+            }
+
+            if (productId.HasValue)
+            {
+                var unitResult = CheckProductUnit(product.BaseUnit, rq.Amount, rq.Times, true);
+                if (!unitResult.Ok)
+                {
+                    return unitResult;
+                }
             }
 
             // Check supplier
@@ -270,14 +355,7 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.SupplierId));
             }
 
-            var asset = await _db.Assets(orgId)
-                .Where(p => p.Id == rq.Id)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (asset == null)
-            {
-                return ApplicationErrors.NoId.AsResult();
-            }
+            var hasFinanceChange = false;
 
             // Duplicate test
             // Sn
@@ -290,6 +368,7 @@ namespace CRM.Server.Services
                 }
 
                 asset.Sn = sn;
+                hasFinanceChange = true;
             }
 
             if (rq.IsModified(nameof(rq.PersonId)) && personId.HasValue)
@@ -315,16 +394,19 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.Expiry)) && rq.Expiry.HasValue)
             {
                 asset.Expiry = rq.Expiry.Value;
+                hasFinanceChange = true;
             }
 
             if (rq.IsModified(nameof(rq.Times)))
             {
                 asset.Times = rq.Times;
+                hasFinanceChange = true;
             }
 
             if (rq.IsModified(nameof(rq.Amount)))
             {
                 asset.Amount = rq.Amount;
+                hasFinanceChange = true;
             }
 
             if (rq.IsModified(nameof(rq.SensitiveData)))
@@ -355,8 +437,29 @@ namespace CRM.Server.Services
                 asset.Status = rq.Status.Value;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
+
+            if (hasFinanceChange)
+            {
+                // Add profile
+                var title = $"{Resources.AssetUpdate} - {product.Name} (${asset.Sn})";
+                var comment = $"<p>{changes.Select(c => $"{c.Name}: {HttpUtility.HtmlEncode(c.OriginalValue)} => {HttpUtility.HtmlEncode(c.CurrentValue)}")}<br/></p>";
+                var data = JsonSerializer.Serialize(changes, ModelJsonSerializerContext.Default.IEnumerableEntityChangedProperty);
+
+                var profile = new PersonProfileAction
+                {
+                    PersonId = asset.PersonId,
+                    Kind = PersonProfileKind.Finance,
+                    Title = title,
+                    Comment = comment,
+                    Data = data
+                };
+                await _commonService.AddProfileAsync(profile, cancellationToken);
+            }
 
             // Return
             return ActionResult.Succeed(rq.Id);

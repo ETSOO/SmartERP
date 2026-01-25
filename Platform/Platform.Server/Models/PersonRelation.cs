@@ -21,6 +21,8 @@ public partial class PersonRelation
 
     public DateTime Creation { get; set; }
 
+    public bool? IsDefault { get; set; }
+
     public virtual Person Contact { get; set; } = null!;
 
     public virtual Person Person { get; set; } = null!;

@@ -4,7 +4,7 @@ using CRM.Server.Dto;
 using PlatformShared.Database.Models;
 using System.Text.Json.Serialization;
 
-namespace CRM.Server.RQ.Person
+namespace CRM.Server.RQ.PersonContact
 {
     /// <summary>
     /// Contact list request data

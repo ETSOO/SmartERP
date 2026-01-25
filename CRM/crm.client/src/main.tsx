@@ -210,6 +210,28 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/customer/asset",
+            lazy: async () => {
+              const Assets = await import("./pages/home/customer/Assets");
+              return { Component: Assets.default };
+            }
+          },
+          {
+            path: "/home/customer/asset/add",
+            lazy: async () => {
+              const AddAsset = await import("./pages/home/customer/AddAsset");
+              return { Component: AddAsset.default };
+            }
+          },
+          {
+            path: "/home/customer/asset/edit/:id",
+            lazy: async () => {
+              const EditAsset = await import("./pages/home/customer/AddAsset");
+              return { Component: EditAsset.default };
+            }
+          },
+
+          {
             path: "/home/order",
             lazy: async () => {
               const AllOrders = await import("./pages/home/order/AllOrders");

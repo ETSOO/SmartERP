@@ -15,13 +15,13 @@ public partial class Promotion
 
     public string Currency { get; set; } = null!;
 
-    public int? ProductId { get; set; }
+    public List<int>? ProductIds { get; set; }
 
-    public int? ProductCategoryId { get; set; }
+    public List<int>? ProductCategoryIds { get; set; }
 
-    public long? PersonId { get; set; }
+    public List<long>? PersonIds { get; set; }
 
-    public int? PersonCategoryId { get; set; }
+    public List<int>? PersonCategoryIds { get; set; }
 
     public short Code { get; set; }
 
@@ -33,7 +33,9 @@ public partial class Promotion
 
     public DateTime ValidEnd { get; set; }
 
-    public int Coupons { get; set; }
+    public int? Coupons { get; set; }
+
+    public int CouponsApplied { get; set; }
 
     public bool Stackable { get; set; }
 
@@ -42,14 +44,4 @@ public partial class Promotion
     public DateTime Creation { get; set; }
 
     public short Status { get; set; }
-
-    public virtual CoreOrganization CoreOrganization { get; set; } = null!;
-
-    public virtual Person? Person { get; set; }
-
-    public virtual PersonCategory? PersonCategory { get; set; }
-
-    public virtual Product? Product { get; set; }
-
-    public virtual ProductCategory? ProductCategory { get; set; }
 }

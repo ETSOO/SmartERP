@@ -38,6 +38,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Name)
                 .HasMaxLength(128)
                 .HasColumnName("name");
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.PlaceId)
                 .HasMaxLength(30)
@@ -59,6 +60,10 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Street)
                 .HasMaxLength(128)
                 .HasColumnName("street");
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("person_address_parent_id_fkey");
 
             entity.HasOne(d => d.Person).WithMany(p => p.PersonAddresses)
                 .HasForeignKey(d => d.PersonId)

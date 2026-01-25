@@ -5,7 +5,7 @@ using com.etsoo.Utils.Models;
 using com.etsoo.Utils.String;
 using PlatformShared.Database.Models;
 
-namespace CRM.Server.RQ.Person
+namespace CRM.Server.RQ.PersonContact
 {
     /// <summary>
     /// Update contact relation request data

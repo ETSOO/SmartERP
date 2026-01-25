@@ -13,9 +13,7 @@ public partial class Product
 
     public string Name { get; set; } = null!;
 
-    public string? ForeignName { get; set; }
-
-    public List<int> CategoryIds { get; set; } = null!;
+    public List<int>? CategoryIds { get; set; }
 
     public string? Description { get; set; }
 
@@ -28,8 +26,6 @@ public partial class Product
     public decimal? StepQty { get; set; }
 
     public decimal? CapQty { get; set; }
-
-    public short? AssetUnit { get; set; }
 
     public int? AssetQty { get; set; }
 
@@ -51,6 +47,8 @@ public partial class Product
 
     public List<int>? Tags { get; set; }
 
+    public string? AssignedId { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
@@ -59,11 +57,7 @@ public partial class Product
 
     public virtual ICollection<PersonProduct> PersonProducts { get; set; } = new List<PersonProduct>();
 
-    public virtual ICollection<ProductCulture> ProductCultures { get; set; } = new List<ProductCulture>();
-
     public virtual ICollection<ProductPrice> ProductPrices { get; set; } = new List<ProductPrice>();
-
-    public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 
     public virtual ProductUnit Unit { get; set; } = null!;
 }

@@ -19,6 +19,12 @@
         public required string Name { get; init; }
 
         /// <summary>
+        /// Base unit
+        /// 基础单位
+        /// </summary>
+        public com.etsoo.CoreFramework.Business.ProductUnit BaseUnit { get; init; }
+
+        /// <summary>
         /// Assigned id
         /// 分配的编号
         /// </summary>

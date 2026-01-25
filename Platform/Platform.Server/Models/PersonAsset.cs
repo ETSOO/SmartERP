@@ -15,8 +15,6 @@ public partial class PersonAsset
 
     public long? SupplierId { get; set; }
 
-    public string Title { get; set; } = null!;
-
     public string Sn { get; set; } = null!;
 
     public string? Description { get; set; }
@@ -26,8 +24,6 @@ public partial class PersonAsset
     public short? Times { get; set; }
 
     public decimal? Amount { get; set; }
-
-    public short Qty { get; set; }
 
     public string? SensitiveData { get; set; }
 

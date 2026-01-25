@@ -8,7 +8,7 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Customer;
-using CRM.Server.Dto.Person;
+using CRM.Server.Dto.PersonInfo;
 using CRM.Server.RQ;
 using CRM.Server.RQ.Customer;
 using Microsoft.EntityFrameworkCore;

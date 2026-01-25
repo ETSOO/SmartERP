@@ -4,7 +4,9 @@ using CRM.Server.Dto.Dept;
 using CRM.Server.Dto.Group;
 using CRM.Server.Dto.Order;
 using CRM.Server.Dto.Person;
+using CRM.Server.Dto.PersonAddress;
 using CRM.Server.Dto.PersonCategory;
+using CRM.Server.Dto.PersonContact;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.PO;
 using CRM.Server.Dto.Product;
@@ -20,7 +22,10 @@ using CRM.Server.RQ.Dept;
 using CRM.Server.RQ.Group;
 using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Person;
+using CRM.Server.RQ.PersonAddress;
 using CRM.Server.RQ.PersonCategory;
+using CRM.Server.RQ.PersonContact;
+using CRM.Server.RQ.PersonInfo;
 using CRM.Server.RQ.PersonProfile;
 using CRM.Server.RQ.PO;
 using CRM.Server.RQ.Product;
@@ -86,27 +91,30 @@ namespace CRM.Server
     [JsonSerializable(typeof(OrderListRQ))]
 
     // Person
-    [JsonSerializable(typeof(AddressUpdateReadData))]
     [JsonSerializable(typeof(ChoosePersonsData))]
-    [JsonSerializable(typeof(IEnumerable<ContactQueryData>))]
     [JsonSerializable(typeof(PersonDuplicateTestData[]))]
     [JsonSerializable(typeof(IEnumerable<PersonQueryData>))]
     [JsonSerializable(typeof(PersonUpdateReadData))]
     [JsonSerializable(typeof(PersonViewData))]
 
+    [JsonSerializable(typeof(ChoosePersonsRQ))]
+    [JsonSerializable(typeof(PersonDuplicateTestRQ))]
+    [JsonSerializable(typeof(PersonListRQ))]
+    [JsonSerializable(typeof(PersonUpdateRQ))]
+
+    // Person address
+    [JsonSerializable(typeof(AddressUpdateReadData))]
+
     [JsonSerializable(typeof(AddressCreateRQ))]
     [JsonSerializable(typeof(AddressUpdateRQ))]
-    [JsonSerializable(typeof(ChoosePersonsRQ))]
+
+    // Person contact
+    [JsonSerializable(typeof(IEnumerable<ContactQueryData>))]
+
     [JsonSerializable(typeof(ContactCreateRQ))]
     [JsonSerializable(typeof(ContactListRQ))]
     [JsonSerializable(typeof(ContactRelationAddRQ))]
     [JsonSerializable(typeof(ContactRelationUpdateRQ))]
-    [JsonSerializable(typeof(PersonDuplicateTestRQ))]
-    [JsonSerializable(typeof(PersonInfoCreateRQ))]
-    [JsonSerializable(typeof(PersonInfoQueryRQ))]
-    [JsonSerializable(typeof(PersonInfoUpdateRQ))]
-    [JsonSerializable(typeof(PersonListRQ))]
-    [JsonSerializable(typeof(PersonUpdateRQ))]
 
     // Person category
     [JsonSerializable(typeof(PersonCategoryDuplicateTestData[]))]
@@ -118,6 +126,11 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonCategoryDuplicateTestRQ))]
     [JsonSerializable(typeof(PersonCategoryListRQ))]
     [JsonSerializable(typeof(PersonCategoryUpdateRQ))]
+
+    // Person info
+    [JsonSerializable(typeof(PersonInfoCreateRQ))]
+    [JsonSerializable(typeof(PersonInfoQueryRQ))]
+    [JsonSerializable(typeof(PersonInfoUpdateRQ))]
 
     // Person profile
     [JsonSerializable(typeof(PersonProfileInnerViewData))]

@@ -146,7 +146,7 @@ export function PersonContacts(props: PersonContactsProps) {
           }
         }
 
-        return await app.personApi.queryContact(
+        return await app.personContactApi.query(
           { personId, ...data },
           {
             defaultValue: [],

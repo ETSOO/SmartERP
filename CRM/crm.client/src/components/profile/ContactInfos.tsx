@@ -84,7 +84,7 @@ export function ContactInfos(props: ContactInfosProps) {
 
   // View data
   const viewData = React.useCallback(async (id: number) => {
-    const data = await app.personApi.readInfo(id);
+    const data = await app.personInfoApi.read(id);
     if (data == null) return;
 
     const notifier = app.notifier.alert(
@@ -164,7 +164,7 @@ export function ContactInfos(props: ContactInfosProps) {
         />
       ]}
       loadData={async (data) => {
-        return await app.personApi.queryInfo(
+        return await app.personInfoApi.query(
           { personId, ...data },
           {
             defaultValue: [],

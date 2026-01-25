@@ -9,6 +9,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CategoryIcon from "@mui/icons-material/Category";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
+import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -44,6 +45,7 @@ export default function AllCustomers() {
   const labels = app.getLabels(
     "actions",
     "add",
+    "assets",
     "assignedId",
     "category",
     "categories",
@@ -75,14 +77,24 @@ export default function AllCustomers() {
         fabButtons: (
           <React.Fragment>
             {app.owns(Permissions.Org.Manage) && (
-              <ButtonLink
-                href={`./../contact/category?identityType=${IdentityTypeFlags.Customer}`}
-                size="small"
-                variant="outlined"
-                startIcon={<CategoryIcon />}
-              >
-                {labels.categories}
-              </ButtonLink>
+              <React.Fragment>
+                <ButtonLink
+                  href="./asset"
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CardGiftcardIcon />}
+                >
+                  {labels.assets}
+                </ButtonLink>
+                <ButtonLink
+                  href={`./../contact/category?identityType=${IdentityTypeFlags.Customer}`}
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CategoryIcon />}
+                >
+                  {labels.categories}
+                </ButtonLink>
+              </React.Fragment>
             )}
             <Fab
               title={labels.add}

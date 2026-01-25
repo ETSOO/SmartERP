@@ -139,7 +139,7 @@ export default function AddContactInfo() {
 
         const rq: PersonInfoCreateRQ = { personId, items };
 
-        const result = await app.personApi.createInfo(rq);
+        const result = await app.personInfoApi.create(rq);
         if (result == null) return;
 
         if (result.ok) {

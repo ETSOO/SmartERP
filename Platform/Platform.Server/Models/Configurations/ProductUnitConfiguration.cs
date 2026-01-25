@@ -20,9 +20,10 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
+            entity.Property(e => e.BaseUnit).HasColumnName("base_unit");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Name)
-                .HasMaxLength(20)
+                .HasMaxLength(30)
                 .HasColumnName("name");
             entity.Property(e => e.OrderIndex).HasColumnName("order_index");
 

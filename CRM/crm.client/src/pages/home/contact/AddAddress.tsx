@@ -113,7 +113,7 @@ export default function AddAddress() {
         }
         rq.changedFields = fields;
 
-        result = await app.personApi.updateAddress(rq);
+        result = await app.personAddressApi.update(rq);
       } else {
         const rq: AddressCreateRQ = {
           ...v
@@ -121,7 +121,7 @@ export default function AddAddress() {
 
         Utils.removeEmptyValues(rq);
 
-        result = await app.personApi.createAddress(rq);
+        result = await app.personAddressApi.create(rq);
       }
 
       if (result == null) return;
@@ -138,7 +138,7 @@ export default function AddAddress() {
   // Load data
   const reloadData = React.useCallback(async () => {
     if (id < 1) return;
-    const result = await app.personApi.updateAddressRead(id);
+    const result = await app.personAddressApi.updateRead(id);
     if (result == null) return;
 
     ReactUtils.updateRefs(refs, result);

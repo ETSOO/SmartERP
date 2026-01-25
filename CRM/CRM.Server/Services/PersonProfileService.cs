@@ -503,7 +503,11 @@ namespace CRM.Server.Services
                     PersonId = p.PersonId,
                     PersonName = p.Person.Name,
                     PersonIdentityType = p.Person.IdentityType,
-                    Persons = p.Persons == null ? null : _db.Persons.Where(o => p.Person.OrgId == orgId && p.Persons.Contains(o.Id)).Select(o => new PersonListItem { Id = o.Id, Name = o.Name }).ToList(),
+                    Persons = p.Persons == null
+                        ? null
+                        : _db.Persons.Where(o => p.Person.OrgId == orgId && p.Persons.Contains(o.Id))
+                                     .Select(o => new PersonListItem { Id = o.Id, Name = o.Name, JobTitle = o.JobTitle, Owner = o.ContactOwners.Select(co => co.Person.Name).FirstOrDefault() })
+                                     .ToList(),
                     OrderId = p.OrderId,
                     OrderTitle = p.Order == null ? null : p.Order.Title,
                     Kind = p.Kind,
@@ -581,7 +585,11 @@ namespace CRM.Server.Services
                     PersonId = p.PersonId,
                     PersonName = p.Person.Name,
                     PersonIdentityType = p.Person.IdentityType,
-                    Persons = p.Persons == null ? null : _db.Persons.Where(o => p.Person.OrgId == orgId && p.Persons.Contains(o.Id)).Select(o => new PersonListItem { Id = o.Id, Name = o.Name }).ToList(),
+                    Persons = p.Persons == null
+                        ? null
+                        : _db.Persons.Where(o => p.Person.OrgId == orgId && p.Persons.Contains(o.Id))
+                                     .Select(o => new PersonListItem { Id = o.Id, Name = o.Name, JobTitle = o.JobTitle, Owner = o.ContactOwners.Select(co => co.Person.Name).FirstOrDefault() })
+                                     .ToList(),
                     OrderId = p.OrderId,
                     OrderTitle = p.Order == null ? null : p.Order.Title,
                     Comment = p.Comment,

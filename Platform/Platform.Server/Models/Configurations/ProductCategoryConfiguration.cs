@@ -39,6 +39,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("names");
             entity.Property(e => e.OrderIndex).HasColumnName("order_index");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
+            entity.Property(e => e.ParentIds).HasColumnName("parent_ids");
 
             entity.HasOne(d => d.CoreOrganization).WithMany(p => p.ProductCategories)
                 .HasForeignKey(d => d.CoreOrganizationId)

@@ -183,6 +183,7 @@ export default function AddProfile() {
           label={labels.relatedTarget}
           idValue={formik.values.personId}
           inputRequired
+          inputOnChange={formik.handleChange}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 3 }}>

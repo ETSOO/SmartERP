@@ -9,6 +9,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ApartmentIcon from "@mui/icons-material/Apartment";
 import { PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
@@ -47,6 +48,7 @@ export function PersonData(props: PersonDataProps) {
     "editAvatar",
     "familyName",
     "givenName",
+    "location",
     "logo",
     "name",
     "nameB",
@@ -217,14 +219,24 @@ export function PersonData(props: PersonDataProps) {
             <HBox gap={1} alignItems="center">
               {labels.addresses}:
               {editable && (
-                <ButtonLink
-                  size="small"
-                  variant="outlined"
-                  startIcon={<AddIcon />}
-                  href={`./../../address/${data.id}`}
-                >
-                  {labels.add}
-                </ButtonLink>
+                <React.Fragment>
+                  <ButtonLink
+                    size="small"
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    href={`./../../address/${data.id}`}
+                  >
+                    {labels.add}
+                  </ButtonLink>
+                  <ButtonLink
+                    size="small"
+                    variant="outlined"
+                    startIcon={<ApartmentIcon />}
+                    href={`./../../address/${data.id}`}
+                  >
+                    {labels.location}
+                  </ButtonLink>
+                </React.Fragment>
               )}
             </HBox>
           ),

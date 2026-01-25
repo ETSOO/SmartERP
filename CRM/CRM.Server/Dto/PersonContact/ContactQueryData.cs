@@ -1,12 +1,13 @@
-﻿using PlatformShared.Database.Models;
+﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Database.Models;
 
-namespace CRM.Server.Dto.Person
+namespace CRM.Server.Dto.PersonContact
 {
     /// <summary>
-    /// Contact relation update read data
-    /// 联系人关系更新读取数据
+    /// Contact query data
+    /// 联系人查询数据
     /// </summary>
-    public record ContactRelationUpdateReadData
+    public record ContactQueryData
     {
         /// <summary>
         /// Id
@@ -27,21 +28,27 @@ namespace CRM.Server.Dto.Person
         public PersonRelationType RelationType { get; init; }
 
         /// <summary>
+        /// Name
+        /// 名称
+        /// </summary>
+        public required string Name { get; init; }
+
+        /// <summary>
         /// Description
         /// 描述
         /// </summary>
         public string? Description { get; init; }
 
         /// <summary>
-        /// JSON data
-        /// JSON 数据
-        /// </summary>
-        public string? Data { get; init; }
-
-        /// <summary>
         /// Creation
         /// 登记时间
         /// </summary>
         public DateTimeOffset Creation { get; init; }
+
+        /// <summary>
+        /// Status
+        /// 状态
+        /// </summary>
+        public EntityStatus Status { get; init; }
     }
 }

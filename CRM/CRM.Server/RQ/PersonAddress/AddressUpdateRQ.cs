@@ -1,36 +1,37 @@
 ﻿using com.etsoo.ApiModel.Dto.Maps;
 using com.etsoo.ApiModel.RQ.Maps;
 using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using com.etsoo.WebUtils.Attributes;
 using PlatformShared.Database.Models;
 
-namespace CRM.Server.RQ.Person
+namespace CRM.Server.RQ.PersonAddress
 {
     /// <summary>
-    /// Person address create request data
-    /// 人员地址创建请求数据
+    /// Person address update request data
+    /// 人员地址更新请求数据
     /// </summary>
-    public record AddressCreateRQ : IModelValidator
+    public record AddressUpdateRQ : UpdateModel<int>, IModelValidator
     {
         /// <summary>
         /// Person id
         /// 人员编号
         /// </summary>
-        public long PersonId { get; init; }
+        public long? PersonId { get; init; }
 
         /// <summary>
         /// Address kind
         /// 地址类型
         /// </summary>
-        public AddressKind Kind { get; init; }
+        public AddressKind? Kind { get; init; }
 
         /// <summary>
         /// Map provider
         /// 地图提供商
         /// </summary>
-        public ApiProvider Provider { get; init; }
+        public ApiProvider? Provider { get; init; }
 
         /// <summary>
         /// Place id
@@ -42,25 +43,25 @@ namespace CRM.Server.RQ.Person
         /// Name
         /// 名称
         /// </summary>
-        public required string Name { get; init; }
+        public string? Name { get; init; }
 
         /// <summary>
         /// Region
         /// 国家或地区
         /// </summary>
-        public required string Region { get; init; }
+        public string? Region { get; init; }
 
         /// <summary>
         /// State
         /// 省或州
         /// </summary>
-        public required string State { get; init; }
+        public string? State { get; init; }
 
         /// <summary>
         /// City
         /// 城市
         /// </summary>
-        public required string City { get; init; }
+        public string? City { get; init; }
 
         /// <summary>
         /// District
@@ -90,7 +91,7 @@ namespace CRM.Server.RQ.Person
         /// Formatted address
         /// 格式化地址
         /// </summary>
-        public required string FormattedAddress { get; init; }
+        public string? FormattedAddress { get; init; }
 
         /// <summary>
         /// Location
@@ -105,22 +106,22 @@ namespace CRM.Server.RQ.Person
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (Name.Length is not (>= 1 and <= 128))
+            if (Name != null && Name.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Name));
             }
 
-            if (!new RegionIdAttribute().IsValid(Region))
+            if (Region != null && !new RegionIdAttribute().IsValid(Region))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Region));
             }
 
-            if (State.Length is not (>= 1 and <= 50))
+            if (State != null && State.Length is not (>= 1 and <= 50))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(State));
             }
 
-            if (City.Length is not (>= 1 and <= 50))
+            if (City != null && City.Length is not (>= 1 and <= 50))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(City));
             }
@@ -145,7 +146,7 @@ namespace CRM.Server.RQ.Person
                 return ApplicationErrors.NoValidData.AsResult(nameof(PostalCode));
             }
 
-            if (FormattedAddress.Length is not (>= 1 and <= 256))
+            if (FormattedAddress != null && FormattedAddress.Length is not (>= 1 and <= 256))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(FormattedAddress));
             }

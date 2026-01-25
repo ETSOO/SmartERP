@@ -23,5 +23,11 @@
         /// 职务
         /// </summary>
         public string? JobTitle { get; init; }
+
+        /// <summary>
+        /// Owner
+        /// 所有者
+        /// </summary>
+        public string? Owner { get; init; }
     }
 }

@@ -143,8 +143,6 @@ public partial class Person
 
     public virtual ICollection<PersonRelation> PersonRelationPeople { get; set; } = new List<PersonRelation>();
 
-    public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
-
     public virtual Person? ReportToNavigation { get; set; }
 
     public virtual ICollection<SettingCrm> SettingCrms { get; set; } = new List<SettingCrm>();

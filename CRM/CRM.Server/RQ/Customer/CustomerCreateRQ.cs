@@ -2,7 +2,7 @@
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
-using CRM.Server.RQ.Person;
+using CRM.Server.RQ.PersonAddress;
 using PlatformShared.Database.Models;
 
 namespace CRM.Server.RQ.Customer

@@ -20,10 +20,10 @@ namespace CRM.Server.Endpoints
             g.MapPost("List", (IAssetService service, AssetListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get asset list / 获取资产列表").WithTags("Asset");
 
-            g.MapPost("Query", (IAssetService service, AssetQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+            g.MapPost("Query", (IAssetService service, AssetQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query asset info / 查询资产信息").WithTags("Asset");
 
-            g.MapPost("Update", (IAssetService service, AssetUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+            g.MapPut("Update", (IAssetService service, AssetUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update asset / 更新资产").WithTags("Asset");
 
             g.MapGet("UpdateRead/{id:int}", (IAssetService service, int id, CancellationToken cancellationToken) => service.UpdateReadAsync(id, cancellationToken))

@@ -122,7 +122,7 @@ export default function ViewProfile() {
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography component="span">
                 {app.profile.getKind(data.kind)},{" "}
-                <LinkEx to={`./../../../../contact/view/${data.userId}`}>
+                <LinkEx to={`./../../../contact/view/${data.userId}`}>
                   {data.userName}
                 </LinkEx>
                 , {app.formatDate(data.creation)},{" "}
@@ -138,7 +138,7 @@ export default function ViewProfile() {
                     data: (item) =>
                       item.assigneeId == null &&
                       (item.persons == null ||
-                        item.persons.length > 0) ? undefined : (
+                        item.persons.length === 0) ? undefined : (
                         <HBoxList gap={0.5}>
                           <Typography variant="caption">
                             {labels.people}:
@@ -147,15 +147,15 @@ export default function ViewProfile() {
                             item.persons.map((p) => (
                               <LinkEx
                                 key={p.id}
-                                to={`./../../../../contact/view/${p.id}`}
+                                to={`./../../../contact/view/${p.id}`}
                                 variant="body2"
                               >
-                                {p.name}
+                                {p.name + (p.owner ? ` (${p.owner})` : "")}
                               </LinkEx>
                             ))}
                           {item.assigneeId && (
                             <LinkEx
-                              to={`./../../../../contact/view/${item.assigneeId}`}
+                              to={`./../../../contact/view/${item.assigneeId}`}
                               variant="body2"
                             >
                               {item.assigneeName} ({labels.assignee})
@@ -184,13 +184,11 @@ export default function ViewProfile() {
                         </ButtonLink>
                       ) : undefined,
                     label: "order",
-                    singleRow: true,
-                    horizontal: true
+                    singleRow: true
                   },
                   {
                     data: (item) => app.getRoleLabel(item.userRole),
-                    label: "profileRole",
-                    horizontal: true
+                    label: "profileRole"
                   },
                   {
                     data: "personName",
@@ -199,13 +197,11 @@ export default function ViewProfile() {
                   {
                     data: (item) => app.getStatusLabel(item.status),
                     label: "status",
-                    singleRow: "small",
-                    horizontal: true
+                    singleRow: "small"
                   },
                   {
                     data: "indexKey",
-                    singleRow: "small",
-                    horizontal: true
+                    singleRow: "small"
                   }
                 ]}
               ></ViewContainer>

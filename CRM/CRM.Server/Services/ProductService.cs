@@ -294,6 +294,7 @@ namespace CRM.Server.Services
                 {
                     Id = p.Id,
                     Name = p.Name,
+                    BaseUnit = p.Unit.BaseUnit,
                     AssignedId = p.AssignedId
                 }).ToJsonAsync(writer, cancellationToken: cancellationToken);
         }

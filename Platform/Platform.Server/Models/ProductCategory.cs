@@ -25,11 +25,11 @@ public partial class ProductCategory
 
     public string? AssignedId { get; set; }
 
+    public List<int>? ParentIds { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<ProductCategory> InverseParent { get; set; } = new List<ProductCategory>();
 
     public virtual ProductCategory? Parent { get; set; }
-
-    public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 }

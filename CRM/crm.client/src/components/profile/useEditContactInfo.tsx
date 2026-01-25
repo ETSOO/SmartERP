@@ -60,7 +60,7 @@ export function useEditContactInfo(personId: number, onSuccess: () => void) {
           rq.changedFields = fields;
 
           // Update
-          const result = await app.personApi.updateInfo(rq);
+          const result = await app.personInfoApi.update(rq);
           if (result == null) return;
 
           if (result.ok) {

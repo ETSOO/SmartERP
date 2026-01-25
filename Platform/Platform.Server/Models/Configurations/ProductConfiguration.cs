@@ -22,7 +22,9 @@ namespace Platform.Server.Models.Configurations
                 .HasIdentityOptions(2001L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
-            entity.Property(e => e.AssetUnit).HasColumnName("asset_unit");
+            entity.Property(e => e.AssignedId)
+                .HasMaxLength(20)
+                .HasColumnName("assigned_id");
             entity.Property(e => e.CapQty)
                 .HasPrecision(12, 2)
                 .HasColumnName("cap_qty");
@@ -37,9 +39,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Description)
                 .HasMaxLength(2560)
                 .HasColumnName("description");
-            entity.Property(e => e.ForeignName)
-                .HasMaxLength(256)
-                .HasColumnName("foreign_name");
             entity.Property(e => e.InventoryWay).HasColumnName("inventory_way");
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)

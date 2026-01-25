@@ -10,6 +10,7 @@ import ArticleIcon from "@mui/icons-material/Article";
 import EmailIcon from "@mui/icons-material/Email";
 import { app } from "../../app/MyApp";
 import {
+  PersonListItem,
   PersonProfileQueryData,
   PersonProfileViewData
 } from "@etsoo/smarterp-crm";
@@ -25,7 +26,6 @@ import {
   VBox,
   ViewContainer
 } from "@etsoo/materialui";
-import { DataTypes } from "@etsoo/shared";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -47,10 +47,6 @@ function isViewData(
 ): data is PersonProfileViewData {
   return "personId" in data && "attachments" in data;
 }
-
-type PersonType = DataTypes.IdNameItem & {
-  role?: number;
-};
 
 export type ViewInnerRef = {
   /**
@@ -134,11 +130,19 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
   // Send email
   const sendEmail = useSendEmail(data?.id ?? 0, data?.personId ?? 0);
 
-  const persons: PersonType[] = [];
+  const persons: PersonListItem[] = [];
   if (data) {
-    persons.push({ id: data.userId, name: data.userName!, role: 0 });
+    persons.push({
+      id: data.userId,
+      name: data.userName!,
+      owner: labels.owner
+    });
     if (data.assigneeId && data.assigneeId !== data.userId) {
-      persons.push({ id: data.assigneeId, name: data.assigneeName!, role: 1 });
+      persons.push({
+        id: data.assigneeId,
+        name: data.assigneeName!,
+        owner: labels.assignee
+      });
     }
     if (data.persons) {
       data.persons.forEach((item) => {
@@ -215,12 +219,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                             to={`./../${p.id}`}
                             variant="body2"
                           >
-                            {p.name}
-                            {p.role === 0
-                              ? ` (${labels.owner})`
-                              : p.role === 1
-                              ? ` (${labels.assignee})`
-                              : undefined}
+                            {p.name + (p.owner ? ` (${p.owner})` : "")}
                           </LinkEx>
                         ))}
                       </HBoxList>

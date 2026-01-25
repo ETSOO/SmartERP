@@ -30,6 +30,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Description)
                 .HasMaxLength(128)
                 .HasColumnName("description");
+            entity.Property(e => e.IsDefault).HasColumnName("is_default");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.RelationType).HasColumnName("relation_type");
 

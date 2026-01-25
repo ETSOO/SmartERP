@@ -68,7 +68,7 @@ export default function AddProduct() {
     ? ProductInventoryWay.Simple
     : ProductInventoryWay.None;
 
-  const defaultCurrency = app.userData?.system?.currencies[0] ?? "CNY";
+  const defaultCurrency = app.userData?.system?.currencies[0] ?? app.currency;
 
   // State
   const [data, setData] = React.useState<DataType>({

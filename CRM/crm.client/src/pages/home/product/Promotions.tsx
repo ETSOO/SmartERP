@@ -81,7 +81,6 @@ export default function Promotions() {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField

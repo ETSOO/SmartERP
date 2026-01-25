@@ -66,6 +66,7 @@ export default function Home() {
     "address",
     "allProfiles",
     "app3",
+    "assets",
     "contacts",
     "categories",
     "customers",
@@ -212,6 +213,24 @@ export default function Home() {
             pattern: "edit/:id",
             title: labels.edit,
             hidden: true
+          },
+          {
+            segment: "asset",
+            title: labels.assets,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              }
+            ]
           }
         ]
       },

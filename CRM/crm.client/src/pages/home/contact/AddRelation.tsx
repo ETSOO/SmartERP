@@ -88,7 +88,7 @@ export default function AddRelation() {
       // Get updated values
       ReactUtils.updateRefValues(refs, rq);
 
-      const result = await app.personApi.createContact(rq);
+      const result = await app.personContactApi.create(rq);
       if (result == null) return;
 
       if (result.ok) {

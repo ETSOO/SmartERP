@@ -41,9 +41,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.OrgId).HasColumnName("org_id");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.Qty)
-                .HasDefaultValue((short)1)
-                .HasColumnName("qty");
             entity.Property(e => e.SensitiveData)
                 .HasMaxLength(1280)
                 .HasColumnName("sensitive_data");
@@ -53,9 +50,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.Times).HasColumnName("times");
-            entity.Property(e => e.Title)
-                .HasMaxLength(128)
-                .HasColumnName("title");
 
             entity.HasOne(d => d.CoreUser).WithMany(p => p.PersonAssets)
                 .HasForeignKey(d => d.CoreUserId)

@@ -1,7 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.Utils.Actions;
 
-namespace CRM.Server.RQ.Person
+namespace CRM.Server.RQ.PersonContact
 {
     /// <summary>
     /// Contact query request data

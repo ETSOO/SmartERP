@@ -1,6 +1,6 @@
 ﻿using PlatformShared.Database.Models;
 
-namespace CRM.Server.RQ.Person
+namespace CRM.Server.RQ.PersonInfo
 {
     /// <summary>
     /// Person info query request data

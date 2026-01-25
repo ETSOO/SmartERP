@@ -24,6 +24,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Code).HasColumnName("code");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Coupons).HasColumnName("coupons");
+            entity.Property(e => e.CouponsApplied).HasColumnName("coupons_applied");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -36,10 +37,10 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnType("money")
                 .HasColumnName("min_amount");
             entity.Property(e => e.OrderIndex).HasColumnName("order_index");
-            entity.Property(e => e.PersonCategoryId).HasColumnName("person_category_id");
-            entity.Property(e => e.PersonId).HasColumnName("person_id");
-            entity.Property(e => e.ProductCategoryId).HasColumnName("product_category_id");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.PersonCategoryIds).HasColumnName("person_category_ids");
+            entity.Property(e => e.PersonIds).HasColumnName("person_ids");
+            entity.Property(e => e.ProductCategoryIds).HasColumnName("product_category_ids");
+            entity.Property(e => e.ProductIds).HasColumnName("product_ids");
             entity.Property(e => e.Stackable).HasColumnName("stackable");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Title)
@@ -47,27 +48,6 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("title");
             entity.Property(e => e.ValidEnd).HasColumnName("valid_end");
             entity.Property(e => e.ValidStart).HasColumnName("valid_start");
-
-            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.Promotions)
-                .HasForeignKey(d => d.CoreOrganizationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("promotion_core_organization_id_fkey");
-
-            entity.HasOne(d => d.PersonCategory).WithMany(p => p.Promotions)
-                .HasForeignKey(d => d.PersonCategoryId)
-                .HasConstraintName("promotion_person_category_id_fkey");
-
-            entity.HasOne(d => d.Person).WithMany(p => p.Promotions)
-                .HasForeignKey(d => d.PersonId)
-                .HasConstraintName("promotion_person_id_fkey");
-
-            entity.HasOne(d => d.ProductCategory).WithMany(p => p.Promotions)
-                .HasForeignKey(d => d.ProductCategoryId)
-                .HasConstraintName("promotion_product_category_id_fkey");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.Promotions)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("promotion_product_id_fkey");
 
             OnConfigurePartial(entity);
         }

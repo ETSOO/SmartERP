@@ -131,10 +131,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "public.product_culture",
-         "ObjectType": 0
-      },
-      {
          "Name": "public.product_price",
          "ObjectType": 0
       },

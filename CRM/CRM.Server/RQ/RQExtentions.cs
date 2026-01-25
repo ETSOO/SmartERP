@@ -1,8 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.Utils.Actions;
 using com.etsoo.WebUtils.Attributes;
-using CRM.Server.Endpoints;
-using CRM.Server.RQ.Person;
+using CRM.Server.RQ.PersonAddress;
 using CRM.Server.RQ.PersonProfile;
 using NpgsqlTypes;
 using PlatformShared.Database.Models;
@@ -54,9 +53,9 @@ namespace CRM.Server.RQ
         /// <param name="rq">Request data</param>
         /// <param name="personId">Person id</param>
         /// <returns>Result</returns>
-        public static PersonAddress CreateAddressFromRQ(this AddressCreateRQ rq, long personId)
+        public static PlatformShared.Database.Models.PersonAddress CreateAddressFromRQ(this AddressCreateRQ rq, long personId)
         {
-            return new PersonAddress
+            return new PlatformShared.Database.Models.PersonAddress
             {
                 PersonId = personId,
                 Kind = rq.Kind,

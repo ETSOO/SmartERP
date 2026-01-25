@@ -175,7 +175,7 @@ export default function AllDepts() {
         {
           field: "unitName",
           header: labels.productUnit,
-          width: 100,
+          width: 110,
           valueFormatter: ({ data }) => {
             if (data == null) return undefined;
             if (data.assetQty) return `${data.unitName} (${data.assetQty})`;

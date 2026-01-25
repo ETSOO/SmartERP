@@ -13,6 +13,8 @@ public partial class ProductUnit
 
     public string Name { get; set; } = null!;
 
+    public short BaseUnit { get; set; }
+
     public short OrderIndex { get; set; }
 
     public virtual CoreOrganization? CoreOrganization { get; set; }

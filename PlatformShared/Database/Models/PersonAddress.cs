@@ -106,9 +106,27 @@ namespace PlatformShared.Database.Models
         public DateTime Creation { get; set; }
 
         /// <summary>
+        /// Parent id
+        /// 父地址编号
+        /// </summary>
+        public int? ParentId { get; set; }
+
+        /// <summary>
+        /// Parent address
+        /// 父地址
+        /// </summary>
+        public PersonAddress? Parent { get; set; }
+
+        /// <summary>
         /// Person related
         /// 关联人员
         /// </summary>
         public Person Person { get; set; } = default!;
+
+        /// <summary>
+        /// Locations
+        /// 位置
+        /// </summary>
+        public ICollection<PersonAddress> Locations { get; } = default!;
     }
 }

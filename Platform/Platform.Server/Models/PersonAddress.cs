@@ -40,5 +40,11 @@ public partial class PersonAddress
 
     public DateTime Creation { get; set; }
 
+    public int? ParentId { get; set; }
+
+    public virtual ICollection<PersonAddress> InverseParent { get; set; } = new List<PersonAddress>();
+
+    public virtual PersonAddress? Parent { get; set; }
+
     public virtual Person Person { get; set; } = null!;
 }

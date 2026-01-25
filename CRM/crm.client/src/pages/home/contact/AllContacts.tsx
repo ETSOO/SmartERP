@@ -8,6 +8,7 @@ import {
 } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
 import CategoryIcon from "@mui/icons-material/Category";
+import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -38,6 +39,7 @@ export default function AllContacts() {
   // Labels
   const labels = app.getLabels(
     "actions",
+    "assets",
     "assignedId",
     "categories",
     "contactInfo",
@@ -70,14 +72,24 @@ export default function AllContacts() {
         fabButtons: (
           <React.Fragment>
             {app.owns(Permissions.Org.Manage) && (
-              <ButtonLink
-                href="./category"
-                size="small"
-                variant="outlined"
-                startIcon={<CategoryIcon />}
-              >
-                {labels.categories}
-              </ButtonLink>
+              <React.Fragment>
+                <ButtonLink
+                  href="./../customer/asset"
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CardGiftcardIcon />}
+                >
+                  {labels.assets}
+                </ButtonLink>
+                <ButtonLink
+                  href="./category"
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CategoryIcon />}
+                >
+                  {labels.categories}
+                </ButtonLink>
+              </React.Fragment>
             )}
           </React.Fragment>
         )

@@ -1,9 +1,9 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
-using CRM.Server.Dto.Person;
+using CRM.Server.Dto.PersonInfo;
 
-namespace CRM.Server.RQ.Person
+namespace CRM.Server.RQ.PersonInfo
 {
     /// <summary>
     /// Person info create request data

@@ -64,6 +64,10 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
 
+            entity.HasOne(d => d.Parent).WithMany(p => p.Locations)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("person_address_parent_id_fkey");
+
             entity.HasOne(d => d.Person).WithMany(p => p.Addresses)
                 .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

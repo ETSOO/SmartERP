@@ -1,5 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
-using CRM.Server.Dto.Person;
+using CRM.Server.Dto.PersonInfo;
 
 namespace CRM.Server.Dto.Customer
 {

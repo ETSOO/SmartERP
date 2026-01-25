@@ -2,7 +2,7 @@
 using com.etsoo.ApiModel.RQ.Maps;
 using PlatformShared.Database.Models;
 
-namespace CRM.Server.Dto.Person
+namespace CRM.Server.Dto.PersonAddress
 {
     /// <summary>
     /// Address update read data

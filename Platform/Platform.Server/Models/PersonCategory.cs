@@ -25,11 +25,11 @@ public partial class PersonCategory
 
     public string? AssignedId { get; set; }
 
+    public List<int>? ParentIds { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<PersonCategory> InverseParent { get; set; } = new List<PersonCategory>();
 
     public virtual PersonCategory? Parent { get; set; }
-
-    public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 }

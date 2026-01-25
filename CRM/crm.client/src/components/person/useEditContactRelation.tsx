@@ -38,7 +38,7 @@ export function useEditContactRelation(
       async (ok) => {
         if (!ok) return;
 
-        const result = await app.personApi.deleteContact(id);
+        const result = await app.personContactApi.delete(id);
         if (result == null) return;
 
         if (result.ok) {
@@ -105,7 +105,7 @@ export function useEditContactRelation(
           rq.changedFields = fields;
 
           // Update
-          result = await app.personApi.updateContactRelation(rq);
+          result = await app.personContactApi.updateRelation(rq);
         } else {
           if (contactId == null || relationType == null) {
             return false;
@@ -119,7 +119,7 @@ export function useEditContactRelation(
           };
 
           // Create
-          result = await app.personApi.addContact(rq);
+          result = await app.personContactApi.add(rq);
         }
 
         if (result == null) return;
@@ -161,7 +161,7 @@ export function useEditContactRelation(
   return React.useCallback(
     (id?: number) => {
       if (id) {
-        app.personApi.updateContactRelationRead(id).then((result) => {
+        app.personContactApi.updateRelationRead(id).then((result) => {
           if (result == null) return;
           doRelation(id, result);
         });

@@ -1,12 +1,15 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
 using CRM.Server.Dto;
+using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.System;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
+using PersonInfo = PlatformShared.Database.Models.PersonInfo;
+using PersonProfile = PlatformShared.Database.Models.PersonProfile;
 
 namespace CRM.Server.Services
 {
@@ -104,6 +107,41 @@ namespace CRM.Server.Services
                     _db.PersonInfos.Add(pinInfo);
                 }
             }
+        }
+
+        /// <summary>
+        /// Add profile
+        /// 添加档案
+        /// </summary>
+        /// <param name="action">Action data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public Task AddProfileAsync(PersonProfileAction action, CancellationToken cancellationToken = default)
+        {
+            var userId = _userAccessor.UserSafe.Oid;
+
+            var profile = new PersonProfile
+            {
+                PersonId = action.PersonId,
+                Persons = action.Persons,
+                OrderId = action.OrderId,
+                Kind = action.Kind ?? PersonProfileKind.Finance,
+                Title = action.Title,
+                Comment = action.Comment,
+                Location = action.Location,
+                LocationId = action.LocationId,
+                HappenDate = action.HappenDate ?? DateTimeOffset.Now,
+                HappenDateEnd = action.HappenDateEnd,
+                UserId = userId,
+                UserRole = action.UserRole,
+                Data = action.Data,
+                IndexKey = action.IndexKey,
+                Importance = action.Importance,
+                AssigneeId = action.AssigneeId
+            };
+
+            _db.PersonProfiles.Add(profile);
+            return _db.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>

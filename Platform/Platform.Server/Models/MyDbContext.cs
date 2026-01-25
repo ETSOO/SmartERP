@@ -70,8 +70,6 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
-    public virtual DbSet<ProductCulture> ProductCultures { get; set; }
-
     public virtual DbSet<ProductPrice> ProductPrices { get; set; }
 
     public virtual DbSet<ProductUnit> ProductUnits { get; set; }
@@ -110,7 +108,6 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.PersonRelationConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductCategoryConfiguration());
-        modelBuilder.ApplyConfiguration(new Configurations.ProductCultureConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductPriceConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.ProductUnitConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PromotionConfiguration());

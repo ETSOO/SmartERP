@@ -4,7 +4,7 @@ using com.etsoo.Utils.Models;
 using CRM.Server.RQ;
 using PlatformShared.Database.Models;
 
-namespace CRM.Server.Dto.Person
+namespace CRM.Server.Dto.PersonInfo
 {
     /// <summary>
     /// Person info item
