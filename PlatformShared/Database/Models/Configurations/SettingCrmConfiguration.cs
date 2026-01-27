@@ -28,6 +28,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnType("character varying(10)[]")
                 .HasColumnName("cultures");
             entity.Property(e => e.HasInventory).HasColumnName("has_inventory");
+            entity.Property(e => e.TaxRate).HasColumnName("tax_rate");
 
             entity.HasOne(d => d.Organization).WithOne(p => p.SettingCrm)
                 .HasForeignKey<SettingCrm>(d => d.Id)

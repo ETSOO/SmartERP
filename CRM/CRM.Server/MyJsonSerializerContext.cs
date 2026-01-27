@@ -52,7 +52,7 @@ namespace CRM.Server
     )]
 
     // Asset
-    [JsonSerializable(typeof(AssetListData))]
+    [JsonSerializable(typeof(AssetListData[]))]
     [JsonSerializable(typeof(AssetQueryData[]))]
     [JsonSerializable(typeof(AssetUpdateReadData))]
 
@@ -61,7 +61,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(AssetUpdateRQ))]
 
     // Customer
-    [JsonSerializable(typeof(CustomerListData))]
+    [JsonSerializable(typeof(CustomerListData[]))]
     [JsonSerializable(typeof(CustomerQueryData[]))]
     [JsonSerializable(typeof(CustomerUpdateReadData))]
 
@@ -70,7 +70,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(CustomerUpdateRQ))]
 
     // Dept
-    [JsonSerializable(typeof(DeptListData))]
+    [JsonSerializable(typeof(DeptListData[]))]
     [JsonSerializable(typeof(DeptQueryData[]))]
 
     [JsonSerializable(typeof(DeptCreateRQ))]
@@ -78,14 +78,14 @@ namespace CRM.Server
     [JsonSerializable(typeof(DeptUpdateRQ))]
 
     // Group
-    [JsonSerializable(typeof(GroupListData))]
+    [JsonSerializable(typeof(GroupListData[]))]
     [JsonSerializable(typeof(GroupQueryData[]))]
     [JsonSerializable(typeof(GroupViewData))]
 
     [JsonSerializable(typeof(GroupListRQ))]
 
     // Order
-    [JsonSerializable(typeof(OrderListData))]
+    [JsonSerializable(typeof(OrderListData[]))]
     [JsonSerializable(typeof(OrderQueryData[]))]
 
     [JsonSerializable(typeof(OrderListRQ))]
@@ -103,9 +103,13 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonUpdateRQ))]
 
     // Person address
+    [JsonSerializable(typeof(AddressListData[]))]
+    [JsonSerializable(typeof(AddressQueryData[]))]
     [JsonSerializable(typeof(AddressUpdateReadData))]
 
     [JsonSerializable(typeof(AddressCreateRQ))]
+    [JsonSerializable(typeof(AddressListRQ))]
+    [JsonSerializable(typeof(AddressLocationCreateRQ))]
     [JsonSerializable(typeof(AddressUpdateRQ))]
 
     // Person contact
@@ -134,8 +138,8 @@ namespace CRM.Server
 
     // Person profile
     [JsonSerializable(typeof(PersonProfileInnerViewData))]
-    [JsonSerializable(typeof(PersonProfileListData))]
-    [JsonSerializable(typeof(PersonProfileQueryData))]
+    [JsonSerializable(typeof(PersonProfileListData[]))]
+    [JsonSerializable(typeof(PersonProfileQueryData[]))]
     [JsonSerializable(typeof(PersonProfileViewData))]
 
     [JsonSerializable(typeof(PersonProfileAttachmentUpdateRQ))]
@@ -148,14 +152,14 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonTaskCreateRQ))]
 
     // PO
-    [JsonSerializable(typeof(POListData))]
+    [JsonSerializable(typeof(POListData[]))]
     [JsonSerializable(typeof(POQueryData[]))]
 
     [JsonSerializable(typeof(POListRQ))]
 
     // Product
     [JsonSerializable(typeof(ProductDuplicateTestData[]))]
-    [JsonSerializable(typeof(ProductListData))]
+    [JsonSerializable(typeof(ProductListData[]))]
     [JsonSerializable(typeof(ProductQueryData[]))]
     [JsonSerializable(typeof(ProductUnitItem[]))]
     [JsonSerializable(typeof(ProductUpdateReadData))]
@@ -185,7 +189,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(PromotionUpdateRQ))]
 
     // Supplier
-    [JsonSerializable(typeof(SupplierListData))]
+    [JsonSerializable(typeof(SupplierListData[]))]
     [JsonSerializable(typeof(SupplierQueryData[]))]
     [JsonSerializable(typeof(SupplierUpdateReadData))]
 
@@ -209,7 +213,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(TagQueryRQ))]
 
     // User
-    [JsonSerializable(typeof(UserListData))]
+    [JsonSerializable(typeof(UserListData[]))]
     [JsonSerializable(typeof(UserQueryData[]))]
     [JsonSerializable(typeof(UserUpdateReadData))]
 

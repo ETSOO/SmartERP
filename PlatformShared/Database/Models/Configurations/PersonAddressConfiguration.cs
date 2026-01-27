@@ -60,6 +60,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Provider)
                 .HasConversion<byte>()
                 .HasColumnName("provider");
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");

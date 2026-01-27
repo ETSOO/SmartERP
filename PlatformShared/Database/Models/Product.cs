@@ -204,6 +204,12 @@ namespace PlatformShared.Database.Models
         public ProductInventoryWay InventoryWay { get; set; }
 
         /// <summary>
+        /// Tax rate
+        /// 税率
+        /// </summary>
+        public decimal? TaxRate { get; set; }
+
+        /// <summary>
         /// Tags (id)
         /// 标签（编号）
         /// </summary>

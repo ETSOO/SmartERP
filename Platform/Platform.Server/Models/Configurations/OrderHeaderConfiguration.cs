@@ -56,6 +56,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnType("money")
                 .HasColumnName("discount");
             entity.Property(e => e.EndDate).HasColumnName("end_date");
+            entity.Property(e => e.IsOrder).HasColumnName("is_order");
             entity.Property(e => e.Items)
                 .HasPrecision(12, 2)
                 .HasColumnName("items");
@@ -90,6 +91,10 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("title");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
+            entity.HasOne(d => d.Address).WithMany(p => p.OrderHeaders)
+                .HasForeignKey(d => d.AddressId)
+                .HasConstraintName("order_header_address_id_fkey");
+
             entity.HasOne(d => d.Buyer).WithMany(p => p.OrderHeaderBuyers)
                 .HasForeignKey(d => d.BuyerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -103,6 +108,14 @@ namespace Platform.Server.Models.Configurations
                 .HasForeignKey(d => d.CoreOrganizationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_header_core_organization_id_fkey");
+
+            entity.HasOne(d => d.Delivery).WithMany(p => p.OrderHeaders)
+                .HasForeignKey(d => d.DeliveryId)
+                .HasConstraintName("order_header_delivery_id_fkey");
+
+            entity.HasOne(d => d.Payment).WithMany(p => p.OrderHeaders)
+                .HasForeignKey(d => d.PaymentId)
+                .HasConstraintName("order_header_payment_id_fkey");
 
             entity.HasOne(d => d.Seller).WithMany(p => p.OrderHeaderSellers)
                 .HasForeignKey(d => d.SellerId)

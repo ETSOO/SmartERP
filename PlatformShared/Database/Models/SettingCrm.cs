@@ -80,6 +80,12 @@
         public bool HasInventory { get; set; }
 
         /// <summary>
+        /// Default tax rate
+        /// 默认税率
+        /// </summary>
+        public decimal? TaxRate { get; set; }
+
+        /// <summary>
         /// Organization
         /// 机构
         /// </summary>

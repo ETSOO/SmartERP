@@ -1,5 +1,5 @@
 import React from "react";
-import { ComboBox, InputField } from "@etsoo/materialui";
+import { InputField } from "@etsoo/materialui";
 import { ButtonRadioRegions } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
 import { app } from "../../app/MyApp";
@@ -13,6 +13,7 @@ import { useTheme } from "@mui/material/styles";
 import { PlaceCommon } from "@etsoo/smarterp-core";
 import { MapApiProvider } from "@etsoo/appscript";
 import { DataTypes, DomUtils } from "@etsoo/shared";
+import { AddressKindList } from "@etsoo/smarterp-crm/components";
 
 const refFields = [
   "personId",
@@ -268,14 +269,7 @@ export function AddressPage(props: AddressPageProps) {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <ComboBox
-          name="kind"
-          label={labels.type}
-          options={app.person.getAddressKinds()}
-          idValue={formData.kind}
-          fullWidth
-          inputRequired
-        />
+        <AddressKindList idValue={formData.kind} inputRequired />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
         <InputField

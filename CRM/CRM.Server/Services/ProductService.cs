@@ -139,7 +139,8 @@ namespace CRM.Server.Services
                 Usage = rq.Usage ?? ProductUsage.FinishedProduct,
                 Scope = rq.Scope ?? ProductScope.Public,
                 InventoryWay = rq.InventoryWay ?? ProductInventoryWay.None,
-                QueryKeyword = queryKeyword
+                QueryKeyword = queryKeyword,
+                TaxRate = rq.TaxRate
             };
 
             if (rq.Tags?.Any() is true)
@@ -483,6 +484,11 @@ namespace CRM.Server.Services
                 }
             }
 
+            if (rq.IsModified(nameof(rq.TaxRate)))
+            {
+                product.TaxRate = rq.TaxRate;
+            }
+
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
             {
                 product.Status = rq.Status.Value;
@@ -562,6 +568,7 @@ namespace CRM.Server.Services
                         ChannelPrice = pp.ChannelPrice,
                         CostPrice = pp.CostPrice
                     }).FirstOrDefault(),
+                    TaxRate = p.TaxRate,
                     Categories = p.CategoryIds,
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
                     Status = p.Status

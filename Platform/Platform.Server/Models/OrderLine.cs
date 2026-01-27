@@ -15,8 +15,6 @@ public partial class OrderLine
 
     public string Title { get; set; } = null!;
 
-    public string? ForeignTitle { get; set; }
-
     public string? Description { get; set; }
 
     public decimal OriginalPrice { get; set; }

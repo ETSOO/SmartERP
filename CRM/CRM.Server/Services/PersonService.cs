@@ -498,7 +498,7 @@ namespace CRM.Server.Services
                     AssignedId = p.AssignedId,
                     Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
-                    Addresses = p.Addresses.Select(a => new AddressItem { Id = a.Id, Kind = a.Kind, Name = a.Name, FormattedAddress = a.FormattedAddress }),
+                    Addresses = p.Addresses.Where(a => a.ParentId == null).Select(a => new AddressItem { Id = a.Id, Kind = a.Kind, Name = a.Name, FormattedAddress = a.FormattedAddress }).Take(3),
                     ReportTo = p.ReportTo,
                     ReportToName = p.ReportToUser == null ? null : p.ReportToUser.Name,
                     Creation = p.Creation,

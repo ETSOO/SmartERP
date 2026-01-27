@@ -66,6 +66,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasDefaultValue(ProductInventoryWay.None)
                 .HasColumnName("inventory_way");
+            entity.Property(e => e.TaxRate).HasColumnName("tax_rate");
             entity.Property(e => e.Tags).HasColumnName("tags");
 
             entity.HasOne(d => d.CoreOrganization).WithMany(p => p.Products)

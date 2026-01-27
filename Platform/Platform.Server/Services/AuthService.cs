@@ -1875,6 +1875,7 @@ namespace Platform.Server.Services
                 ChannelOrganization = data.Data.ChannelOrganizationId?.ToString(),
                 Uid = data.Data.Uid.ToString(),
                 Oid = userData.Oid.GetValueOrDefault(),
+                Pid = userData.Pid.GetValueOrDefault(),
                 RoleValue = (short)userData.Role.GetValueOrDefault(UserRole.User),
                 App = userData.LatestAppId?.ToString(),
                 Scopes = data.Data.Scopes,

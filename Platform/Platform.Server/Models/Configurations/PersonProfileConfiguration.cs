@@ -53,6 +53,10 @@ namespace Platform.Server.Models.Configurations
                 .HasForeignKey(d => d.AssigneeId)
                 .HasConstraintName("person_profile_assignee_id_fkey");
 
+            entity.HasOne(d => d.LocationNavigation).WithMany(p => p.PersonProfiles)
+                .HasForeignKey(d => d.LocationId)
+                .HasConstraintName("person_profile_location_id_fkey");
+
             entity.HasOne(d => d.Order).WithMany(p => p.PersonProfiles)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("person_profile_order_id_fkey");

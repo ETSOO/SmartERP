@@ -38,5 +38,11 @@ namespace CRM.Server.RQ.System
         /// 是否有库存管理
         /// </summary>
         public bool? HasInventory { get; init; }
+
+        /// <summary>
+        /// Default tax rate
+        /// 默认税率
+        /// </summary>
+        public decimal? TaxRate { get; init; }
     }
 }

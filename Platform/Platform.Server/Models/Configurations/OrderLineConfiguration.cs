@@ -42,9 +42,6 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnType("money")
                 .HasColumnName("discount");
             entity.Property(e => e.EndTime).HasColumnName("end_time");
-            entity.Property(e => e.ForeignTitle)
-                .HasMaxLength(256)
-                .HasColumnName("foreign_title");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.OriginalPrice)
                 .HasColumnType("money")

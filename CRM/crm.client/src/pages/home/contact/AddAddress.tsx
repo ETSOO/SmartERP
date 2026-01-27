@@ -1,6 +1,6 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
-import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
+import { EditPage, InputField } from "@etsoo/materialui";
 import {
   ReactUtils,
   useParamsEx,
@@ -23,7 +23,11 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import { IdActionResult, Utils } from "@etsoo/shared";
 import { MapApiProvider } from "@etsoo/appscript";
-import { AddressDuplicateTest } from "@etsoo/smarterp-crm/components";
+import {
+  AddressDuplicateTest,
+  AddressKindList,
+  AddressList
+} from "@etsoo/smarterp-crm/components";
 
 export default function AddAddress() {
   // Route
@@ -46,6 +50,7 @@ export default function AddAddress() {
     "addressState",
     "nameB",
     "addressStreet",
+    "mainAddress",
     "noChanges",
     "parseAddress",
     "status",
@@ -222,13 +227,9 @@ export default function AddAddress() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <ComboBox
-          name="kind"
-          label={labels.type}
-          options={app.person.getAddressKinds()}
+        <AddressKindList
           idValue={formik.values.kind}
           inputOnChange={formik.handleChange}
-          fullWidth
           inputRequired
         />
       </Grid>
@@ -309,6 +310,16 @@ export default function AddAddress() {
           fullWidth
           required
           inputRef={refs.formattedAddress}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <AddressList
+          personId={personId}
+          name="parentId"
+          label={labels.mainAddress}
+          rq={{ excludedIds: id > 0 ? [id] : undefined, isLocation: false }}
+          idValue={formik.values.parentId}
+          inputOnChange={formik.handleChange}
         />
       </Grid>
     </EditPage>

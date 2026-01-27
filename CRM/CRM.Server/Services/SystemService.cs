@@ -38,7 +38,8 @@ namespace CRM.Server.Services
                     Currencies = s.Currencies,
                     SupplierCurrencies = s.SupplierCurrencies,
                     Cultures = s.Cultures,
-                    HasInventory = s.HasInventory
+                    HasInventory = s.HasInventory,
+                    TaxRate = s.TaxRate
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -227,7 +228,8 @@ namespace CRM.Server.Services
                     Currencies = [.. currencies],
                     Cultures = rq.Cultures?.ToList() ?? [App.Configuration.Cultures[0]],
                     SupplierCurrencies = rq.SupplierCurrencies?.ToList() ?? [currencies.First()],
-                    HasInventory = rq.HasInventory.GetValueOrDefault()
+                    HasInventory = rq.HasInventory.GetValueOrDefault(),
+                    TaxRate = rq.TaxRate
                 };
 
                 _db.SettingCrms.Add(settings);
@@ -257,6 +259,11 @@ namespace CRM.Server.Services
                 if (rq.IsModified(nameof(rq.HasInventory)) && rq.HasInventory.HasValue)
                 {
                     settings.HasInventory = rq.HasInventory.Value;
+                }
+
+                if (rq.IsModified(nameof(rq.TaxRate)))
+                {
+                    settings.TaxRate = rq.TaxRate;
                 }
             }
 

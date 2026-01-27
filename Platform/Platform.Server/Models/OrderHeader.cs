@@ -47,19 +47,17 @@ public partial class OrderHeader
 
     public string Culture { get; set; } = null!;
 
-    public short? PaymentId { get; set; }
+    public int? PaymentId { get; set; }
 
     public string? PaymentInstruction { get; set; }
 
-    public short? DeliveryId { get; set; }
+    public int? DeliveryId { get; set; }
+
+    public string? DeliveryInstruction { get; set; }
 
     public int? AddressId { get; set; }
 
     public long? ContactId { get; set; }
-
-    public string? DeliveryInstruction { get; set; }
-
-    public DateTime Creation { get; set; }
 
     public short Status { get; set; }
 
@@ -69,15 +67,23 @@ public partial class OrderHeader
 
     public List<int>? Tags { get; set; }
 
+    public DateTime Creation { get; set; }
+
+    public bool IsOrder { get; set; }
+
+    public virtual PersonAddress? Address { get; set; }
+
     public virtual Person Buyer { get; set; } = null!;
 
     public virtual Person? Contact { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
-    public virtual ICollection<OrderAddress> OrderAddresses { get; set; } = new List<OrderAddress>();
+    public virtual OrderDelivery? Delivery { get; set; }
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
+
+    public virtual OrderPayment? Payment { get; set; }
 
     public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
 

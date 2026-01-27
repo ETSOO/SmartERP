@@ -10,7 +10,11 @@ import {
   UserRoleList,
   UserTiplist
 } from "@etsoo/smarterp-core/components";
-import { PersonList, PersonsList } from "@etsoo/smarterp-crm/components";
+import {
+  AddressList,
+  PersonList,
+  PersonsList
+} from "@etsoo/smarterp-crm/components";
 import { DateUtils, DomUtils, IdActionResult, Utils } from "@etsoo/shared";
 import { EOEditorElement, EOEditorEx } from "@etsoo/reacteditor";
 import {
@@ -44,6 +48,7 @@ export default function AddProfile() {
     "editProfile",
     "happenDate",
     "importance",
+    "location",
     "noChanges",
     "otherParticipants",
     "profileRole",
@@ -233,28 +238,6 @@ export default function AddProfile() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
-        <StatusList
-          inputRequired
-          idValue={formik.values.status}
-          inputOnChange={formik.handleChange}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 4 }}>
-        <UserRoleList
-          label={labels.profileRole}
-          idValue={formik.values.userRole}
-          inputOnChange={formik.handleChange}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 4 }}>
-        <UserTiplist
-          name="assigneeId"
-          label={labels.assignee}
-          idValue={data.assigneeId}
-          inputOnChange={formik.handleChange}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 4 }}>
         <ComboBox
           name="importance"
           label={labels.importance}
@@ -262,6 +245,29 @@ export default function AddProfile() {
           inputOnChange={formik.handleChange}
           options={app.profile.getImportances()}
           fullWidth
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <InputField
+          fullWidth
+          name="location"
+          slotProps={{ htmlInput: { maxLength: 256 } }}
+          label={labels.location}
+          value={formik.values.location ?? ""}
+          onChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <AddressList
+          personId={formik.values.personId}
+          name="locationId"
+          label=""
+          idValue={formik.values.locationId}
+          onValueChange={(value) =>
+            formik.setFieldValue("location", value?.name)
+          }
+          rq={{ includeOwner: true }}
+          inputOnChange={formik.handleChange}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
@@ -281,6 +287,28 @@ export default function AddProfile() {
           ref={editorRef}
           backupKey={`profile-${id}`}
           language={app.culture}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <UserRoleList
+          label={labels.profileRole}
+          idValue={formik.values.userRole}
+          inputOnChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <UserTiplist
+          name="assigneeId"
+          label={labels.assignee}
+          idValue={data.assigneeId}
+          inputOnChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <StatusList
+          inputRequired
+          idValue={formik.values.status}
+          inputOnChange={formik.handleChange}
         />
       </Grid>
     </EditPage>

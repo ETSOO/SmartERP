@@ -34,11 +34,13 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<FeatureCulture> FeatureCultures { get; set; }
 
-    public virtual DbSet<OrderAddress> OrderAddresses { get; set; }
+    public virtual DbSet<OrderDelivery> OrderDeliveries { get; set; }
 
     public virtual DbSet<OrderHeader> OrderHeaders { get; set; }
 
     public virtual DbSet<OrderLine> OrderLines { get; set; }
+
+    public virtual DbSet<OrderPayment> OrderPayments { get; set; }
 
     public virtual DbSet<PermissionGroup> PermissionGroups { get; set; }
 
@@ -90,9 +92,10 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserDeviceTokenConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserIdentifierConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.FeatureCultureConfiguration());
-        modelBuilder.ApplyConfiguration(new Configurations.OrderAddressConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.OrderDeliveryConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderLineConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.OrderPaymentConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PermissionGroupConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PermissionItemConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PersonConfiguration());

@@ -1,4 +1,5 @@
-﻿using CRM.Server.RQ.PersonAddress;
+﻿using com.etsoo.WebUtils;
+using CRM.Server.RQ.PersonAddress;
 using CRM.Server.Services;
 
 namespace CRM.Server.Endpoints
@@ -16,8 +17,17 @@ namespace CRM.Server.Endpoints
             g.MapPost("Create", (IPersonAddressService service, AddressCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create address / 创建地址").WithTags("PersonAddress");
 
+            g.MapPost("CreateLocation", (IPersonAddressService service, AddressLocationCreateRQ rq, CancellationToken cancellationToken) => service.CreateLocationAsync(rq, cancellationToken))
+                .WithDescription("Create address location / 创建地址位置").WithTags("PersonAddress");
+
             g.MapDelete("Delete/{id:int}", (IPersonAddressService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete address / 删除地址").WithTags("PersonAddress");
+
+            g.MapPost("List", (IPersonAddressService service, AddressListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Get person address list / 获取人员地址列表").WithTags("PersonAddress");
+
+            g.MapPost("Query", (IPersonAddressService service, AddressListRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
+                .WithDescription("Query person address / 查询人员地址").WithTags("PersonAddress");
 
             g.MapPut("Update", (IPersonAddressService service, AddressUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update address / 更新地址").WithTags("PersonAddress");

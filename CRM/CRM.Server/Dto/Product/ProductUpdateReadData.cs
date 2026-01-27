@@ -94,6 +94,12 @@ namespace CRM.Server.Dto.Product
         public ProductPriceItem? Price { get; init; }
 
         /// <summary>
+        /// Tax rate
+        /// 税率
+        /// </summary>
+        public decimal? TaxRate { get; init; }
+
+        /// <summary>
         /// Categories
         /// 类目
         /// </summary>

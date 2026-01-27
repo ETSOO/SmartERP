@@ -59,7 +59,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "public.order_address",
+         "Name": "public.order_delivery",
          "ObjectType": 0
       },
       {
@@ -68,6 +68,10 @@
       },
       {
          "Name": "public.order_line",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.order_payment",
          "ObjectType": 0
       },
       {

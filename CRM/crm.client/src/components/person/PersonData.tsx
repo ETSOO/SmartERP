@@ -42,13 +42,13 @@ export function PersonData(props: PersonDataProps) {
   const labels = app.getLabels(
     "add",
     "addresses",
+    "all",
     "delete",
     "deleteConfirm",
     "edit",
     "editAvatar",
     "familyName",
     "givenName",
-    "location",
     "logo",
     "name",
     "nameB",
@@ -197,7 +197,7 @@ export function PersonData(props: PersonDataProps) {
                     <Chip
                       label={a.name + " - " + a.formattedAddress}
                       size="small"
-                      title={app.person.getAddressKind(a.kind)}
+                      title={app.personAddress.getAddressKind(a.kind)}
                     />
                     {editable && (
                       <IconButtonLink
@@ -232,9 +232,9 @@ export function PersonData(props: PersonDataProps) {
                     size="small"
                     variant="outlined"
                     startIcon={<ApartmentIcon />}
-                    href={`./../../address/${data.id}`}
+                    href={`./../../addresses/${data.id}`}
                   >
-                    {labels.location}
+                    {labels.all}
                   </ButtonLink>
                 </React.Fragment>
               )}

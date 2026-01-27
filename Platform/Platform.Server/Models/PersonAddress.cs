@@ -44,7 +44,11 @@ public partial class PersonAddress
 
     public virtual ICollection<PersonAddress> InverseParent { get; set; } = new List<PersonAddress>();
 
+    public virtual ICollection<OrderHeader> OrderHeaders { get; set; } = new List<OrderHeader>();
+
     public virtual PersonAddress? Parent { get; set; }
 
     public virtual Person Person { get; set; } = null!;
+
+    public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
 }

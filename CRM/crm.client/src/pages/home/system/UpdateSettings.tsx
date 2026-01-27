@@ -1,4 +1,4 @@
-import { EditPage, OptionBool } from "@etsoo/materialui";
+import { EditPage, NumberInputField, OptionBool } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
 import React from "react";
 import { SystemSettings, UpdateSettingsRQ } from "@etsoo/smarterp-crm";
@@ -21,6 +21,7 @@ export default function UpdateSettings() {
   const labels = app.getLabels(
     "currencies",
     "cultures",
+    "defaultTaxRate",
     "edit",
     "hasInventory",
     "mainCustomerType",
@@ -131,6 +132,17 @@ export default function UpdateSettings() {
           required
           value={formik.values.cultures}
           onValueChange={(ids) => formik.setFieldValue("cultures", ids)}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <NumberInputField
+          fullWidth
+          name="taxRate"
+          max={99}
+          step={0.01}
+          label={labels.defaultTaxRate}
+          value={formik.values.taxRate ?? ""}
+          onChange={formik.handleChange}
         />
       </Grid>
     </EditPage>

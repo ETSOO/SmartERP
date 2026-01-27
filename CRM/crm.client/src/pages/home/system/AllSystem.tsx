@@ -83,6 +83,10 @@ export default function AllSystem() {
                   },
                   {
                     data: "hasInventory"
+                  },
+                  {
+                    data: "taxRate",
+                    label: "defaultTaxRate"
                   }
                 ]}
               ></ViewContainer>

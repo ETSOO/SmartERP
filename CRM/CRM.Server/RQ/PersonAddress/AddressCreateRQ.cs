@@ -99,6 +99,12 @@ namespace CRM.Server.RQ.PersonAddress
         public Location? Location { get; init; }
 
         /// <summary>
+        /// Parent address id
+        /// 父地址编号
+        /// </summary>
+        public int? ParentId { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -148,6 +154,11 @@ namespace CRM.Server.RQ.PersonAddress
             if (FormattedAddress.Length is not (>= 1 and <= 256))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(FormattedAddress));
+            }
+
+            if (PlaceId != null && PlaceId.Length is not (>= 1 and <= 30))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(PlaceId));
             }
 
             return null;

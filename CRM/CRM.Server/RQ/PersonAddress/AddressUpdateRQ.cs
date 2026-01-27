@@ -94,6 +94,12 @@ namespace CRM.Server.RQ.PersonAddress
         public string? FormattedAddress { get; init; }
 
         /// <summary>
+        /// Parent address id
+        /// 父地址编号
+        /// </summary>
+        public int? ParentId { get; init; }
+
+        /// <summary>
         /// Location
         /// 位置
         /// </summary>

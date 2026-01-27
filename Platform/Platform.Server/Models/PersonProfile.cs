@@ -47,6 +47,8 @@ public partial class PersonProfile
 
     public virtual Person? Assignee { get; set; }
 
+    public virtual PersonAddress? LocationNavigation { get; set; }
+
     public virtual OrderHeader? Order { get; set; }
 
     public virtual Person Person { get; set; } = null!;

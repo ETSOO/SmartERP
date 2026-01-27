@@ -1,5 +1,6 @@
 ﻿using com.etsoo.ApiModel.Dto.Maps;
 using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
@@ -11,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
+using System.Buffers;
 
 namespace CRM.Server.Services
 {
@@ -48,12 +51,12 @@ namespace CRM.Server.Services
             // Organization id
             var orgId = User.OrganizationInt;
 
-            var person = await _db.Persons
+            var person = await _db.Persons.AsNoTracking()
                .Where(p => p.Id == rq.PersonId && p.OrgId == orgId)
-               .Select(p => new Person
+               .Select(p => new
                {
-                   Id = p.Id,
-                   IdentityType = p.IdentityType
+                   p.Id,
+                   p.IdentityType
                })
                .FirstOrDefaultAsync(cancellationToken);
 
@@ -65,6 +68,18 @@ namespace CRM.Server.Services
             if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            // Validate parent id
+            if (rq.ParentId.HasValue)
+            {
+                var parentExists = await _db.PersonAddresses.AsNoTracking()
+                    .Where(a => a.Id == rq.ParentId && a.PersonId == person.Id && a.Kind != AddressKind.Location && a.ParentId == null)
+                    .AnyAsync(cancellationToken);
+                if (!parentExists)
+                {
+                    return ApplicationErrors.NoId.AsResult(nameof(rq.ParentId));
+                }
             }
 
             // Find possible existing address
@@ -90,6 +105,84 @@ namespace CRM.Server.Services
 
             // Return
             return ActionResult.Succeed(addressId);
+        }
+
+        /// <summary>
+        /// Create address location
+        /// 创建地址位置
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateLocationAsync(AddressLocationCreateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var addr = await _db.PersonAddresses
+               .Where(p => p.Id == rq.ParentId && p.Person.OrgId == orgId && p.ParentId == null)
+               .Select(p => new
+               {
+                   p.Id,
+                   p.PersonId,
+                   p.Region,
+                   p.State,
+                   p.City,
+                   p.District,
+                   p.Route,
+                   p.Street,
+                   p.PostalCode,
+                   p.FormattedAddress,
+                   p.Provider,
+                   p.Person.IdentityType
+               })
+               .FirstOrDefaultAsync(cancellationToken);
+
+            if (addr == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.ParentId));
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(addr.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var doesExist = await _db.PersonAddresses
+                .Where(p => p.PersonId == addr.PersonId && (p.Name == rq.Name || (p.PlaceId != null && p.PlaceId == rq.PlaceId)))
+                .AnyAsync(cancellationToken);
+
+            if (doesExist)
+            {
+                return ApplicationErrors.ItemExists.AsResult(nameof(rq.Name));
+            }
+
+            var newAddr = new PersonAddress
+            {
+                PersonId = addr.PersonId,
+                Kind = AddressKind.Location,
+                Name = rq.Name,
+                PlaceId = rq.PlaceId,
+                Region = addr.Region,
+                State = addr.State,
+                City = addr.City,
+                District = addr.District,
+                Route = addr.Route,
+                Street = addr.Street,
+                PostalCode = addr.PostalCode,
+                FormattedAddress = addr.FormattedAddress,
+                Location = null,
+                Provider = addr.Provider,
+                ParentId = addr.Id
+            };
+
+            // Add
+            _db.PersonAddresses.Add(newAddr);
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(newAddr.Id);
         }
 
         /// <summary>
@@ -133,6 +226,125 @@ namespace CRM.Server.Services
             }
         }
 
+        private IQueryable<PersonAddress> CreateQuery(long[] personIds, AddressListRQ rq, Func<IQueryable<PersonAddress>, IQueryable<PersonAddress>>? filters = null)
+        {
+            var orgId = User.OrganizationInt;
+
+            var query = _db.PersonAddresses.AsNoTracking()
+                .Where(q => personIds.Contains(q.PersonId) && q.Person.OrgId == orgId)
+                .QueryEtsoo(rq, (a) => a.Id, null, (q) =>
+                {
+                    if (rq.Kind.HasValue)
+                    {
+                        q = q.Where(a => a.Kind == rq.Kind);
+                    }
+
+                    if (rq.ParentId.HasValue)
+                    {
+                        q = q.Where(a => a.ParentId == rq.ParentId);
+                    }
+
+                    if (rq.IsLocation.HasValue)
+                    {
+                        if (rq.IsLocation.Value)
+                        {
+                            q = q.Where(a => a.Kind == AddressKind.Location && a.ParentId != null);
+                        }
+                        else
+                        {
+                            q = q.Where(a => a.Kind != AddressKind.Location && a.ParentId == null);
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(rq.PlaceId))
+                    {
+                        q = q.Where(a => a.PlaceId == rq.PlaceId);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+                        q = q.Where(a => EF.Functions.ILike(a.Name, $"%{keyword}%") || EF.Functions.ILike(a.FormattedAddress, $"%{keyword}%"));
+                    }
+
+                    if (filters != null)
+                    {
+                        q = filters(q);
+                    }
+
+                    return q;
+                });
+
+            return query;
+        }
+
+        private async ValueTask<long[]> FormatRQAsync(AddressListRQ rq, CancellationToken cancellationToken)
+        {
+            List<long> ids = [rq.PersonId];
+
+            if (rq.IncludeOwner.GetValueOrDefault())
+            {
+                ids.Add(User.Pid);
+
+                var orgId = User.OrganizationInt;
+
+                var ownerIds = await _db.Persons(orgId).AsNoTracking()
+                    .Where(p => p.Id == rq.PersonId)
+                    .SelectMany(p => p.ContactOwners.Select(o => o.PersonId)).ToArrayAsync(cancellationToken);
+
+                ids.AddRange(ownerIds);
+            }
+
+            return [.. ids.Distinct()];
+        }
+
+        /// <summary>
+        /// List
+        /// 列表
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="writer">Writer to hold the data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task ListAsync(AddressListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        {
+            var personIds = await FormatRQAsync(rq, cancellationToken);
+
+            await CreateQuery(personIds, rq)
+                .OrderBy(c => c.Name)
+                .Select(c => new AddressListData
+                {
+                    Id = c.Id,
+                    Kind = c.Kind,
+                    Name = c.Name,
+                    City = c.City,
+                    ParentName = c.Parent != null ? c.Parent.Name : null
+                }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Query
+        /// 查询
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AddressQueryData[]> QueryAsync(AddressListRQ rq, CancellationToken cancellationToken = default)
+        {
+            var personIds = await FormatRQAsync(rq, cancellationToken);
+
+            return await CreateQuery(personIds, rq)
+                .Select(c => new AddressQueryData
+                {
+                    Id = c.Id,
+                    Kind = c.Kind,
+                    Name = c.Name,
+                    FormattedAddress = c.FormattedAddress,
+                    ParentName = c.Parent != null ? c.Parent.Name : null,
+                    Creation = c.Creation
+                }).ToArrayAsync(cancellationToken);
+        }
+
         /// <summary>
         /// Update
         /// 更新
@@ -165,6 +377,7 @@ namespace CRM.Server.Services
                     FormattedAddress = a.FormattedAddress,
                     Location = a.Location,
                     Provider = a.Provider,
+                    ParentId = a.ParentId,
                     Person = new Person
                     {
                         Id = a.Person.Id,
@@ -181,6 +394,18 @@ namespace CRM.Server.Services
             if (!await _commonService.HasIdentityPermissionAsync(addr.Person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            // Validate parent id
+            if (rq.ParentId.HasValue)
+            {
+                var parentExists = await _db.PersonAddresses.AsNoTracking()
+                    .Where(a => a.Id == rq.ParentId && a.PersonId == addr.PersonId && a.Kind != AddressKind.Location && a.ParentId == null)
+                    .AnyAsync(cancellationToken);
+                if (!parentExists)
+                {
+                    return ApplicationErrors.NoId.AsResult(nameof(rq.ParentId));
+                }
             }
 
             _db.PersonAddresses.Attach(addr);
@@ -275,6 +500,11 @@ namespace CRM.Server.Services
                 addr.Provider = rq.Provider.Value;
             }
 
+            if (rq.IsModified(nameof(rq.ParentId)))
+            {
+                addr.ParentId = rq.ParentId;
+            }
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -311,6 +541,7 @@ namespace CRM.Server.Services
                     Street = a.Street,
                     PostalCode = a.PostalCode,
                     FormattedAddress = a.FormattedAddress,
+                    ParentId = a.ParentId,
                     Location = a.Location == null ? null : new Location((float)a.Location.Value.X, (float)a.Location.Value.Y)
                 }).FirstOrDefaultAsync(cancellationToken);
         }

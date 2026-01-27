@@ -70,7 +70,8 @@ namespace CRM.Server.RQ
                 PostalCode = rq.PostalCode,
                 FormattedAddress = rq.FormattedAddress,
                 Location = rq.Location == null ? null : new NpgsqlPoint(rq.Location.Lng, rq.Location.Lat),
-                Provider = rq.Provider
+                Provider = rq.Provider,
+                ParentId = rq.ParentId
             };
         }
 

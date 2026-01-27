@@ -49,6 +49,7 @@ export default function AddProduct() {
     "categories",
     "channelPrice",
     "costPrice",
+    "defaultTaxRate",
     "description",
     "minQty",
     "noChanges",
@@ -58,7 +59,8 @@ export default function AddProduct() {
     "retailPrice",
     "status",
     "stepQty",
-    "tags"
+    "tags",
+    "taxRate"
   );
 
   // Type
@@ -69,6 +71,7 @@ export default function AddProduct() {
     : ProductInventoryWay.None;
 
   const defaultCurrency = app.userData?.system?.currencies[0] ?? app.currency;
+  const defaultTaxRate = app.userData?.system?.taxRate;
 
   // State
   const [data, setData] = React.useState<DataType>({
@@ -96,7 +99,8 @@ export default function AddProduct() {
     "queryKeyword",
     "promotionPrice",
     "retailPrice",
-    "stepQty"
+    "stepQty",
+    "taxRate"
   ] as const;
   const refs = useRefs(refFields);
 
@@ -370,6 +374,19 @@ export default function AddProduct() {
           inputRef={refs.queryKeyword}
         />
       </Grid>
+      {defaultTaxRate && (
+        <Grid size={{ xs: 6, sm: 3 }}>
+          <NumberInputField
+            fullWidth
+            name="taxRate"
+            max={99}
+            step={0.01}
+            label={labels.taxRate}
+            inputRef={refs.taxRate}
+            helperText={labels.defaultTaxRate + `: ${defaultTaxRate}`}
+          />
+        </Grid>
+      )}
     </EditPage>
   );
 }

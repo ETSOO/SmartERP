@@ -64,6 +64,7 @@ export default function Home() {
     "addContactInfo",
     "addProfile",
     "address",
+    "addresses",
     "allProfiles",
     "app3",
     "assets",
@@ -154,6 +155,12 @@ export default function Home() {
             segment: "address",
             pattern: "address/:id",
             title: labels.address,
+            hidden: true
+          },
+          {
+            segment: "addresses",
+            pattern: "addresses/:id",
+            title: labels.addresses,
             hidden: true
           },
           {
