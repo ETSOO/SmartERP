@@ -36,6 +36,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using static Google.Cloud.Iam.V1.AuditConfigDelta.Types;
 
 namespace Platform.Server.Services
 {
@@ -1407,7 +1408,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
         {
             // Check the stream
-            if (avatarStream.Length is not (> 10240 and < 102400000))
+            if (!IsValidPhoto(avatarStream))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(avatarStream));
             }
@@ -1570,6 +1571,98 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Is valid upload file stream
+        /// 是否为有效的上传文件流
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Result</returns>
+        bool IsValidUploadFile(Stream stream)
+        {
+            // 0.1KB - 100MB
+            return stream.Length is (>= 102 and <= 104_857_600);
+        }
+
+        /// <summary>
+        /// Upload files
+        /// 上传文件
+        /// </summary>
+        /// <param name="files">Files</param>
+        /// <param name="id">Target id</param>
+        /// <param name="folder">Folder name</param>
+        /// <param name="sign">Signature</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UploadFilesAsync(IEnumerable<IFormFile> files, long id, string folder, string sign, CancellationToken cancellationToken = default)
+        {
+            // Validate the folder name
+            if (string.IsNullOrEmpty(folder) || folder.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(folder));
+            }
+
+            // Validate the action
+            var actionResult = await _erp.ValidateActionAsync(sign, folder, id, cancellationToken);
+            if (!actionResult.Ok)
+            {
+                return actionResult;
+            }
+
+            var exceptions = new ConcurrentQueue<Exception>();
+
+            var orgId = User.OrganizationInt;
+
+            // Storage
+            var storage = await _storageFactory.CreateAsync(orgId, cancellationToken);
+
+            // File path
+            var path = _storageFactory.GetOrgPath(orgId, folder);
+
+            // Files
+            List<string> paths = [];
+
+            await Parallel.ForEachAsync(files, cancellationToken, async (file, cancellationToken) =>
+            {
+                try
+                {
+                    var stream = file.OpenReadStream();
+                    if (!IsValidUploadFile(stream))
+                    {
+                        exceptions.Enqueue(new Exception($"Invalid file stream {file.FileName}"));
+                        return;
+                    }
+
+                    var filePath = path + Path.GetRandomFileName() + Path.GetExtension(file.FileName);
+
+                    var saveResult = await storage.WriteAsync(filePath, stream, WriteCase.CreateNew, cancellationToken: cancellationToken);
+
+                    if (saveResult)
+                    {
+                        paths.Add(filePath);
+                    }
+                    else
+                    {
+                        exceptions.Enqueue(new Exception($"Failed to save file {file.FileName}"));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Enqueue(ex);
+                }
+            });
+
+            if (!exceptions.IsEmpty)
+            {
+                return LogException(new AggregateException(exceptions));
+            }
+
+            var result = ActionResult.Success;
+            result.Data[nameof(paths)] = paths.ToArray();
+            result.Data["urls"] = paths.Select(p => storage.GetUrl(p)).ToArray();
+
+            return result;
+        }
+
+        /// <summary>
         /// Async upload profile attachment files
         /// 异步上传档案附件
         /// </summary>
@@ -1615,9 +1708,16 @@ namespace Platform.Server.Services
             {
                 try
                 {
+                    var stream = file.OpenReadStream();
+                    if (!IsValidUploadFile(stream))
+                    {
+                        exceptions.Enqueue(new Exception($"Invalid file stream {file.FileName}"));
+                        return;
+                    }
+
                     var filePath = path + Path.GetRandomFileName() + Path.GetExtension(file.FileName);
 
-                    var saveResult = await storage.WriteAsync(filePath, file.OpenReadStream(), WriteCase.CreateNew, cancellationToken: cancellationToken);
+                    var saveResult = await storage.WriteAsync(filePath, stream, WriteCase.CreateNew, cancellationToken: cancellationToken);
 
                     if (saveResult)
                     {

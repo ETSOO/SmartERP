@@ -555,7 +555,7 @@ namespace Platform.Server.Services
         public async ValueTask<IActionResult> UpdateAvatarAsync(Stream avatarStream, string contentType, CancellationToken cancellationToken = default)
         {
             // Check the stream
-            if (avatarStream.Length is not (> 10240 and < 102400000))
+            if (!IsValidPhoto(avatarStream))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(avatarStream));
             }

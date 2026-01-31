@@ -9,7 +9,7 @@ import { DomUtils } from "@etsoo/shared";
 
 function CultureInput(props: NameCulturePros) {
   // Destruct
-  const { id, isProduct, kind } = props;
+  const { kind, id, isProduct = kind === CustomCultureKind.Product } = props;
 
   // Label
   const labels = app.getLabels("description", "title");
@@ -99,6 +99,11 @@ export type NameCulturePros = {
    * 类型
    */
   kind: CustomCultureKind;
+
+  /**
+   * Success handler
+   */
+  onSuccess?: () => void;
 };
 
 export function NameCulture(props: NameCulturePros) {
@@ -149,6 +154,7 @@ export function NameCulture(props: NameCulturePros) {
         if (result == null) return;
 
         if (result.ok) {
+          props.onSuccess?.();
           return true;
         } else {
           return app.formatResult(result);

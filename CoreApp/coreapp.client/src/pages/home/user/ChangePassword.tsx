@@ -53,7 +53,7 @@ export default function ChangePassword() {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       // Submit data
-      var result = await app.core.authApi.changePassword(
+      const result = await app.core.authApi.changePassword(
         values.oldPassword,
         values.password
       );

@@ -273,6 +273,22 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/product/view/:id",
+            lazy: async () => {
+              const ViewProduct =
+                await import("./pages/home/product/ViewProduct");
+              return { Component: ViewProduct.default };
+            }
+          },
+          {
+            path: "/home/product/logo/:id",
+            lazy: async () => {
+              const ProductLogo =
+                await import("./pages/home/product/ProductLogo");
+              return { Component: ProductLogo.default };
+            }
+          },
+          {
             path: "/home/product/unit",
             lazy: async () => {
               const ProductUnits =

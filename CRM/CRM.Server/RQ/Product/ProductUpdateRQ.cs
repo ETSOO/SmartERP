@@ -99,6 +99,12 @@ namespace CRM.Server.RQ.Product
         public decimal? TaxRate { get; init; }
 
         /// <summary>
+        /// Introduction Url
+        /// 介绍链接
+        /// </summary>
+        public string? IntroductionUrl { get; init; }
+
+        /// <summary>
         /// Categories
         /// 类目
         /// </summary>
@@ -156,6 +162,11 @@ namespace CRM.Server.RQ.Product
             if (QueryKeyword != null && QueryKeyword.Length is not (>= 1 and <= 30))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(QueryKeyword));
+            }
+
+            if (IntroductionUrl != null && IntroductionUrl.Length is not (>= 1 and <= 256))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(IntroductionUrl));
             }
 
             if (Tags != null && Tags.Any(t => t.Length is < 1 or > 128))

@@ -1,13 +1,15 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using CRM.Server.Dto.System;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 
 namespace CRM.Server.Dto.Product
 {
     /// <summary>
-    /// Product update read data
-    /// 更新产品读取数据
+    /// Product view data
+    /// 产品浏览数据
     /// </summary>
-    public record ProductUpdateReadData
+    public record ProductViewData
     {
         /// <summary>
         /// Id
@@ -88,16 +90,16 @@ namespace CRM.Server.Dto.Product
         public string? QueryKeyword { get; init; }
 
         /// <summary>
-        /// Price
-        /// 价格
-        /// </summary>
-        public ProductPriceItem? Price { get; init; }
-
-        /// <summary>
         /// Tax rate
         /// 税率
         /// </summary>
         public decimal? TaxRate { get; init; }
+
+        /// <summary>
+        /// Logo
+        /// 图标
+        /// </summary>
+        public string? Logo { get; init; }
 
         /// <summary>
         /// Introduction Url
@@ -106,10 +108,28 @@ namespace CRM.Server.Dto.Product
         public string? IntroductionUrl { get; init; }
 
         /// <summary>
+        /// Status
+        /// 状况
+        /// </summary>
+        public EntityStatus Status { get; init; }
+
+        /// <summary>
+        /// Creation
+        /// 登记时间
+        /// </summary>
+        public DateTimeOffset Creation { get; init; }
+
+        /// <summary>
         /// Categories
         /// 类目
         /// </summary>
-        public IEnumerable<int>? Categories { get; init; }
+        public required IEnumerable<CategoryItem> Categories { get; init; }
+
+        /// <summary>
+        /// Prices
+        /// 所有价格
+        /// </summary>
+        public required IEnumerable<ProductPriceItem> Prices { get; init; }
 
         /// <summary>
         /// Keywords
@@ -118,9 +138,9 @@ namespace CRM.Server.Dto.Product
         public IEnumerable<string>? Tags { get; init; }
 
         /// <summary>
-        /// Status
-        /// 状况
+        /// Cultures
+        /// 文化
         /// </summary>
-        public EntityStatus Status { get; init; }
+        public required IEnumerable<CustomCultureItem> Cultures { get; init; }
     }
 }

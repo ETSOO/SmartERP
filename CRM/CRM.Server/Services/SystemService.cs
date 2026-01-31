@@ -102,6 +102,7 @@ namespace CRM.Server.Services
                 .Select(c => new CustomCultureItem
                 {
                     Id = c.Id,
+                    Culture = c.Culture,
                     Title = c.Title,
                     Description = c.Description,
                     JsonData = c.JsonData

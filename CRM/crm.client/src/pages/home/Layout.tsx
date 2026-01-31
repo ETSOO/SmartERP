@@ -74,6 +74,7 @@ export default function Home() {
     "depts",
     "edit",
     "editAvatar",
+    "editLogo",
     "editProfile",
     "info",
     "menuHome",
@@ -255,6 +256,18 @@ export default function Home() {
             segment: "edit",
             pattern: "edit/:id",
             title: labels.edit,
+            hidden: true
+          },
+          {
+            segment: "logo",
+            pattern: "logo/:id",
+            title: labels.editLogo,
+            hidden: true
+          },
+          {
+            segment: "view",
+            pattern: "view/:id",
+            title: labels.view,
             hidden: true
           },
           {

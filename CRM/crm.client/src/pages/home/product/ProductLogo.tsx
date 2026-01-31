@@ -6,16 +6,16 @@ import { useParamsEx } from "@etsoo/react";
 import Stack from "@mui/material/Stack";
 import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 
-export default function ContactAvatar() {
+export default function ProductLogo() {
   // Route
   const navigate = useNavigate();
   const { id = 0 } = useParamsEx({ id: "number" });
 
   const location = useLocation();
-  const avatar: string | undefined = location.state;
+  const logo: string | undefined = location.state;
 
   // Labels
-  const labels = app.getLabels("avatar", "imageSizeTooSmall", "logo");
+  const labels = app.getLabels("imageSizeTooSmall", "logo");
 
   // Page data hook
   usePageDataEmpty(app);
@@ -23,14 +23,10 @@ export default function ContactAvatar() {
   return (
     <CommonPage sx={{ width: "fit-content" }}>
       <Stack direction={{ xs: "column", sm: "column", md: "row" }} spacing={1}>
-        {avatar == null ? (
+        {logo == null ? (
           <React.Fragment />
         ) : (
-          <img
-            src={avatar}
-            alt={labels.logo}
-            style={CoreUtils.avatarStyles(false)}
-          />
+          <img src={logo} alt={labels.logo} style={CoreUtils.avatarStyles()} />
         )}
         <UserAvatarEditor
           onDone={async (canvas, toBlob, type) => {
@@ -40,23 +36,39 @@ export default function ContactAvatar() {
               return;
             }
 
+            // Action data
+            const action = await app.productApi.uploadLogoAction(id);
+            if (action == null) return;
+
             // Photo blob
             const blob = await toBlob(canvas, type, 1);
 
-            // Form data
-            const form = new FormData();
-            form.append("avatar", blob);
+            const formData = new FormData();
+            formData.append("file", blob, "logo.png");
 
-            const result = await app.core.memberApi.updateAvatar(id, form);
-            if (result == null) return;
+            // Upload the file
+            const result = await app.core.orgApi.uploadFiles(
+              id,
+              "Products",
+              formData,
+              action
+            );
 
-            // To view page
-            navigate(`./../../view/${id}`);
+            if (result == null || !result.data?.urls.length) return;
 
-            // Reset the UI
-            return true;
+            const url = result.data.urls[0];
+
+            const logoResult = await app.productApi.updateLogo({ id, url });
+            if (logoResult == null) return;
+
+            if (result.ok) {
+              navigate(`./../../view/${id}`);
+              return true;
+            } else {
+              app.alertResult(result);
+            }
           }}
-          maxWidth={640}
+          maxWidth={800}
         />
       </Stack>
     </CommonPage>

@@ -106,6 +106,10 @@ namespace Platform.Server.Endpoints.Org
             g.MapGet("UpdateApiRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateApiReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read JSON data for upate API / 浏览JSON数据用于更新API").WithTags("Org");
 
+            g.MapPost("UploadFiles/{id:long}", (IOrgService service, long id, [FromForm] string folder, [FromForm] string sign, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadFilesAsync(files, id, folder, sign, cancellationToken))
+                .DisableAntiforgery()
+                .WithDescription("Upload files / 上传文件").WithTags("Org");
+
             g.MapPost("UploadProfileFiles/{id:long}", (IOrgService service, long id, [FromQuery] string action, IFormFileCollection files, CancellationToken cancellationToken) => service.UploadProfileFilesAsync(id, files, action, cancellationToken))
                 .DisableAntiforgery()
                 .WithDescription("Upload profile attachments / 上传档案附件").WithTags("Org");

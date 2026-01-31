@@ -73,11 +73,13 @@ export function PersonData(props: PersonDataProps) {
       leftContainer={(item) => (
         <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
           {item.avatar && (
-            <img
-              src={item.avatar}
-              alt={labels.logo}
-              style={CoreUtils.avatarStyles(item.isLegalPerson)}
-            />
+            <a href={item.avatar} target="_blank" rel="noopener noreferrer">
+              <img
+                src={item.avatar}
+                alt={labels.logo}
+                style={CoreUtils.avatarStyles(item.isLegalPerson)}
+              />
+            </a>
           )}
           {editable && (
             <IconButtonLink

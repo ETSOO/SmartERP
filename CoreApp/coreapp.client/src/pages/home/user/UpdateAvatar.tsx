@@ -46,7 +46,7 @@ export default function UpdateAvatar() {
             const form = new FormData();
             form.append("avatar", blob);
 
-            var result = await app.core.userApi.updateAvatar(form);
+            const result = await app.core.userApi.updateAvatar(form);
             if (result == null) return;
 
             // Refresh token to get the updated avatar

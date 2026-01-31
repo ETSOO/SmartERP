@@ -120,6 +120,12 @@ namespace PlatformShared.Database.Models
         public string? Logo { get; set; }
 
         /// <summary>
+        /// Introduction Url
+        /// 介绍链接
+        /// </summary>
+        public string? IntroductionUrl { get; set; }
+
+        /// <summary>
         /// Unit id
         /// 产品单位编号
         /// </summary>
@@ -165,7 +171,7 @@ namespace PlatformShared.Database.Models
         /// Creation
         /// 登记时间
         /// </summary>
-        public DateTime Creation { get; set; }
+        public DateTimeOffset Creation { get; set; }
 
         /// <summary>
         /// Status

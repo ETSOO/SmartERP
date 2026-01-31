@@ -163,11 +163,13 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProductQueryData[]))]
     [JsonSerializable(typeof(ProductUnitItem[]))]
     [JsonSerializable(typeof(ProductUpdateReadData))]
+    [JsonSerializable(typeof(ProductViewData))]
 
     [JsonSerializable(typeof(ProductCreateRQ))]
     [JsonSerializable(typeof(ProductDuplicateTestRQ))]
     [JsonSerializable(typeof(ProductListRQ))]
     [JsonSerializable(typeof(ProductUnitUpdateRQ))]
+    [JsonSerializable(typeof(ProductUpdateLogoRQ))]
     [JsonSerializable(typeof(ProductUpdateRQ))]
 
     // Product category

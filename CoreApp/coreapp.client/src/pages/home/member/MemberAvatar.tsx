@@ -50,7 +50,7 @@ export default function MemberAvatar() {
             const form = new FormData();
             form.append("avatar", blob);
 
-            var result = await app.core.memberApi.updateAvatar(id, form);
+            const result = await app.core.memberApi.updateAvatar(id, form);
             if (result == null) return;
 
             // To view page

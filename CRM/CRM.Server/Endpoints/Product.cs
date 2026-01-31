@@ -1,6 +1,8 @@
 ﻿using com.etsoo.WebUtils;
+using CRM.Server.Dto.Product;
 using CRM.Server.RQ.Product;
 using CRM.Server.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.Server.Endpoints
 {
@@ -29,11 +31,26 @@ namespace CRM.Server.Endpoints
             g.MapGet("QueryUnit", (IProductService service,  CancellationToken cancellationToken) => service.QueryUnitAsync(cancellationToken))
                 .WithDescription("Query product unit / 查询产品单位").WithTags("Product");
 
+            g.MapGet("Read/{id:int}", (IProductService service, int id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
+                .WithDescription("Get product detail / 获取产品详情").WithTags("Product");
+
+            g.MapGet("ReadPrice/{id:int}/{currency}", (IProductService service, int id, string currency, CancellationToken cancellationToken) => service.ReadPriceAsync(id, currency, cancellationToken))
+                .WithDescription("Get product price / 获取产品价格").WithTags("Product");
+
             g.MapPut("Update", (IProductService service, ProductUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update product / 更新产品").WithTags("Product");
 
+            g.MapPut("UpdateLogo", (IProductService service, ProductUpdateLogoRQ rq, CancellationToken cancellationToken) => service.UpdateLogoAsync(rq, cancellationToken))
+                .WithDescription("Update product logo / 更新产品标志").WithTags("Product");
+
+            g.MapGet("UploadLogoAction/{id:int}", (IProductService service, int id, CancellationToken cancellationToken) => service.UploadLogoActionAsync(id, cancellationToken))
+                .WithDescription("Get product logo upload action / 获取产品标志上传操作").WithTags("Product");
+
             g.MapGet("UpdateRead/{id:int}", (IProductService service, int id, CancellationToken cancellationToken) => service.UpdateReadAsync(id, cancellationToken))
                 .WithDescription("Get product update info / 获取产品更新信息").WithTags("Product");
+
+            g.MapPut("UpdatePrice/{id:int}", (IProductService service, int id, ProductPriceItem rq, CancellationToken cancellationToken) => service.UpdatePriceAsync(id, rq, cancellationToken))
+                .WithDescription("Update product price / 更新产品价格").WithTags("Product");
 
             g.MapPut("UpdateUnit", (IProductService service, ProductUnitUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateUnitAsync(rq, cancellationToken))
                 .WithDescription("Update product unit / 更新产品单位").WithTags("Product");

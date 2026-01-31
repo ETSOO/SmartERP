@@ -28,6 +28,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)
                 .HasColumnName("logo");
+            entity.Property(e => e.IntroductionUrl)
+                .HasMaxLength(256)
+                .HasColumnName("introduction_url");
             entity.Property(e => e.UnitId).HasColumnName("unit_id");
             entity.Property(e => e.MinQty)
                 .HasPrecision(6, 2)

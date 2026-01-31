@@ -20,5 +20,17 @@ namespace Platform.Server.Services
         {
             User = user;
         }
+
+        /// <summary>
+        /// Is valid photo stream
+        /// 是否为有效的照片流
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Result</returns>
+        protected bool IsValidPhoto(Stream stream)
+        {
+            // 10KB - 10MB
+            return stream.Length is (>= 10_240 and <= 10_485_760);
+        }
     }
 }

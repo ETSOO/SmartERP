@@ -6,13 +6,17 @@ using com.etsoo.Database;
 using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using com.etsoo.WebUtils.Attributes;
+using CRM.Server.Dto.Group;
 using CRM.Server.Dto.Product;
+using CRM.Server.Dto.System;
 using CRM.Server.RQ.Product;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
+using PlatformShared.Services;
 using System.Buffers;
 
 namespace CRM.Server.Services
@@ -140,7 +144,8 @@ namespace CRM.Server.Services
                 Scope = rq.Scope ?? ProductScope.Public,
                 InventoryWay = rq.InventoryWay ?? ProductInventoryWay.None,
                 QueryKeyword = queryKeyword,
-                TaxRate = rq.TaxRate
+                TaxRate = rq.TaxRate,
+                IntroductionUrl = rq.IntroductionUrl
             };
 
             if (rq.Tags?.Any() is true)
@@ -489,6 +494,11 @@ namespace CRM.Server.Services
                 product.TaxRate = rq.TaxRate;
             }
 
+            if (rq.IsModified(nameof(rq.IntroductionUrl)))
+            {
+                product.IntroductionUrl = rq.IntroductionUrl;
+            }
+
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
             {
                 product.Status = rq.Status.Value;
@@ -569,6 +579,7 @@ namespace CRM.Server.Services
                         CostPrice = pp.CostPrice
                     }).FirstOrDefault(),
                     TaxRate = p.TaxRate,
+                    IntroductionUrl = p.IntroductionUrl,
                     Categories = p.CategoryIds,
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
                     Status = p.Status
@@ -627,6 +638,223 @@ namespace CRM.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             return result;
+        }
+
+        /// <summary>
+        /// Read data for view
+        /// 读取用于浏览的数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<ProductViewData?> ReadAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.View, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var key = _commonService.GetCultureKey(id, CustomCultureKind.Product);
+
+            return await _db.Products(orgId).AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => new ProductViewData
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    AssignedId = p.AssignedId,
+                    Description = p.Description,
+                    UnitId = p.UnitId,
+                    MinQty = p.MinQty,
+                    StepQty = p.StepQty,
+                    CapQty = p.CapQty,
+                    AssetQty = p.AssetQty,
+                    Usage = p.Usage,
+                    Scope = p.Scope,
+                    InventoryWay = p.InventoryWay,
+                    QueryKeyword = p.QueryKeyword,
+                    TaxRate = p.TaxRate,
+                    Logo = p.Logo,
+                    IntroductionUrl = p.IntroductionUrl,
+                    Status = p.Status,
+                    Creation = p.Creation,
+                    Categories = _db.ProductCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds != null && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds!.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
+                    Prices = p.Prices.Select(pp => new ProductPriceItem
+                    {
+                        Currency = pp.Currency,
+                        RetailPrice = pp.RetailPrice,
+                        PromotionPrice = pp.PromotionPrice,
+                        ChannelPrice = pp.ChannelPrice,
+                        CostPrice = pp.CostPrice
+                    }).ToList(),
+                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+                    Cultures = _db.FeatureCultures.Where(c => c.CoreOrganizationId == orgId && c.Key == key)
+                                .Select(c => new CustomCultureItem
+                                {
+                                    Id = c.Id,
+                                    Culture = c.Culture,
+                                    Title = c.Title,
+                                    Description = c.Description,
+                                    JsonData = c.JsonData
+                                }).ToList()
+                }).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read price
+        /// 读取价格
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="currency">Currency</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<ProductPriceItem?> ReadPriceAsync(int id, string currency, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.View, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            return await _db.ProductPrices.AsNoTracking()
+                .Where(pp => pp.Product.CoreOrganizationId == orgId && pp.ProductId == id && pp.Currency == currency)
+                .Select(pp => new ProductPriceItem
+                {
+                    Currency = pp.Currency,
+                    RetailPrice = pp.RetailPrice,
+                    PromotionPrice = pp.PromotionPrice,
+                    ChannelPrice = pp.ChannelPrice,
+                    CostPrice = pp.CostPrice
+                }).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Update logo
+        /// 更新图标
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateLogoAsync(ProductUpdateLogoRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Edit, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            // Update
+            var result = await _db.Products(orgId).Where(p => p.Id == rq.Id && p.CoreOrganizationId == orgId)
+                .ExecuteUpdateAsync(p => p.SetProperty(pu => pu.Logo, rq.Url), cancellationToken);
+
+            if (result == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Create upload logo action data
+        /// 创建上传图标的动作数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AppActionData?> UploadLogoActionAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Edit, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            // Validate product
+            var hasProduct = await _db.Products(orgId)
+                .AsNoTracking()
+                .AnyAsync(p => p.Id == id && p.CoreOrganizationId == orgId, cancellationToken);
+
+            if (!hasProduct)
+            {
+                return null;
+            }
+
+            return App.SignAction("Products", id);
+        }
+
+        /// <summary>
+        /// Update price
+        /// 更新价格
+        /// </summary>
+        /// <param name="id">Product id</param>
+        /// <param name="item">Price item</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdatePriceAsync(int id, ProductPriceItem item, CancellationToken cancellationToken = default)
+        {
+            // Currency
+            if (!new CurrencyAttribute().IsValid(item.Currency))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(item.Currency));
+            }
+
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Edit, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            // Validate product
+            var hasProduct = await _db.Products(orgId)
+                .AsNoTracking()
+                .AnyAsync(p => p.Id == id && p.CoreOrganizationId == orgId, cancellationToken);
+
+            if (!hasProduct)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(id));
+            }
+
+            var price = await _db.ProductPrices
+                .Where(pp => pp.ProductId == id && pp.Currency == item.Currency)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (price == null)
+            {
+                price = new ProductPrice
+                {
+                    ProductId = id,
+                    Currency = item.Currency,
+                    RetailPrice = item.RetailPrice,
+                    PromotionPrice = item.PromotionPrice,
+                    ChannelPrice = item.ChannelPrice,
+                    CostPrice = item.CostPrice
+                };
+
+                _db.ProductPrices.Add(price);
+            }
+            else
+            {
+                price.RetailPrice = item.RetailPrice;
+                price.PromotionPrice = item.PromotionPrice;
+                price.ChannelPrice = item.ChannelPrice;
+                price.CostPrice = item.CostPrice;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
     }
 }

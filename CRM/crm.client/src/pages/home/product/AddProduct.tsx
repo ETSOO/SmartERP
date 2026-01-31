@@ -12,7 +12,7 @@ import { useFormik } from "formik";
 import React from "react";
 import Grid from "@mui/material/Grid";
 import { StatusList } from "@etsoo/smarterp-core/components";
-import { IdActionResult, Utils } from "@etsoo/shared";
+import { IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   FeatureTagKind,
   ProductCreateRQ,
@@ -51,6 +51,7 @@ export default function AddProduct() {
     "costPrice",
     "defaultTaxRate",
     "description",
+    "introductionUrl",
     "minQty",
     "noChanges",
     "productName",
@@ -94,6 +95,7 @@ export default function AddProduct() {
     "channelPrice",
     "costPrice",
     "description",
+    "introductionUrl",
     "minQty",
     "name",
     "queryKeyword",
@@ -161,6 +163,9 @@ export default function AddProduct() {
       app.alertResult(result);
     }
   });
+
+  const currency = formik.values.price?.currency ?? defaultCurrency;
+  const symbol = NumberUtils.getCurrencySymbol(currency);
 
   // Load data
   const reloadData = React.useCallback(async () => {
@@ -290,6 +295,7 @@ export default function AddProduct() {
             )})`
           }
           inputRef={refs.retailPrice}
+          symbol={symbol}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
@@ -298,6 +304,7 @@ export default function AddProduct() {
           name="price.promotionPrice"
           label={labels.promotionPrice}
           inputRef={refs.promotionPrice}
+          symbol={symbol}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
@@ -306,6 +313,7 @@ export default function AddProduct() {
           name="price.channelPrice"
           label={labels.channelPrice}
           inputRef={refs.channelPrice}
+          symbol={symbol}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
@@ -314,6 +322,7 @@ export default function AddProduct() {
           name="price.costPrice"
           label={labels.costPrice}
           inputRef={refs.costPrice}
+          symbol={symbol}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
@@ -353,6 +362,18 @@ export default function AddProduct() {
           inputRef={refs.description}
           multiline
           rows={2}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <InputField
+          fullWidth
+          name="introductionUrl"
+          slotProps={{
+            htmlInput: { maxLength: 256 }
+          }}
+          type="url"
+          label={labels.introductionUrl}
+          inputRef={refs.introductionUrl}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>

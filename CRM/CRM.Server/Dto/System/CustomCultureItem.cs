@@ -13,6 +13,12 @@
         public long Id { get; init; }
 
         /// <summary>
+        /// Culture, for example zh-CN
+        /// 文化，比如 zh-CN
+        /// </summary>
+        public required string Culture { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>
