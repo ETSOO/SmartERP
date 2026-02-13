@@ -7,7 +7,6 @@ using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.WebUtils.Attributes;
-using CRM.Server.Dto.Group;
 using CRM.Server.Dto.Product;
 using CRM.Server.Dto.System;
 using CRM.Server.RQ.Product;
@@ -16,7 +15,6 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
-using PlatformShared.Services;
 using System.Buffers;
 
 namespace CRM.Server.Services
@@ -98,6 +96,14 @@ namespace CRM.Server.Services
                 return assetQtyResult;
             }
 
+            // Categories
+            var categoryIds = rq.Categories;
+            var (result, ids) = await _commonService.ValidateCategoriesAsync(categoryIds, orgId, cancellationToken);
+            if (!result.Ok)
+            {
+                return result;
+            }
+
             // Duplicate test
             // Name
             if (await _db.Products(orgId).AnyAsync(p => p.Name.ToUpper() == rq.Name.ToUpper(), cancellationToken))
@@ -131,7 +137,8 @@ namespace CRM.Server.Services
             {
                 CoreOrganizationId = orgId,
                 Name = rq.Name,
-                CategoryIds = rq.Categories?.ToList(),
+                CategoryIds = categoryIds?.ToList(),
+                CategoryIdsAll = ids?.ToList(),
                 Description = rq.Description,
                 UnitId = unitId,
                 MinQty = rq.MinQty,
@@ -189,9 +196,7 @@ namespace CRM.Server.Services
 
                     if (rq.CategoryIdAll.HasValue)
                     {
-                        q = q.Where(p => p.CategoryIds != null && _db.ProductCategories.Any(c => p.CategoryIds.Contains(c.Id)
-                            && c.ParentIds != null && c.ParentIds.Contains(rq.CategoryIdAll.Value))
-                        );
+                        q = q.Where(p => p.CategoryIdsAll != null && p.CategoryIdsAll.Contains(rq.CategoryIdAll.Value));
                     }
                     else if (rq.CategoryId.HasValue)
                     {
@@ -352,6 +357,199 @@ namespace CRM.Server.Services
             .ToArrayAsync(cancellationToken);
         }
 
+        public async Task QueryForPurchaseAsync()
+        {
+
+        }
+
+        /// <summary>
+        /// Query product for sale
+        /// 查询产品用于销售
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            // Products & prices
+            var products = await _db.Products(orgId).AsNoTracking()
+                .Where(p => p.Status < EntityStatus.Inactivated && p.Scope > ProductScope.None)
+                .QueryEtsoo(rq, (p) => p.Id, null, (q) =>
+                {
+                    if (rq.CategoryIdAll.HasValue)
+                    {
+                        q = q.Where(p => p.CategoryIdsAll != null && p.CategoryIdsAll.Contains(rq.CategoryIdAll.Value));
+                    }
+                    else if (rq.CategoryId.HasValue)
+                    {
+                        q = q.Where(p => p.CategoryIds != null && p.CategoryIds.Contains(rq.CategoryId.Value));
+                    }
+
+                    if (rq.AssignedIdStart?.Length is > 1)
+                    {
+                        q = q.Where(ou => ou.AssignedId != null && EF.Functions.ILike(ou.AssignedId, $"{rq.AssignedIdStart}%"));
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        if (keyword.IsComplexQueryKeywords())
+                        {
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, a => a.Name, a => a.Description);
+                        }
+                        else
+                        {
+                            q = q.Where(ou => EF.Functions.ILike(ou.Name, $"%{keyword}%")
+                            || (ou.QueryKeyword != null && EF.Functions.ILike(ou.QueryKeyword, $"%{keyword}%"))
+                            || (ou.Description != null && EF.Functions.ILike(ou.Description, $"%{keyword}%"))
+                            );
+                        }
+                    }
+
+                    return q;
+                })
+                .Join(_db.ProductPrices.Where(pp => pp.Currency == rq.Currency), p => p.Id, pp => pp.ProductId, (p, pp) => new QueryForSaleData
+                {
+                    Id = p.Id,
+                    Logo = p.Logo,
+                    Name = p.Name,
+                    Description = p.Description,
+                    AssignedId = p.AssignedId,
+                    MinQty = p.MinQty,
+                    StepQty = p.StepQty,
+                    CapQty = p.CapQty,
+                    AssetQty = p.AssetQty,
+                    Currency = pp.Currency,
+                    RetailPrice = pp.RetailPrice,
+                    PromotionPrice = pp.PromotionPrice,
+                    UnitName = p.Unit.Name,
+                    CategoryIds = p.CategoryIds,
+                    CategoryIdsAll = p.CategoryIdsAll
+                })
+                .ToArrayAsync(cancellationToken);
+
+            if (products.Length == 0) return [];
+
+            var productIds = products.Select(p => p.Id).ToArray();
+            var allCategoryIds = products.Where(p => p.CategoryIds != null).SelectMany(p => p.CategoryIds!).Distinct();
+
+            var categories = await _db.ProductCategories(orgId)
+                .AsNoTracking()
+                .Where(c => allCategoryIds.Contains(c.Id))
+                .Select(c => new CategoryItemWithParents { Id = c.Id, Names = c.Names, ParentIds = c.ParentIds })
+                .ToArrayAsync(cancellationToken);
+
+            var now = DateTime.UtcNow;
+            var promotions = await _db.Promotions(orgId)
+                .AsNoTracking()
+                .Where(pr => pr.Status < EntityStatus.Inactivated
+                    && pr.ValidStart <= now
+                    && pr.ValidEnd >= now
+                    && ((pr.ProductIds != null && pr.ProductIds.Any(pid => productIds.Contains(pid)))
+                        || (pr.ProductCategoryIds != null && pr.ProductCategoryIds.Any(cid => allCategoryIds.Contains(cid)))))
+                .Select(pr => new
+                {
+                    pr.ProductIds,
+                    pr.ProductCategoryIds,
+                    Promotion = new PromotionItem
+                    {
+                        Id = pr.Id,
+                        Code = pr.Code,
+                        Title = pr.Title,
+                        MinAmount = pr.MinAmount,
+                        Discount = pr.Discount,
+                        Stackable = pr.Stackable
+                    }
+                })
+                .ToArrayAsync(cancellationToken);
+
+            // Loop products
+            foreach (var p in products)
+            {
+                // Categories
+                if (p.CategoryIds != null)
+                {
+                    p.Categories = categories
+                        .Where(c => p.CategoryIds.Contains(c.Id))
+                        .OrderBy(c => p.CategoryIds!.ToArray().IndexOf(c.Id));
+                }
+
+                p.Promotions = promotions
+                    .Where(pr => (pr.ProductIds != null && pr.ProductIds.Contains(p.Id)) || (pr.ProductCategoryIds != null && p.CategoryIdsAll != null && pr.ProductCategoryIds.Intersect(p.CategoryIdsAll).Any()))
+                    .Select(pr => pr.Promotion);
+            }
+
+            // Translations
+            if (!string.IsNullOrEmpty(rq.Culture))
+            {
+                var cultureIds = productIds.ToDictionary(id => _commonService.GetCultureKey(id, CustomCultureKind.Product), id => id);
+                var allKeys = cultureIds.Keys.ToArray();
+
+                var cultures = await _db.FeatureCultures.AsNoTracking()
+                    .Where(c => c.CoreOrganizationId == orgId && allKeys.Contains(c.Key) && c.Culture == rq.Culture)
+                    .Select(c => new { c.Key, c.Title, c.Description })
+                    .ToArrayAsync(cancellationToken);
+
+                foreach (var c in cultures)
+                {
+                    if (cultureIds.TryGetValue(c.Key, out var productId))
+                    {
+                        var p = products.FirstOrDefault(p => p.Id == productId);
+                        if (p == null) continue;
+
+                        p.Name = c.Title;
+                        p.Description = c.Description;
+                    }
+                }
+            }
+
+            // Customer prices
+            if (rq.CustomerId.HasValue)
+            {
+                var cps = await _db.PersonProducts.AsNoTracking()
+                    .Where(cp => cp.PersonId == rq.CustomerId.Value
+                        && productIds.Contains(cp.ProductId))
+                    .Select(cp => new { cp.ProductId, cp.AssignedId, cp.JsonData })
+                    .ToArrayAsync(cancellationToken);
+
+                foreach (var cp in cps)
+                {
+                    var p = products.FirstOrDefault(p => p.Id == cp.ProductId);
+                    if (p == null) continue;
+
+                    p.CustomerAssignedId = cp.AssignedId;
+
+                    if (cp.JsonData != null)
+                    {
+                        if (cp.JsonData.Cultures != null)
+                        {
+                            var ci = rq.Culture ?? await _commonService.GetDefaultCulture(orgId, cancellationToken);
+                            var culture = cp.JsonData.Cultures.FirstOrDefault(c => c.Culture == ci);
+                            if (culture != null)
+                            {
+                                p.CustomerName = culture.Name;
+                                p.CustomerDescription = culture.Description;
+                            }
+                        }
+
+                        if (cp.JsonData.Prices != null)
+                        {
+                            var price = cp.JsonData.Prices.FirstOrDefault(p => p.Currency == rq.Currency);
+                            if (price != null)
+                            {
+                                p.CustomerRetailPrice = price.RetailPrice;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return products;
+        }
+
         /// <summary>
         /// Query product unit
         /// 查询产品单位
@@ -440,7 +638,7 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.AssetQty)))
             {
                 var assetQty = rq.AssetQty;
-                if (assetQty.HasValue && assetQty.Value < 1) assetQty = null;
+                if (assetQty.HasValue && assetQty.Value < 0) assetQty = null;
 
                 product.AssetQty = assetQty;
             }
@@ -506,7 +704,16 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Categories)))
             {
-                product.CategoryIds = rq.Categories?.ToList();
+                // Categories
+                var categoryIds = rq.Categories;
+                var (result, ids) = await _commonService.ValidateCategoriesAsync(categoryIds, orgId, cancellationToken);
+                if (!result.Ok)
+                {
+                    return result;
+                }
+
+                product.CategoryIds = categoryIds?.ToList();
+                product.CategoryIdsAll = ids?.ToList();
             }
 
             if (rq.IsModified(nameof(rq.Tags)))
@@ -704,6 +911,74 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Read custom data
+        /// 读取自定义数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<ProductReadCustomData?> ReadCustomAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var product = await _db.Products(orgId).AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    p.Name,
+                    p.Description,
+                    p.AssignedId,
+                    Prices = p.Prices.Select(pp => new ProductSimplePriceItem
+                    {
+                        Currency = pp.Currency,
+                        RetailPrice = pp.RetailPrice
+                    }).ToList()
+                }).FirstOrDefaultAsync(cancellationToken);
+
+            if (product == null)
+            {
+                return null;
+            }
+
+            var defaultCulture = await _commonService.GetDefaultCulture(orgId, cancellationToken) ?? App.Configuration.Cultures.First();
+            var key = _commonService.GetCultureKey(id, CustomCultureKind.Product);
+
+            var cultures = await _db.FeatureCultures.AsNoTracking()
+                .Where(c => c.CoreOrganizationId == orgId && c.Key == key)
+                .Select(c => new ProductCustomData
+                {
+                    Culture = c.Culture,
+                    Name = c.Title,
+                    Description = c.Description
+                })
+                .ToListAsync(cancellationToken);
+
+            if (!cultures.Any(c => c.Culture == defaultCulture))
+            {
+                cultures.Add(new ProductCustomData
+                {
+                    Culture = defaultCulture,
+                    Name = product.Name,
+                    Description = product.Description
+                });
+            }
+
+            return new ProductReadCustomData
+            {
+                Id = id,
+                AssignedId = product.AssignedId,
+                Cultures = cultures,
+                Prices = product.Prices
+            };
+        }
+
+        /// <summary>
         /// Read price
         /// 读取价格
         /// </summary>
@@ -806,6 +1081,11 @@ namespace CRM.Server.Services
             if (!new CurrencyAttribute().IsValid(item.Currency))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(item.Currency));
+            }
+
+            if (!item.Validate())
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(item));
             }
 
             // Permission check

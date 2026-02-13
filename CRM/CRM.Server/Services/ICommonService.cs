@@ -1,5 +1,6 @@
 ﻿
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.Utils.Actions;
 using CRM.Server.Dto;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.System;
@@ -13,6 +14,7 @@ namespace CRM.Server.Services
         Task AddProfileAsync(PersonProfileAction action, CancellationToken cancellationToken = default);
         Task<int[]> AddTagsAsync(FeatureTagKind kind, IEnumerable<string> tags, CancellationToken cancellationToken = default);
         string GetCultureKey(long id, CustomCultureKind kind);
+        Task<string?> GetDefaultCulture(int orgId, CancellationToken cancellationToken = default);
         Task<string?> GetDefaultCurrency(int orgId, CancellationToken cancellationToken = default);
         Task<(IdentityTypeFlags, bool)> GetPersonIdentityTypeAsync(CancellationToken cancellationToken = default);
         Task<(IdentityTypeFlags, bool)> GetProfileIdentityTypeAsync(CancellationToken cancellationToken = default);
@@ -22,5 +24,6 @@ namespace CRM.Server.Services
         Task<bool[]> HasPermissionsAsync(IEnumerable<short> permissionItemIds, CancellationToken cancellationToken = default);
         Task<int> ReadTagIdAsync(string tag, int orgId, CancellationToken cancellationToken = default);
         ValueTask UpdateTagAsync(IQueryTag tag, int orgId, CancellationToken cancellationToken = default);
+        ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidateCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default);
     }
 }

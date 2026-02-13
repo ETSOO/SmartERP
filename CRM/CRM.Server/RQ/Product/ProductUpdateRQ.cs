@@ -159,6 +159,11 @@ namespace CRM.Server.RQ.Product
                 return ApplicationErrors.NoValidData.AsResult(nameof(CapQty));
             }
 
+            if (Price != null && !Price.Validate())
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Price));
+            }
+
             if (QueryKeyword != null && QueryKeyword.Length is not (>= 1 and <= 30))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(QueryKeyword));

@@ -13,25 +13,28 @@ namespace PlatformShared.Database.Models.Configurations
 
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.Name)
-                .HasMaxLength(256)
-                .HasColumnName("name");
-            entity.Property(e => e.Description)
-                .HasMaxLength(2560)
-                .HasColumnName("description");
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)
                 .HasColumnName("assigned_id");
-            entity.Property(e => e.Currency)
-                .HasMaxLength(3)
-                .IsFixedLength()
-                .HasColumnName("currency");
-            entity.Property(e => e.RetailPrice)
-                .HasColumnType("money")
-                .HasColumnName("retail_price");
+            // Complex types (EF10+) and should not include 'HasColumnType("jsonb")'
+            entity.ComplexProperty(e => e.JsonData, j => j.ToJson("json_data"));
+            /*
+            // Owned entities
+            entity.OwnsOne(e => e.JsonData, j =>
+            {
+                j.ToJson("json_data").HasColumnType("jsonb");
+                j.OwnsMany(d => d.Cultures);
+                j.OwnsMany(d => d.Prices);
+            });
+            */
             entity.Property(e => e.UpdatedTime)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_time");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.PersonProducts)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_product_product_id_fkey");
         }
     }
 }

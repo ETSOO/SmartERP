@@ -231,6 +231,20 @@ const router = createDynamicRouter([
               return { Component: AllOrders.default };
             }
           },
+          {
+            path: "/home/order/add",
+            lazy: async () => {
+              const AddOrder = await import("./pages/home/order/AddOrder");
+              return { Component: AddOrder.default };
+            }
+          },
+          {
+            path: "/home/order/edit/:id",
+            lazy: async () => {
+              const EditOrder = await import("./pages/home/order/AddOrder");
+              return { Component: EditOrder.default };
+            }
+          },
 
           {
             path: "/home/report",
@@ -326,6 +340,30 @@ const router = createDynamicRouter([
               const SortCategories =
                 await import("./pages/home/product/SortProductCategories");
               return { Component: SortCategories.default };
+            }
+          },
+          {
+            path: "/home/product/personProduct",
+            lazy: async () => {
+              const PersonProducts =
+                await import("./pages/home/product/PersonProducts");
+              return { Component: PersonProducts.default };
+            }
+          },
+          {
+            path: "/home/product/personProduct/add",
+            lazy: async () => {
+              const AddPersonProduct =
+                await import("./pages/home/product/AddPersonProduct");
+              return { Component: AddPersonProduct.default };
+            }
+          },
+          {
+            path: "/home/product/personProduct/edit/:productId/:personId",
+            lazy: async () => {
+              const EditPersonProduct =
+                await import("./pages/home/product/AddPersonProduct");
+              return { Component: EditPersonProduct.default };
             }
           },
           {

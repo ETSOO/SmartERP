@@ -44,7 +44,7 @@ export default function ProductLogo() {
             const blob = await toBlob(canvas, type, 1);
 
             const formData = new FormData();
-            formData.append("file", blob, "logo.png");
+            formData.append("file", blob);
 
             // Upload the file
             const result = await app.core.orgApi.uploadFiles(

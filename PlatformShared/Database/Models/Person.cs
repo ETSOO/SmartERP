@@ -512,6 +512,12 @@ namespace PlatformShared.Database.Models
         public List<int>? CategoryIds { get; set; }
 
         /// <summary>
+        /// Category ids, including all parent categories
+        /// 所属类目编号数组，包括所有父类目
+        /// </summary>
+        public List<int>? CategoryIdsAll { get; set; }
+
+        /// <summary>
         /// Tags (id)
         /// 标签（编号）
         /// </summary>

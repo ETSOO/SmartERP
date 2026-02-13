@@ -1,5 +1,7 @@
-﻿using com.etsoo.CoreFramework.Business;
+﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
+using com.etsoo.Utils.Actions;
 using CRM.Server.Dto;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.System;
@@ -178,8 +180,8 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Get default currency
-        /// 获得默认货币
+        /// Get organization's default currency
+        /// 获得机构默认货币
         /// </summary>
         /// <param name="orgId">Organization id</param>
         /// <param name="cancellationToken">Cancellation token</param>
@@ -190,6 +192,22 @@ namespace CRM.Server.Services
                 .AsNoTracking()
                 .Where(s => s.Id == orgId)
                 .Select(s => s.Currencies.FirstOrDefault())
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Get organization's default culture
+        /// 获得机构默认文化
+        /// </summary>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<string?> GetDefaultCulture(int orgId, CancellationToken cancellationToken = default)
+        {
+            return _db.SettingCrms
+                .AsNoTracking()
+                .Where(s => s.Id == orgId)
+                .Select(s => s.Cultures.FirstOrDefault())
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
@@ -376,6 +394,37 @@ namespace CRM.Server.Services
             {
                 tag.TagId = await ReadTagIdAsync(tag.Tag, orgId, cancellationToken);
             }
+        }
+
+        /// <summary>
+        /// Validate categories
+        /// 验证类目
+        /// </summary>
+        /// <param name="ids">Ids</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidateCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return (ActionResult.Success, null);
+            }
+
+            var items = await _db.ProductCategories(orgId)
+                .AsNoTracking()
+                .Where(c => ids.Contains(c.Id))
+                .Select(c => new { c.Id, c.ParentIds })
+                .ToArrayAsync(cancellationToken);
+
+            if (items.Length != ids.Count())
+            {
+                return (ApplicationErrors.NoId.AsResult(), null);
+            }
+
+            var allIds = items.SelectMany(i => i.ParentIds == null ? [i.Id] : new[] { i.Id }.Concat(i.ParentIds)).Distinct();
+
+            return (ActionResult.Success, allIds);
         }
     }
 }

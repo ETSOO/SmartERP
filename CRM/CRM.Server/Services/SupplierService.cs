@@ -58,6 +58,14 @@ namespace CRM.Server.Services
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
+            // Categories
+            var categoryIds = rq.Categories;
+            var (result, ids) = await _commonService.ValidateCategoriesAsync(categoryIds, orgId, cancellationToken);
+            if (!result.Ok)
+            {
+                return result;
+            }
+
             // Organization scope duplicate check
             var duplicateItems = new List<(PersonInfoKind, string)>();
 
@@ -152,7 +160,8 @@ namespace CRM.Server.Services
                 Description = rq.Description,
                 Birthday = rq.Birthday,
                 Status = rq.Status ?? EntityStatus.Normal,
-                CategoryIds = rq.Categories?.ToList(),
+                CategoryIds = categoryIds?.ToList(),
+                CategoryIdsAll = ids?.ToList(),
 
                 Infos = [.. duplicateItems.Select(d => new PersonInfo
                     {
@@ -204,9 +213,7 @@ namespace CRM.Server.Services
 
                     if (rq.CategoryIdAll.HasValue)
                     {
-                        q = q.Where(p => p.CategoryIds != null && _db.PersonCategories.Any(c => p.CategoryIds.Contains(c.Id)
-                            && c.ParentIds != null && c.ParentIds.Contains(rq.CategoryIdAll.Value))
-                        );
+                        q = q.Where(p => p.CategoryIdsAll != null && p.CategoryIdsAll.Contains(rq.CategoryIdAll.Value));
                     }
                     else if (rq.CategoryId.HasValue)
                     {
@@ -375,7 +382,16 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Categories)))
             {
-                supplier.CategoryIds = rq.Categories?.ToList();
+                // Categories
+                var categoryIds = rq.Categories;
+                var (result, ids) = await _commonService.ValidateCategoriesAsync(categoryIds, orgId, cancellationToken);
+                if (!result.Ok)
+                {
+                    return result;
+                }
+
+                supplier.CategoryIds = categoryIds?.ToList();
+                supplier.CategoryIdsAll = ids?.ToList();
             }
 
             if (rq.IsModified(nameof(rq.Pin)))

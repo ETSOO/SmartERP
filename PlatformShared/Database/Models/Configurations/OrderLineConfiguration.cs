@@ -48,8 +48,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("discount");
             entity.OwnsMany(e => e.Promotions,
                 p => p.ToJson("promotions")
-                    .HasColumnType("jsonb")
-                    .Property(p => p.Code).HasConversion<PromotionCodeConverter>());
+                    .HasColumnType("jsonb"));
             entity.Property(e => e.StartTime).HasColumnName("start_time");
             entity.Property(e => e.EndTime).HasColumnName("end_time");
             entity.Property(e => e.Data)

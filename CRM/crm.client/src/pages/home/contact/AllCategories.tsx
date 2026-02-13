@@ -64,8 +64,7 @@ export default function AllCategories() {
     "mergeCategoryDelete",
     "mergeTo",
     "parentCategory",
-    "sortCategory",
-    "view"
+    "sortCategory"
   );
 
   // Refs

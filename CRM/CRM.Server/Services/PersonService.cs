@@ -97,7 +97,7 @@ namespace CRM.Server.Services
                         if (value == IdentityTypeFlags.None)
                             q = q.Where(p => p.IdentityType == IdentityTypeFlags.None);
                         else
-                            q = q.Where(p => (p.IdentityType & value) == value);
+                            q = q.Where(p => (p.IdentityType & value) > 0);
                     }
                     else if (!all)
                     {
@@ -109,7 +109,11 @@ namespace CRM.Server.Services
                         q = q.Where(p => p.Tags != null && p.Tags.Contains(rq.TagId.Value));
                     }
 
-                    if (rq.CategoryId.HasValue)
+                    if (rq.CategoryIdAll.HasValue)
+                    {
+                        q = q.Where(p => p.CategoryIdsAll != null && p.CategoryIdsAll.Contains(rq.CategoryIdAll.Value));
+                    }
+                    else if (rq.CategoryId.HasValue)
                     {
                         q = q.Where(p => p.CategoryIds != null && p.CategoryIds.Contains(rq.CategoryId.Value));
                     }
@@ -649,7 +653,14 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Categories)))
             {
+                var (result, ids) = await _commonService.ValidateCategoriesAsync(rq.Categories, orgId, cancellationToken);
+                if (!result.Ok)
+                {
+                    return result;
+                }
+
                 person.CategoryIds = rq.Categories?.ToList();
+                person.CategoryIdsAll = ids?.ToList();
             }
 
             if (rq.IsModified(nameof(rq.Tags)))

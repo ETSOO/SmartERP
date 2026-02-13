@@ -22,6 +22,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .IsRequired()
                 .HasColumnName("name");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
+            entity.Property(e => e.CategoryIdsAll).HasColumnName("category_ids_all");
             entity.Property(e => e.Description)
                 .HasMaxLength(2560)
                 .HasColumnName("description");

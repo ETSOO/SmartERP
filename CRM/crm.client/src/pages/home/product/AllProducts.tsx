@@ -12,6 +12,7 @@ import CelebrationIcon from "@mui/icons-material/Celebration";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import FlagIcon from "@mui/icons-material/Flag";
+import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -56,6 +57,7 @@ export default function AllDepts() {
     "confirmAction",
     "edit",
     "entityStatus",
+    "personProducts",
     "productName",
     "productUnit",
     "productUnits",
@@ -107,6 +109,16 @@ export default function AllDepts() {
                   {labels.productUnits}
                 </ButtonLink>
               </React.Fragment>
+            )}
+            {app.owns(Permissions.Product.Manage) && (
+              <Fab
+                title={labels.personProducts}
+                size="small"
+                color="secondary"
+                onClick={() => navigate("./personProduct")}
+              >
+                <PriceCheckIcon />
+              </Fab>
             )}
             {app.owns(Permissions.Product.Add) && (
               <Fab

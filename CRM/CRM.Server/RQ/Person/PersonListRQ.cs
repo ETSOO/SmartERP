@@ -39,6 +39,12 @@ namespace CRM.Server.RQ.Person
         public int? CategoryId { get; init; }
 
         /// <summary>
+        /// Category and all descendant category ids
+        /// 所属分类及所有下级子类编号
+        /// </summary>
+        public int? CategoryIdAll { get; init; }
+
+        /// <summary>
         /// Categories
         /// 所属多个分类
         /// </summary>

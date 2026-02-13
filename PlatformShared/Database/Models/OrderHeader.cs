@@ -226,6 +226,10 @@ namespace PlatformShared.Database.Models
         /// </summary>
         public string? PaymentInstruction { get; set; }
 
+        /// <summary>
+        /// Delivery way
+        /// 发货方式
+        /// </summary>
         public short? DeliveryId { get; set; }
 
         /// <summary>

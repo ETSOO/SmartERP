@@ -1,7 +1,6 @@
 ---
-agent: 'ask'
-applyTo: '**/*.cs'
-description: 'Generate TS type from c# declaration'
+agent: "ask"
+description: "Generate TS type from c# declaration"
 ---
 
 ## Task
@@ -11,6 +10,7 @@ description: 'Generate TS type from c# declaration'
 ## Guidelines
 
 - Follow TypeScript naming policy.
+- No necessary to add 'null' type in TS for nullable types.
 - Keep the exact name of reference type, no necessary to generate it.
 - Change type name 'QueryIntRQ', 'QueryLongRQ' to 'QueryRQ'.
 - Keep all current comments, don't add your comments.

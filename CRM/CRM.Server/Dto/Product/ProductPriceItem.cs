@@ -1,23 +1,14 @@
-﻿namespace CRM.Server.Dto.Product
+﻿using com.etsoo.WebUtils.Attributes;
+using PlatformShared.Dto;
+
+namespace CRM.Server.Dto.Product
 {
     /// <summary>
     /// Product price item
     /// 产品价格项
     /// </summary>
-    public record ProductPriceItem
+    public record ProductPriceItem : ProductSimplePriceItem
     {
-        /// <summary>
-        /// Currency
-        /// 币种
-        /// </summary>
-        public required string Currency { get; init; }
-
-        /// <summary>
-        /// Retail price
-        /// 零售价
-        /// </summary>
-        public required decimal RetailPrice { get; init; }
-
         /// <summary>
         /// Promotion price
         /// 促销价
@@ -35,5 +26,29 @@
         /// 成本价
         /// </summary>
         public decimal? CostPrice { get; init; }
+
+        /// <summary>
+        /// Validate
+        /// 验证
+        /// </summary>
+        /// <returns>Result</returns>
+        public override bool Validate()
+        {
+            if (!base.Validate()
+                || PromotionPrice < 0
+                || ChannelPrice < 0
+                || CostPrice < 0
+                || PromotionPrice > RetailPrice
+                || ChannelPrice > RetailPrice
+                || CostPrice > RetailPrice
+            )
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 }

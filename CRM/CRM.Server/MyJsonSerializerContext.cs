@@ -7,6 +7,7 @@ using CRM.Server.Dto.Person;
 using CRM.Server.Dto.PersonAddress;
 using CRM.Server.Dto.PersonCategory;
 using CRM.Server.Dto.PersonContact;
+using CRM.Server.Dto.PersonProduct;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.PO;
 using CRM.Server.Dto.Product;
@@ -26,6 +27,7 @@ using CRM.Server.RQ.PersonAddress;
 using CRM.Server.RQ.PersonCategory;
 using CRM.Server.RQ.PersonContact;
 using CRM.Server.RQ.PersonInfo;
+using CRM.Server.RQ.PersonProduct;
 using CRM.Server.RQ.PersonProfile;
 using CRM.Server.RQ.PO;
 using CRM.Server.RQ.Product;
@@ -136,6 +138,14 @@ namespace CRM.Server
     [JsonSerializable(typeof(PersonInfoQueryRQ))]
     [JsonSerializable(typeof(PersonInfoUpdateRQ))]
 
+    // Person product
+    [JsonSerializable(typeof(PersonProductQueryData[]))]
+    [JsonSerializable(typeof(PersonProductUpdateReadData))]
+
+    [JsonSerializable(typeof(PersonProductCreateRQ))]
+    [JsonSerializable(typeof(PersonProductQueryRQ))]
+    [JsonSerializable(typeof(PersonProductUpdateRQ))]
+
     // Person profile
     [JsonSerializable(typeof(PersonProfileInnerViewData))]
     [JsonSerializable(typeof(PersonProfileListData[]))]
@@ -161,9 +171,11 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProductDuplicateTestData[]))]
     [JsonSerializable(typeof(ProductListData[]))]
     [JsonSerializable(typeof(ProductQueryData[]))]
+    [JsonSerializable(typeof(ProductReadCustomData))]
     [JsonSerializable(typeof(ProductUnitItem[]))]
     [JsonSerializable(typeof(ProductUpdateReadData))]
     [JsonSerializable(typeof(ProductViewData))]
+    [JsonSerializable(typeof(QueryForSaleData[]))]
 
     [JsonSerializable(typeof(ProductCreateRQ))]
     [JsonSerializable(typeof(ProductDuplicateTestRQ))]
@@ -171,6 +183,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProductUnitUpdateRQ))]
     [JsonSerializable(typeof(ProductUpdateLogoRQ))]
     [JsonSerializable(typeof(ProductUpdateRQ))]
+    [JsonSerializable(typeof(QueryForSaleRQ))]
 
     // Product category
     [JsonSerializable(typeof(ProductCategoryDuplicateTestData[]))]

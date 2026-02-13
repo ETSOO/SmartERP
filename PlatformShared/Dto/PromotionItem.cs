@@ -22,7 +22,7 @@
         /// Promotion code
         /// 促销码
         /// </summary>
-        public PromotionCode Code { get; set; } = default!;
+        public short Code { get; set; } = default!;
 
         /// <summary>
         /// Minimum spending amount

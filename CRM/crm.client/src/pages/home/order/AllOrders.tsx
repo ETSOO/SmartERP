@@ -5,6 +5,7 @@ import {
   IconButtonLink,
   MobileListItemRenderer
 } from "@etsoo/materialui";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
@@ -22,6 +23,7 @@ import { DataTypes } from "@etsoo/shared";
 import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Fab from "@mui/material/Fab";
 
 const template = {
   name: "string",
@@ -35,6 +37,7 @@ export default function AllDepts() {
   // Labels
   const labels = app.getLabels(
     "actions",
+    "add",
     "assignedId",
     "confirmAction",
     "creation",
@@ -64,7 +67,18 @@ export default function AllDepts() {
     <ResponsivePage<PersonQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: <React.Fragment></React.Fragment>
+        fabButtons: (
+          <React.Fragment>
+            <Fab
+              title={labels.add}
+              size="medium"
+              color="primary"
+              onClick={() => navigate("./add")}
+            >
+              <AddIcon />
+            </Fab>
+          </React.Fragment>
+        )
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}

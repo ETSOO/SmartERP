@@ -13,8 +13,8 @@
         public IEnumerable<int>? ProductIds { get; set; }
 
         /// <summary>
-        /// Related product category ids
-        /// 关联的产品类目编号
+        /// Related exact product category ids
+        /// 关联的精确产品类目编号
         /// </summary>
         public IEnumerable<int>? ProductCategoryIds { get; set; }
 
@@ -25,8 +25,8 @@
         public IEnumerable<long>? PersonIds { get; set; }
 
         /// <summary>
-        /// Related person category ids
-        /// 关联的人员类目编号
+        /// Related exact person category ids
+        /// 关联的精确人员类目编号
         /// </summary>
         public IEnumerable<int>? PersonCategoryIds { get; set; }
 

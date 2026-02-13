@@ -39,6 +39,7 @@ namespace PlatformShared
     [JsonSerializable(typeof(LoginFailedMessageData))]
     [JsonSerializable(typeof(LoginSuccessMessageData))]
     [JsonSerializable(typeof(RenewAppMessageData))]
+    [JsonSerializable(typeof(PersonProductJsonData))]
     [JsonSerializable(typeof(SendAuthCodeEmailMessage))]
     [JsonSerializable(typeof(SwitchOrgMessageData))]
 

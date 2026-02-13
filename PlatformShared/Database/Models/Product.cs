@@ -108,6 +108,12 @@ namespace PlatformShared.Database.Models
         public List<int>? CategoryIds { get; set; }
 
         /// <summary>
+        /// Category ids, including all parent categories
+        /// 所属类目编号数组，包括所有父类目
+        /// </summary>
+        public List<int>? CategoryIdsAll { get; set; }
+
+        /// <summary>
         /// Description
         /// 描述
         /// </summary>
@@ -238,6 +244,12 @@ namespace PlatformShared.Database.Models
         /// 资产
         /// </summary>
         public ICollection<PersonAsset> Assets { get; set; } = default!;
+
+        /// <summary>
+        /// Person products
+        /// 人员个性化产品
+        /// </summary>
+        public ICollection<PersonProduct> PersonProducts { get; set; } = default!;
 
         /// <summary>
         /// Prices

@@ -28,11 +28,17 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IProductService service, ProductQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query product info / 查询产品信息").WithTags("Product");
 
+            g.MapPost("QueryForSale", (IProductService service, QueryForSaleRQ rq, CancellationToken cancellationToken) => service.QueryForSaleAsync(rq, cancellationToken))
+                .WithDescription("Query product for sale / 查询产品用于销售").WithTags("Product");
+
             g.MapGet("QueryUnit", (IProductService service,  CancellationToken cancellationToken) => service.QueryUnitAsync(cancellationToken))
                 .WithDescription("Query product unit / 查询产品单位").WithTags("Product");
 
             g.MapGet("Read/{id:int}", (IProductService service, int id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
                 .WithDescription("Get product detail / 获取产品详情").WithTags("Product");
+
+            g.MapGet("ReadCustom/{id:int}", (IProductService service, int id, CancellationToken cancellationToken) => service.ReadCustomAsync(id, cancellationToken))
+                .WithDescription("Get product custom data / 获取产品自定义数据").WithTags("Product");
 
             g.MapGet("ReadPrice/{id:int}/{currency}", (IProductService service, int id, string currency, CancellationToken cancellationToken) => service.ReadPriceAsync(id, currency, cancellationToken))
                 .WithDescription("Get product price / 获取产品价格").WithTags("Product");

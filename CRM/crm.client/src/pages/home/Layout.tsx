@@ -83,6 +83,7 @@ export default function Home() {
     "orders",
     "org",
     "permissionGroups",
+    "personProducts",
     "productUnits",
     "promotions",
     "purchases",
@@ -201,11 +202,7 @@ export default function Home() {
           }
         ]
       },
-      app.owns(Permissions.Order.Query) && {
-        segment: "home/order",
-        title: labels.orders,
-        icon: <ShoppingCartIcon />
-      },
+
       app.owns(Permissions.Customer.Query) && {
         segment: "home/customer",
         title: labels.customers,
@@ -299,6 +296,24 @@ export default function Home() {
             ]
           },
           {
+            segment: "personProduct",
+            title: labels.personProducts,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:productId/:personId",
+                title: labels.edit,
+                hidden: true
+              }
+            ]
+          },
+          {
             segment: "promotion",
             title: labels.promotions,
             hidden: true,
@@ -318,11 +333,38 @@ export default function Home() {
           }
         ]
       },
+
+      app.owns(Permissions.Order.Query) && {
+        segment: "home/order",
+        title: labels.orders,
+        icon: <ShoppingCartIcon />,
+        children: [
+          {
+            segment: "add",
+            title: labels.add,
+            hidden: true
+          },
+          {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
+            hidden: true
+          },
+          {
+            segment: "view",
+            pattern: "view/:id",
+            title: labels.view,
+            hidden: true
+          }
+        ]
+      },
+
       app.owns(Permissions.PO.Query) && {
         segment: "home/po",
         title: labels.purchases,
         icon: <InventoryIcon />
       },
+
       app.owns(Permissions.Supplier.Query) && {
         segment: "home/supplier",
         title: labels.suppliers,

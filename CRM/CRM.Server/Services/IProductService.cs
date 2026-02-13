@@ -12,8 +12,10 @@ namespace CRM.Server.Services
         ValueTask<ProductDuplicateTestData[]?> DuplicateTestAsync(ProductDuplicateTestRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(ProductListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<ProductQueryData[]> QueryAsync(ProductQueryRQ rq, CancellationToken cancellationToken = default);
+        Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, CancellationToken cancellationToken = default);
         Task<ProductUnitItem[]> QueryUnitAsync(CancellationToken cancellationToken = default);
         Task<ProductViewData?> ReadAsync(int id, CancellationToken cancellationToken = default);
+        Task<ProductReadCustomData?> ReadCustomAsync(int id, CancellationToken cancellationToken = default);
         Task<ProductPriceItem?> ReadPriceAsync(int id, string currency, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(ProductUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateLogoAsync(ProductUpdateLogoRQ rq, CancellationToken cancellationToken = default);
