@@ -1,10 +1,13 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Json;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using com.etsoo.Utils.String;
 using CRM.Server.Dto.Product;
 using PlatformShared.Database.Models;
+using System.Text.Json;
 
 namespace CRM.Server.RQ.Product
 {
@@ -123,6 +126,18 @@ namespace CRM.Server.RQ.Product
         public EntityStatus? Status { get; init; }
 
         /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public string? Data { get; init; }
+
+        /// <summary>
+        /// Modifiers
+        /// 定制选项
+        /// </summary>
+        public string? Modifiers { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -177,6 +192,16 @@ namespace CRM.Server.RQ.Product
             if (Tags != null && Tags.Any(t => t.Length is < 1 or > 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Tags));
+            }
+
+            if (Data != null && !Data.IsJson())
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Data));
+            }
+
+            if (Modifiers != null && !CustomFieldSchema.Create().Evaluate(JsonElement.Parse(Modifiers)).IsValid)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Modifiers));
             }
 
             return null;

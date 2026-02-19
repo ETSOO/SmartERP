@@ -98,6 +98,7 @@ namespace CRM.Server.Services
                 Names = names,
                 AssignedId = rq.AssignedId?.ToUpper(),
                 Data = rq.Data,
+                Attributes = rq.Attributes,
                 OrderIndex = rq.OrderIndex ?? 0,
             };
 
@@ -266,7 +267,7 @@ namespace CRM.Server.Services
                 WHERE t."id" = d."id" AND t."id" <> {source.Id};
 
                 UPDATE "person"
-                    SET "category_ids" = array_replace("category_ids", {source.Id}, {target.Id})
+                    SET "parent_ids" = array_replace("parent_ids", {source.Id}, {target.Id})
                 WHERE "org_id" = {orgId};
             """, cancellationToken);
 
@@ -419,6 +420,11 @@ namespace CRM.Server.Services
                 category.Data = rq.Data;
             }
 
+            if (rq.IsModified(nameof(rq.Attributes)))
+            {
+                category.Attributes = rq.Attributes;
+            }
+
             // Dynamic SQL update
             // Update all descendants' names and parent_ids
             if (!originalNames.SequenceEqual(category.Names))
@@ -434,7 +440,7 @@ namespace CRM.Server.Services
                     )
                     UPDATE "product_category" t
                         SET "names" = {category.Names} || "names"[{nextItems}:],
-                            "category_ids" = {category.ParentIds} || "category_ids"[{nextItems}:]
+                            "parent_ids" = {category.ParentIds} || "parent_ids"[{nextItems}:]
                     FROM descendants d
                     WHERE t."id" = d."id" AND t."id" <> {rq.Id};
                 """, cancellationToken);
@@ -473,7 +479,8 @@ namespace CRM.Server.Services
                     ParentId = c.ParentId,
                     Names = c.Names,
                     AssignedId = c.AssignedId,
-                    Data = c.Data
+                    Data = c.Data,
+                    Attributes = c.Attributes
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }

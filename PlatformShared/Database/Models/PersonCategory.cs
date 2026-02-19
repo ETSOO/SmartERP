@@ -39,6 +39,12 @@ namespace PlatformShared.Database.Models
         public string? Data { get; set; }
 
         /// <summary>
+        /// Attributes definition
+        /// 属性定义
+        /// </summary>
+        public string? Attributes { get; set; }
+
+        /// <summary>
         /// Creation time
         /// 登记时间
         /// </summary>

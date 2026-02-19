@@ -1,8 +1,10 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Json;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using com.etsoo.Utils.String;
+using System.Text.Json;
 
 namespace CRM.Server.RQ.ProductCategory
 {
@@ -43,6 +45,12 @@ namespace CRM.Server.RQ.ProductCategory
         public string? Data { get; init; }
 
         /// <summary>
+        /// Attributes definition
+        /// 属性定义
+        /// </summary>
+        public string? Attributes { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -62,6 +70,11 @@ namespace CRM.Server.RQ.ProductCategory
             if (Data != null && !Data.IsJson())
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Data));
+            }
+
+            if (Attributes != null && !CustomFieldSchema.Create().Evaluate(JsonElement.Parse(Attributes)).IsValid)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Attributes));
             }
 
             return null;

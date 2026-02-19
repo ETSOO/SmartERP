@@ -63,6 +63,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
                 .HasColumnName("data");
+            entity.Property(e => e.Modifiers)
+                .HasColumnType("jsonb")
+                .HasColumnName("modifiers");
             entity.Property(e => e.QueryKeyword)
                 .HasMaxLength(30)
                 .HasColumnName("query_keyword");

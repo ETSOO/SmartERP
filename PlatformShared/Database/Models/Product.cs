@@ -204,6 +204,12 @@ namespace PlatformShared.Database.Models
         public string? Data { get; set; }
 
         /// <summary>
+        /// Modifiers
+        /// 定制选项
+        /// </summary>
+        public string? Modifiers { get; set; }
+
+        /// <summary>
         /// Query keyword
         /// 查询关键词
         /// </summary>

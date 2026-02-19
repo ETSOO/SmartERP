@@ -106,10 +106,17 @@ namespace CRM.Server.Dto.Product
         public decimal? PromotionPrice { get; init; }
 
         /// <summary>
+        /// Unit id
+        /// 单位编号
+        /// </summary>
+        [JsonIgnore]
+        public int UnitId { get; init; }
+
+        /// <summary>
         /// Unit name
         /// 单位名称
         /// </summary>
-        public required string UnitName { get; init; }
+        public required string UnitName { get; set; }
 
         /// <summary>
         /// Categories

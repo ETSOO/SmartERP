@@ -122,5 +122,17 @@ namespace CRM.Server.Dto.Product
         /// 状况
         /// </summary>
         public EntityStatus Status { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public string? Data { get; init; }
+
+        /// <summary>
+        /// Modifiers
+        /// 定制选项
+        /// </summary>
+        public string? Modifiers { get; init; }
     }
 }

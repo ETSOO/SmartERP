@@ -82,10 +82,12 @@ export default function AddPromotion() {
   // Type
   type DataType = PromotionCreateRQ;
 
+  const defaultCurrency = app.userData?.system?.currencies[0] ?? app.currency;
+
   // State
   const [data, setData] = React.useState<DataType>({
     code: 0,
-    currency: app.currency,
+    currency: defaultCurrency,
     title: "",
     minAmount: 0,
     discount: 0,

@@ -152,7 +152,9 @@ namespace CRM.Server.Services
                 InventoryWay = rq.InventoryWay ?? ProductInventoryWay.None,
                 QueryKeyword = queryKeyword,
                 TaxRate = rq.TaxRate,
-                IntroductionUrl = rq.IntroductionUrl
+                IntroductionUrl = rq.IntroductionUrl,
+                Data = rq.Data,
+                Modifiers = rq.Modifiers
             };
 
             if (rq.Tags?.Any() is true)
@@ -425,6 +427,7 @@ namespace CRM.Server.Services
                     Currency = pp.Currency,
                     RetailPrice = pp.RetailPrice,
                     PromotionPrice = pp.PromotionPrice,
+                    UnitId = p.UnitId,
                     UnitName = p.Unit.Name,
                     CategoryIds = p.CategoryIds,
                     CategoryIdsAll = p.CategoryIdsAll
@@ -466,6 +469,96 @@ namespace CRM.Server.Services
                 })
                 .ToArrayAsync(cancellationToken);
 
+            // Translations
+            if (!string.IsNullOrEmpty(rq.Culture))
+            {
+                var cultureIds = productIds.Select(id => _commonService.GetCultureKey(id, CustomCultureKind.Product));
+                var categoryIds = allCategoryIds.Select(id => _commonService.GetCultureKey(id, CustomCultureKind.ProductCategory));
+                var unitIds = products.Select(p => p.UnitId).Distinct().Select(id => _commonService.GetCultureKey(id, CustomCultureKind.ProductUnit));
+                var promotionIds = promotions.Select(pr => pr.Promotion.Id).Select(id => _commonService.GetCultureKey(id, CustomCultureKind.Promotion));
+
+                string[] allKeys = [..cultureIds, ..categoryIds, ..unitIds, .. promotionIds];
+
+                var cultures = await _db.FeatureCultures.AsNoTracking()
+                    .Where(c => c.CoreOrganizationId == orgId && allKeys.Contains(c.Key) && c.Culture == rq.Culture)
+                    .Select(c => new { c.Key, c.Title, c.Description })
+                    .ToArrayAsync(cancellationToken);
+
+                var cultureItems = cultures.Where(c => cultureIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+                var categoryItems = cultures.Where(c => categoryIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+                var unitItems = cultures.Where(c => unitIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+                var promotionItems = cultures.Where(c => promotionIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+
+                foreach (var p in products)
+                {
+                    if (cultureItems.Count > 0)
+                    {
+                        var idKey = _commonService.GetCultureKey(p.Id, CustomCultureKind.Product);
+                        if (cultureItems.TryGetValue(idKey, out var culture))
+                        {
+                            p.Name = culture.Title;
+                            if (!string.IsNullOrEmpty(culture.Description)) p.Description = culture.Description;
+                        }
+                    }
+
+                    if (unitItems.Count > 0)
+                    {
+                        var unitKey = _commonService.GetCultureKey(p.UnitId, CustomCultureKind.ProductUnit);
+                        if (unitItems.TryGetValue(unitKey, out var u))
+                        {
+                            p.UnitName = u.Title;
+                        }
+                    }
+                }
+
+                if (categoryItems.Count > 0)
+                {
+                    foreach (var category in categories)
+                    {
+                        var categoryKey = _commonService.GetCultureKey(category.Id, CustomCultureKind.ProductCategory);
+                        var names = category.Names.ToArray();
+                        if (categoryItems.TryGetValue(categoryKey, out var c))
+                        {
+                            // Update the last item
+                            if (names.Length > 0)
+                            {
+                                names[^1] = c.Title;
+                            }
+                        }
+
+                        if (category.ParentIds != null)
+                        {
+                            var index = 0;
+                            foreach (var parentId in category.ParentIds)
+                            {
+                                var parentKey = _commonService.GetCultureKey(parentId, CustomCultureKind.ProductCategory);
+                                if (categoryItems.TryGetValue(parentKey, out var pc))
+                                {
+                                    names[index] = pc.Title;
+                                }
+
+                                index++;
+                            }
+                        }
+
+                        // Update
+                        category.Names = names;
+                    }
+                }
+
+                if (promotionItems.Count > 0)
+                {
+                    foreach (var promotion in promotions)
+                    {
+                        var promotionKey = _commonService.GetCultureKey(promotion.Promotion.Id, CustomCultureKind.Promotion);
+                        if (promotionItems.TryGetValue(promotionKey, out var pr))
+                        {
+                            promotion.Promotion.Title = pr.Title;
+                        }
+                    }
+                }
+            }
+
             // Loop products
             foreach (var p in products)
             {
@@ -480,30 +573,6 @@ namespace CRM.Server.Services
                 p.Promotions = promotions
                     .Where(pr => (pr.ProductIds != null && pr.ProductIds.Contains(p.Id)) || (pr.ProductCategoryIds != null && p.CategoryIdsAll != null && pr.ProductCategoryIds.Intersect(p.CategoryIdsAll).Any()))
                     .Select(pr => pr.Promotion);
-            }
-
-            // Translations
-            if (!string.IsNullOrEmpty(rq.Culture))
-            {
-                var cultureIds = productIds.ToDictionary(id => _commonService.GetCultureKey(id, CustomCultureKind.Product), id => id);
-                var allKeys = cultureIds.Keys.ToArray();
-
-                var cultures = await _db.FeatureCultures.AsNoTracking()
-                    .Where(c => c.CoreOrganizationId == orgId && allKeys.Contains(c.Key) && c.Culture == rq.Culture)
-                    .Select(c => new { c.Key, c.Title, c.Description })
-                    .ToArrayAsync(cancellationToken);
-
-                foreach (var c in cultures)
-                {
-                    if (cultureIds.TryGetValue(c.Key, out var productId))
-                    {
-                        var p = products.FirstOrDefault(p => p.Id == productId);
-                        if (p == null) continue;
-
-                        p.Name = c.Title;
-                        p.Description = c.Description;
-                    }
-                }
             }
 
             // Customer prices
@@ -702,6 +771,16 @@ namespace CRM.Server.Services
                 product.Status = rq.Status.Value;
             }
 
+            if (rq.IsModified(nameof(rq.Data)))
+            {
+                product.Data = rq.Data;
+            }
+
+            if (rq.IsModified(nameof(rq.Modifiers)))
+            {
+                product.Modifiers = rq.Modifiers;
+            }
+
             if (rq.IsModified(nameof(rq.Categories)))
             {
                 // Categories
@@ -789,7 +868,9 @@ namespace CRM.Server.Services
                     IntroductionUrl = p.IntroductionUrl,
                     Categories = p.CategoryIds,
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
-                    Status = p.Status
+                    Status = p.Status,
+                    Data = p.Data,
+                    Modifiers = p.Modifiers
                 }).FirstOrDefaultAsync(cancellationToken);
         }
 

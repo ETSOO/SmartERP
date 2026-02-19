@@ -28,6 +28,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
                 .HasColumnName("data");
+            entity.Property(e => e.Attributes)
+                .HasColumnType("jsonb")
+                .HasColumnName("attributes");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
             entity.Property(e => e.ParentIds).HasColumnName("parent_ids");
             entity.Property(e => e.OrderIndex)

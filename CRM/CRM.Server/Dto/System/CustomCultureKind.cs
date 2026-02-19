@@ -28,6 +28,12 @@
         /// Person category
         /// 人员分类
         /// </summary>
-        PersonCategory = 9
+        PersonCategory = 9,
+
+        /// <summary>
+        /// Promotion
+        /// 促销
+        /// </summary>
+        Promotion = 19
     }
 }

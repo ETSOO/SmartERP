@@ -16,6 +16,6 @@
         /// Names
         /// 名称数组
         /// </summary>
-        public required IEnumerable<string> Names { get; init; }
+        public required IEnumerable<string> Names { get; set; }
     }
 }

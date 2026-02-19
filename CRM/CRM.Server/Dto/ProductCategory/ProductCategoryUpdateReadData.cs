@@ -49,5 +49,11 @@ namespace CRM.Server.Dto.ProductCategory
         /// JSON 数据
         /// </summary>
         public string? Data { get; init; }
+
+        /// <summary>
+        /// Attributes definition
+        /// 属性定义
+        /// </summary>
+        public string? Attributes { get; init; }
     }
 }
