@@ -1,9 +1,19 @@
-import { ComboBox, EditPage, InputField } from "@etsoo/materialui";
+import {
+  ComboBox,
+  CustomFieldUI,
+  EditPage,
+  InputField
+} from "@etsoo/materialui";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { DateUtils, Utils } from "@etsoo/shared";
-import { EntityStatus, UserRole } from "@etsoo/appscript";
+import {
+  CustomFieldData,
+  CustomFieldRef,
+  EntityStatus,
+  UserRole
+} from "@etsoo/appscript";
 import { useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
@@ -12,6 +22,7 @@ import { StatusList, UserTiplist } from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
 import { UserUpdateReadData, UserUpdateRQ } from "@etsoo/smarterp-crm";
 import { ButtonDepts, ButtonGroups } from "@etsoo/smarterp-crm/components";
+import Divider from "@mui/material/Divider";
 
 export default function EditUser() {
   // Route
@@ -43,6 +54,10 @@ export default function EditUser() {
     status: EntityStatus.Normal
   });
 
+  const [customFields, setCustomFields] = React.useState<CustomFieldData[]>([]);
+  const attributesRef =
+    React.useRef<CustomFieldRef<Record<string, unknown>>>(null);
+
   // Formik
   // https://formik.org/docs/examples/with-material-ui
   // https://firxworx.com/blog/coding/react/integrating-formik-with-react-material-ui-and-typescript/
@@ -52,7 +67,13 @@ export default function EditUser() {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       // Request data
-      const rq: UserUpdateRQ = { ...values };
+      const rq: UserUpdateRQ = structuredClone(values);
+
+      if (attributesRef.current) {
+        const attributes = attributesRef.current.getValue();
+        rq.data ??= {};
+        rq.data.attributes = attributes;
+      }
 
       // Changed fields
       const fields = Utils.getDataChanges(rq, data);
@@ -81,6 +102,12 @@ export default function EditUser() {
     const data = await app.userApi.updateRead(id);
     if (data == null) return;
     setData(data);
+
+    if (data.categories && data.categories.length > 0) {
+      const fields = await app.personCategoryApi.getAttributes(data.categories);
+      if (fields == null) return;
+      setCustomFields(fields);
+    }
   }, [id]);
 
   // Page data hook
@@ -170,6 +197,18 @@ export default function EditUser() {
           inputOnChange={formik.handleChange}
         />
       </Grid>
+      {customFields.length > 0 && (
+        <React.Fragment>
+          <Grid size={{ xs: 12, sm: 12 }}>
+            <Divider />
+          </Grid>
+          <CustomFieldUI
+            fields={customFields}
+            mref={attributesRef}
+            initialValue={data.data?.attributes as Record<string, unknown>}
+          />
+        </React.Fragment>
+      )}
     </EditPage>
   );
 }

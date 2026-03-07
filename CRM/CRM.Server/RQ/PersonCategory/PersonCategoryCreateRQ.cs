@@ -3,7 +3,6 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Json;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
-using com.etsoo.Utils.String;
 using System.Text.Json;
 
 namespace CRM.Server.RQ.PersonCategory
@@ -48,13 +47,13 @@ namespace CRM.Server.RQ.PersonCategory
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; init; }
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Attributes definition
         /// 属性定义
         /// </summary>
-        public string? Attributes { get; init; }
+        public JsonDocument? Attributes { get; init; }
 
         /// <summary>
         /// Validate the model
@@ -73,12 +72,7 @@ namespace CRM.Server.RQ.PersonCategory
                 return ApplicationErrors.NoValidData.AsResult(nameof(AssignedId));
             }
 
-            if (Data != null && !Data.IsJson())
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Data));
-            }
-
-            if (Attributes != null && !CustomFieldSchema.Create().Evaluate(JsonElement.Parse(Attributes)).IsValid)
+            if (Attributes != null && !CustomFieldSchema.Create().Evaluate(Attributes.RootElement).IsValid)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Attributes));
             }

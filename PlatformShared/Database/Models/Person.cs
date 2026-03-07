@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
+using System.Text.Json;
 
 namespace PlatformShared.Database.Models
 {
@@ -455,7 +456,7 @@ namespace PlatformShared.Database.Models
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; set; }
+        public JsonDocument? Data { get; set; }
 
         /// <summary>
         /// Creation time

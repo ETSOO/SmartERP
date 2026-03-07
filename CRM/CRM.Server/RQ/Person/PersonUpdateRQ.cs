@@ -7,6 +7,7 @@ using com.etsoo.Utils.String;
 using com.etsoo.WebUtils.Attributes;
 using CRM.Server.Dto.Person;
 using PlatformShared.Database.Models;
+using System.Text.Json;
 
 namespace CRM.Server.RQ.Person
 {
@@ -134,7 +135,7 @@ namespace CRM.Server.RQ.Person
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; init; }
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Expiry time
@@ -239,11 +240,6 @@ namespace CRM.Server.RQ.Person
             if (Tags != null && Tags.Any(t => t.Length is < 1 or > 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Tags));
-            }
-
-            if (Data != null && !Data.IsJson())
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Data));
             }
 
             return null;

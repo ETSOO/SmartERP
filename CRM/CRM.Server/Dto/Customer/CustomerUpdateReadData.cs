@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using CRM.Server.Dto.PersonInfo;
+using System.Text.Json;
 
 namespace CRM.Server.Dto.Customer
 {
@@ -74,5 +75,11 @@ namespace CRM.Server.Dto.Customer
         /// 状况
         /// </summary>
         public EntityStatus Status { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
     }
 }

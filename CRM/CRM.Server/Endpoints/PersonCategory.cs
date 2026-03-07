@@ -2,6 +2,7 @@
 using com.etsoo.WebUtils;
 using CRM.Server.RQ.PersonCategory;
 using CRM.Server.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.Server.Endpoints
 {
@@ -20,6 +21,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("DuplicateTest", (IPersonCategoryService service, PersonCategoryDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))
                 .WithDescription("Test for duplicate person category / 测试重复的人员分类").WithTags("PersonCategory");
+
+            g.MapPost("GetAttributes", (IPersonCategoryService service, int[] ids, CancellationToken cancellationToken) => service.GetAttributesAsync(ids, cancellationToken))
+                .WithDescription("Get person category attributes / 获取人员分类属性").WithTags("PersonCategory");
 
             g.MapPost("List", (IPersonCategoryService service, PersonCategoryListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get person category list / 获取人员分类列表").WithTags("PersonCategory");

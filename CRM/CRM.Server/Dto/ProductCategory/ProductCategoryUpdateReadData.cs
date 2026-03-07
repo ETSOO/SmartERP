@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using System.Text.Json;
 
 namespace CRM.Server.Dto.ProductCategory
 {
@@ -48,12 +49,12 @@ namespace CRM.Server.Dto.ProductCategory
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; init; }
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Attributes definition
         /// 属性定义
         /// </summary>
-        public string? Attributes { get; init; }
+        public JsonDocument? Attributes { get; init; }
     }
 }

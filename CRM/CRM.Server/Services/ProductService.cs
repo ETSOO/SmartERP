@@ -968,6 +968,7 @@ namespace CRM.Server.Services
                     Logo = p.Logo,
                     IntroductionUrl = p.IntroductionUrl,
                     Status = p.Status,
+                    Data = p.Data,
                     Creation = p.Creation,
                     Categories = _db.ProductCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds != null && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds!.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
                     Prices = p.Prices.Select(pp => new ProductPriceItem

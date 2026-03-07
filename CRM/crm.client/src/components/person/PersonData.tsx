@@ -1,5 +1,6 @@
 import {
   ButtonLink,
+  CustomFieldViewUI,
   HBox,
   IconButtonLink,
   VBox,
@@ -10,6 +11,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ApartmentIcon from "@mui/icons-material/Apartment";
+import ImageIcon from "@mui/icons-material/Image";
 import { PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
@@ -19,6 +21,8 @@ import React from "react";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import { CustomFieldData } from "@etsoo/appscript";
+import { DataTypes } from "@etsoo/shared";
 
 type PersonDataProps = {
   data: PersonViewData;
@@ -37,6 +41,8 @@ export function PersonData(props: PersonDataProps) {
 
   // Deletable
   const [deletable, setDeletable] = React.useState(false);
+
+  const [customFields, setCustomFields] = React.useState<CustomFieldData[]>([]);
 
   // Labels
   const labels = app.getLabels(
@@ -57,6 +63,15 @@ export function PersonData(props: PersonDataProps) {
   );
 
   React.useEffect(() => {
+    if (data.categories?.length && data.data?.attributes) {
+      app.personCategoryApi
+        .getAttributes(data.categories.map((c) => c.id))
+        .then((fields) => {
+          if (fields == null) return;
+          setCustomFields(fields);
+        });
+    }
+
     app.personApi
       .isDeletable(data.id, { showLoading: false, onError: () => {} })
       .then((result) => {
@@ -70,9 +85,9 @@ export function PersonData(props: PersonDataProps) {
     <ViewContainer
       data={data}
       leftContainerLines={3}
-      leftContainer={(item) => (
-        <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
-          {item.avatar && (
+      leftContainer={(item) =>
+        item.avatar ? (
+          <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
             <a href={item.avatar} target="_blank" rel="noopener noreferrer">
               <img
                 src={item.avatar}
@@ -80,19 +95,19 @@ export function PersonData(props: PersonDataProps) {
                 style={CoreUtils.avatarStyles(item.isLegalPerson)}
               />
             </a>
-          )}
-          {editable && (
-            <IconButtonLink
-              href={`./../../avatar/${item.id}`}
-              state={item.avatar}
-              title={labels.editAvatar}
-              size="small"
-            >
-              <EditIcon />
-            </IconButtonLink>
-          )}
-        </HBox>
-      )}
+            {editable && (
+              <IconButtonLink
+                href={`./../../avatar/${item.id}`}
+                state={item.avatar}
+                title={labels.editAvatar}
+                size="small"
+              >
+                <EditIcon />
+              </IconButtonLink>
+            )}
+          </HBox>
+        ) : undefined
+      }
       fields={[
         {
           data: (item) => app.person.getIdentityType(item),
@@ -174,8 +189,7 @@ export function PersonData(props: PersonDataProps) {
           data: (item) =>
             item.categories?.map((c) => c.names.join(" -> ")).join(", "),
           label: "categories",
-          singleRow: "medium",
-          horizontal: true
+          singleRow: "medium"
         },
         {
           data: "tags",
@@ -272,6 +286,16 @@ export function PersonData(props: PersonDataProps) {
                 )}
                 {editable && (
                   <ButtonLink
+                    startIcon={<ImageIcon />}
+                    variant="outlined"
+                    href={`./../../avatar/${item.id}`}
+                    state={item.avatar}
+                  >
+                    {labels.editAvatar}
+                  </ButtonLink>
+                )}
+                {editable && (
+                  <ButtonLink
                     startIcon={<EditIcon />}
                     variant="outlined"
                     href={`./../../edit/${item.id}`}
@@ -281,6 +305,17 @@ export function PersonData(props: PersonDataProps) {
                 )}
               </HBox>
             ),
+          singleRow: true
+        },
+        {
+          data: (item) =>
+            customFields.length > 0 ? (
+              <CustomFieldViewUI
+                fields={customFields}
+                data={item.data?.attributes as DataTypes.StringRecord}
+                refresh={refresh}
+              />
+            ) : undefined,
           singleRow: true
         },
         ...(data.privateData &&

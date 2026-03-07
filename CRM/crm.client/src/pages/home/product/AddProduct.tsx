@@ -1,6 +1,8 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import {
+  CustomAttributeArea,
+  CustomFieldUI,
   EditPage,
   InputField,
   MoneyInputField,
@@ -22,7 +24,12 @@ import {
   ProductUsage
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
-import { BusinessUtils, EntityStatus } from "@etsoo/appscript";
+import {
+  BusinessUtils,
+  CustomFieldData,
+  CustomFieldRef,
+  EntityStatus
+} from "@etsoo/appscript";
 import {
   ButtonProductCategories,
   ProductAssignedIdDuplicateTest,
@@ -32,6 +39,7 @@ import {
   ProductUnitList,
   ProductUsageList
 } from "@etsoo/smarterp-crm/components";
+import Divider from "@mui/material/Divider";
 
 export default function AddProduct() {
   // Route
@@ -53,6 +61,7 @@ export default function AddProduct() {
     "description",
     "introductionUrl",
     "minQty",
+    "modifiers",
     "noChanges",
     "productName",
     "promotionPrice",
@@ -87,6 +96,10 @@ export default function AddProduct() {
     }
   });
 
+  const [customFields, setCustomFields] = React.useState<CustomFieldData[]>([]);
+  const attributesRef =
+    React.useRef<CustomFieldRef<Record<string, unknown>>>(null);
+
   // Input refs
   const refFields = [
     "assetQty",
@@ -97,6 +110,7 @@ export default function AddProduct() {
     "description",
     "introductionUrl",
     "minQty",
+    "modifiers",
     "name",
     "queryKeyword",
     "promotionPrice",
@@ -119,6 +133,16 @@ export default function AddProduct() {
       if (c.isAsset && (c.assetQty == null || c.assetQty < 0)) {
         refs.assetQty.current?.focus();
         return;
+      }
+
+      if (!!c.modifiers && typeof c.modifiers === "string") {
+        c.modifiers = JSON.parse(c.modifiers);
+      }
+
+      if (attributesRef.current) {
+        const attributes = attributesRef.current.getValue();
+        c.data ??= {};
+        c.data.attributes = attributes;
       }
 
       // Submit
@@ -176,6 +200,14 @@ export default function AddProduct() {
 
     ReactUtils.updateRefs(refs, result);
     setData({ ...result, isAsset: result.assetQty != null });
+
+    if (result.categories && result.categories.length > 0) {
+      const attributes = await app.productCategoryApi.getAttributes(
+        result.categories
+      );
+      if (attributes == null) return;
+      setCustomFields(attributes);
+    }
   }, [id]);
 
   // Page data hook
@@ -329,7 +361,13 @@ export default function AddProduct() {
         <ButtonProductCategories
           fullWidth
           value={formik.values.categories ?? []}
-          onValueChange={(ids) => formik.setFieldValue("categories", ids)}
+          onValueChange={(ids) => {
+            formik.setFieldValue("categories", ids);
+            app.productCategoryApi.getAttributes(ids).then((result) => {
+              if (result == null) return;
+              setCustomFields(result);
+            });
+          }}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
@@ -362,6 +400,13 @@ export default function AddProduct() {
           inputRef={refs.description}
           multiline
           rows={2}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <CustomAttributeArea
+          label={labels.modifiers}
+          name="modifiers"
+          inputRef={refs.modifiers}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
@@ -407,6 +452,18 @@ export default function AddProduct() {
             helperText={labels.defaultTaxRate + `: ${defaultTaxRate}`}
           />
         </Grid>
+      )}
+      {customFields.length > 0 && (
+        <React.Fragment>
+          <Grid size={{ xs: 12, sm: 12 }}>
+            <Divider />
+          </Grid>
+          <CustomFieldUI
+            fields={customFields}
+            mref={attributesRef}
+            initialValue={data.data?.attributes as Record<string, unknown>}
+          />
+        </React.Fragment>
       )}
     </EditPage>
   );

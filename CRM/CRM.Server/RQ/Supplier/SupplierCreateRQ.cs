@@ -2,8 +2,10 @@
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using com.etsoo.Utils.String;
 using CRM.Server.RQ.PersonAddress;
 using PlatformShared.Database.Models;
+using System.Text.Json;
 
 namespace CRM.Server.RQ.Supplier
 {
@@ -108,6 +110,12 @@ namespace CRM.Server.RQ.Supplier
         /// 状况
         /// </summary>
         public EntityStatus? Status { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Validate the model

@@ -2,6 +2,7 @@
 using CRM.Server.Dto.System;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
+using System.Text.Json;
 
 namespace CRM.Server.Dto.Product
 {
@@ -112,6 +113,12 @@ namespace CRM.Server.Dto.Product
         /// 状况
         /// </summary>
         public EntityStatus Status { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Creation

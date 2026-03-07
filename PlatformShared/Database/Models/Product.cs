@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using System.Text.Json;
 
 namespace PlatformShared.Database.Models
 {
@@ -201,13 +202,13 @@ namespace PlatformShared.Database.Models
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; set; }
+        public JsonDocument? Data { get; set; }
 
         /// <summary>
         /// Modifiers
         /// 定制选项
         /// </summary>
-        public string? Modifiers { get; set; }
+        public JsonDocument? Modifiers { get; set; }
 
         /// <summary>
         /// Query keyword

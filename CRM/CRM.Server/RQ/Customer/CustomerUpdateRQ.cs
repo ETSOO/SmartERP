@@ -3,6 +3,8 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using com.etsoo.Utils.String;
+using System.Text.Json;
 
 namespace CRM.Server.RQ.Customer
 {
@@ -77,6 +79,12 @@ namespace CRM.Server.RQ.Customer
         /// 状况
         /// </summary>
         public EntityStatus? Status { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Validate the model

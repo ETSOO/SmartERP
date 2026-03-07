@@ -160,6 +160,7 @@ namespace CRM.Server.Services
                 Description = rq.Description,
                 Birthday = rq.Birthday,
                 Status = rq.Status ?? EntityStatus.Normal,
+                Data = rq.Data,
                 CategoryIds = categoryIds?.ToList(),
                 CategoryIdsAll = ids?.ToList(),
 
@@ -378,6 +379,11 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
             {
                 supplier.Status = rq.Status.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.Data)))
+            {
+                supplier.Data = rq.Data;
             }
 
             if (rq.IsModified(nameof(rq.Categories)))

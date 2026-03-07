@@ -2,6 +2,7 @@
 using com.etsoo.WebUtils;
 using CRM.Server.RQ.ProductCategory;
 using CRM.Server.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.Server.Endpoints
 {
@@ -20,6 +21,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("DuplicateTest", (IProductCategoryService service, ProductCategoryDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))
                 .WithDescription("Test for duplicate product category / 测试重复的产品分类").WithTags("ProductCategory");
+
+            g.MapPost("GetAttributes", (IProductCategoryService service, int[] ids, CancellationToken cancellationToken) => service.GetAttributesAsync(ids, cancellationToken))
+                .WithDescription("Get product category attributes / 获取产品分类属性").WithTags("ProductCategory");
 
             g.MapPost("List", (IProductCategoryService service, ProductCategoryListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get product category list / 获取产品分类列表").WithTags("ProductCategory");

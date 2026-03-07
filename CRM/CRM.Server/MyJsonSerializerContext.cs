@@ -38,6 +38,7 @@ using CRM.Server.RQ.System;
 using CRM.Server.RQ.Tag;
 using CRM.Server.RQ.User;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CRM.Server
@@ -239,6 +240,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(HttpValidationProblemDetails))]
     [JsonSerializable(typeof(IFormFile))]
     [JsonSerializable(typeof(ProblemDetails))]
+    [JsonSerializable(typeof(JsonDocument[]))]
 
     [JsonSerializable(typeof(com.etsoo.Utils.Actions.ActionResult))]
 

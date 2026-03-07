@@ -205,9 +205,28 @@ namespace CRM.Server.Services
                 user.Status = rq.Status.Value;
             }
 
+            if (rq.IsModified(nameof(rq.Data)))
+            {
+                user.Data = rq.Data;
+            }
+
             if (rq.IsModified(nameof(rq.ReportTo)))
             {
                 user.ReportTo = rq.ReportTo;
+            }
+
+            if (rq.IsModified(nameof(rq.Categories)))
+            {
+                // Categories
+                var categoryIds = rq.Categories;
+                var (result, ids) = await _commonService.ValidateCategoriesAsync(categoryIds, orgId, cancellationToken);
+                if (!result.Ok)
+                {
+                    return result;
+                }
+
+                user.CategoryIds = categoryIds?.ToList();
+                user.CategoryIdsAll = ids?.ToList();
             }
 
             if (rq.IsModified(nameof(rq.Depts)))
@@ -329,6 +348,8 @@ namespace CRM.Server.Services
                     ReportTo = u.ReportTo,
                     Expiry = u.Expiry,
                     Status = u.Status,
+                    Data = u.Data,
+                    Categories = u.CategoryIds,
                     Groups = u.PermissionGroups,
                     PermissionIncluded = u.PermissionIncluded,
                     PermissionExcluded = u.PermissionExcluded,

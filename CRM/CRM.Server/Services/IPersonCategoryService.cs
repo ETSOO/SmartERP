@@ -3,6 +3,7 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.PersonCategory;
 using CRM.Server.RQ.PersonCategory;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -10,6 +11,7 @@ namespace CRM.Server.Services
     {
         Task<IActionResult> CreateAsync(PersonCategoryCreateRQ rq, CancellationToken cancellationToken = default);
         ValueTask<PersonCategoryDuplicateTestData[]?> DuplicateTestAsync(PersonCategoryDuplicateTestRQ rq, CancellationToken cancellationToken = default);
+        Task<JsonDocument[]> GetAttributesAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
         Task ListAsync(PersonCategoryListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> MergeAsync(MergeRQ rq, CancellationToken cancellationToken = default);
         Task<PersonCategoryQueryData[]> QueryAsync(PersonCategoryQueryRQ rq, CancellationToken cancellationToken = default);

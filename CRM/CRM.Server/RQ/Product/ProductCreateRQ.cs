@@ -129,13 +129,13 @@ namespace CRM.Server.RQ.Product
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; init; }
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Modifiers
         /// 定制选项
         /// </summary>
-        public string? Modifiers { get; init; }
+        public JsonDocument? Modifiers { get; init; }
 
         /// <summary>
         /// Validate the model
@@ -194,12 +194,7 @@ namespace CRM.Server.RQ.Product
                 return ApplicationErrors.NoValidData.AsResult(nameof(Tags));
             }
 
-            if (Data != null && !Data.IsJson())
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Data));
-            }
-
-            if (Modifiers != null && !CustomFieldSchema.Create().Evaluate(JsonElement.Parse(Modifiers)).IsValid)
+            if (Modifiers != null && !CustomFieldSchema.Create().Evaluate(Modifiers.RootElement).IsValid)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Modifiers));
             }

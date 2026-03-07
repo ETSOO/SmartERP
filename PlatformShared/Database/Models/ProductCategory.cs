@@ -1,4 +1,6 @@
-﻿namespace PlatformShared.Database.Models
+﻿using System.Text.Json;
+
+namespace PlatformShared.Database.Models
 {
     /// <summary>
     /// Product category
@@ -28,13 +30,13 @@
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; set; }
+        public JsonDocument? Data { get; set; }
 
         /// <summary>
         /// Attributes definition
         /// 属性定义
         /// </summary>
-        public string? Attributes { get; set; }
+        public JsonDocument? Attributes { get; set; }
 
         /// <summary>
         /// Creation

@@ -1,6 +1,6 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
-import { EditPage, InputField } from "@etsoo/materialui";
+import { CustomAttributeArea, EditPage, InputField } from "@etsoo/materialui";
 import { ReactUtils, useParamsEx, useRefs } from "@etsoo/react";
 import { useFormik } from "formik";
 import React from "react";
@@ -38,7 +38,7 @@ export default function AddProductCategory() {
   const labels = app.getLabels("nameB", "noChanges", "parentCategory");
 
   // Input refs
-  const refFields = ["assignedId", "name"] as const;
+  const refFields = ["assignedId", "attributes", "name"] as const;
   const refs = useRefs(refFields);
 
   // Type
@@ -57,7 +57,12 @@ export default function AddProductCategory() {
     onSubmit: async (v) => {
       // Get updated values
       const c = { ...v };
+
       ReactUtils.updateRefValues(refs, c);
+
+      if (!!c.attributes && typeof c.attributes === "string") {
+        c.attributes = JSON.parse(c.attributes);
+      }
 
       // Submit
       let result: IdActionResult | undefined;
@@ -147,6 +152,9 @@ export default function AddProductCategory() {
           label={labels.nameB}
           inputRef={refs.name}
         />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <CustomAttributeArea name="attributes" inputRef={refs.attributes} />
       </Grid>
       {canManageCultures && (
         <Grid size={{ xs: 6, sm: 3 }}>

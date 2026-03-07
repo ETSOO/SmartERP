@@ -160,6 +160,7 @@ namespace CRM.Server.Services
                 Description = rq.Description,
                 Birthday = rq.Birthday,
                 Status = rq.Status ?? EntityStatus.Normal,
+                Data = rq.Data,
                 CategoryIds = categoryIds?.ToList(),
                 CategoryIdsAll = ids?.ToList(),
 
@@ -380,6 +381,11 @@ namespace CRM.Server.Services
                 customer.Status = rq.Status.Value;
             }
 
+            if (rq.IsModified(nameof(rq.Data)))
+            {
+                customer.Data = rq.Data;
+            }
+
             if (rq.IsModified(nameof(rq.Categories)))
             {
                 // Categories
@@ -453,6 +459,7 @@ namespace CRM.Server.Services
                     Description = p.Description,
                     Birthday = p.Birthday,
                     Status = p.Status,
+                    Data = p.Data,
                     Categories = p.CategoryIds,
                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
                     Infos = p.Infos

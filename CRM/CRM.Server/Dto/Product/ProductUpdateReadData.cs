@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using PlatformShared.Database.Models;
+using System.Text.Json;
 
 namespace CRM.Server.Dto.Product
 {
@@ -127,12 +128,12 @@ namespace CRM.Server.Dto.Product
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; init; }
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Modifiers
         /// 定制选项
         /// </summary>
-        public string? Modifiers { get; init; }
+        public JsonDocument? Modifiers { get; init; }
     }
 }

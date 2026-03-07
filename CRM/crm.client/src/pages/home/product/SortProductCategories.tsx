@@ -1,4 +1,4 @@
-import { CommonPage, DnDList, HBox } from "@etsoo/materialui";
+import { CommonPage, DnDSortableList, HBox } from "@etsoo/materialui";
 import React from "react";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { ProductCategoryListData } from "@etsoo/smarterp-crm";
@@ -61,7 +61,7 @@ export default function SortProductCategories() {
           </Typography>
           <CardContent>
             <Grid container spacing={0}>
-              <DnDList<ProductCategoryListData>
+              <DnDSortableList<ProductCategoryListData>
                 items={items}
                 labelField="name"
                 onDragEnd={(items) => {
@@ -70,30 +70,35 @@ export default function SortProductCategories() {
                     showLoading: false
                   });
                 }}
-                itemRenderer={(item, index, nodeRef, actionNodeRef) => (
+                itemRenderer={(
+                  data,
+                  style,
+                  { sortable: { index }, ref, handleRef }
+                ) => (
                   <Grid
                     size={{ xs: 12, md: 6, xl: 3 }}
                     display="flex"
                     justifyContent="space-between"
                     alignItems="center"
-                    {...nodeRef}
+                    ref={ref}
+                    style={style}
                   >
                     <Stack direction="row" alignItems="center">
                       <IconButton
                         style={{ cursor: "move" }}
                         size="small"
                         title={labels.dragIndicator}
-                        {...actionNodeRef}
+                        ref={handleRef}
                       >
                         <DragIndicatorIcon />
                       </IconButton>
                       <Typography>
-                        {index + 1}. {item.name}
+                        {index + 1}. {data.name}
                       </Typography>
                     </Stack>
                   </Grid>
                 )}
-              ></DnDList>
+              ></DnDSortableList>
             </Grid>
           </CardContent>
         </Card>

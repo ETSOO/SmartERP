@@ -12,6 +12,7 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -207,6 +208,54 @@ namespace CRM.Server.Services
                 Names = p.Names,
                 IdentityType = p.IdentityType
             }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Get attributes of specified categories and their parent categories
+        /// 获取指定分类及其父分类的属性
+        /// </summary>
+        /// <param name="ids">Ids</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Attributes</returns>
+        public async Task<JsonDocument[]> GetAttributesAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            // Directly fetch attributes of the specified categories
+            var categories = await _db.PersonCategories(orgId).AsNoTracking()
+                .Where(c => ids.Contains(c.Id))
+                .Select(c => new { c.Id, c.Attributes, c.ParentIds })
+                .ToListAsync(cancellationToken);
+
+            // Collect all parent IDs
+            var allParentIds = categories
+                .Where(c => c.ParentIds != null)
+                .SelectMany(c => c.ParentIds!)
+                .Distinct()
+                .ToList();
+
+            if (allParentIds.Count > 0)
+            {
+                // Fetch attributes of parent categories
+                var parentCategories = await _db.PersonCategories(orgId).AsNoTracking()
+                    .Where(c => allParentIds.Contains(c.Id) && c.Attributes != null)
+                    .Select(c => new { c.Id, c.Attributes })
+                    .ToArrayAsync(cancellationToken);
+
+                // Combine attributes from both specified categories and their parents
+                categories.AddRange(parentCategories.Select(pc => new
+                {
+                    Id = categories.Where(c => c.ParentIds != null && c.ParentIds.Contains(pc.Id)).Select(c => c.Id).FirstOrDefault(),
+                    pc.Attributes,
+                    ParentIds = (List<int>?)null
+                }));
+            }
+
+            // Order by the occurrence of category IDs in the input list
+            return [.. categories
+                .Where(c => c.Attributes != null)
+                .OrderBy(c => ids.ToList().IndexOf(c.Id))
+                .Select(c => c.Attributes!)];
         }
 
         /// <summary>

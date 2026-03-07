@@ -1,5 +1,6 @@
 import {
   ButtonLink,
+  CustomFieldViewUI,
   HBox,
   IconButtonLink,
   MoneyInputField,
@@ -17,6 +18,7 @@ import { CustomCultureKind, ProductViewData } from "@etsoo/smarterp-crm";
 import { Permissions } from "@etsoo/smarterp-crm";
 import EditIcon from "@mui/icons-material/Edit";
 import LinkIcon from "@mui/icons-material/Link";
+import ImageIcon from "@mui/icons-material/Image";
 import PriceChangeIcon from "@mui/icons-material/PriceChange";
 import React from "react";
 import Typography from "@mui/material/Typography";
@@ -29,7 +31,8 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import Button from "@mui/material/Button";
 import { CurrencyList } from "../../../components/CurrencyList";
-import { DomUtils, NumberUtils } from "@etsoo/shared";
+import { DataTypes, DomUtils, NumberUtils } from "@etsoo/shared";
+import { CustomFieldData } from "@etsoo/appscript";
 
 function ProductPriceUI({ id }: { id: number }) {
   // Labels
@@ -109,9 +112,19 @@ export default function ViewProduct() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
+  const [customFields, setCustomFields] = React.useState<CustomFieldData[]>([]);
+
   // Load data
-  const loadData = React.useCallback(() => {
-    return app.productApi.read(id);
+  const loadData = React.useCallback(async () => {
+    const data = await app.productApi.read(id);
+    if (data?.categories.length && data?.data?.attributes) {
+      const fields = await app.productCategoryApi.getAttributes(
+        data.categories.map((c) => c.id)
+      );
+      if (fields == null) return;
+      setCustomFields(fields);
+    }
+    return data;
   }, [id]);
 
   // Labels
@@ -204,9 +217,9 @@ export default function ViewProduct() {
     <ViewPage<ProductViewData>
       paddings={0}
       leftContainerLines={3}
-      leftContainer={(item) => (
-        <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
-          {item.logo && (
+      leftContainer={(item) =>
+        item.logo ? (
+          <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
             <a href={item.logo} target="_blank" rel="noopener noreferrer">
               <img
                 src={item.logo}
@@ -214,19 +227,19 @@ export default function ViewProduct() {
                 style={CoreUtils.avatarStyles()}
               />
             </a>
-          )}
-          {editable && (
-            <IconButtonLink
-              href={`./../../logo/${item.id}`}
-              state={item.logo}
-              title={labels.editLogo}
-              size="small"
-            >
-              <EditIcon />
-            </IconButtonLink>
-          )}
-        </HBox>
-      )}
+            {editable && (
+              <IconButtonLink
+                href={`./../../logo/${item.id}`}
+                state={item.logo}
+                title={labels.editLogo}
+                size="small"
+              >
+                <EditIcon />
+              </IconButtonLink>
+            )}
+          </HBox>
+        ) : undefined
+      }
       titleBar={(item) => (
         <HBox justifyContent="center" alignItems="center" marginBottom={2}>
           <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
@@ -343,6 +356,16 @@ export default function ViewProduct() {
         <React.Fragment>
           {editable && (
             <ButtonLink
+              startIcon={<ImageIcon />}
+              variant="outlined"
+              href={`./../../logo/${data.id}`}
+              state={data.logo}
+            >
+              {labels.editLogo}
+            </ButtonLink>
+          )}
+          {editable && (
+            <ButtonLink
               startIcon={<EditIcon />}
               variant="outlined"
               href={`./../../edit/${data.id}`}
@@ -369,32 +392,43 @@ export default function ViewProduct() {
         </React.Fragment>
       )}
     >
-      {(item) =>
-        item.cultures.length && (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell width={100}>{labels.culture}</TableCell>
-                  <TableCell width={200}>{labels.nameB}</TableCell>
-                  <TableCell>{labels.description}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {item.cultures.map((c) => (
-                  <TableRow key={c.culture}>
-                    <TableCell component="th" scope="row">
-                      {c.culture}
-                    </TableCell>
-                    <TableCell>{c.title}</TableCell>
-                    <TableCell>{c.description}</TableCell>
+      {(item) => (
+        <React.Fragment>
+          {customFields.length > 0 && (
+            <CustomFieldViewUI
+              fields={customFields}
+              data={item.data?.attributes as DataTypes.StringRecord}
+              refresh={async () => {
+                loadData();
+              }}
+            />
+          )}
+          {item.cultures.length > 0 && (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell width={100}>{labels.culture}</TableCell>
+                    <TableCell width={200}>{labels.nameB}</TableCell>
+                    <TableCell>{labels.description}</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )
-      }
+                </TableHead>
+                <TableBody>
+                  {item.cultures.map((c) => (
+                    <TableRow key={c.culture}>
+                      <TableCell component="th" scope="row">
+                        {c.culture}
+                      </TableCell>
+                      <TableCell>{c.title}</TableCell>
+                      <TableCell>{c.description}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </React.Fragment>
+      )}
     </ViewPage>
   );
 }

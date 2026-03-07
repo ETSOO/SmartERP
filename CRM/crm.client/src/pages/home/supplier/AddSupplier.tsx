@@ -1,6 +1,12 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
-import { EditPage, InputField, OptionBool, TagList } from "@etsoo/materialui";
+import {
+  CustomFieldUI,
+  EditPage,
+  InputField,
+  OptionBool,
+  TagList
+} from "@etsoo/materialui";
 import { ReactUtils, useParamsEx, useRefs } from "@etsoo/react";
 import { useFormik } from "formik";
 import React from "react";
@@ -14,7 +20,12 @@ import {
   SupplierUpdateRQ
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
-import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
+import {
+  CustomFieldData,
+  CustomFieldRef,
+  EntityStatus,
+  IdentityTypeFlags
+} from "@etsoo/appscript";
 import {
   AssignedIdDuplicateTest,
   ButtonPersonCategories,
@@ -22,6 +33,7 @@ import {
   NameDuplicateTest
 } from "@etsoo/smarterp-crm/components";
 import { AddressCreator } from "../../../components/person/AddressCreator";
+import Divider from "@mui/material/Divider";
 
 export default function AddSupplier() {
   // Route
@@ -57,6 +69,10 @@ export default function AddSupplier() {
     name: ""
   });
 
+  const [customFields, setCustomFields] = React.useState<CustomFieldData[]>([]);
+  const attributesRef =
+    React.useRef<CustomFieldRef<Record<string, unknown>>>(null);
+
   // Input refs
   const refFields = [
     "assignedId",
@@ -79,8 +95,14 @@ export default function AddSupplier() {
     validateOnChange: false,
     onSubmit: async (v) => {
       // Get updated values
-      const c = { ...v };
+      const c = structuredClone(v);
       ReactUtils.updateRefValues(refs, c);
+
+      if (attributesRef.current) {
+        const attributes = attributesRef.current.getValue();
+        c.data ??= {};
+        c.data.attributes = attributes;
+      }
 
       // Submit
       let result: IdActionResult | undefined;
@@ -144,6 +166,14 @@ export default function AddSupplier() {
         "";
 
     setData(result);
+
+    if (result.categories && result.categories.length > 0) {
+      const fields = await app.personCategoryApi.getAttributes(
+        result.categories
+      );
+      if (fields == null) return;
+      setCustomFields(fields);
+    }
   }, [id]);
 
   // Page data hook
@@ -256,7 +286,13 @@ export default function AddSupplier() {
           fullWidth
           value={formik.values.categories ?? []}
           identityType={IdentityTypeFlags.Supplier}
-          onValueChange={(ids) => formik.setFieldValue("categories", ids)}
+          onValueChange={(ids) => {
+            formik.setFieldValue("categories", ids);
+            app.personCategoryApi.getAttributes(ids).then((result) => {
+              if (result == null) return;
+              setCustomFields(result);
+            });
+          }}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
@@ -314,6 +350,18 @@ export default function AddSupplier() {
           inputOnChange={formik.handleChange}
         />
       </Grid>
+      {customFields.length > 0 && (
+        <React.Fragment>
+          <Grid size={{ xs: 12, sm: 12 }}>
+            <Divider />
+          </Grid>
+          <CustomFieldUI
+            fields={customFields}
+            mref={attributesRef}
+            initialValue={data.data?.attributes as Record<string, unknown>}
+          />
+        </React.Fragment>
+      )}
     </EditPage>
   );
 }

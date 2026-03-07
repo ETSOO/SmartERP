@@ -1,9 +1,20 @@
-import { EditPage, InputField, OptionBool, TagList } from "@etsoo/materialui";
+import {
+  CustomFieldUI,
+  EditPage,
+  InputField,
+  OptionBool,
+  TagList
+} from "@etsoo/materialui";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { DateUtils, Utils } from "@etsoo/shared";
-import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
+import {
+  CustomFieldData,
+  CustomFieldRef,
+  EntityStatus,
+  IdentityTypeFlags
+} from "@etsoo/appscript";
 import { useNavigate } from "react-router-dom";
 import { ReactUtils, useParamsEx, useRefs } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
@@ -83,6 +94,10 @@ export default function EditContact() {
     status: EntityStatus.Normal
   });
 
+  const [customFields, setCustomFields] = React.useState<CustomFieldData[]>([]);
+  const attributesRef =
+    React.useRef<CustomFieldRef<Record<string, unknown>>>(null);
+
   // Input refs
   const refFields = [
     "assignedId",
@@ -116,10 +131,16 @@ export default function EditContact() {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       // Request data
-      const rq: PersonUpdateRQ = { ...values };
+      const rq: PersonUpdateRQ = structuredClone(values);
 
       // Get updated values
       ReactUtils.updateRefValues(refs, rq);
+
+      if (attributesRef.current) {
+        const attributes = attributesRef.current.getValue();
+        rq.data ??= {};
+        rq.data.attributes = attributes;
+      }
 
       // Changed fields
       const fields = Utils.getDataChanges(rq, data);
@@ -161,6 +182,12 @@ export default function EditContact() {
     if (data == null) return;
     ReactUtils.updateRefs(refs, data);
     setData(data);
+
+    if (data.categories && data.categories.length > 0) {
+      const fields = await app.personCategoryApi.getAttributes(data.categories);
+      if (fields == null) return;
+      setCustomFields(fields);
+    }
   }, [id]);
 
   // Page data hook
@@ -352,6 +379,18 @@ export default function EditContact() {
           rows={2}
         />
       </Grid>
+      {customFields.length > 0 && (
+        <React.Fragment>
+          <Grid size={{ xs: 12, sm: 12 }}>
+            <Divider />
+          </Grid>
+          <CustomFieldUI
+            fields={customFields}
+            mref={attributesRef}
+            initialValue={data.data?.attributes as Record<string, unknown>}
+          />
+        </React.Fragment>
+      )}
       <Grid size={{ xs: 6, sm: 3 }}>
         <AssignedIdDuplicateTest fullWidth inputRef={refs.assignedId} />
       </Grid>

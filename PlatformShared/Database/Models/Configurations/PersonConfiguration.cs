@@ -115,6 +115,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(50)
                 .HasColumnName("political_status");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
+            entity.Property(e => e.CategoryIdsAll).HasColumnName("category_ids_all");
             entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.PermissionGroups).HasColumnName("permission_groups");

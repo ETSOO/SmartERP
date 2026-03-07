@@ -4,6 +4,8 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using com.etsoo.Utils.String;
+using System.Text.Json;
 
 namespace CRM.Server.RQ.User
 {
@@ -72,6 +74,18 @@ namespace CRM.Server.RQ.User
         /// 排除的权限项目
         /// </summary>
         public IEnumerable<short>? PermissionExcluded { get; init; }
+
+        /// <summary>
+        /// Categories
+        /// 类目
+        /// </summary>
+        public IEnumerable<int>? Categories { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Validate the model

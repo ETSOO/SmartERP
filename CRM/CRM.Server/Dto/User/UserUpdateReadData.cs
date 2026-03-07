@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
+using System.Text.Json;
 
 namespace CRM.Server.Dto.User
 {
@@ -52,10 +53,22 @@ namespace CRM.Server.Dto.User
         public EntityStatus Status { get; init; }
 
         /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
+
+        /// <summary>
         /// Department ids
         /// 所属部门编号
         /// </summary>
         public IEnumerable<long>? Depts { get; init; }
+
+        /// <summary>
+        /// Categories
+        /// 类目
+        /// </summary>
+        public IEnumerable<int>? Categories { get; init; }
 
         /// <summary>
         /// Permission group ids
