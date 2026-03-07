@@ -1,13 +1,22 @@
-import { CommonPage, HBox, VBox } from "@etsoo/materialui";
+import {
+  CommonPage,
+  HBox,
+  SearchBar,
+  SearchField,
+  VBox
+} from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
 import { useParamsEx, useSearchParamsEx } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
-import { CustomerList } from "@etsoo/smarterp-crm/components";
+import {
+  CustomerList,
+  ProductCategoryTiplist
+} from "@etsoo/smarterp-crm/components";
 import { CurrencyList } from "../../../components/CurrencyList";
 import { CultureList } from "../../../components/CultureList";
 import { DomUtils, NumberUtils } from "@etsoo/shared";
-import { QueryForSaleData } from "@etsoo/smarterp-crm";
+import { QueryForSaleData, QueryForSaleRQ } from "@etsoo/smarterp-crm";
 import LinearProgress from "@mui/material/LinearProgress";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
@@ -17,12 +26,8 @@ import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-
-type Cart = {
-  customerId: number;
-  currency: string;
-  culture?: string;
-};
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
 
 function getDefaultCulture() {
   return app.userData?.system?.cultures[0] ?? app.culture;
@@ -57,9 +62,14 @@ export default function AddOrder() {
   });
 
   // Label
-  const labels = app.getLabels("chooseCustomer");
+  const labels = app.getLabels(
+    "assignedId",
+    "category",
+    "chooseCustomer",
+    "productName"
+  );
 
-  const [cart, setCart] = React.useState<Cart>();
+  const [cart, setCart] = React.useState<QueryForSaleRQ>();
 
   const [products, setProducts] = React.useState<QueryForSaleData[]>();
 
@@ -129,44 +139,83 @@ export default function AddOrder() {
   const symbol = NumberUtils.getCurrencySymbol(cart?.currency!);
 
   return (
-    <CommonPage paddings={0}>
-      <ImageList gap={8} cols={cols} rowHeight={180}>
-        {products.map((p) => (
-          <ImageListItem key={p.id}>
-            {p.logo && (
-              <img
-                src={p.logo}
-                alt={p.name}
-                style={{ maxHeight: 180 }}
-                loading="lazy"
+    <React.Fragment>
+      <AppBar position="sticky">
+        <Toolbar>
+          <SearchBar
+            fields={[
+              <SearchField
+                label={labels.productName}
+                name="keyword"
+                minChars={2}
+              />,
+              <SearchField
+                label={labels.assignedId}
+                name="AssignedIdStart"
+                minChars={3}
+              />,
+              <ProductCategoryTiplist
+                label={labels.category}
+                name="categoryIdAll"
+                search
               />
-            )}
-            <ImageListItemBar
-              title={
-                <VBox whiteSpace="wrap">
-                  <Typography>{p.name}</Typography>
-                  {p.description && (
-                    <Typography variant="caption">{p.description}</Typography>
-                  )}
-                  <HBox>
-                    <Typography variant="body1">
-                      {symbol}
-                      {app.formatNumber(p.retailPrice)} /{" "}
-                      {p.assetQty && p.assetQty > 1 ? `${p.assetQty}` : ""}
-                      {p.unitName}
-                    </Typography>
-                  </HBox>
-                  <HBox justifyContent="flex-end">
-                    <IconButton color="warning">
-                      <AddShoppingCartIcon />
-                    </IconButton>
-                  </HBox>
-                </VBox>
-              }
-            />
-          </ImageListItem>
-        ))}
-      </ImageList>
-    </CommonPage>
+            ]}
+            className="searchBarGrid"
+            width={300}
+            top={true}
+            onSubmit={(data, reset) => {
+              const { keyword, assignedIdStart, categoryIdAll } = reset
+                ? {}
+                : DomUtils.dataAs(data, {
+                    keyword: "string",
+                    assignedIdStart: "string",
+                    categoryIdAll: "number"
+                  });
+
+              setCart({ ...cart!, keyword, assignedIdStart, categoryIdAll });
+            }}
+          />
+        </Toolbar>
+      </AppBar>
+      <CommonPage paddings={0}>
+        <ImageList gap={8} cols={cols} rowHeight={180}>
+          {products.map((p) => (
+            <ImageListItem key={p.id}>
+              {p.logo && (
+                <img
+                  src={p.logo}
+                  alt={p.name}
+                  style={{ maxHeight: 180 }}
+                  loading="lazy"
+                />
+              )}
+              <ImageListItemBar
+                title={
+                  <VBox whiteSpace="wrap">
+                    <Typography>{p.name}</Typography>
+                    {p.description && (
+                      <Typography variant="caption">{p.description}</Typography>
+                    )}
+                    <HBox>
+                      <Typography variant="body1">
+                        {symbol}
+                        {app.formatNumber(p.retailPrice)} /{" "}
+                        {p.assetQty && p.assetQty > 1 ? `${p.assetQty}` : ""}
+                        {p.unitName}
+                      </Typography>
+                    </HBox>
+                    <HBox justifyContent="flex-end">
+                      <IconButton color="warning">
+                        <AddShoppingCartIcon />
+                      </IconButton>
+                    </HBox>
+                  </VBox>
+                }
+              />
+            </ImageListItem>
+          ))}
+        </ImageList>
+      </CommonPage>
+    </React.Fragment>
   );
 }

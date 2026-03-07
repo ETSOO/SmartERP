@@ -47,7 +47,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
         position: v ? { x: 0, y: 0 } : { x: 250, y: 0 }
       },
       {
-        id: "org",
+        id: "system",
         data: { label: labels.org },
         targetPosition: Position.Left,
         className: app.owns(Permissions.Org.All) ? undefined : "node-disabled",

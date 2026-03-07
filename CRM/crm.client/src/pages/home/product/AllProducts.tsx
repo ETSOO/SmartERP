@@ -4,7 +4,8 @@ import {
   SearchField,
   IconButtonLink,
   MobileListItemRenderer,
-  ButtonLink
+  ButtonLink,
+  MoneyText
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -75,6 +76,8 @@ export default function AllDepts() {
 
   // Page data hook
   usePageDataEmpty(app);
+
+  console.log("AllProducts render", app.owns(Permissions.Product.Manage));
 
   return (
     <ResponsivePage<ProductQueryData, typeof template>
@@ -233,6 +236,7 @@ export default function AllDepts() {
           }
         }
       ]}
+      rowHeight={180}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
@@ -251,8 +255,37 @@ export default function AllDepts() {
               }
             ],
             <React.Fragment>
-              <Typography variant="caption">
-                {data.categories?.map((c) => c.names.join(" -> ")).join(", ")}
+              {data.categories && data.categories.length > 0 && (
+                <Typography variant="body2">
+                  {labels.categories}:{" "}
+                  {data.categories.map((c) => c.names.join(" -> ")).join(", ")}
+                </Typography>
+              )}
+              <Typography variant="body2">
+                {data.promotionPrice ? (
+                  <React.Fragment>
+                    <MoneyText
+                      value={data.promotionPrice}
+                      currency={app.currency}
+                      color="red"
+                    />{" "}
+                    <MoneyText
+                      value={data.retailPrice}
+                      currency={data.currency}
+                      fontSize={9}
+                      sx={{ textDecoration: "line-through" }}
+                    />
+                  </React.Fragment>
+                ) : (
+                  <MoneyText
+                    value={data.retailPrice}
+                    currency={data.currency}
+                  />
+                )}{" "}
+                /{" "}
+                {data.assetQty
+                  ? `${data.unitName} (${data.assetQty})`
+                  : data.unitName}
               </Typography>
               {data.status >= EntityStatus.Inactivated && (
                 <React.Fragment>

@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.56",
-    "@etsoo/materialui": "^1.6.23",
-    "@etsoo/react": "^1.8.78",
+    "@etsoo/materialui": "^1.6.24",
+    "@etsoo/react": "^1.8.79",
     "@etsoo/reacteditor": "^1.0.33",
     "@etsoo/shared": "^1.2.80",
     "@etsoo/smarterp-core": "^1.1.23",

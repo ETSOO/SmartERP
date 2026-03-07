@@ -28,6 +28,7 @@ import Fab from "@mui/material/Fab";
 import { Permissions } from "@etsoo/smarterp-crm";
 import { IdentityTypeFlags } from "@etsoo/appscript";
 import { PersonCategoryTiplist } from "@etsoo/smarterp-crm/components";
+import { Typography } from "@mui/material";
 
 const template = {
   keyword: "string",
@@ -206,6 +207,7 @@ export default function AllCustomers() {
           }
         }
       ]}
+      rowHeight={180}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
@@ -220,10 +222,23 @@ export default function AllCustomers() {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./view/${data.id}`
+                action: `./../contact/view/${data.id}`
               }
             ],
-            <React.Fragment></React.Fragment>
+            <React.Fragment>
+              {data.assignedId && (
+                <Typography variant="body2">
+                  {labels.assignedId}: {data.assignedId}
+                </Typography>
+              )}
+              {data.categories && data.categories.length > 0 && (
+                <Typography variant="body2">
+                  {labels.categories}:{" "}
+                  {data.categories.map((c) => c.names.join(" -> ")).join(", ")}
+                </Typography>
+              )}
+              <Typography variant="caption">{data.description}</Typography>
+            </React.Fragment>
           ];
         })
       }

@@ -304,16 +304,16 @@ export default function ViewProduct() {
           data: (item) =>
             item.prices.length ? (
               <TableContainer>
-                <Table>
+                <Table size={app.smDown ? "small" : undefined}>
                   <TableHead>
                     <TableRow>
-                      <TableCell width={100}>{labels.currency}</TableCell>
-                      <TableCell align="right">{labels.retailPrice}</TableCell>
+                      <TableCell>{labels.currency}</TableCell>
                       <TableCell align="right">
-                        {labels.promotionPrice}
+                        {labels.retailPrice} / {labels.promotionPrice}
                       </TableCell>
-                      <TableCell align="right">{labels.channelPrice}</TableCell>
-                      <TableCell align="right">{labels.costPrice}</TableCell>
+                      <TableCell align="right">
+                        {labels.channelPrice} / {labels.costPrice}
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -324,21 +324,18 @@ export default function ViewProduct() {
                         </TableCell>
                         <TableCell align="right">
                           {NumberUtils.getCurrencySymbol(p.currency)}
-                          {app.formatNumber(p.retailPrice)}
-                        </TableCell>
-                        <TableCell align="right">
+                          {app.formatNumber(p.retailPrice)} /{" "}
                           {p.promotionPrice == null
-                            ? ""
+                            ? "--"
                             : app.formatNumber(p.promotionPrice)}
                         </TableCell>
                         <TableCell align="right">
                           {p.channelPrice == null
-                            ? ""
-                            : app.formatNumber(p.channelPrice)}
-                        </TableCell>
-                        <TableCell align="right">
+                            ? "--"
+                            : app.formatNumber(p.channelPrice)}{" "}
+                          /{" "}
                           {p.costPrice == null
-                            ? ""
+                            ? "--"
                             : app.formatNumber(p.costPrice)}
                         </TableCell>
                       </TableRow>

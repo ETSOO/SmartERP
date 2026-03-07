@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { PersonQueryData } from "@etsoo/smarterp-crm";
-import { DataTypes, Utils } from "@etsoo/shared";
+import { DataTypes } from "@etsoo/shared";
 import { DefaultUI, IdentityFlagsList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -178,7 +178,7 @@ export default function AllContacts() {
           }
         }
       ]}
-      rowHeight={160}
+      rowHeight={180}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => [
           `[${app.person.getIdentityType(data)}] ${data.name}`,
@@ -191,9 +191,14 @@ export default function AllContacts() {
             }
           ],
           <React.Fragment>
-            <Typography variant="body2">
-              {Utils.joinItems([data.jobTitle, data.assignedId], ", ")}
-            </Typography>
+            {data.jobTitle && (
+              <Typography variant="caption">{data.jobTitle}</Typography>
+            )}
+            {data.assignedId && (
+              <Typography variant="body2">
+                {labels.assignedId}: {data.assignedId}
+              </Typography>
+            )}
             {data.status >= EntityStatus.Inactivated && (
               <React.Fragment>
                 <Typography variant="caption">
