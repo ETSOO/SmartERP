@@ -9,7 +9,6 @@ import { ProductBaseUnits } from "@etsoo/smarterp-core/components";
 import Alert from "@mui/material/Alert";
 import { DataTypes } from "@etsoo/shared";
 import { ProductUnit } from "@etsoo/appscript";
-import { Permissions } from "@etsoo/smarterp-crm";
 import { NameCulture } from "../../../components/NameCulture";
 
 export default function ProductUnits() {
@@ -29,9 +28,7 @@ export default function ProductUnits() {
   usePageDataEmpty(app);
 
   // Culture permission
-  const canManageCultures =
-    app.owns(Permissions.Org.Manage) &&
-    (app.userData?.system?.cultures.length ?? 0) > 1;
+  const canManageCultures = app.system.canManageCultures();
 
   // Labels
   const labels = app.getLabels("nameB", "noChanges", "productUnitTip");

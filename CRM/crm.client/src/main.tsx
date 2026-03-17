@@ -390,6 +390,14 @@ const router = createDynamicRouter([
               return { Component: EditPromotion.default };
             }
           },
+          {
+            path: "/home/product/promotion/sort",
+            lazy: async () => {
+              const SortPromotions =
+                await import("./pages/home/product/SortPromotions");
+              return { Component: SortPromotions.default };
+            }
+          },
 
           {
             path: "/home/profile",

@@ -23,6 +23,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IPromotionService service, PromotionQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query promotion info / 查询促销信息").WithTags("Promotion");
 
+            g.MapPut("Sort", (IPromotionService service, Dictionary<int, short> rq, CancellationToken cancellationToken) => service.SortAsync(rq, cancellationToken))
+                .WithDescription("Sort promotions / 排序促销").WithTags("Promotion");
+
             g.MapPut("Update", (IPromotionService service, PromotionUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update promotion / 更新促销").WithTags("Promotion");
 

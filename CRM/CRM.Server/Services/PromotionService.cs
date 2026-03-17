@@ -193,6 +193,8 @@ namespace CRM.Server.Services
         public Task ListAsync(PromotionListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             return CreateQuery(rq)
+                .OrderBy(c => c.OrderIndex)
+                .ThenBy(c => c.Id)
                 .Select(p => new PromotionListData
                 {
                     Id = p.Id,
@@ -239,6 +241,37 @@ namespace CRM.Server.Services
                 Creation = p.Creation
             })
             .ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Sort
+        /// 排序
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<int> SortAsync(Dictionary<int, short> rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Manage, cancellationToken))
+            {
+                return -1;
+            }
+
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            var ids = rq.Keys.ToArray();
+            var indices = rq.Values.ToArray();
+
+#pragma warning disable EF1002 // No risk of vulnerability to SQL injection.
+            return await _db.Database.ExecuteSqlRawAsync($"""
+                UPDATE "promotion"
+                    SET "order_index" = t."sorder_index"
+                FROM (VALUES {string.Join(", ", ids.Select((id, i) => $"({id}, {indices[i]})"))}) AS t("sid", "sorder_index")
+                WHERE "core_organization_id" = {orgId} AND "id" = t."sid";
+            """, cancellationToken);
+#pragma warning restore EF1002 // No risk of vulnerability to SQL injection.
         }
 
         /// <summary>

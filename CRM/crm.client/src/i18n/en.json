@@ -3,9 +3,11 @@
   "allProfiles": "All profiles",
   "basicInfo": "Basic Info",
   "clickToView": "Click on the left list item to view...",
+  "customerOrCategoryRequired": "Customer or customer category is required",
   "dropFilesLabel": "Drop files here, or",
   "flowchart": "Flowchart",
   "latestTasks": "Latest tasks",
+  "productOrCategoryRequired": "Product or product category is required",
   "productUnitTip": "If no products are using this product unit, clearing the base unit will delete this item",
   "smarterpCRM": "SmartERP Business Management",
   "updateSystemSettings": "Update system settings"

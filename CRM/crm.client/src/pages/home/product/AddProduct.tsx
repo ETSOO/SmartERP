@@ -80,7 +80,7 @@ export default function AddProduct() {
     ? ProductInventoryWay.Simple
     : ProductInventoryWay.None;
 
-  const defaultCurrency = app.userData?.system?.currencies[0] ?? app.currency;
+  const defaultCurrency = app.system.getDefaultCurrency();
   const defaultTaxRate = app.userData?.system?.taxRate;
 
   // State

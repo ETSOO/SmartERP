@@ -16,12 +16,12 @@ import { IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   CustomCultureKind,
   PromotionCode,
+  PromotionCodeName,
   promotionCodes,
   PromotionCreateRQ,
   PromotionUpdateRQ
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
-import { Permissions } from "@etsoo/smarterp-crm";
 import { NameCulture } from "../../../components/NameCulture";
 import { CurrencyList } from "../../../components/CurrencyList";
 import { StatusList } from "@etsoo/smarterp-core/components";
@@ -46,20 +46,19 @@ export default function AddPromotion() {
   const codeRef = React.useRef<PromotionCode>(null);
 
   // Culture permission
-  const canManageCultures =
-    isEditing &&
-    app.owns(Permissions.Org.Manage) &&
-    (app.userData?.system?.cultures.length ?? 0) > 1;
+  const canManageCultures = isEditing && app.system.canManageCultures();
 
   // Labels
   const labels = app.getLabels(
     "coupons",
+    "customerOrCategoryRequired",
     "customers",
     "discount",
     "endDate",
     "minAmount",
     "noChanges",
     "orderIndex",
+    "productOrCategoryRequired",
     "products",
     "promotionCode",
     "stackable",
@@ -82,7 +81,7 @@ export default function AddPromotion() {
   // Type
   type DataType = PromotionCreateRQ;
 
-  const defaultCurrency = app.userData?.system?.currencies[0] ?? app.currency;
+  const defaultCurrency = app.system.getDefaultCurrency();
 
   // State
   const [data, setData] = React.useState<DataType>({
@@ -107,6 +106,36 @@ export default function AddPromotion() {
       ReactUtils.updateRefValues(refs, c);
 
       Utils.correctTypes(c, { stackable: "boolean" });
+
+      // Validate
+      const code = c.code;
+      if (
+        code === PromotionCodeName.PMJ ||
+        code === PromotionCodeName.PMS ||
+        code === PromotionCodeName.PEZ ||
+        code === PromotionCodeName.PKZ ||
+        code === PromotionCodeName.PJH
+      ) {
+        // Product or category required
+        if (
+          (c.productIds == null || c.productIds.length === 0) &&
+          (c.productCategoryIds == null || c.productCategoryIds.length === 0)
+        ) {
+          app.warning(labels.productOrCategoryRequired);
+          return false;
+        }
+      }
+
+      if (code === PromotionCodeName.CKZ || code === PromotionCodeName.CDZ) {
+        // Customer or category required
+        if (
+          (c.personIds == null || c.personIds.length === 0) &&
+          (c.personCategoryIds == null || c.personCategoryIds.length === 0)
+        ) {
+          app.warning(labels.customerOrCategoryRequired);
+          return false;
+        }
+      }
 
       // Submit
       let result: IdActionResult | undefined;

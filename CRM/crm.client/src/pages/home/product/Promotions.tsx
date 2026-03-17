@@ -3,10 +3,12 @@ import {
   SearchField,
   IconButtonLink,
   MobileListItemRenderer,
-  SelectBool
+  SelectBool,
+  ButtonLink
 } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import SortIcon from "@mui/icons-material/Sort";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -49,6 +51,7 @@ export default function Promotions() {
     "enabled",
     "isAvailable",
     "minAmount",
+    "sortPromotion",
     "title"
   );
 
@@ -68,6 +71,14 @@ export default function Promotions() {
         onRefresh: reloadData,
         fabButtons: (
           <React.Fragment>
+            <ButtonLink
+              href="./sort"
+              size="small"
+              variant="outlined"
+              startIcon={<SortIcon />}
+            >
+              {labels.sortPromotion}
+            </ButtonLink>
             <Fab
               title={labels.add}
               size="medium"

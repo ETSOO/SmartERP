@@ -77,8 +77,6 @@ export default function AllDepts() {
   // Page data hook
   usePageDataEmpty(app);
 
-  console.log("AllProducts render", app.owns(Permissions.Product.Manage));
-
   return (
     <ResponsivePage<ProductQueryData, typeof template>
       {...DefaultUI.pageProps({

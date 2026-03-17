@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.56",
-    "@etsoo/materialui": "^1.6.24",
-    "@etsoo/react": "^1.8.79",
+    "@etsoo/appscript": "^1.6.57",
+    "@etsoo/materialui": "^1.6.32",
+    "@etsoo/react": "^1.8.81",
     "@etsoo/reacteditor": "^1.0.33",
     "@etsoo/shared": "^1.2.80",
-    "@etsoo/smarterp-core": "^1.1.23",
+    "@etsoo/smarterp-core": "^1.1.25",
     "@etsoo/smarterp-crm": "file:../../../../EtsooUI/SmartERP/crm",
     "@etsoo/toolpad": "^1.0.45",
     "@mui/icons-material": "^7.3.9",
@@ -31,12 +31,12 @@
     "react-dom": "$react-dom"
   },
   "devDependencies": {
-    "@types/node": "^25.3.5",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^8.0.0"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.59.0"

@@ -320,6 +320,101 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Read customer data for sale
+        /// 读取销售用的客户数据
+        /// </summary>
+        /// <param name="customerId">Customer id, null or 0 for annoymous customer</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<CustomerReadForSaleData?> ReadForSaleAsync(long? customerId, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+            var now = DateTime.UtcNow;
+
+            var data = new CustomerReadForSaleData();
+
+            IEnumerable<PromotionItem> defaultPromotions;
+
+            if (customerId > 0)
+            {
+                var customer = await _db.Customers(orgId).AsNoTracking()
+                    .Where(p => p.Id == customerId.Value && p.Status < EntityStatus.Inactivated)
+                    .Select(p => new CustomerSaleData
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        PreferredName = p.PreferredName,
+                        IsLegalPerson = p.IsLegalPerson,
+                        CategoryIdsAll = p.CategoryIdsAll
+                    }).FirstOrDefaultAsync(cancellationToken);
+
+                if (customer == null)
+                {
+                    return null;
+                }
+
+                var promotions = await _db.Promotions(orgId)
+                    .AsNoTracking()
+                    .Where(pr => pr.Status < EntityStatus.Inactivated
+                        && pr.ValidStart <= now
+                        && pr.ValidEnd >= now
+                        && pr.ProductIds == null
+                        && pr.ProductCategoryIds == null
+                        && (
+                            (pr.PersonIds == null && pr.PersonCategoryIds == null)
+                                ||
+                            ((pr.PersonIds != null && pr.PersonIds.Contains(customerId.Value)) || (pr.PersonCategoryIds != null && customer.CategoryIdsAll != null && pr.PersonCategoryIds.Any(p => customer.CategoryIdsAll.Contains(p))))
+                        )
+                    )
+                    .Select(pr => new
+                    {
+                        IsCustomer = pr.PersonIds != null || pr.PersonCategoryIds != null,
+                        Promotion = new PromotionItem
+                        {
+                            Id = pr.Id,
+                            Code = pr.Code,
+                            Title = pr.Title,
+                            MinAmount = pr.MinAmount,
+                            Discount = pr.Discount,
+                            Stackable = pr.Stackable
+                        }
+                    })
+                    .ToArrayAsync(cancellationToken);
+
+                customer.Promotions = promotions.Where(p => p.IsCustomer).Select(p => p.Promotion);
+                defaultPromotions = promotions.Where(p => !p.IsCustomer).Select(p => p.Promotion);
+
+                data.Customer = customer;
+            }
+            else
+            {
+                defaultPromotions = await _db.Promotions(orgId)
+                    .AsNoTracking()
+                    .Where(pr => pr.Status < EntityStatus.Inactivated
+                        && pr.ValidStart <= now
+                        && pr.ValidEnd >= now
+                        && pr.ProductIds == null
+                        && pr.ProductCategoryIds == null
+                        && pr.PersonIds == null
+                        && pr.PersonCategoryIds == null)
+                    .Select(pr => new PromotionItem
+                    {
+                        Id = pr.Id,
+                        Code = pr.Code,
+                        Title = pr.Title,
+                        MinAmount = pr.MinAmount,
+                        Discount = pr.Discount,
+                        Stackable = pr.Stackable
+                    })
+                    .ToArrayAsync(cancellationToken);
+            }
+
+            data.Promotions = defaultPromotions;
+
+            return data;
+        }
+
+        /// <summary>
         /// Update
         /// 更新
         /// </summary>

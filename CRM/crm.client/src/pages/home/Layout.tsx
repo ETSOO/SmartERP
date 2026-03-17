@@ -90,6 +90,7 @@ export default function Home() {
     "signoutSuccess",
     "simpleInventory",
     "sortCategory",
+    "sortPromotion",
     "stakeholders",
     "system",
     "suppliers",
@@ -327,6 +328,11 @@ export default function Home() {
                 segment: "edit",
                 pattern: "edit/:id",
                 title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "sort",
+                title: labels.sortPromotion,
                 hidden: true
               }
             ]

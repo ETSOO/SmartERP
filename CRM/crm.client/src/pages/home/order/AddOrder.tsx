@@ -1,13 +1,20 @@
 import {
   CommonPage,
+  CustomFieldUI,
   HBox,
+  InputField,
+  MenuButton,
+  MoneyText,
+  NotificationMUDataMethods,
+  NotificationMUDataProps,
+  NumberSpinner,
   SearchBar,
   SearchField,
   VBox
 } from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { useParamsEx, useSearchParamsEx } from "@etsoo/react";
+import { useDimensions, useParamsEx, useSearchParamsEx } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import {
   CustomerList,
@@ -15,8 +22,15 @@ import {
 } from "@etsoo/smarterp-crm/components";
 import { CurrencyList } from "../../../components/CurrencyList";
 import { CultureList } from "../../../components/CultureList";
-import { DomUtils, NumberUtils } from "@etsoo/shared";
-import { QueryForSaleData, QueryForSaleRQ } from "@etsoo/smarterp-crm";
+import { DomUtils, NumberUtils, Utils } from "@etsoo/shared";
+import {
+  CustomerReadForSaleData,
+  PromotionCodeCalculation,
+  PromotionItem,
+  PromotionOrderLine,
+  QueryForSaleData,
+  QueryForSaleRQ
+} from "@etsoo/smarterp-crm";
 import LinearProgress from "@mui/material/LinearProgress";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
@@ -26,29 +40,326 @@ import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CelebrationIcon from "@mui/icons-material/Celebration";
+import ClearIcon from "@mui/icons-material/Clear";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
+import { CustomFieldRef, QueryPagingData } from "@etsoo/appscript";
+import Avatar from "@mui/material/Avatar";
+import Badge from "@mui/material/Badge";
+import Grid from "@mui/material/Grid";
+import Divider from "@mui/material/Divider";
+import { OrderUtils } from "../../../../../../../../EtsooUI/SmartERP/crm/lib/mjs/utils/Order";
+import Chip from "@mui/material/Chip";
 
-function getDefaultCulture() {
-  return app.userData?.system?.cultures[0] ?? app.culture;
+let currencySymbol: string | undefined;
+
+function formatName(data: QueryForSaleData) {
+  return data.assignedId ? `${data.assignedId} - ${data.name}` : data.name;
 }
 
-function CustomerChooser({ customerId }: { customerId?: number }) {
-  // Default currency
-  const defaultCurrency = app.userData?.system?.currencies[0] ?? app.currency;
+function formatPriceLine(data: QueryForSaleData, price?: number) {
+  price ??= app.order.getPrice(data);
+  return (
+    <Typography variant="body1">
+      {currencySymbol}
+      {app.formatNumber(price)}
+      {price < data.retailPrice ? (
+        <Typography
+          variant="caption"
+          sx={{ textDecoration: "line-through", marginLeft: 0.5 }}
+        >
+          {app.formatNumber(data.retailPrice)}
+        </Typography>
+      ) : (
+        ""
+      )}{" "}
+      / {data.assetQty && data.assetQty > 1 ? `${data.assetQty}` : ""}
+      {data.unitName}
+    </Typography>
+  );
+}
 
+function AddItem({
+  data,
+  line,
+  mRef,
+  onClear
+}: NotificationMUDataProps & {
+  data: QueryForSaleData;
+  line?: OrderLine;
+  onClear?: () => void;
+}) {
+  // Labels
+  const labels = app.getLabels(
+    "clear",
+    "confirmAction",
+    "description",
+    "promotions",
+    "qty",
+    "title"
+  );
+
+  const price = app.order.getPrice(data);
+
+  // States
+  const [qty, setQty] = React.useState<number | null>(
+    line?.qty ?? data.minQty ?? 1
+  );
+  const [promotions, setPromotions] = React.useState<
+    PromotionCodeCalculation[]
+  >([]);
+
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  const modifiersRef =
+    React.useRef<CustomFieldRef<Record<string, unknown>>>(null);
+
+  const amount = price * (qty ?? 0);
+  const pamount = promotions.reduce((sum, p) => sum + p.amount, 0);
+
+  function changeQty(value: number | null) {
+    setQty(value);
+
+    if (value != null && value > 0 && data.promotions.length > 0) {
+      const line: PromotionOrderLine = {
+        price,
+        qty: value
+      };
+
+      const results = OrderUtils.calculatePromotions(
+        data.promotions,
+        undefined,
+        line
+      );
+
+      setPromotions(results);
+    } else {
+      setPromotions([]);
+    }
+  }
+
+  React.useEffect(() => {
+    if (line) {
+      changeQty(line.qty);
+      modifiersRef.current?.setValue(
+        line.data?.modifiers as Record<string, unknown>
+      );
+    }
+  }, [line]);
+
+  React.useImperativeHandle(mRef, () => ({
+    getValue: (): OrderLine | undefined => {
+      if (formRef.current == null) return undefined;
+
+      if (!formRef.current.reportValidity()) {
+        return undefined;
+      }
+
+      const { title, description } = DomUtils.dataAs(
+        new FormData(formRef.current),
+        {
+          title: "string",
+          description: "string"
+        }
+      );
+
+      if (!title || qty == null) {
+        return undefined;
+      }
+
+      const modifiers = modifiersRef.current?.getValue();
+
+      if (line == null) {
+        return {
+          id: Utils.newGUID(),
+          productId: data.id,
+          title,
+          description,
+          originalPrice: data.retailPrice,
+          price,
+          qty,
+          amount: amount - pamount,
+          discount: pamount,
+          promotions: promotions.length > 0 ? promotions : undefined,
+          data: modifiers ? { modifiers } : undefined
+        };
+      } else {
+        return {
+          ...line,
+          title,
+          description,
+          price,
+          qty,
+          amount: amount - pamount,
+          discount: pamount,
+          promotions: promotions.length > 0 ? promotions : undefined,
+          data: modifiers ? { modifiers } : undefined
+        };
+      }
+    }
+  }));
+
+  return (
+    <form ref={formRef}>
+      <VBox gap={1} spacing={1} paddingTop={1}>
+        <InputField
+          fullWidth
+          required
+          name="title"
+          slotProps={{ htmlInput: { maxLength: 256 } }}
+          label={labels.title}
+          defaultValue={line?.title ?? data.name}
+        />
+        <Grid container spacing={1} gap={1}>
+          <Grid
+            size={{ xs: 12, sm: 5 }}
+            display="flex"
+            gap={1}
+            alignItems="center"
+            justifyContent="flex-end"
+          >
+            {formatPriceLine(data, price)} x
+          </Grid>
+          <Grid
+            size={{ xs: 12, sm: 7 }}
+            display="flex"
+            gap={1}
+            alignItems="center"
+          >
+            <NumberSpinner
+              size="small"
+              min={data.minQty ?? 1}
+              max={data.capQty ?? 9999999}
+              step={data.stepQty ?? 1}
+              value={qty}
+              required
+              onValueChange={(value) => changeQty(value)}
+            />
+            {line != null && (
+              <IconButton
+                color="warning"
+                title={labels.clear}
+                onClick={() => {
+                  app.notifier.confirm(
+                    labels.confirmAction.format(labels.clear),
+                    undefined,
+                    (result) => {
+                      if (result) {
+                        onClear?.();
+                      }
+                    }
+                  );
+                }}
+              >
+                <ClearIcon />
+              </IconButton>
+            )}
+          </Grid>
+          <Grid
+            size={{ xs: 12 }}
+            display="flex"
+            gap={1}
+            alignItems="center"
+            justifyContent="flex-end"
+          >
+            <Typography>=</Typography>
+            <MoneyText value={amount} currency={data.currency} />
+            {pamount > 0 && (
+              <React.Fragment>
+                <Typography>-</Typography>
+                <MoneyText value={pamount} currency={data.currency} />
+                <Typography>=</Typography>
+                <MoneyText value={amount - pamount} currency={data.currency} />
+              </React.Fragment>
+            )}
+          </Grid>
+          {promotions.length > 0 && (
+            <Grid size={{ xs: 12 }}>
+              <Typography
+                sx={{
+                  whiteSpace: "break-spaces",
+                  lineHeight: "10px",
+                  textAlign: "right"
+                }}
+              >
+                <Typography variant="caption">{labels.promotions}: </Typography>
+                {promotions.map((p, index) => (
+                  <Typography variant="caption" key={p.id}>
+                    {index === 0 ? "" : "; "}
+                    <MoneyText value={p.amount} currency={data.currency} /> (
+                    {p.title})
+                  </Typography>
+                ))}
+              </Typography>
+            </Grid>
+          )}
+        </Grid>
+        {data.modifiers != null && data.modifiers.length > 0 && (
+          <Grid container spacing={2} gap={2}>
+            <Grid size={{ xs: 12, sm: 12 }}>
+              <Divider />
+            </Grid>
+            <CustomFieldUI fields={data.modifiers} mref={modifiersRef} />
+          </Grid>
+        )}
+        <InputField
+          fullWidth
+          name="description"
+          slotProps={{ htmlInput: { maxLength: 1280 } }}
+          label={labels.description}
+          defaultValue={line?.description ?? ""}
+          multiline
+          rows={2}
+        />
+      </VBox>
+    </form>
+  );
+}
+
+function CustomerChooser({ data }: { data: CustomerQueryData }) {
   // Default culture
-  const defaultCulture = getDefaultCulture();
+  data.culture ??= app.system.getDefaultCulture();
 
   // Layout
   return (
     <VBox gap={1} spacing={1} paddingTop={1}>
-      <CustomerList name="customerId" idValue={customerId} inputRequired />
-      <CurrencyList value={defaultCurrency} fullWidth required />
-      <CultureList value={defaultCulture} fullWidth required />
+      <CustomerList name="customerId" idValue={data.customerId} inputRequired />
+      <CurrencyList value={data.currency} fullWidth required />
+      <CultureList value={data.culture} fullWidth required />
     </VBox>
   );
 }
+
+type CustomerQueryData = Pick<
+  QueryForSaleRQ,
+  "customerId" | "currency" | "culture"
+>;
+
+type CustomerQuery = Omit<QueryForSaleRQ, "queryPaging"> & {
+  queryPaging: QueryPagingData;
+};
+
+type CustomerData = {
+  data?: CustomerReadForSaleData;
+  promotions: PromotionItem[];
+  query: CustomerQuery;
+};
+
+type OrderLine = {
+  id: string;
+  productId: number;
+  title: string;
+  description?: string;
+  originalPrice: number;
+  price: number;
+  qty: number;
+  amount: number;
+  discount: number;
+  promotions?: PromotionCodeCalculation[];
+  data?: Record<string, unknown>;
+};
 
 export default function AddOrder() {
   // Route
@@ -66,62 +377,227 @@ export default function AddOrder() {
     "assignedId",
     "category",
     "chooseCustomer",
-    "productName"
+    "productName",
+    "promotions"
   );
 
-  const [cart, setCart] = React.useState<QueryForSaleRQ>();
+  const queryRef = React.useRef<CustomerData>(undefined);
 
   const [products, setProducts] = React.useState<QueryForSaleData[]>();
+  const [orderLines, setOrderLines] = React.useState<OrderLine[]>([]);
+  const [moreProducts, setMoreProducts] = React.useState<boolean>(false);
+
+  // Watch container
+  const searchBarWidthRef = React.useRef<number>(0);
+  const { dimensions } = useDimensions(1, (_, rect) => {
+    if (rect.width - searchBarWidthRef.current <= 32) {
+      return false;
+    }
+
+    if (rect.width > searchBarWidthRef.current) {
+      searchBarWidthRef.current = rect.width;
+    }
+
+    return true;
+  });
+
+  // Load products
+  const initPagingData: QueryPagingData = {
+    currentPage: 0,
+    batchSize: 15,
+    orderBy: [{ field: "id", desc: false, unique: true }]
+  };
+
+  const loadProducts = async (reset: boolean = false) => {
+    if (queryRef.current == null) return;
+
+    const items = await app.productApi.queryForSale(queryRef.current.query);
+    if (items == null) return;
+
+    if (products == null || reset) {
+      setProducts(items);
+    } else {
+      setProducts([...products, ...items]);
+    }
+
+    setMoreProducts(items.length >= initPagingData.batchSize);
+  };
+
+  const observerRef = React.useRef<IntersectionObserver>(undefined);
+  const divRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (cart) {
-      app.productApi
-        .queryForSale({ ...cart, queryPaging: 15 })
-        .then((items) => {
-          setProducts(items);
-        });
-    } else {
-      app.showInputDialog({
-        title: labels.chooseCustomer,
-        message: "",
-        callback: async (form) => {
-          // Cancelled
-          if (form == null) {
-            navigate(id > 0 ? "./../.." : "./..");
-            return;
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = undefined;
+    }
+
+    if (!moreProducts) {
+      return;
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && queryRef.current) {
+          const query = queryRef.current.query.queryPaging;
+          if (query.currentPage != null) {
+            query.currentPage++;
           }
 
-          // Validate form
-          if (!form.reportValidity()) {
-            return false;
+          if (products != null && products.length > 0) {
+            const lastItem = products[products.length - 1];
+            query.keysets = [lastItem.id];
           }
 
-          // Form data
-          const { customerId, currency, culture } = DomUtils.dataAs(
-            new FormData(form),
-            {
-              customerId: "number",
-              currency: "string",
-              culture: "string"
+          loadProducts();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (divRef.current) {
+      observerRef.current.observe(divRef.current);
+    }
+
+    return () => observerRef.current?.disconnect();
+  }, [products, moreProducts]);
+
+  // Add order item
+  const addOrderItem = (
+    data: QueryForSaleData,
+    orderLine?: OrderLine,
+    onClear?: () => void
+  ) => {
+    const title =
+      app.get("add") + (data.assignedId ? ` (${data.assignedId})` : "");
+    const notifier = app.notifier.data<OrderLine>(
+      <AddItem
+        data={data}
+        line={orderLine}
+        mRef={React.createRef<NotificationMUDataMethods>()}
+        onClear={() => {
+          onClear?.();
+          notifier.dismiss();
+        }}
+      />,
+      (line) => {
+        if (line == null) return;
+
+        setOrderLines((prev) => {
+          // Check id
+          const idIndex = prev.findIndex((item) => item.id === line.id);
+          if (idIndex >= 0) {
+            prev[idIndex] = line;
+            return [...prev];
+          } else {
+            // Check if product already exists
+            // with same name, description and modifiers
+            const existingItem = prev.find(
+              (item) =>
+                item.productId === line.productId &&
+                item.title === line.title &&
+                item.description === line.description &&
+                data.promotions.length === 0 &&
+                JSON.stringify(item.data) === JSON.stringify(line.data)
+            );
+
+            if (existingItem) {
+              // Update quantity and amount
+              existingItem.qty += line.qty;
+              existingItem.amount += line.amount;
+              return [...prev];
+            } else {
+              return [...prev, line];
             }
-          );
-
-          if (!customerId || !currency || !culture) {
-            return false;
           }
+        });
+      },
+      title
+    );
+  };
 
-          setCart({
+  // Choose customer
+  const chooseCustomer = (data?: CustomerQueryData | number) => {
+    if (data == null) {
+      data = { currency: app.system.getDefaultCurrency() };
+    } else if (typeof data === "number") {
+      data = { customerId: data, currency: app.system.getDefaultCurrency() };
+    }
+
+    app.showInputDialog({
+      title: labels.chooseCustomer,
+      message: "",
+      callback: async (form) => {
+        // Cancelled
+        if (form == null) {
+          if (queryRef.current == null) {
+            navigate(id > 0 ? "./../.." : "./..");
+          }
+          return;
+        }
+
+        // Validate form
+        if (!form.reportValidity()) {
+          return false;
+        }
+
+        // Form data
+        const { customerId, currency, culture } = DomUtils.dataAs(
+          new FormData(form),
+          {
+            customerId: "number",
+            currency: "string",
+            culture: "string"
+          }
+        );
+
+        if (!customerId || !currency || !culture) {
+          return false;
+        }
+
+        // Load customer data
+        const data = await app.customerApi.readForSale(customerId);
+        if (data == null) {
+          return false;
+        }
+
+        const promotions = [
+          ...data.promotions,
+          ...(data.customer?.promotions ?? [])
+        ];
+
+        queryRef.current = {
+          data,
+          promotions,
+          query: {
             customerId,
             currency,
-            culture: culture === getDefaultCulture() ? undefined : culture
-          });
+            culture:
+              culture === app.system.getDefaultCulture() ? undefined : culture,
+            queryPaging: { ...initPagingData }
+          }
+        };
 
-          return true;
-        },
-        inputs: <CustomerChooser customerId={customerId} />
-      });
-    }
-  }, [cart]);
+        loadProducts(true);
+
+        return true;
+      },
+      inputs: <CustomerChooser data={data} />
+    });
+  };
+
+  function formatCart(lines: OrderLine[]) {
+    const total = lines.reduce((sum, line) => sum + line.amount, 0);
+    const discount = lines.reduce((sum, line) => sum + line.discount, 0);
+    const qty = lines.reduce((sum, line) => sum + line.qty, 0);
+
+    return `${qty}${discount > 0 ? `\n(-${currencySymbol}${app.formatNumber(discount)})\n` : ""}${currencySymbol}${app.formatNumber(total)}`;
+  }
+
+  React.useEffect(() => {
+    if (queryRef.current != null) return;
+    chooseCustomer(customerId);
+  }, []);
 
   const theme = useTheme();
   const cols = useMediaQuery(theme.breakpoints.down("sm"))
@@ -132,49 +608,113 @@ export default function AddOrder() {
         ? 3
         : 5;
 
-  if (products == null) {
+  const searchBarWidth = (dimensions[0][2]?.width ?? 0) - 172;
+
+  if (products == null || queryRef.current == null) {
     return <LinearProgress />;
   }
 
-  const symbol = NumberUtils.getCurrencySymbol(cart?.currency!);
+  currencySymbol = queryRef.current.query.currency
+    ? NumberUtils.getCurrencySymbol(queryRef.current.query.currency)
+    : undefined;
+
+  const promotions = queryRef.current.promotions;
 
   return (
     <React.Fragment>
       <AppBar position="sticky">
-        <Toolbar>
-          <SearchBar
-            fields={[
-              <SearchField
-                label={labels.productName}
-                name="keyword"
-                minChars={2}
-              />,
-              <SearchField
-                label={labels.assignedId}
-                name="AssignedIdStart"
-                minChars={3}
-              />,
-              <ProductCategoryTiplist
-                label={labels.category}
-                name="categoryIdAll"
-                search
-              />
-            ]}
-            className="searchBarGrid"
-            width={300}
-            top={true}
-            onSubmit={(data, reset) => {
-              const { keyword, assignedIdStart, categoryIdAll } = reset
-                ? {}
-                : DomUtils.dataAs(data, {
-                    keyword: "string",
-                    assignedIdStart: "string",
-                    categoryIdAll: "number"
-                  });
+        <Toolbar
+          disableGutters
+          sx={{
+            paddingX: 1,
+            gap: 1,
+            backgroundColor: theme.palette.background.default
+          }}
+          ref={dimensions[0][0]}
+        >
+          {searchBarWidth > 0 ? (
+            <React.Fragment>
+              <IconButton
+                onClick={() => chooseCustomer(queryRef.current?.query)}
+                title={queryRef.current?.data?.customer?.name}
+                size="small"
+              >
+                <Avatar>{queryRef.current?.data?.customer?.name}</Avatar>
+              </IconButton>
+              {promotions.length > 0 && (
+                <MenuButton<PromotionItem>
+                  items={promotions}
+                  labelField="title"
+                  button={(clickHandler) => {
+                    return (
+                      <IconButton
+                        onClick={clickHandler}
+                        size="small"
+                        title={[
+                          labels.promotions,
+                          ...promotions!.map((p) => p.title)
+                        ].join("\n")}
+                      >
+                        <Badge
+                          badgeContent={promotions.length}
+                          color="secondary"
+                        >
+                          <CelebrationIcon color="action" />
+                        </Badge>
+                      </IconButton>
+                    );
+                  }}
+                />
+              )}
+              <SearchBar
+                fields={[
+                  <SearchField
+                    label={labels.productName}
+                    name="keyword"
+                    minChars={2}
+                  />,
+                  <SearchField
+                    label={labels.assignedId}
+                    name="assignedIdStart"
+                  />,
+                  <ProductCategoryTiplist
+                    label={labels.category}
+                    name="categoryIdAll"
+                    search
+                  />
+                ]}
+                width={searchBarWidth}
+                top={true}
+                autoSubmitDelay={0}
+                onSubmit={(data, reset) => {
+                  const { keyword, assignedIdStart, categoryIdAll } = reset
+                    ? {}
+                    : DomUtils.dataAs(data, {
+                        keyword: "string",
+                        assignedIdStart: "string",
+                        categoryIdAll: "number"
+                      });
 
-              setCart({ ...cart!, keyword, assignedIdStart, categoryIdAll });
-            }}
-          />
+                  if (queryRef.current?.query != null) {
+                    queryRef.current.query = {
+                      ...queryRef.current.query,
+                      keyword,
+                      assignedIdStart,
+                      categoryIdAll,
+                      queryPaging: { ...initPagingData }
+                    };
+
+                    loadProducts(true);
+                  }
+                }}
+              />
+              <IconButton title={formatCart(orderLines)}>
+                <Badge badgeContent={orderLines.length} color="warning">
+                  <ShoppingCartIcon color="primary" />
+                </Badge>
+              </IconButton>
+            </React.Fragment>
+          ) : undefined}
         </Toolbar>
       </AppBar>
       <CommonPage paddings={0}>
@@ -192,22 +732,47 @@ export default function AddOrder() {
               <ImageListItemBar
                 title={
                   <VBox whiteSpace="wrap">
-                    <Typography>{p.name}</Typography>
+                    <Typography>{formatName(p)}</Typography>
                     {p.description && (
                       <Typography variant="caption">{p.description}</Typography>
                     )}
-                    <HBox>
-                      <Typography variant="body1">
-                        {symbol}
-                        {app.formatNumber(p.retailPrice)} /{" "}
-                        {p.assetQty && p.assetQty > 1 ? `${p.assetQty}` : ""}
-                        {p.unitName}
-                      </Typography>
-                    </HBox>
-                    <HBox justifyContent="flex-end">
-                      <IconButton color="warning">
-                        <AddShoppingCartIcon />
-                      </IconButton>
+                    <HBox>{formatPriceLine(p)}</HBox>
+                    <HBox
+                      alignItems="center"
+                      justifyContent="flex-end"
+                      height={40}
+                      gap={0.5}
+                    >
+                      {orderLines
+                        .filter((line) => line.productId === p.id)
+                        .map((line) => (
+                          <Chip
+                            key={line.id}
+                            label={line.qty}
+                            title={`${currencySymbol}${app.formatNumber(line.amount)}`}
+                            clickable
+                            color="success"
+                            onClick={() =>
+                              addOrderItem(p, line, () => {
+                                // Clear the line
+                                setOrderLines((prev) =>
+                                  prev.filter((item) => item.id !== line.id)
+                                );
+                              })
+                            }
+                          />
+                        ))}
+                      {(p.promotions.length === 0 ||
+                        !orderLines.some(
+                          (line) => line.productId === p.id
+                        )) && (
+                        <IconButton
+                          color="warning"
+                          onClick={() => addOrderItem(p)}
+                        >
+                          <AddShoppingCartIcon />
+                        </IconButton>
+                      )}
                     </HBox>
                   </VBox>
                 }
@@ -215,6 +780,7 @@ export default function AddOrder() {
             </ImageListItem>
           ))}
         </ImageList>
+        {moreProducts && <div ref={divRef} style={{ height: 48 }} />}
       </CommonPage>
     </React.Fragment>
   );

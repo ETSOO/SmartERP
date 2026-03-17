@@ -66,6 +66,7 @@ namespace CRM.Server
     // Customer
     [JsonSerializable(typeof(CustomerListData[]))]
     [JsonSerializable(typeof(CustomerQueryData[]))]
+    [JsonSerializable(typeof(CustomerReadForSaleData))]
     [JsonSerializable(typeof(CustomerUpdateReadData))]
 
     [JsonSerializable(typeof(CustomerCreateRQ))]

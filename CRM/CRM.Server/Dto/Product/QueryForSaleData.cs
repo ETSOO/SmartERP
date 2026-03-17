@@ -1,4 +1,5 @@
 ﻿using PlatformShared.Dto;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CRM.Server.Dto.Product
@@ -119,6 +120,12 @@ namespace CRM.Server.Dto.Product
         public required string UnitName { get; set; }
 
         /// <summary>
+        /// Modifiers
+        /// 定制选项
+        /// </summary>
+        public JsonDocument? Modifiers { get; init; }
+
+        /// <summary>
         /// Categories
         /// 类目
         /// </summary>
@@ -142,6 +149,6 @@ namespace CRM.Server.Dto.Product
         /// Promotions
         /// 促销
         /// </summary>
-        public IEnumerable<PromotionItem>? Promotions { get; set; }
+        public IEnumerable<PromotionItem> Promotions { get; set; } = [];
     }
 }

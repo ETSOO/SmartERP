@@ -374,6 +374,24 @@ namespace CRM.Server.Services
         public async Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
+            var customerId = rq.CustomerId;
+
+            IEnumerable<int>? customerCategories = null;
+            if (customerId.HasValue)
+            {
+                // Validate the customer id in the organization
+                var customerData = await _db.Customers(orgId).AsNoTracking()
+                    .Where(c => c.Id == customerId)
+                    .Select(c => new { c.Id, c.CategoryIdsAll})
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (customerData == null)
+                {
+                    return [];
+                }
+
+                customerCategories = customerData.CategoryIdsAll;
+            }
 
             // Products & prices
             var products = await _db.Products(orgId).AsNoTracking()
@@ -404,9 +422,10 @@ namespace CRM.Server.Services
                         }
                         else
                         {
-                            q = q.Where(ou => EF.Functions.ILike(ou.Name, $"%{keyword}%")
-                            || (ou.QueryKeyword != null && EF.Functions.ILike(ou.QueryKeyword, $"%{keyword}%"))
-                            || (ou.Description != null && EF.Functions.ILike(ou.Description, $"%{keyword}%"))
+                            var format = $"%{keyword}%";
+                            q = q.Where(p => EF.Functions.ILike(p.Name, format)
+                            || (p.QueryKeyword != null && EF.Functions.ILike(p.QueryKeyword, format))
+                            || (p.Description != null && EF.Functions.ILike(p.Description, format))
                             );
                         }
                     }
@@ -429,6 +448,7 @@ namespace CRM.Server.Services
                     PromotionPrice = pp.PromotionPrice,
                     UnitId = p.UnitId,
                     UnitName = p.Unit.Name,
+                    Modifiers = p.Modifiers,
                     CategoryIds = p.CategoryIds,
                     CategoryIdsAll = p.CategoryIdsAll
                 })
@@ -452,7 +472,11 @@ namespace CRM.Server.Services
                     && pr.ValidStart <= now
                     && pr.ValidEnd >= now
                     && ((pr.ProductIds != null && pr.ProductIds.Any(pid => productIds.Contains(pid)))
-                        || (pr.ProductCategoryIds != null && pr.ProductCategoryIds.Any(cid => allCategoryIds.Contains(cid)))))
+                        || (pr.ProductCategoryIds != null && pr.ProductCategoryIds.Any(cid => allCategoryIds.Contains(cid))))
+                    && ((pr.PersonIds == null && pr.PersonCategoryIds == null) || (pr.PersonIds != null && customerId.HasValue && pr.PersonIds.Contains(customerId.Value)
+                        || (pr.PersonCategoryIds != null && customerCategories != null && pr.PersonCategoryIds.Any(pc => customerCategories.Contains(pc)))))
+                )
+                .OrderBy(pr => pr.OrderIndex).ThenBy(pr => pr.Id)
                 .Select(pr => new
                 {
                     pr.ProductIds,
@@ -576,10 +600,10 @@ namespace CRM.Server.Services
             }
 
             // Customer prices
-            if (rq.CustomerId.HasValue)
+            if (customerId.HasValue)
             {
                 var cps = await _db.PersonProducts.AsNoTracking()
-                    .Where(cp => cp.PersonId == rq.CustomerId.Value
+                    .Where(cp => cp.PersonId == customerId.Value
                         && productIds.Contains(cp.ProductId))
                     .Select(cp => new { cp.ProductId, cp.AssignedId, cp.JsonData })
                     .ToArrayAsync(cancellationToken);

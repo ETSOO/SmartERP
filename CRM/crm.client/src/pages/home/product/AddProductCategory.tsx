@@ -16,7 +16,6 @@ import {
   ProductCategoryAssignedIdDuplicateTest,
   ProductCategoryTiplist
 } from "@etsoo/smarterp-crm/components";
-import { Permissions } from "@etsoo/smarterp-crm";
 import { NameCulture } from "../../../components/NameCulture";
 
 export default function AddProductCategory() {
@@ -29,10 +28,7 @@ export default function AddProductCategory() {
   const isEditing = (id ?? 0) > 0;
 
   // Culture permission
-  const canManageCultures =
-    isEditing &&
-    app.owns(Permissions.Org.Manage) &&
-    (app.userData?.system?.cultures.length ?? 0) > 1;
+  const canManageCultures = isEditing && app.system.canManageCultures();
 
   // Labels
   const labels = app.getLabels("nameB", "noChanges", "parentCategory");

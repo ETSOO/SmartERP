@@ -3,9 +3,11 @@
   "allProfiles": "所有檔案",
   "basicInfo": "基本信息",
   "clickToView": "點擊左側列表項目瀏覽...",
+  "customerOrCategoryRequired": "客戶或客戶分類必填",
   "dropFilesLabel": "拖放文件到這裡，或者",
   "flowchart": "流程圖",
   "latestTasks": "最近的任務",
+  "productOrCategoryRequired": "產品或產品分類必填",
   "productUnitTip": "如果沒有產品使用該產品單位，清除基礎單位可刪除該項目",
   "smarterpCRM": "司友雲ERP業務管理",
   "updateSystemSettings": "更新系統設置"

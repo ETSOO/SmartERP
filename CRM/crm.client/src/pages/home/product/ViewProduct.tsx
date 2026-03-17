@@ -145,9 +145,7 @@ export default function ViewProduct() {
   );
 
   // Culture permission
-  const canManageCultures =
-    app.owns(Permissions.Org.Manage) &&
-    (app.userData?.system?.cultures.length ?? 0) > 1;
+  const canManageCultures = app.system.canManageCultures();
 
   const editable = app.owns(Permissions.Product.Edit);
 

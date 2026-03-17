@@ -58,7 +58,7 @@ export default function Assets() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const defaultCurrency = app.userData?.system?.currencies[0] ?? app.currency;
+  const defaultCurrency = app.system.getDefaultCurrency();
 
   // Page data hook
   usePageDataEmpty(app);

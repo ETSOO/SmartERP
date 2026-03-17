@@ -23,7 +23,6 @@ import {
 } from "@etsoo/smarterp-crm/components";
 import { IdentityTypeFlags } from "@etsoo/appscript";
 import { ButtonIdentityTypes } from "@etsoo/smarterp-core/components";
-import { Permissions } from "@etsoo/smarterp-crm";
 import { NameCulture } from "../../../components/NameCulture";
 
 export default function AddCategory() {
@@ -41,10 +40,7 @@ export default function AddCategory() {
   const isEditing = (id ?? 0) > 0;
 
   // Culture permission
-  const canManageCultures =
-    isEditing &&
-    app.owns(Permissions.Org.Manage) &&
-    (app.userData?.system?.cultures.length ?? 0) > 1;
+  const canManageCultures = isEditing && app.system.canManageCultures();
 
   // Labels
   const labels = app.getLabels("nameB", "noChanges", "parentCategory");
