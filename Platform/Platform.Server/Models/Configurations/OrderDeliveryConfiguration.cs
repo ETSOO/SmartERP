@@ -25,6 +25,7 @@ namespace Platform.Server.Models.Configurations
                 .HasDefaultValue(true)
                 .HasColumnName("is_valid");
             entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.OrderIndex).HasColumnName("order_index");
             entity.Property(e => e.Title)
                 .HasMaxLength(256)
                 .HasColumnName("title");

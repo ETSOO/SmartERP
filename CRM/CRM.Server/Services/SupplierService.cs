@@ -174,8 +174,7 @@ namespace CRM.Server.Services
 
             if (rq.Tags?.Any() is true)
             {
-                var tagKind = _commonService.GetTagKind(IdentityTypeFlags.Supplier);
-                var tagIds = await _commonService.AddTagsAsync(tagKind, rq.Tags, cancellationToken);
+                var tagIds = await _commonService.AddTagsAsync(FeatureTagKind.Supplier, rq.Tags, cancellationToken);
                 supplier.Tags = [.. tagIds];
             }
 
@@ -414,8 +413,7 @@ namespace CRM.Server.Services
             {
                 if (rq.Tags?.Any() is true)
                 {
-                    var tagKind = _commonService.GetTagKind(IdentityTypeFlags.Supplier);
-                    var tagIds = await _commonService.AddTagsAsync(tagKind, rq.Tags, cancellationToken);
+                    var tagIds = await _commonService.AddTagsAsync(FeatureTagKind.Supplier, rq.Tags, cancellationToken);
                     supplier.Tags = [.. tagIds];
                 }
                 else

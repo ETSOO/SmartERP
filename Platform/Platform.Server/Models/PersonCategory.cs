@@ -27,6 +27,8 @@ public partial class PersonCategory
 
     public List<int>? ParentIds { get; set; }
 
+    public string? Attributes { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<PersonCategory> InverseParent { get; set; } = new List<PersonCategory>();

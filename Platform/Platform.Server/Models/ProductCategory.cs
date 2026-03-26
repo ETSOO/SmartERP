@@ -27,6 +27,8 @@ public partial class ProductCategory
 
     public List<int>? ParentIds { get; set; }
 
+    public string? Attributes { get; set; }
+
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<ProductCategory> InverseParent { get; set; } = new List<ProductCategory>();

@@ -9,6 +9,8 @@
   "latestTasks": "最近的任务",
   "productOrCategoryRequired": "产品或产品分类必填",
   "productUnitTip": "如果没有产品使用该产品单位，清除基础单位可删除该项目",
+  "productDisappeared": "产品已不存在: {0}",
   "smarterpCRM": "司友云ERP业务管理",
+  "tooManyItemsToDisplay": "项目过多，无法展示",
   "updateSystemSettings": "更新系统设置"
 }

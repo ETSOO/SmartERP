@@ -321,13 +321,11 @@ namespace PlatformShared.Extentions
         /// 查询订单
         /// </summary>
         /// <param name="db">Database context</param>
-        /// <param name="user">Current user</param>
+        /// <param name="orgId">Current organization</param>
         /// <returns>Result</returns>
-        public static IQueryable<OrderHeader> Orders(this MyDbContext db, CurrentUser user)
+        public static IQueryable<OrderHeader> Orders(this MyDbContext db, int orgId)
         {
-            return db.OrderHeaders.Where(p => p.CoreOrganizationId == user.OrganizationInt
-                && p.SellerId == user.Pid
-            );
+            return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId);
         }
 
         /// <summary>

@@ -24,6 +24,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)
                 .HasColumnName("assigned_id");
+            entity.Property(e => e.Attributes)
+                .HasColumnType("jsonb")
+                .HasColumnName("attributes");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")

@@ -9,6 +9,8 @@
   "latestTasks": "Latest tasks",
   "productOrCategoryRequired": "Product or product category is required",
   "productUnitTip": "If no products are using this product unit, clearing the base unit will delete this item",
+  "productDisappeared": "Product(s) has disappeared: {0}",
   "smarterpCRM": "SmartERP Business Management",
+  "tooManyItemsToDisplay": "Too many items to display",
   "updateSystemSettings": "Update system settings"
 }

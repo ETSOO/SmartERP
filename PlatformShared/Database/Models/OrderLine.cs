@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using PlatformShared.Dto;
+using System.Text.Json;
 
 namespace PlatformShared.Database.Models
 {
@@ -91,19 +92,19 @@ namespace PlatformShared.Database.Models
         /// Promotions
         /// 促销细节
         /// </summary>
-        public IEnumerable<PromotionItem>? Promotions { get; set; }
+        public IEnumerable<PromotionSaleItem>? Promotions { get; set; }
 
         /// <summary>
         /// Start time
         /// 开始时间
         /// </summary>
-        public DateTime? StartTime { get; set; }
+        public DateTimeOffset? StartTime { get; set; }
 
         /// <summary>
         /// End time
         /// 结束时间
         /// </summary>
-        public DateTime? EndTime { get; set; }
+        public DateTimeOffset? EndTime { get; set; }
 
         /// <summary>
         /// Asset id
@@ -127,6 +128,18 @@ namespace PlatformShared.Database.Models
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; set; }
+        public JsonDocument? Data { get; set; }
+
+        /// <summary>
+        /// Order
+        /// 订单
+        /// </summary>
+        public OrderHeader Order { get; set; } = default!;
+
+        /// <summary>
+        /// Product
+        /// 产品
+        /// </summary>
+        public Product Product { get; set; } = default!;
     }
 }

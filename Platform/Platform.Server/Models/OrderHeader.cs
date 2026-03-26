@@ -71,6 +71,10 @@ public partial class OrderHeader
 
     public bool IsOrder { get; set; }
 
+    public decimal TaxAmount { get; set; }
+
+    public decimal ApprovedDiscount { get; set; }
+
     public virtual PersonAddress? Address { get; set; }
 
     public virtual Person Buyer { get; set; } = null!;

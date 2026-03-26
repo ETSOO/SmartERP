@@ -97,6 +97,8 @@ public partial class Person
 
     public List<short>? PermissonExcluded { get; set; }
 
+    public List<int>? CategoryIdsAll { get; set; }
+
     public virtual CoreOrganization? CoreOrganization { get; set; }
 
     public virtual CoreUser? CoreUser { get; set; }

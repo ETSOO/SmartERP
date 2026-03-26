@@ -70,6 +70,7 @@ export default function Home() {
     "assets",
     "contacts",
     "categories",
+    "confirmOrder",
     "customers",
     "depts",
     "edit",
@@ -348,6 +349,11 @@ export default function Home() {
           {
             segment: "add",
             title: labels.add,
+            hidden: true
+          },
+          {
+            segment: "confirm",
+            title: labels.confirmOrder,
             hidden: true
           },
           {

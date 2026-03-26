@@ -62,6 +62,16 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasDefaultValue(EntityStatus.Normal)
                 .HasColumnName("status");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderLines)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("order_line_order_id_fkey");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.OrderLines)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("order_line_product_id_fkey");
         }
     }
 }

@@ -29,6 +29,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("avatar");
             entity.Property(e => e.Birthday).HasColumnName("birthday");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
+            entity.Property(e => e.CategoryIdsAll).HasColumnName("category_ids_all");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)

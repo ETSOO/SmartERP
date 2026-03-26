@@ -160,7 +160,7 @@ namespace PlatformShared.Database.Models
         /// Asset qty
         /// 资产数量
         /// </summary>
-        public int? AssetQty { get; set; }
+        public short? AssetQty { get; set; }
 
         /// <summary>
         /// Assigned id
@@ -251,6 +251,12 @@ namespace PlatformShared.Database.Models
         /// 资产
         /// </summary>
         public ICollection<PersonAsset> Assets { get; set; } = default!;
+
+        /// <summary>
+        /// Order lines
+        /// 订单项目
+        /// </summary>
+        public ICollection<OrderLine> OrderLines { get; set; } = default!;
 
         /// <summary>
         /// Person products

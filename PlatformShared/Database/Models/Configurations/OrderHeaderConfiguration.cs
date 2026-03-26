@@ -18,6 +18,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.IsOrder).HasColumnName("is_order");
             entity.Property(e => e.Source)
                 .HasMaxLength(20)
                 .HasColumnName("source");
@@ -82,6 +83,12 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.DeliveryInstruction)
                 .HasMaxLength(256)
                 .HasColumnName("delivery_instruction");
+            entity.Property(e => e.TaxAmount)
+                .HasColumnType("money")
+                .HasColumnName("tax_amount");
+            entity.Property(e => e.ApprovedDiscount)
+                .HasColumnType("money")
+                .HasColumnName("approved_discount");
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
                 .HasColumnName("data");

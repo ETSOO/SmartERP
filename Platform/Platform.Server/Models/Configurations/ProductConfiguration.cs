@@ -29,6 +29,7 @@ namespace Platform.Server.Models.Configurations
                 .HasPrecision(12, 2)
                 .HasColumnName("cap_qty");
             entity.Property(e => e.CategoryIds).HasColumnName("category_ids");
+            entity.Property(e => e.CategoryIdsAll).HasColumnName("category_ids_all");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
@@ -39,6 +40,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Description)
                 .HasMaxLength(2560)
                 .HasColumnName("description");
+            entity.Property(e => e.IntroductionUrl)
+                .HasMaxLength(256)
+                .HasColumnName("introduction_url");
             entity.Property(e => e.InventoryWay).HasColumnName("inventory_way");
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)
@@ -46,6 +50,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.MinQty)
                 .HasPrecision(6, 2)
                 .HasColumnName("min_qty");
+            entity.Property(e => e.Modifiers)
+                .HasColumnType("jsonb")
+                .HasColumnName("modifiers");
             entity.Property(e => e.Name)
                 .HasMaxLength(256)
                 .HasColumnName("name");
@@ -59,6 +66,9 @@ namespace Platform.Server.Models.Configurations
                 .HasPrecision(6, 2)
                 .HasColumnName("step_qty");
             entity.Property(e => e.Tags).HasColumnName("tags");
+            entity.Property(e => e.TaxRate)
+                .HasPrecision(4, 2)
+                .HasColumnName("tax_rate");
             entity.Property(e => e.UnitId).HasColumnName("unit_id");
             entity.Property(e => e.Usage).HasColumnName("usage");
 

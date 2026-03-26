@@ -11,17 +11,11 @@ public partial class PersonProduct
 
     public int ProductId { get; set; }
 
-    public string? Name { get; set; }
-
-    public string? Description { get; set; }
-
     public string? AssignedId { get; set; }
 
-    public string? Currency { get; set; }
-
-    public decimal? RetailPrice { get; set; }
-
     public DateTime UpdatedTime { get; set; }
+
+    public string? JsonData { get; set; }
 
     public virtual Person Person { get; set; } = null!;
 

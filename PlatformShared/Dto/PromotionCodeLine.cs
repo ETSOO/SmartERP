@@ -1,22 +1,22 @@
 ﻿namespace PlatformShared.Dto
 {
     /// <summary>
-    /// Promotion code line interface
-    /// 促销码行数据接口
+    /// Promotion code line
+    /// 促销码行数据
     /// </summary>
-    public interface IPromotionCodeLine
+    public record PromotionCodeLine : IPromotionCodeLine
     {
         /// <summary>
         /// Price
         /// 成交价格
         /// </summary>
-        public decimal Price { get; }
+        public decimal Price { get; init; }
 
         /// <summary>
         /// Qty
         /// 数量
         /// </summary>
-        public decimal Qty { get; }
+        public decimal Qty { get; init; }
 
         /// <summary>
         /// Current price

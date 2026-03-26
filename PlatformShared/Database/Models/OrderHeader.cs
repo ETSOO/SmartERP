@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using PlatformShared.Dto;
+using System.Text.Json;
 
 namespace PlatformShared.Database.Models
 {
@@ -99,6 +100,24 @@ namespace PlatformShared.Database.Models
         /// 核心机构（订单所属机构）编号
         /// </summary>
         public int CoreOrganizationId { get; set; }
+
+        /// <summary>
+        /// Is order or purchase order
+        /// 是订单还是采购
+        /// </summary>
+        public bool IsOrder { get; init; }
+
+        /// <summary>
+        /// Tax amount
+        /// 纳税金额
+        /// </summary>
+        public decimal TaxAmount { get; set; }
+
+        /// <summary>
+        /// Approved discount
+        /// 授权折扣
+        /// </summary>
+        public decimal ApprovedDiscount { get; set; }
 
         /// <summary>
         /// User Id
@@ -206,7 +225,7 @@ namespace PlatformShared.Database.Models
         /// Promotions
         /// 促销细节
         /// </summary>
-        public IEnumerable<PromotionItem>? Promotions { get; set; }
+        public IEnumerable<PromotionSaleItem>? Promotions { get; set; }
 
         /// <summary>
         /// Culture
@@ -218,7 +237,7 @@ namespace PlatformShared.Database.Models
         /// Payment way
         /// 付款方式
         /// </summary>
-        public OrderPaymentId? PaymentId { get; set; }
+        public int? PaymentId { get; set; }
 
         /// <summary>
         /// Payment instruction
@@ -230,7 +249,13 @@ namespace PlatformShared.Database.Models
         /// Delivery way
         /// 发货方式
         /// </summary>
-        public short? DeliveryId { get; set; }
+        public int? DeliveryId { get; set; }
+
+        /// <summary>
+        /// Delivery instruction
+        /// 发货说明
+        /// </summary>
+        public string? DeliveryInstruction { get; set; }
 
         /// <summary>
         /// Delivery address id
@@ -243,12 +268,6 @@ namespace PlatformShared.Database.Models
         /// 联系人编号
         /// </summary>
         public long? ContactId { get; set; }
-
-        /// <summary>
-        /// Delivery instruction
-        /// 发货说明
-        /// </summary>
-        public string? DeliveryInstruction { get; set; }
 
         /// <summary>
         /// Creation
@@ -266,7 +285,7 @@ namespace PlatformShared.Database.Models
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; set; }
+        public JsonDocument? Data { get; set; }
 
         /// <summary>
         /// Tags (id)
@@ -285,6 +304,12 @@ namespace PlatformShared.Database.Models
         /// 销售方
         /// </summary>
         public Person Seller { get; set; } = null!;
+
+        /// <summary>
+        /// Order lines
+        /// 订单项目
+        /// </summary>
+        public ICollection<OrderLine> OrderLines { get; set; } = default!;
 
         /// <summary>
         /// Profiles

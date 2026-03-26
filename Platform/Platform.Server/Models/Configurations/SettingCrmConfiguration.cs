@@ -32,6 +32,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.SupplierCurrencies)
                 .HasColumnType("character(3)[]")
                 .HasColumnName("supplier_currencies");
+            entity.Property(e => e.TaxRate)
+                .HasPrecision(4, 2)
+                .HasColumnName("tax_rate");
 
             entity.HasOne(d => d.IdNavigation).WithOne(p => p.SettingCrm)
                 .HasForeignKey<SettingCrm>(d => d.Id)

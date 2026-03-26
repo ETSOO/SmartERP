@@ -25,6 +25,10 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Amount)
                 .HasColumnType("money")
                 .HasColumnName("amount");
+            entity.Property(e => e.ApprovedDiscount)
+                .HasDefaultValueSql("0")
+                .HasColumnType("money")
+                .HasColumnName("approved_discount");
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)
                 .HasColumnName("assigned_id");
@@ -86,6 +90,10 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.StartDate).HasColumnName("start_date");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Tags).HasColumnName("tags");
+            entity.Property(e => e.TaxAmount)
+                .HasDefaultValueSql("0")
+                .HasColumnType("money")
+                .HasColumnName("tax_amount");
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");

@@ -22,19 +22,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)
                 .HasColumnName("assigned_id");
-            entity.Property(e => e.Currency)
-                .HasMaxLength(3)
-                .IsFixedLength()
-                .HasColumnName("currency");
-            entity.Property(e => e.Description)
-                .HasMaxLength(2560)
-                .HasColumnName("description");
-            entity.Property(e => e.Name)
-                .HasMaxLength(256)
-                .HasColumnName("name");
-            entity.Property(e => e.RetailPrice)
-                .HasColumnType("money")
-                .HasColumnName("retail_price");
+            entity.Property(e => e.JsonData)
+                .HasColumnType("jsonb")
+                .HasColumnName("json_data");
             entity.Property(e => e.UpdatedTime)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_time");

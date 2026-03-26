@@ -26,7 +26,6 @@ import { DomUtils, NumberUtils, Utils } from "@etsoo/shared";
 import {
   CustomerReadForSaleData,
   PromotionCodeCalculation,
-  PromotionItem,
   PromotionOrderLine,
   QueryForSaleData,
   QueryForSaleRQ
@@ -52,17 +51,24 @@ import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import { OrderUtils } from "../../../../../../../../EtsooUI/SmartERP/crm/lib/mjs/utils/Order";
 import Chip from "@mui/material/Chip";
-
-let currencySymbol: string | undefined;
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import { LocalUtils } from "../../../app/LocalUtils";
 
 function formatName(data: QueryForSaleData) {
   return data.assignedId ? `${data.assignedId} - ${data.name}` : data.name;
 }
 
-function formatPriceLine(data: QueryForSaleData, price?: number) {
+function formatPriceLine(
+  data: QueryForSaleData,
+  currencySymbol?: string,
+  price?: number
+) {
   price ??= app.order.getPrice(data);
   return (
-    <Typography variant="body1">
+    <Typography variant="body2">
       {currencySymbol}
       {app.formatNumber(price)}
       {price < data.retailPrice ? (
@@ -83,12 +89,14 @@ function formatPriceLine(data: QueryForSaleData, price?: number) {
 
 function AddItem({
   data,
+  currencySymbol,
   line,
   mRef,
   onClear
 }: NotificationMUDataProps & {
   data: QueryForSaleData;
-  line?: OrderLine;
+  currencySymbol?: string;
+  line?: LocalUtils.OrderLine;
   onClear?: () => void;
 }) {
   // Labels
@@ -150,7 +158,7 @@ function AddItem({
   }, [line]);
 
   React.useImperativeHandle(mRef, () => ({
-    getValue: (): OrderLine | undefined => {
+    getValue: (): LocalUtils.OrderLine | undefined => {
       if (formRef.current == null) return undefined;
 
       if (!formRef.current.reportValidity()) {
@@ -220,7 +228,7 @@ function AddItem({
             alignItems="center"
             justifyContent="flex-end"
           >
-            {formatPriceLine(data, price)} x
+            {formatPriceLine(data, currencySymbol, price)} x
           </Grid>
           <Grid
             size={{ xs: 12, sm: 7 }}
@@ -332,6 +340,174 @@ function CustomerChooser({ data }: { data: CustomerQueryData }) {
   );
 }
 
+function CartList({
+  currencySymbol,
+  lines,
+  promotions
+}: {
+  currencySymbol?: string;
+  lines: [LocalUtils.OrderLine, QueryForSaleData][];
+  promotions: PromotionCodeCalculation[];
+}) {
+  // Labels
+  const labels = app.getLabels("promotions", "total");
+
+  // Total amount
+  const total = lines.reduce((sum, [line]) => sum + line.amount, 0);
+  const pamount = promotions.reduce((sum, p) => sum + (p.amount ?? 0), 0);
+
+  return (
+    <List
+      sx={{
+        "& .MuiListItem-root": {
+          paddingRight: "160px"
+        }
+      }}
+    >
+      {lines.map(([line, product], index) => {
+        const lps = line.promotions ?? [];
+        return (
+          <React.Fragment key={line.id}>
+            {index > 0 && <Divider variant="inset" component="li" />}
+            <ListItem
+              alignItems="flex-start"
+              key={line.id}
+              secondaryAction={
+                <VBox sx={{ maxWidth: 140 }}>
+                  <HBox justifyContent="flex-end">
+                    {formatPriceLine(product, currencySymbol)}
+                  </HBox>
+                  <Typography variant="body2" align="right">
+                    x {line.qty} ={" "}
+                    <MoneyText
+                      value={line.price * line.qty}
+                      fontWeight={lps.length > 0 ? undefined : "bold"}
+                    />
+                  </Typography>
+                  {lps.length > 0 && (
+                    <Typography variant="body2" align="right">
+                      <MoneyText
+                        value={-lps.reduce((acc, p) => acc + p.amount, 0)}
+                        color="warning"
+                      />
+                      {" = "}
+                      <MoneyText value={line.amount} fontWeight="bold" />
+                    </Typography>
+                  )}
+                </VBox>
+              }
+            >
+              <ListItemAvatar title={formatName(product)}>
+                <Avatar src={product.logo} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={`${line.title}${product.assignedId ? ` (${product.assignedId})` : ""}`}
+                secondary={
+                  <React.Fragment>
+                    {lps.length > 0 && (
+                      <Typography
+                        variant="caption"
+                        align="right"
+                        color="warning"
+                      >
+                        ({labels.promotions}){" "}
+                      </Typography>
+                    )}
+                    {lps.map((p, index) => (
+                      <Typography variant="caption" align="right" key={p.id}>
+                        {index === 0 ? "" : "; "}
+                        {p.title}, <MoneyText value={-p.amount} />
+                      </Typography>
+                    ))}
+                    <Typography
+                      component="div"
+                      variant="body2"
+                      sx={{
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                      }}
+                    >
+                      {line.description}
+                    </Typography>
+                  </React.Fragment>
+                }
+                slotProps={{
+                  secondary: {
+                    component: "div"
+                  }
+                }}
+              />
+            </ListItem>
+          </React.Fragment>
+        );
+      })}
+      <Divider variant="inset" component="li" />
+      <ListItem
+        alignItems="flex-start"
+        secondaryAction={
+          <React.Fragment>
+            <Typography
+              variant="body2"
+              align="right"
+              paddingTop={{ xs: 0, sm: 2 }}
+            >
+              {currencySymbol}
+              <MoneyText
+                value={total}
+                fontWeight={promotions.length > 0 ? undefined : "bold"}
+              />
+            </Typography>
+            {promotions
+              .filter((p) => p.amount != null)
+              .map((p) => (
+                <Typography
+                  key={p.id}
+                  component="div"
+                  variant="caption"
+                  align="right"
+                >
+                  <MoneyText value={-p.amount!} />
+                </Typography>
+              ))}
+            {pamount > 0 && (
+              <Typography variant="body2" align="right">
+                {currencySymbol}
+                <MoneyText value={total - pamount} fontWeight="bold" />
+              </Typography>
+            )}
+          </React.Fragment>
+        }
+      >
+        <ListItemText
+          primary={
+            <Typography variant="body2">{labels.total + ":"}</Typography>
+          }
+          secondary={promotions
+            .filter((p) => p.amount != null)
+            .map((p) => (
+              <Typography
+                key={p.id}
+                component="div"
+                textAlign="right"
+                variant="caption"
+              >
+                {p.title}
+              </Typography>
+            ))}
+          slotProps={{
+            secondary: {
+              component: "div"
+            }
+          }}
+        />
+      </ListItem>
+    </List>
+  );
+}
+
 type CustomerQueryData = Pick<
   QueryForSaleRQ,
   "customerId" | "currency" | "culture"
@@ -343,22 +519,8 @@ type CustomerQuery = Omit<QueryForSaleRQ, "queryPaging"> & {
 
 type CustomerData = {
   data?: CustomerReadForSaleData;
-  promotions: PromotionItem[];
+  promotions: LocalUtils.PromotionItemWithAmount[];
   query: CustomerQuery;
-};
-
-type OrderLine = {
-  id: string;
-  productId: number;
-  title: string;
-  description?: string;
-  originalPrice: number;
-  price: number;
-  qty: number;
-  amount: number;
-  discount: number;
-  promotions?: PromotionCodeCalculation[];
-  data?: Record<string, unknown>;
 };
 
 export default function AddOrder() {
@@ -377,14 +539,19 @@ export default function AddOrder() {
     "assignedId",
     "category",
     "chooseCustomer",
+    "productDisappeared",
     "productName",
-    "promotions"
+    "promotions",
+    "shoppingCart",
+    "tooManyItemsToDisplay"
   );
 
   const queryRef = React.useRef<CustomerData>(undefined);
 
   const [products, setProducts] = React.useState<QueryForSaleData[]>();
-  const [orderLines, setOrderLines] = React.useState<OrderLine[]>([]);
+  const [orderLines, setOrderLines] = React.useState<LocalUtils.OrderLine[]>(
+    []
+  );
   const [moreProducts, setMoreProducts] = React.useState<boolean>(false);
 
   // Watch container
@@ -465,14 +632,16 @@ export default function AddOrder() {
   // Add order item
   const addOrderItem = (
     data: QueryForSaleData,
-    orderLine?: OrderLine,
+    orderLine?: LocalUtils.OrderLine,
     onClear?: () => void
   ) => {
     const title =
-      app.get("add") + (data.assignedId ? ` (${data.assignedId})` : "");
-    const notifier = app.notifier.data<OrderLine>(
+      (orderLine ? app.get("edit") : app.get("add")) +
+      (data.assignedId ? ` (${data.assignedId})` : "");
+    const notifier = app.notifier.data<LocalUtils.OrderLine>(
       <AddItem
         data={data}
+        currencySymbol={currencySymbol}
         line={orderLine}
         mRef={React.createRef<NotificationMUDataMethods>()}
         onClear={() => {
@@ -516,6 +685,47 @@ export default function AddOrder() {
     );
   };
 
+  // Load customer
+  const loadCustomer = async (
+    customerId: number,
+    currency: string,
+    culture?: string
+  ) => {
+    // Load customer data
+    const data = await app.customerApi.readForSale(customerId);
+    if (data == null || data.customer == null) {
+      return false;
+    }
+
+    // Local storage
+    app.storage.setPersistedData(LocalUtils.ORDER_CUSTOMER_DATA_KEY, {
+      customerId,
+      currency,
+      culture
+    });
+
+    const promotions = [
+      ...data.promotions,
+      ...(data.customer?.promotions ?? [])
+    ];
+
+    queryRef.current = {
+      data,
+      promotions,
+      query: {
+        customerId,
+        currency,
+        culture:
+          culture === app.system.getDefaultCulture() ? undefined : culture,
+        queryPaging: { ...initPagingData }
+      }
+    };
+
+    loadProducts(true);
+
+    return true;
+  };
+
   // Choose customer
   const chooseCustomer = (data?: CustomerQueryData | number) => {
     if (data == null) {
@@ -555,48 +765,199 @@ export default function AddOrder() {
           return false;
         }
 
-        // Load customer data
-        const data = await app.customerApi.readForSale(customerId);
-        if (data == null) {
-          return false;
-        }
-
-        const promotions = [
-          ...data.promotions,
-          ...(data.customer?.promotions ?? [])
-        ];
-
-        queryRef.current = {
-          data,
-          promotions,
-          query: {
-            customerId,
-            currency,
-            culture:
-              culture === app.system.getDefaultCulture() ? undefined : culture,
-            queryPaging: { ...initPagingData }
-          }
-        };
-
-        loadProducts(true);
-
-        return true;
+        // Load customer
+        return await loadCustomer(customerId, currency, culture);
       },
       inputs: <CustomerChooser data={data} />
     });
   };
 
-  function formatCart(lines: OrderLine[]) {
-    const total = lines.reduce((sum, line) => sum + line.amount, 0);
-    const discount = lines.reduce((sum, line) => sum + line.discount, 0);
-    const qty = lines.reduce((sum, line) => sum + line.qty, 0);
+  // Total amount
+  const { cartLabel, currencySymbol, orderPromotions } = React.useMemo(() => {
+    // Calculate
+    const total = orderLines.reduce((sum, line) => sum + line.amount, 0);
+    const discount = orderLines.reduce((sum, line) => sum + line.discount, 0);
+    const qty = orderLines.reduce((sum, line) => sum + line.qty, 0);
 
-    return `${qty}${discount > 0 ? `\n(-${currencySymbol}${app.formatNumber(discount)})\n` : ""}${currencySymbol}${app.formatNumber(total)}`;
+    // Cache
+    let currencySymbol: string | undefined = undefined;
+    let cartLabel: string | undefined = undefined;
+    let orderPromotions: PromotionCodeCalculation[] = [];
+    if (queryRef.current != null) {
+      app.storage.setPersistedData(LocalUtils.ORDER_LINES_DATA_KEY, orderLines);
+
+      currencySymbol = NumberUtils.getCurrencySymbol(
+        queryRef.current.query.currency
+      );
+
+      const promotions = queryRef.current.promotions;
+      orderPromotions = OrderUtils.calculatePromotions(promotions, total);
+      let amount = 0;
+      for (const p of promotions) {
+        const op = orderPromotions.find((o) => o.id === p.id);
+        if (op) {
+          amount += op.amount;
+          p.amount = op.amount;
+          p.formattedTitle = `${p.title} (-${currencySymbol}${app.formatNumber(op.amount)})`;
+        } else {
+          p.amount = undefined;
+          p.formattedTitle = undefined;
+        }
+      }
+
+      cartLabel = `${labels.shoppingCart}\n${qty}${discount > 0 ? `\n(-${currencySymbol}${app.formatNumber(discount)})\n` : ""}${amount > 0 ? `(-${currencySymbol}${app.formatNumber(amount)})*\n` : ""}${currencySymbol}${app.formatNumber(total - amount)}`;
+    }
+
+    return {
+      cartLabel,
+      currencySymbol,
+      orderPromotions
+    };
+  }, [orderLines]);
+
+  async function showCart() {
+    if (queryRef.current == null) return;
+
+    // Maximum to load 100 items, which should be enough for most cases
+    const maxItems = 100;
+    if (orderLines.length > maxItems) {
+      app.notifier.alert(labels.tooManyItemsToDisplay);
+      return;
+    }
+
+    const products = await app.productApi.queryForSale({
+      ...queryRef.current.query,
+      ids: orderLines.map((line) => line.productId),
+      queryPaging: maxItems
+    });
+
+    if (products == null) return;
+
+    const lines: [LocalUtils.OrderLine, QueryForSaleData][] = [];
+    const emptyLines: LocalUtils.OrderLine[] = [];
+    for (const line of orderLines) {
+      const product = products.find((p) => p.id === line.productId);
+      if (product == null) {
+        emptyLines.push(line);
+        continue;
+      }
+      lines.push([line, product]);
+    }
+
+    if (emptyLines.length > 0) {
+      // Remove
+      setOrderLines((prev) =>
+        prev.filter((line) => !emptyLines.includes(line))
+      );
+
+      app.notifier.alert(
+        labels.productDisappeared.format(
+          emptyLines.map((line) => line.title).join(", ")
+        )
+      );
+      return;
+    }
+
+    app
+      .showInputDialog({
+        title: labels.shoppingCart,
+        message: "",
+        fullScreen: app.smDown,
+        inputs: (
+          <CartList
+            currencySymbol={currencySymbol}
+            lines={lines}
+            promotions={orderPromotions}
+          />
+        ),
+        callback: (form) => {
+          if (form == null) {
+            return;
+          }
+
+          // Cache order promotions
+          app.storage.setPersistedData(
+            LocalUtils.ORDER_PROMOTIONS_DATA_KEY,
+            promotions
+          );
+
+          // Navigate to order confirmation page
+          navigate("./../confirm");
+
+          return true;
+        }
+      })
+      .dismiss(1800, true);
   }
 
   React.useEffect(() => {
+    // Already chose a customer
     if (queryRef.current != null) return;
-    chooseCustomer(customerId);
+
+    // Local storage
+    const data = app.storage.getPersistedObject<CustomerQueryData>(
+      LocalUtils.ORDER_CUSTOMER_DATA_KEY
+    );
+    if (data == null || !data.customerId) {
+      chooseCustomer(customerId);
+    } else {
+      const { customerId, currency, culture } = data;
+      loadCustomer(customerId, currency, culture).then((success) => {
+        if (success) {
+          // Order lines
+          const pLines = app.storage.getPersistedObject<LocalUtils.OrderLine[]>(
+            LocalUtils.ORDER_LINES_DATA_KEY
+          );
+          if (pLines != null && pLines.length > 0) {
+            // Promotions may change
+            app.productApi
+              .queryForSale({
+                customerId,
+                currency,
+                culture,
+                ids: pLines.map((line) => line.productId)
+              })
+              .then((products) => {
+                if (products == null) return;
+
+                const lines: LocalUtils.OrderLine[] = [];
+
+                for (const line of pLines) {
+                  const product = products.find((p) => p.id === line.productId);
+                  if (product == null) continue;
+
+                  const price = app.order.getPrice(product);
+                  const amount = price * line.qty;
+
+                  const promotions = OrderUtils.calculatePromotions(
+                    product.promotions,
+                    undefined,
+                    {
+                      price,
+                      qty: line.qty
+                    }
+                  );
+
+                  const pamount = promotions.reduce(
+                    (sum, p) => sum + p.amount,
+                    0
+                  );
+
+                  lines.push({
+                    ...line,
+                    price,
+                    amount: amount - pamount,
+                    discount: pamount,
+                    promotions
+                  });
+                }
+
+                setOrderLines(lines);
+              });
+          }
+        }
+      });
+    }
   }, []);
 
   const theme = useTheme();
@@ -613,10 +974,6 @@ export default function AddOrder() {
   if (products == null || queryRef.current == null) {
     return <LinearProgress />;
   }
-
-  currencySymbol = queryRef.current.query.currency
-    ? NumberUtils.getCurrencySymbol(queryRef.current.query.currency)
-    : undefined;
 
   const promotions = queryRef.current.promotions;
 
@@ -642,9 +999,9 @@ export default function AddOrder() {
                 <Avatar>{queryRef.current?.data?.customer?.name}</Avatar>
               </IconButton>
               {promotions.length > 0 && (
-                <MenuButton<PromotionItem>
+                <MenuButton<LocalUtils.PromotionItemWithAmount>
                   items={promotions}
-                  labelField="title"
+                  labelField={(data) => data.formattedTitle ?? data.title}
                   button={(clickHandler) => {
                     return (
                       <IconButton
@@ -652,7 +1009,7 @@ export default function AddOrder() {
                         size="small"
                         title={[
                           labels.promotions,
-                          ...promotions!.map((p) => p.title)
+                          ...promotions.map((p) => p.formattedTitle ?? p.title)
                         ].join("\n")}
                       >
                         <Badge
@@ -708,7 +1065,10 @@ export default function AddOrder() {
                   }
                 }}
               />
-              <IconButton title={formatCart(orderLines)}>
+              <IconButton
+                title={cartLabel}
+                onClick={orderLines.length ? () => showCart() : undefined}
+              >
                 <Badge badgeContent={orderLines.length} color="warning">
                   <ShoppingCartIcon color="primary" />
                 </Badge>
@@ -736,7 +1096,7 @@ export default function AddOrder() {
                     {p.description && (
                       <Typography variant="caption">{p.description}</Typography>
                     )}
-                    <HBox>{formatPriceLine(p)}</HBox>
+                    <HBox>{formatPriceLine(p, currencySymbol)}</HBox>
                     <HBox
                       alignItems="center"
                       justifyContent="flex-end"

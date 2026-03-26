@@ -21,6 +21,8 @@ public partial class SettingCrm
 
     public bool HasInventory { get; set; }
 
+    public decimal? TaxRate { get; set; }
+
     public virtual CoreOrganization IdNavigation { get; set; } = null!;
 
     public virtual Person Person { get; set; } = null!;
