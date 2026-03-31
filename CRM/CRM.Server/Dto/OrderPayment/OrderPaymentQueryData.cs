@@ -1,0 +1,41 @@
+using PlatformShared.Database.Models;
+
+namespace CRM.Server.Dto.OrderPayment
+{
+    /// <summary>
+    /// Order payment query data
+    /// 订单支付方式查询数据
+    /// </summary>
+    public record OrderPaymentQueryData
+    {
+        /// <summary>
+        /// Id
+        /// 编号
+        /// </summary>
+        public int Id { get; init; }
+
+        /// <summary>
+        /// Kind
+        /// 类型
+        /// </summary>
+        public OrderPaymentKind Kind { get; init; }
+
+        /// <summary>
+        /// Title
+        /// 标题
+        /// </summary>
+        public required string Title { get; init; }
+
+        /// <summary>
+        /// Is valid
+        /// 是否有效
+        /// </summary>
+        public bool IsValid { get; init; }
+
+        /// <summary>
+        /// Order index
+        /// 排序数
+        /// </summary>
+        public short OrderIndex { get; init; }
+    }
+}

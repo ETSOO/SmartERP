@@ -21,9 +21,6 @@ namespace PlatformShared.Database.Models.Configurations
                 .IsRequired()
                 .HasMaxLength(256)
                 .HasColumnName("title");
-            entity.Property(e => e.ForeignTitle)
-                .HasMaxLength(256)
-                .HasColumnName("foreign_title");
             entity.Property(e => e.Description)
                 .HasMaxLength(1280)
                 .HasColumnName("description");

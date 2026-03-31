@@ -27,6 +27,7 @@ import {
   CustomerReadForSaleData,
   PromotionCodeCalculation,
   PromotionOrderLine,
+  PromotionSaleItemBase,
   QueryForSaleData,
   QueryForSaleRQ
 } from "@etsoo/smarterp-crm";
@@ -326,14 +327,14 @@ function AddItem({
   );
 }
 
-function CustomerChooser({ data }: { data: CustomerQueryData }) {
+function CustomerChooser({ data }: { data: LocalUtils.CustomerQueryData }) {
   // Default culture
   data.culture ??= app.system.getDefaultCulture();
 
   // Layout
   return (
     <VBox gap={1} spacing={1} paddingTop={1}>
-      <CustomerList name="customerId" idValue={data.customerId} inputRequired />
+      <CustomerList idValue={data.customerId} inputRequired />
       <CurrencyList value={data.currency} fullWidth required />
       <CultureList value={data.culture} fullWidth required />
     </VBox>
@@ -507,11 +508,6 @@ function CartList({
     </List>
   );
 }
-
-type CustomerQueryData = Pick<
-  QueryForSaleRQ,
-  "customerId" | "currency" | "culture"
->;
 
 type CustomerQuery = Omit<QueryForSaleRQ, "queryPaging"> & {
   queryPaging: QueryPagingData;
@@ -692,7 +688,7 @@ export default function AddOrder() {
     culture?: string
   ) => {
     // Load customer data
-    const data = await app.customerApi.readForSale(customerId);
+    const data = await app.customerApi.readForSale({ customerId, currency });
     if (data == null || data.customer == null) {
       return false;
     }
@@ -727,7 +723,7 @@ export default function AddOrder() {
   };
 
   // Choose customer
-  const chooseCustomer = (data?: CustomerQueryData | number) => {
+  const chooseCustomer = (data?: LocalUtils.CustomerQueryData | number) => {
     if (data == null) {
       data = { currency: app.system.getDefaultCurrency() };
     } else if (typeof data === "number") {
@@ -876,9 +872,13 @@ export default function AddOrder() {
           }
 
           // Cache order promotions
+          const pItems: PromotionSaleItemBase[] = promotions
+            .filter((p) => p.amount != null)
+            .map(({ id, amount }) => ({ id, amount: amount! }));
+
           app.storage.setPersistedData(
             LocalUtils.ORDER_PROMOTIONS_DATA_KEY,
-            promotions
+            pItems
           );
 
           // Navigate to order confirmation page
@@ -895,7 +895,7 @@ export default function AddOrder() {
     if (queryRef.current != null) return;
 
     // Local storage
-    const data = app.storage.getPersistedObject<CustomerQueryData>(
+    const data = app.storage.getPersistedObject<LocalUtils.CustomerQueryData>(
       LocalUtils.ORDER_CUSTOMER_DATA_KEY
     );
     if (data == null || !data.customerId) {

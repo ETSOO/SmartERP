@@ -1,4 +1,8 @@
-import { PromotionCodeCalculation, PromotionItem } from "@etsoo/smarterp-crm";
+import {
+  PromotionCodeCalculation,
+  PromotionItem,
+  QueryForSaleRQ
+} from "@etsoo/smarterp-crm";
 
 /**
  * Local utilities
@@ -18,6 +22,14 @@ export namespace LocalUtils {
    * Data key for order promotions data
    */
   export const ORDER_PROMOTIONS_DATA_KEY = "etsoo-order-promotions-data";
+
+  /**
+   * Customer query data, used for order creation
+   */
+  export type CustomerQueryData = Pick<
+    QueryForSaleRQ,
+    "customerId" | "currency" | "culture"
+  >;
 
   /**
    * Promotion item with amount and formatted title

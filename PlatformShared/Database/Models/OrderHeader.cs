@@ -36,54 +36,6 @@ namespace PlatformShared.Database.Models
     }
 
     /// <summary>
-    /// Order 
-    /// </summary>
-    public enum OrderDeliveryId : byte
-    {
-        /// <summary>
-        /// Self pickup
-        /// 自提
-        /// </summary>
-        Pickup = 1,
-
-        /// <summary>
-        /// Express
-        /// 快递
-        /// </summary>
-        Express = 2,
-
-        /// <summary>
-        /// Freight
-        /// 物流，适用于大件或大批量货物，成本较低但速度较慢
-        /// </summary>
-        Freight = 3,
-
-        /// <summary>
-        /// Sea freight
-        /// 海运
-        /// </summary>
-        SeaFreight = 6,
-
-        /// <summary>
-        /// Air freight
-        /// 空运
-        /// </summary>
-        AirFreight = 10,
-
-        /// <summary>
-        /// Rail freight
-        /// 铁路货运
-        /// </summary>
-        RailFreight = 16,
-
-        /// <summary>
-        /// Other
-        /// 其他
-        /// </summary>
-        Other = 255
-    }
-
-    /// <summary>
     /// Order, purchase or transaction
     /// 订单，采购或交易
     /// </summary>
@@ -294,10 +246,34 @@ namespace PlatformShared.Database.Models
         public List<int>? Tags { get; set; }
 
         /// <summary>
+        /// Address
+        /// 地址
+        /// </summary>
+        public PersonAddress? Address { get; set; }
+
+        /// <summary>
         /// Buyer
         /// 购买方
         /// </summary>
         public Person Buyer { get; set; } = null!;
+
+        /// <summary>
+        /// Contact
+        /// 联系人
+        /// </summary>
+        public Person? Contact { get; set; }
+
+        /// <summary>
+        /// Delivery
+        /// 交付方式
+        /// </summary>
+        public OrderDelivery? Delivery { get; set; }
+
+        /// <summary>
+        /// Payment
+        /// 付款方式
+        /// </summary>
+        public OrderPayment? Payment { get; set; }
 
         /// <summary>
         /// Seller

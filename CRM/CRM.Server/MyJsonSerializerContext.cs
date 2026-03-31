@@ -2,6 +2,8 @@
 using CRM.Server.Dto.Customer;
 using CRM.Server.Dto.Dept;
 using CRM.Server.Dto.Group;
+using CRM.Server.Dto.OrderDelivery;
+using CRM.Server.Dto.OrderPayment;
 using CRM.Server.Dto.Order;
 using CRM.Server.Dto.Person;
 using CRM.Server.Dto.PersonAddress;
@@ -21,6 +23,8 @@ using CRM.Server.RQ.Asset;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Dept;
 using CRM.Server.RQ.Group;
+using CRM.Server.RQ.OrderDelivery;
+using CRM.Server.RQ.OrderPayment;
 using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Person;
 using CRM.Server.RQ.PersonAddress;
@@ -71,6 +75,7 @@ namespace CRM.Server
 
     [JsonSerializable(typeof(CustomerCreateRQ))]
     [JsonSerializable(typeof(CustomerListRQ))]
+    [JsonSerializable(typeof(CustomerReadForSaleRQ))]
     [JsonSerializable(typeof(CustomerUpdateRQ))]
 
     // Dept
@@ -88,11 +93,34 @@ namespace CRM.Server
 
     [JsonSerializable(typeof(GroupListRQ))]
 
+    // Order delivery
+    [JsonSerializable(typeof(OrderDeliveryListData[]))]
+    [JsonSerializable(typeof(OrderDeliveryQueryData[]))]
+    [JsonSerializable(typeof(OrderDeliveryUpdateReadData))]
+    [JsonSerializable(typeof(OrderDeliveryCreateRQ))]
+    [JsonSerializable(typeof(OrderDeliveryListRQ))]
+    [JsonSerializable(typeof(OrderDeliveryUpdateRQ))]
+
+    // Order payment
+    [JsonSerializable(typeof(OrderPaymentListData[]))]
+    [JsonSerializable(typeof(OrderPaymentQueryData[]))]
+    [JsonSerializable(typeof(OrderPaymentUpdateReadData))]
+    [JsonSerializable(typeof(OrderPaymentCreateRQ))]
+    [JsonSerializable(typeof(OrderPaymentListRQ))]
+    [JsonSerializable(typeof(OrderPaymentUpdateRQ))]
+
     // Order
+    [JsonSerializable(typeof(OrderDuplicateTestData[]))]
     [JsonSerializable(typeof(OrderListData[]))]
     [JsonSerializable(typeof(OrderQueryData[]))]
+    [JsonSerializable(typeof(OrderUpdateReadData))]
+    [JsonSerializable(typeof(OrderViewData))]
 
+    [JsonSerializable(typeof(OrderCreateRQ))]
+    [JsonSerializable(typeof(OrderDuplicateTestRQ))]
     [JsonSerializable(typeof(OrderListRQ))]
+    [JsonSerializable(typeof(OrderQueryRQ))]
+    [JsonSerializable(typeof(OrderUpdateRQ))]
 
     // Person
     [JsonSerializable(typeof(ChoosePersonsData))]

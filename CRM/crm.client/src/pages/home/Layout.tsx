@@ -81,6 +81,8 @@ export default function Home() {
     "menuHome",
     "newTask",
     "offerings",
+    "orderDeliveries",
+    "orderPayments",
     "orders",
     "org",
     "permissionGroups",
@@ -91,6 +93,8 @@ export default function Home() {
     "signoutSuccess",
     "simpleInventory",
     "sortCategory",
+    "sortOrderDelivery",
+    "sortOrderPayment",
     "sortPromotion",
     "stakeholders",
     "system",
@@ -367,6 +371,52 @@ export default function Home() {
             pattern: "view/:id",
             title: labels.view,
             hidden: true
+          },
+          {
+            segment: "payment",
+            title: labels.orderPayments,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "sort",
+                title: labels.sortOrderPayment,
+                hidden: true
+              }
+            ]
+          },
+          {
+            segment: "delivery",
+            title: labels.orderDeliveries,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "sort",
+                title: labels.sortOrderDelivery,
+                hidden: true
+              }
+            ]
           }
         ]
       },

@@ -208,6 +208,8 @@ services.AddScoped<IAssetService, AssetService>();
 services.AddScoped<ICustomerService, CustomerService>();
 services.AddScoped<IDeptService, DeptService>();
 services.AddScoped<IGroupService, GroupService>();
+services.AddScoped<IOrderDeliveryService, OrderDeliveryService>();
+services.AddScoped<IOrderPaymentService, OrderPaymentService>();
 services.AddScoped<IOrderService, OrderService>();
 services.AddScoped<IPersonService, PersonService>();
 services.AddScoped<IPersonAddressService, PersonAddressService>();
@@ -288,6 +290,8 @@ api.MapAuth()
     .MapCustomer()
     .MapDept()
     .MapGroup()
+    .MapOrderDelivery()
+    .MapOrderPayment()
     .MapOrder()
     .MapPerson()
     .MapPersonAddress()

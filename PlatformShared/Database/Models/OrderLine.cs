@@ -35,12 +35,6 @@ namespace PlatformShared.Database.Models
         public string Title { get; set; } = default!;
 
         /// <summary>
-        /// Foreign title
-        /// 外文标题
-        /// </summary>
-        public string? ForeignTitle { get; set; }
-
-        /// <summary>
         /// Description
         /// 描述
         /// </summary>

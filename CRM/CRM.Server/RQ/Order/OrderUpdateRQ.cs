@@ -3,6 +3,7 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using com.etsoo.WebUtils.Attributes;
 using System.Text.Json;
 
 namespace CRM.Server.RQ.Order
@@ -24,6 +25,18 @@ namespace CRM.Server.RQ.Order
         /// 来源编号
         /// </summary>
         public string? SourceId { get; init; }
+
+        /// <summary>
+        /// Customer id
+        /// 客户编号
+        /// </summary>
+        public long? CustomerId { get; init; }
+
+        /// <summary>
+        /// Culture
+        /// 文化
+        /// </summary>
+        public string? Culture { get; init; }
 
         /// <summary>
         /// Title
@@ -110,6 +123,12 @@ namespace CRM.Server.RQ.Order
         public IEnumerable<string>? Tags { get; init; }
 
         /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long? UserId { get; init; }
+
+        /// <summary>
         /// Status
         /// 状况
         /// </summary>
@@ -132,6 +151,11 @@ namespace CRM.Server.RQ.Order
                 return ApplicationErrors.NoValidData.AsResult(nameof(SourceId));
             }
 
+            if (Culture != null && !new LanguageCodeAttribute().IsValid(Culture))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Culture));
+            }
+
             if (Title != null && Title.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Title));
@@ -142,12 +166,12 @@ namespace CRM.Server.RQ.Order
                 return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
-            if (PaymentInstruction != null && PaymentInstruction.Length is not (>= 1 and <= 256))
+            if (PaymentInstruction != null && PaymentInstruction.Length is not (>= 1 and <= 512))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(PaymentInstruction));
             }
 
-            if (DeliveryInstruction != null && DeliveryInstruction.Length is not (>= 1 and <= 256))
+            if (DeliveryInstruction != null && DeliveryInstruction.Length is not (>= 1 and <= 512))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(DeliveryInstruction));
             }

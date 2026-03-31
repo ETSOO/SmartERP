@@ -63,7 +63,7 @@ namespace CRM.Server.RQ.Product
         /// Asset qty
         /// 资产数量
         /// </summary>
-        public int? AssetQty { get; init; }
+        public short? AssetQty { get; init; }
 
         /// <summary>
         /// Usage

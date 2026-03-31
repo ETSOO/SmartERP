@@ -422,7 +422,11 @@ export default function AddProduct() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <ProductAssignedIdDuplicateTest fullWidth inputRef={refs.assignedId} />
+        <ProductAssignedIdDuplicateTest
+          fullWidth
+          excludedId={id}
+          inputRef={refs.assignedId}
+        />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
         <StatusList

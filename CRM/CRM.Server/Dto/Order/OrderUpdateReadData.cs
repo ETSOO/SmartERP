@@ -28,6 +28,24 @@ namespace CRM.Server.Dto.Order
         public string? SourceId { get; init; }
 
         /// <summary>
+        /// Customer id
+        /// 客户编号
+        /// </summary>
+        public required long CustomerId { get; init; }
+
+        /// <summary>
+        /// Currency
+        /// 币种
+        /// </summary>
+        public required string Currency { get; init; }
+
+        /// <summary>
+        /// Culture
+        /// 文化
+        /// </summary>
+        public required string Culture { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>
@@ -100,6 +118,36 @@ namespace CRM.Server.Dto.Order
         public decimal? TaxAmount { get; init; }
 
         /// <summary>
+        /// Amount
+        /// 总金额
+        /// </summary>
+        public decimal Amount { get; init; }
+
+        /// <summary>
+        /// Discount amount
+        /// 折扣金额
+        /// </summary>
+        public decimal Discount { get; init; }
+
+        /// <summary>
+        /// Line discount amount
+        /// 行折扣金额
+        /// </summary>
+        public decimal LineDiscount { get; init; }
+
+        /// <summary>
+        /// Lines
+        /// 行数
+        /// </summary>
+        public short Lines { get; init; }
+
+        /// <summary>
+        /// Items
+        /// 项目数
+        /// </summary>
+        public decimal Items { get; init; }
+
+        /// <summary>
         /// JSON data
         /// JSON 数据
         /// </summary>
@@ -110,6 +158,12 @@ namespace CRM.Server.Dto.Order
         /// 关键词
         /// </summary>
         public IEnumerable<string>? Tags { get; init; }
+
+        /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long UserId { get; init; }
 
         /// <summary>
         /// Status

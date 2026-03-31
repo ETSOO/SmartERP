@@ -375,6 +375,7 @@ namespace CRM.Server.Services
         {
             var orgId = User.OrganizationInt;
             var customerId = rq.CustomerId;
+            var currency = rq.Currency;
 
             IEnumerable<int>? customerCategories = null;
             if (customerId.HasValue)
@@ -432,7 +433,7 @@ namespace CRM.Server.Services
 
                     return q;
                 })
-                .Join(_db.ProductPrices.Where(pp => pp.Currency == rq.Currency), p => p.Id, pp => pp.ProductId, (p, pp) => new QueryForSaleData
+                .Join(_db.ProductPrices.Where(pp => pp.Currency == currency), p => p.Id, pp => pp.ProductId, (p, pp) => new QueryForSaleData
                 {
                     Id = p.Id,
                     Logo = p.Logo,
@@ -446,6 +447,7 @@ namespace CRM.Server.Services
                     Currency = pp.Currency,
                     RetailPrice = pp.RetailPrice,
                     PromotionPrice = pp.PromotionPrice,
+                    CostPrice = pp.CostPrice,
                     UnitId = p.UnitId,
                     UnitName = p.Unit.Name,
                     Modifiers = p.Modifiers,
@@ -471,6 +473,7 @@ namespace CRM.Server.Services
                 .Where(pr => pr.Status < EntityStatus.Inactivated
                     && pr.ValidStart <= now
                     && pr.ValidEnd >= now
+                    && pr.Currency == currency
                     && ((pr.ProductIds != null && pr.ProductIds.Any(pid => productIds.Contains(pid)))
                         || (pr.ProductCategoryIds != null && pr.ProductCategoryIds.Any(cid => allCategoryIds.Contains(cid))))
                     && ((pr.PersonIds == null && pr.PersonCategoryIds == null) || (pr.PersonIds != null && customerId.HasValue && pr.PersonIds.Contains(customerId.Value)

@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Business;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Text.Json;
 
 namespace PlatformShared.Database.Models.Configurations
 {
@@ -60,28 +61,24 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Items)
                 .HasPrecision(12, 2)
                 .HasColumnName("items");
-            entity.OwnsMany(e => e.Promotions,
-                p => p.ToJson("promotions")
-                    .HasColumnType("jsonb")); // .Property(p => p.Code).HasConversion<PromotionCodeConverter>()
+            entity.OwnsMany(e => e.Promotions, p => p.ToJson("promotions"));
+                //.HasColumnType("jsonb")); // .Property(p => p.Code).HasConversion<PromotionCodeConverter>()
             entity.Property(e => e.Culture)
                 .IsRequired()
                 .HasMaxLength(10)
                 .HasColumnName("culture");
             entity.Property(e => e.PaymentId)
-                .HasConversion<byte>()
                 .HasColumnName("payment_id");
             entity.Property(e => e.PaymentInstruction)
-                .HasMaxLength(256)
+                .HasMaxLength(512)
                 .HasColumnName("payment_instruction");
             entity.Property(e => e.DeliveryId)
-                .HasConversion<byte>()
                 .HasColumnName("delivery_id");
             entity.Property(e => e.AddressId)
-                .HasConversion<byte>()
                 .HasColumnName("address_id");
             entity.Property(e => e.ContactId).HasColumnName("contact_id");
             entity.Property(e => e.DeliveryInstruction)
-                .HasMaxLength(256)
+                .HasMaxLength(512)
                 .HasColumnName("delivery_instruction");
             entity.Property(e => e.TaxAmount)
                 .HasColumnType("money")
@@ -101,10 +98,26 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValue(EntityStatus.Normal)
                 .HasColumnName("status");
 
+            entity.HasOne(d => d.Address).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.AddressId)
+                .HasConstraintName("order_header_address_id_fkey");
+
             entity.HasOne(d => d.Buyer).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.BuyerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_header_buyer_fkey");
+
+            entity.HasOne(d => d.Contact).WithMany(p => p.ContactOrders)
+                .HasForeignKey(d => d.ContactId)
+                .HasConstraintName("order_header_contact_id_fkey");
+
+            entity.HasOne(d => d.Delivery).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.DeliveryId)
+                .HasConstraintName("order_header_delivery_id_fkey");
+
+            entity.HasOne(d => d.Payment).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.PaymentId)
+                .HasConstraintName("order_header_payment_id_fkey");
 
             entity.HasOne(d => d.Seller).WithMany(p => p.Purchases)
                 .HasForeignKey(d => d.SellerId)

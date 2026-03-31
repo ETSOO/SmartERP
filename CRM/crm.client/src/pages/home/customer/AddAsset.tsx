@@ -180,7 +180,6 @@ export default function AddAsset() {
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
         <SupplierList
-          name="supplierId"
           idValue={formik.values.supplierId}
           inputOnChange={formik.handleChange}
         />

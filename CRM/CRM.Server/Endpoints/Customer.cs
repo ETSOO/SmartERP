@@ -23,7 +23,7 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (ICustomerService service, CustomerQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query customer info / 查询客户信息").WithTags("Customer");
 
-            g.MapPost("ReadForSale/{id:long?}", (ICustomerService service, long? id, CancellationToken cancellationToken) => service.ReadForSaleAsync(id, cancellationToken))
+            g.MapPost("ReadForSale", (ICustomerService service, CustomerReadForSaleRQ rq, CancellationToken cancellationToken) => service.ReadForSaleAsync(rq, cancellationToken))
                 .WithDescription("Get customer info for sale / 获取销售用客户信息").WithTags("Customer");
 
             g.MapPut("Update", (ICustomerService service, CustomerUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))

@@ -322,22 +322,26 @@ namespace CRM.Server.Services
         /// Read customer data for sale
         /// 读取销售用的客户数据
         /// </summary>
-        /// <param name="customerId">Customer id, null or 0 for annoymous customer</param>
+        /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<CustomerReadForSaleData?> ReadForSaleAsync(long? customerId, CancellationToken cancellationToken = default)
+        public async Task<CustomerReadForSaleData?> ReadForSaleAsync(CustomerReadForSaleRQ rq, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
             var now = DateTime.UtcNow;
+
+            var currency = rq.Currency;
 
             var data = new CustomerReadForSaleData();
 
             IEnumerable<PromotionItem> defaultPromotions;
 
-            if (customerId > 0)
+            if (rq.CustomerId > 0)
             {
+                var customerId = rq.CustomerId.Value;
+
                 var customer = await _db.Customers(orgId).AsNoTracking()
-                    .Where(p => p.Id == customerId.Value && p.Status < EntityStatus.Inactivated)
+                    .Where(p => p.Id == customerId && p.Status < EntityStatus.Inactivated)
                     .Select(p => new CustomerSaleData
                     {
                         Id = p.Id,
@@ -357,12 +361,13 @@ namespace CRM.Server.Services
                     .Where(pr => pr.Status < EntityStatus.Inactivated
                         && pr.ValidStart <= now
                         && pr.ValidEnd >= now
+                        && pr.Currency == currency
                         && pr.ProductIds == null
                         && pr.ProductCategoryIds == null
                         && (
                             (pr.PersonIds == null && pr.PersonCategoryIds == null)
                                 ||
-                            ((pr.PersonIds != null && pr.PersonIds.Contains(customerId.Value)) || (pr.PersonCategoryIds != null && customer.CategoryIdsAll != null && pr.PersonCategoryIds.Any(p => customer.CategoryIdsAll.Contains(p))))
+                            ((pr.PersonIds != null && pr.PersonIds.Contains(customerId)) || (pr.PersonCategoryIds != null && customer.CategoryIdsAll != null && pr.PersonCategoryIds.Any(p => customer.CategoryIdsAll.Contains(p))))
                         )
                     )
                     .Select(pr => new
@@ -392,6 +397,7 @@ namespace CRM.Server.Services
                     .Where(pr => pr.Status < EntityStatus.Inactivated
                         && pr.ValidStart <= now
                         && pr.ValidEnd >= now
+                        && pr.Currency == currency
                         && pr.ProductIds == null
                         && pr.ProductCategoryIds == null
                         && pr.PersonIds == null

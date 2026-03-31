@@ -107,6 +107,13 @@ namespace CRM.Server.Dto.Product
         public decimal? PromotionPrice { get; init; }
 
         /// <summary>
+        /// Cost price
+        /// 成本价
+        /// </summary>
+        [JsonIgnore]
+        public decimal? CostPrice { get; init; }
+
+        /// <summary>
         /// Unit id
         /// 单位编号
         /// </summary>

@@ -141,6 +141,18 @@ namespace CRM.Server.RQ.Order
         public required IEnumerable<OrderLineRQ> Lines { get; init; }
 
         /// <summary>
+        /// Amount, to be validated by the backend when value presented
+        /// 金额，如果提供后台会验证这个值是否正确
+        /// </summary>
+        public decimal? Amount { get; init; }
+
+        /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long? UserId { get; init; }
+
+        /// <summary>
         /// Status
         /// 状况
         /// </summary>
@@ -183,12 +195,12 @@ namespace CRM.Server.RQ.Order
                 return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
-            if (PaymentInstruction != null && PaymentInstruction.Length is not (>= 1 and <= 256))
+            if (PaymentInstruction != null && PaymentInstruction.Length is not (>= 1 and <= 512))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(PaymentInstruction));
             }
 
-            if (DeliveryInstruction != null && DeliveryInstruction.Length is not (>= 1 and <= 256))
+            if (DeliveryInstruction != null && DeliveryInstruction.Length is not (>= 1 and <= 512))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(DeliveryInstruction));
             }

@@ -124,6 +124,12 @@ namespace PlatformShared.Database.Models
         public Person Person { get; set; } = default!;
 
         /// <summary>
+        /// Orders
+        /// 订单
+        /// </summary>
+        public ICollection<OrderHeader> Orders { get; set; } = default!;
+
+        /// <summary>
         /// Locations
         /// 位置
         /// </summary>

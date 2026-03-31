@@ -26,6 +26,12 @@ namespace CRM.Server.RQ.Order
         public required decimal Qty { get; init; }
 
         /// <summary>
+        /// Price, to be validated by the backend when value presented
+        /// 价格，如果提供后台会验证这个值是否正确
+        /// </summary>
+        public decimal? Price { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>

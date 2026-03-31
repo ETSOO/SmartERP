@@ -73,8 +73,12 @@ export default function AllUsers() {
           name="keyword"
           defaultValue={data.keyword}
         />,
-        <DeptTiplist label={labels.dept} search />,
-        <GroupTiplist label={labels.permissionGroup} search />
+        <DeptTiplist label={labels.dept} search idValue={data.deptId} />,
+        <GroupTiplist
+          label={labels.permissionGroup}
+          search
+          idValue={data.groupId}
+        />
       ]}
       loadData={async (data) => {
         return await app.userApi.query(data, {

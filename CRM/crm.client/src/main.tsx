@@ -253,6 +253,70 @@ const router = createDynamicRouter([
               return { Component: EditOrder.default };
             }
           },
+          {
+            path: "/home/order/payment",
+            lazy: async () => {
+              const OrderPayments =
+                await import("./pages/home/order/OrderPayments");
+              return { Component: OrderPayments.default };
+            }
+          },
+          {
+            path: "/home/order/payment/add",
+            lazy: async () => {
+              const AddOrderPayment =
+                await import("./pages/home/order/AddOrderPayment");
+              return { Component: AddOrderPayment.default };
+            }
+          },
+          {
+            path: "/home/order/payment/edit/:id",
+            lazy: async () => {
+              const EditOrderPayment =
+                await import("./pages/home/order/AddOrderPayment");
+              return { Component: EditOrderPayment.default };
+            }
+          },
+          {
+            path: "/home/order/payment/sort",
+            lazy: async () => {
+              const SortOrderPayments =
+                await import("./pages/home/order/SortOrderPayments");
+              return { Component: SortOrderPayments.default };
+            }
+          },
+          {
+            path: "/home/order/delivery",
+            lazy: async () => {
+              const OrderDeliveries =
+                await import("./pages/home/order/OrderDeliveries");
+              return { Component: OrderDeliveries.default };
+            }
+          },
+          {
+            path: "/home/order/delivery/add",
+            lazy: async () => {
+              const AddOrderDelivery =
+                await import("./pages/home/order/AddOrderDelivery");
+              return { Component: AddOrderDelivery.default };
+            }
+          },
+          {
+            path: "/home/order/delivery/edit/:id",
+            lazy: async () => {
+              const EditOrderDelivery =
+                await import("./pages/home/order/AddOrderDelivery");
+              return { Component: EditOrderDelivery.default };
+            }
+          },
+          {
+            path: "/home/order/delivery/sort",
+            lazy: async () => {
+              const SortOrderDeliveries =
+                await import("./pages/home/order/SortOrderDeliveries");
+              return { Component: SortOrderDeliveries.default };
+            }
+          },
 
           {
             path: "/home/report",

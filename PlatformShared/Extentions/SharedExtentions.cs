@@ -132,6 +132,19 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query person addresses
+        /// 查询人员地址
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="personId">Person id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<PersonAddress> PersonAddresses(this MyDbContext db, long personId)
+        {
+            return db.PersonAddresses
+                .Where(r => r.PersonId == personId);
+        }
+
+        /// <summary>
         /// Query person relations
         /// 查询人员关系
         /// </summary>
@@ -325,6 +338,18 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<OrderHeader> Orders(this MyDbContext db, int orgId)
         {
+            return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId && p.IsOrder);
+        }
+
+        /// <summary>
+        /// Query orders & pos
+        /// 查询订单和采购
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Current organization</param>
+        /// <returns>Result</returns>
+        public static IQueryable<OrderHeader> OrderAndPOs(this MyDbContext db, int orgId)
+        {
             return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId);
         }
 
@@ -386,6 +411,30 @@ namespace PlatformShared.Extentions
         public static IQueryable<ProductCategory> ProductCategories(this MyDbContext db, int orgId)
         {
             return db.ProductCategories.Where(p => p.CoreOrganizationId == orgId);
+        }
+
+        /// <summary>
+        /// Query order deliveries
+        /// 查询订单配送方式
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<OrderDelivery> OrderDeliveries(this MyDbContext db, int orgId)
+        {
+            return db.OrderDeliveries.Where(p => p.CoreOrganizationId == orgId);
+        }
+
+        /// <summary>
+        /// Query order payments
+        /// 查询订单支付方式
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<OrderPayment> OrderPayments(this MyDbContext db, int orgId)
+        {
+            return db.OrderPayments.Where(p => p.CoreOrganizationId == orgId);
         }
 
         /// <summary>

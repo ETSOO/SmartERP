@@ -5,7 +5,7 @@ description: "Generate TS API from c# endpoint declaration"
 
 ## Task
 
-1. Convert to TypeScript function.
+Convert to TypeScript function.
 
 ## Input
 

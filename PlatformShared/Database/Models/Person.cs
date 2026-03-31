@@ -627,6 +627,12 @@ namespace PlatformShared.Database.Models
         public ICollection<PersonRelation> ContactOwners { get; } = default!;
 
         /// <summary>
+        /// Contact orders
+        /// 联系人订单
+        /// </summary>
+        public ICollection<OrderHeader> ContactOrders { get; set; } = default!;
+
+        /// <summary>
         /// Owned users
         /// 拥有的用户
         /// </summary>

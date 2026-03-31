@@ -81,6 +81,18 @@ namespace PlatformShared.Database
         public required DbSet<FeatureTag> FeatureTags { get; set; }
 
         /// <summary>
+        /// Order deliveries
+        /// 订单配送方式
+        /// </summary>
+        public required DbSet<OrderDelivery> OrderDeliveries { get; set; }
+
+        /// <summary>
+        /// Order payment methods
+        /// 订单支付方式
+        /// </summary>
+        public required DbSet<OrderPayment> OrderPayments { get; set; }
+
+        /// <summary>
         /// Order, PO or transaction
         /// 订单，采购或交易
         /// </summary>
@@ -234,6 +246,8 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new CoreUserIdentifierConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureCultureConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureTagConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderDeliveryConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderPaymentConfiguration());
             modelBuilder.ApplyConfiguration(new OrderHeaderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderLineConfiguration());
             modelBuilder.ApplyConfiguration(new PermissionGroupConfiguration());

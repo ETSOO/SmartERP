@@ -343,7 +343,11 @@ export default function AddCustomer() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <AssignedIdDuplicateTest fullWidth inputRef={refs.assignedId} />
+        <AssignedIdDuplicateTest
+          fullWidth
+          excludedId={id}
+          inputRef={refs.assignedId}
+        />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
         <StatusList

@@ -91,7 +91,7 @@ export default function Assets() {
           defaultValue={data.keyword}
         />,
         <ProductList search idValue={data.productId} />,
-        <CustomerList search idValue={data.personId} />,
+        <CustomerList name="personId" search idValue={data.personId} />,
         <StatusList search idValue={data.status} />
       ]}
       loadData={async (data) => {
