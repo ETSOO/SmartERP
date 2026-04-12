@@ -71,8 +71,8 @@ export function useEditContactInfo(personId: number, onSuccess: () => void) {
           app.alertResult(result);
         },
         inputs: (
-          <VBox gap={2} marginTop={1}>
-            <HBox gap={1}>
+          <VBox spacing={2} sx={{ marginTop: 1 }}>
+            <HBox spacing={1}>
               <InfoKindList value={data.kind} />
               <SelectBool
                 name="isDefault"
@@ -93,7 +93,7 @@ export function useEditContactInfo(personId: number, onSuccess: () => void) {
               multiline
               defaultValue={data.description}
             />
-            <HBox gap={1}>
+            <HBox spacing={1}>
               <SelectBool
                 name="subscribed"
                 label={labels.subscribed}

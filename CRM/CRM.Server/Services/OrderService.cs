@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -6,13 +7,10 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.String;
 using CRM.Server.Dto.Order;
-using CRM.Server.Dto.Product;
-using CRM.Server.Dto.System;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Product;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
@@ -49,66 +47,23 @@ namespace CRM.Server.Services
             _productService = productService;
         }
 
-        (IEnumerable<PromotionSaleItem>? saleItems, IActionResult result) ValidatePromotions(IEnumerable<PromotionSaleItemBase>? items, IEnumerable<PromotionItem> promotions, decimal amount, IPromotionCodeLine? sale = null)
-        {
-            if (items == null)
-            {
-                return (null, ActionResult.Success);
-            }
-
-            var saleItems = new List<PromotionSaleItem>();
-
-            // Non-stackable items
-            var np = promotions.Where(p => !p.Stackable)
-                .Select(p => PromotionCode.TryParse<PromotionCode>(p.Code, out var code) ? code.Calculate(p, sale, amount) : null)
-                .OrderByDescending(p => p?.Amount).FirstOrDefault();
-
-            if (np != null)
-            {
-                saleItems.Add(np);
-                amount -= np.Amount;
-            }
-
-            // Stackable items
-            foreach (var p in promotions.Where(p => p.Stackable))
-            {
-                if (PromotionCode.TryParse<PromotionCode>(p.Code, out var code))
-                {
-                    var result = code.Calculate(p, sale, amount);
-                    if (result != null)
-                    {
-                        amount -= result.Amount;
-                        saleItems.Add(result);
-                    }
-                }
-            }
-
-            // Validate with items (user side trust)
-            foreach (var item in items)
-            {
-                var saleItem = saleItems.FirstOrDefault(s => s.Id == item.Id);
-                if (saleItem == null)
-                {
-                    var result = ApplicationErrors.DataOutdated.AsResult(nameof(item.Id));
-                    result.Detail = item.Amount.ToString();
-                    return (null, result);
-                }
-                else if (saleItem.Amount != item.Amount)
-                {
-                    var result = ApplicationErrors.DataOutdated.AsResult(nameof(item.Amount));
-                    result.Detail = $"{saleItem.Title}|{saleItem.Amount}|{item.Amount}";
-                    return (null, result);
-                }
-            }
-
-            return (saleItems, ActionResult.Success);
-        }
-
         IActionResult CreateNoValidDataResult(string field, decimal targetValue, decimal currentValue, string product)
         {
             var result = ApplicationErrors.NoValidData.AsResult(field);
             result.Detail = $"{targetValue}|{currentValue}|{product}";
             return result;
+        }
+
+        /// <summary>
+        /// Check edit permissions
+        /// 检查编辑权限
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<(bool IsEdit, bool IsManage)> CheckEditPermissionsAsync(CancellationToken cancellationToken = default)
+        {
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Edit, (short)Permissions.Order.Manage], cancellationToken);
+            return (permissions[0], permissions[1]);
         }
 
         /// <summary>
@@ -195,10 +150,11 @@ namespace CRM.Server.Services
             }
 
             // Address
+            string? addressFormatted = null;
             if (rq.AddressId.HasValue)
             {
-                var addressExists = await _db.PersonAddresses(customerId).Where(a => a.Id == rq.AddressId.Value).AnyAsync(cancellationToken);
-                if (!addressExists)
+                addressFormatted = await _db.PersonAddresses(customerId).Where(a => a.Id == rq.AddressId.Value).Select(a => a.FormattedAddress).FirstOrDefaultAsync(cancellationToken);
+                if (addressFormatted == null)
                 {
                     return ApplicationErrors.NoId.AsResult(nameof(rq.AddressId));
                 }
@@ -233,25 +189,13 @@ namespace CRM.Server.Services
 
                 var qty = l.Qty;
 
-                // MinQty / 起订量
-                if (product.MinQty.HasValue && qty < product.MinQty.Value)
+                var qtyResult = _productService.ValidateQty(product, qty);
+                if (qtyResult != null)
                 {
-                    return CreateNoValidDataResult(nameof(product.MinQty), product.MinQty.Value, qty, product.Name);
+                    return qtyResult;
                 }
 
-                // StepQty / 最小单位量
-                if (product.StepQty.HasValue && qty % product.StepQty.Value != 0)
-                {
-                    return CreateNoValidDataResult(nameof(product.StepQty), product.StepQty.Value, qty, product.Name);
-                }
-
-                // CapQty / 购买上限
-                if (product.CapQty.HasValue && qty > product.CapQty.Value)
-                {
-                    return CreateNoValidDataResult(nameof(product.CapQty), product.CapQty.Value, qty, product.Name);
-                }
-
-                var price = Math.Min(Math.Min(product.RetailPrice, product.PromotionPrice.GetValueOrDefault(Decimal.MaxValue)), product.CustomerRetailPrice.GetValueOrDefault(Decimal.MaxValue));
+                var price = _productService.GetSalePrice(product);
 
                 if (l.Price.HasValue && l.Price.Value != price)
                 {
@@ -266,7 +210,7 @@ namespace CRM.Server.Services
                     Qty = qty
                 };
 
-                var (linePromotions, lineResult) = ValidatePromotions(l.Promotions, product.Promotions, amount, sale);
+                var (linePromotions, lineResult) = _productService.ValidatePromotions(l.Promotions, product.Promotions, amount, sale);
                 if (!lineResult.Ok)
                 {
                     return lineResult;
@@ -302,7 +246,7 @@ namespace CRM.Server.Services
             }
 
             // Validate order promotions
-            var (orderPromotions, opResult) = ValidatePromotions(rq.Promotions, [.. customer.Promotions, .. customer.Customer.Promotions], totalAmount);
+            var (orderPromotions, opResult) = _productService.ValidatePromotions(rq.Promotions, [.. customer.Promotions, .. customer.Customer.Promotions], totalAmount);
             if (!opResult.Ok)
             {
                 return opResult;
@@ -342,6 +286,7 @@ namespace CRM.Server.Services
                 DeliveryId = rq.DeliveryId,
                 DeliveryInstruction = rq.DeliveryInstruction,
                 AddressId = rq.AddressId,
+                AddressFormatted = addressFormatted,
                 ContactId = rq.ContactId,
                 Promotions = orderPromotions,
                 Amount = orderAmount,
@@ -609,7 +554,7 @@ namespace CRM.Server.Services
         /// <param name="id">Id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<OrderViewData?> ReadAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<OrderViewData?> ReadAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.Order.View, cancellationToken))
@@ -646,13 +591,105 @@ namespace CRM.Server.Services
                      PaymentInstruction = p.PaymentInstruction,
                      Delivery = p.Delivery == null ? null : p.Delivery.Title,
                      DeliveryInstruction = p.DeliveryInstruction,
-                     Address = p.Address == null ? null : p.Address.FormattedAddress,
+                     AddressFormatted = p.AddressFormatted,
                      Contact = p.Contact == null ? null : p.Contact.Name,
                      ContactId = p.ContactId,
+                     User = p.User.Name,
+                     UserId = p.UserId,
                      Creation = p.Creation,
                      Status = p.Status,
                      Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
                  }).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Recalcuate order amount and promotion
+        /// 重新计算订单金额和促销活动
+        /// </summary>
+        /// <param name="id">Order id</param>
+        /// <param name="checkPermission">Check permission or not</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> RecalculateAsync(long id, bool checkPermission, CancellationToken cancellationToken = default)
+        {
+            bool isLocalManage;
+            if (checkPermission)
+            {
+                var (isEdit, isManage) = await CheckEditPermissionsAsync(cancellationToken);
+                if (!isEdit)
+                {
+                    return ApplicationErrors.AccessDenied.AsResult();
+                }
+
+                isLocalManage = isManage;
+            }
+            else
+            {
+                isLocalManage = true;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            // Fetch order with calculated aggregates in a single query
+            var result = await _db.Orders(orgId)
+                .Where(p => p.Id == id && (isLocalManage || p.UserId == User.Oid) && p.Status < EntityStatus.Inactivated)
+                .Select(o => new
+                {
+                    Order = o,
+                    Lines = (short)o.OrderLines.Count,
+                    Items = o.OrderLines.Sum(l => l.Qty),
+                    LineDiscount = o.OrderLines.Sum(l => l.Discount),
+                    TotalAmount = o.OrderLines.Sum(l => l.Amount)
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (result == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var order = result.Order;
+            var lines = result.Lines;
+            var items = result.Items;
+            var lineDiscount = result.LineDiscount;
+            var totalAmount = result.TotalAmount;
+
+            // Attach the order to the context for tracking
+            _db.Attach(order);
+
+            // Check customer data
+            var customerRQ = new CustomerReadForSaleRQ
+            {
+                CustomerId = order.BuyerId,
+                Currency = order.Currency
+            };
+
+            var customer = await _customerService.ReadForSaleAsync(customerRQ, cancellationToken);
+            if (customer == null || customer.Customer == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(customerRQ.CustomerId));
+            }
+
+            // Calculate order promotions
+            var promotions = _productService.CalculatePromotions([.. customer.Promotions, .. customer.Customer.Promotions], totalAmount);
+
+            // Order discount
+            var orderDiscount = promotions?.Sum(p => p.Amount) ?? 0;
+
+            // Order amount without discount
+            var orderAmount = totalAmount - orderDiscount;
+
+            // Update
+            order.Lines = lines;
+            order.LineDiscount = lineDiscount;
+            order.Amount = orderAmount;
+            order.Discount = orderDiscount;
+
+            // Save
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -665,7 +702,8 @@ namespace CRM.Server.Services
         public async Task<IActionResult> UpdateAsync(OrderUpdateRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Order.Edit, cancellationToken))
+            var (isEdit, isManage) = await CheckEditPermissionsAsync(cancellationToken);
+            if (!isEdit)
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
@@ -674,7 +712,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var order = await _db.Orders(orgId)
-                .Where(p => p.Id == rq.Id)
+                .Where(p => p.Id == rq.Id && (isManage || p.UserId == User.Oid))
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (order == null)
@@ -775,11 +813,17 @@ namespace CRM.Server.Services
             {
                 if (rq.AddressId.HasValue)
                 {
-                    var addressExists = await _db.PersonAddresses(order.BuyerId).Where(a => a.Id == rq.AddressId.Value).AnyAsync(cancellationToken);
-                    if (!addressExists)
+                    var addressFormatted = await _db.PersonAddresses(order.BuyerId).Where(a => a.Id == rq.AddressId.Value).Select(a => a.FormattedAddress).FirstOrDefaultAsync(cancellationToken);
+                    if (addressFormatted == null)
                     {
                         return ApplicationErrors.NoId.AsResult(nameof(rq.AddressId));
                     }
+
+                    order.AddressFormatted = addressFormatted;
+                }
+                else
+                {
+                    order.AddressFormatted = null;
                 }
 
                 order.AddressId = rq.AddressId;
@@ -859,7 +903,9 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<OrderUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
         {
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Order.Edit, cancellationToken))
+            // Permission check
+            var (isEdit, isManage) = await CheckEditPermissionsAsync(cancellationToken);
+            if (!isEdit)
             {
                 return null;
             }
@@ -867,7 +913,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             return await _db.Orders(orgId).AsNoTracking()
-                .Where(p => p.Id == id)
+                .Where(p => p.Id == id && (isManage || p.UserId == User.Oid))
                 .Select(p => new OrderUpdateReadData
                 {
                     Id = p.Id,

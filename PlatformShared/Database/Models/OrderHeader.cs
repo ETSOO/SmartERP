@@ -210,8 +210,14 @@ namespace PlatformShared.Database.Models
         public string? DeliveryInstruction { get; set; }
 
         /// <summary>
-        /// Delivery address id
-        /// 发货地址编号
+        /// Formatted delivery address
+        /// 格式化的发货地址
+        /// </summary>
+        public string? AddressFormatted { get; set; }
+
+        /// <summary>
+        /// Delivery address id, targeting delivery address may be changed
+        /// 发货地址编号，目标发货地址可能会改变
         /// </summary>
         public int? AddressId { get; set; }
 
@@ -280,6 +286,12 @@ namespace PlatformShared.Database.Models
         /// 销售方
         /// </summary>
         public Person Seller { get; set; } = null!;
+
+        /// <summary>
+        /// User
+        /// 操作用户
+        /// </summary>
+        public Person User { get; set; } = null!;
 
         /// <summary>
         /// Order lines

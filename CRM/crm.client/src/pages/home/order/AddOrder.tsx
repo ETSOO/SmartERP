@@ -26,6 +26,7 @@ import { DomUtils, NumberUtils, Utils } from "@etsoo/shared";
 import {
   CustomerReadForSaleData,
   PromotionCodeCalculation,
+  PromotionItem,
   PromotionOrderLine,
   PromotionSaleItemBase,
   QueryForSaleData,
@@ -212,7 +213,7 @@ function AddItem({
 
   return (
     <form ref={formRef}>
-      <VBox gap={1} spacing={1} paddingTop={1}>
+      <VBox spacing={1} sx={{ paddingTop: 1 }}>
         <InputField
           fullWidth
           required
@@ -221,21 +222,22 @@ function AddItem({
           label={labels.title}
           defaultValue={line?.title ?? data.name}
         />
-        <Grid container spacing={1} gap={1}>
+        <Grid container spacing={1}>
           <Grid
             size={{ xs: 12, sm: 5 }}
-            display="flex"
-            gap={1}
-            alignItems="center"
-            justifyContent="flex-end"
+            spacing={1}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end"
+            }}
           >
             {formatPriceLine(data, currencySymbol, price)} x
           </Grid>
           <Grid
             size={{ xs: 12, sm: 7 }}
-            display="flex"
-            gap={1}
-            alignItems="center"
+            spacing={1}
+            sx={{ display: "flex", alignItems: "center" }}
           >
             <NumberSpinner
               size="small"
@@ -268,10 +270,12 @@ function AddItem({
           </Grid>
           <Grid
             size={{ xs: 12 }}
-            display="flex"
-            gap={1}
-            alignItems="center"
-            justifyContent="flex-end"
+            spacing={1}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end"
+            }}
           >
             <Typography>=</Typography>
             <MoneyText value={amount} currency={data.currency} />
@@ -306,7 +310,7 @@ function AddItem({
           )}
         </Grid>
         {data.modifiers != null && data.modifiers.length > 0 && (
-          <Grid container spacing={2} gap={2}>
+          <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 12 }}>
               <Divider />
             </Grid>
@@ -333,7 +337,7 @@ function CustomerChooser({ data }: { data: LocalUtils.CustomerQueryData }) {
 
   // Layout
   return (
-    <VBox gap={1} spacing={1} paddingTop={1}>
+    <VBox spacing={1} sx={{ paddingTop: 1 }}>
       <CustomerList idValue={data.customerId} inputRequired />
       <CurrencyList value={data.currency} fullWidth required />
       <CultureList value={data.culture} fullWidth required />
@@ -375,14 +379,14 @@ function CartList({
               key={line.id}
               secondaryAction={
                 <VBox sx={{ maxWidth: 140 }}>
-                  <HBox justifyContent="flex-end">
+                  <HBox sx={{ justifyContent: "flex-end" }}>
                     {formatPriceLine(product, currencySymbol)}
                   </HBox>
                   <Typography variant="body2" align="right">
                     x {line.qty} ={" "}
                     <MoneyText
                       value={line.price * line.qty}
-                      fontWeight={lps.length > 0 ? undefined : "bold"}
+                      sx={{ fontWeight: lps.length > 0 ? undefined : "bold" }}
                     />
                   </Typography>
                   {lps.length > 0 && (
@@ -392,7 +396,10 @@ function CartList({
                         color="warning"
                       />
                       {" = "}
-                      <MoneyText value={line.amount} fontWeight="bold" />
+                      <MoneyText
+                        value={line.amount}
+                        sx={{ fontWeight: "bold" }}
+                      />
                     </Typography>
                   )}
                 </VBox>
@@ -453,12 +460,12 @@ function CartList({
             <Typography
               variant="body2"
               align="right"
-              paddingTop={{ xs: 0, sm: 2 }}
+              sx={{ paddingTop: { xs: 0, sm: 2 } }}
             >
               {currencySymbol}
               <MoneyText
                 value={total}
-                fontWeight={promotions.length > 0 ? undefined : "bold"}
+                sx={{ fontWeight: promotions.length > 0 ? undefined : "bold" }}
               />
             </Typography>
             {promotions
@@ -476,7 +483,10 @@ function CartList({
             {pamount > 0 && (
               <Typography variant="body2" align="right">
                 {currencySymbol}
-                <MoneyText value={total - pamount} fontWeight="bold" />
+                <MoneyText
+                  value={total - pamount}
+                  sx={{ fontWeight: "bold" }}
+                />
               </Typography>
             )}
           </React.Fragment>
@@ -492,7 +502,7 @@ function CartList({
               <Typography
                 key={p.id}
                 component="div"
-                textAlign="right"
+                align="right"
                 variant="caption"
               >
                 {p.title}
@@ -1091,17 +1101,45 @@ export default function AddOrder() {
               )}
               <ImageListItemBar
                 title={
-                  <VBox whiteSpace="wrap">
+                  <VBox sx={{ whiteSpace: "wrap" }}>
                     <Typography>{formatName(p)}</Typography>
                     {p.description && (
                       <Typography variant="caption">{p.description}</Typography>
                     )}
-                    <HBox>{formatPriceLine(p, currencySymbol)}</HBox>
+                    <HBox>
+                      {formatPriceLine(p, currencySymbol)}{" "}
+                      {p.promotions.length > 0 && (
+                        <MenuButton<PromotionItem>
+                          items={p.promotions}
+                          labelField={(data) => data.title}
+                          button={(clickHandler) => {
+                            return (
+                              <IconButton
+                                onClick={clickHandler}
+                                size="small"
+                                sx={{ marginLeft: 1.5 }}
+                                title={[
+                                  labels.promotions,
+                                  ...promotions.map((p) => p.title)
+                                ].join("\n")}
+                              >
+                                <Badge
+                                  badgeContent={promotions.length}
+                                  color="secondary"
+                                />
+                              </IconButton>
+                            );
+                          }}
+                        />
+                      )}
+                    </HBox>
                     <HBox
-                      alignItems="center"
-                      justifyContent="flex-end"
-                      height={40}
-                      gap={0.5}
+                      spacing={0.5}
+                      sx={{
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        height: 40
+                      }}
                     >
                       {orderLines
                         .filter((line) => line.productId === p.id)

@@ -52,7 +52,7 @@ export default function SortCategories() {
 
   return (
     <CommonPage>
-      <HBox marginBottom={2} gap={1} justifyContent="center">
+      <HBox spacing={1} sx={{ marginBottom: 2, justifyContent: "center" }}>
         {it == null && (
           <IdentityFlagsList
             search
@@ -85,7 +85,7 @@ export default function SortCategories() {
         <Card>
           <Typography
             variant="caption"
-            display="block"
+            component="div"
             sx={{ paddingLeft: 2, paddingTop: 2, paddingRight: 2 }}
           >
             * {labels.sortTip}
@@ -108,13 +108,15 @@ export default function SortCategories() {
                 ) => (
                   <Grid
                     size={{ xs: 12, md: 6, xl: 3 }}
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
                     ref={ref}
-                    style={style}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      ...style
+                    }}
                   >
-                    <Stack direction="row" alignItems="center">
+                    <Stack direction="row" sx={{ alignItems: "center" }}>
                       <IconButton
                         style={{ cursor: "move" }}
                         size="small"

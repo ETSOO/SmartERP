@@ -74,6 +74,9 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("payment_instruction");
             entity.Property(e => e.DeliveryId)
                 .HasColumnName("delivery_id");
+            entity.Property(e => e.AddressFormatted)
+                .HasMaxLength(256)
+                .HasColumnName("address_formatted");
             entity.Property(e => e.AddressId)
                 .HasColumnName("address_id");
             entity.Property(e => e.ContactId).HasColumnName("contact_id");
@@ -123,6 +126,11 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasForeignKey(d => d.SellerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_header_seller_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserOrders)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("order_header_user_id_fkey");
         }
     }
 }

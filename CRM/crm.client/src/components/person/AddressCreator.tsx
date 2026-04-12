@@ -55,9 +55,8 @@ export function AddressCreator(props: AddressCreatorProps) {
       inputs: (
         <Grid
           container
-          justifyContent="left"
           spacing={MUGlobal.pagePaddings}
-          paddingTop={1}
+          sx={{ justifyContent: "left", paddingTop: 1 }}
         >
           <AddressPage
             isLegalPerson={isLegalPerson}
@@ -70,7 +69,7 @@ export function AddressCreator(props: AddressCreatorProps) {
   };
 
   return (
-    <HBox alignItems="center" gap={0.5}>
+    <HBox spacing={0.5} sx={{ alignItems: "center" }}>
       <AddressTiplist
         {...rest}
         sx={{ flex: 2, ...sx }}

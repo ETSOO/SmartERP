@@ -61,6 +61,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Title)
                 .HasMaxLength(256)
                 .HasColumnName("title");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Asset).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.AssetId)
@@ -75,6 +76,10 @@ namespace Platform.Server.Models.Configurations
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_line_product_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.OrderLines)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("order_line_user_id_fkey");
 
             OnConfigurePartial(entity);
         }

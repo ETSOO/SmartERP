@@ -182,7 +182,7 @@ export default function AllProfiles() {
                 <ImportanceText
                   importance={data.importance}
                   variant="caption"
-                  marginLeft={0.5}
+                  sx={{ marginLeft: 0.5 }}
                 />
               </React.Fragment>
             );
@@ -273,7 +273,7 @@ export default function AllProfiles() {
               }
             ],
             <React.Fragment>
-              <HBox gap={1}>
+              <HBox spacing={1}>
                 <Typography component="span" variant="body2">
                   {app.profile.getKind(data.kind)}
                 </Typography>

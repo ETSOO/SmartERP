@@ -229,7 +229,10 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                   { data: "location", singleRow: true, horizontal: true },
                   {
                     data: (item) => (
-                      <HBox gap={0.5} alignItems="center" flexWrap="wrap">
+                      <HBox
+                        spacing={0.5}
+                        sx={{ alignItems: "center", flexWrap: "wrap" }}
+                      >
                         <Typography variant="subtitle2">
                           {app.formatDate(item.happenDate, "dm")}
                         </Typography>
@@ -277,10 +280,8 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
             </AccordionSummary>
             <AccordionDetails>
               <HBoxList
-                gap={0.5}
-                marginBottom={1}
-                flexWrap="wrap"
-                alignItems="center"
+                spacing={0.5}
+                sx={{ marginBottom: 1, flexWrap: "wrap", alignItems: "center" }}
               >
                 {data.attachments.map((file, index) => (
                   <React.Fragment key={file.id}>
@@ -353,11 +354,14 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
               {data.links.map((link, index) => (
                 <VBox key={`${link.id}${link.content}`}>
                   <HBox
-                    gap={0.5}
-                    alignItems="center"
-                    padding={0.5}
-                    flexWrap="wrap"
-                    sx={{ fontSize: 14, backgroundColor: "#f3f3f3" }}
+                    spacing={0.5}
+                    sx={{
+                      alignItems: "center",
+                      padding: 0.5,
+                      flexWrap: "wrap",
+                      fontSize: 14,
+                      backgroundColor: "#f3f3f3"
+                    }}
                   >
                     {index + 1}.
                     <LinkEx to={`./../../../../contact/view/${link.userId}`}>

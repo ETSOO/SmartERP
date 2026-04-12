@@ -7,10 +7,13 @@ namespace CRM.Server.Services
 {
     public interface IOrderService
     {
+        Task<(bool IsEdit, bool IsManage)> CheckEditPermissionsAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> CreateAsync(OrderCreateRQ rq, CancellationToken cancellationToken = default);
         ValueTask<OrderDuplicateTestData[]?> DuplicateTestAsync(OrderDuplicateTestRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(OrderListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<OrderQueryData[]> QueryAsync(OrderQueryRQ rq, CancellationToken cancellationToken = default);
+        Task<OrderViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
+        Task<IActionResult> RecalculateAsync(long id, bool checkPermission, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(OrderUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<OrderUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default);
     }

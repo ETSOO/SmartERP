@@ -23,8 +23,8 @@ export default function AuthFail() {
   if (error) {
     const result: IActionResult = JSON.parse(error);
     return (
-      <VBox gap={2} padding={4}>
-        <Typography textAlign="center">{labels.smarterpCore}</Typography>
+      <VBox spacing={2} sx={{ padding: 4 }}>
+        <Typography align="center">{labels.smarterpCore}</Typography>
         <Alert severity="error">
           <Typography>
             {labels.authFailed} - {result.title ?? labels.unknownError}

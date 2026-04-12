@@ -1,27 +1,22 @@
-import { CommonPage, TabBox, TabBoxPanel } from "@etsoo/materialui";
-import HistoryIcon from "@mui/icons-material/History";
-import ContactsIcon from "@mui/icons-material/Contacts";
+import { CommonPage, TabBox } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
-import InfoIcon from "@mui/icons-material/Info";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import React from "react";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import LinearProgress from "@mui/material/LinearProgress";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { app } from "../../../app/MyApp";
 import { useParamsEx } from "@etsoo/react";
+import { OrderViewData } from "@etsoo/smarterp-crm";
+import { OrderViewUI } from "./OrderViewUI";
+import { AllOrderLines } from "./AllOrderLines";
 
 export default function ViewOrder() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
   // Labels
-  const labels = app.getLabels(
-    "basicInfo",
-    "contactInfo",
-    "contacts",
-    "profiles",
-    "view"
-  );
+  const labels = app.getLabels("basicInfo", "orderLines", "view");
 
   // State
   const [data, setData] = React.useState<OrderViewData>();
@@ -43,63 +38,21 @@ export default function ViewOrder() {
       ) : (
         <TabBox
           {...DefaultUI.tabsProps(app.smDown)}
-          root={{ marginTop: -2 }}
-          tabProps={{ paddingTop: 2 }}
+          root={{ sx: { marginTop: -2 } }}
+          tabProps={{ sx: { paddingTop: 2 } }}
           tabs={[
             {
-              children: <PersonData data={data} refresh={loadData} />,
+              children: <OrderViewUI data={data} refresh={loadData} />,
               label: labels.basicInfo,
               icon: <ArticleIcon />,
               iconPosition: "start"
             },
-            ...(app.ownsIdentity(data.identityType, "QueryProfile")
-              ? [
-                  {
-                    children: (visible, index) =>
-                      visible && (
-                        <Profiles
-                          personId={personId}
-                          identityType={data.identityType}
-                          index={index}
-                        />
-                      ),
-                    label: labels.profiles,
-                    icon: <HistoryIcon />,
-                    iconPosition: "start"
-                  } as TabBoxPanel
-                ]
-              : []),
             {
-              children: (visible, index) =>
-                visible && (
-                  <ContactInfos
-                    personId={personId}
-                    editable={app.ownsIdentity(data.identityType, "Edit")}
-                    index={index}
-                  />
-                ),
-              label: labels.contactInfo,
-              icon: <InfoIcon />,
+              children: <AllOrderLines orderId={id} refresh={loadData} />,
+              label: labels.orderLines,
+              icon: <ListAltIcon />,
               iconPosition: "start"
-            },
-            ...(app.ownsIdentity(data.identityType, "QueryContact")
-              ? [
-                  {
-                    children: (visible, index) =>
-                      visible && (
-                        <PersonContacts
-                          personId={personId}
-                          identityType={data.identityType}
-                          isLegalPerson={data.isLegalPerson}
-                          index={index}
-                        />
-                      ),
-                    label: labels.contacts,
-                    icon: <ContactsIcon />,
-                    iconPosition: "start"
-                  } as TabBoxPanel
-                ]
-              : [])
+            }
           ]}
         />
       )}

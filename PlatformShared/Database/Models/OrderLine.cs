@@ -125,6 +125,12 @@ namespace PlatformShared.Database.Models
         public JsonDocument? Data { get; set; }
 
         /// <summary>
+        /// User id
+        /// 执行用户编号
+        /// </summary>
+        public long? UserId { get; set; }
+
+        /// <summary>
         /// Order
         /// 订单
         /// </summary>
@@ -135,5 +141,11 @@ namespace PlatformShared.Database.Models
         /// 产品
         /// </summary>
         public Product Product { get; set; } = default!;
+
+        /// <summary>
+        /// User
+        /// 执行用户
+        /// </summary>
+        public virtual Person? User { get; set; }
     }
 }

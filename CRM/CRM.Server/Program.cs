@@ -211,6 +211,7 @@ services.AddScoped<IGroupService, GroupService>();
 services.AddScoped<IOrderDeliveryService, OrderDeliveryService>();
 services.AddScoped<IOrderPaymentService, OrderPaymentService>();
 services.AddScoped<IOrderService, OrderService>();
+services.AddScoped<IOrderLineService, OrderLineService>();
 services.AddScoped<IPersonService, PersonService>();
 services.AddScoped<IPersonAddressService, PersonAddressService>();
 services.AddScoped<IPersonContactService, PersonContactService>();
@@ -293,6 +294,7 @@ api.MapAuth()
     .MapOrderDelivery()
     .MapOrderPayment()
     .MapOrder()
+    .MapOrderLine()
     .MapPerson()
     .MapPersonAddress()
     .MapPersonContact()

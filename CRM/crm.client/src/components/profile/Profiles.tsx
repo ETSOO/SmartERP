@@ -200,7 +200,7 @@ export function Profiles(props: ProfilesProps) {
                     <ImportanceText
                       importance={data.importance}
                       variant="caption"
-                      marginLeft={0.5}
+                      sx={{ marginLeft: 0.5 }}
                     />
                   </React.Fragment>
                 );
@@ -219,7 +219,7 @@ export function Profiles(props: ProfilesProps) {
             if (index === 0) {
               const { loadedItems, hasNextPage } = states;
               return (
-                <HBox gap={1} alignItems="center">
+                <HBox spacing={1} sx={{ alignItems: "center" }}>
                   <React.Fragment>
                     {loadedItems.toLocaleString() + (hasNextPage ? "+" : "")}
                   </React.Fragment>
@@ -256,7 +256,7 @@ export function Profiles(props: ProfilesProps) {
                   }
                 ],
                 <React.Fragment>
-                  <HBox gap={1}>
+                  <HBox spacing={1}>
                     <Typography component="span" variant="body2">
                       {app.profile.getKind(data.kind)}
                     </Typography>

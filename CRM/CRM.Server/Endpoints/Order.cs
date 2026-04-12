@@ -26,6 +26,12 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IOrderService service, OrderQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query order info / 查询订单信息").WithTags("Order");
 
+            g.MapGet("Read/{id:long}", (IOrderService service, long id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
+                .WithDescription("Get order info / 获取订单信息").WithTags("Order");
+
+            g.MapPut("Recalculate/{id:long}", (IOrderService service, long id, CancellationToken cancellationToken) => service.RecalculateAsync(id, true, cancellationToken))
+                .WithDescription("Recalculate order / 重新计算订单").WithTags("Order");
+
             g.MapPut("Update", (IOrderService service, OrderUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update order / 更新订单").WithTags("Order");
 

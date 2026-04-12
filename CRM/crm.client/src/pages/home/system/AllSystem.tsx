@@ -55,7 +55,7 @@ export default function AllSystem() {
       {settings == null ? (
         <LinearProgress />
       ) : (
-        <VBox gap={2}>
+        <VBox spacing={2}>
           <Paper sx={{ paddingY: 1 }}>
             <ButtonLink href="./dept">{labels.depts}</ButtonLink>
             <ButtonLink href="./group">{labels.permissionGroups}</ButtonLink>

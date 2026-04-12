@@ -75,6 +75,46 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Calculate promotions
+        /// 计算促销
+        /// </summary>
+        /// <param name="promotions">Possible promotions</param>
+        /// <param name="amount">Total amount</param>
+        /// <param name="sale">Sale item</param>
+        /// <returns>Result</returns>
+        public IEnumerable<PromotionSaleItem> CalculatePromotions(IEnumerable<PromotionItem> promotions, decimal amount, IPromotionCodeLine? sale = null)
+        {
+            var saleItems = new List<PromotionSaleItem>();
+
+            // Non-stackable items
+            var np = promotions.Where(p => !p.Stackable)
+                .Select(p => PromotionCode.TryParse<PromotionCode>(p.Code, out var code) ? code.Calculate(p, sale, amount) : null)
+                .OrderByDescending(p => p?.Amount).FirstOrDefault();
+
+            if (np != null)
+            {
+                saleItems.Add(np);
+                amount -= np.Amount;
+            }
+
+            // Stackable items
+            foreach (var p in promotions.Where(p => p.Stackable))
+            {
+                if (PromotionCode.TryParse<PromotionCode>(p.Code, out var code))
+                {
+                    var result = code.Calculate(p, sale, amount);
+                    if (result != null)
+                    {
+                        amount -= result.Amount;
+                        saleItems.Add(result);
+                    }
+                }
+            }
+
+            return saleItems;
+        }
+
+        /// <summary>
         /// Create
         /// 创建
         /// </summary>
@@ -288,6 +328,29 @@ namespace CRM.Server.Services
                 Name = p.Name,
                 AssignedId = p.AssignedId
             }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Get sale price
+        /// 获取销售价格
+        /// </summary>
+        /// <param name="product">Product data</param>
+        /// <returns>Result</returns>
+        public decimal GetSalePrice(QueryForSaleData product)
+        {
+            var price = product.RetailPrice;
+
+            if (product.PromotionPrice.HasValue && product.PromotionPrice.Value < price)
+            {
+                price = product.PromotionPrice.Value;
+            }
+
+            if (product.CustomerRetailPrice.HasValue && product.CustomerRetailPrice.Value < price)
+            {
+                price = product.CustomerRetailPrice.Value;
+            }
+
+            return price;
         }
 
         /// <summary>
@@ -1244,6 +1307,82 @@ namespace CRM.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             return ActionResult.Succeed(id);
+        }
+
+        IActionResult CreateNoValidDataResult(string field, decimal targetValue, decimal currentValue, string product)
+        {
+            var result = ApplicationErrors.NoValidData.AsResult(field);
+            result.Detail = $"{targetValue}|{currentValue}|{product}";
+            return result;
+        }
+
+        /// <summary>
+        /// Validate promotions
+        /// 验证促销
+        /// </summary>
+        /// <param name="items">Declared promotions</param>
+        /// <param name="promotions">Possible promotions</param>
+        /// <param name="amount">Total amount</param>
+        /// <param name="sale">Sale item</param>
+        /// <returns>Result</returns>
+        public (IEnumerable<PromotionSaleItem>? saleItems, IActionResult result) ValidatePromotions(IEnumerable<PromotionSaleItemBase>? items, IEnumerable<PromotionItem> promotions, decimal amount, IPromotionCodeLine? sale = null)
+        {
+            if (items == null)
+            {
+                return (null, ActionResult.Success);
+            }
+
+            var saleItems = CalculatePromotions(promotions, amount, sale);
+
+            // Validate with items (user side trust)
+            foreach (var item in items)
+            {
+                var saleItem = saleItems.FirstOrDefault(s => s.Id == item.Id);
+                if (saleItem == null)
+                {
+                    var result = ApplicationErrors.DataOutdated.AsResult(nameof(item.Id));
+                    result.Detail = item.Amount.ToString();
+                    return (null, result);
+                }
+                else if (saleItem.Amount != item.Amount)
+                {
+                    var result = ApplicationErrors.DataOutdated.AsResult(nameof(item.Amount));
+                    result.Detail = $"{saleItem.Title}|{saleItem.Amount}|{item.Amount}";
+                    return (null, result);
+                }
+            }
+
+            return (saleItems, ActionResult.Success);
+        }
+
+        /// <summary>
+        /// Validate qty
+        /// 验证数量
+        /// </summary>
+        /// <param name="product">Product data</param>
+        /// <param name="qty">Qty</param>
+        /// <returns>Result</returns>
+        public IActionResult? ValidateQty(QueryForSaleData product, decimal qty)
+        {
+            // MinQty / 起订量
+            if (product.MinQty.HasValue && qty < product.MinQty.Value)
+            {
+                return CreateNoValidDataResult(nameof(product.MinQty), product.MinQty.Value, qty, product.Name);
+            }
+
+            // StepQty / 最小单位量
+            if (product.StepQty.HasValue && qty % product.StepQty.Value != 0)
+            {
+                return CreateNoValidDataResult(nameof(product.StepQty), product.StepQty.Value, qty, product.Name);
+            }
+
+            // CapQty / 购买上限
+            if (product.CapQty.HasValue && qty > product.CapQty.Value)
+            {
+                return CreateNoValidDataResult(nameof(product.CapQty), product.CapQty.Value, qty, product.Name);
+            }
+
+            return null;
         }
     }
 }

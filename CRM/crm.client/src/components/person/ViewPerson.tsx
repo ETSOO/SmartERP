@@ -62,8 +62,8 @@ export function ViewPerson(props: ViewPersonProps) {
       ) : (
         <TabBox
           {...DefaultUI.tabsProps(app.smDown)}
-          root={{ marginTop: -2 }}
-          tabProps={{ paddingTop: 2 }}
+          root={{ sx: { marginTop: -2 } }}
+          tabProps={{ sx: { paddingTop: 2 } }}
           tabs={[
             {
               children: <PersonData data={data} refresh={loadData} />,

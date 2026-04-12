@@ -95,8 +95,11 @@ export default function ViewProfile() {
         <LinearProgress />
       ) : (
         <React.Fragment>
-          <HBox gap={1} alignItems="center" justifyContent="center">
-            <Typography textAlign="center" variant="h6">
+          <HBox
+            spacing={1}
+            sx={{ alignItems: "center", justifyContent: "center" }}
+          >
+            <Typography align="center" variant="h6">
               [{app.core.getIdentityFlagsLabel(data.personIdentityType)}]{" "}
               {data.title}
             </Typography>
@@ -139,7 +142,7 @@ export default function ViewProfile() {
                       item.assigneeId == null &&
                       (item.persons == null ||
                         item.persons.length === 0) ? undefined : (
-                        <HBoxList gap={0.5}>
+                        <HBoxList spacing={0.5}>
                           <Typography variant="caption">
                             {labels.people}:
                           </Typography>
@@ -223,10 +226,8 @@ export default function ViewProfile() {
             </AccordionSummary>
             <AccordionDetails>
               <HBoxList
-                gap={0.5}
-                marginBottom={1}
-                flexWrap="wrap"
-                alignItems="center"
+                spacing={0.5}
+                sx={{ marginBottom: 1, flexWrap: "wrap", alignItems: "center" }}
               >
                 {data.attachments.map((file, index) => (
                   <React.Fragment key={file.id}>
@@ -292,11 +293,14 @@ export default function ViewProfile() {
               {data.links.map((link, index) => (
                 <VBox key={`${link.id}${link.content}`}>
                   <HBox
-                    gap={0.5}
-                    alignItems="center"
-                    padding={0.5}
-                    flexWrap="wrap"
-                    sx={{ fontSize: 14, backgroundColor: "#f3f3f3" }}
+                    spacing={0.5}
+                    sx={{
+                      alignItems: "center",
+                      padding: 0.5,
+                      flexWrap: "wrap",
+                      fontSize: 14,
+                      backgroundColor: "#f3f3f3"
+                    }}
                   >
                     {index + 1}.
                     <LinkEx to={`./../../../../contact/view/${link.userId}`}>

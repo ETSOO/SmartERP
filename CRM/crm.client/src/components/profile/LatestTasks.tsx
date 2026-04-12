@@ -111,7 +111,7 @@ export function LatestTasks() {
   // Layout
   return (
     <Stack spacing={1}>
-      <Stack direction="row" gap={0.5} flexWrap="wrap">
+      <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
         <Button
           startIcon={<TodayIcon />}
           disabled={today.valueOf() === date.valueOf()}
@@ -186,8 +186,7 @@ export function LatestTasks() {
                       direction="column"
                       className="tasks"
                       spacing={0.5}
-                      flexWrap="wrap"
-                      flexGrow={3}
+                      sx={{ flexWrap: "wrap", flexGrow: 3 }}
                     >
                       {d.tasks?.map((task, index) => (
                         <LinkEx

@@ -89,7 +89,7 @@ export function ContactInfos(props: ContactInfosProps) {
 
     const notifier = app.notifier.alert(
       <React.Fragment>
-        <Typography component="span" paddingRight={1}>
+        <Typography component="span" sx={{ paddingRight: 1 }}>
           {data}
         </Typography>
         <TooltipClick title={labels.completeTip.format(labels.copy)}>
@@ -188,7 +188,7 @@ export function ContactInfos(props: ContactInfosProps) {
             if (data == null) return undefined;
 
             return (
-              <HBox alignItems="center" gap={0.5}>
+              <HBox sx={{ alignItems: "center" }} spacing={0.5}>
                 <Typography component="span" variant="body2">
                   {data.identifier}
                 </Typography>

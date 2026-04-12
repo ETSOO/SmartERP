@@ -270,8 +270,7 @@ export default function AllDepts() {
                     <MoneyText
                       value={data.retailPrice}
                       currency={data.currency}
-                      fontSize={9}
-                      sx={{ textDecoration: "line-through" }}
+                      sx={{ fontSize: 9, textDecoration: "line-through" }}
                     />
                   </React.Fragment>
                 ) : (

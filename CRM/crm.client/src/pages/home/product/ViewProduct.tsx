@@ -57,7 +57,7 @@ function ProductPriceUI({ id }: { id: number }) {
   const symbol = currency?.symbol;
 
   return (
-    <VBox gap={1} spacing={1} paddingTop={1}>
+    <VBox spacing={1} sx={{ paddingTop: 1 }}>
       <CurrencyList
         fullWidth
         onItemChange={(item) => {
@@ -217,7 +217,7 @@ export default function ViewProduct() {
       leftContainerLines={3}
       leftContainer={(item) =>
         item.logo ? (
-          <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
+          <HBox sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}>
             <a href={item.logo} target="_blank" rel="noopener noreferrer">
               <img
                 src={item.logo}
@@ -239,8 +239,17 @@ export default function ViewProduct() {
         ) : undefined
       }
       titleBar={(item) => (
-        <HBox justifyContent="center" alignItems="center" marginBottom={2}>
-          <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
+        <HBox
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 2
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{ textAlign: "center", paddingRight: 2 }}
+          >
             {item.name}
           </Typography>
           {editable && (

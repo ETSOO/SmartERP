@@ -50,7 +50,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("data");
             entity.Property(e => e.DeliveryId).HasColumnName("delivery_id");
             entity.Property(e => e.DeliveryInstruction)
-                .HasMaxLength(256)
+                .HasMaxLength(512)
                 .HasColumnName("delivery_instruction");
             entity.Property(e => e.Description)
                 .HasMaxLength(1280)
@@ -75,7 +75,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("paid_amount");
             entity.Property(e => e.PaymentId).HasColumnName("payment_id");
             entity.Property(e => e.PaymentInstruction)
-                .HasMaxLength(256)
+                .HasMaxLength(512)
                 .HasColumnName("payment_instruction");
             entity.Property(e => e.Promotions)
                 .HasColumnType("jsonb")

@@ -44,6 +44,8 @@ using CRM.Server.RQ.User;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CRM.Server.Dto.OrderLine;
+using CRM.Server.RQ.OrderLine;
 
 namespace CRM.Server
 {
@@ -97,14 +99,27 @@ namespace CRM.Server
     [JsonSerializable(typeof(OrderDeliveryListData[]))]
     [JsonSerializable(typeof(OrderDeliveryQueryData[]))]
     [JsonSerializable(typeof(OrderDeliveryUpdateReadData))]
+
     [JsonSerializable(typeof(OrderDeliveryCreateRQ))]
     [JsonSerializable(typeof(OrderDeliveryListRQ))]
     [JsonSerializable(typeof(OrderDeliveryUpdateRQ))]
+
+    // Order line
+    [JsonSerializable(typeof(OrderLineListData[]))]
+    [JsonSerializable(typeof(OrderLineQueryData[]))]
+    [JsonSerializable(typeof(OrderLineUpdateReadData))]
+
+    [JsonSerializable(typeof(OrderLineCreateRQ))]
+    [JsonSerializable(typeof(OrderLineListRQ))]
+    [JsonSerializable(typeof(OrderLineQueryRQ))]
+    [JsonSerializable(typeof(OrderLineStartRQ))]
+    [JsonSerializable(typeof(OrderLineUpdateRQ))]
 
     // Order payment
     [JsonSerializable(typeof(OrderPaymentListData[]))]
     [JsonSerializable(typeof(OrderPaymentQueryData[]))]
     [JsonSerializable(typeof(OrderPaymentUpdateReadData))]
+
     [JsonSerializable(typeof(OrderPaymentCreateRQ))]
     [JsonSerializable(typeof(OrderPaymentListRQ))]
     [JsonSerializable(typeof(OrderPaymentUpdateRQ))]

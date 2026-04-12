@@ -24,7 +24,7 @@ function AllItems(props: AllItemsProps) {
   }, []);
 
   return (
-    <VBox gap={0.5}>
+    <VBox spacing={0.5}>
       {app.system.getModules().map((m) => {
         // Module items
         const moduleItems = items
@@ -102,8 +102,17 @@ export default function ViewGroup() {
     <ViewPage<GroupViewData>
       paddings={0}
       titleBar={(item) => (
-        <HBox justifyContent="center" alignItems="center" marginBottom={2}>
-          <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
+        <HBox
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 2
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{ textAlign: "center", paddingRight: 2 }}
+          >
             {item.name}
           </Typography>
         </HBox>

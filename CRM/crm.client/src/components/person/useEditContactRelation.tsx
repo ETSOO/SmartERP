@@ -132,7 +132,7 @@ export function useEditContactRelation(
         app.alertResult(result);
       },
       inputs: (
-        <VBox gap={2} marginTop={1}>
+        <VBox spacing={2} sx={{ marginTop: 1 }}>
           <ButtonRadioContactRelations
             fullWidth
             isLegalPerson={isLegalPerson}

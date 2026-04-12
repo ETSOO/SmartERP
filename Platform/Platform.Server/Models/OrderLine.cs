@@ -45,9 +45,13 @@ public partial class OrderLine
 
     public short Status { get; set; }
 
+    public long? UserId { get; set; }
+
     public virtual PersonAsset? Asset { get; set; }
 
     public virtual OrderHeader Order { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;
+
+    public virtual Person? User { get; set; }
 }

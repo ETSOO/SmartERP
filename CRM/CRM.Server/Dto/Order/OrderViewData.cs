@@ -148,10 +148,10 @@ namespace CRM.Server.Dto.Order
         public string? DeliveryInstruction { get; init; }
 
         /// <summary>
-        /// Delivery address
-        /// 发货地址
+        /// Formatted delivery address
+        /// 格式化发货地址
         /// </summary>
-        public string? Address { get; init; }
+        public string? AddressFormatted { get; init; }
 
         /// <summary>
         /// Contact
@@ -164,6 +164,18 @@ namespace CRM.Server.Dto.Order
         /// 联系人编号
         /// </summary>
         public long? ContactId { get; init; }
+
+        /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long UserId { get; init; }
+
+        /// <summary>
+        /// User
+        /// 用户
+        /// </summary>
+        public required string User { get; init; }
 
         /// <summary>
         /// Creation

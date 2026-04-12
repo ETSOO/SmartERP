@@ -87,7 +87,7 @@ export function PersonData(props: PersonDataProps) {
       leftContainerLines={3}
       leftContainer={(item) =>
         item.avatar ? (
-          <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
+          <HBox sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}>
             <a href={item.avatar} target="_blank" rel="noopener noreferrer">
               <img
                 src={item.avatar}
@@ -160,7 +160,7 @@ export function PersonData(props: PersonDataProps) {
         {
           data: (item) =>
             item.contactOwners != null && item.contactOwners.length > 0 ? (
-              <HBox gap={0.5} flexWrap="wrap">
+              <HBox spacing={0.5} sx={{ flexWrap: "wrap" }}>
                 {item.contactOwners.map((o) => (
                   <ButtonLink
                     key={o.id}
@@ -207,9 +207,9 @@ export function PersonData(props: PersonDataProps) {
         {
           data: (item) => {
             return item.addresses?.length ? (
-              <VBox flexWrap="wrap" paddingTop={0.5}>
+              <VBox sx={{ flexWrap: "wrap", paddingTop: 0.5 }}>
                 {item.addresses.map((a) => (
-                  <HBox key={a.id} alignItems="center">
+                  <HBox key={a.id} sx={{ alignItems: "center" }}>
                     <Chip
                       label={a.name + " - " + a.formattedAddress}
                       size="small"
@@ -232,7 +232,7 @@ export function PersonData(props: PersonDataProps) {
             ) : undefined;
           },
           label: () => (
-            <HBox gap={1} alignItems="center">
+            <HBox spacing={1} sx={{ alignItems: "center" }}>
               {labels.addresses}:
               {editable && (
                 <React.Fragment>
@@ -261,7 +261,10 @@ export function PersonData(props: PersonDataProps) {
         {
           data: (item) =>
             (editable || deletable) && (
-              <HBox gap={1} justifyContent="center" flexWrap="wrap">
+              <HBox
+                spacing={1}
+                sx={{ justifyContent: "center", flexWrap: "wrap" }}
+              >
                 {deletable && (
                   <Button
                     startIcon={<DeleteIcon />}

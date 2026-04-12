@@ -94,8 +94,8 @@ namespace CRM.Server.Dto.Order
         public DateTimeOffset? EndDate { get; init; }
 
         /// <summary>
-        /// Delivery address id
-        /// 发货地址编号
+        /// Delivery address id, targeting delivery address may be changed
+        /// 发货地址编号，目标发货地址可能会改变
         /// </summary>
         public int? AddressId { get; init; }
 

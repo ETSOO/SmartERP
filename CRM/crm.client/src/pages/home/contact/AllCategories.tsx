@@ -113,7 +113,7 @@ export default function AllCategories() {
         return app.formatResult(result);
       },
       inputs: (
-        <VBox gap={2} paddingTop={2}>
+        <VBox spacing={2} sx={{ paddingTop: 2 }}>
           <Typography>
             {labels.category}: {data.names.join(" -> ")}
           </Typography>

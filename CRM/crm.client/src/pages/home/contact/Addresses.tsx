@@ -103,7 +103,7 @@ export default function Addresses() {
         }
       },
       inputs: (
-        <VBox gap={2} marginTop={1}>
+        <VBox spacing={2} sx={{ marginTop: 1 }}>
           <InputField label={labels.nameB} name="name" required />
           <InputField label={labels.id} name="placeId" />
         </VBox>

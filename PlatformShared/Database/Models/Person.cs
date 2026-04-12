@@ -651,6 +651,12 @@ namespace PlatformShared.Database.Models
         public ICollection<OrderHeader> Orders { get; set; } = default!;
 
         /// <summary>
+        /// Executed order lines
+        /// 执行的订单项目
+        /// </summary>
+        public ICollection<OrderLine> OrderLines { get; set; } = default!;
+
+        /// <summary>
         /// Profiles related
         /// 关联的档案
         /// </summary>
@@ -691,5 +697,11 @@ namespace PlatformShared.Database.Models
         /// 采购
         /// </summary>
         public ICollection<OrderHeader> Purchases { get; set; } = default!;
+
+        /// <summary>
+        /// User orders
+        /// 用户订单
+        /// </summary>
+        public ICollection<OrderHeader> UserOrders { get; set; } = default!;
     }
 }

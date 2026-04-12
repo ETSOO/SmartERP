@@ -59,6 +59,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasDefaultValue(EntityStatus.Normal)
                 .HasColumnName("status");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.OrderId)
@@ -69,6 +70,10 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_line_product_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.OrderLines)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("order_line_user_id_fkey");
         }
     }
 }
