@@ -1,19 +1,36 @@
-using com.etsoo.CoreFramework.Business;
-using System.Text.Json;
+﻿using com.etsoo.CoreFramework.Business;
 
 namespace CRM.Server.Dto.OrderLine
 {
     /// <summary>
-    /// Order line update read data
-    /// 更新订单行读取数据
+    /// Order line all query data
+    /// 订单行全部查询数据
     /// </summary>
-    public record OrderLineUpdateReadData
+    public record OrderLineQueryAllData
     {
         /// <summary>
         /// Id
         /// 编号
         /// </summary>
         public long Id { get; init; }
+
+        /// <summary>
+        /// Source
+        /// 来源
+        /// </summary>
+        public string? Source { get; init; }
+
+        /// <summary>
+        /// Customer
+        /// 客户
+        /// </summary>
+        public required string Customer { get; init; }
+
+        /// <summary>
+        /// Customer id
+        /// 客户编号
+        /// </summary>
+        public long CustomerId { get; init; }
 
         /// <summary>
         /// Order id
@@ -40,16 +57,10 @@ namespace CRM.Server.Dto.OrderLine
         public string? Description { get; init; }
 
         /// <summary>
-        /// Original price
-        /// 原价
+        /// Currency
+        /// 币种
         /// </summary>
-        public decimal OriginalPrice { get; init; }
-
-        /// <summary>
-        /// Cost price
-        /// 成本价
-        /// </summary>
-        public decimal CostPrice { get; init; }
+        public required string Currency { get; init; }
 
         /// <summary>
         /// Price
@@ -64,6 +75,18 @@ namespace CRM.Server.Dto.OrderLine
         public decimal Qty { get; init; }
 
         /// <summary>
+        /// Amount
+        /// 金额
+        /// </summary>
+        public decimal Amount { get; init; }
+
+        /// <summary>
+        /// Discount
+        /// 折扣
+        /// </summary>
+        public decimal Discount { get; init; }
+
+        /// <summary>
         /// Start time
         /// 开始时间
         /// </summary>
@@ -76,15 +99,15 @@ namespace CRM.Server.Dto.OrderLine
         public DateTimeOffset? EndTime { get; init; }
 
         /// <summary>
-        /// JSON data
-        /// JSON 数据
-        /// </summary>
-        public JsonDocument? Data { get; init; }
-
-        /// <summary>
         /// Status
         /// 状态
         /// </summary>
         public EntityStatus Status { get; init; }
+
+        /// <summary>
+        /// Creation
+        /// 登记时间
+        /// </summary>
+        public DateTimeOffset Creation { get; init; }
     }
 }

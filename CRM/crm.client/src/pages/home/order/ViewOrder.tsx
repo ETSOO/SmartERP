@@ -9,7 +9,7 @@ import { app } from "../../../app/MyApp";
 import { useParamsEx } from "@etsoo/react";
 import { OrderViewData } from "@etsoo/smarterp-crm";
 import { OrderViewUI } from "./OrderViewUI";
-import { AllOrderLines } from "./AllOrderLines";
+import { OrderLines } from "./OrderLines";
 
 export default function ViewOrder() {
   // Route
@@ -48,8 +48,9 @@ export default function ViewOrder() {
               iconPosition: "start"
             },
             {
-              children: <AllOrderLines orderId={id} refresh={loadData} />,
-              label: labels.orderLines,
+              children: (visible) =>
+                visible && <OrderLines orderId={id} refresh={loadData} />,
+              label: labels.orderLines + ` (${data.lines})`,
               icon: <ListAltIcon />,
               iconPosition: "start"
             }

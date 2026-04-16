@@ -27,6 +27,12 @@ namespace CRM.Server.Dto.Order
         public required string Title { get; init; }
 
         /// <summary>
+        /// Customer id
+        /// 客户编号
+        /// </summary>
+        public long CustomerId {  get; init; }
+
+        /// <summary>
         /// Customer name
         /// 客户名称
         /// </summary>

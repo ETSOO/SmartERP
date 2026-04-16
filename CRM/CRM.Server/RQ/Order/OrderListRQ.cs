@@ -68,6 +68,6 @@ namespace CRM.Server.RQ.Order
         /// User id
         /// 用户编号
         /// </summary>
-        public long? UserId { get; init; }
+        public long? UserId { get; set; }
     }
 }

@@ -239,6 +239,22 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/order/lines",
+            lazy: async () => {
+              const AllOrderLines =
+                await import("./pages/home/order/AllOrderLines");
+              return { Component: AllOrderLines.default };
+            }
+          },
+          {
+            path: "/home/order/viewline/:id",
+            lazy: async () => {
+              const ViewOrderLine =
+                await import("./pages/home/order/ViewOrderLine");
+              return { Component: ViewOrderLine.default };
+            }
+          },
+          {
             path: "/home/order/confirm",
             lazy: async () => {
               const ConfirmOrder =

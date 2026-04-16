@@ -68,7 +68,7 @@ namespace PlatformShared.Database.Models
         /// Asset qty
         /// 资产数量
         /// </summary>
-        public short AssetQty { get; set; }
+        public int AssetQty { get; set; }
 
         /// <summary>
         /// Amount

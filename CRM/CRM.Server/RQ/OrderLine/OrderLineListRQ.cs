@@ -8,6 +8,7 @@ namespace CRM.Server.RQ.OrderLine
     /// 订单行列表请求数据
     /// </summary>
     [JsonDerivedType(typeof(OrderLineQueryRQ))]
+    [JsonDerivedType(typeof(OrderLineQueryAllRQ))]
     public record OrderLineListRQ : QueryLongRQ
     {
         /// <summary>

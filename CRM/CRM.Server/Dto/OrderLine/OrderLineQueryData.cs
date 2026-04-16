@@ -48,13 +48,13 @@ namespace CRM.Server.Dto.OrderLine
         /// Start time
         /// 开始时间
         /// </summary>
-        public DateTimeOffset? StartTime { get; set; }
+        public DateTimeOffset? StartTime { get; init; }
 
         /// <summary>
         /// End time
         /// 结束时间
         /// </summary>
-        public DateTimeOffset? EndTime { get; set; }
+        public DateTimeOffset? EndTime { get; init; }
 
         /// <summary>
         /// Status

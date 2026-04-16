@@ -139,16 +139,14 @@ export default function PersonProducts() {
         {
           width: DefaultUI.Widths.icon1,
           header: labels.actions,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingBottom: "6px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<PersonProductQueryData, BoxProps>) => {
             if (data == null) return undefined;
-
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
 
             return (
               <React.Fragment>

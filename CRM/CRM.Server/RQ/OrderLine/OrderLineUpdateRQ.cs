@@ -14,6 +14,18 @@ namespace CRM.Server.RQ.OrderLine
     public record OrderLineUpdateRQ : UpdateModel<long>, IModelValidator
     {
         /// <summary>
+        /// Original price
+        /// 原价
+        /// </summary>
+        public decimal? OriginalPrice { get; init; }
+
+        /// <summary>
+        /// Cost price
+        /// 成本价
+        /// </summary>
+        public decimal? CostPrice { get; init; }
+
+        /// <summary>
         /// Qty
         /// 数量
         /// </summary>
@@ -54,6 +66,12 @@ namespace CRM.Server.RQ.OrderLine
         /// JSON 数据
         /// </summary>
         public JsonDocument? Data { get; set; }
+
+        /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long? UserId { get; init; }
 
         /// <summary>
         /// Status

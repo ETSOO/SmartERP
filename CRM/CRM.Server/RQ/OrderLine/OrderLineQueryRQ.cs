@@ -7,15 +7,9 @@ namespace CRM.Server.RQ.OrderLine
     public record OrderLineQueryRQ : OrderLineListRQ
     {
         /// <summary>
-        /// Start time start
-        /// 开始时间开始
+        /// Qty start
+        /// 开始数据
         /// </summary>
-        public DateTimeOffset? StartTimeStart { get; init; }
-
-        /// <summary>
-        /// Start time end
-        /// 开始时间结束
-        /// </summary>
-        public DateTimeOffset? StartTimeEnd { get; init; }
+        public decimal? QtyStart { get; init; }
     }
 }

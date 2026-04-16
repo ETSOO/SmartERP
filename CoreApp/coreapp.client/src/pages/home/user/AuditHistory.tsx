@@ -134,16 +134,14 @@ export default function LoginHistory() {
           width: DefaultUI.Widths.icon1,
           header: labels.actions,
           align: "center",
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingBottom: "6px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<AuditHistoryDto, BoxProps>) => {
             if (data == null) return undefined;
-
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
 
             return (
               <DialogButton

@@ -210,25 +210,33 @@ export default function AllDepts() {
         {
           width: DefaultUI.Widths.icon2,
           header: labels.actions,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingBottom: "6px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<ProductQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
-
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
-                  <EditIcon />
-                </IconButtonLink>
-                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
-                  <ArticleIcon />
-                </IconButtonLink>
+                {app.owns(Permissions.Product.Edit) && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
+                {app.owns(Permissions.Product.View) && (
+                  <IconButtonLink
+                    title={labels.view}
+                    href={`./view/${data.id}`}
+                  >
+                    <ArticleIcon />
+                  </IconButtonLink>
+                )}
               </React.Fragment>
             );
           }
@@ -241,12 +249,12 @@ export default function AllDepts() {
             data.name,
             data.assignedId,
             [
-              {
+              app.owns(Permissions.Product.Edit) && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./edit/${data.id}`
               },
-              {
+              app.owns(Permissions.Product.View) && {
                 label: labels.view,
                 icon: <ArticleIcon />,
                 action: `./view/${data.id}`

@@ -60,7 +60,7 @@ namespace PlatformShared.Database.Models
         /// Remaining times
         /// 剩余次数
         /// </summary>
-        public short? Times { get; set; }
+        public int? Times { get; set; }
 
         /// <summary>
         /// Remaining amount

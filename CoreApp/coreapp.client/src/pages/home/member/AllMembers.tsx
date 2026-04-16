@@ -162,16 +162,14 @@ export default function AllMembers() {
         {
           width: DefaultUI.Widths.icon2,
           header: labels.actions,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingBottom: "6px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<MemberQueryDto, BoxProps>) => {
             if (data == null) return undefined;
-
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
 
             return (
               <React.Fragment>

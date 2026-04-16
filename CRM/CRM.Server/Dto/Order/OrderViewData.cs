@@ -82,6 +82,12 @@ namespace CRM.Server.Dto.Order
         public decimal Amount { get; init; }
 
         /// <summary>
+        /// Tax amount
+        /// 纳税金额
+        /// </summary>
+        public decimal TaxAmount { get; init; }
+
+        /// <summary>
         /// Paid amount
         /// 已付款金额
         /// </summary>
@@ -92,6 +98,12 @@ namespace CRM.Server.Dto.Order
         /// 折扣金额
         /// </summary>
         public decimal Discount { get; init; }
+
+        /// <summary>
+        /// Approved discount
+        /// 授权折扣
+        /// </summary>
+        public decimal ApprovedDiscount { get; init; }
 
         /// <summary>
         /// Line discount amount

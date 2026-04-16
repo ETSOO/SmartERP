@@ -180,16 +180,14 @@ export default function AllOrgs() {
         {
           width: DefaultUI.Widths.icon3,
           header: labels.actions,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingBottom: "6px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<OrgQueryDto, BoxProps>) => {
             if (data == null) return undefined;
-
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
 
             return (
               <React.Fragment>

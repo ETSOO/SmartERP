@@ -52,7 +52,7 @@ namespace CRM.Server.RQ.Asset
         /// Remaining times
         /// 剩余次数
         /// </summary>
-        public short? Times { get; init; }
+        public int? Times { get; init; }
 
         /// <summary>
         /// Remaining amount

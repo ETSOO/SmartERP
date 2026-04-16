@@ -1,7 +1,12 @@
-import { ButtonLink, ViewContainer } from "@etsoo/materialui";
+import { ButtonLink, HBox, MenuButton, ViewContainer } from "@etsoo/materialui";
 import { GridDataType } from "@etsoo/react";
-import { OrderViewData } from "@etsoo/smarterp-crm";
+import { OrderViewData, PromotionCodeCalculation } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
+import Badge from "@mui/material/Badge";
+import IconButton from "@mui/material/IconButton";
+import CelebrationIcon from "@mui/icons-material/Celebration";
+import EditIcon from "@mui/icons-material/Edit";
+import { Typography } from "@mui/material";
 
 export type OrderViewUIProps = {
   data: OrderViewData;
@@ -12,15 +17,115 @@ export function OrderViewUI(props: OrderViewUIProps) {
   // Destruct
   const { data, refresh } = props;
 
+  const labels = app.getLabels("edit", "promotions");
+
+  const moneyProps = { currency: data.currency };
+
+  const formatAmount = (amount: number) =>
+    app.formatMoney(amount, undefined, moneyProps);
+
   return (
     <ViewContainer
       data={data}
       refresh={refresh}
       fields={[
         {
-          data: "title",
-          singleRow: true,
-          horizontal: true
+          data: (item) => (
+            <HBox
+              sx={{
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 2
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{ textAlign: "center", paddingRight: 2 }}
+              >
+                {item.title}
+              </Typography>
+              <ButtonLink
+                startIcon={<EditIcon />}
+                variant="outlined"
+                href={`./../../edit/${item.id}`}
+              >
+                {labels.edit}
+              </ButtonLink>
+            </HBox>
+          ),
+          singleRow: true
+        },
+        {
+          data: (item) =>
+            `${app.formatNumber(item.lines)} / ${app.formatNumber(item.items)}`,
+          label: "orderLines"
+        },
+        {
+          data: (item) =>
+            item.lineDiscount === 0
+              ? undefined
+              : formatAmount(-item.lineDiscount),
+          label: "orderLineDiscount"
+        },
+        {
+          data: (item) => {
+            if (item.discount === 0) return undefined;
+            const promotions = item.promotions ?? [];
+
+            const titleFormatter = (data: PromotionCodeCalculation) =>
+              `${data.title} (${formatAmount(data.amount)})`;
+
+            return (
+              <HBox>
+                <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                  {formatAmount(-item.discount)}
+                </Typography>
+                <MenuButton<PromotionCodeCalculation>
+                  items={promotions}
+                  labelField={titleFormatter}
+                  button={(clickHandler) => {
+                    return (
+                      <IconButton
+                        onClick={clickHandler}
+                        size="small"
+                        title={[
+                          labels.promotions,
+                          ...promotions.map(titleFormatter)
+                        ].join("\n")}
+                      >
+                        <Badge
+                          badgeContent={promotions.length}
+                          color="secondary"
+                        >
+                          <CelebrationIcon color="action" fontSize="small" />
+                        </Badge>
+                      </IconButton>
+                    );
+                  }}
+                />
+              </HBox>
+            );
+          },
+          label: "discount"
+        },
+        ["amount", GridDataType.Money, moneyProps],
+        {
+          data: (item) =>
+            item.approvedDiscount === 0
+              ? undefined
+              : formatAmount(-item.approvedDiscount),
+          label: "approvedDiscount"
+        },
+        {
+          data: (item) =>
+            item.taxAmount === 0 ? undefined : formatAmount(item.taxAmount),
+          label: "taxAmount"
+        },
+        {
+          data: "paidAmount",
+          label: "amountPaid",
+          renderProps: moneyProps,
+          dataType: GridDataType.Money
         },
         {
           data: "source",
@@ -75,6 +180,19 @@ export function OrderViewUI(props: OrderViewUIProps) {
         {
           data: "paymentInstruction",
           singleRow: "large"
+        },
+        {
+          data: (item) => (
+            <ButtonLink
+              href={`./../../../contact/view/${item.customerId}`}
+              size="small"
+              variant="outlined"
+            >
+              {item.customerName}
+            </ButtonLink>
+          ),
+          singleRow: "large",
+          label: "customer"
         },
         ["startDate", GridDataType.DateTime],
         ["endDate", GridDataType.DateTime],

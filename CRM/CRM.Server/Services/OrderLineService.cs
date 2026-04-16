@@ -14,6 +14,7 @@ using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using ProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
 {
@@ -77,6 +78,105 @@ namespace CRM.Server.Services
 
                     return q;
                 });
+        }
+
+        /// <summary>
+        /// Complete the order line
+        /// 完成订单行
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CompleteAsync(OrderLineCompleteRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Execute, (short)Permissions.Order.Manage], cancellationToken);
+            var isExecute = permissions[0];
+            var isManage = permissions[1];
+            if (!isExecute)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var userId = User.Oid;
+            var id = rq.Id;
+            var assetId = rq.AssetId;
+            var now = DateTimeOffset.Now;
+
+            var line = await _db.OrderLines
+                .Where(p => p.Id == id
+                          && p.Order.CoreOrganizationId == orgId
+                          && (isManage || p.Order.UserId == userId || p.UserId == userId)
+                          && p.Order.Status < EntityStatus.Inactivated
+                          && p.Status < EntityStatus.Inactivated
+                          && (p.StartTime < now || (p.AssetQty > 0 && p.AssetId == null)))
+                .Select(a => new
+                {
+                    a.Order.BuyerId,
+                    a.ProductId,
+                    a.Qty,
+                    a.AssetId,
+                    a.AssetQty
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (line == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Asset
+            if (assetId.HasValue)
+            {
+                var hasAsset = await _db.PersonAssets.Where(a => a.Id == assetId.Value && a.PersonId == line.BuyerId)
+                    .AnyAsync(cancellationToken);
+
+                if (!hasAsset)
+                {
+                    return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.AssetId));
+                }
+            }
+            else if (line.AssetId == null && line.AssetQty > 0 && !assetId.HasValue)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.AssetId));
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                if (assetId.HasValue)
+                {
+                    var assetResult = await SyncAssetAsync(line.ProductId, assetId.Value, line.AssetQty, line.Qty, cancellationToken);
+
+                    if (!assetResult.Ok)
+                    {
+                        await transaction.RollbackAsync(cancellationToken);
+
+                        return assetResult;
+                    }
+                }
+
+                await _db.OrderLines
+                                .Where(p => p.Id == id)
+                                .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.EndTime, now)
+                                                        .SetProperty(ol => ol.AssetId, ol => ol.AssetId ?? assetId)
+                                                        .SetProperty(ol => ol.Status, EntityStatus.Completed), cancellationToken)
+                                ;
+
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log and return the result
+                return LogException(ex);
+            }
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -294,17 +394,52 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Query order line
-        /// 查询订单行
+        /// Query all order lines
+        /// 查询所有订单行
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task<OrderLineQueryData[]> QueryAsync(OrderLineQueryRQ rq, CancellationToken cancellationToken = default)
+        public async Task<OrderLineQueryAllData[]> QueryAllAsync(OrderLineQueryAllRQ rq, CancellationToken cancellationToken = default)
         {
-            return CreateQuery(rq, (q) =>
+            // Permission check
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Query, (short)Permissions.Order.Manage], cancellationToken);
+            var isQuery = permissions[0];
+            var isManage = permissions[1];
+            if (!isQuery)
             {
-                if(rq.StartTimeStart.HasValue)
+                return [];
+            }
+
+            if (!isManage)
+            {
+                // Limit to current user
+                rq.UserId = User.Oid;
+            }
+
+            return await CreateQuery(rq, (q) =>
+            {
+                if (rq.UserId.HasValue)
+                {
+                    q = q.Where(p => p.UserId == rq.UserId.Value || p.Order.UserId == rq.UserId.Value);
+                }
+
+                if (rq.Source?.Length is > 1)
+                {
+                    q = q.Where(p => p.Order.Source == rq.Source.ToUpper());
+                }
+
+                if (rq.CustomerId.HasValue)
+                {
+                    q = q.Where(p => p.Order.BuyerId == rq.CustomerId.Value);
+                }
+
+                if (rq.QtyStart.HasValue)
+                {
+                    q = q.Where(p => p.Qty >= rq.QtyStart.Value);
+                }
+
+                if (rq.StartTimeStart.HasValue)
                 {
                     q = q.Where(p => p.StartTime >= rq.StartTimeStart.Value);
                 }
@@ -312,6 +447,63 @@ namespace CRM.Server.Services
                 if (rq.StartTimeEnd.HasValue)
                 {
                     q = q.Where(p => p.StartTime <= rq.StartTimeEnd.Value);
+                }
+
+                return q;
+            })
+            .TagWith(nameof(QueryAsync))
+            .Select(p => new OrderLineQueryAllData
+            {
+                Id = p.Id,
+                Source = p.Order.Source,
+                Customer = p.Order.Buyer.Name,
+                CustomerId = p.Order.BuyerId,
+                OrderId = p.OrderId,
+                ProductId = p.ProductId,
+                Title = p.Title,
+                Description = p.Description,
+                Currency = p.Order.Currency,
+                Price = p.Price,
+                Qty = p.Qty,
+                Amount = p.Amount,
+                Discount = p.Discount,
+                StartTime = p.StartTime,
+                EndTime = p.EndTime,
+                Status = p.Status,
+                Creation = p.Creation
+            })
+            .ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Query order line
+        /// 查询订单行
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<OrderLineQueryData[]> QueryAsync(OrderLineQueryRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.View, (short)Permissions.Order.Manage], cancellationToken);
+            var isView = permissions[0];
+            var isManage = permissions[1];
+            if (!isView)
+            {
+                return [];
+            }
+
+            return await CreateQuery(rq, (q) =>
+            {
+                if (!isManage)
+                {
+                    var userId = User.Oid;
+                    q = q.Where(p => p.UserId == userId || p.Order.UserId == userId);
+                }
+
+                if (rq.QtyStart.HasValue)
+                {
+                    q = q.Where(p => p.Qty >= rq.QtyStart.Value);
                 }
 
                 return q;
@@ -334,6 +526,242 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Read data for view
+        /// 读取用于浏览的数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<OrderLineViewData?> ReadAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.View, (short)Permissions.Order.Execute, (short)Permissions.Order.Manage], cancellationToken);
+            var isView = permissions[0];
+            var isExecute = permissions[1];
+            var isManage = permissions[2];
+            if (!isView && !isExecute)
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var data = await _db.OrderLines.AsNoTracking()
+                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId)
+                .Select(p => new OrderLineViewData
+                {
+                    Id = p.Id,
+                    OrderTitle = p.Order.Title,
+                    OrderId = p.OrderId,
+                    ProductName = p.Product.Name,
+                    ProductId = p.ProductId,
+                    Title = p.Title,
+                    Description = p.Description,
+                    OriginalPrice = p.OriginalPrice,
+                    CostPrice = p.CostPrice,
+                    Price = p.Price,
+                    Qty = p.Qty,
+                    AssetQty = p.AssetQty,
+                    Amount = p.Amount,
+                    Discount = p.Discount,
+                    Promotions = p.Promotions,
+                    StartTime = p.StartTime,
+                    EndTime = p.EndTime,
+                    UserName = (p.User == null ? null : p.User.Name),
+                    UserId = p.UserId,
+                    OrderUserId = p.Order.UserId,
+                    AssetId = p.AssetId,
+                    Data = p.Data,
+                    Status = p.Status,
+                    OrderStatus = p.Order.Status,
+                    Creation = p.Creation
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (data != null)
+            {
+                var userId = User.Oid;
+                var now = DateTimeOffset.Now;
+
+                data.IsStartable = data.Status < EntityStatus.Inactivated
+                    && data.OrderStatus < EntityStatus.Inactivated
+                    && (data.UserId == null || data.StartTime == null);
+
+                data.IsCompletable = data.Status < EntityStatus.Inactivated
+                        && data.OrderStatus < EntityStatus.Inactivated
+                        && (isManage || data.OrderUserId == userId || data.UserId == userId)
+                        && (data.StartTime < now || (data.AssetQty > 0 && data.AssetId == null));
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// Rollback the order line
+        /// 回滚订单行
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> RollbackAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Execute, (short)Permissions.Order.Manage], cancellationToken);
+            var isExecute = permissions[0];
+            var isManage = permissions[1];
+            if (!isExecute)
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var userId = User.Oid;
+
+            var line = await _db.OrderLines
+                .Where(p => p.Id == id
+                          && p.Order.CoreOrganizationId == orgId
+                          && (isManage || p.Order.UserId == userId || p.UserId == userId)
+                ).Select(p => new
+                {
+                    p.Order.BuyerId,
+                    p.ProductId,
+                    p.Qty,
+                    p.AssetId,
+                    p.AssetQty
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (line == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                if (line.AssetId.HasValue)
+                {
+                    var assetResult = await SyncAssetAsync(line.BuyerId, line.AssetId.Value, -line.AssetQty, line.Qty, cancellationToken);
+                    if (!assetResult.Ok)
+                    {
+                        await transaction.RollbackAsync(cancellationToken);
+
+                        return assetResult;
+                    }
+                }
+
+                await _db.OrderLines
+                    .Where(p => p.Id == id)
+                    .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, (DateTimeOffset?)null)
+                                            .SetProperty(ol => ol.EndTime, (DateTimeOffset?)null)
+                                            .SetProperty(ol => ol.UserId, (long?)null)
+                                            .SetProperty(ol => ol.AssetId, (int?)null)
+                                            .SetProperty(ol => ol.Status, EntityStatus.Normal), cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log and return the result
+                return LogException(ex);
+            }
+
+            return ActionResult.Succeed(id);
+        }
+
+        private async Task<IActionResult> SyncAssetAsync(long personId, int assetId, int assetQty, decimal qty, CancellationToken cancellationToken = default)
+        {
+            var asset = await _db.PersonAssets.Where(a => a.Id == assetId && a.PersonId == personId)
+                .Select(a => new
+                {
+                    a.Expiry,
+                    a.Product.Unit.BaseUnit
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (asset == null)
+            {
+                return ApplicationErrors.NoId.AsResult("AssetId");
+            }
+
+            var unit = asset.BaseUnit;
+
+            if (!Constants.IsAssetUnit(unit))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(asset.BaseUnit));
+            }
+
+            try
+            {
+                if (unit == ProductUnit.TIME)
+                {
+                    var totalTimes = Convert.ToInt32(assetQty * qty);
+
+                    await _db.PersonAssets.Where(a => a.Id == assetId)
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Times, p => p.Times.GetValueOrDefault() + totalTimes), cancellationToken);
+                }
+                else if (unit == ProductUnit.MONEY)
+                {
+                    var totalAmount = assetQty * qty;
+                    await _db.PersonAssets.Where(a => a.Id == assetId)
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Amount, p => p.Amount.GetValueOrDefault() + totalAmount), cancellationToken);
+                }
+                else
+                {
+                    var expiry = asset.Expiry;
+                    var totalQty = Convert.ToInt32(assetQty * qty);
+
+                    switch (unit)
+                    {
+                        case ProductUnit.HOUR:
+                            expiry = expiry.AddHours(totalQty);
+                            break;
+                        case ProductUnit.DAY:
+                            expiry = expiry.AddDays(totalQty);
+                            break;
+                        case ProductUnit.WEEK:
+                            expiry = expiry.AddDays(totalQty * 7);
+                            break;
+                        case ProductUnit.FORTNIGHT:
+                            expiry = expiry.AddDays(totalQty * 14);
+                            break;
+                        case ProductUnit.FOURWEEK:
+                            expiry = expiry.AddDays(totalQty * 28);
+                            break;
+                        case ProductUnit.MONTH:
+                            expiry = expiry.AddMonths(totalQty);
+                            break;
+                        case ProductUnit.BIMONTH:
+                            expiry = expiry.AddMonths(totalQty * 2);
+                            break;
+                        case ProductUnit.QUATER:
+                            expiry = expiry.AddMonths(totalQty * 3);
+                            break;
+                        case ProductUnit.HALFYEAR:
+                            expiry = expiry.AddMonths(totalQty * 6);
+                            break;
+                        case ProductUnit.YEAR:
+                            expiry = expiry.AddYears(totalQty);
+                            break;
+                    }
+
+                    await _db.PersonAssets.Where(a => a.Id == assetId)
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Expiry, expiry), cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                return LogException(ex);
+            }
+
+            return ActionResult.Success;
+        }
+
+        /// <summary>
         /// Start to execute the order line
         /// 开始执行订单行
         /// </summary>
@@ -343,8 +771,10 @@ namespace CRM.Server.Services
         public async Task<IActionResult> StartAsync(OrderLineStartRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var (isEdit, isManage) = await _orderService.CheckEditPermissionsAsync(cancellationToken);
-            if (!isEdit)
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Execute, (short)Permissions.Order.Manage], cancellationToken);
+            var isExecute = permissions[0];
+            var isManage = permissions[1];
+            if (!isExecute)
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
@@ -357,11 +787,11 @@ namespace CRM.Server.Services
             var result = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
-                          && (isManage || p.Order.UserId == User.Oid)
                           && p.Order.Status < EntityStatus.Inactivated
                           && p.Status < EntityStatus.Inactivated)
                 .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, ol => initStart ? ol.StartTime ?? DateTimeOffset.Now : ol.StartTime)
-                                        .SetProperty(ol => ol.UserId, ol => ol.UserId ?? userId), cancellationToken);
+                                        .SetProperty(ol => ol.UserId, ol => (isManage || ol.Order.UserId == userId) ? rq.UserId ?? ol.UserId ?? userId : ol.UserId ?? userId)
+                                        .SetProperty(ol => ol.Status, ol => ol.Status == EntityStatus.Normal ? EntityStatus.Doing : ol.Status), cancellationToken);
 
             return result > 0 ? ActionResult.Succeed(id) : ApplicationErrors.NoId.AsResult();
         }
@@ -421,6 +851,16 @@ namespace CRM.Server.Services
                 orderLine.Title = rq.Title;
             }
 
+            if (rq.IsModified(nameof(rq.OriginalPrice)) && rq.OriginalPrice.HasValue)
+            {
+                orderLine.OriginalPrice = rq.OriginalPrice.Value;
+            }
+
+            if (rq.IsModified(nameof(rq.CostPrice)) && rq.CostPrice.HasValue)
+            {
+                orderLine.CostPrice = rq.CostPrice.Value;
+            }
+
             if (rq.IsModified(nameof(rq.Description)))
             {
                 orderLine.Description = rq.Description;
@@ -439,6 +879,17 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.Data)))
             {
                 orderLine.Data = rq.Data;
+            }
+
+            if (rq.IsModified(nameof(rq.UserId)) && rq.UserId.HasValue)
+            {
+                var userExists = await _db.Users(orgId).Where(u => u.Id == rq.UserId.Value).AnyAsync(cancellationToken);
+                if (!userExists)
+                {
+                    return ApplicationErrors.NoId.AsResult(nameof(rq.UserId));
+                }
+
+                orderLine.UserId = rq.UserId.Value;
             }
 
             if (rq.IsModified(nameof(rq.Status)) && rq.Status.HasValue)
@@ -507,6 +958,8 @@ namespace CRM.Server.Services
                     ProductId = p.ProductId,
                     Title = p.Title,
                     Description = p.Description,
+                    OriginalPrice = p.OriginalPrice,
+                    CostPrice = p.CostPrice,
                     Price = p.Price,
                     Qty = p.Qty,
                     StartTime = p.StartTime,

@@ -53,7 +53,7 @@ namespace CRM.Server.Services
             return App.EncriptData(sensitiveData, GetEncryptionKey(productId));
         }
 
-        private ActionResult CheckProductUnit(BusinessProductUnit unit, decimal? amount, short? times, bool isUpdating = false)
+        private ActionResult CheckProductUnit(BusinessProductUnit unit, decimal? amount, int? times, bool isUpdating = false)
         {
             if (unit == BusinessProductUnit.TIME)
             {

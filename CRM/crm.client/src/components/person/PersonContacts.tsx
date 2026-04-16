@@ -183,16 +183,14 @@ export function PersonContacts(props: PersonContactsProps) {
         {
           width: DefaultUI.Widths.icon2,
           header: labels.actions,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingBottom: "6px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<ContactQueryData, BoxProps>) => {
             if (data == null) return undefined;
-
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
 
             return (
               <React.Fragment>

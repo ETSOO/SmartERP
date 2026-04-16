@@ -54,7 +54,7 @@ namespace CRM.Server.Dto.Asset
         /// Remaining times
         /// 剩余次数
         /// </summary>
-        public short? Times { get; init; }
+        public int? Times { get; init; }
 
         /// <summary>
         /// Remaining amount

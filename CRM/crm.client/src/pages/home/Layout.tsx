@@ -65,6 +65,7 @@ export default function Home() {
     "addProfile",
     "address",
     "addresses",
+    "allOrderLines",
     "allProfiles",
     "app3",
     "assets",
@@ -102,6 +103,7 @@ export default function Home() {
     "updateSystemSettings",
     "users",
     "view",
+    "viewOrder",
     "viewProfile"
   );
 
@@ -356,6 +358,17 @@ export default function Home() {
             hidden: true
           },
           {
+            segment: "lines",
+            title: labels.allOrderLines,
+            hidden: true
+          },
+          {
+            segment: "viewline",
+            pattern: "viewline/:id",
+            title: labels.view,
+            hidden: true
+          },
+          {
             segment: "confirm",
             title: labels.confirmOrder,
             hidden: true
@@ -369,7 +382,7 @@ export default function Home() {
           {
             segment: "view",
             pattern: "view/:id",
-            title: labels.view,
+            title: labels.viewOrder,
             hidden: true
           },
           {

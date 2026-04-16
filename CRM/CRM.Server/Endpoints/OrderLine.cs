@@ -14,6 +14,9 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("OrderLine");
 
+            g.MapPut("Complete", (IOrderLineService service, OrderLineCompleteRQ rq, CancellationToken cancellationToken) => service.CompleteAsync(rq, cancellationToken))
+                .WithDescription("Complete order line / 完成订单行").WithTags("OrderLine");
+
             g.MapPut("Create", (IOrderLineService service, OrderLineCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create order line / 创建订单行").WithTags("OrderLine");
 
@@ -25,6 +28,15 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("Query", (IOrderLineService service, OrderLineQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query order line info / 查询订单行信息").WithTags("OrderLine");
+
+            g.MapPost("QueryAll", (IOrderLineService service, OrderLineQueryAllRQ rq, CancellationToken cancellationToken) => service.QueryAllAsync(rq, cancellationToken))
+                .WithDescription("Query order line info / 查询订单行信息").WithTags("OrderLine");
+
+            g.MapGet("Read/{id:long}", (IOrderLineService service, long id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
+                .WithDescription("Read order line info / 读取订单行信息").WithTags("OrderLine");
+
+            g.MapPut("Rollback/{id:long}", (IOrderLineService service, long id, CancellationToken cancellationToken) => service.RollbackAsync(id, cancellationToken))
+                .WithDescription("Rollback order line / 回滚订单行").WithTags("OrderLine");
 
             g.MapPut("Start", (IOrderLineService service, OrderLineStartRQ rq, CancellationToken cancellationToken) => service.StartAsync(rq, cancellationToken))
                 .WithDescription("Start to execute order line / 开始执行订单行").WithTags("OrderLine");

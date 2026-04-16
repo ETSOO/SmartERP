@@ -4,13 +4,15 @@ import {
   IconButtonLink,
   MobileListItemRenderer,
   ButtonLink,
-  SelectBool
+  SelectBool,
+  LinkEx
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import React from "react";
 import {
   GridCellRendererProps,
@@ -49,6 +51,7 @@ export default function AllDepts() {
   const labels = app.getLabels(
     "actions",
     "add",
+    "allOrderLines",
     "amount",
     "approvedDiscount",
     "confirmAction",
@@ -102,14 +105,24 @@ export default function AllDepts() {
                 </ButtonLink>
               </React.Fragment>
             )}
-            <Fab
-              title={labels.add}
-              size="medium"
-              color="primary"
-              onClick={() => navigate("./add")}
+            <ButtonLink
+              href={`./lines`}
+              size="small"
+              variant="outlined"
+              startIcon={<ListAltIcon />}
             >
-              <AddIcon />
-            </Fab>
+              {labels.allOrderLines}
+            </ButtonLink>
+            {app.owns(Permissions.Order.Add) && (
+              <Fab
+                title={labels.add}
+                size="medium"
+                color="primary"
+                onClick={() => navigate("./add")}
+              >
+                <AddIcon />
+              </Fab>
+            )}
           </React.Fragment>
         )
       })}
@@ -167,25 +180,26 @@ export default function AllDepts() {
       columns={[
         {
           header: labels.title,
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<OrderQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
-
             return (
               <React.Fragment>
-                <Typography sx={GridDeletedCellBoxStyle(data)}>
+                <Typography variant="body2" sx={GridDeletedCellBoxStyle(data)}>
                   {data.title}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {data.customerName}
-                  {data.source ? ` / ${data.source}` : ""}
+                  {data.source ? ` / ${data.source}` : ""}{" "}
+                  <LinkEx to={`./../contact/view/${data.customerId}`}>
+                    {labels.view}
+                  </LinkEx>
                 </Typography>
               </React.Fragment>
             );
@@ -195,20 +209,20 @@ export default function AllDepts() {
           width: 108,
           header: labels.orderLines,
           align: "right",
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<OrderQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
-
             return (
               <React.Fragment>
-                <Typography>{app.formatNumber(data.lines)}</Typography>
+                <Typography variant="body2">
+                  {app.formatNumber(data.lines)}
+                </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {app.formatNumber(data.items)}
                 </Typography>
@@ -220,22 +234,20 @@ export default function AllDepts() {
           width: 116,
           header: labels.amount,
           align: "right",
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<OrderQueryData, BoxProps>) => {
             if (data == null) return undefined;
-
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
 
             const discount = data.discount + data.lineDiscount;
 
             return (
               <React.Fragment>
-                <Typography>
+                <Typography variant="body2">
                   {app.formatMoney(data.amount, undefined, {
                     currency: data.currency
                   })}
@@ -251,20 +263,18 @@ export default function AllDepts() {
           width: 116,
           header: labels.taxAmount,
           align: "right",
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<OrderQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
-
             return (
               <React.Fragment>
-                <Typography>
+                <Typography variant="body2">
                   {app.formatMoney(data.taxAmount, undefined, {
                     currency: data.currency
                   })}
@@ -281,20 +291,20 @@ export default function AllDepts() {
         {
           width: 116,
           header: labels.startDate,
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<OrderQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
-
             return (
               <React.Fragment>
-                <Typography>{app.formatDate(data.startDate) ?? "-"}</Typography>
+                <Typography variant="body2">
+                  {app.formatDate(data.startDate) ?? "-"}
+                </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {app.formatDate(data.creation)}
                 </Typography>
@@ -305,25 +315,33 @@ export default function AllDepts() {
         {
           width: DefaultUI.Widths.icon2,
           header: labels.actions,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingBottom: "6px!important"
+          },
           cellRenderer: ({
-            data,
-            cellProps
+            data
           }: GridCellRendererProps<OrderQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
-            cellProps.sx = {
-              paddingTop: "6px!important",
-              paddingBottom: "6px!important"
-            };
-
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
-                  <EditIcon />
-                </IconButtonLink>
-                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
-                  <ArticleIcon />
-                </IconButtonLink>
+                {app.owns(Permissions.Order.Edit) && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
+                {app.owns(Permissions.Order.View) && (
+                  <IconButtonLink
+                    title={labels.view}
+                    href={`./view/${data.id}`}
+                  >
+                    <ArticleIcon />
+                  </IconButtonLink>
+                )}
               </React.Fragment>
             );
           }
@@ -336,12 +354,12 @@ export default function AllDepts() {
             data.title,
             app.formatDate(data.creation, "d"),
             [
-              {
+              app.owns(Permissions.Order.Edit) && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./edit/${data.id}`
               },
-              {
+              app.owns(Permissions.Order.View) && {
                 label: labels.view,
                 icon: <ArticleIcon />,
                 action: `./view/${data.id}`
@@ -350,7 +368,10 @@ export default function AllDepts() {
             <React.Fragment>
               <Typography variant="body2" sx={GridDeletedCellBoxStyle(data)}>
                 {data.customerName}
-                {data.source ? ` / ${data.source}` : ""}
+                {data.source ? ` / ${data.source}` : ""}{" "}
+                <LinkEx to={`./../contact/view/${data.customerId}`}>
+                  {labels.view}
+                </LinkEx>
               </Typography>
               <Typography variant="body2">
                 {labels.orderLines}: {app.formatNumber(data.lines)} /{" "}

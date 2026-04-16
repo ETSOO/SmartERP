@@ -469,6 +469,21 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<OrderQueryData[]> QueryAsync(OrderQueryRQ rq, CancellationToken cancellationToken = default)
         {
+            // Permission check
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Query, (short)Permissions.Order.Manage], cancellationToken);
+            var isQuery = permissions[0];
+            var isManage = permissions[1];
+            if (!isQuery)
+            {
+                return [];
+            }
+
+            if (!isManage)
+            {
+                // Limit to current user
+                rq.UserId = User.Oid;
+            }
+
             await _commonService.UpdateTagAsync(rq, User.OrganizationInt, cancellationToken);
 
             return await CreateQuery(rq, (q) =>
@@ -532,6 +547,7 @@ namespace CRM.Server.Services
                 Id = o.Id,
                 Source = o.Source,
                 Title = o.Title,
+                CustomerId = o.BuyerId,
                 CustomerName = o.Buyer.Name,
                 Lines = o.Lines,
                 Items = o.Items,
@@ -583,6 +599,8 @@ namespace CRM.Server.Services
                      PaidAmount = p.PaidAmount,
                      Discount = p.Discount,
                      LineDiscount = p.LineDiscount,
+                     ApprovedDiscount = p.ApprovedDiscount,
+                     TaxAmount = p.TaxAmount,
                      Lines = p.Lines,
                      Items = p.Items,
                      Promotions = p.Promotions,
