@@ -12,7 +12,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import ImageIcon from "@mui/icons-material/Image";
-import { PersonViewData } from "@etsoo/smarterp-crm";
+import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
+import { Permissions, PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
 import Divider from "@mui/material/Divider";
@@ -49,6 +50,7 @@ export function PersonData(props: PersonDataProps) {
     "add",
     "addresses",
     "all",
+    "assets",
     "delete",
     "deleteConfirm",
     "edit",
@@ -295,6 +297,16 @@ export function PersonData(props: PersonDataProps) {
                     state={item.avatar}
                   >
                     {labels.editAvatar}
+                  </ButtonLink>
+                )}
+                {app.owns(Permissions.Org.Manage) && (
+                  <ButtonLink
+                    href={`./../../../customer/asset?personId=${item.id}`}
+                    size="small"
+                    variant="outlined"
+                    startIcon={<CardGiftcardIcon />}
+                  >
+                    {labels.assets}
                   </ButtonLink>
                 )}
                 {editable && (

@@ -43,7 +43,7 @@ const template = {
   status: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export default function AllOrders() {
   // Route
   const navigate = useNavigate();
 

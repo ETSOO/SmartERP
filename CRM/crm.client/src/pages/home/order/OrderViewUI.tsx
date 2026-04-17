@@ -1,6 +1,10 @@
 import { ButtonLink, HBox, MenuButton, ViewContainer } from "@etsoo/materialui";
 import { GridDataType } from "@etsoo/react";
-import { OrderViewData, PromotionCodeCalculation } from "@etsoo/smarterp-crm";
+import {
+  OrderViewData,
+  Permissions,
+  PromotionCodeCalculation
+} from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
@@ -187,6 +191,7 @@ export function OrderViewUI(props: OrderViewUIProps) {
               href={`./../../../contact/view/${item.customerId}`}
               size="small"
               variant="outlined"
+              disabled={!app.owns(Permissions.Customer.View)}
             >
               {item.customerName}
             </ButtonLink>

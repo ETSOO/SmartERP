@@ -12,7 +12,8 @@ import {
   GridCellRendererProps,
   GridDataType,
   GridDeletedCellBoxStyle,
-  ScrollerListForwardRef
+  ScrollerListForwardRef,
+  useSearchParamsEx
 } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
@@ -35,6 +36,8 @@ const template = {
 export default function Assets() {
   // Route
   const navigate = useNavigate();
+
+  const { personId } = useSearchParamsEx({ personId: "number" });
 
   // Labels
   const labels = app.getLabels(
@@ -91,7 +94,11 @@ export default function Assets() {
           defaultValue={data.keyword}
         />,
         <ProductList search idValue={data.productId} />,
-        <CustomerList name="personId" search idValue={data.personId} />,
+        <CustomerList
+          name="personId"
+          search
+          idValue={data.personId ?? personId}
+        />,
         <StatusList search idValue={data.status} />
       ]}
       loadData={async (data) => {

@@ -49,7 +49,7 @@ export default function ViewOrder() {
             },
             {
               children: (visible) =>
-                visible && <OrderLines orderId={id} refresh={loadData} />,
+                visible && <OrderLines orderId={id} currency={data.currency} />,
               label: labels.orderLines + ` (${data.lines})`,
               icon: <ListAltIcon />,
               iconPosition: "start"

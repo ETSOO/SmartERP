@@ -20,6 +20,11 @@ import React from "react";
 import { ProductList } from "@etsoo/smarterp-crm/components";
 import { useNavigate } from "react-router-dom";
 import ArticleIcon from "@mui/icons-material/Article";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import { Permissions } from "@etsoo/smarterp-crm";
+import Typography from "@mui/material/Typography";
+import Fab from "@mui/material/Fab";
 
 const template = {
   keyword: "string",
@@ -29,7 +34,7 @@ const template = {
 
 export type AllOrderLinesProps = {
   orderId: number;
-  refresh: () => Promise<void>;
+  currency: string;
 };
 
 export function OrderLines(props: AllOrderLinesProps) {
@@ -37,13 +42,15 @@ export function OrderLines(props: AllOrderLinesProps) {
   const navigate = useNavigate();
 
   // Destruct
-  const { orderId, refresh } = props;
+  const { orderId, currency } = props;
 
   // Labels
   const labels = app.getLabels(
     "actions",
+    "add",
     "amount",
     "discount",
+    "edit",
     "keywords",
     "orderLineStartTime",
     "price",
@@ -64,7 +71,20 @@ export function OrderLines(props: AllOrderLinesProps) {
     <ResponsivePage<OrderLineQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: <React.Fragment></React.Fragment>
+        fabButtons: (
+          <React.Fragment>
+            {app.owns(Permissions.Order.Edit) && (
+              <Fab
+                title={labels.add}
+                size="medium"
+                color="primary"
+                onClick={() => navigate("./add")}
+              >
+                <AddIcon />
+              </Fab>
+            )}
+          </React.Fragment>
+        )
       })}
       mRef={ref}
       quickAction={(data) => navigate(`./../../viewline/${data.id}`)}
@@ -119,6 +139,7 @@ export function OrderLines(props: AllOrderLinesProps) {
           field: "amount",
           header: labels.amount,
           type: GridDataType.Money,
+          renderProps: { currency },
           width: 116
         },
         {
@@ -130,7 +151,7 @@ export function OrderLines(props: AllOrderLinesProps) {
           sortAsc: false
         },
         {
-          width: DefaultUI.Widths.icon3,
+          width: DefaultUI.Widths.icon2,
           header: labels.actions,
           cellBoxStyle: {
             paddingTop: "6px!important",
@@ -143,6 +164,14 @@ export function OrderLines(props: AllOrderLinesProps) {
 
             return (
               <React.Fragment>
+                {app.owns(Permissions.Order.Edit) && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./../../editline/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
                 <IconButtonLink
                   title={labels.view}
                   href={`./../../viewline/${data.id}`}
@@ -161,12 +190,36 @@ export function OrderLines(props: AllOrderLinesProps) {
             app.formatDate(data.startTime, "ds"),
             [
               {
+                label: labels.edit,
+                icon: <EditIcon />,
+                action: `./../../editline/${data.id}`
+              },
+              {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../viewline/${data.id}`
+                action: `./../../viewline/${data.id}`
               }
             ],
-            <React.Fragment></React.Fragment>
+            <React.Fragment>
+              <Typography variant="body2">
+                {labels.amount}:{" "}
+                {app.formatMoney(data.amount, undefined, {
+                  currency
+                })}
+              </Typography>
+              <Typography component="div" variant="caption">
+                {app.formatNumber(data.price)} x {app.formatNumber(data.qty)}
+                {data.discount == 0
+                  ? ""
+                  : ` - ${app.formatNumber(data.discount)}`}
+              </Typography>
+              {data.startTime && (
+                <Typography variant="body2">
+                  {labels.orderLineStartTime}:{" "}
+                  {app.formatDate(data.startTime, "ds")}
+                </Typography>
+              )}
+            </React.Fragment>
           ];
         })
       }

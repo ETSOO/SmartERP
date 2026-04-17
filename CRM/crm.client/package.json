@@ -14,7 +14,7 @@
     "@etsoo/react": "^1.8.85",
     "@etsoo/reacteditor": "^1.0.33",
     "@etsoo/shared": "^1.2.83",
-    "@etsoo/smarterp-core": "^1.1.35",
+    "@etsoo/smarterp-core": "^1.1.36",
     "@etsoo/smarterp-crm": "file:../../../../EtsooUI/SmartERP/crm",
     "@etsoo/toolpad": "^1.0.48",
     "@mui/icons-material": "^9.0.0",
@@ -34,7 +34,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "typescript": "^6.0.2",
+    "typescript": "^6.0.3",
     "vite": "^8.0.8"
   },
   "optionalDependencies": {
