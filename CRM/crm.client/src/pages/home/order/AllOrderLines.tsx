@@ -20,18 +20,28 @@ import { DataTypes, DateUtils, Utils } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { CustomerList, ProductList } from "@etsoo/smarterp-crm/components";
+import {
+  CustomerList,
+  PersonList,
+  ProductList,
+  UserTiplist
+} from "@etsoo/smarterp-crm/components";
 import ArticleIcon from "@mui/icons-material/Article";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { IdentityTypeFlags } from "@etsoo/appscript";
 
 const template = {
   source: "string",
   customerId: "number",
   productId: "number",
+  supplierId: "number",
+  userId: "number",
   qtyStart: "number",
   startTimeStart: "date",
-  startTimeEnd: "date"
+  startTimeEnd: "date",
+  creationStart: "date",
+  creationEnd: "date"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllOrderLines() {
@@ -48,6 +58,7 @@ export default function AllOrderLines() {
     "orderLineStartTime",
     "orderSource",
     "qtyStart",
+    "supplier",
     "status",
     "title",
     "view",
@@ -85,6 +96,20 @@ export default function AllOrderLines() {
           minChars={2}
         />,
         <CustomerList search idValue={data.customerId} />,
+        <PersonList
+          label={labels.supplier}
+          name="supplierId"
+          search
+          rq={{
+            identityType:
+              IdentityTypeFlags.Customer |
+              IdentityTypeFlags.Supplier |
+              IdentityTypeFlags.User |
+              IdentityTypeFlags.Org
+          }}
+          idValue={data.supplierId}
+        />,
+        <UserTiplist search idValue={data.userId} />,
         <SearchField
           label={labels.orderLineStartTime}
           name="startTimeStart"
@@ -96,6 +121,18 @@ export default function AllOrderLines() {
           name="startTimeEnd"
           type="date"
           defaultValue={DateUtils.formatForInput(data.startTimeEnd)}
+        />,
+        <SearchField
+          label={labels.creation}
+          name="creationStart"
+          type="date"
+          defaultValue={DateUtils.formatForInput(data.creationStart)}
+        />,
+        <SearchField
+          label=""
+          name="creationEnd"
+          type="date"
+          defaultValue={DateUtils.formatForInput(data.creationEnd)}
         />
       ]}
       loadData={async (data) => {

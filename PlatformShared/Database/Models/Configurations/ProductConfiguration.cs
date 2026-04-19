@@ -43,6 +43,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasPrecision(12, 2)
                 .HasColumnName("cap_qty");
             entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
+            entity.Property(e => e.Validity).HasColumnName("validity");
             entity.Property(e => e.AssignedId).HasColumnName("assigned_id");
             entity.Property(e => e.OrderIndex)
                 .HasDefaultValue((short)0)

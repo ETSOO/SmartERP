@@ -1,9 +1,7 @@
 import {
   IconButtonLink,
   MobileListItemRenderer,
-  NumberInputField,
-  ResponsivePage,
-  SearchField
+  ResponsivePage
 } from "@etsoo/materialui";
 import {
   GridCellRendererProps,
@@ -13,11 +11,10 @@ import {
 } from "@etsoo/react";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
-import { OrderLineQueryData } from "@etsoo/smarterp-crm";
+import { OrderLineQueryAllData, OrderLineQueryData } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import { BoxProps } from "@mui/material/Box";
 import React from "react";
-import { ProductList } from "@etsoo/smarterp-crm/components";
 import { useNavigate } from "react-router-dom";
 import ArticleIcon from "@mui/icons-material/Article";
 import AddIcon from "@mui/icons-material/Add";
@@ -25,26 +22,19 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Permissions } from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
-import { EntityStatus } from "@etsoo/appscript";
 
-const template = {
-  keyword: "string",
-  productId: "number",
-  qtyStart: "number"
-} as const satisfies DataTypes.BasicTemplate;
+const template = {} as const satisfies DataTypes.BasicTemplate;
 
-export type AllOrderLinesProps = {
-  orderId: number;
-  orderStatus: EntityStatus;
-  currency: string;
+export type AssetOrderLinesProps = {
+  assetId: number;
 };
 
-export function OrderLines(props: AllOrderLinesProps) {
+export function AssetOrderLines(props: AssetOrderLinesProps) {
   // Route
   const navigate = useNavigate();
 
   // Destruct
-  const { orderId, orderStatus, currency } = props;
+  const { assetId } = props;
 
   // Labels
   const labels = app.getLabels(
@@ -64,46 +54,26 @@ export function OrderLines(props: AllOrderLinesProps) {
 
   // Refs
   const ref =
-    React.useRef<ScrollerListForwardRef<OrderLineQueryData>>(undefined);
+    React.useRef<ScrollerListForwardRef<OrderLineQueryAllData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   return (
-    <ResponsivePage<OrderLineQueryData, typeof template>
+    <ResponsivePage<OrderLineQueryAllData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: (
-          <React.Fragment>
-            {app.owns(Permissions.Order.Edit) && (
-              <Fab
-                title={labels.add}
-                size="medium"
-                color="primary"
-                onClick={() => navigate("./add")}
-              >
-                <AddIcon />
-              </Fab>
-            )}
-          </React.Fragment>
-        )
+        fabButtons: <React.Fragment></React.Fragment>
       })}
       mRef={ref}
-      quickAction={(data) => navigate(`./../../viewline/${data.id}`)}
+      quickAction={(data) =>
+        navigate(`./../../../../order/viewline/${data.id}`)
+      }
       fieldTemplate={template}
-      fields={(data) => [
-        <ProductList search idValue={data.productId} />,
-        <SearchField
-          label={labels.keywords}
-          name="keyword"
-          defaultValue={data.keyword}
-          minChars={2}
-        />,
-        <NumberInputField search name="qtyStart" label={labels.qtyStart} />
-      ]}
+      fields={(data) => []}
       loadData={(data) =>
-        app.orderLineApi.query(
-          { orderId, ...data },
+        app.orderLineApi.queryAll(
+          { assetId, ...data },
           {
             defaultValue: [],
             showLoading: false
@@ -141,7 +111,6 @@ export function OrderLines(props: AllOrderLinesProps) {
           field: "amount",
           header: labels.amount,
           type: GridDataType.Money,
-          renderProps: { currency },
           width: 116
         },
         {
@@ -153,7 +122,7 @@ export function OrderLines(props: AllOrderLinesProps) {
           sortAsc: false
         },
         {
-          width: DefaultUI.Widths.icon2,
+          width: DefaultUI.Widths.icon1,
           header: labels.actions,
           cellBoxStyle: {
             paddingTop: "6px!important",
@@ -166,18 +135,9 @@ export function OrderLines(props: AllOrderLinesProps) {
 
             return (
               <React.Fragment>
-                {app.owns(Permissions.Order.Edit) &&
-                  orderStatus < EntityStatus.Inactivated && (
-                    <IconButtonLink
-                      title={labels.edit}
-                      href={`./../../editline/${data.id}`}
-                    >
-                      <EditIcon />
-                    </IconButtonLink>
-                  )}
                 <IconButtonLink
                   title={labels.view}
-                  href={`./../../viewline/${data.id}`}
+                  href={`./../../../../order/viewline/${data.id}`}
                 >
                   <ArticleIcon />
                 </IconButtonLink>
@@ -193,22 +153,14 @@ export function OrderLines(props: AllOrderLinesProps) {
             app.formatDate(data.startTime, "ds"),
             [
               {
-                label: labels.edit,
-                icon: <EditIcon />,
-                action: `./../../editline/${data.id}`
-              },
-              {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../../viewline/${data.id}`
+                action: `./../../../../order/viewline/${data.id}`
               }
             ],
             <React.Fragment>
               <Typography variant="body2">
-                {labels.amount}:{" "}
-                {app.formatMoney(data.amount, undefined, {
-                  currency
-                })}
+                {labels.amount}: {app.formatMoney(data.amount)}
               </Typography>
               <Typography component="div" variant="caption">
                 {app.formatNumber(data.price)} x {app.formatNumber(data.qty)}

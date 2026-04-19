@@ -25,7 +25,7 @@ public partial class OrderLine
 
     public decimal Qty { get; set; }
 
-    public short AssetQty { get; set; }
+    public int AssetQty { get; set; }
 
     public decimal Amount { get; set; }
 
@@ -47,11 +47,15 @@ public partial class OrderLine
 
     public long? UserId { get; set; }
 
+    public long? SupplierId { get; set; }
+
     public virtual PersonAsset? Asset { get; set; }
 
     public virtual OrderHeader Order { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;
+
+    public virtual Person? Supplier { get; set; }
 
     public virtual Person? User { get; set; }
 }

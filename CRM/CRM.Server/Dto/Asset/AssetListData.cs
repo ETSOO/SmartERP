@@ -13,6 +13,12 @@
         public int Id { get; init; }
 
         /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
+
+        /// <summary>
         /// Product name
         /// 产品名称
         /// </summary>

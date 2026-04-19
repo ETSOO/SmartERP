@@ -22,6 +22,12 @@ namespace CRM.Server.Dto.OrderLine
         public long OrderId { get; init; }
 
         /// <summary>
+        /// Currency
+        /// 币种
+        /// </summary>
+        public required string Currency { get; init; }
+
+        /// <summary>
         /// Product id
         /// 产品编号
         /// </summary>
@@ -76,6 +82,24 @@ namespace CRM.Server.Dto.OrderLine
         public DateTimeOffset? EndTime { get; init; }
 
         /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
+
+        /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long? UserId { get; init; }
+
+        /// <summary>
+        /// Modifiers
+        /// 定制选项
+        /// </summary>
+        public JsonDocument? Modifiers { get; init; }
+
+        /// <summary>
         /// JSON data
         /// JSON 数据
         /// </summary>
@@ -86,5 +110,11 @@ namespace CRM.Server.Dto.OrderLine
         /// 状态
         /// </summary>
         public EntityStatus Status { get; init; }
+
+        /// <summary>
+        /// Is deletable
+        /// 是否可删除
+        /// </summary>
+        public bool IsDeletable { get; init; }
     }
 }

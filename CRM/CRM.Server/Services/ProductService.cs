@@ -185,6 +185,7 @@ namespace CRM.Server.Services
                 StepQty = rq.StepQty,
                 CapQty = rq.CapQty,
                 AssetQty = assetQty,
+                Validity = rq.Validity,
                 AssignedId = assignedId,
                 Status = rq.Status ?? EntityStatus.Normal,
                 Usage = rq.Usage ?? ProductUsage.FinishedProduct,
@@ -203,14 +204,14 @@ namespace CRM.Server.Services
                 product.Tags = [.. tagIds];
             }
 
-            if (rq.Price != null)
+            if (rq.Price != null && rq.Price.RetailPrice.HasValue)
             {
                 product.Prices =
                 [
                     new ProductPrice
                     {
                         Currency = rq.Price.Currency,
-                        RetailPrice = rq.Price.RetailPrice,
+                        RetailPrice = rq.Price.RetailPrice.Value,
                         PromotionPrice = rq.Price.PromotionPrice,
                         ChannelPrice = rq.Price.ChannelPrice,
                         CostPrice = rq.Price.CostPrice
@@ -697,9 +698,9 @@ namespace CRM.Server.Services
                         if (cp.JsonData.Prices != null)
                         {
                             var price = cp.JsonData.Prices.FirstOrDefault(p => p.Currency == rq.Currency);
-                            if (price != null)
+                            if (price != null && price.RetailPrice.HasValue)
                             {
-                                p.CustomerRetailPrice = price.RetailPrice;
+                                p.CustomerRetailPrice = price.RetailPrice.Value;
                             }
                         }
                     }
@@ -802,6 +803,11 @@ namespace CRM.Server.Services
                 product.AssetQty = assetQty;
             }
 
+            if (rq.IsModified(nameof(rq.Validity)))
+            {
+                product.Validity = rq.Validity;
+            }
+
             if (rq.IsModified(nameof(rq.Usage)) && rq.Usage.HasValue)
             {
                 product.Usage = rq.Usage.Value;
@@ -822,13 +828,13 @@ namespace CRM.Server.Services
                 product.QueryKeyword = rq.QueryKeyword;
             }
 
-            if (rq.IsModified(nameof(rq.Price)) && rq.Price != null)
+            if (rq.IsModified(nameof(rq.Price)) && rq.Price != null && rq.Price.RetailPrice.HasValue)
             {
                 var price = rq.Price;
                 var existingPrice = product.Prices.FirstOrDefault(p => p.Currency == price.Currency);
                 if (existingPrice != null)
                 {
-                    existingPrice.RetailPrice = price.RetailPrice;
+                    existingPrice.RetailPrice = price.RetailPrice.Value;
                     existingPrice.PromotionPrice = price.PromotionPrice;
                     existingPrice.ChannelPrice = price.ChannelPrice;
                     existingPrice.CostPrice = price.CostPrice;
@@ -838,7 +844,7 @@ namespace CRM.Server.Services
                     product.Prices.Add(new ProductPrice
                     {
                         Currency = price.Currency,
-                        RetailPrice = price.RetailPrice,
+                        RetailPrice = price.RetailPrice.Value,
                         PromotionPrice = price.PromotionPrice,
                         ChannelPrice = price.ChannelPrice,
                         CostPrice = price.CostPrice
@@ -942,6 +948,7 @@ namespace CRM.Server.Services
                     StepQty = p.StepQty,
                     CapQty = p.CapQty,
                     AssetQty = p.AssetQty,
+                    Validity = p.Validity,
                     Usage = p.Usage,
                     Scope = p.Scope,
                     InventoryWay = p.InventoryWay,
@@ -1050,6 +1057,7 @@ namespace CRM.Server.Services
                     StepQty = p.StepQty,
                     CapQty = p.CapQty,
                     AssetQty = p.AssetQty,
+                    Validity = p.Validity,
                     Usage = p.Usage,
                     Scope = p.Scope,
                     InventoryWay = p.InventoryWay,
@@ -1278,30 +1286,33 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoValidData.AsResult(nameof(id));
             }
 
-            var price = await _db.ProductPrices
-                .Where(pp => pp.ProductId == id && pp.Currency == item.Currency)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (price == null)
+            if (item.RetailPrice.HasValue)
             {
-                price = new ProductPrice
+                var price = await _db.ProductPrices
+                    .Where(pp => pp.ProductId == id && pp.Currency == item.Currency)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (price == null)
                 {
-                    ProductId = id,
-                    Currency = item.Currency,
-                    RetailPrice = item.RetailPrice,
-                    PromotionPrice = item.PromotionPrice,
-                    ChannelPrice = item.ChannelPrice,
-                    CostPrice = item.CostPrice
-                };
+                    price = new ProductPrice
+                    {
+                        ProductId = id,
+                        Currency = item.Currency,
+                        RetailPrice = item.RetailPrice.Value,
+                        PromotionPrice = item.PromotionPrice,
+                        ChannelPrice = item.ChannelPrice,
+                        CostPrice = item.CostPrice
+                    };
 
-                _db.ProductPrices.Add(price);
-            }
-            else
-            {
-                price.RetailPrice = item.RetailPrice;
-                price.PromotionPrice = item.PromotionPrice;
-                price.ChannelPrice = item.ChannelPrice;
-                price.CostPrice = item.CostPrice;
+                    _db.ProductPrices.Add(price);
+                }
+                else
+                {
+                    price.RetailPrice = item.RetailPrice.Value;
+                    price.PromotionPrice = item.PromotionPrice;
+                    price.ChannelPrice = item.ChannelPrice;
+                    price.CostPrice = item.CostPrice;
+                }
             }
 
             await _db.SaveChangesAsync(cancellationToken);

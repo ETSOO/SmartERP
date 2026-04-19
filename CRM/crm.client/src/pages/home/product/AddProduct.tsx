@@ -57,6 +57,7 @@ export default function AddProduct() {
     "categories",
     "channelPrice",
     "costPrice",
+    "days",
     "defaultTaxRate",
     "description",
     "introductionUrl",
@@ -70,7 +71,8 @@ export default function AddProduct() {
     "status",
     "stepQty",
     "tags",
-    "taxRate"
+    "taxRate",
+    "validity"
   );
 
   // Type
@@ -116,7 +118,8 @@ export default function AddProduct() {
     "promotionPrice",
     "retailPrice",
     "stepQty",
-    "taxRate"
+    "taxRate",
+    "validity"
   ] as const;
   const refs = useRefs(refFields);
 
@@ -442,6 +445,14 @@ export default function AddProduct() {
           slotProps={{ htmlInput: { maxLength: 30 } }}
           label={labels.queryKeyword}
           inputRef={refs.queryKeyword}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <NumberInputField
+          fullWidth
+          name="validity"
+          label={`${labels.validity} (${labels.days})`}
+          inputRef={refs.validity}
         />
       </Grid>
       {defaultTaxRate && (

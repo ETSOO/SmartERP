@@ -75,6 +75,8 @@ public partial class OrderHeader
 
     public decimal ApprovedDiscount { get; set; }
 
+    public string? AddressFormatted { get; set; }
+
     public virtual PersonAddress? Address { get; set; }
 
     public virtual Person Buyer { get; set; } = null!;

@@ -1,35 +1,54 @@
-﻿using com.etsoo.CoreFramework.Application;
-using com.etsoo.CoreFramework.Business;
-using com.etsoo.Utils.Actions;
-using com.etsoo.Utils.Models;
-using com.etsoo.Utils.String;
-using System.Text.Json;
+﻿using com.etsoo.CoreFramework.Business;
 
-namespace CRM.Server.RQ.Asset
+namespace CRM.Server.Dto.Asset
 {
     /// <summary>
-    /// Create asset request data
-    /// 创建资产请求数据
+    /// Asset view data
+    /// 资产浏览数据
     /// </summary>
-    public record AssetCreateRQ : IModelValidator
+    public record AssetViewData
     {
         /// <summary>
-        /// Person (owner) id
-        /// 所有者编号
+        /// Id
+        /// 编号
+        /// </summary>
+        public int Id { get; init; }
+
+        /// <summary>
+        /// Person id
+        /// 人员编号
         /// </summary>
         public long PersonId { get; init; }
+
+        /// <summary>
+        /// Person name
+        /// 人员名称
+        /// </summary>
+        public required string PersonName { get; init; }
 
         /// <summary>
         /// Product id
         /// 产品编号
         /// </summary>
         public int ProductId { get; init; }
+        
+        /// <summary>
+        /// Product name
+        /// 产品名称
+        /// </summary>
+        public required string ProductName { get; init; }
 
         /// <summary>
         /// Supplier id
         /// 供应商编号
         /// </summary>
         public long? SupplierId { get; init; }
+
+        /// <summary>
+        /// Supplier name
+        /// 供应商名称
+        /// </summary>
+        public string? SupplierName { get; init; }
 
         /// <summary>
         /// Serial number
@@ -74,45 +93,21 @@ namespace CRM.Server.RQ.Asset
         public string? HealthCheckUrl { get; init; }
 
         /// <summary>
-        /// JSON data
-        /// JSON 数据
+        /// Health check schedule
+        /// 健康检查计划
         /// </summary>
-        public JsonDocument? Data { get; init;  }
+        public DateTimeOffset? HealthCheckSchedule { get; init; }
 
         /// <summary>
         /// Status
         /// 状态
         /// </summary>
-        public EntityStatus? Status { get; init; }
+        public EntityStatus Status { get; init; }
 
         /// <summary>
-        /// Validate the model
-        /// 验证模块
+        /// Creation time
+        /// 登记时间
         /// </summary>
-        /// <returns>Result</returns>
-        public IActionResult? Validate()
-        {
-            if (Sn.Length is not (>= 1 and <= 256))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Sn));
-            }
-
-            if (Description != null && Description.Length is not (>= 1 and <= 1280))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Description));
-            }
-
-            if (SensitiveData != null && SensitiveData.Length is not (>= 1 and <= 128))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(SensitiveData));
-            }
-
-            if (HealthCheckUrl != null && HealthCheckUrl.Length is not (>= 1 and <= 1280))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(HealthCheckUrl));
-            }
-
-            return null;
-        }
+        public DateTimeOffset Creation { get; init; }
     }
 }

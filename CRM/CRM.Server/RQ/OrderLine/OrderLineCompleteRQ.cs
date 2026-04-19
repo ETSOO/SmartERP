@@ -17,5 +17,17 @@
         /// 资产编号
         /// </summary>
         public int? AssetId { get; init; }
+
+        /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
+
+        /// <summary>
+        /// Cost price
+        /// 成本价
+        /// </summary>
+        public decimal? CostPrice { get; init; }
     }
 }

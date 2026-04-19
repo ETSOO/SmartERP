@@ -117,7 +117,9 @@ public partial class Person
 
     public virtual ICollection<OrderHeader> OrderHeaderUsers { get; set; } = new List<OrderHeader>();
 
-    public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
+    public virtual ICollection<OrderLine> OrderLineSuppliers { get; set; } = new List<OrderLine>();
+
+    public virtual ICollection<OrderLine> OrderLineUsers { get; set; } = new List<OrderLine>();
 
     public virtual CoreOrganization Org { get; set; } = null!;
 

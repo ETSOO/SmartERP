@@ -163,6 +163,12 @@ namespace PlatformShared.Database.Models
         public int? AssetQty { get; set; }
 
         /// <summary>
+        /// Validity
+        /// 有效期
+        /// </summary>
+        public int? Validity { get; set; }
+
+        /// <summary>
         /// Assigned id
         /// 分配编号
         /// </summary>

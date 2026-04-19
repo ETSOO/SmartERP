@@ -71,6 +71,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("tax_rate");
             entity.Property(e => e.UnitId).HasColumnName("unit_id");
             entity.Property(e => e.Usage).HasColumnName("usage");
+            entity.Property(e => e.Validity).HasColumnName("validity");
 
             entity.HasOne(d => d.CoreOrganization).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CoreOrganizationId)

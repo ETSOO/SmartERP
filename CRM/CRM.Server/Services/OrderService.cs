@@ -702,6 +702,7 @@ namespace CRM.Server.Services
             order.LineDiscount = lineDiscount;
             order.Amount = orderAmount;
             order.Discount = orderDiscount;
+            order.Promotions = promotions;
 
             // Save
             await _db.SaveChangesAsync(cancellationToken);

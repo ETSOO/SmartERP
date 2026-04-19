@@ -58,6 +58,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("qty");
             entity.Property(e => e.StartTime).HasColumnName("start_time");
             entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.Title)
                 .HasMaxLength(256)
                 .HasColumnName("title");
@@ -77,7 +78,11 @@ namespace Platform.Server.Models.Configurations
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_line_product_id_fkey");
 
-            entity.HasOne(d => d.User).WithMany(p => p.OrderLines)
+            entity.HasOne(d => d.Supplier).WithMany(p => p.OrderLineSuppliers)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("order_line_supplier_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.OrderLineUsers)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("order_line_user_id_fkey");
 

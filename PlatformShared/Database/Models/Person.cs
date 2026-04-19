@@ -651,6 +651,12 @@ namespace PlatformShared.Database.Models
         public ICollection<OrderHeader> Orders { get; set; } = default!;
 
         /// <summary>
+        /// Supplier order lines
+        /// 供应商订单项目
+        /// </summary>
+        public ICollection<OrderLine> SupplierOrderLines { get; set; } = default!;
+
+        /// <summary>
         /// Executed order lines
         /// 执行的订单项目
         /// </summary>

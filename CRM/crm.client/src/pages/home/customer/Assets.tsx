@@ -24,12 +24,17 @@ import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import { Typography } from "@mui/material";
-import { CustomerList, ProductList } from "@etsoo/smarterp-crm/components";
+import {
+  PersonList,
+  ProductList,
+  SupplierList
+} from "@etsoo/smarterp-crm/components";
 
 const template = {
   keyword: "string",
   productId: "number",
   personId: "number",
+  supplierId: "number",
   status: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -49,7 +54,9 @@ export default function Assets() {
     "expiry",
     "keywords",
     "product",
+    "relatedTarget",
     "sn",
+    "supplier",
     "times",
     "title",
     "view"
@@ -94,11 +101,13 @@ export default function Assets() {
           defaultValue={data.keyword}
         />,
         <ProductList search idValue={data.productId} />,
-        <CustomerList
+        <PersonList
+          label={labels.relatedTarget}
           name="personId"
           search
           idValue={data.personId ?? personId}
         />,
+        <SupplierList search idValue={data.supplierId} />,
         <StatusList search idValue={data.status} />
       ]}
       loadData={async (data) => {

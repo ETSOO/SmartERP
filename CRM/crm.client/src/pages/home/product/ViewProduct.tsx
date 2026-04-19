@@ -133,6 +133,7 @@ export default function ViewProduct() {
     "costPrice",
     "culture",
     "currency",
+    "days",
     "definePrices",
     "description",
     "edit",
@@ -141,7 +142,8 @@ export default function ViewProduct() {
     "logo",
     "nameB",
     "promotionPrice",
-    "retailPrice"
+    "retailPrice",
+    "validity"
   );
 
   // Culture permission
@@ -297,6 +299,11 @@ export default function ViewProduct() {
         },
         ["creation", GridDataType.DateTime],
         "queryKeyword",
+        {
+          data: "validity",
+          dataType: GridDataType.Number,
+          label: `${labels.validity} (${labels.days})`
+        },
         {
           data: (item) =>
             item.categories.map((c) => c.names.join(" -> ")).join(", "),

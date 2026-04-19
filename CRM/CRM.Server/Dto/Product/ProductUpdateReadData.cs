@@ -65,6 +65,12 @@ namespace CRM.Server.Dto.Product
         public int? AssetQty { get; init; }
 
         /// <summary>
+        /// Validity
+        /// 有效期
+        /// </summary>
+        public int? Validity { get; init; }
+
+        /// <summary>
         /// Usage
         /// 使用范围
         /// </summary>

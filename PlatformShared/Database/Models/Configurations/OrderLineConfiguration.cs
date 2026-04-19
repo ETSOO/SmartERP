@@ -59,6 +59,11 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValue(EntityStatus.Normal)
                 .HasColumnName("status");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
+
+            entity.HasOne(d => d.Asset).WithMany(p => p.OrderLines)
+                .HasForeignKey(d => d.AssetId)
+                .HasConstraintName("order_line_asset_id_fkey");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.OrderId)
@@ -70,9 +75,13 @@ namespace PlatformShared.Database.Models.Configurations
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("order_line_product_id_fkey");
 
-            entity.HasOne(d => d.User).WithMany(p => p.OrderLines)
+            entity.HasOne(d => d.User).WithMany(p => p.SupplierOrderLines)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("order_line_user_id_fkey");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.OrderLines)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("order_line_supplier_id_fkey");
         }
     }
 }

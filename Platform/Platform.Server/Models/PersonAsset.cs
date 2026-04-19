@@ -21,7 +21,7 @@ public partial class PersonAsset
 
     public DateTime Expiry { get; set; }
 
-    public short? Times { get; set; }
+    public int? Times { get; set; }
 
     public decimal? Amount { get; set; }
 

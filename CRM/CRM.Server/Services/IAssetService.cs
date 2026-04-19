@@ -10,6 +10,8 @@ namespace CRM.Server.Services
         Task<IActionResult> CreateAsync(AssetCreateRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(AssetListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<AssetQueryData[]> QueryAsync(AssetQueryRQ rq, CancellationToken cancellationToken = default);
+        Task<AssetViewData?> ReadAsync(int id, CancellationToken cancellationToken = default);
+        Task<string?> ReadSensitiveDataAsync(int id, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(AssetUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<AssetUpdateReadData?> UpdateReadAsync(int id, CancellationToken cancellationToken = default);
     }

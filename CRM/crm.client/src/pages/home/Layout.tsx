@@ -83,6 +83,7 @@ export default function Home() {
     "newTask",
     "offerings",
     "orderDeliveries",
+    "orderLine",
     "orderPayments",
     "orders",
     "org",
@@ -242,6 +243,12 @@ export default function Home() {
                 pattern: "edit/:id",
                 title: labels.edit,
                 hidden: true
+              },
+              {
+                segment: "view",
+                pattern: "view/:id",
+                title: labels.view,
+                hidden: true
               }
             ]
           }
@@ -365,7 +372,13 @@ export default function Home() {
           {
             segment: "viewline",
             pattern: "viewline/:id",
-            title: labels.view,
+            title: labels.orderLine,
+            hidden: true
+          },
+          {
+            segment: "editline",
+            pattern: "editline/:id",
+            title: `${labels.orderLine} (${labels.edit})`,
             hidden: true
           },
           {

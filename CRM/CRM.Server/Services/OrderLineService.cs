@@ -59,9 +59,19 @@ namespace CRM.Server.Services
                         q = q.Where(p => p.OrderId == rq.OrderId.Value);
                     }
 
+                    if (rq.SupplierId.HasValue)
+                    {
+                        q = q.Where(p => p.SupplierId == rq.SupplierId.Value);
+                    }
+
                     if (rq.ProductId.HasValue)
                     {
                         q = q.Where(p => p.ProductId == rq.ProductId.Value);
+                    }
+
+                    if (rq.AssetId.HasValue)
+                    {
+                        q = q.Where(p => p.AssetId == rq.AssetId.Value);
                     }
 
                     if (rq.Keyword?.Length > 1)
@@ -102,7 +112,9 @@ namespace CRM.Server.Services
             var userId = User.Oid;
             var id = rq.Id;
             var assetId = rq.AssetId;
-            var now = DateTimeOffset.Now;
+            var supplierId = rq.SupplierId;
+            var costPrice = rq.CostPrice;
+            var now = DateTimeOffset.UtcNow;
 
             var line = await _db.OrderLines
                 .Where(p => p.Id == id
@@ -129,12 +141,22 @@ namespace CRM.Server.Services
             // Asset
             if (assetId.HasValue)
             {
-                var hasAsset = await _db.PersonAssets.Where(a => a.Id == assetId.Value && a.PersonId == line.BuyerId)
-                    .AnyAsync(cancellationToken);
+                var asset = await _db.PersonAssets.Where(a => a.Id == assetId.Value && a.PersonId == line.BuyerId).Select(a => new { a.SupplierId })
+                    .FirstOrDefaultAsync(cancellationToken);
 
-                if (!hasAsset)
+                if (asset == null)
                 {
                     return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.AssetId));
+                }
+
+                if (asset.SupplierId.HasValue)
+                {
+                    // 如果资产指定了供应商，则使用资产的供应商编号覆盖请求中的供应商编号
+                    supplierId = asset.SupplierId.Value;
+                }
+                else if (!supplierId.HasValue)
+                {
+                    return ApplicationErrors.NoId.AsResult(nameof(rq.SupplierId));
                 }
             }
             else if (line.AssetId == null && line.AssetQty > 0 && !assetId.HasValue)
@@ -148,7 +170,7 @@ namespace CRM.Server.Services
             {
                 if (assetId.HasValue)
                 {
-                    var assetResult = await SyncAssetAsync(line.ProductId, assetId.Value, line.AssetQty, line.Qty, cancellationToken);
+                    var assetResult = await SyncAssetAsync(line.BuyerId, assetId.Value, line.AssetQty, line.Qty, cancellationToken);
 
                     if (!assetResult.Ok)
                     {
@@ -162,6 +184,9 @@ namespace CRM.Server.Services
                                 .Where(p => p.Id == id)
                                 .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.EndTime, now)
                                                         .SetProperty(ol => ol.AssetId, ol => ol.AssetId ?? assetId)
+                                                        .SetProperty(ol => ol.SupplierId, ol => supplierId ?? ol.SupplierId)
+                                                        .SetProperty(ol => ol.CostPrice, ol => costPrice ?? ol.CostPrice)
+                                                        .SetProperty(ol => ol.UserId, ol => ol.UserId ?? userId)
                                                         .SetProperty(ol => ol.Status, EntityStatus.Completed), cancellationToken)
                                 ;
 
@@ -439,6 +464,16 @@ namespace CRM.Server.Services
                     q = q.Where(p => p.Qty >= rq.QtyStart.Value);
                 }
 
+                if (rq.CreationStart.HasValue)
+                {
+                    q = q.Where(p => p.Creation >= rq.CreationStart.Value);
+                }
+
+                if (rq.CreationEnd.HasValue)
+                {
+                    q = q.Where(p => p.Creation < rq.CreationEnd.Value);
+                }
+
                 if (rq.StartTimeStart.HasValue)
                 {
                     q = q.Where(p => p.StartTime >= rq.StartTimeStart.Value);
@@ -446,7 +481,7 @@ namespace CRM.Server.Services
 
                 if (rq.StartTimeEnd.HasValue)
                 {
-                    q = q.Where(p => p.StartTime <= rq.StartTimeEnd.Value);
+                    q = q.Where(p => p.StartTime < rq.StartTimeEnd.Value);
                 }
 
                 return q;
@@ -553,6 +588,7 @@ namespace CRM.Server.Services
                     Id = p.Id,
                     OrderTitle = p.Order.Title,
                     OrderId = p.OrderId,
+                    Currency = p.Order.Currency,
                     ProductName = p.Product.Name,
                     ProductId = p.ProductId,
                     Title = p.Title,
@@ -570,7 +606,12 @@ namespace CRM.Server.Services
                     UserName = (p.User == null ? null : p.User.Name),
                     UserId = p.UserId,
                     OrderUserId = p.Order.UserId,
+                    CustomerId = p.Order.BuyerId,
                     AssetId = p.AssetId,
+                    AssetSn = (p.Asset == null ? null : p.Asset.Sn),
+                    SupplierId = p.SupplierId,
+                    SupplierName = p.Supplier == null ? null : p.Supplier.Name,
+                    Modifiers = p.Product.Modifiers,
                     Data = p.Data,
                     Status = p.Status,
                     OrderStatus = p.Order.Status,
@@ -581,16 +622,22 @@ namespace CRM.Server.Services
             if (data != null)
             {
                 var userId = User.Oid;
-                var now = DateTimeOffset.Now;
+                var now = DateTimeOffset.UtcNow;
 
-                data.IsStartable = data.Status < EntityStatus.Inactivated
+                data.IsStartable = isExecute
+                    && data.Status < EntityStatus.Inactivated
                     && data.OrderStatus < EntityStatus.Inactivated
                     && (data.UserId == null || data.StartTime == null);
 
-                data.IsCompletable = data.Status < EntityStatus.Inactivated
+                data.IsCompletable = isExecute
+                        && data.Status < EntityStatus.Inactivated
                         && data.OrderStatus < EntityStatus.Inactivated
                         && (isManage || data.OrderUserId == userId || data.UserId == userId)
                         && (data.StartTime < now || (data.AssetQty > 0 && data.AssetId == null));
+
+                data.IsRestorable = isExecute
+                        && (isManage || data.OrderUserId == userId || data.UserId == userId)
+                        && data.Status != EntityStatus.Completed && data.Status != EntityStatus.Normal;
             }
 
             return data;
@@ -621,6 +668,7 @@ namespace CRM.Server.Services
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
                           && (isManage || p.Order.UserId == userId || p.UserId == userId)
+                          && p.Status != EntityStatus.Normal && p.Status != EntityStatus.Completed
                 ).Select(p => new
                 {
                     p.Order.BuyerId,
@@ -657,6 +705,7 @@ namespace CRM.Server.Services
                                             .SetProperty(ol => ol.EndTime, (DateTimeOffset?)null)
                                             .SetProperty(ol => ol.UserId, (long?)null)
                                             .SetProperty(ol => ol.AssetId, (int?)null)
+                                            .SetProperty(ol => ol.SupplierId, (int?)null)
                                             .SetProperty(ol => ol.Status, EntityStatus.Normal), cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
@@ -679,6 +728,7 @@ namespace CRM.Server.Services
                 .Select(a => new
                 {
                     a.Expiry,
+                    a.Product.Validity,
                     a.Product.Unit.BaseUnit
                 })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -700,17 +750,19 @@ namespace CRM.Server.Services
                 if (unit == ProductUnit.TIME)
                 {
                     // 次卡有效期自动延长1年
+                    var days = asset.Validity.GetValueOrDefault(366);
                     var totalTimes = Convert.ToInt32(assetQty * qty);
 
                     await _db.PersonAssets.Where(a => a.Id == assetId)
-                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Times, p => p.Times.GetValueOrDefault() + totalTimes).SetProperty(p => p.Expiry, p => p.Expiry.AddYears(1)), cancellationToken);
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Times, p => p.Times.GetValueOrDefault() + totalTimes).SetProperty(p => p.Expiry, p => p.Expiry.AddDays(days)), cancellationToken);
                 }
                 else if (unit == ProductUnit.MONEY)
                 {
                     // 储值卡有效期自动延长3年
+                    var days = asset.Validity.GetValueOrDefault(732);
                     var totalAmount = assetQty * qty;
                     await _db.PersonAssets.Where(a => a.Id == assetId)
-                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Amount, p => p.Amount.GetValueOrDefault() + totalAmount).SetProperty(p => p.Expiry, p => p.Expiry.AddYears(3)), cancellationToken);
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Amount, p => p.Amount.GetValueOrDefault() + totalAmount).SetProperty(p => p.Expiry, p => p.Expiry.AddDays(days)), cancellationToken);
                 }
                 else
                 {
@@ -785,13 +837,14 @@ namespace CRM.Server.Services
             var userId = User.Oid;
             var id = rq.Id;
             var initStart = rq.InitStart ?? false;
+            var now = DateTimeOffset.UtcNow;
 
             var result = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
                           && p.Order.Status < EntityStatus.Inactivated
                           && p.Status < EntityStatus.Inactivated)
-                .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, ol => initStart ? ol.StartTime ?? DateTimeOffset.Now : ol.StartTime)
+                .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, ol => initStart || ol.StartTime == null ? now : ol.StartTime)
                                         .SetProperty(ol => ol.UserId, ol => (isManage || ol.Order.UserId == userId) ? rq.UserId ?? ol.UserId ?? userId : ol.UserId ?? userId)
                                         .SetProperty(ol => ol.Status, ol => ol.Status == EntityStatus.Normal ? EntityStatus.Doing : ol.Status), cancellationToken);
 
@@ -820,8 +873,7 @@ namespace CRM.Server.Services
                 .Where(p => p.Id == rq.Id
                           && p.Order.CoreOrganizationId == orgId
                           && (isManage || p.Order.UserId == User.Oid)
-                          && p.Order.Status < EntityStatus.Inactivated
-                          && p.Status < EntityStatus.Inactivated)
+                          && p.Order.Status < EntityStatus.Inactivated)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (orderLine == null)
@@ -881,6 +933,21 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.Data)))
             {
                 orderLine.Data = rq.Data;
+            }
+
+            if (rq.IsModified(nameof(rq.SupplierId)))
+            {
+                if (rq.SupplierId.HasValue)
+                {
+                    // 并不限制SupplierId必须是供应商编号，以增强系统灵活性
+                    var supplierExists = await _db.Persons(orgId).Where(s => s.Id == rq.SupplierId.Value).AnyAsync(cancellationToken);
+                    if (!supplierExists)
+                    {
+                        return ApplicationErrors.NoId.AsResult(nameof(rq.SupplierId));
+                    }
+                }
+
+                orderLine.SupplierId = rq.SupplierId;
             }
 
             if (rq.IsModified(nameof(rq.UserId)) && rq.UserId.HasValue)
@@ -944,12 +1011,15 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<OrderLineUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
         {
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Order.Edit, cancellationToken))
+            // Permission check
+            var (isEdit, isManage) = await _orderService.CheckEditPermissionsAsync(cancellationToken);
+            if (!isEdit)
             {
                 return null;
             }
 
             var orgId = User.OrganizationInt;
+            var userId = User.Oid;
 
             return await _db.OrderLines.AsNoTracking()
                 .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId)
@@ -957,6 +1027,7 @@ namespace CRM.Server.Services
                 {
                     Id = p.Id,
                     OrderId = p.OrderId,
+                    Currency = p.Order.Currency,
                     ProductId = p.ProductId,
                     Title = p.Title,
                     Description = p.Description,
@@ -966,8 +1037,12 @@ namespace CRM.Server.Services
                     Qty = p.Qty,
                     StartTime = p.StartTime,
                     EndTime = p.EndTime,
+                    SupplierId = p.SupplierId,
+                    UserId = p.UserId,
+                    Modifiers = p.Product.Modifiers,
                     Data = p.Data,
-                    Status = p.Status
+                    Status = p.Status,
+                    IsDeletable = p.Status < EntityStatus.Inactivated && p.Order.Status < EntityStatus.Inactivated && (isManage || p.Order.UserId == userId)
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }

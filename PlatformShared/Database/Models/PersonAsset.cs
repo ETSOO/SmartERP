@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using System.Text.Json;
 
 namespace PlatformShared.Database.Models
 {
@@ -108,7 +109,7 @@ namespace PlatformShared.Database.Models
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; set; }
+        public JsonDocument? Data { get; set; }
 
         /// <summary>
         /// Person (owner)
@@ -127,5 +128,11 @@ namespace PlatformShared.Database.Models
         /// 供应商
         /// </summary>
         public Person? Supplier { get; set; }
+
+        /// <summary>
+        /// Order lines
+        /// 订单行
+        /// </summary>
+        public ICollection<OrderLine> OrderLines { get; set; } = default!;
     }
 }

@@ -31,6 +31,18 @@
         public decimal? QtyStart { get; init; }
 
         /// <summary>
+        /// Creation start
+        /// 创建开始
+        /// </summary>
+        public DateTimeOffset? CreationStart {  get; init; }
+
+        /// <summary>
+        /// Creation end
+        /// 创建结束
+        /// </summary>
+        public DateTimeOffset? CreationEnd { get; init; }
+
+        /// <summary>
         /// Start time start
         /// 开始时间开始
         /// </summary>

@@ -4,6 +4,7 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using com.etsoo.Utils.String;
+using System.Text.Json;
 
 namespace CRM.Server.RQ.Asset
 {
@@ -77,7 +78,7 @@ namespace CRM.Server.RQ.Asset
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; init; }
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Status
@@ -110,11 +111,6 @@ namespace CRM.Server.RQ.Asset
             if (HealthCheckUrl != null && HealthCheckUrl.Length is not (>= 1 and <= 1280))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(HealthCheckUrl));
-            }
-
-            if (Data != null && !Data.IsJson())
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Data));
             }
 
             return null;

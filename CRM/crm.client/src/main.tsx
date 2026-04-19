@@ -223,6 +223,13 @@ const router = createDynamicRouter([
               return { Component: EditAsset.default };
             }
           },
+          {
+            path: "/home/customer/asset/view/:id",
+            lazy: async () => {
+              const ViewAsset = await import("./pages/home/customer/ViewAsset");
+              return { Component: ViewAsset.default };
+            }
+          },
 
           {
             path: "/home/order",
@@ -252,6 +259,14 @@ const router = createDynamicRouter([
               const ViewOrderLine =
                 await import("./pages/home/order/ViewOrderLine");
               return { Component: ViewOrderLine.default };
+            }
+          },
+          {
+            path: "/home/order/editline/:id",
+            lazy: async () => {
+              const EditOrderLine =
+                await import("./pages/home/order/EditOrderLine");
+              return { Component: EditOrderLine.default };
             }
           },
           {

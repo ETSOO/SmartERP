@@ -513,7 +513,7 @@ export default function SubmitOrder() {
           inputOnChange={formik.handleChange}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 3 }}>
+      <Grid size={{ xs: 6, sm: 3 }}>
         <UserTiplist
           idValue={data.userId}
           inputOnChange={formik.handleChange}

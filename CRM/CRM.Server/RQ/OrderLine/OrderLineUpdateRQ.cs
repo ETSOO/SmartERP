@@ -68,6 +68,12 @@ namespace CRM.Server.RQ.OrderLine
         public JsonDocument? Data { get; set; }
 
         /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
+
+        /// <summary>
         /// User id
         /// 用户编号
         /// </summary>

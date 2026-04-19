@@ -27,7 +27,7 @@ public partial class Product
 
     public decimal? CapQty { get; set; }
 
-    public short? AssetQty { get; set; }
+    public int? AssetQty { get; set; }
 
     public short OrderIndex { get; set; }
 
@@ -56,6 +56,8 @@ public partial class Product
     public List<int>? CategoryIdsAll { get; set; }
 
     public string? Modifiers { get; set; }
+
+    public int? Validity { get; set; }
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 

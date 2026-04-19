@@ -21,6 +21,9 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(2001L, null, null, null, null, null)
                 .HasColumnName("id");
+            entity.Property(e => e.AddressFormatted)
+                .HasMaxLength(256)
+                .HasColumnName("address_formatted");
             entity.Property(e => e.AddressId).HasColumnName("address_id");
             entity.Property(e => e.Amount)
                 .HasColumnType("money")

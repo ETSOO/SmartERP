@@ -7,9 +7,9 @@ import LinearProgress from "@mui/material/LinearProgress";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { app } from "../../../app/MyApp";
 import { useParamsEx } from "@etsoo/react";
-import { OrderViewData } from "@etsoo/smarterp-crm";
-import { OrderViewUI } from "./OrderViewUI";
-import { OrderLines } from "./OrderLines";
+import { AssetViewData } from "@etsoo/smarterp-crm";
+import { AssetViewUI } from "./AssetViewUI";
+import { AssetOrderLines } from "./AssetOrderLines";
 
 export default function ViewOrder() {
   // Route
@@ -19,11 +19,11 @@ export default function ViewOrder() {
   const labels = app.getLabels("basicInfo", "orderLines", "view");
 
   // State
-  const [data, setData] = React.useState<OrderViewData>();
+  const [data, setData] = React.useState<AssetViewData>();
 
   // Load data
   const loadData = React.useCallback(async () => {
-    const data = await app.orderApi.read(id);
+    const data = await app.assetApi.read(id);
     setData(data);
   }, [id]);
 
@@ -42,21 +42,15 @@ export default function ViewOrder() {
           tabProps={{ sx: { paddingTop: 2 } }}
           tabs={[
             {
-              children: <OrderViewUI data={data} refresh={loadData} />,
+              children: <AssetViewUI data={data} refresh={loadData} />,
               label: labels.basicInfo,
               icon: <ArticleIcon />,
               iconPosition: "start"
             },
             {
               children: (visible) =>
-                visible && (
-                  <OrderLines
-                    orderId={id}
-                    orderStatus={data.status}
-                    currency={data.currency}
-                  />
-                ),
-              label: labels.orderLines + ` (${data.lines})`,
+                visible && <AssetOrderLines assetId={id} />,
+              label: labels.orderLines,
               icon: <ListAltIcon />,
               iconPosition: "start"
             }

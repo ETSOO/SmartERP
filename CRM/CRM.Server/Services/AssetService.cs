@@ -57,11 +57,7 @@ namespace CRM.Server.Services
         {
             if (unit == BusinessProductUnit.TIME)
             {
-                if (!isUpdating && !times.HasValue)
-                {
-                    return ApplicationErrors.NoValidData.AsResult(nameof(times));
-                }
-                else if (amount.HasValue)
+                if (amount.HasValue)
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(amount));
                 }
@@ -71,11 +67,7 @@ namespace CRM.Server.Services
 
             if (unit == BusinessProductUnit.MONEY)
             {
-                if (!isUpdating && !amount.HasValue)
-                {
-                    return ApplicationErrors.NoValidData.AsResult(nameof(amount));
-                }
-                else if (times.HasValue)
+                if (times.HasValue)
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(times));
                 }
@@ -85,7 +77,7 @@ namespace CRM.Server.Services
 
             if (amount.HasValue || times.HasValue)
             {
-                return ApplicationErrors.NoValidData.AsResult();
+                return ApplicationErrors.NoValidData.AsResult("NoAsset");
             }
 
             return ActionResult.Success;
@@ -248,6 +240,7 @@ namespace CRM.Server.Services
                 .Select(a => new AssetListData
                 {
                     Id = a.Id,
+                    SupplierId = a.SupplierId,
                     Product = a.Product.Name,
                     Sn = a.Sn,
                     Expiry = a.Expiry
@@ -284,6 +277,77 @@ namespace CRM.Server.Services
                 Status = a.Status,
                 Creation = a.Creation
             }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read data for view
+        /// 读取用于浏览的数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AssetViewData?> ReadAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return null;
+            }
+
+            // Organization id
+            var orgId = User.OrganizationInt;
+
+            return await _db.Assets(orgId).AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(a => new AssetViewData
+                {
+                    Id = a.Id,
+                    PersonId = a.PersonId,
+                    PersonName = a.Person.Name,
+                    ProductId = a.ProductId,
+                    ProductName = a.Product.Name,
+                    SupplierId = a.SupplierId,
+                    SupplierName = a.Supplier != null ? a.Supplier.Name : null,
+                    Sn = a.Sn,
+                    Description = a.Description,
+                    Expiry = a.Expiry,
+                    Times = a.Times,
+                    Amount = a.Amount,
+                    SensitiveData = a.SensitiveData == null ? null : "***",
+                    HealthCheckUrl = a.HealthCheckUrl,
+                    HealthCheckSchedule = a.HealthCheckSchedule,
+                    Status = a.Status,
+                    Creation = a.Creation
+                }).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read sensitive data
+        /// 读取敏感数据
+        /// </summary>
+        /// <param name="id">Asset id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<string?> ReadSensitiveDataAsync(int id, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var data = await _db.Assets(orgId).AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(a => new { a.ProductId, a.SensitiveData })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (data != null && !string.IsNullOrEmpty(data.SensitiveData))
+            {
+                return App.DecriptData(data.SensitiveData, GetEncryptionKey(data.ProductId));
+            }
+
+            return null;
         }
 
         /// <summary>

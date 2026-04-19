@@ -1,4 +1,10 @@
-import { ButtonLink, HBox, MenuButton, ViewContainer } from "@etsoo/materialui";
+import {
+  ButtonLink,
+  HBox,
+  IconButtonLink,
+  MenuButton,
+  ViewContainer
+} from "@etsoo/materialui";
 import { GridDataType } from "@etsoo/react";
 import {
   OrderViewData,
@@ -10,7 +16,10 @@ import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import CelebrationIcon from "@mui/icons-material/Celebration";
 import EditIcon from "@mui/icons-material/Edit";
-import { Typography } from "@mui/material";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import { EntityStatus } from "@etsoo/appscript";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
 export type OrderViewUIProps = {
   data: OrderViewData;
@@ -21,12 +30,19 @@ export function OrderViewUI(props: OrderViewUIProps) {
   // Destruct
   const { data, refresh } = props;
 
-  const labels = app.getLabels("edit", "promotions");
+  const labels = app.getLabels(
+    "confirmAction",
+    "edit",
+    "promotions",
+    "recalculate"
+  );
 
   const moneyProps = { currency: data.currency };
 
   const formatAmount = (amount: number) =>
     app.formatMoney(amount, undefined, moneyProps);
+
+  const editable = app.owns(Permissions.Order.Edit);
 
   return (
     <ViewContainer
@@ -48,13 +64,15 @@ export function OrderViewUI(props: OrderViewUIProps) {
               >
                 {item.title}
               </Typography>
-              <ButtonLink
-                startIcon={<EditIcon />}
-                variant="outlined"
-                href={`./../../edit/${item.id}`}
-              >
-                {labels.edit}
-              </ButtonLink>
+              {editable && (
+                <IconButtonLink
+                  href={`./../../edit/${item.id}`}
+                  title={labels.edit}
+                  size="small"
+                >
+                  <EditIcon />
+                </IconButtonLink>
+              )}
             </HBox>
           ),
           singleRow: true
@@ -156,6 +174,55 @@ export function OrderViewUI(props: OrderViewUIProps) {
           data: "tags",
           singleRow: "medium",
           horizontal: true
+        },
+        {
+          data: (item) => (
+            <HBox
+              spacing={1}
+              sx={{ justifyContent: "center", flexWrap: "wrap" }}
+            >
+              {app.owns(Permissions.Order.Manage) &&
+                item.status < EntityStatus.Inactivated && (
+                  <Button
+                    startIcon={<CalculateIcon />}
+                    variant="outlined"
+                    onClick={() => {
+                      app.notifier.confirm(
+                        labels.confirmAction.format(labels.recalculate),
+                        undefined,
+                        async (ok) => {
+                          if (!ok) return;
+
+                          const result = await app.orderApi.recalculate(
+                            item.id
+                          );
+                          if (result == null) return;
+
+                          if (result.ok) {
+                            refresh();
+                            return;
+                          }
+
+                          return app.formatResult(result);
+                        }
+                      );
+                    }}
+                  >
+                    {labels.recalculate}
+                  </Button>
+                )}
+              {editable && (
+                <ButtonLink
+                  startIcon={<EditIcon />}
+                  variant="outlined"
+                  href={`./../../edit/${item.id}`}
+                >
+                  {labels.edit}
+                </ButtonLink>
+              )}
+            </HBox>
+          ),
+          singleRow: true
         },
         {
           data: "description",

@@ -23,6 +23,12 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IAssetService service, AssetQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query asset info / 查询资产信息").WithTags("Asset");
 
+            g.MapGet("Read/{id:int}", (IAssetService service, int id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
+                .WithDescription("Read asset info / 读取资产信息").WithTags("Asset");
+
+            g.MapPost("ReadSensitiveData/{id:int}", (IAssetService service, int id, CancellationToken cancellationToken) => service.ReadSensitiveDataAsync(id, cancellationToken))
+                .WithDescription("Read asset sensitive data / 读取资产敏感数据").WithTags("Asset");
+
             g.MapPut("Update", (IAssetService service, AssetUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update asset / 更新资产").WithTags("Asset");
 

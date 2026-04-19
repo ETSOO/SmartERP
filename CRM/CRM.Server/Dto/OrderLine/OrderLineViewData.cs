@@ -29,6 +29,12 @@ namespace CRM.Server.Dto.OrderLine
         public long OrderId { get; init; }
 
         /// <summary>
+        /// Currency
+        /// 币种
+        /// </summary>
+        public required string Currency { get; init; }
+
+        /// <summary>
         /// Product name
         /// 产品名称
         /// </summary>
@@ -131,10 +137,34 @@ namespace CRM.Server.Dto.OrderLine
         public long OrderUserId { get; init; }
 
         /// <summary>
+        /// Customer id
+        /// 客户编号
+        /// </summary>
+        public long CustomerId { get; init; }
+
+        /// <summary>
         /// Asset id
         /// 资产编号
         /// </summary>
         public int? AssetId { get; init; }
+
+        /// <summary>
+        /// Serial number
+        /// 序列号
+        /// </summary>
+        public string? AssetSn { get; init; }
+
+        /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
+
+        /// <summary>
+        /// Supplier name
+        /// 供应商名称
+        /// </summary>
+        public string? SupplierName { get; init; }
 
         /// <summary>
         /// Status
@@ -147,6 +177,12 @@ namespace CRM.Server.Dto.OrderLine
         /// 订单状态
         /// </summary>
         public EntityStatus OrderStatus { get; init; }
+
+        /// <summary>
+        /// Modifiers
+        /// 定制选项
+        /// </summary>
+        public JsonDocument? Modifiers { get; init; }
 
         /// <summary>
         /// JSON data
@@ -171,5 +207,11 @@ namespace CRM.Server.Dto.OrderLine
         /// 是否可完成执行
         /// </summary>
         public bool IsCompletable { get; set; }
+
+        /// <summary>
+        /// Whether the order line is restorable
+        /// 是否可恢复原状
+        /// </summary>
+        public bool IsRestorable { get; set; }
     }
 }

@@ -18,9 +18,21 @@ namespace CRM.Server.RQ.OrderLine
         public long? OrderId { get; init; }
 
         /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
+
+        /// <summary>
         /// Product id
         /// 产品编号
         /// </summary>
         public int? ProductId { get; init; }
+
+        /// <summary>
+        /// Asset id
+        /// 资产编号
+        /// </summary>
+        public int? AssetId { get; init; }
     }
 }

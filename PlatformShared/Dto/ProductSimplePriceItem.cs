@@ -18,7 +18,13 @@ namespace PlatformShared.Dto
         /// Retail price
         /// 零售价
         /// </summary>
-        public required decimal RetailPrice { get; init; }
+        public decimal? RetailPrice { get; init; }
+
+        /// <summary>
+        /// Cost price
+        /// 成本价
+        /// </summary>
+        public decimal? CostPrice { get; init; }
 
         /// <summary>
         /// Validate
@@ -28,7 +34,7 @@ namespace PlatformShared.Dto
         public virtual bool Validate()
         {
             if (!new CurrencyAttribute().IsValid(Currency)
-                || RetailPrice < 0
+                || RetailPrice < 0 || CostPrice < 0
             )
             {
                 return false;

@@ -9,12 +9,12 @@ import { IActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   PersonProductCreateRQ,
   PersonProductJsonData,
-  PersonProductUpdateRQ
+  PersonProductUpdateRQ,
+  ProductReadCustomData
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
 import { PersonList, ProductList } from "@etsoo/smarterp-crm/components";
 import { IdentityTypeFlags } from "@etsoo/appscript";
-import { ProductReadCustomData } from "../../../../../../../../EtsooUI/SmartERP/crm/lib/mjs/dto/product/ProductReadCustomData";
 
 export default function AddPersonProduct() {
   // Route

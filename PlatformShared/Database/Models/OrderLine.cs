@@ -131,6 +131,18 @@ namespace PlatformShared.Database.Models
         public long? UserId { get; set; }
 
         /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; set; }
+
+        /// <summary>
+        /// Asset
+        /// 资产
+        /// </summary>
+        public PersonAsset? Asset { get; set; }
+
+        /// <summary>
         /// Order
         /// 订单
         /// </summary>
@@ -141,6 +153,12 @@ namespace PlatformShared.Database.Models
         /// 产品
         /// </summary>
         public Product Product { get; set; } = default!;
+
+        /// <summary>
+        /// Supplier
+        /// 供应商
+        /// </summary>
+        public Person? Supplier { get; set; }
 
         /// <summary>
         /// User

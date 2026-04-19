@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using System.Text.Json;
 
 namespace CRM.Server.Dto.Asset
 {
@@ -78,7 +79,7 @@ namespace CRM.Server.Dto.Asset
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public string? Data { get; init; }
+        public JsonDocument? Data { get; init; }
 
         /// <summary>
         /// Status
