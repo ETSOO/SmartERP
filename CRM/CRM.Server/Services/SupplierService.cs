@@ -224,6 +224,11 @@ namespace CRM.Server.Services
                         q = q.Where(p => p.CategoryIds != null && rq.CategoryIds.Any(c => p.CategoryIds.Contains(c)));
                     }
 
+                    if (rq.ProductId.HasValue)
+                    {
+                        q = q.Where(p => p.Products.Any(pr => pr.ProductId == rq.ProductId.Value));
+                    }
+
                     if (!string.IsNullOrEmpty(rq.City))
                     {
                         q = q.Where(p => p.Addresses.Any(a => a.City == rq.City));

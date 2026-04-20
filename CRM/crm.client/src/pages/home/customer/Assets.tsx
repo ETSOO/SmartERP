@@ -18,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { AssetQueryData } from "@etsoo/smarterp-crm";
+import { AssetQueryData, Permissions } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
@@ -70,6 +70,8 @@ export default function Assets() {
 
   const defaultCurrency = app.system.getDefaultCurrency();
 
+  const hasEdit = app.owns(Permissions.Org.Manage);
+
   // Page data hook
   usePageDataEmpty(app);
 
@@ -79,14 +81,16 @@ export default function Assets() {
         onRefresh: reloadData,
         fabButtons: (
           <React.Fragment>
-            <Fab
-              title={labels.add}
-              size="medium"
-              color="primary"
-              onClick={() => navigate("./add")}
-            >
-              <AddIcon />
-            </Fab>
+            {hasEdit && (
+              <Fab
+                title={labels.add}
+                size="medium"
+                color="primary"
+                onClick={() => navigate("./add")}
+              >
+                <AddIcon />
+              </Fab>
+            )}
           </React.Fragment>
         )
       })}
@@ -117,6 +121,10 @@ export default function Assets() {
         });
       }}
       columns={[
+        {
+          field: "owner",
+          header: labels.relatedTarget
+        },
         {
           field: "product",
           header: labels.product
@@ -159,12 +167,22 @@ export default function Assets() {
 
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
-                  <EditIcon />
-                </IconButtonLink>
-                <IconButtonLink title={labels.view} href={`./view/${data.id}`}>
-                  <ArticleIcon />
-                </IconButtonLink>
+                {hasEdit && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
+                {hasEdit && (
+                  <IconButtonLink
+                    title={labels.view}
+                    href={`./view/${data.id}`}
+                  >
+                    <ArticleIcon />
+                  </IconButtonLink>
+                )}
               </React.Fragment>
             );
           }
@@ -176,14 +194,40 @@ export default function Assets() {
             data.sn,
             app.formatDate(data.creation, "d"),
             [
-              {
+              hasEdit && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./edit/${data.id}`
+              },
+              hasEdit && {
+                label: labels.view,
+                icon: <ArticleIcon />,
+                action: `./view/${data.id}`
               }
             ],
             <React.Fragment>
-              <Typography variant="body2"></Typography>
+              <Typography variant="body2">{data.owner}</Typography>
+              <Typography component="div" variant="caption">
+                {data.sn} - {data.product}
+              </Typography>
+              {data.amount != null && (
+                <Typography variant="body2">
+                  {labels.balance}:{" "}
+                  {app.formatMoney(
+                    data.amount,
+                    undefined,
+                    app.getMoneyFormatProps(defaultCurrency)
+                  )}
+                </Typography>
+              )}
+              {data.times != null && (
+                <Typography variant="body2">
+                  {labels.times}: {app.formatNumber(data.times)}
+                </Typography>
+              )}
+              <Typography variant="body2">
+                {labels.expiry}: {app.formatDate(data.expiry, "d")}
+              </Typography>
             </React.Fragment>
           ];
         })

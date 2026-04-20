@@ -41,6 +41,12 @@ namespace CRM.Server.RQ.Supplier
         public IEnumerable<int>? CategoryIds { get; init; }
 
         /// <summary>
+        /// Product id
+        /// 产品编号
+        /// </summary>
+        public int? ProductId { get; init; }
+
+        /// <summary>
         /// City
         /// 所在城市
         /// </summary>

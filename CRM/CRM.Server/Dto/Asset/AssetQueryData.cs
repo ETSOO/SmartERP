@@ -15,6 +15,12 @@ namespace CRM.Server.Dto.Asset
         public int Id { get; init; }
 
         /// <summary>
+        /// Owner
+        /// 所有人
+        /// </summary>
+        public required string Owner { get; init; }
+
+        /// <summary>
         /// Product name
         /// 产品名称
         /// </summary>

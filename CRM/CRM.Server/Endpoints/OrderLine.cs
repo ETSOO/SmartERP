@@ -32,6 +32,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("QueryAll", (IOrderLineService service, OrderLineQueryAllRQ rq, CancellationToken cancellationToken) => service.QueryAllAsync(rq, cancellationToken))
                 .WithDescription("Query order line info / 查询订单行信息").WithTags("OrderLine");
 
+            g.MapPost("QueryAsset", (IOrderLineService service, OrderLineQueryAssetRQ rq, CancellationToken cancellationToken) => service.QueryAssetAsync(rq, cancellationToken))
+                .WithDescription("Query order line asset info / 查询订单行资产信息").WithTags("OrderLine");
+
             g.MapGet("Read/{id:long}", (IOrderLineService service, long id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
                 .WithDescription("Read order line info / 读取订单行信息").WithTags("OrderLine");
 

@@ -268,6 +268,7 @@ namespace CRM.Server.Services
             .Select(a => new AssetQueryData
             {
                 Id = a.Id,
+                Owner = a.Person.Name,
                 Product = a.Product.Name,
                 Sn = a.Sn,
                 Description = a.Description,
@@ -344,7 +345,8 @@ namespace CRM.Server.Services
 
             if (data != null && !string.IsNullOrEmpty(data.SensitiveData))
             {
-                return App.DecriptData(data.SensitiveData, GetEncryptionKey(data.ProductId));
+                var sensitiveData = App.DecriptData(data.SensitiveData, GetEncryptionKey(data.ProductId));
+                return EncryptWeb(sensitiveData, id.ToString());
             }
 
             return null;

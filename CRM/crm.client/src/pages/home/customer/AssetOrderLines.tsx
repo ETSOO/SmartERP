@@ -1,7 +1,8 @@
 import {
   IconButtonLink,
   MobileListItemRenderer,
-  ResponsivePage
+  ResponsivePage,
+  SearchField
 } from "@etsoo/materialui";
 import {
   GridCellRendererProps,
@@ -9,21 +10,21 @@ import {
   GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
-import { DataTypes } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
-import { OrderLineQueryAllData, OrderLineQueryData } from "@etsoo/smarterp-crm";
+import { DataTypes, DateUtils } from "@etsoo/shared";
+import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
+import { OrderLineQueryAssetData } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import { BoxProps } from "@mui/material/Box";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ArticleIcon from "@mui/icons-material/Article";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import { Permissions } from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
-import Fab from "@mui/material/Fab";
 
-const template = {} as const satisfies DataTypes.BasicTemplate;
+const template = {
+  userId: "number",
+  creationStart: "date",
+  creationEnd: "date"
+} as const satisfies DataTypes.BasicTemplate;
 
 export type AssetOrderLinesProps = {
   assetId: number;
@@ -40,27 +41,25 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
   const labels = app.getLabels(
     "actions",
     "add",
-    "amount",
-    "discount",
-    "edit",
+    "assetQty",
+    "costPrice",
+    "creation",
     "keywords",
-    "orderLineStartTime",
     "price",
     "qty",
-    "qtyStart",
     "title",
     "view"
   );
 
   // Refs
   const ref =
-    React.useRef<ScrollerListForwardRef<OrderLineQueryAllData>>(undefined);
+    React.useRef<ScrollerListForwardRef<OrderLineQueryAssetData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   return (
-    <ResponsivePage<OrderLineQueryAllData, typeof template>
+    <ResponsivePage<OrderLineQueryAssetData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: <React.Fragment></React.Fragment>
@@ -70,9 +69,23 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
         navigate(`./../../../../order/viewline/${data.id}`)
       }
       fieldTemplate={template}
-      fields={(data) => []}
+      fields={(data) => [
+        <UserTiplist search idValue={data.userId} />,
+        <SearchField
+          label={labels.creation}
+          name="creationStart"
+          type="date"
+          defaultValue={DateUtils.formatForInput(data.creationStart)}
+        />,
+        <SearchField
+          label=""
+          name="creationEnd"
+          type="date"
+          defaultValue={DateUtils.formatForInput(data.creationEnd)}
+        />
+      ]}
       loadData={(data) =>
-        app.orderLineApi.queryAll(
+        app.orderLineApi.queryAsset(
           { assetId, ...data },
           {
             defaultValue: [],
@@ -88,36 +101,34 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
           cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
+          field: "assetQty",
+          header: labels.assetQty,
+          type: GridDataType.Number,
+          width: 108
+        },
+        {
+          field: "qty",
+          header: labels.qty,
+          type: GridDataType.Number,
+          width: 108
+        },
+        {
+          field: "costPrice",
+          header: labels.costPrice,
+          type: GridDataType.Money,
+          width: 116
+        },
+        {
           field: "price",
           header: labels.price,
           type: GridDataType.Money,
           width: 116
         },
         {
-          field: "qty",
-          header: labels.qty,
-          type: GridDataType.Number,
-          width: 88
-        },
-        {
-          field: "discount",
-          header: labels.discount,
-          type: GridDataType.Money,
-          valueFormatter: ({ data }) =>
-            data?.discount === 0 ? undefined : data?.discount,
-          width: 116
-        },
-        {
-          field: "amount",
-          header: labels.amount,
-          type: GridDataType.Money,
-          width: 116
-        },
-        {
-          field: "startTime",
-          type: GridDataType.DateTime,
-          width: 128,
-          header: labels.orderLineStartTime,
+          field: "creation",
+          header: labels.creation,
+          type: GridDataType.Date,
+          width: 116,
           sortable: true,
           sortAsc: false
         },
@@ -130,7 +141,7 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
           },
           cellRenderer: ({
             data
-          }: GridCellRendererProps<OrderLineQueryData, BoxProps>) => {
+          }: GridCellRendererProps<OrderLineQueryAssetData, BoxProps>) => {
             if (data == null) return undefined;
 
             return (
@@ -150,7 +161,7 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
         MobileListItemRenderer(props, (data) => {
           return [
             data.title,
-            app.formatDate(data.startTime, "ds"),
+            app.formatDate(data.creation, "d"),
             [
               {
                 label: labels.view,
@@ -160,20 +171,11 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
             ],
             <React.Fragment>
               <Typography variant="body2">
-                {labels.amount}: {app.formatMoney(data.amount)}
+                {labels.assetQty}: {app.formatNumber(data.assetQty)}
               </Typography>
               <Typography component="div" variant="caption">
                 {app.formatNumber(data.price)} x {app.formatNumber(data.qty)}
-                {data.discount == 0
-                  ? ""
-                  : ` - ${app.formatNumber(data.discount)}`}
               </Typography>
-              {data.startTime && (
-                <Typography variant="body2">
-                  {labels.orderLineStartTime}:{" "}
-                  {app.formatDate(data.startTime, "ds")}
-                </Typography>
-              )}
             </React.Fragment>
           ];
         })

@@ -31,6 +31,11 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_time");
 
+            entity.HasOne(d => d.Person).WithMany(p => p.Products)
+                .HasForeignKey(d => d.PersonId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("person_product_person_id_fkey");
+
             entity.HasOne(d => d.Product).WithMany(p => p.PersonProducts)
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

@@ -138,25 +138,27 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            // Supplier
+            if (supplierId.HasValue)
+            {
+                var hasSupplier = await _db.Suppliers(orgId).Where(s => s.Id == supplierId.Value)
+                    .AnyAsync(cancellationToken);
+
+                if (!hasSupplier)
+                {
+                    return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.SupplierId));
+                }
+            }
+
             // Asset
             if (assetId.HasValue)
             {
-                var asset = await _db.PersonAssets.Where(a => a.Id == assetId.Value && a.PersonId == line.BuyerId).Select(a => new { a.SupplierId })
-                    .FirstOrDefaultAsync(cancellationToken);
+                var hasAsset = await _db.PersonAssets.Where(a => a.Id == assetId.Value && a.PersonId == line.BuyerId)
+                    .AnyAsync(cancellationToken);
 
-                if (asset == null)
+                if (!hasAsset)
                 {
                     return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.AssetId));
-                }
-
-                if (asset.SupplierId.HasValue)
-                {
-                    // 如果资产指定了供应商，则使用资产的供应商编号覆盖请求中的供应商编号
-                    supplierId = asset.SupplierId.Value;
-                }
-                else if (!supplierId.HasValue)
-                {
-                    return ApplicationErrors.NoId.AsResult(nameof(rq.SupplierId));
                 }
             }
             else if (line.AssetId == null && line.AssetQty > 0 && !assetId.HasValue)
@@ -486,7 +488,7 @@ namespace CRM.Server.Services
 
                 return q;
             })
-            .TagWith(nameof(QueryAsync))
+            .TagWith(nameof(QueryAllAsync))
             .Select(p => new OrderLineQueryAllData
             {
                 Id = p.Id,
@@ -504,6 +506,57 @@ namespace CRM.Server.Services
                 Discount = p.Discount,
                 StartTime = p.StartTime,
                 EndTime = p.EndTime,
+                Status = p.Status,
+                Creation = p.Creation
+            })
+            .ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Query asset order line
+        /// 查询资产订单行
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<OrderLineQueryAssetData[]> QueryAssetAsync(OrderLineQueryAssetRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return [];
+            }
+
+            return await CreateQuery(rq, (q) =>
+            {
+                if (rq.UserId.HasValue)
+                {
+                    q = q.Where(p => p.UserId == rq.UserId.Value || p.Order.UserId == rq.UserId.Value);
+                }
+
+                if (rq.CreationStart.HasValue)
+                {
+                    q = q.Where(p => p.Creation >= rq.CreationStart.Value);
+                }
+
+                if (rq.CreationEnd.HasValue)
+                {
+                    q = q.Where(p => p.Creation < rq.CreationEnd.Value);
+                }
+
+                return q;
+            })
+            .TagWith(nameof(QueryAssetAsync))
+            .Select(p => new OrderLineQueryAssetData
+            {
+                Id = p.Id,
+                Title = p.Title,
+                CostPrice = p.CostPrice,
+                SupplierId = p.SupplierId,
+                SupplierName = p.Supplier == null ? null : p.Supplier.Name,
+                Price = p.Price,
+                Qty = p.Qty,
+                AssetQty = p.AssetQty,
                 Status = p.Status,
                 Creation = p.Creation
             })

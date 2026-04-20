@@ -161,7 +161,7 @@ export default function EditUser() {
         <UserTiplist
           label={labels.reportTo}
           idValue={formik.values.reportTo}
-          rq={{ enabled: true, excludedIds: [id] }}
+          rq={{ excludedIds: [id] }}
           onChange={(_event, value) =>
             // Set null instead of undefined to avoid remove the property causing
             // Utils.getDataChanges ignore the field

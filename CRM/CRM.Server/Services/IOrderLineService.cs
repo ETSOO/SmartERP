@@ -13,6 +13,7 @@ namespace CRM.Server.Services
         Task ListAsync(OrderLineListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<OrderLineQueryData[]> QueryAsync(OrderLineQueryRQ rq, CancellationToken cancellationToken = default);
         Task<OrderLineQueryAllData[]> QueryAllAsync(OrderLineQueryAllRQ rq, CancellationToken cancellationToken = default);
+        Task<OrderLineQueryAssetData[]> QueryAssetAsync(OrderLineQueryAssetRQ rq, CancellationToken cancellationToken = default);
         Task<OrderLineViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> RollbackAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> StartAsync(OrderLineStartRQ rq, CancellationToken cancellationToken = default);

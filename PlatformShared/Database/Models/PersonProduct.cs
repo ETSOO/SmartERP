@@ -39,6 +39,12 @@ namespace PlatformShared.Database.Models
         public DateTimeOffset UpdatedTime { get; set; }
 
         /// <summary>
+        /// Person
+        /// 人员
+        /// </summary>
+        public Person Person { get; set; } = default!;
+
+        /// <summary>
         /// Product
         /// 产品
         /// </summary>

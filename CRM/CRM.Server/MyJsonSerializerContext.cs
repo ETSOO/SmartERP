@@ -109,6 +109,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(OrderLineListData[]))]
     [JsonSerializable(typeof(OrderLineQueryData[]))]
     [JsonSerializable(typeof(OrderLineQueryAllData[]))]
+    [JsonSerializable(typeof(OrderLineQueryAssetData[]))]
     [JsonSerializable(typeof(OrderLineViewData))]
     [JsonSerializable(typeof(OrderLineUpdateReadData))]
 

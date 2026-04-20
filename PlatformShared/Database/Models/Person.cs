@@ -699,6 +699,12 @@ namespace PlatformShared.Database.Models
         public ICollection<PersonProfileLink> ProfileLinks { get; } = default!;
 
         /// <summary>
+        /// Custom products
+        /// 自定义产品
+        /// </summary>
+        public ICollection<PersonProduct> Products { get; set; } = default!;
+
+        /// <summary>
         /// Purchases
         /// 采购
         /// </summary>

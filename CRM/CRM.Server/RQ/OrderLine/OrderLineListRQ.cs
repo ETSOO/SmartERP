@@ -9,6 +9,7 @@ namespace CRM.Server.RQ.OrderLine
     /// </summary>
     [JsonDerivedType(typeof(OrderLineQueryRQ))]
     [JsonDerivedType(typeof(OrderLineQueryAllRQ))]
+    [JsonDerivedType(typeof(OrderLineQueryAssetRQ))]
     public record OrderLineListRQ : QueryLongRQ
     {
         /// <summary>

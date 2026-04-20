@@ -79,14 +79,13 @@ export namespace AppUtils {
             name="requester"
             search={false}
             label={labels.applicant}
-            rq={{ enabled: true, orgId: data.id, excludeSelf: true }}
+            rq={{ orgId: data.id, excludeSelf: true }}
           />
           <UserTiplist
             name="approver"
             search={false}
             label={labels.approver}
             rq={{
-              enabled: true,
               orgId: app.userData?.organization,
               excludeSelf: true
             }}
@@ -236,14 +235,13 @@ export namespace AppUtils {
             name="requester"
             search={false}
             label={labels.applicant}
-            rq={{ enabled: true, orgId: data.orgId, excludeSelf: true }}
+            rq={{ orgId: data.orgId, excludeSelf: true }}
           />
           <UserTiplist
             name="approver"
             search={false}
             label={labels.approver}
             rq={{
-              enabled: true,
               orgId: app.userData?.organization,
               excludeSelf: true
             }}

@@ -30,42 +30,26 @@ import { DataTypes, DateUtils, DomUtils } from "@etsoo/shared";
 import { UserTiplist } from "@etsoo/smarterp-core/components";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
-import {
-  AssetList,
-  PersonList,
-  SupplierList
-} from "@etsoo/smarterp-crm/components";
-import { EntityStatus, IdentityTypeFlags } from "@etsoo/appscript";
+import { AssetList, SupplierList } from "@etsoo/smarterp-crm/components";
+import { EntityStatus } from "@etsoo/appscript";
 
-export default function ViewOrderLine() {
-  // Route
-  const { id = 0 } = useParamsEx({ id: "number" });
-
-  // Labels
+function CompleteUI({
+  data,
+  requiresAsset
+}: {
+  data: OrderLineViewData;
+  requiresAsset: boolean;
+}) {
+  // labels
   const labels = app.getLabels(
     "add",
     "asset",
-    "confirmAction",
-    "completeExecution",
     "costPrice",
     "description",
-    "edit",
     "expiry",
-    "promotions",
-    "restart",
-    "restore",
     "sn",
-    "startExecution",
     "supplier"
   );
-
-  // Load data
-  const loadData = React.useCallback(
-    async () => app.orderLineApi.read(id),
-    [id]
-  );
-
-  const editable = app.owns(Permissions.Order.Edit);
 
   const addAsset = async (data: OrderLineViewData) => {
     app.showInputDialog({
@@ -127,7 +111,7 @@ export default function ViewOrderLine() {
             defaultValue={DateUtils.formatForInput(new Date())}
             label={labels.expiry}
           />
-          <SupplierList fullWidth />
+
           <InputField
             fullWidth
             name="description"
@@ -142,6 +126,63 @@ export default function ViewOrderLine() {
       )
     });
   };
+
+  const [supplierId, setSupplierId] = React.useState<number>();
+
+  return (
+    <VBox spacing={2} sx={{ paddingTop: 1 }}>
+      {requiresAsset && (
+        <HBox spacing={1}>
+          <AssetList
+            fullWidth
+            inputRequired
+            rq={{ personId: data.customerId, productId: data.productId }}
+          />
+          <Button onClick={() => addAsset(data)} variant="outlined">
+            {labels.add}
+          </Button>
+        </HBox>
+      )}
+      <SupplierList
+        fullWidth
+        onValueChange={(item) => setSupplierId(item?.id)}
+        rq={{ productId: data.productId }}
+      />
+      {supplierId && (
+        <MoneyInputField
+          fullWidth
+          required
+          name="costPrice"
+          label={labels.costPrice}
+        />
+      )}
+    </VBox>
+  );
+}
+
+export default function ViewOrderLine() {
+  // Route
+  const { id = 0 } = useParamsEx({ id: "number" });
+
+  // Labels
+  const labels = app.getLabels(
+    "confirmAction",
+    "completeExecution",
+    "edit",
+    "promotions",
+    "restart",
+    "restore",
+    "startExecution",
+    "supplier"
+  );
+
+  // Load data
+  const loadData = React.useCallback(
+    async () => app.orderLineApi.read(id),
+    [id]
+  );
+
+  const editable = app.owns(Permissions.Order.Edit);
 
   const start = async (
     data: OrderLineViewData,
@@ -198,8 +239,6 @@ export default function ViewOrderLine() {
     // Required asset
     const requiresAsset = data.assetQty > 0 && data.assetId == null;
 
-    let assetSupplierId: number | undefined = undefined;
-
     // Show dialog
     app.showInputDialog({
       title: labels.completeExecution,
@@ -230,8 +269,8 @@ export default function ViewOrderLine() {
           return false;
         }
 
-        if (requiresAsset && assetSupplierId == null && supplierId == null) {
-          DomUtils.setFocus("supplierIdInput", form);
+        if (supplierId != null && costPrice == null) {
+          DomUtils.setFocus("costPrice", form);
           return false;
         }
 
@@ -251,31 +290,7 @@ export default function ViewOrderLine() {
 
         return app.formatResult(result);
       },
-      inputs: (
-        <VBox spacing={2} sx={{ paddingTop: 1 }}>
-          {requiresAsset && (
-            <HBox spacing={1}>
-              <AssetList
-                fullWidth
-                inputRequired
-                rq={{ personId: data.customerId, productId: data.productId }}
-                onValueChange={(item) => (assetSupplierId = item?.supplierId)}
-              />
-              <Button onClick={() => addAsset(data)} variant="outlined">
-                {labels.add}
-              </Button>
-            </HBox>
-          )}
-          {requiresAsset && (
-            <MoneyInputField
-              fullWidth
-              required
-              name="costPrice"
-              label={labels.costPrice}
-            />
-          )}
-        </VBox>
-      )
+      inputs: <CompleteUI data={data} requiresAsset={requiresAsset} />
     });
   };
 
