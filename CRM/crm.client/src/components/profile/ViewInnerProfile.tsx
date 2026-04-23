@@ -66,11 +66,17 @@ type ViewInnerProfileProps = {
    * Current tab index
    */
   index: number;
+
+  /**
+   * Order id
+   * 订单编号
+   */
+  orderId?: number;
 };
 
 export function ViewInnerProfile(props: ViewInnerProfileProps) {
   // Destruct
-  const { mRef, index } = props;
+  const { mRef, index, orderId } = props;
 
   // Labels
   const labels = app.getLabels(
@@ -176,7 +182,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
               <EmailIcon />
             </IconButton>
             <IconButtonLink
-              href={`./../../../profile/edit/${data?.id}?index=${index}`}
+              href={`./../../../profile/edit/${data?.id}?index=${index}&orderId=${orderId ?? ""}`}
               color="inherit"
               title={labels.edit}
               disabled={data == null}

@@ -12,6 +12,7 @@ import {
 } from "@etsoo/smarterp-core/components";
 import {
   AddressList,
+  OrderAllList,
   PersonList,
   PersonsList
 } from "@etsoo/smarterp-crm/components";
@@ -32,9 +33,14 @@ export default function AddProfile() {
   const { id = 0 } = useParamsEx({
     id: "number"
   });
-  const { personId = 0, index } = useSearchParamsEx({
+  const {
+    personId = 0,
+    index,
+    orderId
+  } = useSearchParamsEx({
     personId: "number",
-    index: "number"
+    index: "number",
+    orderId: "number"
   });
   const isTask = location.pathname.includes("/addTask");
   const isEditing = id > 0;
@@ -115,13 +121,15 @@ export default function AddProfile() {
         rq.changedFields = fields;
         rq.auth = auth;
 
-        redirectUrl = "./../../../";
-
         result = await app.profileApi.update(rq);
 
-        redirectUrl = index
-          ? `./../../../contact/view/${v.personId}?id=${id}&index=${index}`
-          : `./../../view/${id}`;
+        if (!!orderId) {
+          redirectUrl = `./../../../order/view/${orderId}?index=${index}`;
+        } else {
+          redirectUrl = index
+            ? `./../../../contact/view/${v.personId}?id=${id}&index=${index}`
+            : `./../../view/${id}`;
+        }
       } else {
         const rq: PersonProfileCreateRQ = {
           ...v,
@@ -133,9 +141,13 @@ export default function AddProfile() {
 
         result = await app.profileApi.create(rq);
 
-        redirectUrl = index
-          ? `./../../contact/view/${v.personId}?id=${result?.data?.id}&index=${index}`
-          : `./../view/${id}`;
+        if (!!orderId) {
+          redirectUrl = `./../../order/view/${orderId}?index=${index}`;
+        } else {
+          redirectUrl = index
+            ? `./../../contact/view/${v.personId}?id=${result?.data?.id}&index=${index}`
+            : `./../view/${id}`;
+        }
       }
 
       if (result == null) return;
@@ -247,6 +259,13 @@ export default function AddProfile() {
           fullWidth
         />
       </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <EOEditorEx
+          ref={editorRef}
+          backupKey={`profile-${id}`}
+          language={app.culture}
+        />
+      </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
@@ -283,10 +302,11 @@ export default function AddProfile() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
-        <EOEditorEx
-          ref={editorRef}
-          backupKey={`profile-${id}`}
-          language={app.culture}
+        <OrderAllList
+          rq={{ enabled: undefined }}
+          idValue={orderId}
+          disabled={!!orderId}
+          inputOnChange={formik.handleChange}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>

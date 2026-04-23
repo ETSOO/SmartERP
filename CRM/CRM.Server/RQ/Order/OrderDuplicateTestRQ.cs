@@ -35,6 +35,12 @@ namespace CRM.Server.RQ.Order
         public string? SourceId { get; init; }
 
         /// <summary>
+        /// Is order or not
+        /// 是否为订单
+        /// </summary>
+        public bool? IsOrder {  get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>

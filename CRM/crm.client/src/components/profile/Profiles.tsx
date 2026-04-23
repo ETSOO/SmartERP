@@ -58,6 +58,12 @@ export type ProfilesProps = {
    * Person ID
    */
   personId: number;
+
+  /**
+   * Order id
+   * 订单编号
+   */
+  orderId?: number;
 };
 
 /**
@@ -67,7 +73,7 @@ export type ProfilesProps = {
  */
 export function Profiles(props: ProfilesProps) {
   // Destruct
-  const { identityType, index: tabIndex, personId } = props;
+  const { identityType, index: tabIndex, personId, orderId } = props;
 
   // Route
   const navigate = useNavigate();
@@ -144,7 +150,8 @@ export function Profiles(props: ProfilesProps) {
             const rq: PersonProfileQueryRQ = {
               ...BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
               participantId: personIdRef.current,
-              id: idRef.current
+              id: idRef.current,
+              orderId
             };
 
             const items = await app.profileApi.query(rq, {
@@ -220,12 +227,12 @@ export function Profiles(props: ProfilesProps) {
               const { loadedItems, hasNextPage } = states;
               return (
                 <HBox spacing={1} sx={{ alignItems: "center" }}>
-                  <React.Fragment>
+                  <Typography variant="body2">
                     {loadedItems.toLocaleString() + (hasNextPage ? "+" : "")}
-                  </React.Fragment>
+                  </Typography>
                   {canAdd && (
                     <ButtonLink
-                      href={`./../../../profile/add?index=${tabIndex}&personId=${personId}`}
+                      href={`./../../../profile/add?index=${tabIndex}&personId=${personId}&orderId=${orderId ?? ""}`}
                       variant="outlined"
                       startIcon={<AddIcon />}
                     >
@@ -273,7 +280,7 @@ export function Profiles(props: ProfilesProps) {
       </Grid>
       {app.mdUp && (
         <Grid size={{ md: 6, lg: 7, xl: 8 }}>
-          <ViewInnerProfile mRef={mRef} index={tabIndex} />
+          <ViewInnerProfile mRef={mRef} index={tabIndex} orderId={orderId} />
         </Grid>
       )}
     </Grid>

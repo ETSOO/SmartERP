@@ -176,15 +176,7 @@ export default function SubmitOrder() {
 
         if (result?.ok) {
           // Clear local storage
-          app.storage.setPersistedData(
-            LocalUtils.ORDER_CUSTOMER_DATA_KEY,
-            null
-          );
-          app.storage.setPersistedData(LocalUtils.ORDER_LINES_DATA_KEY, null);
-          app.storage.setPersistedData(
-            LocalUtils.ORDER_PROMOTIONS_DATA_KEY,
-            null
-          );
+          LocalUtils.clearOrderData();
         }
       }
 

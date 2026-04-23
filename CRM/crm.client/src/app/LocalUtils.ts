@@ -3,6 +3,7 @@ import {
   PromotionItem,
   QueryForSaleRQ
 } from "@etsoo/smarterp-crm";
+import { app } from "./MyApp";
 
 /**
  * Local utilities
@@ -98,4 +99,15 @@ export namespace LocalUtils {
      */
     data?: Record<string, unknown>;
   };
+
+  /**
+   * Clear order data from storage
+   */
+  export function clearOrderData(all: boolean = true) {
+    if (all) {
+      app.storage.setPersistedData(LocalUtils.ORDER_CUSTOMER_DATA_KEY, null);
+    }
+    app.storage.setPersistedData(LocalUtils.ORDER_LINES_DATA_KEY, null);
+    app.storage.setPersistedData(LocalUtils.ORDER_PROMOTIONS_DATA_KEY, null);
+  }
 }

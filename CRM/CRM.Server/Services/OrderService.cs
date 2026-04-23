@@ -317,9 +317,14 @@ namespace CRM.Server.Services
 
         private IQueryable<OrderHeader> CreateQuery(OrderListRQ rq, Func<IQueryable<OrderHeader>, IQueryable<OrderHeader>>? filters = null)
         {
-            var query = _db.Orders(User.OrganizationInt).AsNoTracking()
+            var query = _db.OrderAndPOs(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (o) => o.Id, (o) => o.Status, (q) =>
                 {
+                    if (rq.IsOrder.HasValue)
+                    {
+                        q = q.Where(p => p.IsOrder == rq.IsOrder.Value);
+                    }
+
                     if (rq.TagId != null)
                     {
                         q = q.Where(p => p.Tags != null && p.Tags.Contains(rq.TagId.Value));
@@ -404,6 +409,11 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var q = _db.OrderAndPOs(orgId).AsNoTracking();
+
+            if (rq.IsOrder.HasValue)
+            {
+                q = q.Where(p => p.IsOrder == rq.IsOrder.Value);
+            }
 
             var hasFilter = false;
 

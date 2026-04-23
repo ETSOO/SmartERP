@@ -16,10 +16,12 @@ import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import CelebrationIcon from "@mui/icons-material/Celebration";
 import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import { EntityStatus } from "@etsoo/appscript";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { OrderUIUtils } from "./OrderUIUtils";
 
 export type OrderViewUIProps = {
   data: OrderViewData;
@@ -31,6 +33,7 @@ export function OrderViewUI(props: OrderViewUIProps) {
   const { data, refresh } = props;
 
   const labels = app.getLabels(
+    "addOrderLine",
     "confirmAction",
     "edit",
     "promotions",
@@ -219,6 +222,24 @@ export function OrderViewUI(props: OrderViewUIProps) {
                 >
                   {labels.edit}
                 </ButtonLink>
+              )}
+              {editable && (
+                <Button
+                  startIcon={<AddIcon />}
+                  variant="outlined"
+                  onClick={() =>
+                    OrderUIUtils.addOrderLine(
+                      {
+                        customerId: item.customerId,
+                        orderId: item.id,
+                        currency: item.currency
+                      },
+                      refresh
+                    )
+                  }
+                >
+                  {labels.addOrderLine}
+                </Button>
               )}
             </HBox>
           ),

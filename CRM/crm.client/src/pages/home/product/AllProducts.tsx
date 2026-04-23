@@ -168,6 +168,10 @@ export default function AllDepts() {
         {
           field: "name",
           header: labels.productName,
+          valueFormatter: ({ data }) =>
+            data == null
+              ? undefined
+              : `${data.assignedId ? `${data.assignedId} - ` : ""}${data.name}`,
           sortable: true,
           cellBoxStyle: GridDeletedCellBoxStyle
         },
@@ -201,11 +205,6 @@ export default function AllDepts() {
           width: 200,
           valueFormatter: ({ data }) =>
             data?.categories?.map((c) => c.names.join(" -> ")).join(", ")
-        },
-        {
-          field: "assignedId",
-          width: 142,
-          header: labels.assignedId
         },
         {
           width: DefaultUI.Widths.icon2,

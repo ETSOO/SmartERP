@@ -26,6 +26,7 @@ import { Permissions } from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import { EntityStatus } from "@etsoo/appscript";
+import { OrderUIUtils } from "./OrderUIUtils";
 
 const template = {
   keyword: "string",
@@ -37,6 +38,8 @@ export type AllOrderLinesProps = {
   orderId: number;
   orderStatus: EntityStatus;
   currency: string;
+  customerId: number;
+  refresh: () => Promise<void>;
 };
 
 export function OrderLines(props: AllOrderLinesProps) {
@@ -44,12 +47,12 @@ export function OrderLines(props: AllOrderLinesProps) {
   const navigate = useNavigate();
 
   // Destruct
-  const { orderId, orderStatus, currency } = props;
+  const { orderId, orderStatus, currency, customerId, refresh } = props;
 
   // Labels
   const labels = app.getLabels(
     "actions",
-    "add",
+    "addOrderLine",
     "amount",
     "discount",
     "edit",
@@ -77,10 +80,18 @@ export function OrderLines(props: AllOrderLinesProps) {
           <React.Fragment>
             {app.owns(Permissions.Order.Edit) && (
               <Fab
-                title={labels.add}
+                title={labels.addOrderLine}
                 size="medium"
                 color="primary"
-                onClick={() => navigate("./add")}
+                onClick={() =>
+                  OrderUIUtils.addOrderLine(
+                    { orderId, currency, customerId },
+                    () => {
+                      reloadData();
+                      refresh();
+                    }
+                  )
+                }
               >
                 <AddIcon />
               </Fab>

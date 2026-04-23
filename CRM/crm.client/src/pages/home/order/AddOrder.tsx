@@ -25,6 +25,7 @@ import { CultureList } from "../../../components/CultureList";
 import { DomUtils, NumberUtils, Utils } from "@etsoo/shared";
 import {
   CustomerReadForSaleData,
+  OrderUtils,
   PromotionCodeCalculation,
   PromotionItem,
   PromotionOrderLine,
@@ -51,13 +52,13 @@ import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
-import { OrderUtils } from "../../../../../../../../EtsooUI/SmartERP/crm/lib/mjs/utils/Order";
 import Chip from "@mui/material/Chip";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import { LocalUtils } from "../../../app/LocalUtils";
+import { Button } from "@mui/material";
 
 function formatName(data: QueryForSaleData) {
   return data.assignedId ? `${data.assignedId} - ${data.name}` : data.name;
@@ -176,7 +177,7 @@ function AddItem({
       );
 
       if (!title || qty == null) {
-        return undefined;
+        return;
       }
 
       const modifiers = modifiersRef.current?.getValue();
@@ -376,6 +377,7 @@ function CartList({
             {index > 0 && <Divider variant="inset" component="li" />}
             <ListItem
               alignItems="flex-start"
+              disableGutters
               key={line.id}
               secondaryAction={
                 <VBox sx={{ maxWidth: 140 }}>
@@ -455,6 +457,7 @@ function CartList({
       <Divider variant="inset" component="li" />
       <ListItem
         alignItems="flex-start"
+        disableGutters
         secondaryAction={
           <React.Fragment>
             <Typography
@@ -545,6 +548,8 @@ export default function AddOrder() {
     "assignedId",
     "category",
     "chooseCustomer",
+    "clear",
+    "confirmAction",
     "productDisappeared",
     "productName",
     "promotions",
@@ -875,6 +880,30 @@ export default function AddOrder() {
             lines={lines}
             promotions={orderPromotions}
           />
+        ),
+        buttons: (n, _callback, base) => (
+          <React.Fragment>
+            <Button
+              startIcon={<ClearIcon />}
+              variant="outlined"
+              onClick={() => {
+                app.notifier.confirm(
+                  labels.confirmAction.format(labels.clear),
+                  undefined,
+                  (result) => {
+                    if (result) {
+                      LocalUtils.clearOrderData(false);
+                      setOrderLines([]);
+                      n.dismiss();
+                    }
+                  }
+                );
+              }}
+            >
+              {labels.clear}
+            </Button>
+            {base()}
+          </React.Fragment>
         ),
         callback: (form) => {
           if (form == null) {

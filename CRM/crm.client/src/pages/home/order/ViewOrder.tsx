@@ -1,6 +1,7 @@
-import { CommonPage, TabBox } from "@etsoo/materialui";
+import { CommonPage, TabBox, TabBoxPanel } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import HistoryIcon from "@mui/icons-material/History";
 import React from "react";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -10,13 +11,15 @@ import { useParamsEx } from "@etsoo/react";
 import { OrderViewData } from "@etsoo/smarterp-crm";
 import { OrderViewUI } from "./OrderViewUI";
 import { OrderLines } from "./OrderLines";
+import { IdentityTypeFlags } from "@etsoo/appscript";
+import { Profiles } from "../../../components/profile/Profiles";
 
 export default function ViewOrder() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
   // Labels
-  const labels = app.getLabels("basicInfo", "orderLines", "view");
+  const labels = app.getLabels("basicInfo", "orderLines", "profiles", "view");
 
   // State
   const [data, setData] = React.useState<OrderViewData>();
@@ -54,12 +57,32 @@ export default function ViewOrder() {
                     orderId={id}
                     orderStatus={data.status}
                     currency={data.currency}
+                    customerId={data.customerId}
+                    refresh={loadData}
                   />
                 ),
               label: labels.orderLines + ` (${data.lines})`,
               icon: <ListAltIcon />,
               iconPosition: "start"
-            }
+            },
+            ...(app.ownsIdentity(IdentityTypeFlags.Customer, "QueryProfile")
+              ? [
+                  {
+                    children: (visible, index) =>
+                      visible && (
+                        <Profiles
+                          personId={data.customerId}
+                          identityType={IdentityTypeFlags.Customer}
+                          orderId={id}
+                          index={index}
+                        />
+                      ),
+                    label: labels.profiles,
+                    icon: <HistoryIcon />,
+                    iconPosition: "start"
+                  } as TabBoxPanel
+                ]
+              : [])
           ]}
         />
       )}
