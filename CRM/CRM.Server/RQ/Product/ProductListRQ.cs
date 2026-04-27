@@ -1,4 +1,5 @@
 ﻿using CRM.Server.Dto;
+using PlatformShared.Database.Models;
 using System.Text.Json.Serialization;
 
 namespace CRM.Server.RQ.Product
@@ -10,6 +11,18 @@ namespace CRM.Server.RQ.Product
     [JsonDerivedType(typeof(ProductQueryRQ))]
     public record ProductListRQ : QueryIntRQ, IQueryTag
     {
+        /// <summary>
+        /// Scope
+        /// 范围
+        /// </summary>
+        public ProductScope? Scope { get; init; }
+
+        /// <summary>
+        /// Usage
+        /// 用途
+        /// </summary>
+        public ProductUsage? Usage { get; init; }
+
         /// <summary>
         /// Tag
         /// 标签

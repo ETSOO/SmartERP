@@ -63,6 +63,7 @@ export default function AddPromotion() {
     "promotionCode",
     "stackable",
     "startDate",
+    "suppliers",
     "title"
   );
 
@@ -367,8 +368,11 @@ export default function AddPromotion() {
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
         <PersonsList
-          label={labels.customers}
-          rq={{ identityType: IdentityTypeFlags.Customer }}
+          label={labels.customers + " / " + labels.suppliers}
+          rq={{
+            identityType:
+              IdentityTypeFlags.Customer | IdentityTypeFlags.Supplier
+          }}
           onChange={(_event, value) =>
             formik.setFieldValue(
               "personIds",

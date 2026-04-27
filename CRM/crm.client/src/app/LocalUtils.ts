@@ -1,6 +1,7 @@
 import {
   PromotionCodeCalculation,
   PromotionItem,
+  QueryForPurchaseRQ,
   QueryForSaleRQ
 } from "@etsoo/smarterp-crm";
 import { app } from "./MyApp";
@@ -25,11 +26,34 @@ export namespace LocalUtils {
   export const ORDER_PROMOTIONS_DATA_KEY = "etsoo-order-promotions-data";
 
   /**
+   * Data key for PO supplier data
+   */
+  export const PO_SUPPLIER_DATA_KEY = "etsoo-po-supplier-data";
+
+  /**
+   * Data key for PO lines data
+   */
+  export const PO_LINES_DATA_KEY = "etsoo-po-lines-data";
+
+  /**
+   * Data key for PO promotions data
+   */
+  export const PO_PROMOTIONS_DATA_KEY = "etsoo-po-promotions-data";
+
+  /**
    * Customer query data, used for order creation
    */
   export type CustomerQueryData = Pick<
     QueryForSaleRQ,
     "customerId" | "currency" | "culture"
+  >;
+
+  /**
+   * Supplier query data, used for order creation
+   */
+  export type SupplierQueryData = Pick<
+    QueryForPurchaseRQ,
+    "supplierId" | "currency" | "culture"
   >;
 
   /**
@@ -109,5 +133,16 @@ export namespace LocalUtils {
     }
     app.storage.setPersistedData(LocalUtils.ORDER_LINES_DATA_KEY, null);
     app.storage.setPersistedData(LocalUtils.ORDER_PROMOTIONS_DATA_KEY, null);
+  }
+
+  /**
+   * Clear PO data from storage
+   */
+  export function clearPOData(all: boolean = true) {
+    if (all) {
+      app.storage.setPersistedData(LocalUtils.PO_SUPPLIER_DATA_KEY, null);
+    }
+    app.storage.setPersistedData(LocalUtils.PO_LINES_DATA_KEY, null);
+    app.storage.setPersistedData(LocalUtils.PO_PROMOTIONS_DATA_KEY, null);
   }
 }

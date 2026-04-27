@@ -29,10 +29,11 @@ namespace PlatformShared.Database.Models
     }
 
     /// <summary>
-    /// Product sales control scope
-    /// 产品销售控制范围
+    /// Product sale / purchase control scope
+    /// 产品销售/采购控制范围
     /// </summary>
-    public enum ProductScope : byte
+    [Flags]
+    public enum ProductScope : short
     {
         /// <summary>
         /// None
@@ -41,41 +42,34 @@ namespace PlatformShared.Database.Models
         None = 0,
 
         /// <summary>
-        /// Internal
-        /// 仅内部
+        /// Internal sale
+        /// 内部销售
         /// </summary>
-        Internal = 1,
+        InternalSale = 1,
 
         /// <summary>
-        /// Public
-        /// 仅对外
+        /// Public sale
+        /// 公开销售
         /// </summary>
-        Public = 16
-    }
-
-    /// <summary>
-    /// Product inventory management way
-    /// 产品库存管理方式
-    /// </summary>
-    public enum ProductInventoryWay : byte
-    {
-        /// <summary>
-        /// None
-        /// 无
-        /// </summary>
-        None = 0,
+        PublicSale = 2,
 
         /// <summary>
-        /// Simple
-        /// 简单管理
+        /// Purchase
+        /// 采购
         /// </summary>
-        Simple = 4,
+        Purchase = 4,
 
         /// <summary>
-        /// Full
-        /// 完整管理
+        /// Production
+        /// 生产
         /// </summary>
-        Full = 9
+        Production = 32,
+
+        /// <summary>
+        /// Inventory
+        /// 库存管理
+        /// </summary>
+        Inventory = 64
     }
 
     /// <summary>
@@ -221,12 +215,6 @@ namespace PlatformShared.Database.Models
         /// 查询关键词
         /// </summary>
         public string? QueryKeyword { get; set; }
-
-        /// <summary>
-        /// Inventory management way
-        /// 库存管理方式
-        /// </summary>
-        public ProductInventoryWay InventoryWay { get; set; }
 
         /// <summary>
         /// Tax rate

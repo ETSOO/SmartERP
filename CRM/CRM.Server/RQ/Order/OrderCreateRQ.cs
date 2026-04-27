@@ -9,7 +9,7 @@ using System.Text.Json;
 namespace CRM.Server.RQ.Order
 {
     /// <summary>
-    /// Create create request data
+    /// Create order request data
     /// 创建订单请求数据
     /// </summary>
     public record OrderCreateRQ : IModelValidator

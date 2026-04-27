@@ -21,6 +21,9 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(256)
                 .HasColumnName("title");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+            entity.Property(e => e.IsOrder)
+                .HasDefaultValue(true)
+                .HasColumnName("is_order");
             entity.Property(e => e.IsValid)
                 .HasDefaultValue(true)
                 .HasColumnName("is_valid");

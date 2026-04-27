@@ -23,6 +23,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (ISupplierService service, SupplierQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query supplier info / 查询供应商信息").WithTags("Supplier");
 
+            g.MapPost("ReadForPurchase", (ISupplierService service, SupplierReadForPurchaseRQ rq, CancellationToken cancellationToken) => service.ReadForPurchaseAsync(rq, cancellationToken))
+                .WithDescription("Get supplier info for purchase / 获取供应商采购信息").WithTags("Supplier");
+
             g.MapPut("Update", (ISupplierService service, SupplierUpdateRQ rq,  CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update supplier / 更新供应商").WithTags("Supplier");
 

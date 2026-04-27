@@ -271,18 +271,20 @@ export default function ViewProduct() {
         </HBox>
       )}
       fields={[
+        { data: "unit", label: "productUnit" },
         "assignedId",
         {
-          data: (item) => app.product.getScope(item.scope),
-          label: "productScope"
+          data: (item) =>
+            app.product
+              .getScope(item.scope)
+              ?.map((s) => s.label)
+              .join(", "),
+          label: "productScope",
+          singleRow: "large"
         },
         {
           data: (item) => app.product.getUsage(item.usage),
           label: "productUsage"
-        },
-        {
-          data: (item) => app.product.getInventoryWay(item.inventoryWay),
-          label: "productInventoryWay"
         },
         "minQty",
         "stepQty",
@@ -338,7 +340,7 @@ export default function ViewProduct() {
                         </TableCell>
                         <TableCell align="right">
                           {NumberUtils.getCurrencySymbol(p.currency)}
-                          {app.formatNumber(p.retailPrice)} /{" "}
+                          {app.formatNumber(p.retailPrice ?? 0)} /{" "}
                           {p.promotionPrice == null
                             ? "--"
                             : app.formatNumber(p.promotionPrice)}

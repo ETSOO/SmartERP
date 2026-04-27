@@ -83,12 +83,6 @@ namespace CRM.Server.Dto.Product
         public ProductScope Scope { get; init; }
 
         /// <summary>
-        /// Inventory management way
-        /// 库存管理方式
-        /// </summary>
-        public ProductInventoryWay InventoryWay { get; init; }
-
-        /// <summary>
         /// Query keyword
         /// 查询关键词
         /// </summary>

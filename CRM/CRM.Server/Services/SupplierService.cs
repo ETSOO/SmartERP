@@ -7,9 +7,11 @@ using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Dto.Customer;
 using CRM.Server.Dto.PersonInfo;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.RQ;
+using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Supplier;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
@@ -321,6 +323,70 @@ namespace CRM.Server.Services
                 Description = p.Description,
                 Creation = p.Creation
             }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read supplier data for purchase
+        /// 读取采购用的供应商数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<SupplierReadForPurchaseData?> ReadForPurchaseAsync(SupplierReadForPurchaseRQ rq, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+            var now = DateTime.UtcNow;
+
+            var currency = rq.Currency;
+
+            var data = new SupplierReadForPurchaseData();
+
+            if (rq.SupplierId > 0)
+            {
+                var supplierId = rq.SupplierId.Value;
+
+                var supplier = await _db.Suppliers(orgId).AsNoTracking()
+                    .Where(p => p.Id == supplierId && p.Status < EntityStatus.Inactivated)
+                    .Select(p => new SupplierPurchaseData
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        PreferredName = p.PreferredName,
+                        IsLegalPerson = p.IsLegalPerson
+                    }).FirstOrDefaultAsync(cancellationToken);
+
+                if (supplier == null)
+                {
+                    return null;
+                }
+
+                var promotions = await _db.Promotions(orgId)
+                    .AsNoTracking()
+                    .Where(pr => pr.Status < EntityStatus.Inactivated
+                        && pr.ValidStart <= now
+                        && pr.ValidEnd >= now
+                        && pr.Currency == currency
+                        && pr.ProductIds == null
+                        && pr.ProductCategoryIds == null
+                        && (pr.PersonIds != null && pr.PersonIds.Contains(supplierId))
+                    )
+                    .Select(pr => new PromotionItem
+                    {
+                        Id = pr.Id,
+                        Code = pr.Code,
+                        Title = pr.Title,
+                        MinAmount = pr.MinAmount,
+                        Discount = pr.Discount,
+                        Stackable = pr.Stackable
+                    })
+                    .ToArrayAsync(cancellationToken);
+
+                supplier.Promotions = promotions;
+
+                data.Supplier = supplier;
+            }
+
+            return data;
         }
 
         /// <summary>

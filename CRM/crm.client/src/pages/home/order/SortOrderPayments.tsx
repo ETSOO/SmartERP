@@ -10,17 +10,20 @@ import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import { OrderPaymentListData } from "@etsoo/smarterp-crm";
+import { useIsOrder } from "./useIsOrder";
 
 export default function SortOrderPayments() {
   const [items, setItems] = React.useState<OrderPaymentListData[]>([]);
+
+  const isOrder = useIsOrder();
 
   const labels = app.getLabels("sortTip", "dragIndicator");
 
   const loadData = React.useCallback(() => {
     app.orderPaymentApi
-      .list({ isValid: true, queryPaging: 64 })
+      .list({ isValid: true, isOrder, queryPaging: 64 })
       .then((result) => setItems(result ?? []));
-  }, []);
+  }, [isOrder]);
 
   usePageDataEmpty(app);
 

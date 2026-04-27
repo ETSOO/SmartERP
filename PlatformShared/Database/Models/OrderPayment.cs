@@ -86,6 +86,12 @@ namespace PlatformShared.Database.Models
         public bool IsValid { get; set; }
 
         /// <summary>
+        /// Is order or not
+        /// 是否为订单
+        /// </summary>
+        public bool IsOrder { get; set; }
+
+        /// <summary>
         /// Order index
         /// 排序数
         /// </summary>

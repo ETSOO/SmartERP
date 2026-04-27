@@ -28,6 +28,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IProductService service, ProductQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query product info / 查询产品信息").WithTags("Product");
 
+            g.MapPost("QueryForPurchase", (IProductService service, QueryForPurchaseRQ rq, CancellationToken cancellationToken) => service.QueryForPurchaseAsync(rq, cancellationToken))
+                .WithDescription("Query product for purchase / 查询产品用于采购").WithTags("Product");
+
             g.MapPost("QueryForSale", (IProductService service, QueryForSaleRQ rq, CancellationToken cancellationToken) => service.QueryForSaleAsync(rq, cancellationToken))
                 .WithDescription("Query product for sale / 查询产品用于销售").WithTags("Product");
 

@@ -4,7 +4,6 @@ using com.etsoo.CoreFramework.Json;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
-using com.etsoo.Utils.String;
 using CRM.Server.Dto.Product;
 using PlatformShared.Database.Models;
 using System.Text.Json;
@@ -82,12 +81,6 @@ namespace CRM.Server.RQ.Product
         /// 销售范围
         /// </summary>
         public ProductScope? Scope { get; init; }
-
-        /// <summary>
-        /// Inventory management way
-        /// 库存管理方式
-        /// </summary>
-        public ProductInventoryWay? InventoryWay { get; init; }
 
         /// <summary>
         /// Query keyword

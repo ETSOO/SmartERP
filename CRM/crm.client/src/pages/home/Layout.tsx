@@ -450,7 +450,94 @@ export default function Home() {
       app.owns(Permissions.PO.Query) && {
         segment: "home/po",
         title: labels.purchases,
-        icon: <InventoryIcon />
+        icon: <InventoryIcon />,
+        children: [
+          {
+            segment: "add",
+            title: labels.add,
+            hidden: true
+          },
+          {
+            segment: "lines",
+            title: labels.allOrderLines,
+            hidden: true
+          },
+          {
+            segment: "viewline",
+            pattern: "viewline/:id",
+            title: labels.orderLine,
+            hidden: true
+          },
+          {
+            segment: "editline",
+            pattern: "editline/:id",
+            title: `${labels.orderLine} (${labels.edit})`,
+            hidden: true
+          },
+          {
+            segment: "confirm",
+            title: labels.confirmOrder,
+            hidden: true
+          },
+          {
+            segment: "edit",
+            pattern: "edit/:id",
+            title: labels.edit,
+            hidden: true
+          },
+          {
+            segment: "view",
+            pattern: "view/:id",
+            title: labels.viewOrder,
+            hidden: true
+          },
+          {
+            segment: "payment",
+            title: labels.orderPayments,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "sort",
+                title: labels.sortOrderPayment,
+                hidden: true
+              }
+            ]
+          },
+          {
+            segment: "delivery",
+            title: labels.orderDeliveries,
+            hidden: true,
+            children: [
+              {
+                segment: "add",
+                title: labels.add,
+                hidden: true
+              },
+              {
+                segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "sort",
+                title: labels.sortOrderDelivery,
+                hidden: true
+              }
+            ]
+          }
+        ]
       },
 
       app.owns(Permissions.Supplier.Query) && {

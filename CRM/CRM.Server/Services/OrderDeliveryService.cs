@@ -43,6 +43,8 @@ namespace CRM.Server.Services
             var query = _db.OrderDeliveries(orgId).AsNoTracking()
                 .QueryEtsoo(rq, (p) => p.Id, null, (q) =>
                 {
+                    q = q.Where(p => p.IsOrder == rq.IsOrder);
+
                     if (rq.Kind.HasValue)
                     {
                         q = q.Where(p => p.Kind == rq.Kind.Value);
@@ -86,6 +88,7 @@ namespace CRM.Server.Services
                 CoreOrganizationId = orgId,
                 Kind = rq.Kind,
                 Title = rq.Title,
+                IsOrder = rq.IsOrder,
                 IsValid = rq.IsValid.GetValueOrDefault(true),
                 OrderIndex = rq.OrderIndex.GetValueOrDefault()
             };
@@ -240,6 +243,7 @@ namespace CRM.Server.Services
                     Id = p.Id,
                     Kind = p.Kind,
                     Title = p.Title,
+                    IsOrder = p.IsOrder,
                     IsValid = p.IsValid,
                     OrderIndex = p.OrderIndex
                 }).FirstOrDefaultAsync(cancellationToken);

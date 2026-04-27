@@ -24,6 +24,12 @@ namespace CRM.Server.RQ.OrderPayment
         public required string Title { get; init; }
 
         /// <summary>
+        /// Is order or not
+        /// 是否为订单
+        /// </summary>
+        public bool IsOrder { get; init; }
+
+        /// <summary>
         /// Is valid
         /// 是否有效
         /// </summary>

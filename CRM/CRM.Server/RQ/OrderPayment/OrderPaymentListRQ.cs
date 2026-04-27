@@ -11,6 +11,12 @@ namespace CRM.Server.RQ.OrderPayment
     public record OrderPaymentListRQ : QueryIntRQ
     {
         /// <summary>
+        /// Is order or not
+        /// 是否为订单
+        /// </summary>
+        public bool IsOrder { get; init; }
+
+        /// <summary>
         /// Kind
         /// 类型
         /// </summary>

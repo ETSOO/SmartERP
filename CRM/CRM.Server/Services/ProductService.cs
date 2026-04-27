@@ -25,6 +25,9 @@ namespace CRM.Server.Services
     /// </summary>
     public class ProductService : SEUserService, IProductService
     {
+        // Sale scope includes both internal and public sale
+        const ProductScope SaleScope = ProductScope.InternalSale | ProductScope.PublicSale;
+
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
 
@@ -189,8 +192,7 @@ namespace CRM.Server.Services
                 AssignedId = assignedId,
                 Status = rq.Status ?? EntityStatus.Normal,
                 Usage = rq.Usage ?? ProductUsage.FinishedProduct,
-                Scope = rq.Scope ?? ProductScope.Public,
-                InventoryWay = rq.InventoryWay ?? ProductInventoryWay.None,
+                Scope = rq.Scope ?? SaleScope,
                 QueryKeyword = queryKeyword,
                 TaxRate = rq.TaxRate,
                 IntroductionUrl = rq.IntroductionUrl,
@@ -232,6 +234,16 @@ namespace CRM.Server.Services
             var query = _db.Products(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
                 {
+                    if (rq.Scope.HasValue)
+                    {
+                        q = q.Where(p => (p.Scope & rq.Scope.Value) > 0);
+                    }
+
+                    if (rq.Usage.HasValue)
+                    {
+                        q = q.Where(p => p.Usage == rq.Usage.Value);
+                    }
+
                     if (rq.TagId != null)
                     {
                         q = q.Where(p => p.Tags != null && p.Tags.Contains(rq.TagId.Value));
@@ -355,6 +367,24 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Get purchase price
+        /// 获取采购价格
+        /// </summary>
+        /// <param name="product">Product data</param>
+        /// <returns>Result</returns>
+        public decimal? GetPurchasePrice(QueryForPurchaseData product)
+        {
+            var price = product.CostPrice;
+
+            if (product.SupplierRetailPrice.HasValue && product.SupplierRetailPrice.Value < price)
+            {
+                price = product.SupplierRetailPrice.Value;
+            }
+
+            return price;
+        }
+
+        /// <summary>
         /// List product JSON data
         /// 产品列表JSON数据
         /// </summary>
@@ -393,11 +423,6 @@ namespace CRM.Server.Services
 
             return await CreateQuery(rq, q =>
             {
-                if (rq.Scope != null)
-                {
-                    q = q.Where(p => p.Scope == rq.Scope.Value);
-                }
-
                 if (rq.UnitId != null)
                 {
                     q = q.Where(p => p.UnitId == rq.UnitId.Value);
@@ -423,9 +448,275 @@ namespace CRM.Server.Services
             .ToArrayAsync(cancellationToken);
         }
 
-        public async Task QueryForPurchaseAsync()
+        /// <summary>
+        /// Query product for purchase
+        /// 查询产品用于采购
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<QueryForPurchaseData[]> QueryForPurchaseAsync(QueryForPurchaseRQ rq, CancellationToken cancellationToken = default)
         {
+            var orgId = User.OrganizationInt;
+            var supplierId = rq.SupplierId;
+            var currency = rq.Currency;
 
+            // Validate the supplier id in the organization
+            var supplierData = await _db.Suppliers(orgId).AsNoTracking()
+                .Where(s => s.Id == supplierId)
+                .Select(s => new { s.Id, s.CategoryIdsAll })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (supplierData == null)
+            {
+                return [];
+            }
+
+            // Products & prices
+            var products = await _db.Products(orgId).AsNoTracking()
+                .Where(p => p.Status < EntityStatus.Inactivated && (p.Scope & ProductScope.Purchase) > 0)
+                .QueryEtsoo(rq, (p) => p.Id, null, (q) =>
+                {
+                    if (rq.CategoryIdAll.HasValue)
+                    {
+                        q = q.Where(p => p.CategoryIdsAll != null && p.CategoryIdsAll.Contains(rq.CategoryIdAll.Value));
+                    }
+                    else if (rq.CategoryId.HasValue)
+                    {
+                        q = q.Where(p => p.CategoryIds != null && p.CategoryIds.Contains(rq.CategoryId.Value));
+                    }
+
+                    if (rq.AssignedIdStart?.Length is > 1)
+                    {
+                        q = q.Where(ou => ou.AssignedId != null && EF.Functions.ILike(ou.AssignedId, $"{rq.AssignedIdStart}%"));
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        if (keyword.IsComplexQueryKeywords())
+                        {
+                            q = q.QueryEtsooKeywords(keyword, DbUtils.ILikeMethod, a => a.Name, a => a.Description);
+                        }
+                        else
+                        {
+                            var format = $"%{keyword}%";
+                            q = q.Where(p => EF.Functions.ILike(p.Name, format)
+                            || (p.QueryKeyword != null && EF.Functions.ILike(p.QueryKeyword, format))
+                            || (p.Description != null && EF.Functions.ILike(p.Description, format))
+                            );
+                        }
+                    }
+
+                    return q;
+                })
+                .Join(_db.ProductPrices.Where(pp => pp.Currency == currency), p => p.Id, pp => pp.ProductId, (p, pp) => new QueryForPurchaseData
+                {
+                    Id = p.Id,
+                    Logo = p.Logo,
+                    Name = p.Name,
+                    Description = p.Description,
+                    AssignedId = p.AssignedId,
+                    MinQty = p.MinQty,
+                    StepQty = p.StepQty,
+                    CapQty = p.CapQty,
+                    AssetQty = p.AssetQty,
+                    Currency = pp.Currency,
+                    CostPrice = pp.CostPrice,
+                    UnitId = p.UnitId,
+                    UnitName = p.Unit.Name,
+                    Modifiers = p.Modifiers,
+                    CategoryIds = p.CategoryIds,
+                    CategoryIdsAll = p.CategoryIdsAll
+                })
+                .ToArrayAsync(cancellationToken);
+
+            if (products.Length == 0) return [];
+
+            var productIds = products.Select(p => p.Id).ToArray();
+            var allCategoryIds = products.Where(p => p.CategoryIds != null).SelectMany(p => p.CategoryIds!).Distinct();
+
+            var categories = await _db.ProductCategories(orgId)
+                .AsNoTracking()
+                .Where(c => allCategoryIds.Contains(c.Id))
+                .Select(c => new CategoryItemWithParents { Id = c.Id, Names = c.Names, ParentIds = c.ParentIds })
+                .ToArrayAsync(cancellationToken);
+
+            var now = DateTime.UtcNow;
+            var promotions = await _db.Promotions(orgId)
+                .AsNoTracking()
+                .Where(pr => pr.Status < EntityStatus.Inactivated
+                    && pr.ValidStart <= now
+                    && pr.ValidEnd >= now
+                    && pr.Currency == currency
+                    && (pr.Coupons == null || pr.Coupons < 1 || pr.CouponsApplied < pr.Coupons)
+                    && (pr.PersonIds != null && pr.PersonIds.Contains(supplierId)) // Supplier promotions should be specific to the supplier
+                    && ((pr.ProductIds != null && pr.ProductIds.Any(pid => productIds.Contains(pid)))
+                        || (pr.ProductCategoryIds != null && pr.ProductCategoryIds.Any(cid => allCategoryIds.Contains(cid))))
+                )
+                .OrderBy(pr => pr.OrderIndex).ThenBy(pr => pr.Id)
+                .Select(pr => new
+                {
+                    pr.ProductIds,
+                    pr.ProductCategoryIds,
+                    Promotion = new PromotionItem
+                    {
+                        Id = pr.Id,
+                        Code = pr.Code,
+                        Title = pr.Title,
+                        MinAmount = pr.MinAmount,
+                        Discount = pr.Discount,
+                        Stackable = pr.Stackable
+                    }
+                })
+                .ToArrayAsync(cancellationToken);
+
+            // Translations
+            if (!string.IsNullOrEmpty(rq.Culture))
+            {
+                var cultureIds = productIds.Select(id => _commonService.GetCultureKey(id, CustomCultureKind.Product));
+                var categoryIds = allCategoryIds.Select(id => _commonService.GetCultureKey(id, CustomCultureKind.ProductCategory));
+                var unitIds = products.Select(p => p.UnitId).Distinct().Select(id => _commonService.GetCultureKey(id, CustomCultureKind.ProductUnit));
+                var promotionIds = promotions.Select(pr => pr.Promotion.Id).Select(id => _commonService.GetCultureKey(id, CustomCultureKind.Promotion));
+
+                string[] allKeys = [.. cultureIds, .. categoryIds, .. unitIds, .. promotionIds];
+
+                var cultures = await _db.FeatureCultures.AsNoTracking()
+                    .Where(c => c.CoreOrganizationId == orgId && allKeys.Contains(c.Key) && c.Culture == rq.Culture)
+                    .Select(c => new { c.Key, c.Title, c.Description })
+                    .ToArrayAsync(cancellationToken);
+
+                var cultureItems = cultures.Where(c => cultureIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+                var categoryItems = cultures.Where(c => categoryIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+                var unitItems = cultures.Where(c => unitIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+                var promotionItems = cultures.Where(c => promotionIds.Contains(c.Key)).ToDictionary(c => c.Key, c => c);
+
+                foreach (var p in products)
+                {
+                    if (cultureItems.Count > 0)
+                    {
+                        var idKey = _commonService.GetCultureKey(p.Id, CustomCultureKind.Product);
+                        if (cultureItems.TryGetValue(idKey, out var culture))
+                        {
+                            p.Name = culture.Title;
+                            if (!string.IsNullOrEmpty(culture.Description)) p.Description = culture.Description;
+                        }
+                    }
+
+                    if (unitItems.Count > 0)
+                    {
+                        var unitKey = _commonService.GetCultureKey(p.UnitId, CustomCultureKind.ProductUnit);
+                        if (unitItems.TryGetValue(unitKey, out var u))
+                        {
+                            p.UnitName = u.Title;
+                        }
+                    }
+                }
+
+                if (categoryItems.Count > 0)
+                {
+                    foreach (var category in categories)
+                    {
+                        var categoryKey = _commonService.GetCultureKey(category.Id, CustomCultureKind.ProductCategory);
+                        var names = category.Names.ToArray();
+                        if (categoryItems.TryGetValue(categoryKey, out var c))
+                        {
+                            // Update the last item
+                            if (names.Length > 0)
+                            {
+                                names[^1] = c.Title;
+                            }
+                        }
+
+                        if (category.ParentIds != null)
+                        {
+                            var index = 0;
+                            foreach (var parentId in category.ParentIds)
+                            {
+                                var parentKey = _commonService.GetCultureKey(parentId, CustomCultureKind.ProductCategory);
+                                if (categoryItems.TryGetValue(parentKey, out var pc))
+                                {
+                                    names[index] = pc.Title;
+                                }
+
+                                index++;
+                            }
+                        }
+
+                        // Update
+                        category.Names = names;
+                    }
+                }
+
+                if (promotionItems.Count > 0)
+                {
+                    foreach (var promotion in promotions)
+                    {
+                        var promotionKey = _commonService.GetCultureKey(promotion.Promotion.Id, CustomCultureKind.Promotion);
+                        if (promotionItems.TryGetValue(promotionKey, out var pr))
+                        {
+                            promotion.Promotion.Title = pr.Title;
+                        }
+                    }
+                }
+            }
+
+            // Custom price
+            // Loop products
+            foreach (var p in products)
+            {
+                // Categories
+                if (p.CategoryIds != null)
+                {
+                    p.Categories = categories
+                        .Where(c => p.CategoryIds.Contains(c.Id))
+                        .OrderBy(c => p.CategoryIds!.ToArray().IndexOf(c.Id));
+                }
+
+                p.Promotions = promotions
+                    .Where(pr => (pr.ProductIds != null && pr.ProductIds.Contains(p.Id)) || (pr.ProductCategoryIds != null && p.CategoryIdsAll != null && pr.ProductCategoryIds.Intersect(p.CategoryIdsAll).Any()))
+                    .Select(pr => pr.Promotion);
+            }
+
+            var cps = await _db.PersonProducts.AsNoTracking()
+                .Where(cp => cp.PersonId == supplierId
+                    && productIds.Contains(cp.ProductId))
+                .Select(cp => new { cp.ProductId, cp.AssignedId, cp.JsonData })
+                .ToArrayAsync(cancellationToken);
+
+            foreach (var cp in cps)
+            {
+                var p = products.FirstOrDefault(p => p.Id == cp.ProductId);
+                if (p == null) continue;
+
+                p.SupplierAssignedId = cp.AssignedId;
+
+                if (cp.JsonData != null)
+                {
+                    if (cp.JsonData.Cultures != null)
+                    {
+                        var ci = rq.Culture ?? await _commonService.GetDefaultCulture(orgId, cancellationToken);
+                        var culture = cp.JsonData.Cultures.FirstOrDefault(c => c.Culture == ci);
+                        if (culture != null)
+                        {
+                            p.SupplierName = culture.Name;
+                            p.SupplierDescription = culture.Description;
+                        }
+                    }
+
+                    if (cp.JsonData.Prices != null)
+                    {
+                        var price = cp.JsonData.Prices.FirstOrDefault(p => p.Currency == rq.Currency);
+                        if (price != null && price.RetailPrice.HasValue)
+                        {
+                            p.SupplierRetailPrice = price.RetailPrice.Value;
+                        }
+                    }
+                }
+            }
+
+            return products;
         }
 
         /// <summary>
@@ -460,7 +751,7 @@ namespace CRM.Server.Services
 
             // Products & prices
             var products = await _db.Products(orgId).AsNoTracking()
-                .Where(p => p.Status < EntityStatus.Inactivated && p.Scope > ProductScope.None)
+                .Where(p => p.Status < EntityStatus.Inactivated && (p.Scope & SaleScope) > 0)
                 .QueryEtsoo(rq, (p) => p.Id, null, (q) =>
                 {
                     if (rq.CategoryIdAll.HasValue)
@@ -538,6 +829,7 @@ namespace CRM.Server.Services
                     && pr.ValidStart <= now
                     && pr.ValidEnd >= now
                     && pr.Currency == currency
+                    && (pr.Coupons == null || pr.Coupons < 1 || pr.CouponsApplied < pr.Coupons)
                     && ((pr.ProductIds != null && pr.ProductIds.Any(pid => productIds.Contains(pid)))
                         || (pr.ProductCategoryIds != null && pr.ProductCategoryIds.Any(cid => allCategoryIds.Contains(cid))))
                     && ((pr.PersonIds == null && pr.PersonCategoryIds == null) || (pr.PersonIds != null && customerId.HasValue && pr.PersonIds.Contains(customerId.Value)
@@ -818,11 +1110,6 @@ namespace CRM.Server.Services
                 product.Scope = rq.Scope.Value;
             }
 
-            if (rq.IsModified(nameof(rq.InventoryWay)) && rq.InventoryWay.HasValue)
-            {
-                product.InventoryWay = rq.InventoryWay.Value;
-            }
-
             if (rq.IsModified(nameof(rq.QueryKeyword)))
             {
                 product.QueryKeyword = rq.QueryKeyword;
@@ -951,7 +1238,6 @@ namespace CRM.Server.Services
                     Validity = p.Validity,
                     Usage = p.Usage,
                     Scope = p.Scope,
-                    InventoryWay = p.InventoryWay,
                     QueryKeyword = p.QueryKeyword,
                     Price = p.Prices.Where(pp => pp.Currency == currency).Select(pp => new ProductPriceItem
                     {
@@ -1052,7 +1338,7 @@ namespace CRM.Server.Services
                     Name = p.Name,
                     AssignedId = p.AssignedId,
                     Description = p.Description,
-                    UnitId = p.UnitId,
+                    Unit = p.Unit.Name,
                     MinQty = p.MinQty,
                     StepQty = p.StepQty,
                     CapQty = p.CapQty,
@@ -1060,7 +1346,6 @@ namespace CRM.Server.Services
                     Validity = p.Validity,
                     Usage = p.Usage,
                     Scope = p.Scope,
-                    InventoryWay = p.InventoryWay,
                     QueryKeyword = p.QueryKeyword,
                     TaxRate = p.TaxRate,
                     Logo = p.Logo,
@@ -1373,7 +1658,7 @@ namespace CRM.Server.Services
         /// <param name="product">Product data</param>
         /// <param name="qty">Qty</param>
         /// <returns>Result</returns>
-        public IActionResult? ValidateQty(QueryForSaleData product, decimal qty)
+        public IActionResult? ValidateQty(IProductQtyValidateData product, decimal qty)
         {
             // MinQty / 起订量
             if (product.MinQty.HasValue && qty < product.MinQty.Value)

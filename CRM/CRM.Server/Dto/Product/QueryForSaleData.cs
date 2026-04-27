@@ -8,7 +8,7 @@ namespace CRM.Server.Dto.Product
     /// Query product data for sale
     /// 查询产品数据用于销售
     /// </summary>
-    public record QueryForSaleData
+    public record QueryForSaleData : IProductQtyValidateData
     {
         /// <summary>
         /// Id

@@ -12,9 +12,11 @@ namespace CRM.Server.Services
         IEnumerable<PromotionSaleItem> CalculatePromotions(IEnumerable<PromotionItem> promotions, decimal amount, IPromotionCodeLine? sale = null);
         Task<IActionResult> CreateAsync(ProductCreateRQ rq, CancellationToken cancellationToken = default);
         ValueTask<ProductDuplicateTestData[]?> DuplicateTestAsync(ProductDuplicateTestRQ rq, CancellationToken cancellationToken = default);
+        decimal? GetPurchasePrice(QueryForPurchaseData product);
         decimal GetSalePrice(QueryForSaleData product);
         Task ListAsync(ProductListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<ProductQueryData[]> QueryAsync(ProductQueryRQ rq, CancellationToken cancellationToken = default);
+        Task<QueryForPurchaseData[]> QueryForPurchaseAsync(QueryForPurchaseRQ rq, CancellationToken cancellationToken = default);
         Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, CancellationToken cancellationToken = default);
         Task<ProductUnitItem[]> QueryUnitAsync(CancellationToken cancellationToken = default);
         Task<ProductViewData?> ReadAsync(int id, CancellationToken cancellationToken = default);
@@ -27,6 +29,6 @@ namespace CRM.Server.Services
         Task<int> UpdateUnitAsync(ProductUnitUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdatePriceAsync(int id, ProductPriceItem item, CancellationToken cancellationToken = default);
         (IEnumerable<PromotionSaleItem>? saleItems, IActionResult result) ValidatePromotions(IEnumerable<PromotionSaleItemBase>? items, IEnumerable<PromotionItem> promotions, decimal amount, IPromotionCodeLine? sale = null);
-        IActionResult? ValidateQty(QueryForSaleData product, decimal qty);
+        IActionResult? ValidateQty(IProductQtyValidateData product, decimal qty);
     }
 }

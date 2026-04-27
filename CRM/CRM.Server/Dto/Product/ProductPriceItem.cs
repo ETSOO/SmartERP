@@ -1,5 +1,4 @@
-﻿using com.etsoo.WebUtils.Attributes;
-using PlatformShared.Dto;
+﻿using PlatformShared.Dto;
 
 namespace CRM.Server.Dto.Product
 {
@@ -20,12 +19,6 @@ namespace CRM.Server.Dto.Product
         /// 渠道价
         /// </summary>
         public decimal? ChannelPrice { get; init; }
-
-        /// <summary>
-        /// Cost price
-        /// 成本价
-        /// </summary>
-        public decimal? CostPrice { get; init; }
 
         /// <summary>
         /// Validate

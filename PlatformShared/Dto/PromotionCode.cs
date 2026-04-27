@@ -99,6 +99,7 @@ namespace PlatformShared.Dto
                     return new PromotionSaleItem
                     {
                         Id = p.Id,
+                        Times = times,
                         Title = p.Title,
                         Amount = times * p.Discount
                     };
@@ -153,6 +154,7 @@ namespace PlatformShared.Dto
                     return new PromotionSaleItem
                     {
                         Id = p.Id,
+                        Times = times,
                         Title = p.Title,
                         Amount = times * p.Discount
                     };
@@ -209,6 +211,7 @@ namespace PlatformShared.Dto
                     return new PromotionSaleItem
                     {
                         Id = p.Id,
+                        Times = times,
                         Title = p.Title,
                         Amount = newDiscount
                     };
@@ -262,6 +265,7 @@ namespace PlatformShared.Dto
                     return new PromotionSaleItem
                     {
                         Id = p.Id,
+                        Times = times,
                         Title = p.Title,
                         Amount = pAmount
                     };
@@ -306,10 +310,13 @@ namespace PlatformShared.Dto
                 var newPrice = Math.Round(currentPrice * p.Discount) / 100;
                 sale.CurrentPrice = newPrice;
 
+                var qty = (int)Math.Floor(sale.Qty);
+
                 return new PromotionSaleItem
                 {
                     Id = p.Id,
                     Title = p.Title,
+                    Times = qty,
                     Amount = Math.Round(sale.Qty * (currentPrice - newPrice))
                 };
             }
@@ -359,6 +366,7 @@ namespace PlatformShared.Dto
                 {
                     Id = p.Id,
                     Title = p.Title,
+                    Times = 1,
                     Amount = Math.Round(qty * (currentPrice - minAmount))
                 };
             }
@@ -415,6 +423,7 @@ namespace PlatformShared.Dto
                 {
                     Id = p.Id,
                     Title = p.Title,
+                    Times = 1,
                     Amount = newAmount
                 };
             }
@@ -467,6 +476,7 @@ namespace PlatformShared.Dto
                 {
                     Id = p.Id,
                     Title = p.Title,
+                    Times = 1,
                     Amount = newAmount
                 };
             }

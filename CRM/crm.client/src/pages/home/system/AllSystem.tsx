@@ -45,10 +45,13 @@ export default function AllSystem() {
   // Labels
   const labels = app.getLabels(
     "depts",
+    "org",
     "permissionGroups",
     "settings",
     "updateSystemSettings"
   );
+
+  const orgPersonId = app.userData?.system?.personId;
 
   return (
     <CommonPage paddings={0}>
@@ -57,6 +60,11 @@ export default function AllSystem() {
       ) : (
         <VBox spacing={2}>
           <Paper sx={{ paddingY: 1 }}>
+            {orgPersonId && (
+              <ButtonLink href={`./../contact/view/${orgPersonId}`}>
+                {labels.org}
+              </ButtonLink>
+            )}
             <ButtonLink href="./dept">{labels.depts}</ButtonLink>
             <ButtonLink href="./group">{labels.permissionGroups}</ButtonLink>
           </Paper>

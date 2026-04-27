@@ -86,6 +86,12 @@ namespace PlatformShared.Database.Models
         public int CoreOrganizationId { get; set; }
 
         /// <summary>
+        /// Is order or not
+        /// 是否为订单
+        /// </summary>
+        public bool IsOrder { get; set; }
+
+        /// <summary>
         /// Is valid
         /// 是否有效
         /// </summary>

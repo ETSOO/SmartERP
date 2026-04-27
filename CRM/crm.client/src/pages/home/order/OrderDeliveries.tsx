@@ -19,6 +19,7 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import { OrderDeliveryQueryData } from "@etsoo/smarterp-crm";
+import { useIsOrder } from "./useIsOrder";
 
 const template = {
   keyword: "string",
@@ -27,6 +28,8 @@ const template = {
 
 export default function OrderDeliveries() {
   const navigate = useNavigate();
+
+  const isOrder = useIsOrder();
 
   const labels = app.getLabels(
     "actions",
@@ -89,10 +92,13 @@ export default function OrderDeliveries() {
         />
       ]}
       loadData={async (data) => {
-        return await app.orderDeliveryApi.query(data, {
-          defaultValue: [],
-          showLoading: false
-        });
+        return await app.orderDeliveryApi.query(
+          { ...data, isOrder },
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        );
       }}
       columns={[
         {

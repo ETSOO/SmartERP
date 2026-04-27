@@ -33,6 +33,7 @@ import Fab from "@mui/material/Fab";
 import { Permissions } from "@etsoo/smarterp-crm";
 import {
   ProductCategoryTiplist,
+  ProductScopeList,
   ProductUnitList
 } from "@etsoo/smarterp-crm/components";
 
@@ -41,7 +42,8 @@ const template = {
   assignedId: "string",
   status: "number",
   unitId: "number",
-  categoryId: "number"
+  categoryId: "number",
+  scope: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
 export default function AllDepts() {
@@ -156,6 +158,7 @@ export default function AllDepts() {
           search
         />,
         <ProductUnitList search value={data.unitId} />,
+        <ProductScopeList search value={data.scope} />,
         <StatusList search idValue={data.status} />
       ]}
       loadData={(data) =>

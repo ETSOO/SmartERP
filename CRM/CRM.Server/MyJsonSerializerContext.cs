@@ -214,8 +214,13 @@ namespace CRM.Server
     // PO
     [JsonSerializable(typeof(POListData[]))]
     [JsonSerializable(typeof(POQueryData[]))]
+    [JsonSerializable(typeof(POUpdateReadData))]
+    [JsonSerializable(typeof(POViewData))]
 
+    [JsonSerializable(typeof(POCreateRQ))]
     [JsonSerializable(typeof(POListRQ))]
+    [JsonSerializable(typeof(POQueryRQ))]
+    [JsonSerializable(typeof(POUpdateRQ))]
 
     // Product
     [JsonSerializable(typeof(ProductDuplicateTestData[]))]
@@ -225,6 +230,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProductUnitItem[]))]
     [JsonSerializable(typeof(ProductUpdateReadData))]
     [JsonSerializable(typeof(ProductViewData))]
+    [JsonSerializable(typeof(QueryForPurchaseData[]))]
     [JsonSerializable(typeof(QueryForSaleData[]))]
 
     [JsonSerializable(typeof(ProductCreateRQ))]
@@ -233,6 +239,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProductUnitUpdateRQ))]
     [JsonSerializable(typeof(ProductUpdateLogoRQ))]
     [JsonSerializable(typeof(ProductUpdateRQ))]
+    [JsonSerializable(typeof(QueryForPurchaseRQ))]
     [JsonSerializable(typeof(QueryForSaleRQ))]
 
     // Product category
@@ -256,10 +263,12 @@ namespace CRM.Server
     // Supplier
     [JsonSerializable(typeof(SupplierListData[]))]
     [JsonSerializable(typeof(SupplierQueryData[]))]
+    [JsonSerializable(typeof(SupplierReadForPurchaseData))]
     [JsonSerializable(typeof(SupplierUpdateReadData))]
 
     [JsonSerializable(typeof(SupplierCreateRQ))]
     [JsonSerializable(typeof(SupplierListRQ))]
+    [JsonSerializable(typeof(SupplierReadForPurchaseRQ))]
     [JsonSerializable(typeof(SupplierUpdateRQ))]
 
     // System

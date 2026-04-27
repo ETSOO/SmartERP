@@ -24,6 +24,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.IsValid)
                 .HasDefaultValue(true)
                 .HasColumnName("is_valid");
+            entity.Property(e => e.IsOrder)
+                .HasDefaultValue(true)
+                .HasColumnName("is_order");
             entity.Property(e => e.OrderIndex).HasColumnName("order_index");
         }
     }

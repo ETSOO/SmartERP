@@ -380,13 +380,11 @@ namespace PlatformShared.Extentions
         /// 查询采购
         /// </summary>
         /// <param name="db">Database context</param>
-        /// <param name="user">Current user</param>
+        /// <param name="orgId">Organization id</param>
         /// <returns>Result</returns>
-        public static IQueryable<OrderHeader> POs(this MyDbContext db, CurrentUser user)
+        public static IQueryable<OrderHeader> POs(this MyDbContext db, int orgId)
         {
-            return db.OrderHeaders.Where(p => p.CoreOrganizationId == user.OrganizationInt
-                && p.BuyerId == user.Pid
-            );
+            return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId && !p.IsOrder);
         }
 
         /// <summary>

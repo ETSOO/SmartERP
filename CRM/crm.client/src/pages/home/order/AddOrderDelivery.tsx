@@ -13,11 +13,14 @@ import {
   OrderDeliveryUpdateRQ
 } from "@etsoo/smarterp-crm";
 import { OrderDeliveryKindList } from "@etsoo/smarterp-crm/components";
+import { useIsOrder } from "./useIsOrder";
 
 export default function AddOrderDelivery() {
   const navigate = useNavigate();
   const { id } = useParamsEx({ id: "number" });
   const isEditing = (id ?? 0) > 0;
+
+  const isOrder = useIsOrder();
 
   const labels = app.getLabels("enabled", "noChanges", "title");
 
@@ -29,7 +32,8 @@ export default function AddOrderDelivery() {
   const [data, setData] = React.useState<DataType>({
     kind: 0 as OrderDeliveryKind,
     title: "",
-    isValid: true
+    isValid: true,
+    isOrder
   });
 
   const formik = useFormik<DataType>({

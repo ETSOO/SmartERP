@@ -59,7 +59,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasColumnName("usage");
             entity.Property(e => e.Scope)
-                .HasConversion<byte>()
+                .HasConversion<short>()
                 .HasColumnName("scope");
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")
@@ -70,10 +70,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.QueryKeyword)
                 .HasMaxLength(30)
                 .HasColumnName("query_keyword");
-            entity.Property(e => e.InventoryWay)
-                .HasConversion<byte>()
-                .HasDefaultValue(ProductInventoryWay.None)
-                .HasColumnName("inventory_way");
             entity.Property(e => e.TaxRate).HasColumnName("tax_rate");
             entity.Property(e => e.Tags).HasColumnName("tags");
 

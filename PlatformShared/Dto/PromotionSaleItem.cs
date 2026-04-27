@@ -26,6 +26,12 @@
     public record PromotionSaleItem : PromotionSaleItemBase
     {
         /// <summary>
+        /// Times
+        /// 次数
+        /// </summary>
+        public int Times { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>

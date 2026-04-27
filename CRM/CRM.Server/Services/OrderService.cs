@@ -6,6 +6,7 @@ using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.String;
+using CRM.Server.Dto;
 using CRM.Server.Dto.Order;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Order;
@@ -133,7 +134,7 @@ namespace CRM.Server.Services
             // Delivery & Payment validation
             if (rq.DeliveryId.HasValue)
             {
-                var deliveryExists = await _db.OrderDeliveries(orgId).Where(d => d.Id == rq.DeliveryId.Value).AnyAsync(cancellationToken);
+                var deliveryExists = await _db.OrderDeliveries(orgId).Where(d => d.Id == rq.DeliveryId.Value && d.IsOrder).AnyAsync(cancellationToken);
                 if (!deliveryExists)
                 {
                     return ApplicationErrors.NoId.AsResult(nameof(rq.DeliveryId));
@@ -142,7 +143,7 @@ namespace CRM.Server.Services
 
             if (rq.PaymentId.HasValue)
             {
-                var paymentExists = await _db.OrderPayments(orgId).Where(p => p.Id == rq.PaymentId.Value).AnyAsync(cancellationToken);
+                var paymentExists = await _db.OrderPayments(orgId).Where(p => p.Id == rq.PaymentId.Value && p.IsOrder).AnyAsync(cancellationToken);
                 if (!paymentExists)
                 {
                     return ApplicationErrors.NoId.AsResult(nameof(rq.PaymentId));
@@ -173,6 +174,8 @@ namespace CRM.Server.Services
             var title = rq.Title ?? StringUtils.FormatName(customer.Customer.Name, 6, 2) + " " + now.ToString("yyyy/MM/dd");
 
             var lines = new List<OrderLine>();
+
+            var promotionSummary = new PromotionSummary();
 
             short lineCount = 0;
             decimal items = 0;
@@ -216,6 +219,8 @@ namespace CRM.Server.Services
                     return lineResult;
                 }
 
+                promotionSummary.Add(linePromotions);
+
                 var lineTitle = l.Title ?? product.Name;
                 var discount = l.Promotions?.Sum(p => p.Amount) ?? 0;
                 var netAmount = amount - discount;
@@ -252,6 +257,8 @@ namespace CRM.Server.Services
                 return opResult;
             }
 
+            promotionSummary.Add(orderPromotions);
+
             // Order discount
             var orderDiscount = orderPromotions?.Sum(p => p.Amount) ?? 0;
 
@@ -271,7 +278,7 @@ namespace CRM.Server.Services
                 UserId = userId,
                 IsOrder = true,
                 SellerId = User.Pid,
-                BuyerId = rq.CustomerId,
+                BuyerId = customerId,
                 Source = rq.Source?.ToUpper(),
                 SourceId = rq.SourceId?.ToUpper(),
                 Title = title,
@@ -311,6 +318,9 @@ namespace CRM.Server.Services
 
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Update promotion summary
+            await promotionSummary.UpdateAsync(_db, cancellationToken);
 
             return ActionResult.Succeed(order.Id);
         }
@@ -794,7 +804,7 @@ namespace CRM.Server.Services
             {
                 if (rq.PaymentId.HasValue)
                 {
-                    var paymentExists = await _db.OrderPayments(orgId).Where(p => p.Id == rq.PaymentId.Value).AnyAsync(cancellationToken);
+                    var paymentExists = await _db.OrderPayments(orgId).Where(p => p.Id == rq.PaymentId.Value && p.IsOrder).AnyAsync(cancellationToken);
                     if (!paymentExists)
                     {
                         return ApplicationErrors.NoId.AsResult(nameof(rq.PaymentId));
@@ -813,7 +823,7 @@ namespace CRM.Server.Services
             {
                 if (rq.DeliveryId.HasValue)
                 {
-                    var deliveryExists = await _db.OrderDeliveries(orgId).Where(d => d.Id == rq.DeliveryId.Value).AnyAsync(cancellationToken);
+                    var deliveryExists = await _db.OrderDeliveries(orgId).Where(d => d.Id == rq.DeliveryId.Value && d.IsOrder).AnyAsync(cancellationToken);
                     if (!deliveryExists)
                     {
                         return ApplicationErrors.NoId.AsResult(nameof(rq.DeliveryId));

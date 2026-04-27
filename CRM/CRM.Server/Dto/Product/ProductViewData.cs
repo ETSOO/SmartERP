@@ -37,10 +37,10 @@ namespace CRM.Server.Dto.Product
         public string? Description { get; init; }
 
         /// <summary>
-        /// Unit id
-        /// 产品单位编号
+        /// Unit
+        /// 产品单位
         /// </summary>
-        public int UnitId { get; init; }
+        public string Unit { get; init; }
 
         /// <summary>
         /// Minimum purchase qty
@@ -83,12 +83,6 @@ namespace CRM.Server.Dto.Product
         /// 销售范围
         /// </summary>
         public ProductScope Scope { get; init; }
-
-        /// <summary>
-        /// Inventory management way
-        /// 库存管理方式
-        /// </summary>
-        public ProductInventoryWay InventoryWay { get; init; }
 
         /// <summary>
         /// Query keyword

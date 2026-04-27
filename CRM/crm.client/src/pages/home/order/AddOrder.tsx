@@ -226,19 +226,19 @@ function AddItem({
         <Grid container spacing={1}>
           <Grid
             size={{ xs: 12, sm: 5 }}
-            spacing={1}
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "flex-end"
+              justifyContent: "flex-end",
+              gap: 1
             }}
           >
-            {formatPriceLine(data, currencySymbol, price)} x
+            {formatPriceLine(data, currencySymbol, price)}
+            <Typography variant="body2">x</Typography>
           </Grid>
           <Grid
             size={{ xs: 12, sm: 7 }}
-            spacing={1}
-            sx={{ display: "flex", alignItems: "center" }}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
             <NumberSpinner
               size="small"
@@ -271,14 +271,14 @@ function AddItem({
           </Grid>
           <Grid
             size={{ xs: 12 }}
-            spacing={1}
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "flex-end"
+              justifyContent: "flex-end",
+              gap: 1
             }}
           >
-            <Typography>=</Typography>
+            <Typography> = </Typography>
             <MoneyText value={amount} currency={data.currency} />
             {pamount > 0 && (
               <React.Fragment>
@@ -426,7 +426,12 @@ function CartList({
                     {lps.map((p, index) => (
                       <Typography variant="caption" align="right" key={p.id}>
                         {index === 0 ? "" : "; "}
-                        {p.title}, <MoneyText value={-p.amount} />
+                        {p.title},{" "}
+                        <MoneyText
+                          variant="caption"
+                          sx={{ fontWeight: "bold" }}
+                          value={-p.amount}
+                        />
                       </Typography>
                     ))}
                     <Typography
@@ -824,7 +829,7 @@ export default function AddOrder() {
       currencySymbol,
       orderPromotions
     };
-  }, [orderLines]);
+  }, [orderLines, queryRef.current?.query.currency]);
 
   async function showCart() {
     if (queryRef.current == null) return;
@@ -1149,11 +1154,11 @@ export default function AddOrder() {
                                 sx={{ marginLeft: 1.5 }}
                                 title={[
                                   labels.promotions,
-                                  ...promotions.map((p) => p.title)
+                                  ...p.promotions.map((p) => p.title)
                                 ].join("\n")}
                               >
                                 <Badge
-                                  badgeContent={promotions.length}
+                                  badgeContent={p.promotions.length}
                                   color="secondary"
                                 />
                               </IconButton>

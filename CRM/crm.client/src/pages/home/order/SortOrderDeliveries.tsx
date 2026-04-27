@@ -10,17 +10,20 @@ import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import { OrderDeliveryListData } from "@etsoo/smarterp-crm";
+import { useIsOrder } from "./useIsOrder";
 
 export default function SortOrderDeliveries() {
   const [items, setItems] = React.useState<OrderDeliveryListData[]>([]);
+
+  const isOrder = useIsOrder();
 
   const labels = app.getLabels("sortTip", "dragIndicator");
 
   const loadData = React.useCallback(() => {
     app.orderDeliveryApi
-      .list({ isValid: true, queryPaging: 64 })
+      .list({ isValid: true, isOrder, queryPaging: 64 })
       .then((result) => setItems(result ?? []));
-  }, []);
+  }, [isOrder]);
 
   usePageDataEmpty(app);
 

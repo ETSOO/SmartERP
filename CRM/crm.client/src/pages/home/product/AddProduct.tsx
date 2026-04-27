@@ -18,7 +18,6 @@ import { IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   FeatureTagKind,
   ProductCreateRQ,
-  ProductInventoryWay,
   ProductScope,
   ProductUpdateRQ,
   ProductUsage
@@ -33,7 +32,7 @@ import {
 import {
   ButtonProductCategories,
   ProductAssignedIdDuplicateTest,
-  ProductInventoryWayList,
+  ProductButtonScopes,
   ProductNameDuplicateTest,
   ProductScopeList,
   ProductUnitList,
@@ -78,10 +77,6 @@ export default function AddProduct() {
   // Type
   type DataType = ProductCreateRQ & { isAsset?: boolean };
 
-  const defaultInventoryWay = app.userData?.system?.hasInventory
-    ? ProductInventoryWay.Simple
-    : ProductInventoryWay.None;
-
   const defaultCurrency = app.system.getDefaultCurrency();
   const defaultTaxRate = app.userData?.system?.taxRate;
 
@@ -89,9 +84,8 @@ export default function AddProduct() {
   const [data, setData] = React.useState<DataType>({
     name: "",
     unitId: 1,
-    scope: ProductScope.Public,
+    scope: ProductScope.InternalSale | ProductScope.PublicSale,
     usage: ProductUsage.FinishedProduct,
-    inventoryWay: defaultInventoryWay,
     price: {
       currency: defaultCurrency,
       retailPrice: 9999
@@ -246,11 +240,6 @@ export default function AddProduct() {
             let isAsset = false;
             if (item) {
               isAsset = BusinessUtils.isAssetUnit(item.baseUnit);
-
-              formik.setFieldValue(
-                "inventoryWay",
-                isAsset ? ProductInventoryWay.None : defaultInventoryWay
-              );
             }
 
             formik.setFieldValue("isAsset", isAsset);
@@ -259,24 +248,17 @@ export default function AddProduct() {
           }}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <ProductScopeList
+      <Grid size={{ xs: 12, sm: 9, xl: 6 }}>
+        <ProductButtonScopes
           fullWidth
           value={formik.values.scope}
-          onChange={formik.handleChange}
+          onValueChange={(v) => formik.setFieldValue("scope", v)}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
         <ProductUsageList
           fullWidth
           value={formik.values.usage}
-          onChange={formik.handleChange}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <ProductInventoryWayList
-          fullWidth
-          value={formik.values.inventoryWay}
           onChange={formik.handleChange}
         />
       </Grid>
@@ -367,8 +349,7 @@ export default function AddProduct() {
           onValueChange={(ids) => {
             formik.setFieldValue("categories", ids);
             app.productCategoryApi.getAttributes(ids).then((result) => {
-              if (result == null) return;
-              setCustomFields(result);
+              setCustomFields(result ?? []);
             });
           }}
         />

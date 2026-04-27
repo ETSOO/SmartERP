@@ -1,8 +1,8 @@
-﻿namespace CRM.Server.Dto.PO
+namespace CRM.Server.Dto.PO
 {
     /// <summary>
-    /// Purchase order list data
-    /// 采购列表数据
+    /// PO list data
+    /// 订单列表数据
     /// </summary>
     public record POListData
     {
@@ -19,3 +19,4 @@
         public required string Title { get; init; }
     }
 }
+

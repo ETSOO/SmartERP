@@ -371,6 +371,119 @@ const router = createDynamicRouter([
               return { Component: AllPOs.default };
             }
           },
+          {
+            path: "/home/po/add",
+            lazy: async () => {
+              const AddPO = await import("./pages/home/po/AddPO");
+              return { Component: AddPO.default };
+            }
+          },
+          {
+            path: "/home/po/lines",
+            lazy: async () => {
+              const AllPOLines = await import("./pages/home/po/AllPOLines");
+              return { Component: AllPOLines.default };
+            }
+          },
+          {
+            path: "/home/po/viewline/:id",
+            lazy: async () => {
+              const ViewPOLine = await import("./pages/home/po/ViewPOLine");
+              return { Component: ViewPOLine.default };
+            }
+          },
+          {
+            path: "/home/po/editline/:id",
+            lazy: async () => {
+              const EditPOLine = await import("./pages/home/po/EditPOLine");
+              return { Component: EditPOLine.default };
+            }
+          },
+          {
+            path: "/home/po/confirm",
+            lazy: async () => {
+              const ConfirmPO = await import("./pages/home/po/SubmitPO");
+              return { Component: ConfirmPO.default };
+            }
+          },
+          {
+            path: "/home/po/edit/:id",
+            lazy: async () => {
+              const EditPO = await import("./pages/home/po/SubmitPO");
+              return { Component: EditPO.default };
+            }
+          },
+          {
+            path: "/home/po/view/:id",
+            lazy: async () => {
+              const ViewPO = await import("./pages/home/po/ViewPO");
+              return { Component: ViewPO.default };
+            }
+          },
+          {
+            path: "/home/po/payment",
+            lazy: async () => {
+              const POPayments =
+                await import("./pages/home/order/OrderPayments");
+              return { Component: POPayments.default };
+            }
+          },
+          {
+            path: "/home/po/payment/add",
+            lazy: async () => {
+              const AddPOPayment =
+                await import("./pages/home/order/AddOrderPayment");
+              return { Component: AddPOPayment.default };
+            }
+          },
+          {
+            path: "/home/po/payment/edit/:id",
+            lazy: async () => {
+              const EditPOPayment =
+                await import("./pages/home/order/AddOrderPayment");
+              return { Component: EditPOPayment.default };
+            }
+          },
+          {
+            path: "/home/po/payment/sort",
+            lazy: async () => {
+              const SortPOPayments =
+                await import("./pages/home/order/SortOrderPayments");
+              return { Component: SortPOPayments.default };
+            }
+          },
+          {
+            path: "/home/po/delivery",
+            lazy: async () => {
+              const PODeliveries =
+                await import("./pages/home/order/OrderDeliveries");
+              return { Component: PODeliveries.default };
+            }
+          },
+          {
+            path: "/home/po/delivery/add",
+            lazy: async () => {
+              const AddPODelivery =
+                await import("./pages/home/order/AddOrderDelivery");
+              return { Component: AddPODelivery.default };
+            }
+          },
+          {
+            path: "/home/po/delivery/edit/:id",
+            lazy: async () => {
+              const EditPODelivery =
+                await import("./pages/home/order/AddOrderDelivery");
+              return { Component: EditPODelivery.default };
+            }
+          },
+          {
+            path: "/home/po/delivery/sort",
+            lazy: async () => {
+              const SortPODeliveries =
+                await import("./pages/home/order/SortOrderDeliveries");
+              return { Component: SortPODeliveries.default };
+            }
+          },
 
           {
             path: "/home/product",

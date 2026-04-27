@@ -351,6 +351,7 @@ export default function SubmitOrder() {
         <OrderTitleDuplicateTest
           fullWidth
           required
+          isOrder
           excludedId={id}
           inputRef={refs.title}
         />
@@ -478,6 +479,7 @@ export default function SubmitOrder() {
       <Grid size={{ xs: 6, sm: 3 }}>
         <OrderSourceIdDuplicateTest
           excludedId={id}
+          isOrder
           fullWidth
           inputRef={refs.sourceId}
         />
@@ -485,6 +487,7 @@ export default function SubmitOrder() {
       <Grid size={{ xs: 6, sm: 3 }}>
         <OrderAssignedIdDuplicateTest
           excludedId={id}
+          isOrder
           fullWidth
           inputRef={refs.assignedId}
         />
