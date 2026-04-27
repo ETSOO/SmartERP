@@ -34,16 +34,16 @@ namespace CRM.Server.Dto.PO
         public string? AssignedId { get; init; }
 
         /// <summary>
-        /// Customer id
-        /// 客户编号
+        /// Supplier id
+        /// 供应商编号
         /// </summary>
-        public long CustomerId { get; init; }
+        public long SupplierId { get; init; }
 
         /// <summary>
-        /// Customer name
-        /// 客户名称
+        /// Supplier name
+        /// 供应商名称
         /// </summary>
-        public required string CustomerName { get; init; }
+        public required string SupplierName { get; init; }
 
         /// <summary>
         /// Title

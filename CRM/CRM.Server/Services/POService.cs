@@ -154,7 +154,8 @@ namespace CRM.Server.Services
             string? addressFormatted = null;
             if (rq.AddressId.HasValue)
             {
-                addressFormatted = await _db.PersonAddresses(supplierId).Where(a => a.Id == rq.AddressId.Value).Select(a => a.FormattedAddress).FirstOrDefaultAsync(cancellationToken);
+                var orgPersonId = User.Pid;
+                addressFormatted = await _db.PersonAddresses(orgPersonId).Where(a => a.Id == rq.AddressId.Value).Select(a => a.FormattedAddress).FirstOrDefaultAsync(cancellationToken);
                 if (addressFormatted == null)
                 {
                     return ApplicationErrors.NoId.AsResult(nameof(rq.AddressId));
@@ -279,8 +280,8 @@ namespace CRM.Server.Services
                 CoreOrganizationId = orgId,
                 UserId = userId,
                 IsOrder = false,
-                SellerId = User.Pid,
-                BuyerId = supplierId,
+                SellerId = supplierId,
+                BuyerId = User.Pid, // Organization is the buyer
                 Source = rq.Source?.ToUpper(),
                 SourceId = rq.SourceId?.ToUpper(),
                 Title = title,
@@ -516,8 +517,8 @@ namespace CRM.Server.Services
                 Id = o.Id,
                 Source = o.Source,
                 Title = o.Title,
-                CustomerId = o.BuyerId,
-                CustomerName = o.Buyer.Name,
+                SupplierId = o.SellerId,
+                SupplierName = o.Seller.Name,
                 Lines = o.Lines,
                 Items = o.Items,
                 Currency = o.Currency,
@@ -557,8 +558,8 @@ namespace CRM.Server.Services
                      Source = p.Source,
                      SourceId = p.SourceId,
                      AssignedId = p.AssignedId,
-                     CustomerId = p.BuyerId,
-                     CustomerName = p.Buyer.Name,
+                     SupplierId = p.SellerId,
+                     SupplierName = p.Seller.Name,
                      Title = p.Title,
                      Description = p.Description,
                      StartDate = p.StartDate,
@@ -801,7 +802,8 @@ namespace CRM.Server.Services
             {
                 if (rq.AddressId.HasValue)
                 {
-                    var addressFormatted = await _db.PersonAddresses(order.BuyerId).Where(a => a.Id == rq.AddressId.Value).Select(a => a.FormattedAddress).FirstOrDefaultAsync(cancellationToken);
+                    var orgPersonId = User.Pid;
+                    var addressFormatted = await _db.PersonAddresses(orgPersonId).Where(a => a.Id == rq.AddressId.Value).Select(a => a.FormattedAddress).FirstOrDefaultAsync(cancellationToken);
                     if (addressFormatted == null)
                     {
                         return ApplicationErrors.NoId.AsResult(nameof(rq.AddressId));
@@ -907,7 +909,7 @@ namespace CRM.Server.Services
                     Id = p.Id,
                     Source = p.Source,
                     SourceId = p.SourceId,
-                    CustomerId = p.BuyerId,
+                    SupplierId = p.SellerId,
                     Currency = p.Currency,
                     Culture = p.Culture,
                     Amount = p.Amount,

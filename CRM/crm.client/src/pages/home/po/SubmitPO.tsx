@@ -64,6 +64,7 @@ export default function SubmitPO() {
   // Labels
   const labels = app.getLabels(
     "amount",
+    "deliveryAddress",
     "deliveryInstruction",
     "description",
     "discount",
@@ -362,9 +363,10 @@ export default function SubmitPO() {
       </Grid>
       <Grid size={{ xs: 12, sm: 9 }}>
         <AddressList
-          personId={poData?.supplierId ?? 0}
+          personId={app.userData?.system?.personId ?? 0}
           idValue={data.addressId}
           inputOnChange={formik.handleChange}
+          label={labels.deliveryAddress}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>

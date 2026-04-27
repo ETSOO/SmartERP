@@ -64,6 +64,7 @@ export default function SubmitOrder() {
   // Labels
   const labels = app.getLabels(
     "amount",
+    "deliveryAddress",
     "deliveryInstruction",
     "description",
     "discount",
@@ -366,6 +367,7 @@ export default function SubmitOrder() {
       <Grid size={{ xs: 12, sm: 9 }}>
         <AddressList
           personId={orderData?.customerId ?? 0}
+          label={labels.deliveryAddress}
           idValue={data.addressId}
           inputOnChange={formik.handleChange}
         />

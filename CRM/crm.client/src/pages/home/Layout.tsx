@@ -72,6 +72,7 @@ export default function Home() {
     "contacts",
     "categories",
     "confirmOrder",
+    "confirmPO",
     "customers",
     "depts",
     "edit",
@@ -476,7 +477,7 @@ export default function Home() {
           },
           {
             segment: "confirm",
-            title: labels.confirmOrder,
+            title: labels.confirmPO,
             hidden: true
           },
           {

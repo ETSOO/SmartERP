@@ -50,14 +50,12 @@ namespace CRM.Server.Dto
             var ids = Data.Keys.ToArray();
             var times = Data.Values.ToArray();
 
-            var sql = """
-                UPDATE 'promotion' AS p
-                    SET 'coupons_applied' = p.'coupons_applied' + v.times
-                FROM UNNEST($1::int[], $2::int[]) AS v(id, times)
-                    WHERE p.'id' = v.id
-            """;
-
-            await db.Database.ExecuteSqlRawAsync(sql, [ids, times], cancellationToken);
+            await db.Database.ExecuteSqlAsync($"""
+                UPDATE "promotion" AS p
+                    SET "coupons_applied" = p."coupons_applied" + v.times
+                FROM UNNEST({ids}::int[], {times}::int[]) AS v(id, times)
+                    WHERE p."id" = v.id
+            """, cancellationToken);
         }
     }
 }

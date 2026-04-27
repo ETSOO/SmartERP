@@ -28,10 +28,10 @@ namespace CRM.Server.Dto.PO
         public string? SourceId { get; init; }
 
         /// <summary>
-        /// Customer id
-        /// 客户编号
+        /// Supplier id
+        /// 供应商编号
         /// </summary>
-        public required long CustomerId { get; init; }
+        public required long SupplierId { get; init; }
 
         /// <summary>
         /// Currency

@@ -22,7 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { POQueryData } from "@etsoo/smarterp-crm";
+import { POQueryData, ProductScope } from "@etsoo/smarterp-crm";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI, StatusList } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
@@ -58,9 +58,9 @@ export default function AllPOs() {
     "keywords",
     "edit",
     "orderDeliveries",
-    "orderLines",
     "orderPayments",
-    "orderSource",
+    "poLines",
+    "poSource",
     "promotion",
     "startDate",
     "taxAmount",
@@ -136,9 +136,13 @@ export default function AllPOs() {
           minChars={2}
         />,
         <SupplierList search idValue={data.supplierId} />,
-        <ProductList search idValue={data.productId} />,
+        <ProductList
+          search
+          idValue={data.productId}
+          rq={{ scope: ProductScope.Purchase }}
+        />,
         <SearchField
-          label={labels.orderSource}
+          label={labels.poSource}
           name="source"
           defaultValue={data.source}
           minChars={2}
@@ -199,7 +203,7 @@ export default function AllPOs() {
         },
         {
           width: 108,
-          header: labels.orderLines,
+          header: labels.poLines,
           align: "right",
           cellBoxStyle: {
             paddingTop: "10px!important",
@@ -366,7 +370,7 @@ export default function AllPOs() {
                 </LinkEx>
               </Typography>
               <Typography variant="body2">
-                {labels.orderLines}: {app.formatNumber(data.lines)} /{" "}
+                {labels.poLines}: {app.formatNumber(data.lines)} /{" "}
                 {app.formatNumber(data.items)}
               </Typography>
               <Typography variant="body2">
