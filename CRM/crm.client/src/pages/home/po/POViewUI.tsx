@@ -196,9 +196,7 @@ export function POViewUI(props: POViewUIProps) {
                         async (ok) => {
                           if (!ok) return;
 
-                          const result = await app.poApi.recalculate(
-                            item.id
-                          );
+                          const result = await app.poApi.recalculate(item.id);
                           if (result == null) return;
 
                           if (result.ok) {
@@ -252,7 +250,7 @@ export function POViewUI(props: POViewUIProps) {
         },
         {
           data: "addressFormatted",
-          label: "address",
+          label: "deliveryAddress",
           singleRow: true
         },
         {

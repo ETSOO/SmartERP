@@ -234,7 +234,7 @@ namespace CRM.Server.Services
                     Title = lineTitle,
                     Description = l.Description,
                     OriginalPrice = purchasePrice.GetValueOrDefault(),
-                    CostPrice = -1,
+                    CostPrice = price, // Cost price is the same in purchase order
                     Price = price,
                     Qty = qty,
                     AssetQty = product.AssetQty.GetValueOrDefault(),

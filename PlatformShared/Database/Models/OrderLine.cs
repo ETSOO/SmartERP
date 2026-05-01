@@ -65,6 +65,12 @@ namespace PlatformShared.Database.Models
         public decimal Qty { get; set; }
 
         /// <summary>
+        /// Qty delivered
+        /// 已交付数量
+        /// </summary>
+        public decimal QtyDelivered { get; set; }
+
+        /// <summary>
         /// Asset qty
         /// 资产数量
         /// </summary>

@@ -9,7 +9,7 @@ Convert to TypeScript type (not interface) with 'export'.
 
 ## Guidelines
 
-- Follow TypeScript naming policy.
+- Follow TypeScript camelCase naming policy.
 - Use 'unknown' type rather than 'any' for unrecognized types.
 - No necessary to add 'null' type in TS for nullable types.
 - Keep the exact name of reference type, no necessary to generate it.

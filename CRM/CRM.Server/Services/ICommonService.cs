@@ -23,6 +23,7 @@ namespace CRM.Server.Services
         Task<bool> HasPermissionAsync(short permissionItemId, CancellationToken cancellationToken = default);
         Task<bool[]> HasPermissionsAsync(IEnumerable<short> permissionItemIds, CancellationToken cancellationToken = default);
         Task<int> ReadTagIdAsync(string tag, int orgId, CancellationToken cancellationToken = default);
+        Task<IActionResult> SyncAssetAsync(long personId, int assetId, int assetQty, decimal qty, CancellationToken cancellationToken = default);
         ValueTask UpdateTagAsync(IQueryTag tag, int orgId, CancellationToken cancellationToken = default);
         ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidateCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default);
     }

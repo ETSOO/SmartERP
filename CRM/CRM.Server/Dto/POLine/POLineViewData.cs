@@ -2,13 +2,13 @@
 using PlatformShared.Dto;
 using System.Text.Json;
 
-namespace CRM.Server.Dto.OrderLine
+namespace CRM.Server.Dto.POLine
 {
     /// <summary>
-    /// Order line view data
-    /// 订单项目浏览数据
+    /// Purchase order line view data
+    /// 采购项目浏览数据
     /// </summary>
-    public record OrderLineViewData
+    public record POLineViewData
     {
         /// <summary>
         /// Id
@@ -17,16 +17,16 @@ namespace CRM.Server.Dto.OrderLine
         public long Id { get; init; }
 
         /// <summary>
-        /// Order title
-        /// 订单标题
+        /// PO title
+        /// 采购标题
         /// </summary>
-        public required string OrderTitle { get; init; }
+        public required string POTitle { get; init; }
 
         /// <summary>
-        /// Order id
-        /// 订单编号
+        /// PO id
+        /// 采购编号
         /// </summary>
-        public long OrderId { get; init; }
+        public long POId { get; init; }
 
         /// <summary>
         /// Currency
@@ -137,16 +137,16 @@ namespace CRM.Server.Dto.OrderLine
         public long? UserId { get; init; }
 
         /// <summary>
-        /// Order user id
-        /// 订单用户编号
+        /// PO user id
+        /// 采购用户编号
         /// </summary>
-        public long OrderUserId { get; init; }
+        public long POUserId { get; init; }
 
         /// <summary>
-        /// Customer id
-        /// 客户编号
+        /// Supplier id
+        /// 供应商编号
         /// </summary>
-        public long CustomerId { get; init; }
+        public long SupplierId { get; init; }
 
         /// <summary>
         /// Asset id
@@ -161,28 +161,16 @@ namespace CRM.Server.Dto.OrderLine
         public string? AssetSn { get; init; }
 
         /// <summary>
-        /// Supplier id
-        /// 供应商编号
-        /// </summary>
-        public long? SupplierId { get; init; }
-
-        /// <summary>
-        /// Supplier name
-        /// 供应商名称
-        /// </summary>
-        public string? SupplierName { get; init; }
-
-        /// <summary>
         /// Status
         /// 状态
         /// </summary>
         public EntityStatus Status { get; init; }
 
         /// <summary>
-        /// Order status
-        /// 订单状态
+        /// PO status
+        /// 采购状态
         /// </summary>
-        public EntityStatus OrderStatus { get; init; }
+        public EntityStatus POStatus { get; init; }
 
         /// <summary>
         /// Modifiers

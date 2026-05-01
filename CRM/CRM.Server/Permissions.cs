@@ -188,7 +188,8 @@
         Edit = 10012,
         Delete = 10013,
 
-        Manage = 10200
+        Manage = 10200,
+        Execute = 10202
     }
 
     /// <summary>

@@ -1,12 +1,12 @@
-using com.etsoo.CoreFramework.Application;
+﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
-using CRM.Server.Dto.OrderLine;
-using CRM.Server.RQ.OrderLine;
+using CRM.Server.Dto.POLine;
+using CRM.Server.RQ.POLine;
 using CRM.Server.RQ.Product;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
@@ -18,49 +18,49 @@ using System.Buffers;
 namespace CRM.Server.Services
 {
     /// <summary>
-    /// Order line service
-    /// 订单行服务
+    /// Purchase line service
+    /// 采购行服务
     /// </summary>
-    public class OrderLineService : SEUserService, IOrderLineService
+    public class POLineService : SEUserService, IPOLineService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
         readonly IProductService _productService;
-        readonly IOrderService _orderService;
+        readonly IPOService _poService;
 
-        public OrderLineService(
+        public POLineService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<OrderLineService> logger,
             ICommonService commonService,
             IProductService productService,
-            IOrderService orderService
+            IPOService poService
         )
-            : base(app, userAccessor.UserSafe, "order_line", logger)
+            : base(app, userAccessor.UserSafe, "po_line", logger)
         {
             _db = db;
             _commonService = commonService;
             _productService = productService;
-            _orderService = orderService;
+            _poService = poService;
         }
 
-        private IQueryable<OrderLine> CreateQuery(OrderLineListRQ rq, Func<IQueryable<OrderLine>, IQueryable<OrderLine>>? filters = null)
+        private IQueryable<OrderLine> CreateQuery(POLineListRQ rq, Func<IQueryable<OrderLine>, IQueryable<OrderLine>>? filters = null)
         {
             var orgId = User.OrganizationInt;
 
             return _db.OrderLines.AsNoTracking()
-                .Where(p => p.Order.CoreOrganizationId == orgId && p.Order.IsOrder)
+                .Where(p => p.Order.CoreOrganizationId == orgId && !p.Order.IsOrder)
                 .QueryEtsoo(rq, p => p.Id, p => p.Status, q =>
                 {
-                    if (rq.OrderId.HasValue)
+                    if (rq.POId.HasValue)
                     {
-                        q = q.Where(p => p.OrderId == rq.OrderId.Value);
+                        q = q.Where(p => p.OrderId == rq.POId.Value);
                     }
 
                     if (rq.SupplierId.HasValue)
                     {
-                        q = q.Where(p => p.SupplierId == rq.SupplierId.Value);
+                        q = q.Where(p => p.Order.SellerId == rq.SupplierId.Value);
                     }
 
                     if (rq.ProductId.HasValue)
@@ -90,18 +90,18 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Complete the order line
-        /// 完成订单行
+        /// Complete the purchase line
+        /// 完成采购行
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> CompleteAsync(OrderLineCompleteRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CompleteAsync(POLineCompleteRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
             var permissions = await _commonService.HasPermissionsAsync([
-                (short)Permissions.Order.Execute,
-                (short)Permissions.Order.Manage
+                (short)Permissions.PO.Execute,
+                (short)Permissions.PO.Manage,
             ], cancellationToken);
 
             var isExecute = permissions[0];
@@ -116,20 +116,19 @@ namespace CRM.Server.Services
             var userId = User.Oid;
             var id = rq.Id;
             var assetId = rq.AssetId;
-            var supplierId = rq.SupplierId;
-            var costPrice = rq.CostPrice;
             var now = DateTimeOffset.UtcNow;
 
             var line = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
-                          && p.Order.IsOrder
+                          && !p.Order.IsOrder
                           && p.Order.Status < EntityStatus.Inactivated
                           && p.Status < EntityStatus.Inactivated
                           && (isManage || p.Order.UserId == userId || p.UserId == userId)
                           && (p.StartTime < now || (p.AssetQty > 0 && p.AssetId == null)))
                 .Select(a => new
                 {
+                    a.Order.SellerId,
                     a.Order.BuyerId,
                     a.ProductId,
                     a.Qty,
@@ -142,18 +141,6 @@ namespace CRM.Server.Services
             if (line == null)
             {
                 return ApplicationErrors.NoId.AsResult();
-            }
-
-            // Supplier
-            if (supplierId.HasValue)
-            {
-                var hasSupplier = await _db.Suppliers(orgId).Where(s => s.Id == supplierId.Value)
-                    .AnyAsync(cancellationToken);
-
-                if (!hasSupplier)
-                {
-                    return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.SupplierId));
-                }
             }
 
             // Asset
@@ -192,8 +179,7 @@ namespace CRM.Server.Services
                                 .Where(p => p.Id == id)
                                 .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.EndTime, now)
                                                         .SetProperty(ol => ol.AssetId, ol => ol.AssetId ?? assetId)
-                                                        .SetProperty(ol => ol.SupplierId, ol => supplierId ?? ol.SupplierId)
-                                                        .SetProperty(ol => ol.CostPrice, ol => costPrice ?? ol.CostPrice)
+                                                        .SetProperty(ol => ol.SupplierId, line.SellerId)
                                                         .SetProperty(ol => ol.UserId, ol => ol.UserId ?? userId)
                                                         .SetProperty(ol => ol.Status, EntityStatus.Completed), cancellationToken)
                                 ;
@@ -219,42 +205,42 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> CreateAsync(OrderLineCreateRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateAsync(POLineCreateRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var (isEdit, isManage) = await _orderService.CheckEditPermissionsAsync(cancellationToken);
+            var (isEdit, isManage) = await _poService.CheckEditPermissionsAsync(cancellationToken);
             if (!isEdit)
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
             var orgId = User.OrganizationInt;
-            var orderId = rq.OrderId;
+            var poId = rq.POId;
 
-            var order = await _db.Orders(orgId)
-                .Where(o => o.Id == orderId && (isManage || o.UserId == User.Oid) && o.Status < EntityStatus.Inactivated)
+            var po = await _db.POs(orgId)
+                .Where(o => o.Id == poId && (isManage || o.UserId == User.Oid) && o.Status < EntityStatus.Inactivated)
                 .Select(o => new
                 {
-                    CustomerId = o.BuyerId,
+                    SupplierId = o.SellerId,
                     o.Currency,
                     o.Culture
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (order == null)
+            if (po == null)
             {
-                return ApplicationErrors.NoValidData.AsResult(nameof(rq.OrderId));
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.POId));
             }
 
-            var productRQ = new QueryForSaleRQ
+            var productRQ = new QueryForPurchaseRQ
             {
-                CustomerId = order.CustomerId,
-                Currency = order.Currency,
-                Culture = order.Culture,
+                SupplierId = po.SupplierId,
+                Currency = po.Currency,
+                Culture = po.Culture,
                 Ids = [rq.ProductId]
             };
 
-            var products = await _productService.QueryForSaleAsync(productRQ, cancellationToken);
+            var products = await _productService.QueryForPurchaseAsync(productRQ, cancellationToken);
             if (products == null || products.Length != 1)
             {
                 return ApplicationErrors.DataOutdated.AsResult();
@@ -270,14 +256,10 @@ namespace CRM.Server.Services
                 return qtyResult;
             }
 
-            var price = _productService.GetSalePrice(product);
+            var price = rq.Price;
+            var poPrice = _productService.GetPurchasePrice(product);
 
-            if (rq.Price.HasValue && rq.Price.Value != price)
-            {
-                return ApplicationErrors.DataOutdated.AsResult(nameof(rq.Price));
-            }
-
-            var sale = new PromotionCodeLine
+            var promotion = new PromotionCodeLine
             {
                 Price = price,
                 Qty = qty
@@ -285,7 +267,7 @@ namespace CRM.Server.Services
 
             var amount = price * qty;
 
-            var (linePromotions, lineResult) = _productService.ValidatePromotions(rq.Promotions, product.Promotions, amount, sale);
+            var (linePromotions, lineResult) = _productService.ValidatePromotions(rq.Promotions, product.Promotions, amount, promotion);
             if (!lineResult.Ok)
             {
                 return lineResult;
@@ -297,12 +279,12 @@ namespace CRM.Server.Services
 
             var orderLine = new OrderLine
             {
-                OrderId = orderId,
+                OrderId = poId,
                 ProductId = rq.ProductId,
                 Title = title,
                 Description = rq.Description,
-                OriginalPrice = product.RetailPrice,
-                CostPrice = product.CostPrice ?? 0,
+                OriginalPrice = poPrice.GetValueOrDefault(),
+                CostPrice = price, // Cost price is the same in purchase order
                 Price = price,
                 Qty = qty,
                 AssetQty = product.AssetQty.GetValueOrDefault(),
@@ -322,7 +304,7 @@ namespace CRM.Server.Services
             {
                 await _db.SaveChangesAsync(cancellationToken);
 
-                var result = await _orderService.RecalculateAsync(orderId, false, cancellationToken);
+                var result = await _poService.RecalculateAsync(poId, false, cancellationToken);
                 if (!result.Ok)
                 {
                     await transaction.RollbackAsync(cancellationToken);
@@ -354,7 +336,7 @@ namespace CRM.Server.Services
         public async Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var (isEdit, isManage) = await _orderService.CheckEditPermissionsAsync(cancellationToken);
+            var (isEdit, isManage) = await _poService.CheckEditPermissionsAsync(cancellationToken);
             if (!isEdit)
             {
                 return ApplicationErrors.AccessDenied.AsResult();
@@ -367,9 +349,9 @@ namespace CRM.Server.Services
 
             var orgId = User.OrganizationInt;
 
-            var orderId = await _db.OrderLines
+            var poID = await _db.OrderLines
                 .Where(q => q.Id == id && q.Order.CoreOrganizationId == orgId
-                            && q.Order.IsOrder
+                            && !q.Order.IsOrder
                             && q.Order.Status < EntityStatus.Inactivated
                             && q.Status < EntityStatus.Inactivated
                             && (isManage || q.Order.UserId == User.Oid)
@@ -377,7 +359,7 @@ namespace CRM.Server.Services
                 .Select(q => q.OrderId)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (orderId == 0)
+            if (poID == 0)
             {
                 return ApplicationErrors.NoId.AsResult(nameof(id));
             }
@@ -388,7 +370,7 @@ namespace CRM.Server.Services
             {
                 await _db.OrderLines.Where(q => q.Id == id).ExecuteDeleteAsync(cancellationToken);
 
-                var result = await _orderService.RecalculateAsync(orderId, false, cancellationToken);
+                var result = await _poService.RecalculateAsync(poID, false, cancellationToken);
 
                 if (!result.Ok)
                 {
@@ -412,19 +394,19 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// List order line JSON data
-        /// 订单行列表JSON数据
+        /// List purchase line JSON data
+        /// 采购行列表JSON数据
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="writer">Writer to hold the data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task ListAsync(OrderLineListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
+        public Task ListAsync(POLineListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             return CreateQuery(rq)
                 .OrderByDescending(c => c.Creation)
                 .ThenBy(c => c.Id)
-                .Select(p => new OrderLineListData
+                .Select(p => new POLineListData
                 {
                     Id = p.Id,
                     Title = p.Title,
@@ -434,16 +416,16 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Query all order lines
-        /// 查询所有订单行
+        /// Query all purchase lines
+        /// 查询所有采购行
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<OrderLineQueryAllData[]> QueryAllAsync(OrderLineQueryAllRQ rq, CancellationToken cancellationToken = default)
+        public async Task<POLineQueryAllData[]> QueryAllAsync(POLineQueryAllRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Query, (short)Permissions.Order.Manage], cancellationToken);
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.PO.Query, (short)Permissions.PO.Manage], cancellationToken);
             var isQuery = permissions[0];
             var isManage = permissions[1];
             if (!isQuery)
@@ -469,9 +451,9 @@ namespace CRM.Server.Services
                     q = q.Where(p => p.Order.Source == rq.Source.ToUpper());
                 }
 
-                if (rq.CustomerId.HasValue)
+                if (rq.SupplierId.HasValue)
                 {
-                    q = q.Where(p => p.Order.BuyerId == rq.CustomerId.Value);
+                    q = q.Where(p => p.Order.SellerId == rq.SupplierId.Value);
                 }
 
                 if (rq.QtyStart.HasValue)
@@ -502,13 +484,13 @@ namespace CRM.Server.Services
                 return q;
             })
             .TagWith(nameof(QueryAllAsync))
-            .Select(p => new OrderLineQueryAllData
+            .Select(p => new POLineQueryAllData
             {
                 Id = p.Id,
                 Source = p.Order.Source,
-                Customer = p.Order.Buyer.Name,
-                CustomerId = p.Order.BuyerId,
-                OrderId = p.OrderId,
+                Supplier = p.Order.Seller.Name,
+                SupplierId = p.Order.SellerId,
+                POId = p.OrderId,
                 ProductId = p.ProductId,
                 Title = p.Title,
                 Description = p.Description,
@@ -526,67 +508,16 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Query asset order line
-        /// 查询资产订单行
+        /// Query purchase line
+        /// 查询采购行
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<OrderLineQueryAssetData[]> QueryAssetAsync(OrderLineQueryAssetRQ rq, CancellationToken cancellationToken = default)
+        public async Task<POLineQueryData[]> QueryAsync(POLineQueryRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
-            {
-                return [];
-            }
-
-            return await CreateQuery(rq, (q) =>
-            {
-                if (rq.UserId.HasValue)
-                {
-                    q = q.Where(p => p.UserId == rq.UserId.Value || p.Order.UserId == rq.UserId.Value);
-                }
-
-                if (rq.CreationStart.HasValue)
-                {
-                    q = q.Where(p => p.Creation >= rq.CreationStart.Value);
-                }
-
-                if (rq.CreationEnd.HasValue)
-                {
-                    q = q.Where(p => p.Creation < rq.CreationEnd.Value);
-                }
-
-                return q;
-            })
-            .TagWith(nameof(QueryAssetAsync))
-            .Select(p => new OrderLineQueryAssetData
-            {
-                Id = p.Id,
-                Title = p.Title,
-                CostPrice = p.CostPrice,
-                SupplierId = p.SupplierId,
-                SupplierName = p.Supplier == null ? null : p.Supplier.Name,
-                Price = p.Price,
-                Qty = p.Qty,
-                AssetQty = p.AssetQty,
-                Status = p.Status,
-                Creation = p.Creation
-            })
-            .ToArrayAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// Query order line
-        /// 查询订单行
-        /// </summary>
-        /// <param name="rq">Request data</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Result</returns>
-        public async Task<OrderLineQueryData[]> QueryAsync(OrderLineQueryRQ rq, CancellationToken cancellationToken = default)
-        {
-            // Permission check
-            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.View, (short)Permissions.Order.Manage], cancellationToken);
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.PO.View, (short)Permissions.PO.Manage], cancellationToken);
             var isView = permissions[0];
             var isManage = permissions[1];
             if (!isView)
@@ -610,7 +541,7 @@ namespace CRM.Server.Services
                 return q;
             })
             .TagWith(nameof(QueryAsync))
-            .Select(p => new OrderLineQueryData
+            .Select(p => new POLineQueryData
             {
                 Id = p.Id,
                 Title = p.Title,
@@ -633,10 +564,10 @@ namespace CRM.Server.Services
         /// <param name="id">Id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<OrderLineViewData?> ReadAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<POLineViewData?> ReadAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.View, (short)Permissions.Order.Execute, (short)Permissions.Order.Manage], cancellationToken);
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.PO.View, (short)Permissions.PO.Execute, (short)Permissions.PO.Manage], cancellationToken);
             var isView = permissions[0];
             var isExecute = permissions[1];
             var isManage = permissions[2];
@@ -648,12 +579,12 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var data = await _db.OrderLines.AsNoTracking()
-                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && p.Order.IsOrder)
-                .Select(p => new OrderLineViewData
+                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && !p.Order.IsOrder)
+                .Select(p => new POLineViewData
                 {
                     Id = p.Id,
-                    OrderTitle = p.Order.Title,
-                    OrderId = p.OrderId,
+                    POTitle = p.Order.Title,
+                    POId = p.OrderId,
                     Currency = p.Order.Currency,
                     ProductName = p.Product.Name,
                     ProductId = p.ProductId,
@@ -672,16 +603,14 @@ namespace CRM.Server.Services
                     EndTime = p.EndTime,
                     UserName = (p.User == null ? null : p.User.Name),
                     UserId = p.UserId,
-                    OrderUserId = p.Order.UserId,
-                    CustomerId = p.Order.BuyerId,
+                    POUserId = p.Order.UserId,
+                    SupplierId = p.Order.SellerId,
                     AssetId = p.AssetId,
                     AssetSn = (p.Asset == null ? null : p.Asset.Sn),
-                    SupplierId = p.SupplierId,
-                    SupplierName = p.Supplier == null ? null : p.Supplier.Name,
                     Modifiers = p.Product.Modifiers,
                     Data = p.Data,
                     Status = p.Status,
-                    OrderStatus = p.Order.Status,
+                    POStatus = p.Order.Status,
                     Creation = p.Creation
                 })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -693,17 +622,17 @@ namespace CRM.Server.Services
 
                 data.IsStartable = isExecute
                     && data.Status < EntityStatus.Inactivated
-                    && data.OrderStatus < EntityStatus.Inactivated
+                    && data.POStatus < EntityStatus.Inactivated
                     && (data.UserId == null || data.StartTime == null);
 
                 data.IsCompletable = isExecute
                         && data.Status < EntityStatus.Inactivated
-                        && data.OrderStatus < EntityStatus.Inactivated
-                        && (isManage || data.OrderUserId == userId || data.UserId == userId)
+                        && data.POStatus < EntityStatus.Inactivated
+                        && (isManage || data.POUserId == userId || data.UserId == userId)
                         && (data.StartTime < now || (data.AssetQty > 0 && data.AssetId == null));
 
                 data.IsRestorable = isExecute
-                        && (isManage || data.OrderUserId == userId || data.UserId == userId)
+                        && (isManage || data.POUserId == userId || data.UserId == userId)
                         && data.Status != EntityStatus.Completed && data.Status != EntityStatus.Normal;
             }
 
@@ -720,7 +649,7 @@ namespace CRM.Server.Services
         public async Task<IActionResult> RollbackAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Execute, (short)Permissions.Order.Manage], cancellationToken);
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.PO.Execute, (short)Permissions.PO.Manage], cancellationToken);
             var isExecute = permissions[0];
             var isManage = permissions[1];
             if (!isExecute)
@@ -734,7 +663,7 @@ namespace CRM.Server.Services
             var line = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
-                          && p.Order.IsOrder
+                          && !p.Order.IsOrder
                           && (isManage || p.Order.UserId == userId || p.UserId == userId)
                           && p.Status != EntityStatus.Normal && p.Status != EntityStatus.Completed
                 ).Select(p => new
@@ -797,10 +726,10 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> StartAsync(OrderLineStartRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> StartAsync(POLineStartRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.Order.Execute, (short)Permissions.Order.Manage], cancellationToken);
+            var permissions = await _commonService.HasPermissionsAsync([(short)Permissions.PO.Execute, (short)Permissions.PO.Manage], cancellationToken);
             var isExecute = permissions[0];
             var isManage = permissions[1];
             if (!isExecute)
@@ -817,7 +746,7 @@ namespace CRM.Server.Services
             var result = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
-                          && p.Order.IsOrder
+                          && !p.Order.IsOrder
                           && p.Order.Status < EntityStatus.Inactivated
                           && p.Status < EntityStatus.Inactivated)
                 .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, ol => initStart || ol.StartTime == null ? now : ol.StartTime)
@@ -834,10 +763,10 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> UpdateAsync(OrderLineUpdateRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateAsync(POLineUpdateRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var (isEdit, isManage) = await _orderService.CheckEditPermissionsAsync(cancellationToken);
+            var (isEdit, isManage) = await _poService.CheckEditPermissionsAsync(cancellationToken);
             if (!isEdit)
             {
                 return ApplicationErrors.AccessDenied.AsResult();
@@ -848,7 +777,7 @@ namespace CRM.Server.Services
             var orderLine = await _db.OrderLines
                 .Where(p => p.Id == rq.Id
                           && p.Order.CoreOrganizationId == orgId
-                          && p.Order.IsOrder
+                          && !p.Order.IsOrder
                           && (isManage || p.Order.UserId == User.Oid)
                           && p.Order.Status < EntityStatus.Inactivated)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -951,7 +880,7 @@ namespace CRM.Server.Services
                 {
                     await _db.SaveChangesAsync(cancellationToken);
 
-                    var result = await _orderService.RecalculateAsync(orderLine.OrderId, false, cancellationToken);
+                    var result = await _poService.RecalculateAsync(orderLine.OrderId, false, cancellationToken);
 
                     if (!result.Ok)
                     {
@@ -986,10 +915,10 @@ namespace CRM.Server.Services
         /// <param name="id">Order line id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<OrderLineUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<POLineUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
-            var (isEdit, isManage) = await _orderService.CheckEditPermissionsAsync(cancellationToken);
+            var (isEdit, isManage) = await _poService.CheckEditPermissionsAsync(cancellationToken);
             if (!isEdit)
             {
                 return null;
@@ -999,11 +928,11 @@ namespace CRM.Server.Services
             var userId = User.Oid;
 
             return await _db.OrderLines.AsNoTracking()
-                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && p.Order.IsOrder)
-                .Select(p => new OrderLineUpdateReadData
+                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && !p.Order.IsOrder)
+                .Select(p => new POLineUpdateReadData
                 {
                     Id = p.Id,
-                    OrderId = p.OrderId,
+                    POId = p.OrderId,
                     Currency = p.Order.Currency,
                     ProductId = p.ProductId,
                     Title = p.Title,

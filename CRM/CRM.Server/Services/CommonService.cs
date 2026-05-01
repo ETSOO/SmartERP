@@ -12,6 +12,7 @@ using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PersonInfo = PlatformShared.Database.Models.PersonInfo;
 using PersonProfile = PlatformShared.Database.Models.PersonProfile;
+using ProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
 {
@@ -378,6 +379,109 @@ namespace CRM.Server.Services
                 .Where(t => t.CoreOrganizationId == orgId && t.Tag == tag)
                 .Select(t => t.Id)
                 .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Sync asset
+        /// 同步资产
+        /// </summary>
+        /// <param name="personId">Person id</param>
+        /// <param name="assetId">Asset id</param>
+        /// <param name="assetQty">Asset quantity</param>
+        /// <param name="qty">Quantity</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> SyncAssetAsync(long personId, int assetId, int assetQty, decimal qty, CancellationToken cancellationToken = default)
+        {
+            var asset = await _db.PersonAssets.Where(a => a.Id == assetId && a.PersonId == personId)
+                .Select(a => new
+                {
+                    a.Expiry,
+                    a.Product.Validity,
+                    a.Product.Unit.BaseUnit
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (asset == null)
+            {
+                return ApplicationErrors.NoId.AsResult("AssetId");
+            }
+
+            var unit = asset.BaseUnit;
+
+            if (!Constants.IsAssetUnit(unit))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(asset.BaseUnit));
+            }
+
+            try
+            {
+                if (unit == ProductUnit.TIME)
+                {
+                    // 次卡有效期自动延长1年
+                    var days = asset.Validity.GetValueOrDefault(366);
+                    var totalTimes = Convert.ToInt32(assetQty * qty);
+
+                    await _db.PersonAssets.Where(a => a.Id == assetId)
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Times, p => p.Times.GetValueOrDefault() + totalTimes).SetProperty(p => p.Expiry, p => p.Expiry.AddDays(days)), cancellationToken);
+                }
+                else if (unit == ProductUnit.MONEY)
+                {
+                    // 储值卡有效期自动延长3年
+                    var days = asset.Validity.GetValueOrDefault(732);
+                    var totalAmount = assetQty * qty;
+                    await _db.PersonAssets.Where(a => a.Id == assetId)
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Amount, p => p.Amount.GetValueOrDefault() + totalAmount).SetProperty(p => p.Expiry, p => p.Expiry.AddDays(days)), cancellationToken);
+                }
+                else
+                {
+                    var expiry = asset.Expiry;
+                    var totalQty = Convert.ToInt32(assetQty * qty);
+
+                    switch (unit)
+                    {
+                        case ProductUnit.HOUR:
+                            expiry = expiry.AddHours(totalQty);
+                            break;
+                        case ProductUnit.DAY:
+                            expiry = expiry.AddDays(totalQty);
+                            break;
+                        case ProductUnit.WEEK:
+                            expiry = expiry.AddDays(totalQty * 7);
+                            break;
+                        case ProductUnit.FORTNIGHT:
+                            expiry = expiry.AddDays(totalQty * 14);
+                            break;
+                        case ProductUnit.FOURWEEK:
+                            expiry = expiry.AddDays(totalQty * 28);
+                            break;
+                        case ProductUnit.MONTH:
+                            expiry = expiry.AddMonths(totalQty);
+                            break;
+                        case ProductUnit.BIMONTH:
+                            expiry = expiry.AddMonths(totalQty * 2);
+                            break;
+                        case ProductUnit.QUATER:
+                            expiry = expiry.AddMonths(totalQty * 3);
+                            break;
+                        case ProductUnit.HALFYEAR:
+                            expiry = expiry.AddMonths(totalQty * 6);
+                            break;
+                        case ProductUnit.YEAR:
+                            expiry = expiry.AddYears(totalQty);
+                            break;
+                    }
+
+                    await _db.PersonAssets.Where(a => a.Id == assetId)
+                        .ExecuteUpdateAsync(a => a.SetProperty(p => p.Expiry, expiry), cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                return ActionResult.From(ex);
+            }
+
+            return ActionResult.Success;
         }
 
         /// <summary>

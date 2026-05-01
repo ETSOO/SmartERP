@@ -36,6 +36,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Qty)
                 .HasPrecision(12, 2)
                 .HasColumnName("qty");
+            entity.Property(e => e.QtyDelivered)
+                .HasPrecision(12, 2)
+                .HasColumnName("qty_delivered");
             entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
             entity.Property(e => e.Amount)
                 .HasColumnType("money")

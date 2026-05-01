@@ -46,6 +46,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CRM.Server.Dto.OrderLine;
 using CRM.Server.RQ.OrderLine;
+using CRM.Server.RQ.POLine;
+using CRM.Server.Dto.POLine;
 
 namespace CRM.Server
 {
@@ -221,6 +223,19 @@ namespace CRM.Server
     [JsonSerializable(typeof(POListRQ))]
     [JsonSerializable(typeof(POQueryRQ))]
     [JsonSerializable(typeof(POUpdateRQ))]
+
+    // PO line
+    [JsonSerializable(typeof(POLineListData[]))]
+    [JsonSerializable(typeof(POLineQueryAllData[]))]
+    [JsonSerializable(typeof(POLineQueryData[]))]
+    [JsonSerializable(typeof(POLineViewData))]
+    [JsonSerializable(typeof(POLineUpdateReadData))]
+
+    [JsonSerializable(typeof(POLineCompleteRQ))]
+    [JsonSerializable(typeof(POLineCreateRQ))]
+    [JsonSerializable(typeof(POLineListRQ))]
+    [JsonSerializable(typeof(POLineStartRQ))]
+    [JsonSerializable(typeof(POLineUpdateRQ))]
 
     // Product
     [JsonSerializable(typeof(ProductDuplicateTestData[]))]

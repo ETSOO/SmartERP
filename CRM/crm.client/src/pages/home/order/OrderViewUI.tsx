@@ -252,7 +252,7 @@ export function OrderViewUI(props: OrderViewUIProps) {
         },
         {
           data: "addressFormatted",
-          label: "address",
+          label: "deliveryAddress",
           singleRow: true
         },
         {

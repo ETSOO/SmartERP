@@ -13,7 +13,6 @@ import {
 } from "@etsoo/react";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
-import { POLineQueryData } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import { BoxProps } from "@mui/material/Box";
 import React from "react";
@@ -22,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import ArticleIcon from "@mui/icons-material/Article";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import { Permissions } from "@etsoo/smarterp-crm";
+import { OrderLineQueryData, Permissions } from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import { EntityStatus } from "@etsoo/appscript";
@@ -67,13 +66,13 @@ export function POLines(props: AllPOLinesProps) {
 
   // Refs
   const ref =
-    React.useRef<ScrollerListForwardRef<POLineQueryData>>(undefined);
+    React.useRef<ScrollerListForwardRef<OrderLineQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
   return (
-    <ResponsivePage<POLineQueryData, typeof template>
+    <ResponsivePage<OrderLineQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
         fabButtons: (
@@ -84,13 +83,10 @@ export function POLines(props: AllPOLinesProps) {
                 size="medium"
                 color="primary"
                 onClick={() =>
-                  POUIUtils.addPOLine(
-                    { poId, currency, customerId },
-                    () => {
-                      reloadData();
-                      refresh();
-                    }
-                  )
+                  POUIUtils.addPOLine({ poId, currency, customerId }, () => {
+                    reloadData();
+                    refresh();
+                  })
                 }
               >
                 <AddIcon />
@@ -113,8 +109,8 @@ export function POLines(props: AllPOLinesProps) {
         <NumberInputField search name="qtyStart" label={labels.qtyStart} />
       ]}
       loadData={(data) =>
-        app.poLineApi.query(
-          { poId, ...data },
+        app.orderLineApi.query(
+          { orderId: poId, ...data },
           {
             defaultValue: [],
             showLoading: false
@@ -172,7 +168,7 @@ export function POLines(props: AllPOLinesProps) {
           },
           cellRenderer: ({
             data
-          }: GridCellRendererProps<POLineQueryData, BoxProps>) => {
+          }: GridCellRendererProps<OrderLineQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
             return (

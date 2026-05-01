@@ -1,0 +1,112 @@
+using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
+using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Models;
+using PlatformShared.Dto;
+using System.Text.Json;
+
+namespace CRM.Server.RQ.POLine
+{
+    /// <summary>
+    /// Create purchase line request data
+    /// 创建采购行请求数据
+    /// </summary>
+    public record POLineCreateRQ : IModelValidator
+    {
+        /// <summary>
+        /// PO id
+        /// 采购编号
+        /// </summary>
+        public required long POId { get; init; }
+
+        /// <summary>
+        /// Product id
+        /// 产品编号
+        /// </summary>
+        public required int ProductId { get; init; }
+
+        /// <summary>
+        /// Qty
+        /// 数量
+        /// </summary>
+        public required decimal Qty { get; init; }
+
+        /// <summary>
+        /// Price
+        /// 价格
+        /// </summary>
+        public required decimal Price { get; init; }
+
+        /// <summary>
+        /// Title
+        /// 标题
+        /// </summary>
+        public string? Title { get; init; }
+
+        /// <summary>
+        /// Description
+        /// 描述
+        /// </summary>
+        public string? Description { get; init; }
+
+        /// <summary>
+        /// Start time
+        /// 开始时间
+        /// </summary>
+        public DateTimeOffset? StartTime { get; init; }
+
+        /// <summary>
+        /// End time
+        /// 结束时间
+        /// </summary>
+        public DateTimeOffset? EndTime { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
+
+        /// <summary>
+        /// Status
+        /// 状况
+        /// </summary>
+        public EntityStatus? Status { get; init; }
+
+        /// <summary>
+        /// Promotions
+        /// 促销
+        /// </summary>
+        public IEnumerable<PromotionSaleItemBase>? Promotions { get; init; }
+
+        /// <summary>
+        /// Validate the model
+        /// 验证模块
+        /// </summary>
+        /// <returns>Result</returns>
+        public IActionResult? Validate()
+        {
+            if (Qty <= 0 || Qty > 999999999 || Qty.Scale > 2)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Qty));
+            }
+
+            if (Price < 0)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Price));
+            }
+
+            if (Title != null && Title.Length is not (>= 1 and <= 256))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Title));
+            }
+
+            if (Description != null && Description.Length is not (>= 1 and <= 1280))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Description));
+            }
+
+            return null;
+        }
+    }
+}

@@ -66,6 +66,7 @@ export default function Home() {
     "address",
     "addresses",
     "allOrderLines",
+    "allPOLines",
     "allProfiles",
     "app3",
     "assets",
@@ -460,7 +461,7 @@ export default function Home() {
           },
           {
             segment: "lines",
-            title: labels.allOrderLines,
+            title: labels.allPOLines,
             hidden: true
           },
           {
