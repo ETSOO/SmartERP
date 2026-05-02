@@ -47,6 +47,12 @@ namespace CRM.Server.Dto.PersonProfile
         public string? OrderTitle { get; init; }
 
         /// <summary>
+        /// Is order or purchase
+        /// 是否为订单或采购
+        /// </summary>
+        public bool? IsOrder { get; init; }
+
+        /// <summary>
         /// Comment
         /// 评价
         /// </summary>

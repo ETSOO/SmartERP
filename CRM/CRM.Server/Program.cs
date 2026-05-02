@@ -220,6 +220,7 @@ services.AddScoped<IPersonInfoService, PersonInfoService>();
 services.AddScoped<IPersonProductService, PersonProductService>();
 services.AddScoped<IPersonProfileService, PersonProfileService>();
 services.AddScoped<IPOService, POService>();
+services.AddScoped<IPOLineService, POLineService>();
 services.AddScoped<IProductService, ProductService>();
 services.AddScoped<IProductCategoryService, ProductCategoryService>();
 services.AddScoped<IPromotionService, PromotionService>();
@@ -303,6 +304,7 @@ api.MapAuth()
     .MapPersonProduct()
     .MapPersonProfile()
     .MapPO()
+    .MapPOLine()
     .MapProduct()
     .MapProductCategory()
     .MapPromotion()

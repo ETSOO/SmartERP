@@ -623,7 +623,7 @@ namespace CRM.Server.Services
                 .Where(p => p.Id == id && (isLocalManage || p.UserId == User.Oid) && p.Status < EntityStatus.Inactivated)
                 .Select(o => new
                 {
-                    Order = o,
+                    PO = o,
                     Lines = (short)o.OrderLines.Count,
                     Items = o.OrderLines.Sum(l => l.Qty),
                     LineDiscount = o.OrderLines.Sum(l => l.Discount),
@@ -636,20 +636,20 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            var order = result.Order;
+            var po = result.PO;
             var lines = result.Lines;
             var items = result.Items;
             var lineDiscount = result.LineDiscount;
             var totalAmount = result.TotalAmount;
 
             // Attach the order to the context for tracking
-            _db.Attach(order);
+            _db.Attach(po);
 
             // Check supplier data
             var supplierRQ = new SupplierReadForPurchaseRQ
             {
-                SupplierId = order.BuyerId,
-                Currency = order.Currency
+                SupplierId = po.SellerId,
+                Currency = po.Currency
             };
 
             var supplier = await _supplierService.ReadForPurchaseAsync(supplierRQ, cancellationToken);
@@ -668,11 +668,11 @@ namespace CRM.Server.Services
             var orderAmount = totalAmount - orderDiscount;
 
             // Update
-            order.Lines = lines;
-            order.LineDiscount = lineDiscount;
-            order.Amount = orderAmount;
-            order.Discount = orderDiscount;
-            order.Promotions = promotions;
+            po.Lines = lines;
+            po.LineDiscount = lineDiscount;
+            po.Amount = orderAmount;
+            po.Discount = orderDiscount;
+            po.Promotions = promotions;
 
             // Save
             await _db.SaveChangesAsync(cancellationToken);

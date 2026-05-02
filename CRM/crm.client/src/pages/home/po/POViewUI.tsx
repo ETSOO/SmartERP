@@ -228,7 +228,7 @@ export function POViewUI(props: POViewUIProps) {
                   onClick={() =>
                     POUIUtils.addPOLine(
                       {
-                        customerId: item.customerId,
+                        supplierId: item.supplierId,
                         poId: item.id,
                         currency: item.currency
                       },
@@ -255,7 +255,7 @@ export function POViewUI(props: POViewUIProps) {
         },
         {
           data: "delivery",
-          label: "poDelivery",
+          label: "orderDelivery",
           singleRow: "small"
         },
         {
@@ -264,7 +264,7 @@ export function POViewUI(props: POViewUIProps) {
         },
         {
           data: "payment",
-          label: "poPayment",
+          label: "orderPayment",
           singleRow: "small"
         },
         {
@@ -274,16 +274,16 @@ export function POViewUI(props: POViewUIProps) {
         {
           data: (item) => (
             <ButtonLink
-              href={`./../../../contact/view/${item.customerId}`}
+              href={`./../../../contact/view/${item.supplierId}`}
               size="small"
               variant="outlined"
-              disabled={!app.owns(Permissions.Customer.View)}
+              disabled={!app.owns(Permissions.Supplier.View)}
             >
-              {item.customerName}
+              {item.supplierName}
             </ButtonLink>
           ),
           singleRow: "large",
-          label: "customer"
+          label: "supplier"
         },
         ["startDate", GridDataType.DateTime],
         ["endDate", GridDataType.DateTime],

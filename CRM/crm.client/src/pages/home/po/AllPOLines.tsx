@@ -15,7 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { POLineQueryAllData } from "@etsoo/smarterp-crm";
+import { POLineQueryAllData, ProductScope } from "@etsoo/smarterp-crm";
 import { DataTypes, DateUtils, Utils } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
@@ -33,7 +33,6 @@ import { IdentityTypeFlags } from "@etsoo/appscript";
 
 const template = {
   source: "string",
-  customerId: "number",
   productId: "number",
   supplierId: "number",
   userId: "number",
@@ -53,7 +52,6 @@ export default function AllPOLines() {
     "actions",
     "amount",
     "creation",
-    "customer",
     "keywords",
     "poLineStartTime",
     "poSource",
@@ -62,8 +60,8 @@ export default function AllPOLines() {
     "status",
     "title",
     "view",
-    "viewCustomer",
-    "viewPO"
+    "viewPO",
+    "viewSupplier"
   );
 
   // Refs
@@ -84,10 +82,14 @@ export default function AllPOLines() {
       })}
       mRef={ref}
       quickAction={(data) => navigate(`./../viewline/${data.id}`)}
-      defaultPOBy={[{ field: "creation", desc: true }]}
+      defaultOrderBy={[{ field: "creation", desc: true }]}
       fieldTemplate={template}
       fields={(data) => [
-        <ProductList search idValue={data.productId} />,
+        <ProductList
+          search
+          idValue={data.productId}
+          rq={{ scope: ProductScope.Purchase }}
+        />,
         <NumberInputField search name="qtyStart" label={labels.qtyStart} />,
         <SearchField
           label={labels.poSource}
@@ -95,17 +97,13 @@ export default function AllPOLines() {
           defaultValue={data.source}
           minChars={2}
         />,
-        <CustomerList search idValue={data.customerId} />,
         <PersonList
           label={labels.supplier}
           name="supplierId"
           search
           rq={{
             identityType:
-              IdentityTypeFlags.Customer |
-              IdentityTypeFlags.Supplier |
-              IdentityTypeFlags.User |
-              IdentityTypeFlags.Org
+              IdentityTypeFlags.Customer | IdentityTypeFlags.Supplier
           }}
           idValue={data.supplierId}
         />,
@@ -195,7 +193,7 @@ export default function AllPOLines() {
         },
         {
           width: 280,
-          header: labels.customer,
+          header: labels.supplier,
           cellBoxStyle: {
             paddingTop: "10px!important",
             paddingBottom: "10px!important"
@@ -207,14 +205,14 @@ export default function AllPOLines() {
 
             return (
               <React.Fragment>
-                <Typography variant="body2">{data.customer}</Typography>
+                <Typography variant="body2">{data.supplier}</Typography>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: "flex", gap: 1 }}
                 >
-                  <LinkEx to={`./../../contact/view/${data.customerId}`}>
-                    {labels.viewCustomer}
+                  <LinkEx to={`./../../contact/view/${data.supplierId}`}>
+                    {labels.viewSupplier}
                   </LinkEx>
                   <LinkEx to={`./../../po/view/${data.poId}`}>
                     {labels.viewPO}
@@ -301,9 +299,9 @@ export default function AllPOLines() {
                 action: `./../viewline/${data.id}`
               },
               {
-                label: labels.viewCustomer,
+                label: labels.viewSupplier,
                 icon: <GroupsIcon />,
-                action: `./../../contact/view/${data.customerId}`
+                action: `./../../contact/view/${data.supplierId}`
               },
               {
                 label: labels.viewPO,
@@ -318,7 +316,7 @@ export default function AllPOLines() {
                   currency: data.currency
                 })}
               </Typography>
-              <Typography variant="body2">{data.customer}</Typography>
+              <Typography variant="body2">{data.supplier}</Typography>
               <Typography variant="caption" color="text.secondary">
                 {data.description}
               </Typography>

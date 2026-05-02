@@ -1,4 +1,5 @@
 import {
+  CustomFieldUI,
   HBox,
   InputField,
   MenuButton,
@@ -21,7 +22,8 @@ import { ProductList } from "@etsoo/smarterp-crm/components";
 import { DomUtils, NumberUtils } from "@etsoo/shared";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
-import { Typography } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
+import { CustomFieldRef } from "@etsoo/appscript";
 
 function OrderLineUI({
   mRef,
@@ -101,6 +103,12 @@ function OrderLineUI({
         description
       };
 
+      if (modifiersRef.current) {
+        const modifiers = modifiersRef.current.getValue();
+        rq.data ??= {};
+        rq.data.modifiers = modifiers;
+      }
+
       return rq;
     }
   }));
@@ -133,7 +141,7 @@ function OrderLineUI({
           );
 
           setPrice(price);
-          setQty(1);
+          setQty(sale.minQty ?? 1);
         });
     }
   };
@@ -147,6 +155,10 @@ function OrderLineUI({
         : "")
     );
   };
+
+  const customFields = sale?.modifiers ?? [];
+  const modifiersRef =
+    React.useRef<CustomFieldRef<Record<string, unknown>>>(null);
 
   return (
     <form ref={formRef}>
@@ -189,6 +201,9 @@ function OrderLineUI({
             fullWidth
             name="qty"
             label={labels.qty}
+            min={sale?.minQty}
+            max={sale?.capQty}
+            step={sale?.stepQty}
             value={qty ?? ""}
             onChange={(input) => setQty(NumberUtils.parse(input.target.value))}
             helperText={
@@ -240,6 +255,12 @@ function OrderLineUI({
           multiline
           rows={2}
         />
+        {customFields.length > 0 && (
+          <React.Fragment>
+            <Divider />
+            <CustomFieldUI fields={customFields} mref={modifiersRef} />
+          </React.Fragment>
+        )}
       </VBox>
     </form>
   );

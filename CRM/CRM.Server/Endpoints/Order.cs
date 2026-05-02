@@ -23,6 +23,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("List", (IOrderService service, OrderListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get order list / 获取订单列表").WithTags("Order");
 
+            g.MapPost("ListAll", (IOrderService service, OrderListAllRQ rq, CancellationToken cancellationToken) => service.ListAllAsync(rq, cancellationToken))
+                .WithDescription("Get order / PO list / 获取订单/采购列表").WithTags("Order");
+
             g.MapPost("Query", (IOrderService service, OrderQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query order info / 查询订单信息").WithTags("Order");
 

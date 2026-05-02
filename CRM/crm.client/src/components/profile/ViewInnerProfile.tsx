@@ -90,8 +90,10 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
     "description",
     "dropFilesLabel",
     "edit",
+    "order",
     "owner",
     "people",
+    "po",
     "sendEmail",
     "view"
   );
@@ -253,16 +255,17 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                   },
                   {
                     data: (item) =>
-                      item.orderTitle ? (
+                      item.orderTitle && orderId == null ? (
                         <ButtonLink
-                          href={`./../../../order/view/${item.orderId}`}
+                          href={`./../../../${item.isOrder ? "order" : "po"}/view/${item.orderId}`}
                           size="small"
                           variant="outlined"
                         >
                           {item.orderTitle}
                         </ButtonLink>
                       ) : undefined,
-                    label: "order",
+                    label: (item) =>
+                      (item.isOrder ? labels.order : labels.po) + ":",
                     singleRow: true,
                     horizontal: true
                   },

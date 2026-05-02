@@ -46,7 +46,7 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
     "creation",
     "keywords",
     "price",
-    "qty",
+    "supplier",
     "title",
     "view"
   );
@@ -101,16 +101,17 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
           cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
-          field: "assetQty",
-          header: labels.assetQty,
-          type: GridDataType.Number,
-          width: 108
+          field: "supplierName",
+          header: labels.supplier
         },
         {
-          field: "qty",
-          header: labels.qty,
-          type: GridDataType.Number,
-          width: 108
+          field: "assetQty",
+          header: labels.assetQty,
+          valueFormatter: ({ data }) =>
+            data == null
+              ? undefined
+              : `${app.formatNumber(data.qty)} x ${app.formatNumber(data.assetQty)}`,
+          width: 118
         },
         {
           field: "costPrice",
@@ -148,7 +149,7 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
               <React.Fragment>
                 <IconButtonLink
                   title={labels.view}
-                  href={`./../../../../order/viewline/${data.id}`}
+                  href={`./../../../../${data.isOrder ? "order" : "po"}/viewline/${data.id}`}
                 >
                   <ArticleIcon />
                 </IconButtonLink>
@@ -166,15 +167,17 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../../../../order/viewline/${data.id}`
+                action: `./../../../../${data.isOrder ? "order" : "po"}/viewline/${data.id}`
               }
             ],
             <React.Fragment>
               <Typography variant="body2">
-                {labels.assetQty}: {app.formatNumber(data.assetQty)}
+                {labels.assetQty}: {app.formatNumber(data.qty)} x{" "}
+                {app.formatNumber(data.assetQty)}
               </Typography>
               <Typography component="div" variant="caption">
-                {app.formatNumber(data.price)} x {app.formatNumber(data.qty)}
+                {app.formatNumber(data.price)},{" "}
+                {app.formatNumber(data.costPrice)}
               </Typography>
             </React.Fragment>
           ];

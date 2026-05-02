@@ -21,7 +21,11 @@ import { useNavigate } from "react-router-dom";
 import ArticleIcon from "@mui/icons-material/Article";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import { OrderLineQueryData, Permissions } from "@etsoo/smarterp-crm";
+import {
+  OrderLineQueryData,
+  Permissions,
+  ProductScope
+} from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import { EntityStatus } from "@etsoo/appscript";
@@ -37,7 +41,7 @@ export type AllPOLinesProps = {
   poId: number;
   poStatus: EntityStatus;
   currency: string;
-  customerId: number;
+  supplierId: number;
   refresh: () => Promise<void>;
 };
 
@@ -46,7 +50,7 @@ export function POLines(props: AllPOLinesProps) {
   const navigate = useNavigate();
 
   // Destruct
-  const { poId, poStatus, currency, customerId, refresh } = props;
+  const { poId, poStatus, currency, supplierId, refresh } = props;
 
   // Labels
   const labels = app.getLabels(
@@ -83,7 +87,7 @@ export function POLines(props: AllPOLinesProps) {
                 size="medium"
                 color="primary"
                 onClick={() =>
-                  POUIUtils.addPOLine({ poId, currency, customerId }, () => {
+                  POUIUtils.addPOLine({ poId, currency, supplierId }, () => {
                     reloadData();
                     refresh();
                   })
@@ -99,7 +103,11 @@ export function POLines(props: AllPOLinesProps) {
       quickAction={(data) => navigate(`./../../viewline/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
-        <ProductList search idValue={data.productId} />,
+        <ProductList
+          search
+          idValue={data.productId}
+          rq={{ scope: ProductScope.Purchase }}
+        />,
         <SearchField
           label={labels.keywords}
           name="keyword"
@@ -109,8 +117,8 @@ export function POLines(props: AllPOLinesProps) {
         <NumberInputField search name="qtyStart" label={labels.qtyStart} />
       ]}
       loadData={(data) =>
-        app.orderLineApi.query(
-          { orderId: poId, ...data },
+        app.poLineApi.query(
+          { poId, ...data },
           {
             defaultValue: [],
             showLoading: false

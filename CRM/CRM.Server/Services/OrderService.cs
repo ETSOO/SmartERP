@@ -350,6 +350,11 @@ namespace CRM.Server.Services
                         q = q.Where(o => o.BuyerId == rq.CustomerId.Value);
                     }
 
+                    if (rq.SupplierId.HasValue)
+                    {
+                        q = q.Where(o => o.SellerId == rq.SupplierId.Value);
+                    }
+
                     if (!string.IsNullOrEmpty(rq.Currency))
                     {
                         q = q.Where(o => o.Currency == rq.Currency);
@@ -478,6 +483,35 @@ namespace CRM.Server.Services
                     Id = o.Id,
                     Title = o.Title
                 }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// List order JSON data
+        /// 订单列表JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<OrderListAllData[]> ListAllAsync(OrderListAllRQ rq, CancellationToken cancellationToken = default)
+        {
+            await _commonService.UpdateTagAsync(rq, User.OrganizationInt, cancellationToken);
+
+            return await CreateQuery(rq, (q) =>
+            {
+                if (rq.PersonId.HasValue)
+                {
+                    var personId = rq.PersonId.Value;
+                    q = q.Where(o => o.BuyerId == personId || o.SellerId == personId);
+                }
+
+                return q;
+            })
+            .Select(o => new OrderListAllData
+            {
+                Id = o.Id,
+                Title = o.Title,
+                IsOrder = o.IsOrder
+            }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>

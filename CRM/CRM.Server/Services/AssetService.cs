@@ -421,6 +421,11 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.SupplierId));
             }
 
+            if (rq.IsModified(nameof(rq.ProductId)) && productId.HasValue)
+            {
+                asset.ProductId = productId.Value;
+            }
+
             var hasFinanceChange = false;
 
             // Duplicate test
@@ -428,7 +433,7 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.Sn)) && !string.IsNullOrEmpty(rq.Sn))
             {
                 var sn = rq.Sn.ToLower();
-                if (await _db.Assets(orgId).AnyAsync(p => p.Id != rq.Id && p.ProductId == productId && p.Sn == sn, cancellationToken))
+                if (await _db.Assets(orgId).AnyAsync(p => p.Id != rq.Id && p.ProductId == asset.ProductId && p.Sn == sn, cancellationToken))
                 {
                     return ApplicationErrors.ItemExists.AsResult(nameof(rq.Sn));
                 }
@@ -440,11 +445,6 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.PersonId)) && personId.HasValue)
             {
                 asset.PersonId = personId.Value;
-            }
-
-            if (rq.IsModified(nameof(rq.ProductId)) && productId.HasValue)
-            {
-                asset.ProductId = productId.Value;
             }
 
             if (rq.IsModified(nameof(rq.SupplierId)))

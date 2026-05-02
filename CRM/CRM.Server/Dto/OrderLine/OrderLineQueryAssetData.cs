@@ -15,6 +15,12 @@ namespace CRM.Server.Dto.OrderLine
         public long Id { get; init; }
 
         /// <summary>
+        /// Is order or purchase order
+        /// 是订单还是采购
+        /// </summary>
+        public bool IsOrder { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>

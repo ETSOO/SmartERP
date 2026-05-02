@@ -583,6 +583,7 @@ namespace CRM.Server.Services
                 .Select(p => new POLineViewData
                 {
                     Id = p.Id,
+                    BuyerId = p.Order.BuyerId,
                     POTitle = p.Order.Title,
                     POId = p.OrderId,
                     Currency = p.Order.Currency,
@@ -604,7 +605,8 @@ namespace CRM.Server.Services
                     UserName = (p.User == null ? null : p.User.Name),
                     UserId = p.UserId,
                     POUserId = p.Order.UserId,
-                    SupplierId = p.Order.SellerId,
+                    SupplierId = p.SupplierId,
+                    SupplierName = p.Supplier == null ? null : p.Supplier.Name,
                     AssetId = p.AssetId,
                     AssetSn = (p.Asset == null ? null : p.Asset.Sn),
                     Modifiers = p.Product.Modifiers,

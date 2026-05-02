@@ -7,6 +7,7 @@ namespace CRM.Server.RQ.Order
     /// Order list request data
     /// 订单列表请求数据
     /// </summary>
+    [JsonDerivedType(typeof(OrderListAllRQ))]
     [JsonDerivedType(typeof(OrderQueryRQ))]
     public record OrderListRQ : QueryLongRQ, IQueryTag
     {
@@ -33,6 +34,12 @@ namespace CRM.Server.RQ.Order
         /// 客户编号
         /// </summary>
         public long? CustomerId { get; init; }
+
+        /// <summary>
+        /// Supplier id
+        /// 供应商编号
+        /// </summary>
+        public long? SupplierId { get; init; }
 
         /// <summary>
         /// Currency

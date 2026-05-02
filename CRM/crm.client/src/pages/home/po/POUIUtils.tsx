@@ -1,4 +1,5 @@
 import {
+  CustomFieldUI,
   HBox,
   InputField,
   MenuButton,
@@ -10,18 +11,20 @@ import {
 } from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
 import {
+  OrderUtils,
   POLineCreateRQ,
-  POUtils,
   ProductListData,
+  ProductScope,
   PromotionItem,
-  QueryForSaleData
+  QueryForPurchaseData
 } from "@etsoo/smarterp-crm";
 import React from "react";
 import { ProductList } from "@etsoo/smarterp-crm/components";
 import { DomUtils, NumberUtils } from "@etsoo/shared";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
-import { Typography } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
+import { CustomFieldRef } from "@etsoo/appscript";
 
 function POLineUI({
   mRef,
@@ -46,17 +49,23 @@ function POLineUI({
   // State
   const [price, setPrice] = React.useState<number>();
   const [qty, setQty] = React.useState<number>();
-  const [sale, setSale] = React.useState<QueryForSaleData>();
+  const [purchase, setPurchase] = React.useState<QueryForPurchaseData>();
 
   const promotions = React.useMemo(() => {
-    if (sale == null || qty == null || qty <= 0 || price == null || price < 0)
+    if (
+      purchase == null ||
+      qty == null ||
+      qty <= 0 ||
+      price == null ||
+      price < 0
+    )
       return [];
 
-    return POUtils.calculatePromotions(sale.promotions, undefined, {
+    return OrderUtils.calculatePromotions(purchase.promotions, undefined, {
       qty,
       price
     });
-  }, [sale, qty, price]);
+  }, [purchase, qty, price]);
 
   const symbol = NumberUtils.getCurrencySymbol(data.currency);
 
@@ -101,6 +110,12 @@ function POLineUI({
         description
       };
 
+      if (modifiersRef.current) {
+        const modifiers = modifiersRef.current.getValue();
+        rq.data ??= {};
+        rq.data.modifiers = modifiers;
+      }
+
       return rq;
     }
   }));
@@ -112,9 +127,9 @@ function POLineUI({
 
     if (value != null) {
       app.productApi
-        .queryForSale(
+        .queryForPurchase(
           {
-            customerId: data.customerId,
+            supplierId: data.supplierId,
             currency: data.currency,
             ids: [value.id]
           },
@@ -123,17 +138,23 @@ function POLineUI({
         .then((products) => {
           if (products == null || products.length === 0) return;
 
-          const sale = products[0];
-          setSale(sale);
+          const purchase = products[0];
+          setPurchase(purchase);
 
-          const price = Math.min(
-            sale.retailPrice,
-            sale.promotionPrice ?? Number.MAX_SAFE_INTEGER,
-            sale.customerRetailPrice ?? Number.MAX_SAFE_INTEGER
-          );
+          let price = purchase.costPrice;
+          if (
+            price == null ||
+            (purchase.supplierRetailPrice != null &&
+              price < purchase.supplierRetailPrice)
+          ) {
+            price = purchase.supplierRetailPrice;
+          }
 
-          setPrice(price);
-          setQty(1);
+          if (price != null) {
+            setPrice(price);
+          }
+
+          setQty(purchase.minQty ?? 1);
         });
     }
   };
@@ -148,10 +169,19 @@ function POLineUI({
     );
   };
 
+  const customFields = purchase?.modifiers ?? [];
+  const modifiersRef =
+    React.useRef<CustomFieldRef<Record<string, unknown>>>(null);
+
   return (
     <form ref={formRef}>
       <VBox spacing={2} sx={{ paddingTop: 1 }}>
-        <ProductList fullWidth inputRequired onValueChange={changeProduct} />
+        <ProductList
+          fullWidth
+          inputRequired
+          rq={{ scope: ProductScope.Purchase }}
+          onValueChange={changeProduct}
+        />
         <InputField
           fullWidth
           name="title"
@@ -189,14 +219,17 @@ function POLineUI({
             fullWidth
             name="qty"
             label={labels.qty}
+            min={purchase?.minQty}
+            max={purchase?.capQty}
+            step={purchase?.stepQty}
             value={qty ?? ""}
             onChange={(input) => setQty(NumberUtils.parse(input.target.value))}
             helperText={
-              sale != null &&
-              sale.promotions.length > 0 && (
+              purchase != null &&
+              purchase.promotions.length > 0 && (
                 <HBox spacing={1}>
                   <MenuButton<PromotionItem>
-                    items={sale.promotions}
+                    items={purchase.promotions}
                     labelField={titleFormatter}
                     button={(clickHandler) => {
                       return (
@@ -206,11 +239,11 @@ function POLineUI({
                           sx={{ marginLeft: 1.5 }}
                           title={[
                             labels.promotions,
-                            ...sale.promotions.map(titleFormatter)
+                            ...purchase.promotions.map(titleFormatter)
                           ].join("\n")}
                         >
                           <Badge
-                            badgeContent={sale.promotions.length}
+                            badgeContent={purchase.promotions.length}
                             color="secondary"
                           />
                         </IconButton>
@@ -240,6 +273,12 @@ function POLineUI({
           multiline
           rows={2}
         />
+        {customFields.length > 0 && (
+          <React.Fragment>
+            <Divider />
+            <CustomFieldUI fields={customFields} mref={modifiersRef} />
+          </React.Fragment>
+        )}
       </VBox>
     </form>
   );
@@ -250,7 +289,7 @@ export namespace POUIUtils {
    * Add po line type
    */
   export type AddPOLineType = {
-    customerId: number;
+    supplierId: number;
     poId: number;
     currency: string;
   };

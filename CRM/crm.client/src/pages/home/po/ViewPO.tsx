@@ -57,7 +57,7 @@ export default function ViewPO() {
                     poId={id}
                     poStatus={data.status}
                     currency={data.currency}
-                    customerId={data.customerId}
+                    supplierId={data.supplierId}
                     refresh={loadData}
                   />
                 ),
@@ -65,15 +65,15 @@ export default function ViewPO() {
               icon: <ListAltIcon />,
               iconPosition: "start"
             },
-            ...(app.ownsIdentity(IdentityTypeFlags.Customer, "QueryProfile")
+            ...(app.ownsIdentity(IdentityTypeFlags.Supplier, "QueryProfile")
               ? [
                   {
                     children: (visible, index) =>
                       visible && (
                         <Profiles
-                          personId={data.customerId}
-                          identityType={IdentityTypeFlags.Customer}
-                          poId={id}
+                          personId={data.supplierId}
+                          identityType={IdentityTypeFlags.Supplier}
+                          orderId={id}
                           index={index}
                         />
                       ),

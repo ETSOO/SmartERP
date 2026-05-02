@@ -17,6 +17,12 @@ namespace CRM.Server.Dto.POLine
         public long Id { get; init; }
 
         /// <summary>
+        /// Buyer id
+        /// 购买方编号
+        /// </summary>
+        public long BuyerId { get; init; }
+
+        /// <summary>
         /// PO title
         /// 采购标题
         /// </summary>
@@ -86,7 +92,7 @@ namespace CRM.Server.Dto.POLine
         /// Qty delivered
         /// 已交付数量
         /// </summary>
-        public decimal QtyDelivered { get; init; }
+        public decimal? QtyDelivered { get; init; }
 
         /// <summary>
         /// Asset qty
@@ -146,7 +152,13 @@ namespace CRM.Server.Dto.POLine
         /// Supplier id
         /// 供应商编号
         /// </summary>
-        public long SupplierId { get; init; }
+        public long? SupplierId { get; init; }
+
+        /// <summary>
+        /// Supplier name
+        /// 供应商名称
+        /// </summary>
+        public string? SupplierName { get; init; }
 
         /// <summary>
         /// Asset id

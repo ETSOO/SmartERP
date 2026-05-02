@@ -6,7 +6,6 @@ import {
   IconButtonLink,
   InputField,
   MenuButton,
-  MoneyInputField,
   OptionBool,
   VBox,
   ViewPage
@@ -30,7 +29,7 @@ import { DataTypes, DateUtils, DomUtils } from "@etsoo/shared";
 import { UserTiplist } from "@etsoo/smarterp-core/components";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
-import { AssetList, SupplierList } from "@etsoo/smarterp-crm/components";
+import { AssetList } from "@etsoo/smarterp-crm/components";
 import { EntityStatus } from "@etsoo/appscript";
 
 function CompleteUI({
@@ -81,7 +80,7 @@ function CompleteUI({
         }
 
         const result = await app.assetApi.create({
-          personId: data.customerId,
+          personId: data.buyerId,
           productId: data.productId,
           sn,
           expiry,
@@ -127,8 +126,6 @@ function CompleteUI({
     });
   };
 
-  const [supplierId, setSupplierId] = React.useState<number>();
-
   return (
     <VBox spacing={2} sx={{ paddingTop: 1 }}>
       {requiresAsset && (
@@ -136,25 +133,12 @@ function CompleteUI({
           <AssetList
             fullWidth
             inputRequired
-            rq={{ personId: data.customerId, productId: data.productId }}
+            rq={{ personId: data.buyerId, productId: data.productId }}
           />
           <Button onClick={() => addAsset(data)} variant="outlined">
             {labels.add}
           </Button>
         </HBox>
-      )}
-      <SupplierList
-        fullWidth
-        onValueChange={(item) => setSupplierId(item?.id)}
-        rq={{ productId: data.productId }}
-      />
-      {supplierId && (
-        <MoneyInputField
-          fullWidth
-          required
-          name="costPrice"
-          label={labels.costPrice}
-        />
       )}
     </VBox>
   );
@@ -177,10 +161,7 @@ export default function ViewPOLine() {
   );
 
   // Load data
-  const loadData = React.useCallback(
-    async () => app.poLineApi.read(id),
-    [id]
-  );
+  const loadData = React.useCallback(async () => app.poLineApi.read(id), [id]);
 
   const editable = app.owns(Permissions.PO.Edit);
 
@@ -276,9 +257,7 @@ export default function ViewPOLine() {
 
         const result = await app.poLineApi.complete({
           id: data.id,
-          assetId,
-          supplierId,
-          costPrice
+          assetId
         });
 
         if (result == null) return;
@@ -383,6 +362,13 @@ export default function ViewPOLine() {
         ["price", GridDataType.Money],
         ["qty", GridDataType.Number],
         {
+          data: (item) =>
+            item.qtyDelivered == null
+              ? undefined
+              : `${app.formatNumber(item.qtyDelivered)} (${((item.qtyDelivered * 100.0) / item.qty).toExact(1)}%)`,
+          label: "qtyDelivered"
+        },
+        {
           data: (item) => {
             if (item.discount === 0) return undefined;
             const promotions = item.promotions ?? [];
@@ -467,7 +453,7 @@ export default function ViewPOLine() {
         },
         {
           data: "startTime",
-          label: "poLineStartTime",
+          label: "orderLineStartTime",
           dataType: GridDataType.DateTime
         },
         ["endTime", GridDataType.DateTime],

@@ -70,7 +70,9 @@ export default function ViewProfile() {
     "leaveOrg",
     "logo",
     "noChanges",
+    "order",
     "people",
+    "po",
     "profile",
     "sendEmail"
   );
@@ -179,14 +181,14 @@ export default function ViewProfile() {
                     data: (item) =>
                       item.orderTitle ? (
                         <ButtonLink
-                          href={`./../${item.orderId}`}
+                          href={`./../../../${item.isOrder ? "order" : "po"}/view/${item.orderId}`}
                           size="small"
                           variant="outlined"
                         >
                           {item.orderTitle}
                         </ButtonLink>
                       ) : undefined,
-                    label: "order",
+                    label: (item) => (item.isOrder ? labels.order : labels.po),
                     singleRow: true
                   },
                   {

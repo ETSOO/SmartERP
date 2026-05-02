@@ -133,7 +133,7 @@ namespace CRM.Server.Services
                 Comment = action.Comment,
                 Location = action.Location,
                 LocationId = action.LocationId,
-                HappenDate = action.HappenDate ?? DateTimeOffset.Now,
+                HappenDate = action.HappenDate ?? DateTimeOffset.UtcNow,
                 HappenDateEnd = action.HappenDateEnd,
                 UserId = userId,
                 UserRole = action.UserRole,

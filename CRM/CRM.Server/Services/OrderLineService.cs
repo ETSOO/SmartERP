@@ -45,14 +45,19 @@ namespace CRM.Server.Services
             _orderService = orderService;
         }
 
-        private IQueryable<OrderLine> CreateQuery(OrderLineListRQ rq, Func<IQueryable<OrderLine>, IQueryable<OrderLine>>? filters = null)
+        private IQueryable<OrderLine> CreateQuery(OrderLineListRQ rq, Func<IQueryable<OrderLine>, IQueryable<OrderLine>>? filters = null, bool isOrder = true)
         {
             var orgId = User.OrganizationInt;
 
             return _db.OrderLines.AsNoTracking()
-                .Where(p => p.Order.CoreOrganizationId == orgId && p.Order.IsOrder)
+                .Where(p => p.Order.CoreOrganizationId == orgId)
                 .QueryEtsoo(rq, p => p.Id, p => p.Status, q =>
                 {
+                    if (isOrder)
+                    {
+                        q = q.Where(p => p.Order.IsOrder);
+                    }
+
                     if (rq.OrderId.HasValue)
                     {
                         q = q.Where(p => p.OrderId == rq.OrderId.Value);
@@ -558,11 +563,12 @@ namespace CRM.Server.Services
                 }
 
                 return q;
-            })
+            }, false)
             .TagWith(nameof(QueryAssetAsync))
             .Select(p => new OrderLineQueryAssetData
             {
                 Id = p.Id,
+                IsOrder = p.Order.IsOrder,
                 Title = p.Title,
                 CostPrice = p.CostPrice,
                 SupplierId = p.SupplierId,

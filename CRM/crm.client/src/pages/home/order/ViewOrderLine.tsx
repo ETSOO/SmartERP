@@ -383,6 +383,13 @@ export default function ViewOrderLine() {
         ["price", GridDataType.Money],
         ["qty", GridDataType.Number],
         {
+          data: (item) =>
+            item.qtyDelivered == null
+              ? undefined
+              : `${app.formatNumber(item.qtyDelivered)} (${((item.qtyDelivered * 100.0) / item.qty).toExact(1)}%)`,
+          label: "qtyDelivered"
+        },
+        {
           data: (item) => {
             if (item.discount === 0) return undefined;
             const promotions = item.promotions ?? [];

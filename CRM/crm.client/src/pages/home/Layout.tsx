@@ -490,7 +490,7 @@ export default function Home() {
           {
             segment: "view",
             pattern: "view/:id",
-            title: labels.viewOrder,
+            title: labels.view,
             hidden: true
           },
           {

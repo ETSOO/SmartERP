@@ -79,6 +79,7 @@ export default function AddProfile() {
 
   // Refs
   const editorRef = React.useRef<EOEditorElement>(null);
+  const isOrderRef = React.useRef<boolean>(undefined);
 
   // Formik
   const formik = useFormik<DataType>({
@@ -124,7 +125,7 @@ export default function AddProfile() {
         result = await app.profileApi.update(rq);
 
         if (!!orderId) {
-          redirectUrl = `./../../../order/view/${orderId}?index=${index}`;
+          redirectUrl = `./../../../${isOrderRef.current ? "order" : "po"}/view/${orderId}?index=${index}`;
         } else {
           redirectUrl = index
             ? `./../../../contact/view/${v.personId}?id=${id}&index=${index}`
@@ -142,7 +143,7 @@ export default function AddProfile() {
         result = await app.profileApi.create(rq);
 
         if (!!orderId) {
-          redirectUrl = `./../../order/view/${orderId}?index=${index}`;
+          redirectUrl = `./../../${isOrderRef.current ? "order" : "po"}/view/${orderId}?index=${index}`;
         } else {
           redirectUrl = index
             ? `./../../contact/view/${v.personId}?id=${result?.data?.id}&index=${index}`
@@ -303,10 +304,13 @@ export default function AddProfile() {
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
         <OrderAllList
-          rq={{ enabled: undefined }}
+          rq={{ personId: formik.values.personId, enabled: undefined }}
           idValue={orderId}
           disabled={!!orderId}
-          inputOnChange={formik.handleChange}
+          onValueChange={(o) => {
+            isOrderRef.current = o?.isOrder;
+            formik.setFieldValue("orderId", o?.id);
+          }}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>

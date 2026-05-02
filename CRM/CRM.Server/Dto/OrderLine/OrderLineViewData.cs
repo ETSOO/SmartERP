@@ -86,7 +86,7 @@ namespace CRM.Server.Dto.OrderLine
         /// Qty delivered
         /// 已交付数量
         /// </summary>
-        public decimal QtyDelivered { get; init; }
+        public decimal? QtyDelivered { get; init; }
 
         /// <summary>
         /// Asset qty
