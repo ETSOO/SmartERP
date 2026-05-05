@@ -66,16 +66,22 @@ namespace PlatformShared.Database.Models
         Assemble = 16,
 
         /// <summary>
+        /// Disassemble
+        /// 拆解
+        /// </summary>
+        Disassemble = 32,
+
+        /// <summary>
         /// Production
         /// 生产
         /// </summary>
-        Production = 32,
+        Production = 64,
 
         /// <summary>
         /// Inventory
         /// 库存管理
         /// </summary>
-        Inventory = 64
+        Inventory = 128
     }
 
     /// <summary>
