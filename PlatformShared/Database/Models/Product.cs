@@ -60,6 +60,12 @@ namespace PlatformShared.Database.Models
         Purchase = 4,
 
         /// <summary>
+        /// Assemble
+        /// 组装
+        /// </summary>
+        Assemble = 16,
+
+        /// <summary>
         /// Production
         /// 生产
         /// </summary>

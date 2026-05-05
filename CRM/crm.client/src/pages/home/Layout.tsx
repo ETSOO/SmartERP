@@ -81,6 +81,7 @@ export default function Home() {
     "editLogo",
     "editProfile",
     "info",
+    "inventory",
     "menuHome",
     "newTask",
     "offerings",
@@ -95,7 +96,6 @@ export default function Home() {
     "promotions",
     "purchases",
     "signoutSuccess",
-    "simpleInventory",
     "sortCategory",
     "sortOrderDelivery",
     "sortOrderPayment",
@@ -562,7 +562,7 @@ export default function Home() {
       },
       app.userData?.system?.hasInventory === true && {
         segment: "home/inventory",
-        title: labels.simpleInventory,
+        title: labels.inventory,
         icon: <LocalShippingIcon />
       },
       {

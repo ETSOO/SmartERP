@@ -513,7 +513,7 @@ namespace CRM.Server.Services
             {
                 // Add profile
                 var title = $"{Resources.AssetUpdate} - {product.Name} (${asset.Sn})";
-                var comment = $"<p>{changes.Select(c => $"{c.Name}: {HttpUtility.HtmlEncode(c.OriginalValue)} => {HttpUtility.HtmlEncode(c.CurrentValue)}")}<br/></p>";
+                var comment = $"<p>{string.Join("<br/>", changes.Select(c => $"{c.Name}: {HttpUtility.HtmlEncode(c.OriginalValue)} => {HttpUtility.HtmlEncode(c.CurrentValue)}"))}</p>";
                 var data = JsonSerializer.Serialize(changes, ModelJsonSerializerContext.Default.IEnumerableEntityChangedProperty);
 
                 var profile = new PersonProfileAction
