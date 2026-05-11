@@ -35,5 +35,17 @@ namespace CRM.Server.RQ.OrderLine
         /// 资产编号
         /// </summary>
         public int? AssetId { get; init; }
+
+        /// <summary>
+        /// Has BOM line id or not
+        /// 是否有BOM行编号
+        /// </summary>
+        public bool? HasBomId { get; init; }
+
+        /// <summary>
+        /// BOM line id
+        /// BOM行编号
+        /// </summary>
+        public long? BomId { get; init; }
     }
 }

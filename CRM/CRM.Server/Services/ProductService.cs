@@ -344,6 +344,78 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Edit BOMs
+        /// 编辑物料清单
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> EditBomsAsync(ProductEditBomsRQ rq, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Edit, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var parentId = rq.ParentId;
+
+            // Check product
+            var product = await _db.Products(orgId)
+                .Where(p => p.Id == parentId)
+                .Select(p => new Product { Id = p.Id, Boms = p.Boms })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (product == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (rq.Items.Any())
+            {
+                // Check BOM items
+                var bomProductIds = rq.Items.Select(i => i.ProductId).ToArray();
+                var bomProducts = await _db.Products(orgId).AsNoTracking()
+                    .Where(p => bomProductIds.Contains(p.Id))
+                    .Select(p => new { p.Id, Boms = p.Boms.Select(b => b.ProductId) })
+                    .ToArrayAsync(cancellationToken);
+
+                if (bomProductIds.Length != bomProducts.Length)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.Items));
+                }
+
+                // Second level check
+                var secondLevelBomIds = bomProducts.SelectMany(p => p.Boms).Distinct().ToArray();
+
+                if (secondLevelBomIds.Length > 0)
+                {
+                    var hasSecondLevelBoms = await _db.Products(orgId).AsNoTracking()
+                        .Where(p => secondLevelBomIds.Contains(p.Id) && p.Boms.Any())
+                        .AnyAsync(cancellationToken);
+
+                    if (hasSecondLevelBoms)
+                    {
+                        return ApplicationErrors.InvalidAction.AsResult(nameof(rq.Items));
+                    }
+                }
+
+                _db.Attach(product);
+
+                product.Boms = [.. rq.Items.Select(item => new ProductBom { ProductId = item.ProductId, Qty = item.Qty })];
+
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                // Delete
+                await _db.ProductBoms.Where(pb => pb.ParentId == parentId).ExecuteDeleteAsync(cancellationToken);
+            }
+
+            return ActionResult.Succeed(parentId);
+        }
+
+        /// <summary>
         /// Get sale price
         /// 获取销售价格
         /// </summary>
@@ -453,9 +525,10 @@ namespace CRM.Server.Services
         /// 查询产品用于采购
         /// </summary>
         /// <param name="rq">Request data</param>
+        /// <param name="checkScope">Check scope or not</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<QueryForPurchaseData[]> QueryForPurchaseAsync(QueryForPurchaseRQ rq, CancellationToken cancellationToken = default)
+        public async Task<QueryForPurchaseData[]> QueryForPurchaseAsync(QueryForPurchaseRQ rq, bool checkScope = true, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
             var supplierId = rq.SupplierId;
@@ -474,9 +547,14 @@ namespace CRM.Server.Services
 
             // Products & prices
             var products = await _db.Products(orgId).AsNoTracking()
-                .Where(p => p.Status < EntityStatus.Inactivated && (p.Scope & ProductScope.Purchase) > 0)
+                .Where(p => p.Status < EntityStatus.Inactivated)
                 .QueryEtsoo(rq, (p) => p.Id, null, (q) =>
                 {
+                    if (checkScope)
+                    {
+                        q = q.Where(p => (p.Scope & ProductScope.Purchase) > 0);
+                    }
+
                     if (rq.CategoryIdAll.HasValue)
                     {
                         q = q.Where(p => p.CategoryIdsAll != null && p.CategoryIdsAll.Contains(rq.CategoryIdAll.Value));
@@ -724,9 +802,10 @@ namespace CRM.Server.Services
         /// 查询产品用于销售
         /// </summary>
         /// <param name="rq">Request data</param>
+        /// <param name="checkScope">Check scope or not</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, CancellationToken cancellationToken = default)
+        public async Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, bool checkScope = true, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
             var customerId = rq.CustomerId;
@@ -751,9 +830,14 @@ namespace CRM.Server.Services
 
             // Products & prices
             var products = await _db.Products(orgId).AsNoTracking()
-                .Where(p => p.Status < EntityStatus.Inactivated && (p.Scope & SaleScope) > 0)
+                .Where(p => p.Status < EntityStatus.Inactivated)
                 .QueryEtsoo(rq, (p) => p.Id, null, (q) =>
                 {
+                    if (checkScope)
+                    {
+                        q = q.Where(p => (p.Scope & SaleScope) > 0);
+                    }
+
                     if (rq.CategoryIdAll.HasValue)
                     {
                         q = q.Where(p => p.CategoryIdsAll != null && p.CategoryIdsAll.Contains(rq.CategoryIdAll.Value));
@@ -804,6 +888,12 @@ namespace CRM.Server.Services
                     PromotionPrice = pp.PromotionPrice,
                     CostPrice = pp.CostPrice,
                     UnitId = p.UnitId,
+                    Scope = p.Scope,
+                    Boms = p.Boms.Select(b => new ProductBomItem
+                    {
+                        ProductId = b.ProductId,
+                        Qty = b.Qty
+                    }).ToArray(),
                     UnitName = p.Unit.Name,
                     Modifiers = p.Modifiers,
                     CategoryIds = p.CategoryIds,
@@ -1353,6 +1443,12 @@ namespace CRM.Server.Services
                     Status = p.Status,
                     Data = p.Data,
                     Creation = p.Creation,
+                    Boms = p.Boms.Select(b => new ProductBomNameItem
+                    {
+                        ProductId = b.ProductId,
+                        Qty = b.Qty,
+                        Name = b.Product.Name
+                    }).ToList(),
                     Categories = _db.ProductCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds != null && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds!.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
                     Prices = p.Prices.Select(pp => new ProductPriceItem
                     {

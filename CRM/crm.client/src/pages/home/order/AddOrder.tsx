@@ -338,7 +338,7 @@ function CustomerChooser({ data }: { data: LocalUtils.CustomerQueryData }) {
 
   // Layout
   return (
-    <VBox spacing={1} sx={{ paddingTop: 1 }}>
+    <VBox spacing={2} sx={{ paddingTop: 1 }}>
       <CustomerList idValue={data.customerId} inputRequired />
       <CurrencyList value={data.currency} fullWidth required />
       <CultureList value={data.culture} fullWidth required />

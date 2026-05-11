@@ -114,7 +114,14 @@ export function OrderLines(props: AllOrderLinesProps) {
       ]}
       loadData={(data) =>
         app.orderLineApi.query(
-          { orderId, ...data },
+          {
+            orderId,
+            ...data,
+            queryPaging: {
+              batchSize: 20,
+              orderBy: [{ field: "id", desc: false, unique: true }]
+            }
+          },
           {
             defaultValue: [],
             showLoading: false
@@ -126,7 +133,10 @@ export function OrderLines(props: AllOrderLinesProps) {
           field: "title",
           header: labels.title,
           sortable: true,
-          cellBoxStyle: GridDeletedCellBoxStyle
+          cellBoxStyle: (data) => ({
+            ...GridDeletedCellBoxStyle(data),
+            paddingLeft: data?.bomId ? "32px!important" : undefined
+          })
         },
         {
           field: "price",
@@ -200,7 +210,7 @@ export function OrderLines(props: AllOrderLinesProps) {
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.title,
+            data.title + (data.bomId ? " ***" : ""),
             app.formatDate(data.startTime, "ds"),
             [
               {

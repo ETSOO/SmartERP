@@ -115,7 +115,7 @@ namespace CRM.Server.Services
                 Ids = lineProductIds
             };
 
-            var products = await _productService.QueryForPurchaseAsync(productRQ, cancellationToken);
+            var products = await _productService.QueryForPurchaseAsync(productRQ, true, cancellationToken);
             if (products == null || lineProductIds.Count() != products.Length)
             {
                 return ApplicationErrors.DataOutdated.AsResult();
@@ -311,19 +311,35 @@ namespace CRM.Server.Services
                 OrderLines = lines
             };
 
-            if (rq.Tags?.Any() is true)
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
             {
-                var tagIds = await _commonService.AddTagsAsync(FeatureTagKind.PO, rq.Tags, cancellationToken);
-                po.Tags = [.. tagIds];
+                if (rq.Tags?.Any() is true)
+                {
+                    var tagIds = await _commonService.AddTagsAsync(FeatureTagKind.PO, rq.Tags, cancellationToken);
+                    po.Tags = [.. tagIds];
+                }
+
+                _db.OrderHeaders.Add(po);
+
+                // Save changes
+                await _db.SaveChangesAsync(cancellationToken);
+
+                // Update promotion summary
+                await promotionSummary.UpdateAsync(_db, cancellationToken);
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
             }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
 
-            _db.OrderHeaders.Add(po);
-
-            // Save changes
-            await _db.SaveChangesAsync(cancellationToken);
-
-            // Update promotion summary
-            await promotionSummary.UpdateAsync(_db, cancellationToken);
+                // Log and return the result
+                return LogException(ex);
+            }
 
             return ActionResult.Succeed(po.Id);
         }
@@ -624,10 +640,15 @@ namespace CRM.Server.Services
                 .Select(o => new
                 {
                     PO = o,
-                    Lines = (short)o.OrderLines.Count,
-                    Items = o.OrderLines.Sum(l => l.Qty),
-                    LineDiscount = o.OrderLines.Sum(l => l.Discount),
-                    TotalAmount = o.OrderLines.Sum(l => l.Amount)
+                    Lines = o.OrderLines.Where(l => l.BomId == null)
+                })
+                .Select(o => new
+                {
+                    o.PO,
+                    Lines = (short)o.Lines.Count(),
+                    Items = o.Lines.Sum(l => l.Qty),
+                    LineDiscount = o.Lines.Sum(l => l.Discount),
+                    TotalAmount = o.Lines.Sum(l => l.Amount)
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 

@@ -22,16 +22,19 @@ namespace CRM.Server.Endpoints
             g.MapPost("DuplicateTest", (IProductService service, ProductDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))
                 .WithDescription("Test for duplicate product / 测试重复的产品").WithTags("Product");
 
+            g.MapPut("EditBoms", (IProductService service, ProductEditBomsRQ rq, CancellationToken cancellationToken) => service.EditBomsAsync(rq, cancellationToken))
+                .WithDescription("Edit product BOMs / 编辑产品物料清单").WithTags("Product");
+
             g.MapPost("List", (IProductService service, ProductListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get product list / 获取产品列表").WithTags("Product");
 
             g.MapPost("Query", (IProductService service, ProductQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query product info / 查询产品信息").WithTags("Product");
 
-            g.MapPost("QueryForPurchase", (IProductService service, QueryForPurchaseRQ rq, CancellationToken cancellationToken) => service.QueryForPurchaseAsync(rq, cancellationToken))
+            g.MapPost("QueryForPurchase", (IProductService service, QueryForPurchaseRQ rq, CancellationToken cancellationToken) => service.QueryForPurchaseAsync(rq, true, cancellationToken))
                 .WithDescription("Query product for purchase / 查询产品用于采购").WithTags("Product");
 
-            g.MapPost("QueryForSale", (IProductService service, QueryForSaleRQ rq, CancellationToken cancellationToken) => service.QueryForSaleAsync(rq, cancellationToken))
+            g.MapPost("QueryForSale", (IProductService service, QueryForSaleRQ rq, CancellationToken cancellationToken) => service.QueryForSaleAsync(rq, true, cancellationToken))
                 .WithDescription("Query product for sale / 查询产品用于销售").WithTags("Product");
 
             g.MapGet("QueryUnit", (IProductService service,  CancellationToken cancellationToken) => service.QueryUnitAsync(cancellationToken))

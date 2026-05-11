@@ -251,6 +251,7 @@ namespace CRM.Server
 
     [JsonSerializable(typeof(ProductCreateRQ))]
     [JsonSerializable(typeof(ProductDuplicateTestRQ))]
+    [JsonSerializable(typeof(ProductEditBomsRQ))]
     [JsonSerializable(typeof(ProductListRQ))]
     [JsonSerializable(typeof(ProductUnitUpdateRQ))]
     [JsonSerializable(typeof(ProductUpdateLogoRQ))]

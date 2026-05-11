@@ -492,6 +492,19 @@ export default function ViewOrderLine() {
               </ButtonLink>
             ) : undefined,
           label: "user"
+        },
+        {
+          data: (item) =>
+            item.bomId ? (
+              <ButtonLink
+                href={`./../${item.bomId}`}
+                size="small"
+                variant="outlined"
+              >
+                {item.bomTitle}
+              </ButtonLink>
+            ) : undefined,
+          label: "bom"
         }
       ]}
       loadData={loadData}
@@ -541,7 +554,7 @@ export default function ViewOrderLine() {
           {item.modifiers != null && item.modifiers.length > 0 && (
             <CustomFieldViewUI
               fields={item.modifiers}
-              data={item.data?.modifiers as DataTypes.StringRecord}
+              data={(item.data?.modifiers ?? {}) as DataTypes.StringRecord}
               refresh={async () => {
                 loadData();
               }}

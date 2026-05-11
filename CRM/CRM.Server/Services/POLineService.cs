@@ -73,6 +73,24 @@ namespace CRM.Server.Services
                         q = q.Where(p => p.AssetId == rq.AssetId.Value);
                     }
 
+
+                    if (rq.HasBomId.HasValue)
+                    {
+                        if (rq.HasBomId.Value)
+                        {
+                            q = q.Where(p => p.BomId != null);
+                        }
+                        else
+                        {
+                            q = q.Where(p => p.BomId == null);
+                        }
+                    }
+
+                    if (rq.BomId.HasValue)
+                    {
+                        q = q.Where(p => p.BomId == rq.BomId.Value);
+                    }
+
                     if (rq.Keyword?.Length > 1)
                     {
                         var keyword = rq.Keyword;
@@ -240,7 +258,7 @@ namespace CRM.Server.Services
                 Ids = [rq.ProductId]
             };
 
-            var products = await _productService.QueryForPurchaseAsync(productRQ, cancellationToken);
+            var products = await _productService.QueryForPurchaseAsync(productRQ, true, cancellationToken);
             if (products == null || products.Length != 1)
             {
                 return ApplicationErrors.DataOutdated.AsResult();
@@ -502,7 +520,8 @@ namespace CRM.Server.Services
                 StartTime = p.StartTime,
                 EndTime = p.EndTime,
                 Status = p.Status,
-                Creation = p.Creation
+                Creation = p.Creation,
+                BomId = p.BomId
             })
             .ToArrayAsync(cancellationToken);
         }
@@ -552,7 +571,8 @@ namespace CRM.Server.Services
                 StartTime = p.StartTime,
                 EndTime = p.EndTime,
                 Status = p.Status,
-                Creation = p.Creation
+                Creation = p.Creation,
+                BomId = p.BomId
             })
             .ToArrayAsync(cancellationToken);
         }
@@ -613,7 +633,9 @@ namespace CRM.Server.Services
                     Data = p.Data,
                     Status = p.Status,
                     POStatus = p.Order.Status,
-                    Creation = p.Creation
+                    Creation = p.Creation,
+                    BomId = p.BomId,
+                    BomTitle = p.Bom == null ? null : p.Bom.Title
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 

@@ -360,7 +360,7 @@ function SupplierChooser({ data }: { data: LocalUtils.SupplierQueryData }) {
 
   // Layout
   return (
-    <VBox spacing={1} sx={{ paddingTop: 1 }}>
+    <VBox spacing={2} sx={{ paddingTop: 1 }}>
       <SupplierList idValue={supplierId} inputRequired />
       <CurrencyList value={data.currency} fullWidth required />
       <CultureList value={data.culture} fullWidth required />

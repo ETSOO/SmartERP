@@ -34,7 +34,6 @@ import {
   ProductAssignedIdDuplicateTest,
   ProductButtonScopes,
   ProductNameDuplicateTest,
-  ProductScopeList,
   ProductUnitList,
   ProductUsageList
 } from "@etsoo/smarterp-crm/components";
@@ -126,6 +125,14 @@ export default function AddProduct() {
       // Get updated values
       const c = structuredClone(v);
       ReactUtils.updateRefValues(refs, c);
+
+      if (c.price) {
+        if (Utils.isEmptyObject(c.price)) {
+          delete c.price;
+        } else {
+          c.price.currency = c.price.currency ?? defaultCurrency;
+        }
+      }
 
       if (c.isAsset && (c.assetQty == null || c.assetQty < 0)) {
         refs.assetQty.current?.focus();

@@ -203,6 +203,18 @@ namespace CRM.Server.Dto.POLine
         public DateTimeOffset Creation { get; init; }
 
         /// <summary>
+        /// BOM line id
+        /// BOM行编号
+        /// </summary>
+        public long? BomId { get; init; }
+
+        /// <summary>
+        /// Bom line title
+        /// BOM行标题
+        /// </summary>
+        public string? BomTitle { get; init; }
+
+        /// <summary>
         /// Whether the order line is startable
         /// 是否可开始执行
         /// </summary>

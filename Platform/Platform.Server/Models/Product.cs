@@ -43,8 +43,6 @@ public partial class Product
 
     public string? QueryKeyword { get; set; }
 
-    public short InventoryWay { get; set; }
-
     public List<int>? Tags { get; set; }
 
     public string? AssignedId { get; set; }
@@ -66,6 +64,10 @@ public partial class Product
     public virtual ICollection<PersonAsset> PersonAssets { get; set; } = new List<PersonAsset>();
 
     public virtual ICollection<PersonProduct> PersonProducts { get; set; } = new List<PersonProduct>();
+
+    public virtual ICollection<ProductBom> ProductBomParents { get; set; } = new List<ProductBom>();
+
+    public virtual ICollection<ProductBom> ProductBomProducts { get; set; } = new List<ProductBom>();
 
     public virtual ICollection<ProductPrice> ProductPrices { get; set; } = new List<ProductPrice>();
 

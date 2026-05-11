@@ -25,6 +25,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("amount");
             entity.Property(e => e.AssetId).HasColumnName("asset_id");
             entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
+            entity.Property(e => e.BomId).HasColumnName("bom_id");
             entity.Property(e => e.CostPrice)
                 .HasColumnType("money")
                 .HasColumnName("cost_price");
@@ -56,6 +57,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Qty)
                 .HasPrecision(12, 2)
                 .HasColumnName("qty");
+            entity.Property(e => e.QtyDelivered)
+                .HasPrecision(12, 2)
+                .HasColumnName("qty_delivered");
             entity.Property(e => e.StartTime).HasColumnName("start_time");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
@@ -67,6 +71,10 @@ namespace Platform.Server.Models.Configurations
             entity.HasOne(d => d.Asset).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.AssetId)
                 .HasConstraintName("order_line_asset_id_fkey");
+
+            entity.HasOne(d => d.Bom).WithMany(p => p.InverseBom)
+                .HasForeignKey(d => d.BomId)
+                .HasConstraintName("order_line_bom_id_fkey");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.OrderId)

@@ -8,9 +8,11 @@ using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.String;
 using CRM.Server.Dto;
 using CRM.Server.Dto.Order;
+using CRM.Server.Dto.Product;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Product;
+using CRM.Server.Utils;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -115,7 +117,7 @@ namespace CRM.Server.Services
                 Ids = lineProductIds
             };
 
-            var products = await _productService.QueryForSaleAsync(productRQ, cancellationToken);
+            var products = await _productService.QueryForSaleAsync(productRQ, true, cancellationToken);
             if (products == null || lineProductIds.Count() != products.Length)
             {
                 return ApplicationErrors.DataOutdated.AsResult();
@@ -182,6 +184,8 @@ namespace CRM.Server.Services
             decimal lineDiscount = 0;
             decimal totalAmount = 0;
 
+            var boms = new OrderBoms();
+
             foreach (var l in rq.Lines)
             {
                 var product = products.FirstOrDefault(p => p.Id == l.ProductId);
@@ -225,7 +229,7 @@ namespace CRM.Server.Services
                 var discount = l.Promotions?.Sum(p => p.Amount) ?? 0;
                 var netAmount = amount - discount;
 
-                lines.Add(new OrderLine
+                var line = new OrderLine
                 {
                     ProductId = l.ProductId,
                     Title = lineTitle,
@@ -242,7 +246,11 @@ namespace CRM.Server.Services
                     EndTime = l.EndTime,
                     Data = l.Data,
                     Status = l.Status.GetValueOrDefault()
-                });
+                };
+
+                lines.Add(line);
+
+                boms.Add(product, line);
 
                 lineCount++;
                 items += qty;
@@ -268,6 +276,13 @@ namespace CRM.Server.Services
             if (rq.Amount.HasValue && rq.Amount.Value != orderAmount)
             {
                 return CreateNoValidDataResult(nameof(rq.Amount), orderAmount, rq.Amount.Value, "Order");
+            }
+
+            // BOM calculation
+            var bomResult = await boms.CalculateAsync(_productService, productRQ, cancellationToken);
+            if (!bomResult.Ok)
+            {
+                return bomResult;
             }
 
             var userId = rq.UserId ?? User.Oid;
@@ -308,19 +323,47 @@ namespace CRM.Server.Services
                 OrderLines = lines
             };
 
-            if (rq.Tags?.Any() is true)
+            // Set the order reference for each line's BOM lines
+            foreach (var line in lines)
             {
-                var tagIds = await _commonService.AddTagsAsync(FeatureTagKind.Order, rq.Tags, cancellationToken);
-                order.Tags = [.. tagIds];
+                if (line.BomLines != null)
+                {
+                    foreach (var bomLine in line.BomLines)
+                    {
+                        bomLine.Order = order;
+                    }
+                }
             }
 
-            _db.OrderHeaders.Add(order);
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
-            // Save changes
-            await _db.SaveChangesAsync(cancellationToken);
+            try
+            {
+                if (rq.Tags?.Any() is true)
+                {
+                    var tagIds = await _commonService.AddTagsAsync(FeatureTagKind.Order, rq.Tags, cancellationToken);
+                    order.Tags = [.. tagIds];
+                }
 
-            // Update promotion summary
-            await promotionSummary.UpdateAsync(_db, cancellationToken);
+                _db.OrderHeaders.Add(order);
+
+                // Save changes
+                await _db.SaveChangesAsync(cancellationToken);
+
+                // Update promotion summary
+                await promotionSummary.UpdateAsync(_db, cancellationToken);
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log and return the result
+                return LogException(ex);
+            }
 
             return ActionResult.Succeed(order.Id);
         }
@@ -708,10 +751,15 @@ namespace CRM.Server.Services
                 .Select(o => new
                 {
                     Order = o,
-                    Lines = (short)o.OrderLines.Count,
-                    Items = o.OrderLines.Sum(l => l.Qty),
-                    LineDiscount = o.OrderLines.Sum(l => l.Discount),
-                    TotalAmount = o.OrderLines.Sum(l => l.Amount)
+                    Lines = o.OrderLines.Where(l => l.BomId == null)
+                })
+                .Select(o => new
+                {
+                    o.Order,
+                    Lines = (short)o.Lines.Count(),
+                    Items = o.Lines.Sum(l => l.Qty),
+                    LineDiscount = o.Lines.Sum(l => l.Discount),
+                    TotalAmount = o.Lines.Sum(l => l.Amount)
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 

@@ -1,9 +1,18 @@
 import {
   ButtonLink,
   CustomFieldViewUI,
+  DataGrid,
+  GridColDef,
+  GridRowId,
   HBox,
   IconButtonLink,
   MoneyInputField,
+  NotificationMUDataMethods,
+  NotificationMUDataProps,
+  NumberInputField,
+  Toolbar,
+  ToolbarButton,
+  useGridApiRef,
   VBox,
   ViewPage
 } from "@etsoo/materialui";
@@ -14,10 +23,19 @@ import {
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
-import { CustomCultureKind, ProductViewData } from "@etsoo/smarterp-crm";
+import {
+  CustomCultureKind,
+  ProductScope,
+  ProductViewData,
+  ProductBomNameItem,
+  ProductBomItem
+} from "@etsoo/smarterp-crm";
 import { Permissions } from "@etsoo/smarterp-crm";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import LinkIcon from "@mui/icons-material/Link";
+import ListIcon from "@mui/icons-material/List";
 import ImageIcon from "@mui/icons-material/Image";
 import PriceChangeIcon from "@mui/icons-material/PriceChange";
 import React from "react";
@@ -33,6 +51,214 @@ import Button from "@mui/material/Button";
 import { CurrencyList } from "../../../components/CurrencyList";
 import { DataTypes, DomUtils, NumberUtils } from "@etsoo/shared";
 import { CustomFieldData } from "@etsoo/appscript";
+import { ProductList } from "@etsoo/smarterp-crm/components";
+
+function isBom(scope: ProductScope) {
+  return (
+    (scope & ProductScope.Bundle) > 0 ||
+    (scope & ProductScope.Disassemble) > 0 ||
+    (scope & ProductScope.Production) > 0
+  );
+}
+
+function BomAddUI({
+  excludeId,
+  item
+}: {
+  excludeId: number;
+  item?: ProductBomNameItem;
+}) {
+  // Labels
+  const labels = app.getLabels("qty");
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const qtyRef = React.useRef<HTMLInputElement>(null);
+
+  return (
+    <VBox spacing={2} sx={{ paddingTop: 1 }}>
+      <input
+        type="hidden"
+        name="name"
+        ref={inputRef}
+        value={item?.name ?? ""}
+      />
+      <ProductList
+        fullWidth
+        inputRequired
+        idValue={item?.productId}
+        rq={{ excludedIds: [excludeId] }}
+        onValueChange={(p) => {
+          if (inputRef.current) inputRef.current.value = p?.name ?? "";
+          if (p != null) qtyRef.current?.focus();
+        }}
+      />
+      <NumberInputField
+        fullWidth
+        name="qty"
+        defaultValue={item?.qty ?? ""}
+        label={labels.qty}
+        inputRef={qtyRef}
+        required
+      />
+    </VBox>
+  );
+}
+
+function BomUI({
+  excludeId,
+  items,
+  mRef
+}: NotificationMUDataProps & {
+  excludeId: number;
+  items: ProductBomNameItem[];
+}) {
+  // Labels
+  const labels = app.getLabels(
+    "add",
+    "delete",
+    "edit",
+    "noRows",
+    "product",
+    "qty"
+  );
+
+  const [rows, setRows] = React.useState(items);
+  const [selectedId, setSelectedId] = React.useState<GridRowId>();
+
+  const gridRef = useGridApiRef();
+
+  React.useImperativeHandle(mRef, () => ({
+    getValue: (): ProductBomItem[] | undefined => {
+      return rows;
+    }
+  }));
+
+  const columns: GridColDef<ProductBomNameItem>[] = [
+    {
+      field: "name",
+      headerName: labels.product,
+      editable: false,
+      flex: 2
+    },
+    {
+      field: "qty",
+      headerName: labels.qty,
+      type: "number",
+      width: 110,
+      editable: true
+    }
+  ];
+
+  const addItem = (item?: ProductBomNameItem) => {
+    app.showInputDialog({
+      title: labels.add,
+      message: "",
+      callback: async (form) => {
+        // Cancelled
+        if (form == null) return;
+
+        // Validate form
+        if (!form.reportValidity()) {
+          return false;
+        }
+
+        const { productId, name, qty } = DomUtils.dataAs(new FormData(form), {
+          productId: "number",
+          name: "string",
+          qty: "number"
+        });
+
+        if (productId == null || name == null || qty == null) {
+          return false;
+        } else if (qty <= 0) {
+          DomUtils.setFocus("qty", form);
+          return false;
+        } else if (
+          rows.some(
+            (r) => r.productId === productId && (item == null || item != r)
+          )
+        ) {
+          DomUtils.setFocus("productIdInput", form);
+          return false;
+        }
+
+        /*
+        const id = gridRef.current?.state.rowSelection.ids
+          ?.values()
+          .next().value;
+
+        const rowIndex = id
+          ? gridRef.current?.getRowIndexRelativeToVisibleRows(id)
+          : undefined;
+        */
+
+        if (item) {
+          setRows((prev) =>
+            prev.map((r) =>
+              r.productId === item.productId ? { productId, name, qty } : r
+            )
+          );
+        } else {
+          setRows((prev) => [...prev, { productId, name, qty }]);
+        }
+
+        return;
+      },
+      inputs: <BomAddUI excludeId={excludeId} item={item} />
+    });
+  };
+
+  function CustomToolbar() {
+    return (
+      <Toolbar>
+        <ToolbarButton
+          disabled={selectedId == null}
+          title={labels.delete}
+          onClick={() => {
+            if (selectedId == null) return;
+            setRows((prev) => prev.filter((r) => r.productId !== selectedId));
+          }}
+        >
+          <DeleteIcon fontSize="small" />
+        </ToolbarButton>
+        <ToolbarButton
+          disabled={selectedId == null}
+          title={labels.edit}
+          onClick={() => addItem(rows.find((r) => r.productId === selectedId))}
+        >
+          <EditIcon fontSize="small" />
+        </ToolbarButton>
+        <ToolbarButton title={labels.add} onClick={() => addItem()}>
+          <AddIcon fontSize="small" />
+        </ToolbarButton>
+      </Toolbar>
+    );
+  }
+
+  return (
+    <VBox sx={{ height: 400, width: "100%" }}>
+      <DataGrid
+        apiRef={gridRef}
+        rows={rows}
+        columns={columns}
+        editMode="row"
+        hideFooter
+        disableColumnMenu
+        disableColumnSorting
+        disableMultipleRowSelection
+        localeText={{ noRowsLabel: labels.noRows }}
+        showToolbar
+        slots={{
+          toolbar: CustomToolbar
+        }}
+        getRowId={(row) => row.productId}
+        onRowSelectionModelChange={(row, detail) => {
+          setSelectedId(row.ids.values().next().value);
+        }}
+      />
+    </VBox>
+  );
+}
 
 function ProductPriceUI({ id }: { id: number }) {
   // Labels
@@ -57,7 +283,7 @@ function ProductPriceUI({ id }: { id: number }) {
   const symbol = currency?.symbol;
 
   return (
-    <VBox spacing={1} sx={{ paddingTop: 1 }}>
+    <VBox spacing={2} sx={{ paddingTop: 1 }}>
       <CurrencyList
         fullWidth
         onItemChange={(item) => {
@@ -129,6 +355,7 @@ export default function ViewProduct() {
 
   // Labels
   const labels = app.getLabels(
+    "bom",
     "channelPrice",
     "costPrice",
     "culture",
@@ -141,7 +368,9 @@ export default function ViewProduct() {
     "introductionUrl",
     "logo",
     "nameB",
+    "product",
     "promotionPrice",
+    "qty",
     "retailPrice",
     "validity"
   );
@@ -150,6 +379,34 @@ export default function ViewProduct() {
   const canManageCultures = app.system.canManageCultures();
 
   const editable = app.owns(Permissions.Product.Edit);
+
+  const editBoms = (items: ProductBomNameItem[], onSuccess: () => void) => {
+    app.notifier.data<ProductBomItem[]>(
+      <BomUI
+        excludeId={id}
+        items={items}
+        mRef={React.createRef<NotificationMUDataMethods>()}
+      />,
+      async (data) => {
+        if (data == null) return;
+
+        const result = await app.productApi.editBoms({
+          parentId: id,
+          items: data
+        });
+
+        if (result == null) return;
+
+        if (result.ok) {
+          onSuccess();
+          return true;
+        } else {
+          return app.formatResult(result);
+        }
+      },
+      labels.bom
+    );
+  };
 
   const definePrices = (onSuccess: () => void) => {
     app.showInputDialog({
@@ -377,14 +634,14 @@ export default function ViewProduct() {
               {labels.editLogo}
             </ButtonLink>
           )}
-          {editable && (
-            <ButtonLink
-              startIcon={<EditIcon />}
+          {editable && isBom(data.scope) && (
+            <Button
+              startIcon={<ListIcon />}
               variant="outlined"
-              href={`./../../edit/${data.id}`}
+              onClick={() => editBoms(data.boms, refresh)}
             >
-              {labels.edit}
-            </ButtonLink>
+              {labels.bom}
+            </Button>
           )}
           {editable && (
             <Button
@@ -402,6 +659,15 @@ export default function ViewProduct() {
               onSuccess={refresh}
             />
           )}
+          {editable && (
+            <ButtonLink
+              startIcon={<EditIcon />}
+              variant="outlined"
+              href={`./../../edit/${data.id}`}
+            >
+              {labels.edit}
+            </ButtonLink>
+          )}
         </React.Fragment>
       )}
     >
@@ -415,6 +681,30 @@ export default function ViewProduct() {
                 loadData();
               }}
             />
+          )}
+          {item.boms.length > 0 && (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{labels.product} (BOM)</TableCell>
+                    <TableCell width={100} align="right">
+                      {labels.qty}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {item.boms.map((b) => (
+                    <TableRow key={b.productId}>
+                      <TableCell component="th" scope="row">
+                        {b.name}
+                      </TableCell>
+                      <TableCell align="right">{b.qty}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
           {item.cultures.length > 0 && (
             <TableContainer>

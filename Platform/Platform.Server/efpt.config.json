@@ -131,6 +131,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.product_bom",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.product_category",
          "ObjectType": 0
       },

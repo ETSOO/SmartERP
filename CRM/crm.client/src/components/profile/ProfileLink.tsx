@@ -26,7 +26,7 @@ export function ProfileLink(props: ProfileLinkProps) {
 
   // Layout
   return (
-    <VBox spacing={1} sx={{ paddingTop: 1 }}>
+    <VBox spacing={2} sx={{ paddingTop: 1 }}>
       <ComboBox
         name="kind"
         label={labels.type}

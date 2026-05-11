@@ -40,7 +40,7 @@ namespace CRM.Server.Dto.Product
         /// Unit
         /// 产品单位
         /// </summary>
-        public string Unit { get; init; }
+        public required string Unit { get; init; }
 
         /// <summary>
         /// Minimum purchase qty
@@ -125,6 +125,12 @@ namespace CRM.Server.Dto.Product
         /// 登记时间
         /// </summary>
         public DateTimeOffset Creation { get; init; }
+
+        /// <summary>
+        /// BOMs
+        /// 物料清单
+        /// </summary>
+        public required IEnumerable<ProductBomNameItem> Boms { get; init; }
 
         /// <summary>
         /// Categories

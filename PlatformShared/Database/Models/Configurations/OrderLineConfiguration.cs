@@ -63,10 +63,15 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("status");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
+            entity.Property(e => e.BomId).HasColumnName("bom_id");
 
             entity.HasOne(d => d.Asset).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.AssetId)
                 .HasConstraintName("order_line_asset_id_fkey");
+
+            entity.HasOne(d => d.Bom).WithMany(p => p.BomLines)
+                .HasForeignKey(d => d.BomId)
+                .HasConstraintName("order_line_bom_id_fkey");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderLines)
                 .HasForeignKey(d => d.OrderId)

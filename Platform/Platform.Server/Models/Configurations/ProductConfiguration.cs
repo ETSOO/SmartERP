@@ -43,7 +43,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.IntroductionUrl)
                 .HasMaxLength(256)
                 .HasColumnName("introduction_url");
-            entity.Property(e => e.InventoryWay).HasColumnName("inventory_way");
             entity.Property(e => e.Logo)
                 .HasMaxLength(256)
                 .HasColumnName("logo");

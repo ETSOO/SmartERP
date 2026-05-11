@@ -109,5 +109,11 @@ namespace CRM.Server.Dto.OrderLine
         /// 登记时间
         /// </summary>
         public DateTimeOffset Creation { get; init; }
+
+        /// <summary>
+        /// BOM line id
+        /// BOM行编号
+        /// </summary>
+        public long? BomId { get; init; }
     }
 }

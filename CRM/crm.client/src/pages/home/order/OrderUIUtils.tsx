@@ -75,8 +75,6 @@ function OrderLineUI({
         {
           productId: "number",
           title: "string",
-          price: "number",
-          qty: "number",
           description: "string"
         }
       );

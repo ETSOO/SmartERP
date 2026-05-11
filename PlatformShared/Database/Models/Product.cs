@@ -60,10 +60,10 @@ namespace PlatformShared.Database.Models
         Purchase = 4,
 
         /// <summary>
-        /// Assemble
-        /// 组装
+        /// Bundle
+        /// 组合
         /// </summary>
-        Assemble = 16,
+        Bundle = 16,
 
         /// <summary>
         /// Disassemble
@@ -257,6 +257,18 @@ namespace PlatformShared.Database.Models
         /// 资产
         /// </summary>
         public ICollection<PersonAsset> Assets { get; set; } = default!;
+
+        /// <summary>
+        /// BOMs
+        /// 物料清单
+        /// </summary>
+        public ICollection<ProductBom> Boms { get; set; } = default!;
+
+        /// <summary>
+        /// BOM parents
+        /// 物料清单父产品
+        /// </summary>
+        public ICollection<ProductBom> BomParents { get; set; } = default!;
 
         /// <summary>
         /// Order lines

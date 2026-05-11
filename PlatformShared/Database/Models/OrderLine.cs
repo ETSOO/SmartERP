@@ -143,10 +143,22 @@ namespace PlatformShared.Database.Models
         public long? SupplierId { get; set; }
 
         /// <summary>
+        /// BOM line id
+        /// 物料清单行编号
+        /// </summary>
+        public long? BomId { get; set; }
+
+        /// <summary>
         /// Asset
         /// 资产
         /// </summary>
         public PersonAsset? Asset { get; set; }
+
+        /// <summary>
+        /// BOM line
+        /// 物料清单行
+        /// </summary>
+        public OrderLine? Bom { get; set; }
 
         /// <summary>
         /// Order
@@ -170,6 +182,12 @@ namespace PlatformShared.Database.Models
         /// User
         /// 执行用户
         /// </summary>
-        public virtual Person? User { get; set; }
+        public Person? User { get; set; }
+
+        /// <summary>
+        /// BOM lines
+        /// 物料清单行列表
+        /// </summary>
+        public ICollection<OrderLine> BomLines { get; set; } = default!;
     }
 }

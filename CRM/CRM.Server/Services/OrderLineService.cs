@@ -8,6 +8,7 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.OrderLine;
 using CRM.Server.RQ.OrderLine;
 using CRM.Server.RQ.Product;
+using CRM.Server.Utils;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -76,6 +77,23 @@ namespace CRM.Server.Services
                     if (rq.AssetId.HasValue)
                     {
                         q = q.Where(p => p.AssetId == rq.AssetId.Value);
+                    }
+
+                    if (rq.HasBomId.HasValue)
+                    {
+                        if (rq.HasBomId.Value)
+                        {
+                            q = q.Where(p => p.BomId != null);
+                        }
+                        else
+                        {
+                            q = q.Where(p => p.BomId == null);
+                        }
+                    }
+
+                    if (rq.BomId.HasValue)
+                    {
+                        q = q.Where(p => p.BomId == rq.BomId.Value);
                     }
 
                     if (rq.Keyword?.Length > 1)
@@ -259,7 +277,7 @@ namespace CRM.Server.Services
                 Ids = [rq.ProductId]
             };
 
-            var products = await _productService.QueryForSaleAsync(productRQ, cancellationToken);
+            var products = await _productService.QueryForSaleAsync(productRQ, true, cancellationToken);
             if (products == null || products.Length != 1)
             {
                 return ApplicationErrors.DataOutdated.AsResult();
@@ -318,6 +336,25 @@ namespace CRM.Server.Services
                 Data = rq.Data,
                 Status = rq.Status ?? EntityStatus.Normal
             };
+
+            // BOM calculation
+            var boms = new OrderBoms();
+            boms.Add(product, orderLine);
+
+            var bomResult = await boms.CalculateAsync(_productService, productRQ, cancellationToken);
+            if (!bomResult.Ok)
+            {
+                return bomResult;
+            }
+
+            // Set the order reference for each line's BOM lines
+            if (orderLine.BomLines != null)
+            {
+                foreach (var bomLine in orderLine.BomLines)
+                {
+                    bomLine.OrderId = orderId;
+                }
+            }
 
             _db.OrderLines.Add(orderLine);
 
@@ -387,10 +424,21 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(id));
             }
 
+            var hasBomLines = await _db.OrderLines
+                .Where(q => q.BomId == id && (q.Status == EntityStatus.Completed || q.Status == EntityStatus.Archived))
+                .AnyAsync(cancellationToken);
+
+            if (hasBomLines)
+            {
+                return ApplicationErrors.DeleteReferencedData.AsResult("Bom");
+            }
+
             await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
+                await _db.OrderLines.Where(q => q.BomId == id).ExecuteDeleteAsync(cancellationToken);
+
                 await _db.OrderLines.Where(q => q.Id == id).ExecuteDeleteAsync(cancellationToken);
 
                 var result = await _orderService.RecalculateAsync(orderId, false, cancellationToken);
@@ -525,7 +573,8 @@ namespace CRM.Server.Services
                 StartTime = p.StartTime,
                 EndTime = p.EndTime,
                 Status = p.Status,
-                Creation = p.Creation
+                Creation = p.Creation,
+                BomId = p.BomId
             })
             .ToArrayAsync(cancellationToken);
         }
@@ -627,7 +676,8 @@ namespace CRM.Server.Services
                 StartTime = p.StartTime,
                 EndTime = p.EndTime,
                 Status = p.Status,
-                Creation = p.Creation
+                Creation = p.Creation,
+                BomId = p.BomId
             })
             .ToArrayAsync(cancellationToken);
         }
@@ -688,7 +738,9 @@ namespace CRM.Server.Services
                     Data = p.Data,
                     Status = p.Status,
                     OrderStatus = p.Order.Status,
-                    Creation = p.Creation
+                    Creation = p.Creation,
+                    BomId = p.BomId,
+                    BomTitle = p.Bom == null ? null : p.Bom.Title
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -864,7 +916,10 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            var orderId = orderLine.OrderId;
             var amountUpdated = false;
+
+            Func<Task<int>>? bomTask = null;
 
             if (rq.IsModified(nameof(rq.Price)) && rq.Price.HasValue)
             {
@@ -874,7 +929,13 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Qty)) && rq.Qty.HasValue)
             {
-                orderLine.Qty = rq.Qty.Value;
+                var originalQty = orderLine.Qty;
+                var newQty = rq.Qty.Value;
+
+                bomTask = () => _db.OrderLines.Where(ol => ol.OrderId == orderId && ol.BomId == rq.Id)
+                    .ExecuteUpdateAsync(ol => ol.SetProperty(p => p.Qty, (p) => p.Qty * newQty / originalQty), cancellationToken: cancellationToken);
+
+                orderLine.Qty = newQty;
                 amountUpdated = true;
             }
 
@@ -957,7 +1018,12 @@ namespace CRM.Server.Services
                 {
                     await _db.SaveChangesAsync(cancellationToken);
 
-                    var result = await _orderService.RecalculateAsync(orderLine.OrderId, false, cancellationToken);
+                    if (bomTask != null)
+                    {
+                        await bomTask();
+                    }
+
+                    var result = await _orderService.RecalculateAsync(orderId, false, cancellationToken);
 
                     if (!result.Ok)
                     {

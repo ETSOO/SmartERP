@@ -1,4 +1,5 @@
-﻿using PlatformShared.Dto;
+﻿using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -119,6 +120,20 @@ namespace CRM.Server.Dto.Product
         /// </summary>
         [JsonIgnore]
         public int UnitId { get; init; }
+
+        /// <summary>
+        /// Sale scope
+        /// 销售范围
+        /// </summary>
+        [JsonIgnore]
+        public ProductScope Scope { get; init; }
+
+        /// <summary>
+        /// BOMs
+        /// 物料清单
+        /// </summary>
+        [JsonIgnore]
+        public ProductBomItem[] Boms { get; init; } = [];
 
         /// <summary>
         /// Unit name

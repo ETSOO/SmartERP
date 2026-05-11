@@ -19,5 +19,7 @@ public partial class OrderPayment
 
     public short OrderIndex { get; set; }
 
+    public bool IsOrder { get; set; }
+
     public virtual ICollection<OrderHeader> OrderHeaders { get; set; } = new List<OrderHeader>();
 }

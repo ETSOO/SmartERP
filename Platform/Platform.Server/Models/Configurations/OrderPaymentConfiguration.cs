@@ -21,6 +21,9 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+            entity.Property(e => e.IsOrder)
+                .HasDefaultValue(true)
+                .HasColumnName("is_order");
             entity.Property(e => e.IsValid)
                 .HasDefaultValue(true)
                 .HasColumnName("is_valid");

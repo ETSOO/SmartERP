@@ -49,7 +49,15 @@ public partial class OrderLine
 
     public long? SupplierId { get; set; }
 
+    public decimal? QtyDelivered { get; set; }
+
+    public long? BomId { get; set; }
+
     public virtual PersonAsset? Asset { get; set; }
+
+    public virtual OrderLine? Bom { get; set; }
+
+    public virtual ICollection<OrderLine> InverseBom { get; set; } = new List<OrderLine>();
 
     public virtual OrderHeader Order { get; set; } = null!;
 

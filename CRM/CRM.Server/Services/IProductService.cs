@@ -12,12 +12,13 @@ namespace CRM.Server.Services
         IEnumerable<PromotionSaleItem> CalculatePromotions(IEnumerable<PromotionItem> promotions, decimal amount, IPromotionCodeLine? sale = null);
         Task<IActionResult> CreateAsync(ProductCreateRQ rq, CancellationToken cancellationToken = default);
         ValueTask<ProductDuplicateTestData[]?> DuplicateTestAsync(ProductDuplicateTestRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> EditBomsAsync(ProductEditBomsRQ rq, CancellationToken cancellationToken = default);
         decimal? GetPurchasePrice(QueryForPurchaseData product);
         decimal GetSalePrice(QueryForSaleData product);
         Task ListAsync(ProductListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<ProductQueryData[]> QueryAsync(ProductQueryRQ rq, CancellationToken cancellationToken = default);
-        Task<QueryForPurchaseData[]> QueryForPurchaseAsync(QueryForPurchaseRQ rq, CancellationToken cancellationToken = default);
-        Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, CancellationToken cancellationToken = default);
+        Task<QueryForPurchaseData[]> QueryForPurchaseAsync(QueryForPurchaseRQ rq, bool checkScope = true, CancellationToken cancellationToken = default);
+        Task<QueryForSaleData[]> QueryForSaleAsync(QueryForSaleRQ rq, bool checkScope = true, CancellationToken cancellationToken = default);
         Task<ProductUnitItem[]> QueryUnitAsync(CancellationToken cancellationToken = default);
         Task<ProductViewData?> ReadAsync(int id, CancellationToken cancellationToken = default);
         Task<ProductReadCustomData?> ReadCustomAsync(int id, CancellationToken cancellationToken = default);

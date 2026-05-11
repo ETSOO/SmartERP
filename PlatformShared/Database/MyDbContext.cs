@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using PlatformShared.Database.Models;
 using PlatformShared.Database.Models.Configurations;
 
@@ -189,6 +190,12 @@ namespace PlatformShared.Database
         public required DbSet<Product> Products { get; set; }
 
         /// <summary>
+        /// Product BOMs
+        /// 产品物料清单
+        /// </summary>
+        public required DbSet<ProductBom> ProductBoms { get; set; }
+
+        /// <summary>
         /// Product categories
         /// 产品类目
         /// </summary>
@@ -264,6 +271,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new PersonProfileLinkConfiguration());
             modelBuilder.ApplyConfiguration(new PersonRelationConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductBomConfiguration());
             modelBuilder.ApplyConfiguration(new ProductCategoryConfiguration());
             modelBuilder.ApplyConfiguration(new ProductPriceConfiguration());
             modelBuilder.ApplyConfiguration(new ProductUnitConfiguration());

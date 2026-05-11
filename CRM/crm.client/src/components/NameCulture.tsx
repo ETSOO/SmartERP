@@ -23,7 +23,7 @@ function CultureInput(props: NameCulturePros) {
 
   // Layout
   return (
-    <VBox spacing={1} sx={{ paddingTop: 1 }}>
+    <VBox spacing={2} sx={{ paddingTop: 1 }}>
       <CultureList
         fullWidth
         onItemChange={(item) => {
