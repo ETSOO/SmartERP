@@ -71,5 +71,9 @@ public partial class Product
 
     public virtual ICollection<ProductPrice> ProductPrices { get; set; } = new List<ProductPrice>();
 
+    public virtual ICollection<StockLine> StockLines { get; set; } = new List<StockLine>();
+
+    public virtual ICollection<StockSite> StockSites { get; set; } = new List<StockSite>();
+
     public virtual ProductUnit Unit { get; set; } = null!;
 }

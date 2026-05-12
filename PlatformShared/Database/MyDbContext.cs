@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Configuration;
 using PlatformShared.Database.Models;
 using PlatformShared.Database.Models.Configurations;
 
@@ -226,6 +225,24 @@ namespace PlatformShared.Database
         public required DbSet<SettingCrm> SettingCrms { get; set; }
 
         /// <summary>
+        /// Stocks
+        /// 库存
+        /// </summary>
+        public required DbSet<StockHeader> StockHeaders { get; set; }
+
+        /// <summary>
+        /// Stock lines
+        /// 库存行
+        /// </summary>
+        public required DbSet<StockLine> StockLines { get; set; }
+
+        /// <summary>
+        /// Stock sites
+        /// 库存点
+        /// </summary>
+        public required DbSet<StockSite> StockSites { get; set; }
+
+        /// <summary>
         /// Is sensitive data logging enabled
         /// 敏感数据日志是否启用
         /// </summary>
@@ -277,6 +294,9 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new ProductUnitConfiguration());
             modelBuilder.ApplyConfiguration(new PromotionConfiguration());
             modelBuilder.ApplyConfiguration(new SettingCrmConfiguration());
+            modelBuilder.ApplyConfiguration(new StockHeaderConfiguration());
+            modelBuilder.ApplyConfiguration(new StockLineConfiguration());
+            modelBuilder.ApplyConfiguration(new StockSiteConfiguration());
         }
     }
 }

@@ -153,5 +153,9 @@ public partial class Person
 
     public virtual ICollection<SettingCrm> SettingCrms { get; set; } = new List<SettingCrm>();
 
+    public virtual ICollection<StockHeader> StockHeaderPeople { get; set; } = new List<StockHeader>();
+
+    public virtual ICollection<StockHeader> StockHeaderUsers { get; set; } = new List<StockHeader>();
+
     public virtual Person User { get; set; } = null!;
 }

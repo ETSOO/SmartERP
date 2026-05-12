@@ -287,5 +287,17 @@ namespace PlatformShared.Database.Models
         /// 价格
         /// </summary>
         public ICollection<ProductPrice> Prices { get; set; } = default!;
+
+        /// <summary>
+        /// Stock lines
+        /// 库存行
+        /// </summary>
+        public ICollection<StockLine> StockLines { get; set; } = default!;
+
+        /// <summary>
+        /// Stock sites
+        /// 库存点
+        /// </summary>
+        public ICollection<StockSite> StockSites { get; set; } = default!;
     }
 }

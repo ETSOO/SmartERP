@@ -134,5 +134,29 @@ namespace PlatformShared.Database.Models
         /// 位置
         /// </summary>
         public ICollection<PersonAddress> Locations { get; } = default!;
+
+        /// <summary>
+        /// Stock lines
+        /// 库存行
+        /// </summary>
+        public ICollection<StockLine> StockLines { get; set; } = default!;
+
+        /// <summary>
+        /// Stock sites
+        /// 库存点
+        /// </summary>
+        public ICollection<StockSite> StockSites { get; set; } = default!;
+
+        /// <summary>
+        /// Stocks from the location
+        /// 来自该地点的库存
+        /// </summary>
+        public ICollection<StockHeader> StockFroms { get; } = default!;
+
+        /// <summary>
+        /// Stocks to the location
+        /// 运达该地点的库存
+        /// </summary>
+        public ICollection<StockHeader> StockTos { get; } = default!;
     }
 }

@@ -63,6 +63,8 @@ public partial class OrderLine
 
     public virtual Product Product { get; set; } = null!;
 
+    public virtual ICollection<StockLine> StockLines { get; set; } = new List<StockLine>();
+
     public virtual Person? Supplier { get; set; }
 
     public virtual Person? User { get; set; }

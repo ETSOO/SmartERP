@@ -153,6 +153,18 @@
       {
          "Name": "public.setting_crm",
          "ObjectType": 0
+      },
+      {
+         "Name": "public.stock_header",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.stock_line",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.stock_site",
+         "ObjectType": 0
       }
    ],
    "UiHint": null,

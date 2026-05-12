@@ -189,5 +189,11 @@ namespace PlatformShared.Database.Models
         /// 物料清单行列表
         /// </summary>
         public ICollection<OrderLine> BomLines { get; set; } = default!;
+
+        /// <summary>
+        /// Stock lines
+        /// 库存行
+        /// </summary>
+        public ICollection<StockLine> StockLines { get; set; } = default!;
     }
 }

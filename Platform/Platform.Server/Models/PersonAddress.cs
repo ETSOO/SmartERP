@@ -51,4 +51,12 @@ public partial class PersonAddress
     public virtual Person Person { get; set; } = null!;
 
     public virtual ICollection<PersonProfile> PersonProfiles { get; set; } = new List<PersonProfile>();
+
+    public virtual ICollection<StockHeader> StockHeaderLocationFroms { get; set; } = new List<StockHeader>();
+
+    public virtual ICollection<StockHeader> StockHeaderLocationTos { get; set; } = new List<StockHeader>();
+
+    public virtual ICollection<StockLine> StockLines { get; set; } = new List<StockLine>();
+
+    public virtual ICollection<StockSite> StockSites { get; set; } = new List<StockSite>();
 }

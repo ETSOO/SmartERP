@@ -711,9 +711,21 @@ namespace PlatformShared.Database.Models
         public ICollection<OrderHeader> Purchases { get; set; } = default!;
 
         /// <summary>
+        /// Owned stocks
+        /// 拥有的库存记录
+        /// </summary>
+        public ICollection<StockHeader> Stocks { get; set; } = default!;
+
+        /// <summary>
         /// User orders
         /// 用户订单
         /// </summary>
         public ICollection<OrderHeader> UserOrders { get; set; } = default!;
+
+        /// <summary>
+        /// User stocks
+        /// 用户操作的库存
+        /// </summary>
+        public ICollection<StockHeader> UserStocks { get; set; } = default!;
     }
 }

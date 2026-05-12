@@ -62,4 +62,6 @@ public partial class CoreOrganization
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 
     public virtual SettingCrm? SettingCrm { get; set; }
+
+    public virtual ICollection<StockHeader> StockHeaders { get; set; } = new List<StockHeader>();
 }

@@ -56,6 +56,7 @@ export default function AllOrders() {
     "approvedDiscount",
     "confirmAction",
     "creation",
+    "discount",
     "keywords",
     "edit",
     "orderDeliveries",
@@ -252,7 +253,11 @@ export default function AllOrders() {
                     currency: data.currency
                   })}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  title={labels.discount}
+                >
                   {app.formatNumber(discount)}
                 </Typography>
               </React.Fragment>
@@ -305,7 +310,11 @@ export default function AllOrders() {
                 <Typography variant="body2">
                   {app.formatDate(data.startDate) ?? "-"}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  title={labels.creation}
+                >
                   {app.formatDate(data.creation)}
                 </Typography>
               </React.Fragment>
@@ -383,7 +392,7 @@ export default function AllOrders() {
                   currency: data.currency
                 })}{" "}
                 / {app.formatNumber(data.discount + data.lineDiscount)} (
-                {labels.promotion})
+                {labels.discount})
               </Typography>
               <Typography variant="body2">
                 {labels.startDate}: {app.formatDate(data.startDate) ?? "-"} /{" "}

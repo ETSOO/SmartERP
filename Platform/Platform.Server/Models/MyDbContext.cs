@@ -82,6 +82,12 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<SettingCrm> SettingCrms { get; set; }
 
+    public virtual DbSet<StockHeader> StockHeaders { get; set; }
+
+    public virtual DbSet<StockLine> StockLines { get; set; }
+
+    public virtual DbSet<StockSite> StockSites { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new Configurations.CoreApiConfiguration());
@@ -118,6 +124,9 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.ProductUnitConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PromotionConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.SettingCrmConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.StockHeaderConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.StockLineConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.StockSiteConfiguration());
 
         OnModelCreatingPartial(modelBuilder);
     }
