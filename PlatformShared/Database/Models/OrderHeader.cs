@@ -5,34 +5,28 @@ using System.Text.Json;
 namespace PlatformShared.Database.Models
 {
     /// <summary>
-    /// Order payment way
-    /// 订单支付方式
+    /// Order kind
+    /// 订单类型
     /// </summary>
-    public enum OrderPaymentId : byte
+    public enum OrderKind : byte
     {
         /// <summary>
-        /// Cash
-        /// 现金
+        /// Order
+        /// 订单
         /// </summary>
-        Cash = 1,
+        Order = 1,
 
         /// <summary>
-        /// Credit card
-        /// 信用卡
+        /// PO
+        /// 采购
         /// </summary>
-        CreditCard = 2,
+        PO = 2,
 
         /// <summary>
-        /// Bank transfer
-        /// 银行转账
+        /// Production
+        /// 生产
         /// </summary>
-        BankTransfer = 3,
-
-        /// <summary>
-        /// Other
-        /// 其他
-        /// </summary>
-        Other = 255
+        Production = 8
     }
 
     /// <summary>
@@ -54,10 +48,10 @@ namespace PlatformShared.Database.Models
         public int CoreOrganizationId { get; set; }
 
         /// <summary>
-        /// Is order or purchase order
-        /// 是订单还是采购
+        /// Kind
+        /// 类型
         /// </summary>
-        public bool IsOrder { get; init; }
+        public OrderKind Kind { get; set; }
 
         /// <summary>
         /// Tax amount

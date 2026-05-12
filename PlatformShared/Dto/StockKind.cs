@@ -31,6 +31,12 @@
         StockTaking = 80,
 
         /// <summary>
+        /// Quick assembly
+        /// 快速组装
+        /// </summary>
+        Assembly = 100,
+
+        /// <summary>
         /// Production
         /// 生产
         /// </summary>

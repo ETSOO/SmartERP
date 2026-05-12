@@ -338,7 +338,7 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<OrderHeader> Orders(this MyDbContext db, int orgId)
         {
-            return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId && p.IsOrder);
+            return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId && p.Kind == OrderKind.Order);
         }
 
         /// <summary>
@@ -384,7 +384,7 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<OrderHeader> POs(this MyDbContext db, int orgId)
         {
-            return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId && !p.IsOrder);
+            return db.OrderHeaders.Where(p => p.CoreOrganizationId == orgId && p.Kind == OrderKind.PO);
         }
 
         /// <summary>
@@ -445,6 +445,18 @@ namespace PlatformShared.Extentions
         public static IQueryable<Promotion> Promotions(this MyDbContext db, int orgId)
         {
             return db.Promotions.Where(p => p.CoreOrganizationId == orgId);
+        }
+
+        /// <summary>
+        /// Query stocks
+        /// 查询库存
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id belonged</param>
+        /// <returns>Result</returns>
+        public static IQueryable<StockHeader> Stocks(this MyDbContext db, int orgId)
+        {
+            return db.StockHeaders.Where(p => p.OrganizationId == orgId);
         }
 
         /// <summary>

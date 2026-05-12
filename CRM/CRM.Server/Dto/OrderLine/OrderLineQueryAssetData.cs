@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Database.Models;
 
 namespace CRM.Server.Dto.OrderLine
 {
@@ -15,10 +16,10 @@ namespace CRM.Server.Dto.OrderLine
         public long Id { get; init; }
 
         /// <summary>
-        /// Is order or purchase order
-        /// 是订单还是采购
+        /// Kind
+        /// 类型
         /// </summary>
-        public bool IsOrder { get; init; }
+        public OrderKind Kind { get; init; }
 
         /// <summary>
         /// Title

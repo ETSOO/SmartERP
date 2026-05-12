@@ -36,14 +36,16 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+            entity.Property(e => e.TotalLines).HasColumnName("total_lines");
+            entity.Property(e => e.TotalQty).HasColumnName("total_qty");
 
             entity.HasOne(d => d.LocationFrom).WithMany(p => p.StockFroms)
-                .HasForeignKey(d => d.LocationFrom)
+                .HasForeignKey(d => d.LocationFromId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("stock_header_location_from_id_fkey");
 
             entity.HasOne(d => d.LocationTo).WithMany(p => p.StockTos)
-                .HasForeignKey(d => d.LocationTo)
+                .HasForeignKey(d => d.LocationToId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("stock_header_location_to_id_fkey");
 

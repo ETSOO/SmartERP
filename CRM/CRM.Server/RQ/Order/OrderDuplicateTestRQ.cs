@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using PlatformShared.Database.Models;
 
 namespace CRM.Server.RQ.Order
 {
@@ -35,10 +36,10 @@ namespace CRM.Server.RQ.Order
         public string? SourceId { get; init; }
 
         /// <summary>
-        /// Is order or not
-        /// 是否为订单
+        /// Kind
+        /// 类型
         /// </summary>
-        public bool? IsOrder {  get; init; }
+        public OrderKind? Kind { get; init; }
 
         /// <summary>
         /// Validate the model

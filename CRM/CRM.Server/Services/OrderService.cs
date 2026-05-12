@@ -291,7 +291,7 @@ namespace CRM.Server.Services
             {
                 CoreOrganizationId = orgId,
                 UserId = userId,
-                IsOrder = true,
+                Kind = OrderKind.Order,
                 SellerId = User.Pid,
                 BuyerId = customerId,
                 Source = rq.Source?.ToUpper(),
@@ -373,9 +373,9 @@ namespace CRM.Server.Services
             var query = _db.OrderAndPOs(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (o) => o.Id, (o) => o.Status, (q) =>
                 {
-                    if (rq.IsOrder.HasValue)
+                    if (rq.Kind.HasValue)
                     {
-                        q = q.Where(p => p.IsOrder == rq.IsOrder.Value);
+                        q = q.Where(p => p.Kind == rq.Kind.Value);
                     }
 
                     if (rq.TagId != null)
@@ -468,9 +468,9 @@ namespace CRM.Server.Services
 
             var q = _db.OrderAndPOs(orgId).AsNoTracking();
 
-            if (rq.IsOrder.HasValue)
+            if (rq.Kind.HasValue)
             {
-                q = q.Where(p => p.IsOrder == rq.IsOrder.Value);
+                q = q.Where(p => p.Kind == rq.Kind.Value);
             }
 
             var hasFilter = false;
@@ -504,7 +504,7 @@ namespace CRM.Server.Services
             {
                 Id = p.Id,
                 Title = p.Title,
-                IsOrder = p.IsOrder
+                Kind = p.Kind
             }).ToArrayAsync(cancellationToken);
         }
 
@@ -553,7 +553,7 @@ namespace CRM.Server.Services
             {
                 Id = o.Id,
                 Title = o.Title,
-                IsOrder = o.IsOrder
+                Kind = o.Kind
             }).ToArrayAsync(cancellationToken);
         }
 

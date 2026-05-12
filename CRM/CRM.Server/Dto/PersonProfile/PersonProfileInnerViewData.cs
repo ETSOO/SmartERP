@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using CRM.Server.Dto.Person;
+using PlatformShared.Database.Models;
 
 namespace CRM.Server.Dto.PersonProfile
 {
@@ -47,10 +48,10 @@ namespace CRM.Server.Dto.PersonProfile
         public string? OrderTitle { get; init; }
 
         /// <summary>
-        /// Is order or purchase
-        /// 是否为订单或采购
+        /// Order kind
+        /// 订单类型
         /// </summary>
-        public bool? IsOrder { get; init; }
+        public OrderKind? OrderKind { get; set; }
 
         /// <summary>
         /// Comment

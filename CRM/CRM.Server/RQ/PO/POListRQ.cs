@@ -69,12 +69,6 @@ namespace CRM.Server.RQ.PO
         /// 用户编号
         /// </summary>
         public long? UserId { get; set; }
-
-        /// <summary>
-        /// Is PO or not
-        /// 是否为订单
-        /// </summary>
-        public bool? IsOrder { get; init; }
     }
 }
 

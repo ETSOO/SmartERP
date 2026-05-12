@@ -1,4 +1,5 @@
 ﻿using CRM.Server.Dto;
+using PlatformShared.Database.Models;
 using System.Text.Json.Serialization;
 
 namespace CRM.Server.RQ.Order
@@ -78,9 +79,9 @@ namespace CRM.Server.RQ.Order
         public long? UserId { get; set; }
 
         /// <summary>
-        /// Is order or not
-        /// 是否为订单
+        /// Kind
+        /// 类型
         /// </summary>
-        public bool? IsOrder { get; init; }
+        public OrderKind? Kind { get; init; }
     }
 }

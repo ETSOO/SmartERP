@@ -78,13 +78,25 @@ namespace PlatformShared.Database.Models
         /// Receipt time, null means in transit
         /// 收货时间，空表示在途
         /// </summary>
-        public DateTime? ReceiptTime { get; set; }
+        public DateTimeOffset? ReceiptTime { get; set; }
 
         /// <summary>
         /// Creation
         /// 登记时间
         /// </summary>
-        public DateTime Creation { get; set; }
+        public DateTimeOffset Creation { get; set; }
+
+        /// <summary>
+        /// Total lines
+        /// 总行数
+        /// </summary>
+        public int TotalLines { get; set; }
+
+        /// <summary>
+        /// Total qty
+        /// 总数量
+        /// </summary>
+        public decimal TotalQty { get; set; }
 
         /// <summary>
         /// Shipping location

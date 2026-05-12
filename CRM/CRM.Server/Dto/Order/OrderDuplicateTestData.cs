@@ -1,4 +1,6 @@
-﻿namespace CRM.Server.Dto.Order
+﻿using PlatformShared.Database.Models;
+
+namespace CRM.Server.Dto.Order
 {
     /// <summary>
     /// Order duplicate test data
@@ -19,9 +21,9 @@
         public required string Title { get; init; }
 
         /// <summary>
-        /// Is order or not
-        /// 是否为订单
+        /// Kind
+        /// 类型
         /// </summary>
-        public bool IsOrder { get; init; }
+        public OrderKind Kind { get; init; }
     }
 }

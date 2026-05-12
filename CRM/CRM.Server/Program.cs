@@ -224,6 +224,8 @@ services.AddScoped<IPOLineService, POLineService>();
 services.AddScoped<IProductService, ProductService>();
 services.AddScoped<IProductCategoryService, ProductCategoryService>();
 services.AddScoped<IPromotionService, PromotionService>();
+services.AddScoped<IStockService, StockService>();
+services.AddScoped<IStockSiteService, StockSiteService>();
 services.AddScoped<ISupplierService, SupplierService>();
 services.AddScoped<ISystemService, SystemService>();
 services.AddScoped<ITagService, TagService>();
@@ -308,6 +310,8 @@ api.MapAuth()
     .MapProduct()
     .MapProductCategory()
     .MapPromotion()
+    .MapStock()
+    .MapStockSite()
     .MapSupplier()
     .MapSystem()
     .MapTag()

@@ -279,7 +279,7 @@ namespace CRM.Server.Services
             {
                 CoreOrganizationId = orgId,
                 UserId = userId,
-                IsOrder = false,
+                Kind = OrderKind.PO,
                 SellerId = supplierId,
                 BuyerId = User.Pid, // Organization is the buyer
                 Source = rq.Source?.ToUpper(),
@@ -349,11 +349,6 @@ namespace CRM.Server.Services
             var query = _db.POs(User.OrganizationInt).AsNoTracking()
                 .QueryEtsoo(rq, (o) => o.Id, (o) => o.Status, (q) =>
                 {
-                    if (rq.IsOrder.HasValue)
-                    {
-                        q = q.Where(p => p.IsOrder == rq.IsOrder.Value);
-                    }
-
                     if (rq.TagId != null)
                     {
                         q = q.Where(p => p.Tags != null && p.Tags.Contains(rq.TagId.Value));

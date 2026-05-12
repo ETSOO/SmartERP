@@ -48,6 +48,10 @@ using CRM.Server.Dto.OrderLine;
 using CRM.Server.RQ.OrderLine;
 using CRM.Server.RQ.POLine;
 using CRM.Server.Dto.POLine;
+using CRM.Server.Dto.StockSite;
+using CRM.Server.RQ.StockSite;
+using CRM.Server.Dto.Stock;
+using CRM.Server.RQ.Stock;
 
 namespace CRM.Server
 {
@@ -273,9 +277,22 @@ namespace CRM.Server
     [JsonSerializable(typeof(PromotionListData[]))]
     [JsonSerializable(typeof(PromotionQueryData[]))]
     [JsonSerializable(typeof(PromotionUpdateReadData))]
+
     [JsonSerializable(typeof(PromotionCreateRQ))]
     [JsonSerializable(typeof(PromotionListRQ))]
     [JsonSerializable(typeof(PromotionUpdateRQ))]
+
+    // Stock
+    [JsonSerializable(typeof(StockListData[]))]
+    [JsonSerializable(typeof(StockQueryData[]))]
+
+    [JsonSerializable(typeof(StockListRQ))]
+
+    // Stock site
+    [JsonSerializable(typeof(StockSiteQueryData[]))]
+    [JsonSerializable(typeof(StockSiteViewProductData[]))]
+
+    [JsonSerializable(typeof(StockSiteQueryRQ))]
 
     // Supplier
     [JsonSerializable(typeof(SupplierListData[]))]

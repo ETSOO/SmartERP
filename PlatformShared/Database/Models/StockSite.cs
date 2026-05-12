@@ -28,13 +28,13 @@
         /// Qty.
         /// 数量
         /// </summary>
-        public decimal? Qty { get; set; }
+        public decimal Qty { get; set; }
 
         /// <summary>
         /// Last refresh time
         /// 上次刷新时间
         /// </summary>
-        public DateTime RefreshTime { get; set; }
+        public DateTimeOffset RefreshTime { get; set; }
 
         /// <summary>
         /// Location

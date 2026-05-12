@@ -50,7 +50,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             return _db.OrderLines.AsNoTracking()
-                .Where(p => p.Order.CoreOrganizationId == orgId && !p.Order.IsOrder)
+                .Where(p => p.Order.CoreOrganizationId == orgId && p.Order.Kind == OrderKind.PO)
                 .QueryEtsoo(rq, p => p.Id, p => p.Status, q =>
                 {
                     if (rq.POId.HasValue)
@@ -139,7 +139,7 @@ namespace CRM.Server.Services
             var line = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
-                          && !p.Order.IsOrder
+                          && p.Order.Kind == OrderKind.PO
                           && p.Order.Status < EntityStatus.Inactivated
                           && p.Status < EntityStatus.Inactivated
                           && (isManage || p.Order.UserId == userId || p.UserId == userId)
@@ -369,7 +369,7 @@ namespace CRM.Server.Services
 
             var poID = await _db.OrderLines
                 .Where(q => q.Id == id && q.Order.CoreOrganizationId == orgId
-                            && !q.Order.IsOrder
+                            && q.Order.Kind == OrderKind.PO
                             && q.Order.Status < EntityStatus.Inactivated
                             && q.Status < EntityStatus.Inactivated
                             && (isManage || q.Order.UserId == User.Oid)
@@ -599,7 +599,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var data = await _db.OrderLines.AsNoTracking()
-                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && !p.Order.IsOrder)
+                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && p.Order.Kind == OrderKind.PO)
                 .Select(p => new POLineViewData
                 {
                     Id = p.Id,
@@ -687,7 +687,7 @@ namespace CRM.Server.Services
             var line = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
-                          && !p.Order.IsOrder
+                          && p.Order.Kind == OrderKind.PO
                           && (isManage || p.Order.UserId == userId || p.UserId == userId)
                           && p.Status != EntityStatus.Normal && p.Status != EntityStatus.Completed
                 ).Select(p => new
@@ -770,7 +770,7 @@ namespace CRM.Server.Services
             var result = await _db.OrderLines
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
-                          && !p.Order.IsOrder
+                          && p.Order.Kind == OrderKind.PO
                           && p.Order.Status < EntityStatus.Inactivated
                           && p.Status < EntityStatus.Inactivated)
                 .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, ol => initStart || ol.StartTime == null ? now : ol.StartTime)
@@ -801,7 +801,7 @@ namespace CRM.Server.Services
             var orderLine = await _db.OrderLines
                 .Where(p => p.Id == rq.Id
                           && p.Order.CoreOrganizationId == orgId
-                          && !p.Order.IsOrder
+                          && p.Order.Kind == OrderKind.PO
                           && (isManage || p.Order.UserId == User.Oid)
                           && p.Order.Status < EntityStatus.Inactivated)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -952,7 +952,7 @@ namespace CRM.Server.Services
             var userId = User.Oid;
 
             return await _db.OrderLines.AsNoTracking()
-                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && !p.Order.IsOrder)
+                .Where(p => p.Id == id && p.Order.CoreOrganizationId == orgId && p.Order.Kind == OrderKind.PO)
                 .Select(p => new POLineUpdateReadData
                 {
                     Id = p.Id,

@@ -19,7 +19,9 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.IsOrder).HasColumnName("is_order");
+            entity.Property(e => e.Kind)
+                .HasConversion<byte>()
+                .HasColumnName("kind");
             entity.Property(e => e.Source)
                 .HasMaxLength(20)
                 .HasColumnName("source");
