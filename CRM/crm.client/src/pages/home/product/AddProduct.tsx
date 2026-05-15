@@ -17,6 +17,7 @@ import { StatusList } from "@etsoo/smarterp-core/components";
 import { IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   FeatureTagKind,
+  Permissions,
   ProductCreateRQ,
   ProductScope,
   ProductUpdateRQ,
@@ -57,11 +58,13 @@ export default function AddProduct() {
     "costPrice",
     "days",
     "defaultTaxRate",
+    "deleteConfirm",
     "description",
     "introductionUrl",
     "minQty",
     "modifiers",
     "noChanges",
+    "product",
     "productName",
     "promotionPrice",
     "queryKeyword",
@@ -220,6 +223,29 @@ export default function AddProduct() {
   return (
     <EditPage
       isEditing={isEditing}
+      onDelete={
+        app.owns(Permissions.Product.Delete) && id
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.product),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
+
+                  const result = await app.productApi.delete(id);
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate(`./../../`);
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
       onSubmit={(event) => {
         formik.handleSubmit(event);
       }}

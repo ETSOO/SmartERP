@@ -286,7 +286,15 @@ namespace CRM.Server
     [JsonSerializable(typeof(StockListData[]))]
     [JsonSerializable(typeof(StockQueryData[]))]
 
+    [JsonSerializable(typeof(StockAssembleRQ))]
+    [JsonSerializable(typeof(CheckStockRQ))]
     [JsonSerializable(typeof(StockListRQ))]
+    [JsonSerializable(typeof(StockLoseRQ))]
+    [JsonSerializable(typeof(StockInitRQ))]
+    [JsonSerializable(typeof(StockOrderOutRQ))]
+    [JsonSerializable(typeof(StockPOInRQ))]
+    [JsonSerializable(typeof(StockReceiveRQ))]
+    [JsonSerializable(typeof(StockTransferRQ))]
 
     // Stock site
     [JsonSerializable(typeof(StockSiteQueryData[]))]

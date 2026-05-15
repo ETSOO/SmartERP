@@ -174,16 +174,14 @@ namespace CRM.Server.Services
             var person = await _db.Persons
                .Where(p => p.Id == id
                     && p.OrgId == orgId
-                    && !p.OwnedUsers.Any()
-                    && !p.Profiles.Any()
                     && !p.Contacts.Any()
-                    && !p.ContactOwners.Any()
-                    && !p.Orders.Any())
-               .Select(p => new
-               {
-                   p.IdentityType
-               })
-               .FirstOrDefaultAsync(cancellationToken);
+                    && !p.Profiles.Any()
+                    && !p.Orders.Any()
+                ).Select(p => new
+                   {
+                       p.IdentityType
+                   }
+                ).FirstOrDefaultAsync(cancellationToken);
 
             if (person == null)
             {

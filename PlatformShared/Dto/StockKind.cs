@@ -46,6 +46,12 @@
         /// Loss reporting
         /// 报损
         /// </summary>
-        Loss = 150
+        Loss = 150,
+
+        /// <summary>
+        /// Init
+        /// 初始化
+        /// </summary>
+        Init = 180
     }
 }

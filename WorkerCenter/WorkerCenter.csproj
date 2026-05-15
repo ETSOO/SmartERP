@@ -90,13 +90,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.Localization" Version="1.0.40" />
-    <PackageReference Include="com.etsoo.SMTP" Version="1.0.90" />
+    <PackageReference Include="com.etsoo.Localization" Version="1.0.42" />
+    <PackageReference Include="com.etsoo.SMTP" Version="1.0.91" />
     <PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.2" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
   </ItemGroup>
 
   <ItemGroup>

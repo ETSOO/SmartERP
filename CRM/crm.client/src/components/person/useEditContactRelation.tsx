@@ -44,7 +44,7 @@ export function useEditContactRelation(
         if (result.ok) {
           onDeleted();
         } else {
-          return app.formatResult(result);
+          app.alertResult(result);
         }
       }
     );

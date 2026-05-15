@@ -8,10 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="com.etsoo.ApiModel" Version="1.0.80" />
-    <PackageReference Include="com.etsoo.DI" Version="1.0.31" />
-    <PackageReference Include="com.etsoo.MessageQueue" Version="1.1.5" />
+    <PackageReference Include="com.etsoo.DI" Version="1.0.32" />
+    <PackageReference Include="com.etsoo.MessageQueue" Version="1.1.6" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.30" />
-    <PackageReference Include="com.etsoo.Web" Version="1.3.78" />
+    <PackageReference Include="com.etsoo.Web" Version="1.3.79" />
     <PackageReference Include="EFCore.BulkExtensions.MIT.PostgreSql" Version="10.22.0" />
   </ItemGroup>
 

@@ -11,6 +11,7 @@ namespace CRM.Server.Services
     {
         IEnumerable<PromotionSaleItem> CalculatePromotions(IEnumerable<PromotionItem> promotions, decimal amount, IPromotionCodeLine? sale = null);
         Task<IActionResult> CreateAsync(ProductCreateRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
         ValueTask<ProductDuplicateTestData[]?> DuplicateTestAsync(ProductDuplicateTestRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> EditBomsAsync(ProductEditBomsRQ rq, CancellationToken cancellationToken = default);
         decimal? GetPurchasePrice(QueryForPurchaseData product);

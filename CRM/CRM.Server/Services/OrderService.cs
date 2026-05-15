@@ -8,7 +8,6 @@ using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.String;
 using CRM.Server.Dto;
 using CRM.Server.Dto.Order;
-using CRM.Server.Dto.Product;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Product;

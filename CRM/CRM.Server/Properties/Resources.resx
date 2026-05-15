@@ -120,4 +120,7 @@
   <data name="AssetUpdate" xml:space="preserve">
     <value>Update asset</value>
   </data>
+  <data name="InsufficientStock" xml:space="preserve">
+    <value>Insufficient Stock</value>
+  </data>
 </root>

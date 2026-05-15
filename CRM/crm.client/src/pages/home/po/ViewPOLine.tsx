@@ -291,7 +291,7 @@ export default function ViewPOLine() {
           return;
         }
 
-        return app.formatResult(result);
+        app.alertResult(result);
       }
     );
   };

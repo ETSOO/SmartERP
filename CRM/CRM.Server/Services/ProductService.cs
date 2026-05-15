@@ -302,6 +302,66 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Delete
+        /// 删除
+        /// </summary>
+        /// <param name="id">Product id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Product.Delete, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var hasOrderLines = await _db.Products(orgId).AsNoTracking()
+                .Where(p => p.Id == id).Select(p => (bool?)p.OrderLines.Any())
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (hasOrderLines == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+            else if (hasOrderLines.Value)
+            {
+                return ApplicationErrors.DeleteReferencedData.AsResult("Order");
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // Price
+                await _db.ProductPrices.Where(pp => pp.ProductId == id).ExecuteDeleteAsync(cancellationToken);
+
+                // Bom
+                await _db.ProductBoms.Where(pb => pb.ParentId == id).ExecuteDeleteAsync(cancellationToken);
+
+                // Product itself
+                await _db.Products(orgId).Where(p => p.Id == id).ExecuteDeleteAsync(cancellationToken);
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                LogException(ex);
+
+                return ApplicationErrors.DeleteReferencedData.AsResult();
+            }
+
+
+            return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
         /// Duplicate test
         /// 重复测试
         /// </summary>

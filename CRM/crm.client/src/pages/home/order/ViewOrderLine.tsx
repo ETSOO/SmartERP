@@ -312,7 +312,7 @@ export default function ViewOrderLine() {
           return;
         }
 
-        return app.formatResult(result);
+        app.alertResult(result);
       }
     );
   };

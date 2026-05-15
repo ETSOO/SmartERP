@@ -120,4 +120,7 @@
   <data name="AssetUpdate" xml:space="preserve">
     <value>更新資產</value>
   </data>
+  <data name="InsufficientStock" xml:space="preserve">
+    <value>庫存不足</value>
+  </data>
 </root>

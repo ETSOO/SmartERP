@@ -1,14 +1,17 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Models;
 using CRM.Server.Dto.Stock;
 using CRM.Server.RQ.Stock;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
 
@@ -34,6 +37,187 @@ namespace CRM.Server.Services
         {
             _db = db;
             _commonService = commonService;
+        }
+
+        /// <summary>
+        /// Stock assembly
+        /// 库存组装
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> AssembleAsync(StockAssembleRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+
+            // Location check
+            var locationId = rq.LocationId;
+            var hasLocation = await _db.PersonAddresses(orgPersonId).AsNoTracking()
+                .Where(a => a.Id == locationId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationId));
+            }
+
+            // Items check
+            var items = rq.Items.ToArray();
+            var scope = ProductScope.Inventory & ProductScope.Production;
+            var productIds = items.Select(i => i.ProductId).ToArray();
+            var products = await _db.Products(orgId).AsNoTracking()
+                .Where(p => productIds.Contains(p.Id)
+                    && p.Status < EntityStatus.Inactivated
+                    && (p.Scope & scope) > 0
+                    && p.Boms != null && p.Boms.Count > 0)
+                .Select(p => new { p.Id, p.Boms })
+                .ToArrayAsync(cancellationToken);
+
+            if (products.Length != productIds.Length)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.Items));
+            }
+
+            // Assemble lines
+            var assemberItems = products.SelectMany(p => p.Boms.Select(b => new StockItem
+            {
+                ProductId = b.ProductId,
+                Qty = b.Qty * items.First(i => i.ProductId == p.Id).Qty
+            })).ToArray();
+
+            var checkResult = await CheckStockItemsAsync(orgId, assemberItems, cancellationToken);
+            if (!checkResult.Ok)
+            {
+                return checkResult;
+            }
+
+            // Stock check
+            var checkStockResult = await CheckStockAsync(locationId, assemberItems, cancellationToken);
+            if (!checkStockResult.Ok)
+            {
+                return checkStockResult;
+            }
+
+            var lines = items.Select(i => new StockLine
+            {
+                ProductId = i.ProductId,
+                Qty = i.Qty,
+                LocationId = locationId
+            }).ToList();
+
+            var bomLines = assemberItems.Select(a => new StockLine
+            {
+                ProductId = a.ProductId,
+                Qty = -a.Qty,
+                LocationId = locationId
+            }).ToArray();
+
+            lines.AddRange(bomLines);
+
+            var userId = User.Oid;
+            var totalLines = lines.Count;
+            var totalQty = lines.Sum(l => Math.Abs(l.Qty));
+            var now = DateTimeOffset.UtcNow;
+
+            var stock = new StockHeader
+            {
+                OrganizationId = orgId,
+                Kind = StockKind.Assembly,
+                PersonId = orgPersonId,
+                LocationFromId = locationId,
+                LocationToId = locationId,
+                UserId = userId,
+                Title = rq.Title,
+                Description = rq.Description,
+                Creation = now,
+                ReceiptTime = now,
+                TotalLines = totalLines,
+                TotalQty = totalQty,
+
+                Lines = lines
+            };
+
+            // Add to database
+            _db.StockHeaders.Add(stock);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return result
+            return ActionResult.Succeed(stock.Id);
+        }
+
+        /// <summary>
+        /// Check stock
+        /// 检查库存
+        /// </summary>
+        /// <param name="locationId">Location id</param>
+        /// <param name="items">Items</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CheckStockAsync(int locationId, StockItem[] items, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+
+            var ids = items.Select(i => i.ProductId).ToArray();
+
+            var products = await _db.StockSites.AsNoTracking()
+                .Where(s => s.LocationId == locationId && ids.Contains(s.ProductId) && s.Product.CoreOrganizationId == orgId)
+                .Select(s => new { s.ProductId, s.Qty })
+                .ToArrayAsync(cancellationToken);
+
+            var noIds = ids.Where(i => !products.Any(p => p.ProductId == i)).ToArray();
+            if (noIds.Length > 0)
+            {
+                var result = ApplicationErrors.NoId.AsResult(nameof(items));
+                result.Data["ids"] = noIds;
+                return result;
+            }
+
+            var insufficientIds = items.Where(i => products.First(p => p.ProductId == i.ProductId).Qty < i.Qty).Select(i => i.ProductId).ToArray();
+            if (insufficientIds.Length > 0)
+            {
+                var result = LocalAppErrors.InsufficientStock.AsResult(nameof(items));
+                result.Data["ids"] = insufficientIds;
+                return result;
+            }
+
+            return ActionResult.Success;
+        }
+
+        /// <summary>
+        /// Check stock
+        /// 检查库存
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<IActionResult> CheckStockAsync(CheckStockRQ rq, CancellationToken cancellationToken = default)
+        {
+            return CheckStockItemsAsync(rq.LocationId, [.. rq.Items], cancellationToken);
+        }
+
+        private async Task<IActionResult> CheckStockItemsAsync(int orgId, StockItem[] items, CancellationToken cancellationToken)
+        {
+            var productIds = items.Select(i => i.ProductId).ToArray();
+
+            var products = await _db.Products(orgId).AsNoTracking()
+                .Where(p => productIds.Contains(p.Id) && p.Status < EntityStatus.Inactivated && (p.Scope & ProductScope.Inventory) > 0)
+                .CountAsync(cancellationToken);
+
+            if (products != productIds.Length)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(items));
+            }
+
+            return ActionResult.Success;
         }
 
         private IQueryable<StockHeader> CreateQuery(StockListRQ rq, Func<IQueryable<StockHeader>, IQueryable<StockHeader>>? filters = null)
@@ -118,15 +302,218 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Create
-        /// 创建
+        /// Delete
+        /// 删除
+        /// </summary>
+        /// <param name="id">Stock id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Delete, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var hasStock = await _db.Stocks(orgId).AsNoTracking()
+                .Where(s => s.Id == id)
+                .AnyAsync(cancellationToken);
+
+            if (!hasStock)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // Lines
+                await _db.StockLines.AsNoTracking()
+                    .Where(l => l.StockId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                // Itself
+                await _db.Stocks(orgId).AsNoTracking()
+                    .Where(s => s.Id == id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
+
+            return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// Stock loss
+        /// 库存报损
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> CreateAsync(StockCreateRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> LoseAsync(StockLoseRQ rq,  CancellationToken cancellationToken = default)
         {
-            return ActionResult.Success;
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+
+            // Location check
+            var locationId = rq.LocationId;
+            var hasLocation = await _db.PersonAddresses(orgPersonId).AsNoTracking()
+                .Where(a => a.Id == locationId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationId));
+            }
+
+            // Items check
+            var items = rq.Items.ToArray();
+            var checkResult = await CheckStockItemsAsync(orgId, items, cancellationToken);
+            if (!checkResult.Ok)
+            {
+                return checkResult;
+            }
+
+            // Stock check
+            var checkStockResult = await CheckStockAsync(locationId, items, cancellationToken);
+            if (!checkStockResult.Ok)
+            {
+                return checkStockResult;
+            }
+
+            var lines = items.Select(i => new StockLine
+            {
+                ProductId = i.ProductId,
+                Qty = -i.Qty,
+                LocationId = locationId
+            }).ToArray();
+
+            var userId = User.Oid;
+            var totalLines = lines.Length;
+            var totalQty = lines.Sum(l => Math.Abs(l.Qty));
+            var now = DateTimeOffset.UtcNow;
+
+            var stock = new StockHeader
+            {
+                OrganizationId = orgId,
+                Kind = StockKind.Loss,
+                PersonId = orgPersonId,
+                LocationFromId = locationId,
+                LocationToId = locationId,
+                UserId = userId,
+                Title = rq.Title,
+                Description = rq.Description,
+                Creation = now,
+                ReceiptTime = now,
+                TotalLines = totalLines,
+                TotalQty = totalQty,
+
+                Lines = lines
+            };
+
+            // Add to database
+            _db.StockHeaders.Add(stock);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return result
+            return ActionResult.Succeed(stock.Id);
+        }
+
+        /// <summary>
+        /// Init
+        /// 初始化
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> InitAsync(StockInitRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+
+            // Location check
+            var locationId = rq.LocationId;
+            var hasLocation = await _db.PersonAddresses(orgPersonId).AsNoTracking()
+                .Where(a => a.Id == locationId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationId));
+            }
+
+            // Items check
+            var items = rq.Items.ToArray();
+            var checkResult = await CheckStockItemsAsync(orgId, items, cancellationToken);
+            if (!checkResult.Ok)
+            {
+                return checkResult;
+            }
+
+            var lines = items.Select(i => new StockLine
+            {
+                ProductId = i.ProductId,
+                Qty = i.Qty,
+                LocationId = locationId
+            }).ToArray();
+
+            var userId = User.Oid;
+            var totalLines = lines.Length;
+            var totalQty = lines.Sum(l => l.Qty);
+            var now = DateTimeOffset.UtcNow;
+
+            var stock = new StockHeader
+            {
+                OrganizationId = orgId,
+                Kind = StockKind.Init,
+                PersonId = orgPersonId,
+                LocationFromId = locationId,
+                LocationToId = locationId,
+                UserId = userId,
+                Title = rq.Title,
+                Description = rq.Description,
+                Creation = now,
+                ReceiptTime = now,
+                TotalLines = totalLines,
+                TotalQty = totalQty,
+
+                Lines = lines
+            };
+
+            // Add to database
+            _db.StockHeaders.Add(stock);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return result
+            return ActionResult.Succeed(stock.Id);
         }
 
         /// <summary>
@@ -215,32 +602,416 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Receiving stock
-        /// 入库
+        /// Order deliver
+        /// 订单发货
         /// </summary>
-        /// <param name="id">Stock ID</param>
+        /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> ReceiveAsync(long id, bool checkPermission = true, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> OrderOutAsync(StockOrderOutRQ rq, CancellationToken cancellationToken = default)
         {
-            if (checkPermission && !await _commonService.HasPermissionAsync((short)Permissions.Inventory.Add, cancellationToken))
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
             {
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
             var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
 
-            var stock = _db.Stocks(orgId).AsNoTracking()
+            var customerId = rq.CustomerId;
+
+            // Locations check
+            var locationFromId = rq.LocationFromId;
+            var locationToId = rq.LocationToId;
+
+            var hasOrgLocation = await _db.PersonAddresses(orgPersonId).AsNoTracking()
+                .Where(a => a.Id == locationFromId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasOrgLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationFromId));
+            }
+
+            var hasCustomerLocation = await _db.PersonAddresses(customerId).AsNoTracking()
+                .Where(a => a.Id == locationToId && a.Person.CoreOrganizationId == orgId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasCustomerLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationToId));
+            }
+
+            // Items check
+            var items = rq.Items.ToArray();
+
+            // Stock check
+            var checkStockResult = await CheckStockAsync(locationFromId, items, cancellationToken);
+            if (!checkStockResult.Ok)
+            {
+                return checkStockResult;
+            }
+
+            var orders = rq.Orders.ToArray();
+            var productIds = new int[items.Length];
+            var qtys = new decimal[items.Length];
+            var lineIds = new long[items.Length];
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                productIds[i] = items[i].ProductId;
+                qtys[i] = items[i].Qty;
+                lineIds[i] = items[i].OrderLineId;
+            }
+
+            var validProducts = await _db.Database.SqlQuery<int>($@"
+                SELECT
+                    ol.product_id
+                FROM order_line AS ol
+                    INNER JOIN unnest(
+                        {productIds}::int[],
+                        {qtys}::numeric[],
+                        {lineIds}::bigint[]
+                    ) AS t(product_id, qty, order_line_id)
+                ON ol.id = t.order_line_id AND ol.product_id = t.product_id AND ol.qty - ol.qty_delivered >= t.qty
+                WHERE ol.order_id = ANY({orders}::bigint[])
+            ").ToArrayAsync(cancellationToken);
+
+            var noIds = productIds.Where(pid => !validProducts.Contains(pid)).ToArray();
+            if (noIds.Length > 0)
+            {
+                var result = ApplicationErrors.NoId.AsResult(nameof(rq.Items));
+                result.Data["ids"] = noIds;
+                return result;
+            }
+
+            var lines = items.Select(i => new StockLine
+            {
+                ProductId = i.ProductId,
+                Qty = -i.Qty,
+                LocationId = locationFromId,
+                OrderLineId = i.OrderLineId
+            }).ToArray();
+
+            var userId = User.Oid;
+            var totalLines = lines.Length;
+            var totalQty = -lines.Sum(l => l.Qty);
+            var now = DateTimeOffset.UtcNow;
+
+            var stock = new StockHeader
+            {
+                OrganizationId = orgId,
+                Kind = StockKind.Order,
+                PersonId = orgPersonId,
+                LocationFromId = locationFromId,
+                LocationToId = locationToId,
+                UserId = userId,
+                Title = rq.Title,
+                Description = rq.Description,
+                TrackingNumber = rq.TrackingNumber?.Trim().ToUpper(),
+                ReceiptTime = now, // Future tracking may update this value
+                Creation = now,
+                TotalLines = totalLines,
+                TotalQty = totalQty,
+
+                Lines = lines
+            };
+
+            // Add to database
+            _db.StockHeaders.Add(stock);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return result
+            return ActionResult.Succeed(stock.Id);
+        }
+
+        /// <summary>
+        /// PO receive
+        /// 采购入库
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> POInAsync(StockPOInRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+
+            var supplierId = rq.SupplierId;
+
+            // Locations check
+            var locationFromId = rq.LocationFromId;
+            var locationToId = rq.LocationToId;
+
+            var hasSupplierLocation = await _db.PersonAddresses(supplierId).AsNoTracking()
+                .Where(a => a.Id == locationFromId && a.Person.CoreOrganizationId == orgId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasSupplierLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationFromId));
+            }
+
+            var hasOrgLocation = await _db.PersonAddresses(orgPersonId).AsNoTracking()
+                .Where(a => a.Id == locationToId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasOrgLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationToId));
+            }
+
+            // Items check
+            var items = rq.Items.ToArray();
+
+            // Stock check
+            var checkStockResult = await CheckStockAsync(locationFromId, items, cancellationToken);
+            if (!checkStockResult.Ok)
+            {
+                return checkStockResult;
+            }
+
+            var pos = rq.POs.ToArray();
+            var productIds = new int[items.Length];
+            var qtys = new decimal[items.Length];
+            var lineIds = new long[items.Length];
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                productIds[i] = items[i].ProductId;
+                qtys[i] = items[i].Qty;
+                lineIds[i] = items[i].OrderLineId;
+            }
+
+            var validProducts = await _db.Database.SqlQuery<int>($@"
+                SELECT
+                    ol.product_id
+                FROM order_line AS ol
+                    INNER JOIN unnest(
+                        {productIds}::int[],
+                        {qtys}::numeric[],
+                        {lineIds}::bigint[]
+                    ) AS t(product_id, qty, order_line_id)
+                ON ol.id = t.order_line_id AND ol.product_id = t.product_id AND ol.qty - ol.qty_delivered >= t.qty
+                WHERE ol.order_id = ANY({pos}::bigint[])
+            ").ToArrayAsync(cancellationToken);
+
+            var noIds = productIds.Where(pid => !validProducts.Contains(pid)).ToArray();
+            if (noIds.Length > 0)
+            {
+                var result = ApplicationErrors.NoId.AsResult(nameof(rq.Items));
+                result.Data["ids"] = noIds;
+                return result;
+            }
+
+            var lines = items.Select(i => new StockLine
+            {
+                ProductId = i.ProductId,
+                Qty = i.Qty,
+                LocationId = locationFromId,
+                OrderLineId = i.OrderLineId
+            }).ToArray();
+
+            var userId = User.Oid;
+            var totalLines = lines.Length;
+            var totalQty = lines.Sum(l => l.Qty);
+            var now = DateTimeOffset.UtcNow;
+
+            var stock = new StockHeader
+            {
+                OrganizationId = orgId,
+                Kind = StockKind.PO,
+                PersonId = orgPersonId,
+                LocationFromId = locationFromId,
+                LocationToId = locationToId,
+                UserId = userId,
+                Title = rq.Title,
+                Description = rq.Description,
+                TrackingNumber = rq.TrackingNumber?.Trim().ToUpper(),
+                ReceiptTime = now,
+                Creation = now,
+                TotalLines = totalLines,
+                TotalQty = totalQty,
+
+                Lines = lines
+            };
+
+            // Add to database
+            _db.StockHeaders.Add(stock);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return result
+            return ActionResult.Succeed(stock.Id);
+        }
+
+        /// <summary>
+        /// Receiving stock
+        /// 入库
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> ReceiveAsync(StockReceiveRQ rq, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Add, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var id = rq.Id;
+            var trackingNumber = rq.TrackingNumber?.Trim().ToUpper();
+
+            var hasStock = await _db.Stocks(orgId).AsNoTracking()
                 .Where(s => s.Id == id && s.ReceiptTime == null)
-                .Select(s => new { })
-                .FirstOrDefaultAsync(cancellationToken);
+                .AnyAsync(cancellationToken);
 
-            if (stock == null)
+            if (!hasStock)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            var now = DateTimeOffset.UtcNow;
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                await _db.Database.ExecuteSqlAsync($@"
+                    INSERT INTO stock_line
+                    (
+                        stock_id,
+                        product_id,
+                        location_id,
+                        -qty,
+                        order_line_id
+                    )
+                    SELECT
+                        {id},
+                        product_id,
+                        location_id,
+                        qty,
+                        order_line_id
+                    FROM stock_line
+                    WHERE stock_id = {id}
+                ", cancellationToken);
+
+                await _db.Stocks(orgId).AsNoTracking()
+                    .Where(s => s.Id == id)
+                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.ReceiptTime, now)
+                                              .SetProperty(p => p.TotalLines, p => 2 * p.TotalLines)
+                                              .SetProperty(p => p.TotalQty, p => 2 * p.TotalQty)
+                                              .SetProperty(p => p.TrackingNumber, (p) => trackingNumber ?? p.TrackingNumber), cancellationToken);
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
+
             return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// Stock transfer
+        /// 库存调货
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> TransferAsync(StockTransferRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+
+            // Locations check
+            var locationFromId = rq.LocationFromId;
+            var locationToId = rq.LocationToId;
+
+            var locations = await _db.PersonAddresses(orgPersonId).AsNoTracking()
+                .Where(a => a.Id == locationFromId || a.Id == locationToId)
+                .CountAsync(cancellationToken);
+
+            if (locations != 2)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationFromId));
+            }
+
+            // Items check
+            var items = rq.Items.ToArray();
+            var checkResult = await CheckStockItemsAsync(orgId, items, cancellationToken);
+            if (!checkResult.Ok)
+            {
+                return checkResult;
+            }
+
+            // Stock check
+            var checkStockResult = await CheckStockAsync(locationFromId, items, cancellationToken);
+            if (!checkStockResult.Ok)
+            {
+                return checkStockResult;
+            }
+
+            var lines = items.Select(i => new StockLine
+            {
+                ProductId = i.ProductId,
+                Qty = -i.Qty,
+                LocationId = locationFromId
+            }).ToArray();
+
+            var userId = User.Oid;
+            var totalLines = lines.Length;
+            var totalQty = lines.Sum(l => l.Qty);
+            var now = DateTimeOffset.UtcNow;
+
+            var stock = new StockHeader
+            {
+                OrganizationId = orgId,
+                Kind = StockKind.StockTransfer,
+                PersonId = orgPersonId,
+                LocationFromId = locationFromId,
+                LocationToId = locationToId,
+                UserId = userId,
+                Title = rq.Title,
+                Description = rq.Description,
+                Creation = now,
+                TotalLines = totalLines,
+                TotalQty = totalQty,
+
+                Lines = lines
+            };
+
+            // Add to database
+            _db.StockHeaders.Add(stock);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return result
+            return ActionResult.Succeed(stock.Id);
         }
     }
 }

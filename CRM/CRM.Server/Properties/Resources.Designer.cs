@@ -68,5 +68,14 @@ namespace CRM.Server.Properties {
                 return ResourceManager.GetString("AssetUpdate", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insufficient Stock.
+        /// </summary>
+        public static string InsufficientStock {
+            get {
+                return ResourceManager.GetString("InsufficientStock", resourceCulture);
+            }
+        }
     }
 }

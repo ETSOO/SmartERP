@@ -2,7 +2,6 @@
 using CRM.Server.Dto.Product;
 using CRM.Server.RQ.Product;
 using CRM.Server.Services;
-using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.Server.Endpoints
 {
@@ -18,6 +17,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPut("Create", (IProductService service, ProductCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create product / 创建产品").WithTags("Product");
+
+            g.MapDelete("Delete/{id:int}", (IProductService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
+                .WithDescription("Delete product / 删除产品").WithTags("Product");
 
             g.MapPost("DuplicateTest", (IProductService service, ProductDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))
                 .WithDescription("Test for duplicate product / 测试重复的产品").WithTags("Product");

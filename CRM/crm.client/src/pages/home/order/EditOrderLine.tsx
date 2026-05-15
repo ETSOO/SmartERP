@@ -153,7 +153,7 @@ export default function EditOrderLine() {
                     return;
                   }
 
-                  return app.formatResult(result);
+                  app.alertResult(result);
                 }
               );
             }

@@ -204,7 +204,7 @@ export function POViewUI(props: POViewUIProps) {
                             return;
                           }
 
-                          return app.formatResult(result);
+                          app.alertResult(result);
                         }
                       );
                     }}
