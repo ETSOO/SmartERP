@@ -1,6 +1,4 @@
-﻿using PlatformShared.Database.Models;
-
-namespace CRM.Server.RQ.Product
+﻿namespace CRM.Server.RQ.Product
 {
     /// <summary>
     /// Product query request data

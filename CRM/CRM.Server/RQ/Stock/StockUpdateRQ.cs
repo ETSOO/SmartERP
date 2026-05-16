@@ -1,27 +1,21 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
-using CRM.Server.Dto.Stock;
 
 namespace CRM.Server.RQ.Stock
 {
     /// <summary>
-    /// Stock assemble request data
-    /// 库存组装请求数据
+    /// Stock update request data
+    /// 库存更新请求数据
     /// </summary>
-    public record StockAssembleRQ : IModelValidator
+    public record StockUpdateRQ : UpdateModel<int>, IModelValidator
     {
-        /// <summary>
-        /// Organization location id
-        /// 机构位置编号
-        /// </summary>
-        public int LocationId { get; set; }
-
         /// <summary>
         /// Title
         /// 标题
         /// </summary>
-        public required string Title { get; init; }
+        public string? Title { get; init; }
 
         /// <summary>
         /// Description
@@ -30,10 +24,10 @@ namespace CRM.Server.RQ.Stock
         public string? Description { get; init; }
 
         /// <summary>
-        /// Items
-        /// 项目
+        /// Tracking number
+        /// 物流编号
         /// </summary>
-        public required IEnumerable<StockItem> Items { get; init; }
+        public string? TrackingNumber { get; init; }
 
         /// <summary>
         /// Validate the model
@@ -42,7 +36,7 @@ namespace CRM.Server.RQ.Stock
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (Title.Length is not (>= 1 and <= 128))
+            if (Title != null && Title.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Title));
             }
@@ -52,9 +46,9 @@ namespace CRM.Server.RQ.Stock
                 return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
-            if (!Items.Any() || Items.Any(i => i.Qty <= 0) || !Items.IsProductUnique())
+            if (TrackingNumber != null && TrackingNumber.Length is not (>= 1 and <= 20))
             {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Items));
+                return ApplicationErrors.NoValidData.AsResult(nameof(TrackingNumber));
             }
 
             return null;

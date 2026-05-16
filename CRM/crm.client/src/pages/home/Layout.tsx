@@ -101,6 +101,13 @@ export default function Home() {
     "sortOrderPayment",
     "sortPromotion",
     "stakeholders",
+    "stockKindAssembly",
+    "stockKindLoss",
+    "stockKindInit",
+    "stockKindOrder",
+    "stockKindPO",
+    "stockKindStockTaking",
+    "stockKindStockTransfer",
     "system",
     "suppliers",
     "updateSystemSettings",
@@ -563,7 +570,20 @@ export default function Home() {
       app.userData?.system?.hasInventory === true && {
         segment: "home/inventory",
         title: labels.inventory,
-        icon: <LocalShippingIcon />
+        icon: <LocalShippingIcon />,
+        children: [
+          {
+            segment: "init",
+            title: labels.stockKindInit,
+            hidden: true
+          },
+          {
+            segment: "view",
+            pattern: "view/:id",
+            title: labels.view,
+            hidden: true
+          }
+        ]
       },
       {
         segment: "home/profile",

@@ -252,7 +252,7 @@ function BomUI({
           toolbar: CustomToolbar
         }}
         getRowId={(row) => row.productId}
-        onRowSelectionModelChange={(row, detail) => {
+        onRowSelectionModelChange={(row) => {
           setSelectedId(row.ids.values().next().value);
         }}
       />

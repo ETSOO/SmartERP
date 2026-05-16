@@ -56,6 +56,6 @@ namespace CRM.Server.RQ.Stock
         /// Is in transit
         /// 是否在途
         /// </summary>
-        public bool? Intransit { get; init; }
+        public bool? InTransit { get; init; }
     }
 }

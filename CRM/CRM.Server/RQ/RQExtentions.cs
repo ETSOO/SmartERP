@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.Utils.Actions;
 using com.etsoo.WebUtils.Attributes;
+using CRM.Server.Dto.Stock;
 using CRM.Server.RQ.PersonAddress;
 using CRM.Server.RQ.PersonProfile;
 using NpgsqlTypes;
@@ -16,6 +17,15 @@ namespace CRM.Server.RQ
     /// </summary>
     public static partial class RQExtentions
     {
+        /// <summary>
+        /// Is product unique in stock items
+        /// 产品在库存项中是否唯一
+        /// </summary>
+        /// <param name="items">Stock items</param>
+        /// <returns>Result</returns>
+        public static bool IsProductUnique(this IEnumerable<StockItem> items)
+            => items.DistinctBy(item => item.ProductId).Count() == items.Count();
+
         /// <summary>
         /// Create person profile request from task
         /// 从任务创建人员档案请求

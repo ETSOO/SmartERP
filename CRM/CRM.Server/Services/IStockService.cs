@@ -17,7 +17,11 @@ namespace CRM.Server.Services
         Task<IActionResult> OrderOutAsync(StockOrderOutRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> POInAsync(StockPOInRQ rq, CancellationToken cancellationToken = default);
         Task<StockQueryData[]> QueryAsync(StockQueryRQ rq, CancellationToken cancellationToken = default);
+        Task<StockQueryLinesData[]> QueryLinesAsync(StockQueryLinesRQ rq, CancellationToken cancellationToken);
+        Task<StockQueryProductData[]> QueryProductAsync(StockQueryProductRQ rq, CancellationToken cancellationToken = default);
+        Task<StockViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> ReceiveAsync(StockReceiveRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> TransferAsync(StockTransferRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> UpdateAsync(StockUpdateRQ rq, CancellationToken cancellationToken = default);
     }
 }

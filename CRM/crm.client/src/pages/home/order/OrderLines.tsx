@@ -213,11 +213,12 @@ export function OrderLines(props: AllOrderLinesProps) {
             data.title + (data.bomId ? " ***" : ""),
             app.formatDate(data.startTime, "ds"),
             [
-              {
-                label: labels.edit,
-                icon: <EditIcon />,
-                action: `./../../editline/${data.id}`
-              },
+              app.owns(Permissions.Order.Edit) &&
+                orderStatus < EntityStatus.Inactivated && {
+                  label: labels.edit,
+                  icon: <EditIcon />,
+                  action: `./../../editline/${data.id}`
+                },
               {
                 label: labels.view,
                 icon: <ArticleIcon />,

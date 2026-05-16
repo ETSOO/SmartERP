@@ -37,11 +37,23 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IStockService service, StockQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query stock info / 查询库存信息").WithTags("Stock");
 
+            g.MapPost("QueryLines", (IStockService service, StockQueryLinesRQ rq, CancellationToken cancellationToken) => service.QueryLinesAsync(rq, cancellationToken))
+                .WithDescription("Query stock lines / 查询库存明细").WithTags("Stock");
+
+            g.MapPost("QueryProduct", (IStockService service, StockQueryProductRQ rq, CancellationToken cancellationToken) => service.QueryProductAsync(rq, cancellationToken))
+                .WithDescription("Query stock product / 查询库存产品").WithTags("Stock");
+
+            g.MapGet("Read/{id:long}", (IStockService service, long id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
+                .WithDescription("Read stock data for view / 读取用于浏览的库存数据").WithTags("Stock");
+
             g.MapPost("Receive", (IStockService service, StockReceiveRQ rq, CancellationToken cancellationToken) => service.ReceiveAsync(rq, cancellationToken))
                 .WithDescription("Receive stock / 入库").WithTags("Stock");
 
             g.MapPost("Transfer", (IStockService service, StockTransferRQ rq, CancellationToken cancellationToken) => service.TransferAsync(rq, cancellationToken))
                 .WithDescription("Transfer stock / 调货").WithTags("Stock");
+
+            g.MapPut("Update", (IStockService service, StockUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+                .WithDescription("Update stock / 更新库存").WithTags("Stock");
 
             return builder;
         }

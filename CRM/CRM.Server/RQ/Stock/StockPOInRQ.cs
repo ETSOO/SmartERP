@@ -86,7 +86,7 @@ namespace CRM.Server.RQ.Stock
                 return ApplicationErrors.NoValidData.AsResult(nameof(POs));
             }
 
-            if (!Items.Any() || Items.Any(i => i.Qty <= 0))
+            if (!Items.Any() || Items.Any(i => i.Qty <= 0) || !Items.IsProductUnique())
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Items));
             }

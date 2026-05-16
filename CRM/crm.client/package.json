@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.63",
-    "@etsoo/materialui": "^1.6.55",
+    "@etsoo/materialui": "^1.6.56",
     "@etsoo/react": "^1.8.88",
     "@etsoo/reacteditor": "^1.0.33",
     "@etsoo/shared": "^1.2.84",
@@ -30,14 +30,14 @@
     "react-dom": "$react-dom"
   },
   "devDependencies": {
-    "@types/node": "^25.6.2",
+    "@types/node": "^25.8.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^6.0.2",
     "typescript": "^6.0.3",
-    "vite": "^8.0.11"
+    "vite": "^8.0.13"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.60.3"
+    "@rollup/rollup-linux-x64-gnu": "^4.60.4"
   }
 }

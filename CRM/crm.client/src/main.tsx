@@ -695,6 +695,22 @@ const router = createDynamicRouter([
               return { Component: AllInventory.default };
             }
           },
+          {
+            path: "/home/inventory/init",
+            lazy: async () => {
+              const InitStock =
+                await import("./pages/home/inventory/InitStock");
+              return { Component: InitStock.default };
+            }
+          },
+          {
+            path: "/home/inventory/view/:id",
+            lazy: async () => {
+              const ViewStock =
+                await import("./pages/home/inventory/ViewStock");
+              return { Component: ViewStock.default };
+            }
+          },
 
           {
             path: "/home/user",
