@@ -23,13 +23,16 @@ import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { Permissions } from "@etsoo/smarterp-crm";
 import {
+  AddressList,
   ProductCategoryTiplist,
   ProductUnitList
 } from "@etsoo/smarterp-crm/components";
 import Button from "@mui/material/Button";
 import { StockActionData, StockProducts, StockWindow } from "./StockWindow";
+import { LocalUtils } from "../../../app/LocalUtils";
 
 const template = {
+  locationId: "number",
   name: "string",
   assignedId: "string",
   unitId: "number",
@@ -54,6 +57,7 @@ export default function InitStock() {
     "productUnit",
     "stockQty",
     "stockKindInit",
+    "warehouse",
     "view"
   );
 
@@ -65,6 +69,8 @@ export default function InitStock() {
     React.useRef<ScrollerListForwardRef<StockQueryProductData>>(undefined);
 
   const productsRef = React.useRef<StockProducts>({});
+
+  const locationRef = React.useRef(LocalUtils.getCurrentLocationId());
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
@@ -87,6 +93,7 @@ export default function InitStock() {
     app.notifier.data<StockActionData>(
       <StockWindow
         products={productsRef.current}
+        defaultLocationToId={locationRef.current}
         toPersonId={app.userData?.system?.personId ?? 0}
         mRef={React.createRef<NotificationMUDataMethods>()}
       />,
@@ -119,6 +126,8 @@ export default function InitStock() {
     );
   }
 
+  const orgPersonId = app.userData?.system?.personId ?? 0;
+
   // Page data hook
   usePageDataEmpty(app);
 
@@ -140,6 +149,22 @@ export default function InitStock() {
       defaultOrderBy={[{ field: "creation", desc: true }]}
       fieldTemplate={template}
       fields={(data) => [
+        <AddressList
+          name="locationId"
+          personId={orgPersonId}
+          label={labels.warehouse}
+          idValue={data.locationId ?? locationRef.current}
+          onValueChange={(value) => {
+            locationRef.current = value?.id;
+            LocalUtils.setCurrentLocationId(locationRef.current);
+          }}
+          search
+          sx={(theme) => ({
+            "& .MuiInputLabel-root": {
+              color: theme.palette.warning.main
+            }
+          })}
+        />,
         <SearchField
           label={labels.productName}
           name="name"
@@ -158,12 +183,15 @@ export default function InitStock() {
         />,
         <ProductUnitList search value={data.unitId} />
       ]}
-      loadData={(data) =>
-        app.stockApi.queryProduct(data, {
+      loadData={(data) => {
+        const locationId = data.locationId;
+        if (locationId == null) return Promise.resolve([]);
+
+        return app.stockApi.queryProduct(data, {
           defaultValue: [],
           showLoading: false
-        })
-      }
+        });
+      }}
       columns={[
         {
           field: "name",

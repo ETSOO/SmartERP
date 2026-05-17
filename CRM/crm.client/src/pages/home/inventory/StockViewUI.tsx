@@ -1,17 +1,20 @@
 import {
   ButtonLink,
   HBox,
-  IconButtonLink,
+  InputField,
+  VBox,
   ViewContainer
 } from "@etsoo/materialui";
 import { GridDataType } from "@etsoo/react";
-import { Permissions, StockViewData } from "@etsoo/smarterp-crm";
+import { Permissions, StockUpdateRQ, StockViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import { DomUtils, Utils } from "@etsoo/shared";
+import { useNavigate } from "react-router-dom";
 
 export function StockViewUI({
   data,
@@ -20,14 +23,117 @@ export function StockViewUI({
   data: StockViewData;
   refresh: () => Promise<void>;
 }) {
+  // Route
+  const navigate = useNavigate();
+
   // Labels
-  const labels = app.getLabels("confirmAction", "delete", "edit");
+  const labels = app.getLabels(
+    "confirmAction",
+    "delete",
+    "deleteConfirm1",
+    "description",
+    "edit",
+    "noChanges",
+    "title",
+    "trackingNumber"
+  );
 
   const editable = app.owns(Permissions.Inventory.Edit);
 
-  function doEdit() {}
+  function doEdit() {
+    // Show
+    app.showInputDialog({
+      title: labels.edit,
+      message: "",
+      callback: async (form) => {
+        // Cancelled
+        if (form == null) return;
 
-  function doDelete() {}
+        if (!form.reportValidity()) {
+          return false;
+        }
+
+        // Form data
+        const rq: StockUpdateRQ = {
+          id: data.id,
+          ...DomUtils.dataAs(new FormData(form), {
+            title: "string",
+            description: "string",
+            trackingNumber: "string"
+          })
+        };
+
+        if (rq.title == null) {
+          return;
+        }
+
+        // Changed fields
+        const fields = Utils.getDataChanges(rq, data);
+        if (fields.length === 0) {
+          return labels.noChanges;
+        }
+        rq.changedFields = fields;
+
+        const result = await app.stockApi.update(rq);
+        if (result == null) return;
+
+        if (result.ok) {
+          refresh();
+          return true;
+        } else {
+          return app.formatResult(result);
+        }
+      },
+      inputs: (
+        <VBox spacing={2} sx={{ marginTop: 1 }}>
+          <InputField
+            name="title"
+            label={labels.title}
+            fullWidth
+            required
+            defaultValue={data.title}
+            slotProps={{ htmlInput: { maxLength: 128 } }}
+          />
+          <InputField
+            name="description"
+            label={labels.description}
+            multiline
+            rows={2}
+            fullWidth
+            defaultValue={data.description ?? ""}
+            slotProps={{ htmlInput: { maxLength: 1280 } }}
+          />
+          <InputField
+            name="trackingNumber"
+            label={labels.trackingNumber}
+            fullWidth
+            defaultValue={data.trackingNumber ?? ""}
+            slotProps={{ htmlInput: { maxLength: 20 } }}
+          />
+        </VBox>
+      )
+    });
+  }
+
+  function doDelete() {
+    app.notifier.confirm(
+      labels.deleteConfirm1.format(data.title),
+      undefined,
+      async (ok) => {
+        if (!ok) return;
+
+        const result = await app.stockApi.delete(data.id);
+        if (result == null) return;
+
+        if (result.ok) {
+          navigate("./../..");
+          return;
+        }
+
+        app.alertResult(result);
+      }
+    );
+  }
 
   return (
     <ViewContainer

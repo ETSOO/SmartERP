@@ -20,7 +20,7 @@ const template = {
   keyword: "string"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export default function AllGroups() {
   // Route
   const navigate = useNavigate();
 

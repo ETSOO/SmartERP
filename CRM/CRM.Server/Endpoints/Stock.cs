@@ -16,6 +16,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Check", (IStockService service, CheckStockRQ rq, CancellationToken cancellationToken) => service.CheckStockAsync(rq, cancellationToken))
                 .WithDescription("Check stock / 检查库存").WithTags("Stock");
 
+            g.MapPost("CreateLine", (IStockService service, StockCreateLineRQ rq, CancellationToken cancellationToken) => service.CreateLineAsync(rq, cancellationToken))
+                .WithDescription("Create stock line, only for order & PO / 创建库存行，仅限订单和采购").WithTags("Stock");
+
             g.MapDelete("Delete/{id:long}", (IStockService service, long id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete stock / 删除库存").WithTags("Stock");
 
@@ -37,8 +40,11 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IStockService service, StockQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query stock info / 查询库存信息").WithTags("Stock");
 
-            g.MapPost("QueryLines", (IStockService service, StockQueryLinesRQ rq, CancellationToken cancellationToken) => service.QueryLinesAsync(rq, cancellationToken))
+            g.MapPost("QueryLines", (IStockService service, StockQueryLineRQ rq, CancellationToken cancellationToken) => service.QueryLinesAsync(rq, cancellationToken))
                 .WithDescription("Query stock lines / 查询库存明细").WithTags("Stock");
+
+            g.MapPost("QueryProductLines", (IStockService service, StockQueryProductLineRQ rq, CancellationToken cancellationToken) => service.QueryProductLinesAsync(rq, cancellationToken))
+                .WithDescription("Query stock product lines / 查询库存产品明细").WithTags("Stock");
 
             g.MapPost("QueryProduct", (IStockService service, StockQueryProductRQ rq, CancellationToken cancellationToken) => service.QueryProductAsync(rq, cancellationToken))
                 .WithDescription("Query stock product / 查询库存产品").WithTags("Stock");
@@ -54,6 +60,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPut("Update", (IStockService service, StockUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update stock / 更新库存").WithTags("Stock");
+
+            g.MapPut("UpdateLine", (IStockService service, StockUpdateLineRQ rq, CancellationToken cancellationToken) => service.UpdateLineAsync(rq, cancellationToken))
+                .WithDescription("Update stock line / 更新库存行").WithTags("Stock");
 
             return builder;
         }

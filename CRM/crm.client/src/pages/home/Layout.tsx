@@ -80,6 +80,7 @@ export default function Home() {
     "editAvatar",
     "editLogo",
     "editProfile",
+    "history",
     "info",
     "inventory",
     "menuHome",
@@ -95,6 +96,7 @@ export default function Home() {
     "productUnits",
     "promotions",
     "purchases",
+    "realtimeInventory",
     "signoutSuccess",
     "sortCategory",
     "sortOrderDelivery",
@@ -573,8 +575,19 @@ export default function Home() {
         icon: <LocalShippingIcon />,
         children: [
           {
+            segment: "realtime",
+            title: labels.realtimeInventory,
+            hidden: true
+          },
+          {
             segment: "init",
             title: labels.stockKindInit,
+            hidden: true
+          },
+          {
+            segment: "history",
+            pattern: "history/:productId?",
+            title: labels.history,
             hidden: true
           },
           {

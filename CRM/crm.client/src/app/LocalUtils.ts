@@ -41,6 +41,11 @@ export namespace LocalUtils {
   export const PO_PROMOTIONS_DATA_KEY = "etsoo-po-promotions-data";
 
   /**
+   * Data key for current location
+   */
+  export const CURRENT_LOCATION_KEY = "etsoo-current-location";
+
+  /**
    * Customer query data, used for order creation
    */
   export type CustomerQueryData = Pick<
@@ -144,5 +149,22 @@ export namespace LocalUtils {
     }
     app.storage.setPersistedData(LocalUtils.PO_LINES_DATA_KEY, null);
     app.storage.setPersistedData(LocalUtils.PO_PROMOTIONS_DATA_KEY, null);
+  }
+
+  /**
+   * Get current location ID from storage
+   */
+  export function getCurrentLocationId() {
+    return app.storage.getPersistedData<number>(
+      LocalUtils.CURRENT_LOCATION_KEY
+    );
+  }
+
+  /**
+   * Set current location ID to storage
+   * @param locationId New location id
+   */
+  export function setCurrentLocationId(locationId: number | null | undefined) {
+    app.storage.setPersistedData(LocalUtils.CURRENT_LOCATION_KEY, locationId);
   }
 }

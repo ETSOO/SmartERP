@@ -34,6 +34,8 @@ import { Permissions } from "@etsoo/smarterp-crm";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import HistoryIcon from "@mui/icons-material/History";
+import WidgetsIcon from "@mui/icons-material/Widgets";
 import LinkIcon from "@mui/icons-material/Link";
 import ListIcon from "@mui/icons-material/List";
 import ImageIcon from "@mui/icons-material/Image";
@@ -52,6 +54,7 @@ import { CurrencyList } from "../../../components/CurrencyList";
 import { DataTypes, DomUtils, NumberUtils } from "@etsoo/shared";
 import { CustomFieldData } from "@etsoo/appscript";
 import { ProductList } from "@etsoo/smarterp-crm/components";
+import { StockByWarehouse } from "../inventory/StockByWarehouse";
 
 function isBom(scope: ProductScope) {
   return (
@@ -365,6 +368,7 @@ export default function ViewProduct() {
     "description",
     "edit",
     "editLogo",
+    "history",
     "introductionUrl",
     "logo",
     "nameB",
@@ -372,6 +376,7 @@ export default function ViewProduct() {
     "promotionPrice",
     "qty",
     "retailPrice",
+    "stockByWarehouse",
     "validity"
   );
 
@@ -379,6 +384,7 @@ export default function ViewProduct() {
   const canManageCultures = app.system.canManageCultures();
 
   const editable = app.owns(Permissions.Product.Edit);
+  const isQueryInventory = app.owns(Permissions.Inventory.Query);
 
   const editBoms = (items: ProductBomNameItem[], onSuccess: () => void) => {
     app.notifier.data<ProductBomItem[]>(
@@ -571,6 +577,31 @@ export default function ViewProduct() {
         },
         {
           data: "description",
+          singleRow: true
+        },
+        {
+          data: (item) =>
+            (item.scope & ProductScope.Inventory) > 0 && isQueryInventory ? (
+              <HBox
+                spacing={1}
+                sx={{ justifyContent: "center", flexWrap: "wrap" }}
+              >
+                <Button
+                  startIcon={<WidgetsIcon />}
+                  variant="outlined"
+                  onClick={() => StockByWarehouse.show(item.id)}
+                >
+                  {labels.stockByWarehouse}
+                </Button>
+                <ButtonLink
+                  startIcon={<HistoryIcon />}
+                  variant="outlined"
+                  href={`./../../../inventory/history/${item.id}`}
+                >
+                  {labels.history}
+                </ButtonLink>
+              </HBox>
+            ) : undefined,
           singleRow: true
         },
         {

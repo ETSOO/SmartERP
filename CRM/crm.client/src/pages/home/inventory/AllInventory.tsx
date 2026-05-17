@@ -18,12 +18,16 @@ import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
-import { Permissions, StockQueryData } from "@etsoo/smarterp-crm";
+import { Permissions, ProductScope, StockQueryData } from "@etsoo/smarterp-crm";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { PersonList, StockKindList } from "@etsoo/smarterp-crm/components";
+import {
+  PersonList,
+  ProductList,
+  StockKindList
+} from "@etsoo/smarterp-crm/components";
 
 const template = {
   keyword: "string",
@@ -31,13 +35,14 @@ const template = {
   personId: "number",
   trackingNumber: "string",
   inTransit: "boolean",
+  productId: "number",
   totalQtyStart: "number",
   totalQtyEnd: "number",
   creationStart: "date",
   creationEnd: "date"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export default function AllInventory() {
   // Route
   const navigate = useNavigate();
 
@@ -172,12 +177,23 @@ export default function AllDepts() {
           label={labels.inTransit}
           value={data.inTransit}
         />,
+        <ProductList
+          search
+          idValue={data.productId}
+          rq={{ scope: ProductScope.Inventory }}
+        />,
         <NumberInputField
           search
           name="totalQtyStart"
           label={labels.totalQty}
+          defaultValue={data.totalQtyStart}
         />,
-        <NumberInputField search name="totalQtyEnd" label="" />,
+        <NumberInputField
+          search
+          name="totalQtyEnd"
+          label=""
+          defaultValue={data.totalQtyEnd}
+        />,
         <SearchField
           label={labels.creation}
           name="creationStart"

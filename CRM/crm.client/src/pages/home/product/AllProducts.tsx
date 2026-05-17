@@ -46,7 +46,7 @@ const template = {
   scope: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export default function AllProducts() {
   // Route
   const navigate = useNavigate();
 

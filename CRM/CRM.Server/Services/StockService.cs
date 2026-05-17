@@ -220,6 +220,83 @@ namespace CRM.Server.Services
             return ActionResult.Success;
         }
 
+        /// <summary>
+        /// Create stock line, only for order & PO
+        /// 创建库存行，仅限订单和采购
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CreateLineAsync(StockCreateLineRQ rq, CancellationToken cancellationToken = default)
+        {
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Edit, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var stockId = rq.StockId;
+            var validDate = GetDeletableDate();
+
+            var stock = await _db.Stocks(orgId).AsNoTracking()
+                                 .Where(s => s.Id == stockId && (s.Kind == StockKind.Order || s.Kind == StockKind.PO) && s.Creation >= validDate)
+                                 .Select(s => new StockHeader { Kind = s.Kind, LocationFromId = s.LocationFromId, LocationToId = s.LocationToId, OrderIds = s.OrderIds, TotalLines = s.TotalLines, TotalQty = s.TotalQty })
+                                 .FirstOrDefaultAsync(cancellationToken);
+
+            if (stock == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.StockId));
+            }
+
+            var locationId = stock.Kind == StockKind.Order ? stock.LocationFromId : stock.LocationToId;
+
+            // Check order line and product
+            var orderLineId = rq.OrderLineId;
+            var productId = rq.ProductId;
+            var qty = rq.Qty;
+
+            var orderId = await _db.OrderLines.AsNoTracking()
+                .Where(ol => ol.Id == orderLineId && ol.ProductId == productId && ol.QtyDelivered + qty <= ol.Qty && ol.Order.CoreOrganizationId == orgId && (ol.Product.Scope & ProductScope.Inventory) > 0)
+                .Select(ol => ol.OrderId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (orderId < 1)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.OrderLineId));
+            }
+
+            _db.StockHeaders.Attach(stock);
+
+            if (stock.OrderIds == null)
+            {
+                stock.OrderIds = [orderId];
+            }
+            else if (!stock.OrderIds.Contains(orderId))
+            {
+                stock.OrderIds.Add(orderId);
+            }
+
+            stock.TotalLines += 1;
+            stock.TotalQty += qty;
+
+            var lineQty = stock.Kind == StockKind.Order ? -qty : qty;
+
+            var line = new StockLine
+            {
+                StockId = stockId,
+                ProductId = productId,
+                Qty = lineQty,
+                LocationId = locationId,
+                OrderLineId = orderLineId
+            };
+
+            _db.StockLines.Add(line);
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ActionResult.Succeed(line.Id);
+        }
+
         private IQueryable<StockHeader> CreateQuery(StockListRQ rq, Func<IQueryable<StockHeader>, IQueryable<StockHeader>>? filters = null)
         {
             var orgId = User.OrganizationInt;
@@ -234,6 +311,11 @@ namespace CRM.Server.Services
                     if (rq.PersonId.HasValue)
                     {
                         q = q.Where(s => s.PersonId == rq.PersonId.Value);
+                    }
+
+                    if (rq.ProductId.HasValue)
+                    {
+                        q = q.Where(s => s.Lines.Any(l => l.ProductId == rq.ProductId.Value));
                     }
 
                     if (rq.LocationFromId.HasValue)
@@ -616,7 +698,7 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<StockQueryLinesData[]> QueryLinesAsync(StockQueryLinesRQ rq, CancellationToken cancellationToken)
+        public async Task<StockQueryLineData[]> QueryLinesAsync(StockQueryLineRQ rq, CancellationToken cancellationToken)
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.View, cancellationToken))
@@ -648,13 +730,79 @@ namespace CRM.Server.Services
 
                     return q;
                 })
-                .Select(l => new StockQueryLinesData
+                .Select(l => new StockQueryLineData
                 {
                     Id = l.Id,
                     ProductId = l.ProductId,
                     ProductName = l.Product.Name,
                     Qty = l.Qty,
                     OrderLineId = l.OrderLineId
+                }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Query product lines
+        /// 查询产品行
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<StockQueryProductLineData[]> QueryProductLinesAsync(StockQueryProductLineRQ rq, CancellationToken cancellationToken)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Query, cancellationToken))
+            {
+                return [];
+            }
+
+            var orgId = User.OrganizationInt;
+
+            return await _db.StockLines.AsNoTracking()
+                .Where(sl => sl.ProductId == rq.ProductId && sl.Stock.OrganizationId == orgId)
+                .QueryEtsoo(rq, (p) => p.Id, null, (q) =>
+                {
+                    if (rq.StockKind.HasValue)
+                    {
+                        q = q.Where(p => p.Stock.Kind == rq.StockKind.Value);
+                    }
+
+                    if (rq.LocationId.HasValue)
+                    {
+                        q = q.Where(p => p.LocationId == rq.LocationId.Value);
+                    }
+
+                    if (rq.QtyStart.HasValue)
+                    {
+                        q = q.Where(p => p.Qty >= rq.QtyStart.Value);
+                    }
+
+                    if (rq.QtyEnd.HasValue)
+                    {
+                        q = q.Where(p => p.Qty <= rq.QtyEnd.Value);
+                    }
+
+                    if (rq.CreationStart.HasValue)
+                    {
+                        q = q.Where(p => p.Stock.Creation >= rq.CreationStart.Value);
+                    }
+
+                    if (rq.CreationEnd.HasValue)
+                    {
+                        q = q.Where(p => p.Stock.Creation <= rq.CreationEnd.Value);
+                    }
+
+                    return q;
+                })
+                .Select(l => new StockQueryProductLineData
+                {
+                    Id = l.Id,
+                    StockId = l.StockId,
+                    Title = l.Stock.Title,
+                    LocationId = l.LocationId,
+                    LocationName = l.Location.Name,
+                    Qty = l.Qty,
+                    OrderLineId = l.OrderLineId,
+                    Creation = l.Stock.Creation
                 }).ToArrayAsync(cancellationToken);
         }
 
@@ -1278,6 +1426,99 @@ namespace CRM.Server.Services
 
             // Return
             return ActionResult.Succeed(rq.Id);
+        }
+
+        /// <summary>
+        /// Update stock line
+        /// 更新库存行
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> UpdateLineAsync(StockUpdateLineRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Edit, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var id = rq.Id;
+
+            var stockLine = await _db.StockLines.AsNoTracking()
+                .Where(l => l.Id == id && l.Stock.OrganizationId == orgId && (l.Stock.Kind == StockKind.Order || l.Stock.Kind == StockKind.PO) && l.OrderLineId != null)
+                .Select(l => new { l.StockId, l.Stock.Kind, CurrentQty = l.Qty, Qty = l.OrderLine == null ? 0 : l.OrderLine.Qty, QtyDelivered = l.OrderLine == null ? 0 : l.OrderLine.QtyDelivered })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (stockLine == null || stockLine.Qty == 0)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var stockId = stockLine.StockId;
+            var kind = stockLine.Kind;
+            var currentQty = stockLine.CurrentQty;
+            var lineQty = stockLine.Qty;
+            var deliveredQty = stockLine.QtyDelivered;
+            var qty = rq.Qty;
+
+            decimal adjustQty = 0;
+
+            if (kind == StockKind.Order)
+            {
+                adjustQty = currentQty - qty;
+
+                if (qty > 0 || currentQty > 0 || deliveredQty + adjustQty > lineQty)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.Qty));
+                }
+            }
+            else if (kind == StockKind.PO)
+            {
+                adjustQty = qty - currentQty;
+
+                if (qty < 0 || currentQty < 0 || deliveredQty + adjustQty > lineQty)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.Qty));
+                }
+            }
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                if (qty == 0)
+                {
+                    await _db.StockLines.AsNoTracking().Where(l => l.Id == id).ExecuteDeleteAsync(cancellationToken);
+                }
+                else
+                {
+                    await _db.StockLines.AsNoTracking().Where(l => l.Id == id).ExecuteUpdateAsync(l => l.SetProperty(p => p.Qty, qty), cancellationToken);
+                }
+
+                if (adjustQty != 0)
+                {
+                    await _db.Stocks(orgId).AsNoTracking()
+                        .Where(s => s.Id == stockId)
+                        .ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalLines, p => qty == 0 ? p.TotalLines - 1 : p.TotalLines)
+                                                  .SetProperty(p => p.TotalQty, p => p.TotalQty + adjustQty), cancellationToken);
+                }
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
+
+            // Return
+            return ActionResult.Succeed(id);
         }
     }
 }

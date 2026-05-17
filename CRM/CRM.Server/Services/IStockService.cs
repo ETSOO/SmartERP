@@ -10,6 +10,7 @@ namespace CRM.Server.Services
         Task<IActionResult> AssembleAsync(StockAssembleRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> CheckStockAsync(CheckStockRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> CheckStockAsync(int locationId, StockItem[] items, CancellationToken cancellationToken = default);
+        Task<IActionResult> CreateLineAsync(StockCreateLineRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> LoseAsync(StockLoseRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> InitAsync(StockInitRQ rq, CancellationToken cancellationToken = default);
@@ -17,11 +18,13 @@ namespace CRM.Server.Services
         Task<IActionResult> OrderOutAsync(StockOrderOutRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> POInAsync(StockPOInRQ rq, CancellationToken cancellationToken = default);
         Task<StockQueryData[]> QueryAsync(StockQueryRQ rq, CancellationToken cancellationToken = default);
-        Task<StockQueryLinesData[]> QueryLinesAsync(StockQueryLinesRQ rq, CancellationToken cancellationToken);
+        Task<StockQueryLineData[]> QueryLinesAsync(StockQueryLineRQ rq, CancellationToken cancellationToken);
+        Task<StockQueryProductLineData[]> QueryProductLinesAsync(StockQueryProductLineRQ rq, CancellationToken cancellationToken);
         Task<StockQueryProductData[]> QueryProductAsync(StockQueryProductRQ rq, CancellationToken cancellationToken = default);
         Task<StockViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> ReceiveAsync(StockReceiveRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> TransferAsync(StockTransferRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(StockUpdateRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> UpdateLineAsync(StockUpdateLineRQ rq, CancellationToken cancellationToken = default);
     }
 }

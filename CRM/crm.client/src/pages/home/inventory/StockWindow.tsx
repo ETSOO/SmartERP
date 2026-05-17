@@ -29,11 +29,15 @@ export function StockWindow({
   products,
   fromPersonId,
   toPersonId,
+  defaultLocationFromId,
+  defaultLocationToId,
   mRef
 }: NotificationMUDataProps & {
   products: StockProducts;
   fromPersonId?: number;
   toPersonId?: number;
+  defaultLocationFromId?: number;
+  defaultLocationToId?: number;
 }) {
   // Labels
   const labels = app.getLabels(
@@ -67,13 +71,17 @@ export function StockWindow({
         return;
       }
 
-      const { locationFromId, locationToId, title, description } =
-        DomUtils.dataAs(new FormData(form), {
-          locationFromId: "number",
-          locationToId: "number",
-          title: "string",
-          description: "string"
-        });
+      const {
+        locationFromId = defaultLocationFromId,
+        locationToId = defaultLocationToId,
+        title,
+        description
+      } = DomUtils.dataAs(new FormData(form), {
+        locationFromId: "number",
+        locationToId: "number",
+        title: "string",
+        description: "string"
+      });
 
       if (title == null) {
         return;
@@ -115,6 +123,8 @@ export function StockWindow({
             personId={fromPersonId}
             label={labels.shippingWarehouse}
             inputRequired
+            idValue={defaultLocationFromId}
+            disabled={defaultLocationFromId != null}
           />
         )}
         {toPersonId && (
@@ -123,6 +133,8 @@ export function StockWindow({
             personId={toPersonId}
             label={labels.receivingWarehouse}
             inputRequired
+            idValue={defaultLocationToId}
+            disabled={defaultLocationToId != null}
           />
         )}
         <InputField

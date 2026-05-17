@@ -100,7 +100,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             return await _db.StockSites.AsNoTracking()
-                .Where(s => s.ProductId == id && s.Product.CoreOrganizationId == orgId)
+                .Where(s => s.ProductId == id && s.Qty != 0 && s.Product.CoreOrganizationId == orgId)
                 .Select(s => new StockSiteViewProductData
                 {
                     Id = s.Id,

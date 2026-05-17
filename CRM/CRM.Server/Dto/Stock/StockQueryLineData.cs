@@ -1,10 +1,10 @@
 ﻿namespace CRM.Server.Dto.Stock
 {
     /// <summary>
-    /// Stock query lines data
+    /// Stock query line data
     /// 库存行查询数据
     /// </summary>
-    public record StockQueryLinesData
+    public record StockQueryLineData
     {
         /// <summary>
         /// Id

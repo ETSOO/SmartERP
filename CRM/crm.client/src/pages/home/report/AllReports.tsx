@@ -28,7 +28,7 @@ const template = {
   identityType: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function AllDepts() {
+export default function AllReports() {
   // Route
   const navigate = useNavigate();
 

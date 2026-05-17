@@ -1,10 +1,10 @@
 ﻿namespace CRM.Server.RQ.Stock
 {
     /// <summary>
-    /// Stock query lines request data
+    /// Stock query line request data
     /// 库存行查询请求数据
     /// </summary>
-    public record StockQueryLinesRQ : QueryLongRQ
+    public record StockQueryLineRQ : QueryLongRQ
     {
         /// <summary>
         /// Stock id

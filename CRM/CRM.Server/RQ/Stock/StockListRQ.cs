@@ -23,6 +23,12 @@ namespace CRM.Server.RQ.Stock
         public long? PersonId { get; init; }
 
         /// <summary>
+        /// Product id
+        /// 产品编号
+        /// </summary>
+        public int? ProductId { get; init; }
+
+        /// <summary>
         /// Shipping address id
         /// 发货地址编号
         /// </summary>
