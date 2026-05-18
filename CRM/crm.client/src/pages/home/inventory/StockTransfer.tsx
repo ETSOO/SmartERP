@@ -8,15 +8,19 @@ import {
 } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
-import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
+import {
+  GridCellRendererProps,
+  GridDataType,
+  ScrollerListForwardRef
+} from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import {
-  StockInitRQ,
   StockItem,
   StockKind,
-  StockQueryProductData
+  StockQueryProductData,
+  StockTransferRQ
 } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
@@ -29,8 +33,11 @@ import {
   ProductUnitList
 } from "@etsoo/smarterp-crm/components";
 import Button from "@mui/material/Button";
+import WidgetsIcon from "@mui/icons-material/Widgets";
 import { StockActionData, StockProducts, StockWindow } from "./StockWindow";
 import { LocalUtils } from "../../../app/LocalUtils";
+import IconButton from "@mui/material/IconButton";
+import { StockByWarehouse } from "./StockByWarehouse";
 
 const template = {
   locationId: "number",
@@ -40,7 +47,7 @@ const template = {
   categoryId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function InitStock() {
+export default function StockTransfer() {
   // Route
   const navigate = useNavigate();
 
@@ -56,9 +63,11 @@ export default function InitStock() {
     "nextStep",
     "productName",
     "productUnit",
+    "shippingWarehouse",
+    "stockByWarehouse",
     "stockQty",
-    "stockKindInit",
-    "warehouse",
+    "stockKindStockTransfer",
+    "transferQty",
     "view"
   );
 
@@ -95,9 +104,10 @@ export default function InitStock() {
   function complete() {
     app.notifier.data<StockActionData>(
       <StockWindow
-        kind={StockKind.Init}
+        kind={StockKind.StockTransfer}
         products={productsRef.current}
-        defaultLocationToId={locationRef.current}
+        defaultLocationFromId={locationRef.current}
+        fromPersonId={orgPersonId}
         toPersonId={orgPersonId}
         mRef={React.createRef<NotificationMUDataMethods>()}
       />,
@@ -105,7 +115,7 @@ export default function InitStock() {
         if (data == null) return;
 
         const { locationFromId, locationToId, ...rest } = data;
-        if (locationToId == null) return;
+        if (locationFromId == null || locationToId == null) return;
 
         const items: StockItem[] = Object.values(productsRef.current).map(
           (p) => ({
@@ -114,9 +124,14 @@ export default function InitStock() {
           })
         );
 
-        const rq: StockInitRQ = { ...rest, locationId: locationToId, items };
+        const rq: StockTransferRQ = {
+          ...rest,
+          locationFromId,
+          locationToId,
+          items
+        };
 
-        const result = await app.stockApi.init(rq);
+        const result = await app.stockApi.transfer(rq);
 
         if (result == null) return;
 
@@ -126,7 +141,7 @@ export default function InitStock() {
           return app.formatResult(result);
         }
       },
-      labels.stockKindInit
+      labels.stockKindStockTransfer
     );
   }
 
@@ -153,7 +168,7 @@ export default function InitStock() {
         <AddressList
           name="locationId"
           personId={orgPersonId}
-          label={labels.warehouse}
+          label={labels.shippingWarehouse}
           idValue={data.locationId ?? locationRef.current}
           onValueChange={(value) => {
             locationRef.current = value?.id;
@@ -185,13 +200,16 @@ export default function InitStock() {
         <ProductUnitList search value={data.unitId} />
       ]}
       loadData={(data) => {
-        const locationId = data.locationId;
+        const { locationId, ...rest } = data;
         if (locationId == null) return Promise.resolve([]);
 
-        return app.stockApi.queryProduct(data, {
-          defaultValue: [],
-          showLoading: false
-        });
+        return app.stockApi.queryProduct(
+          { locationId, ...rest, hasStockQty: true },
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        );
       }}
       columns={[
         {
@@ -203,17 +221,48 @@ export default function InitStock() {
               : `${data.assignedId ? `${data.assignedId} - ` : ""}${data.name}`
         },
         {
-          width: 148,
+          field: "qty",
           header: labels.stockQty,
+          type: GridDataType.Number,
+          width: 108
+        },
+        {
+          header: "",
+          width: 48,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingLeft: "0px!important",
+            paddingRight: "0px!important"
+          },
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<StockQueryProductData, BoxProps>) => {
+            if (data == null) return undefined;
+            return (
+              <IconButton
+                title={labels.stockByWarehouse}
+                onClick={() =>
+                  StockByWarehouse.show(data.id, locationRef.current)
+                }
+              >
+                {<WidgetsIcon />}
+              </IconButton>
+            );
+          }
+        },
+        {
+          width: 148,
+          header: labels.transferQty,
           cellBoxStyle: {
             paddingTop: "6px!important"
           },
           cellRenderer: ({
             data
           }: GridCellRendererProps<StockQueryProductData, BoxProps>) => {
-            if (data == null) return undefined;
+            if (data == null || data.qty == null || data.qty <= 0)
+              return undefined;
 
-            const qty = productsRef.current[data.id]?.qty ?? data.qty ?? "";
+            const qty = productsRef.current[data.id]?.qty ?? "";
 
             return (
               <NumberInputField
@@ -221,7 +270,7 @@ export default function InitStock() {
                 fullWidth
                 step={data.stepQty ?? 1}
                 defaultValue={qty}
-                disabled={data.qty != null}
+                max={data.qty}
                 onNumberChange={(value) => {
                   updateQty(data, value);
                 }}

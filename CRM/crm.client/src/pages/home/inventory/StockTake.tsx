@@ -8,20 +8,25 @@ import {
 } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
-import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
+import {
+  GridCellRendererProps,
+  GridDataType,
+  ScrollerListForwardRef
+} from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import {
-  StockInitRQ,
   StockItem,
   StockKind,
-  StockQueryProductData
+  StockQueryProductData,
+  StockTakeRQ
 } from "@etsoo/smarterp-crm";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import WidgetsIcon from "@mui/icons-material/Widgets";
 import { Permissions } from "@etsoo/smarterp-crm";
 import {
   AddressList,
@@ -31,6 +36,8 @@ import {
 import Button from "@mui/material/Button";
 import { StockActionData, StockProducts, StockWindow } from "./StockWindow";
 import { LocalUtils } from "../../../app/LocalUtils";
+import { StockByWarehouse } from "./StockByWarehouse";
+import IconButton from "@mui/material/IconButton";
 
 const template = {
   locationId: "number",
@@ -40,7 +47,7 @@ const template = {
   categoryId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function InitStock() {
+export default function StockTake() {
   // Route
   const navigate = useNavigate();
 
@@ -56,8 +63,12 @@ export default function InitStock() {
     "nextStep",
     "productName",
     "productUnit",
+    "scrapQty",
+    "stockByWarehouse",
     "stockQty",
-    "stockKindInit",
+    "stockKindStockTaking",
+    "stockTakingGain",
+    "stockTakingLoss",
     "warehouse",
     "view"
   );
@@ -83,7 +94,7 @@ export default function InitStock() {
     qty: number | undefined | null
   ) {
     const id = data.id;
-    if (qty == null || qty <= 0) {
+    if (qty == null || qty === 0) {
       delete productsRef.current[id];
     } else {
       productsRef.current[id] = { ...data, qty };
@@ -95,7 +106,7 @@ export default function InitStock() {
   function complete() {
     app.notifier.data<StockActionData>(
       <StockWindow
-        kind={StockKind.Init}
+        kind={StockKind.StockTaking}
         products={productsRef.current}
         defaultLocationToId={locationRef.current}
         toPersonId={orgPersonId}
@@ -114,9 +125,9 @@ export default function InitStock() {
           })
         );
 
-        const rq: StockInitRQ = { ...rest, locationId: locationToId, items };
+        const rq: StockTakeRQ = { ...rest, locationId: locationToId, items };
 
-        const result = await app.stockApi.init(rq);
+        const result = await app.stockApi.take(rq);
 
         if (result == null) return;
 
@@ -126,8 +137,17 @@ export default function InitStock() {
           return app.formatResult(result);
         }
       },
-      labels.stockKindInit
+      labels.stockKindStockTaking
     );
+  }
+
+  function updateField(id: number, gain: boolean) {
+    const input = globalThis.document.getElementById(
+      `${gain ? "lost" : "gain"}-${id}`
+    ) as HTMLInputElement | null;
+    if (input == null) return;
+
+    input.value = "";
   }
 
   // Page data hook
@@ -185,13 +205,16 @@ export default function InitStock() {
         <ProductUnitList search value={data.unitId} />
       ]}
       loadData={(data) => {
-        const locationId = data.locationId;
+        const { locationId, ...rest } = data;
         if (locationId == null) return Promise.resolve([]);
 
-        return app.stockApi.queryProduct(data, {
-          defaultValue: [],
-          showLoading: false
-        });
+        return app.stockApi.queryProduct(
+          { locationId, ...rest },
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        );
       }}
       columns={[
         {
@@ -203,8 +226,38 @@ export default function InitStock() {
               : `${data.assignedId ? `${data.assignedId} - ` : ""}${data.name}`
         },
         {
-          width: 148,
+          field: "qty",
           header: labels.stockQty,
+          type: GridDataType.Number,
+          width: 108
+        },
+        {
+          header: "",
+          width: 48,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingLeft: "0px!important",
+            paddingRight: "0px!important"
+          },
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<StockQueryProductData, BoxProps>) => {
+            if (data == null) return undefined;
+            return (
+              <IconButton
+                title={labels.stockByWarehouse}
+                onClick={() =>
+                  StockByWarehouse.show(data.id, locationRef.current)
+                }
+              >
+                {<WidgetsIcon />}
+              </IconButton>
+            );
+          }
+        },
+        {
+          width: 148,
+          header: labels.stockTakingGain,
           cellBoxStyle: {
             paddingTop: "6px!important"
           },
@@ -213,17 +266,50 @@ export default function InitStock() {
           }: GridCellRendererProps<StockQueryProductData, BoxProps>) => {
             if (data == null) return undefined;
 
-            const qty = productsRef.current[data.id]?.qty ?? data.qty ?? "";
+            const cachedQty = productsRef.current[data.id]?.qty;
+            const qty = cachedQty > 0 ? cachedQty : "";
 
             return (
               <NumberInputField
+                id={`gain-${data.id}`}
                 search
                 fullWidth
                 step={data.stepQty ?? 1}
                 defaultValue={qty}
-                disabled={data.qty != null}
                 onNumberChange={(value) => {
                   updateQty(data, value);
+                  updateField(data.id, true);
+                }}
+              />
+            );
+          }
+        },
+        {
+          width: 148,
+          header: labels.stockTakingLoss,
+          cellBoxStyle: {
+            paddingTop: "6px!important"
+          },
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<StockQueryProductData, BoxProps>) => {
+            if (data == null || data.qty == null || data.qty <= 0)
+              return undefined;
+
+            const cachedQty = productsRef.current[data.id]?.qty;
+            const qty = cachedQty < 0 ? -cachedQty : "";
+
+            return (
+              <NumberInputField
+                id={`lost-${data.id}`}
+                search
+                fullWidth
+                step={data.stepQty ?? 1}
+                defaultValue={qty}
+                max={data.qty}
+                onNumberChange={(value) => {
+                  updateQty(data, value == null ? value : -value);
+                  updateField(data.id, false);
                 }}
               />
             );

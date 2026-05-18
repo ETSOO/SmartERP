@@ -23,6 +23,7 @@ namespace CRM.Server.Services
         Task<StockQueryProductData[]> QueryProductAsync(StockQueryProductRQ rq, CancellationToken cancellationToken = default);
         Task<StockViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> ReceiveAsync(StockReceiveRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> TakeAsync(StockTakeRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> TransferAsync(StockTransferRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(StockUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateLineAsync(StockUpdateLineRQ rq, CancellationToken cancellationToken = default);

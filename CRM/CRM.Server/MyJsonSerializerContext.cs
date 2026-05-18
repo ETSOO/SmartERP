@@ -302,6 +302,7 @@ namespace CRM.Server
     [JsonSerializable(typeof(StockQueryProductLineRQ))]
     [JsonSerializable(typeof(StockQueryProductRQ))]
     [JsonSerializable(typeof(StockReceiveRQ))]
+    [JsonSerializable(typeof(StockTakeRQ))]
     [JsonSerializable(typeof(StockTransferRQ))]
     [JsonSerializable(typeof(StockUpdateRQ))]
     [JsonSerializable(typeof(StockUpdateLineRQ))]

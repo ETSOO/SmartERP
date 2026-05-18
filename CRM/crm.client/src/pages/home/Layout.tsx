@@ -580,8 +580,28 @@ export default function Home() {
             hidden: true
           },
           {
+            segment: "assembly",
+            title: labels.stockKindAssembly,
+            hidden: true
+          },
+          {
             segment: "init",
             title: labels.stockKindInit,
+            hidden: true
+          },
+          {
+            segment: "loss",
+            title: labels.stockKindLoss,
+            hidden: true
+          },
+          {
+            segment: "take",
+            title: labels.stockKindStockTaking,
+            hidden: true
+          },
+          {
+            segment: "transfer",
+            title: labels.stockKindStockTransfer,
             hidden: true
           },
           {

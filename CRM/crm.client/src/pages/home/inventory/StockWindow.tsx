@@ -6,7 +6,7 @@ import {
   NotificationMUDataProps,
   VBox
 } from "@etsoo/materialui";
-import { StockQueryProductData } from "@etsoo/smarterp-crm";
+import { StockKind, StockQueryProductData } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import { AddressList } from "@etsoo/smarterp-crm/components";
 import { DateUtils, DomUtils } from "@etsoo/shared";
@@ -19,6 +19,7 @@ export type StockProducts = Record<
 export type StockActionData =
   | {
       title: string;
+      trackingNumber?: string;
       description?: string;
       locationFromId?: number;
       locationToId?: number;
@@ -26,6 +27,7 @@ export type StockActionData =
   | undefined;
 
 export function StockWindow({
+  kind,
   products,
   fromPersonId,
   toPersonId,
@@ -33,6 +35,7 @@ export function StockWindow({
   defaultLocationToId,
   mRef
 }: NotificationMUDataProps & {
+  kind: StockKind;
   products: StockProducts;
   fromPersonId?: number;
   toPersonId?: number;
@@ -48,11 +51,11 @@ export function StockWindow({
     "qty",
     "receivingWarehouse",
     "shippingWarehouse",
-    "stockKindInit",
-    "title"
+    "title",
+    "trackingNumber"
   );
 
-  const title = `${labels.stockKindInit} ${DateUtils.format(new Date(), "yyyyMMdd")}`;
+  const title = `${app.stock.getKind(kind)} ${DateUtils.format(new Date(), "yyyyMMdd")}`;
 
   const rows = Object.values(products);
 
@@ -75,11 +78,13 @@ export function StockWindow({
         locationFromId = defaultLocationFromId,
         locationToId = defaultLocationToId,
         title,
+        trackingNumber,
         description
       } = DomUtils.dataAs(new FormData(form), {
         locationFromId: "number",
         locationToId: "number",
         title: "string",
+        trackingNumber: "string",
         description: "string"
       });
 
@@ -89,9 +94,18 @@ export function StockWindow({
 
       if (locationFromId == null && locationToId == null) {
         return;
+      } else if (locationToId === locationFromId) {
+        DomUtils.setFocus("locationToIdInput", form);
+        return;
       }
 
-      return { locationFromId, locationToId, title, description };
+      return {
+        locationFromId,
+        locationToId,
+        title,
+        trackingNumber,
+        description
+      };
     }
   }));
 
@@ -114,6 +128,8 @@ export function StockWindow({
     }
   ];
 
+  const gridHeight = fromPersonId != null && toPersonId != null ? 200 : 250;
+
   return (
     <form ref={formRef}>
       <VBox spacing={2} sx={{ paddingTop: 1 }}>
@@ -123,6 +139,7 @@ export function StockWindow({
             personId={fromPersonId}
             label={labels.shippingWarehouse}
             inputRequired
+            size="small"
             idValue={defaultLocationFromId}
             disabled={defaultLocationFromId != null}
           />
@@ -133,6 +150,7 @@ export function StockWindow({
             personId={toPersonId}
             label={labels.receivingWarehouse}
             inputRequired
+            size="small"
             idValue={defaultLocationToId}
             disabled={defaultLocationToId != null}
           />
@@ -143,17 +161,28 @@ export function StockWindow({
           fullWidth
           required
           defaultValue={title}
+          size="small"
           slotProps={{ htmlInput: { maxLength: 128 } }}
         />
+        {kind == StockKind.StockTransfer && (
+          <InputField
+            name="trackingNumber"
+            label={labels.trackingNumber}
+            fullWidth
+            size="small"
+            slotProps={{ htmlInput: { maxLength: 20 } }}
+          />
+        )}
         <InputField
           name="description"
           label={labels.description}
           multiline
           rows={1}
           fullWidth
+          size="small"
           slotProps={{ htmlInput: { maxLength: 1280 } }}
         />
-        <VBox sx={{ height: 250, width: "100%" }}>
+        <VBox sx={{ height: gridHeight, width: "100%" }}>
           <DataGrid
             rows={rows}
             columns={columns}

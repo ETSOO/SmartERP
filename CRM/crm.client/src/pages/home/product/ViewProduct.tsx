@@ -6,6 +6,7 @@ import {
   GridRowId,
   HBox,
   IconButtonLink,
+  LinkEx,
   MoneyInputField,
   NotificationMUDataMethods,
   NotificationMUDataProps,
@@ -55,6 +56,7 @@ import { DataTypes, DomUtils, NumberUtils } from "@etsoo/shared";
 import { CustomFieldData } from "@etsoo/appscript";
 import { ProductList } from "@etsoo/smarterp-crm/components";
 import { StockByWarehouse } from "../inventory/StockByWarehouse";
+import IconButton from "@mui/material/IconButton";
 
 function isBom(scope: ProductScope) {
   return (
@@ -728,7 +730,17 @@ export default function ViewProduct() {
                   {item.boms.map((b) => (
                     <TableRow key={b.productId}>
                       <TableCell component="th" scope="row">
-                        {b.name}
+                        <LinkEx to={`./../${b.productId}`}>{b.name}</LinkEx>
+                        {(item.scope & ProductScope.Inventory) > 0 &&
+                          isQueryInventory && (
+                            <IconButton
+                              size="small"
+                              onClick={() => StockByWarehouse.show(b.productId)}
+                              title={labels.stockByWarehouse}
+                            >
+                              <WidgetsIcon />
+                            </IconButton>
+                          )}
                       </TableCell>
                       <TableCell align="right">{b.qty}</TableCell>
                     </TableRow>

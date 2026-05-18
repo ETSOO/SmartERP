@@ -61,5 +61,11 @@ namespace CRM.Server.RQ.Stock
         /// 单位编号
         /// </summary>
         public int? UnitId { get; init; }
+
+        /// <summary>
+        /// Has stock qty
+        /// 是否有库存数量
+        /// </summary>
+        public bool? HasStockQty {  get; init; }
     }
 }

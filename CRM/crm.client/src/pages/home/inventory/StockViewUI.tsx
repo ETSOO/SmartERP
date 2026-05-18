@@ -10,6 +10,7 @@ import { Permissions, StockUpdateRQ, StockViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -34,11 +35,13 @@ export function StockViewUI({
     "description",
     "edit",
     "noChanges",
+    "receiving",
     "title",
     "trackingNumber"
   );
 
   const editable = app.owns(Permissions.Inventory.Edit);
+  const hasManage = app.owns(Permissions.Inventory.Manage);
 
   function doEdit() {
     // Show
@@ -135,6 +138,43 @@ export function StockViewUI({
     );
   }
 
+  function doReceive() {
+    app.notifier.prompt(
+      labels.trackingNumber,
+      async (trackingNumber) => {
+        if (trackingNumber == null) return;
+
+        if (trackingNumber === "" || trackingNumber == data.trackingNumber) {
+          trackingNumber = undefined;
+        }
+
+        const result = await app.stockApi.receive(
+          { id: data.id, trackingNumber },
+          { showLoading: false }
+        );
+
+        if (result == null) return false;
+
+        if (result.ok) {
+          refresh();
+        } else {
+          return app.formatResult(result);
+        }
+      },
+      labels.receiving,
+      {
+        inputProps: {
+          type: "input",
+          defaultValue: data.trackingNumber,
+          required: false,
+          slotProps: {
+            htmlInput: { maxLength: 20 }
+          }
+        }
+      }
+    );
+  }
+
   return (
     <ViewContainer
       data={data}
@@ -207,6 +247,15 @@ export function StockViewUI({
                   onClick={doDelete}
                 >
                   {labels.delete}
+                </Button>
+              )}
+              {hasManage && data.receiptTime == null && (
+                <Button
+                  startIcon={<ThumbUpIcon />}
+                  variant="outlined"
+                  onClick={doReceive}
+                >
+                  {labels.receiving}
                 </Button>
               )}
               {editable && (

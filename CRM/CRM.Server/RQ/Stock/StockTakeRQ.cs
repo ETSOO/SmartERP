@@ -6,22 +6,16 @@ using CRM.Server.Dto.Stock;
 namespace CRM.Server.RQ.Stock
 {
     /// <summary>
-    /// Stock transfer request data
-    /// 库存调货请求数据
+    /// Stock take request data
+    /// 库存盘点请求数据
     /// </summary>
-    public record StockTransferRQ : IModelValidator
+    public record StockTakeRQ : IModelValidator
     {
         /// <summary>
-        /// Shipping address id
-        /// 发货地址编号
+        /// Organization location id
+        /// 机构位置编号
         /// </summary>
-        public int LocationFromId { get; set; }
-
-        /// <summary>
-        /// Receiving address id
-        /// 收货地址编号
-        /// </summary>
-        public int LocationToId { get; set; }
+        public int LocationId { get; set; }
 
         /// <summary>
         /// Title
@@ -34,12 +28,6 @@ namespace CRM.Server.RQ.Stock
         /// 描述
         /// </summary>
         public string? Description { get; init; }
-
-        /// <summary>
-        /// Tracking number
-        /// 物流编号
-        /// </summary>
-        public string? TrackingNumber { get; init; }
 
         /// <summary>
         /// Items
@@ -64,12 +52,7 @@ namespace CRM.Server.RQ.Stock
                 return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
-            if (TrackingNumber != null && TrackingNumber.Length is not (>= 1 and <= 20))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(TrackingNumber));
-            }
-
-            if (!Items.Any() || Items.Any(i => i.Qty <= 0) || !Items.IsProductUnique())
+            if (!Items.Any() || Items.Any(i => i.Qty == 0) || !Items.IsProductUnique())
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Items));
             }

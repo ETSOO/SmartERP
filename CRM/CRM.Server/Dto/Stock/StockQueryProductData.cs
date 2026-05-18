@@ -25,6 +25,12 @@
         public string? AssignedId { get; init; }
 
         /// <summary>
+        /// Purchase minimum unit
+        /// 购买最小单位
+        /// </summary>
+        public decimal? StepQty { get; init; }
+
+        /// <summary>
         /// Stock qty
         /// 库存数量
         /// </summary>

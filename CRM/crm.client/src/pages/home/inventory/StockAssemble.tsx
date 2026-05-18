@@ -8,12 +8,17 @@ import {
 } from "@etsoo/materialui";
 import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
-import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
+import {
+  GridCellRendererProps,
+  GridDataType,
+  ScrollerListForwardRef
+} from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import {
-  StockInitRQ,
+  ProductScope,
+  StockAssembleRQ,
   StockItem,
   StockKind,
   StockQueryProductData
@@ -22,6 +27,7 @@ import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import WidgetsIcon from "@mui/icons-material/Widgets";
 import { Permissions } from "@etsoo/smarterp-crm";
 import {
   AddressList,
@@ -31,6 +37,8 @@ import {
 import Button from "@mui/material/Button";
 import { StockActionData, StockProducts, StockWindow } from "./StockWindow";
 import { LocalUtils } from "../../../app/LocalUtils";
+import IconButton from "@mui/material/IconButton";
+import { StockByWarehouse } from "./StockByWarehouse";
 
 const template = {
   locationId: "number",
@@ -40,7 +48,7 @@ const template = {
   categoryId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function InitStock() {
+export default function StockAssemble() {
   // Route
   const navigate = useNavigate();
 
@@ -48,6 +56,7 @@ export default function InitStock() {
   const labels = app.getLabels(
     "actions",
     "add",
+    "assemblyQty",
     "assignedId",
     "category",
     "categories",
@@ -56,8 +65,9 @@ export default function InitStock() {
     "nextStep",
     "productName",
     "productUnit",
+    "stockByWarehouse",
     "stockQty",
-    "stockKindInit",
+    "stockKindAssembly",
     "warehouse",
     "view"
   );
@@ -95,7 +105,7 @@ export default function InitStock() {
   function complete() {
     app.notifier.data<StockActionData>(
       <StockWindow
-        kind={StockKind.Init}
+        kind={StockKind.Assembly}
         products={productsRef.current}
         defaultLocationToId={locationRef.current}
         toPersonId={orgPersonId}
@@ -114,9 +124,13 @@ export default function InitStock() {
           })
         );
 
-        const rq: StockInitRQ = { ...rest, locationId: locationToId, items };
+        const rq: StockAssembleRQ = {
+          ...rest,
+          locationId: locationToId,
+          items
+        };
 
-        const result = await app.stockApi.init(rq);
+        const result = await app.stockApi.assemble(rq);
 
         if (result == null) return;
 
@@ -126,7 +140,7 @@ export default function InitStock() {
           return app.formatResult(result);
         }
       },
-      labels.stockKindInit
+      labels.stockKindAssembly
     );
   }
 
@@ -188,10 +202,13 @@ export default function InitStock() {
         const locationId = data.locationId;
         if (locationId == null) return Promise.resolve([]);
 
-        return app.stockApi.queryProduct(data, {
-          defaultValue: [],
-          showLoading: false
-        });
+        return app.stockApi.queryProduct(
+          { ...data, scope: ProductScope.Production },
+          {
+            defaultValue: [],
+            showLoading: false
+          }
+        );
       }}
       columns={[
         {
@@ -203,8 +220,38 @@ export default function InitStock() {
               : `${data.assignedId ? `${data.assignedId} - ` : ""}${data.name}`
         },
         {
-          width: 148,
+          field: "qty",
           header: labels.stockQty,
+          type: GridDataType.Number,
+          width: 108
+        },
+        {
+          header: "",
+          width: 48,
+          cellBoxStyle: {
+            paddingTop: "6px!important",
+            paddingLeft: "0px!important",
+            paddingRight: "0px!important"
+          },
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<StockQueryProductData, BoxProps>) => {
+            if (data == null) return undefined;
+            return (
+              <IconButton
+                title={labels.stockByWarehouse}
+                onClick={() =>
+                  StockByWarehouse.show(data.id, locationRef.current)
+                }
+              >
+                {<WidgetsIcon />}
+              </IconButton>
+            );
+          }
+        },
+        {
+          width: 148,
+          header: labels.assemblyQty,
           cellBoxStyle: {
             paddingTop: "6px!important"
           },
@@ -213,7 +260,7 @@ export default function InitStock() {
           }: GridCellRendererProps<StockQueryProductData, BoxProps>) => {
             if (data == null) return undefined;
 
-            const qty = productsRef.current[data.id]?.qty ?? data.qty ?? "";
+            const qty = productsRef.current[data.id]?.qty ?? "";
 
             return (
               <NumberInputField
@@ -221,7 +268,6 @@ export default function InitStock() {
                 fullWidth
                 step={data.stepQty ?? 1}
                 defaultValue={qty}
-                disabled={data.qty != null}
                 onNumberChange={(value) => {
                   updateQty(data, value);
                 }}

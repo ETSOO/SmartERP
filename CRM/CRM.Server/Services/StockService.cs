@@ -70,7 +70,7 @@ namespace CRM.Server.Services
 
             // Items check
             var items = rq.Items.ToArray();
-            var scope = ProductScope.Inventory & ProductScope.Production;
+            var scope = ProductScope.Inventory | ProductScope.Production;
             var productIds = items.Select(i => i.ProductId).ToArray();
             var products = await _db.Products(orgId).AsNoTracking()
                 .Where(p => productIds.Contains(p.Id)
@@ -498,7 +498,7 @@ namespace CRM.Server.Services
 
             var userId = User.Oid;
             var totalLines = lines.Length;
-            var totalQty = lines.Sum(l => Math.Abs(l.Qty));
+            var totalQty = -lines.Sum(l => l.Qty);
             var now = DateTimeOffset.UtcNow;
 
             var stock = new StockHeader
@@ -823,21 +823,39 @@ namespace CRM.Server.Services
 
             var orgId = User.OrganizationInt;
 
-            var scope = ProductScope.Inventory;
-            if (rq.Scope.HasValue)
-            {
-                scope &= rq.Scope.Value;
-            }
+            var defaultScope = ProductScope.Inventory;
 
             rq.Enabled ??= true;
 
             var locationId = rq.LocationId;
 
             // Query
-            var query = _db.Products(orgId).AsNoTracking()
-                .Where(p => (p.Scope & scope) > 0)
+            return await _db.Products(orgId).AsNoTracking()
+                .Where(p => (p.Scope & defaultScope) > 0)
+                .LeftJoin(_db.StockSites.AsNoTracking().Where(s => s.LocationId == locationId), p => p.Id, s => s.ProductId, (p, s) => new
+                {
+                    p.Id,
+                    p.Scope,
+                    p.Status,
+                    p.Usage,
+                    p.CategoryIds,
+                    p.CategoryIdsAll,
+                    p.Name,
+                    p.Description,
+                    p.AssignedId,
+                    p.StepQty,
+                    p.UnitId,
+                    UnitName = p.Unit.Name,
+                    p.QueryKeyword,
+                    Qty = s == null ? (decimal?)null : s.Qty
+                })
                 .QueryEtsoo(rq, (p) => p.Id, (p) => p.Status, (q) =>
                 {
+                    if (rq.Scope.HasValue)
+                    {
+                        q = q.Where(p => (p.Scope & rq.Scope.Value) > 0);
+                    }
+
                     if (rq.Usage.HasValue)
                     {
                         q = q.Where(p => p.Usage == rq.Usage.Value);
@@ -871,6 +889,18 @@ namespace CRM.Server.Services
                         q = q.Where(p => p.UnitId == rq.UnitId.Value);
                     }
 
+                    if (rq.HasStockQty.HasValue)
+                    {
+                        if (rq.HasStockQty.Value)
+                        {
+                            q = q.Where(p => p.Qty > 0);
+                        }
+                        else
+                        {
+                            q = q.Where(p => p.Qty == null || p.Qty <= 0);
+                        }
+                    }
+
                     if (rq.Keyword?.Length > 1)
                     {
                         var keyword = rq.Keyword;
@@ -890,23 +920,15 @@ namespace CRM.Server.Services
                     }
 
                     return q;
-                });
-
-            return await query
-                .SelectMany(
-                    p => p.StockSites
-                        .Where(s => s.LocationId == locationId)
-                        .DefaultIfEmpty(),
-                    (p, s) => new StockQueryProductData
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        AssignedId = p.AssignedId,
-                        Qty = s == null ? null : s.Qty,
-                        UnitName = p.Unit.Name
-                    }
-                )
-                .ToArrayAsync(cancellationToken);
+                }).Select(p => new StockQueryProductData
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    AssignedId = p.AssignedId,
+                    StepQty = p.StepQty,
+                    Qty = p.Qty,
+                    UnitName = p.UnitName
+                }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
@@ -1239,16 +1261,20 @@ namespace CRM.Server.Services
             var id = rq.Id;
             var trackingNumber = rq.TrackingNumber?.Trim().ToUpper();
 
-            var hasStock = await _db.Stocks(orgId).AsNoTracking()
+            var stock = await _db.Stocks(orgId).AsNoTracking()
                 .Where(s => s.Id == id && s.ReceiptTime == null)
-                .AnyAsync(cancellationToken);
+                .Select(s => new { s.LocationFromId, s.LocationToId })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (!hasStock)
+            if (stock == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
 
             var now = DateTimeOffset.UtcNow;
+
+            var locationFromId = stock.LocationFromId;
+            var locationToId = stock.LocationToId;
 
             await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
@@ -1260,14 +1286,17 @@ namespace CRM.Server.Services
                         stock_id,
                         product_id,
                         location_id,
-                        -qty,
+                        qty,
                         order_line_id
                     )
                     SELECT
                         {id},
                         product_id,
-                        location_id,
-                        qty,
+                        CASE
+                            WHEN location_id = {locationToId} THEN {locationFromId}
+                            ELSE {locationToId}
+                        END,
+                        -qty,
                         order_line_id
                     FROM stock_line
                     WHERE stock_id = {id}
@@ -1293,6 +1322,95 @@ namespace CRM.Server.Services
             }
 
             return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// Stock take
+        /// 库存盘点
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> TakeAsync(StockTakeRQ rq,  CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+
+            // Location check
+            var locationId = rq.LocationId;
+            var hasLocation = await _db.PersonAddresses(orgPersonId).AsNoTracking()
+                .Where(a => a.Id == locationId)
+                .AnyAsync(cancellationToken);
+
+            if (!hasLocation)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.LocationId));
+            }
+
+            // Items check
+            var items = rq.Items.ToArray();
+            var checkResult = await CheckStockItemsAsync(orgId, items, cancellationToken);
+            if (!checkResult.Ok)
+            {
+                return checkResult;
+            }
+
+            // Stock check for loss, not for gain
+            var lossItems = items.Where(i => i.Qty < 0).Select(i => new StockItem
+            {
+                ProductId = i.ProductId,
+                Qty = -i.Qty
+            }).ToArray();
+            var checkStockResult = await CheckStockAsync(locationId, lossItems, cancellationToken);
+            if (!checkStockResult.Ok)
+            {
+                return checkStockResult;
+            }
+
+            var lines = items.Select(i => new StockLine
+            {
+                ProductId = i.ProductId,
+                Qty = i.Qty,
+                LocationId = locationId
+            }).ToArray();
+
+            var userId = User.Oid;
+            var totalLines = lines.Length;
+            var totalQty = lines.Sum(l => Math.Abs(l.Qty));
+            var now = DateTimeOffset.UtcNow;
+
+            var stock = new StockHeader
+            {
+                OrganizationId = orgId,
+                Kind = StockKind.Loss,
+                PersonId = orgPersonId,
+                LocationFromId = locationId,
+                LocationToId = locationId,
+                UserId = userId,
+                Title = rq.Title,
+                Description = rq.Description,
+                Creation = now,
+                ReceiptTime = now,
+                TotalLines = totalLines,
+                TotalQty = totalQty,
+
+                Lines = lines
+            };
+
+            // Add to database
+            _db.StockHeaders.Add(stock);
+
+            // Save changes
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Return result
+            return ActionResult.Succeed(stock.Id);
         }
 
         /// <summary>
@@ -1350,7 +1468,7 @@ namespace CRM.Server.Services
 
             var userId = User.Oid;
             var totalLines = lines.Length;
-            var totalQty = lines.Sum(l => l.Qty);
+            var totalQty = -lines.Sum(l => l.Qty);
             var now = DateTimeOffset.UtcNow;
 
             var stock = new StockHeader
@@ -1363,6 +1481,7 @@ namespace CRM.Server.Services
                 UserId = userId,
                 Title = rq.Title,
                 Description = rq.Description,
+                TrackingNumber = rq.TrackingNumber?.Trim().ToUpper(),
                 Creation = now,
                 TotalLines = totalLines,
                 TotalQty = totalQty,

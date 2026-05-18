@@ -712,11 +712,43 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/inventory/assembly",
+            lazy: async () => {
+              const StockAssemble =
+                await import("./pages/home/inventory/StockAssemble");
+              return { Component: StockAssemble.default };
+            }
+          },
+          {
             path: "/home/inventory/init",
             lazy: async () => {
               const InitStock =
                 await import("./pages/home/inventory/InitStock");
               return { Component: InitStock.default };
+            }
+          },
+          {
+            path: "/home/inventory/loss",
+            lazy: async () => {
+              const StockLoss =
+                await import("./pages/home/inventory/StockLoss");
+              return { Component: StockLoss.default };
+            }
+          },
+          {
+            path: "/home/inventory/take",
+            lazy: async () => {
+              const StockTake =
+                await import("./pages/home/inventory/StockTake");
+              return { Component: StockTake.default };
+            }
+          },
+          {
+            path: "/home/inventory/transfer",
+            lazy: async () => {
+              const TransferStock =
+                await import("./pages/home/inventory/StockTransfer");
+              return { Component: TransferStock.default };
             }
           },
           {
