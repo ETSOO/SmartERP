@@ -220,6 +220,39 @@ namespace CRM.Server.Services
             return ActionResult.Success;
         }
 
+        private async Task<IActionResult> CheckStockOrderItemsAsync(int orgId, List<long> orders, StockOrderItem[] items, CancellationToken cancellationToken)
+        {
+            var lineIds = items.Select(i => i.OrderLineId).ToArray();
+
+            var lines = await _db.OrderLines.AsNoTracking()
+                .Where(ol => lineIds.Contains(ol.Id)
+                             && (ol.QtyDelivered == null || ol.Qty > ol.QtyDelivered)
+                             && orders.Contains(ol.OrderId)
+                             && (ol.Product.Scope & ProductScope.Inventory) > 0
+                             && ol.Order.Status < EntityStatus.Inactivated
+                             && ol.Order.CoreOrganizationId == orgId)
+                .Select(ol => new { ol.Id, ol.ProductId, ol.Qty, ol.QtyDelivered })
+                .ToArrayAsync(cancellationToken);
+
+            if (lines.Length != lineIds.Length)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(items));
+            }
+            else
+            {
+                foreach (var line in lines)
+                {
+                    var item = items.First(item => item.OrderLineId == line.Id);
+                    if (line.QtyDelivered + item.Qty > line.Qty)
+                    {
+                        return ApplicationErrors.NoValidData.AsResult(nameof(item.Qty));
+                    }
+                }
+            }
+
+            return ActionResult.Success;
+        }
+
         /// <summary>
         /// Create stock line, only for order & PO
         /// 创建库存行，仅限订单和采购
@@ -741,6 +774,95 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Query order line stock
+        /// 查询订单行库存
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<StockQueryOrderLineData[]> QueryOrderLinesAsync(StockQueryOrderLineRQ rq, CancellationToken cancellationToken)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Query, cancellationToken))
+            {
+                return [];
+            }
+
+            var orgId = User.OrganizationInt;
+            var personId = rq.PersonId;
+            var locationId = rq.LocationId;
+            var orders = rq.Orders.ToArray();
+
+            // Query all lines
+            var lines = await _db.OrderLines.AsNoTracking()
+                .Where(ol => orders.Contains(ol.OrderId)
+                    && (ol.QtyDelivered == null || ol.Qty > ol.QtyDelivered)
+                    && ol.Order.CoreOrganizationId == orgId
+                    && ol.Order.Status < EntityStatus.Inactivated
+                    && (ol.Order.SellerId == personId || ol.Order.BuyerId == personId))
+                .Select(ol => new
+                {
+                    ol.Id,
+                    ol.ProductId,
+                    ol.Qty,
+                    PendingQty = ol.Qty - ol.QtyDelivered.GetValueOrDefault(),
+                    ol.OrderId
+                })
+                .ToArrayAsync(cancellationToken);
+
+            var productIds = lines.Select(l => l.ProductId).Distinct().ToArray();
+            var defaultScope = ProductScope.Inventory;
+
+            var stocks = await _db.Products(orgId).AsNoTracking()
+                .Where(p => productIds.Contains(p.Id) && (p.Scope & defaultScope) > 0)
+                .LeftJoin(_db.StockSites.AsNoTracking().Where(s => s.LocationId == locationId), p => p.Id, s => s.ProductId, (p, s) => new
+                {
+                    p.Id,
+                    p.Name,
+                    p.AssignedId,
+                    p.StepQty,
+                    UnitName = p.Unit.Name,
+                    p.QueryKeyword,
+                    Qty = s == null ? 0 : s.Qty
+                })
+                .ToArrayAsync(cancellationToken);
+
+            return [.. stocks.Select(s => {
+                // Same product lines
+                var items = lines.Where(l => l.ProductId == s.Id).OrderBy(l => l.PendingQty);
+
+                var (qty, pendingQty, itemLines) = items.Aggregate(
+                    (Qty: 0m, PendingQty: 0m, Lines: new List<StockQueryOrderLineItemData>()),
+                    (acc, i) =>
+                    {
+                        var pendingQty = i.PendingQty;
+                        acc.Lines.Add(new StockQueryOrderLineItemData
+                        {
+                            Id = i.Id,
+                            OrderId = i.OrderId,
+                            Qty = i.Qty,
+                            PendingQty = pendingQty
+                        });
+                        return (acc.Qty + i.Qty, acc.PendingQty + pendingQty, acc.Lines);
+                    }
+                );
+
+                return new StockQueryOrderLineData
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    AssignedId = s.AssignedId,
+                    UnitName = s.UnitName,
+                    StepQty = s.StepQty,
+                    StockQty = s.Qty,
+                    OrderQty = qty,
+                    PendingQty = pendingQty,
+                    Lines = itemLines
+                };
+            })];
+        }
+
+        /// <summary>
         /// Query product lines
         /// 查询产品行
         /// </summary>
@@ -965,7 +1087,7 @@ namespace CRM.Server.Services
             }
 
             var hasCustomerLocation = await _db.PersonAddresses(customerId).AsNoTracking()
-                .Where(a => a.Id == locationToId && a.Person.CoreOrganizationId == orgId)
+                .Where(a => a.Id == locationToId && a.Person.OrgId == orgId)
                 .AnyAsync(cancellationToken);
 
             if (!hasCustomerLocation)
@@ -973,49 +1095,28 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.LocationToId));
             }
 
+            var orders = rq.Orders.ToList();
+
             // Items check
             var items = rq.Items.ToArray();
 
-            // Stock check
-            var checkStockResult = await CheckStockAsync(locationFromId, items, cancellationToken);
+            var checkResult = await CheckStockOrderItemsAsync(orgId, orders, items, cancellationToken);
+            if (!checkResult.Ok)
+            {
+                return checkResult;
+            }
+
+            // Check stock
+            var stockItems = items.GroupBy(i => i.ProductId).Select(g => new StockItem
+            {
+                ProductId = g.Key,
+                Qty = g.Sum(i => i.Qty)
+            }).ToArray();
+
+            var checkStockResult = await CheckStockAsync(locationFromId, stockItems, cancellationToken);
             if (!checkStockResult.Ok)
             {
                 return checkStockResult;
-            }
-
-            var orders = rq.Orders.ToArray();
-            var productIds = new int[items.Length];
-            var qtys = new decimal[items.Length];
-            var lineIds = new long[items.Length];
-
-            for (int i = 0; i < items.Length; i++)
-            {
-                productIds[i] = items[i].ProductId;
-                qtys[i] = items[i].Qty;
-                lineIds[i] = items[i].OrderLineId;
-            }
-
-            var validProducts = await _db.Database.SqlQuery<int>($@"
-                SELECT
-                    ol.product_id
-                FROM order_line AS ol
-                    INNER JOIN order_header AS o
-                ON ol.order_id = o.id
-                    INNER JOIN unnest(
-                        {productIds}::int[],
-                        {qtys}::numeric[],
-                        {lineIds}::bigint[]
-                    ) AS t(product_id, qty, order_line_id)
-                ON ol.id = t.order_line_id AND ol.product_id = t.product_id
-                WHERE od.id = ANY({orders}::bigint[]) AND od.core_organization_id = {orgId} AND ol.qty - ol.qty_delivered >= t.qty
-            ").ToArrayAsync(cancellationToken);
-
-            var noIds = productIds.Where(pid => !validProducts.Contains(pid)).ToArray();
-            if (noIds.Length > 0)
-            {
-                var result = ApplicationErrors.NoId.AsResult(nameof(rq.Items));
-                result.Data["ids"] = noIds;
-                return result;
             }
 
             var lines = items.Select(i => new StockLine
@@ -1044,6 +1145,7 @@ namespace CRM.Server.Services
                 TrackingNumber = rq.TrackingNumber?.Trim().ToUpper(),
                 ReceiptTime = now, // Future tracking may update this value
                 Creation = now,
+                OrderIds = orders,
                 TotalLines = totalLines,
                 TotalQty = totalQty,
 
@@ -1085,7 +1187,7 @@ namespace CRM.Server.Services
             var locationToId = rq.LocationToId;
 
             var hasSupplierLocation = await _db.PersonAddresses(supplierId).AsNoTracking()
-                .Where(a => a.Id == locationFromId && a.Person.CoreOrganizationId == orgId)
+                .Where(a => a.Id == locationFromId && a.Person.OrgId == orgId)
                 .AnyAsync(cancellationToken);
 
             if (!hasSupplierLocation)
@@ -1102,56 +1204,21 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.LocationToId));
             }
 
+            var pos = rq.POs.ToList();
+
             // Items check
             var items = rq.Items.ToArray();
-
-            // Stock check
-            var checkStockResult = await CheckStockAsync(locationFromId, items, cancellationToken);
-            if (!checkStockResult.Ok)
+            var checkResult = await CheckStockOrderItemsAsync(orgId, pos, items, cancellationToken);
+            if (!checkResult.Ok)
             {
-                return checkStockResult;
-            }
-
-            var pos = rq.POs.ToArray();
-            var productIds = new int[items.Length];
-            var qtys = new decimal[items.Length];
-            var lineIds = new long[items.Length];
-
-            for (int i = 0; i < items.Length; i++)
-            {
-                productIds[i] = items[i].ProductId;
-                qtys[i] = items[i].Qty;
-                lineIds[i] = items[i].OrderLineId;
-            }
-
-            var validProducts = await _db.Database.SqlQuery<int>($@"
-                SELECT
-                    ol.product_id
-                FROM order_line AS ol
-                    INNER JOIN order_header AS o
-                ON ol.order_id = o.id
-                    INNER JOIN unnest(
-                        {productIds}::int[],
-                        {qtys}::numeric[],
-                        {lineIds}::bigint[]
-                    ) AS t(product_id, qty, order_line_id)
-                ON ol.id = t.order_line_id AND ol.product_id = t.product_id
-                WHERE o.id = ANY({pos}::bigint[]) AND o.core_organization_id = {orgId} AND ol.qty - ol.qty_delivered >= t.qty
-            ").ToArrayAsync(cancellationToken);
-
-            var noIds = productIds.Where(pid => !validProducts.Contains(pid)).ToArray();
-            if (noIds.Length > 0)
-            {
-                var result = ApplicationErrors.NoId.AsResult(nameof(rq.Items));
-                result.Data["ids"] = noIds;
-                return result;
+                return checkResult;
             }
 
             var lines = items.Select(i => new StockLine
             {
                 ProductId = i.ProductId,
                 Qty = i.Qty,
-                LocationId = locationFromId,
+                LocationId = locationToId,
                 OrderLineId = i.OrderLineId
             }).ToArray();
 
@@ -1173,6 +1240,7 @@ namespace CRM.Server.Services
                 TrackingNumber = rq.TrackingNumber?.Trim().ToUpper(),
                 ReceiptTime = now,
                 Creation = now,
+                OrderIds = pos,
                 TotalLines = totalLines,
                 TotalQty = totalQty,
 
@@ -1219,7 +1287,7 @@ namespace CRM.Server.Services
                      Description = s.Description,
                      PersonId = s.PersonId,
                      PersonName = s.Person.Name,
-                     Orders = _db.Orders(orgId).AsNoTracking()
+                     Orders = _db.OrderAndPOs(orgId).AsNoTracking()
                         .Where(o => s.OrderIds != null && s.OrderIds.Contains(o.Id))
                         .Select(o => new IdLabelItem<long>
                         {

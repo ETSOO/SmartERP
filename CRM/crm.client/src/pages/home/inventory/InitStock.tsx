@@ -21,7 +21,6 @@ import {
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { Permissions } from "@etsoo/smarterp-crm";
 import {
   AddressList,
@@ -121,7 +120,8 @@ export default function InitStock() {
         if (result == null) return;
 
         if (result.ok) {
-          return navigate("./..");
+          navigate("./..");
+          return;
         } else {
           return app.formatResult(result);
         }
@@ -264,6 +264,7 @@ export default function InitStock() {
       rowHeight={180}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
+          const qty = productsRef.current[data.id]?.qty ?? data.qty ?? "";
           return [
             data.name,
             data.assignedId,
@@ -275,9 +276,16 @@ export default function InitStock() {
               }
             ],
             <React.Fragment>
-              <Typography variant="body2">
-                {data.qty} {data.unitName}
-              </Typography>
+              <NumberInputField
+                fullWidth
+                step={data.stepQty ?? 1}
+                defaultValue={qty}
+                disabled={data.qty != null}
+                endSymbol={data.unitName}
+                onNumberChange={(value) => {
+                  updateQty(data, value);
+                }}
+              />
             </React.Fragment>
           ];
         })

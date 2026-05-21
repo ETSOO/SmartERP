@@ -43,6 +43,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("QueryLines", (IStockService service, StockQueryLineRQ rq, CancellationToken cancellationToken) => service.QueryLinesAsync(rq, cancellationToken))
                 .WithDescription("Query stock lines / 查询库存明细").WithTags("Stock");
 
+            g.MapPost("QueryOrderLines", (IStockService service, StockQueryOrderLineRQ rq, CancellationToken cancellationToken) => service.QueryOrderLinesAsync(rq, cancellationToken))
+                .WithDescription("Query order line items / 查询订单行项目").WithTags("Stock");
+
             g.MapPost("QueryProductLines", (IStockService service, StockQueryProductLineRQ rq, CancellationToken cancellationToken) => service.QueryProductLinesAsync(rq, cancellationToken))
                 .WithDescription("Query stock product lines / 查询库存产品明细").WithTags("Stock");
 

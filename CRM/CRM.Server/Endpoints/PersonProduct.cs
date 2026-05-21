@@ -13,7 +13,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("PersonProduct");
 
-            g.MapPut("Create", (IPersonProductService service, PersonProductCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IPersonProductService service, PersonProductCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create person product / 创建人员个性化产品").WithTags("PersonProduct");
 
             g.MapDelete("Delete/{productId:int}/{personId:long}", (IPersonProductService service, int productId, long personId, CancellationToken cancellationToken) => service.DeleteAsync(personId, productId, cancellationToken))

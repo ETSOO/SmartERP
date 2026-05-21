@@ -14,7 +14,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("Promotion");
 
-            g.MapPut("Create", (IPromotionService service, PromotionCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IPromotionService service, PromotionCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create promotion / 创建促销").WithTags("Promotion");
 
             g.MapPost("List", (IPromotionService service, PromotionListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))

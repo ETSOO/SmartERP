@@ -15,7 +15,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("Product");
 
-            g.MapPut("Create", (IProductService service, ProductCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IProductService service, ProductCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create product / 创建产品").WithTags("Product");
 
             g.MapDelete("Delete/{id:int}", (IProductService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))

@@ -14,7 +14,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("PO");
 
-            g.MapPut("Create", (IPOService service, POCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IPOService service, POCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create PO / 创建订单").WithTags("PO");
 
             g.MapPost("List", (IPOService service, POListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))

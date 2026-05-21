@@ -14,7 +14,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("OrderDelivery");
 
-            g.MapPut("Create", (IOrderDeliveryService service, OrderDeliveryCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IOrderDeliveryService service, OrderDeliveryCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create order delivery / 创建订单配送方式").WithTags("OrderDelivery");
 
             g.MapPost("List", (IOrderDeliveryService service, OrderDeliveryListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))

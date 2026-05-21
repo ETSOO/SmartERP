@@ -14,7 +14,7 @@ import {
 } from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { useDimensions, useParamsEx, useSearchParamsEx } from "@etsoo/react";
+import { useDimensions, useSearchParamsEx } from "@etsoo/react";
 import { useNavigate } from "react-router-dom";
 import {
   CustomerList,
@@ -540,9 +540,6 @@ type CustomerData = {
 export default function AddOrder() {
   // Route
   const navigate = useNavigate();
-  const { id = 0 } = useParamsEx({
-    id: "number"
-  });
 
   const { customerId } = useSearchParamsEx({
     customerId: "number"
@@ -757,7 +754,7 @@ export default function AddOrder() {
         // Cancelled
         if (form == null) {
           if (queryRef.current == null) {
-            navigate(id > 0 ? "./../.." : "./..");
+            navigate(-1);
           }
           return;
         }
@@ -784,7 +781,8 @@ export default function AddOrder() {
         // Load customer
         return await loadCustomer(customerId, currency, culture);
       },
-      inputs: <CustomerChooser data={data} />
+      inputs: <CustomerChooser data={data} />,
+      fullScreen: app.smDown
     });
   };
 

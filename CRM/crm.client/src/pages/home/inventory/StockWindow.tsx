@@ -119,12 +119,12 @@ export function StockWindow({
       field: "qty",
       headerName: labels.qty,
       type: "number",
-      width: 110
+      width: 88
     },
     {
       field: "unitName",
       headerName: labels.productUnit,
-      width: 110
+      width: 102
     }
   ];
 

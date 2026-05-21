@@ -17,7 +17,7 @@ namespace CRM.Server.Endpoints
             g.MapPut("Complete", (IPOLineService service, POLineCompleteRQ rq, CancellationToken cancellationToken) => service.CompleteAsync(rq, cancellationToken))
                 .WithDescription("Complete purchase line / 完成采购行").WithTags("POLine");
 
-            g.MapPut("Create", (IPOLineService service, POLineCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IPOLineService service, POLineCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create purchase line / 创建采购行").WithTags("POLine");
 
             g.MapDelete("Delete/{id:long}", (IPOLineService service, long id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))

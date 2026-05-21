@@ -166,7 +166,7 @@ export function StockViewUI({
         inputProps: {
           type: "input",
           defaultValue: data.trackingNumber,
-          required: false,
+          required: false, // default is true
           slotProps: {
             htmlInput: { maxLength: 20 }
           }

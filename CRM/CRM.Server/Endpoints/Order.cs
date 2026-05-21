@@ -14,7 +14,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("Order");
 
-            g.MapPut("Create", (IOrderService service, OrderCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IOrderService service, OrderCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create order / 创建订单").WithTags("Order");
 
             g.MapPost("DuplicateTest", (IOrderService service, OrderDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))

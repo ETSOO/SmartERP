@@ -350,6 +350,7 @@ export default function StockTake() {
       rowHeight={180}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
+          const qty = productsRef.current[data.id]?.qty ?? "";
           return [
             data.name,
             data.assignedId,
@@ -358,12 +359,25 @@ export default function StockTake() {
                 label: labels.view,
                 icon: <ArticleIcon />,
                 action: `./../../product/view/${data.id}`
+              },
+              {
+                label: labels.stockByWarehouse,
+                icon: <WidgetsIcon />,
+                action: () =>
+                  StockByWarehouse.show(data.id, locationRef.current)
               }
             ],
             <React.Fragment>
-              <Typography variant="body2">
-                {data.qty} {data.unitName}
-              </Typography>
+              <NumberInputField
+                fullWidth
+                step={data.stepQty ?? 1}
+                min={-(data.qty ?? 0)}
+                defaultValue={qty}
+                endSymbol={data.unitName}
+                onNumberChange={(value) => {
+                  updateQty(data, value);
+                }}
+              />
             </React.Fragment>
           ];
         })

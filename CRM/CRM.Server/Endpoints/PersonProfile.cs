@@ -14,7 +14,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("PersonProfile");
 
-            g.MapPut("Create", (IPersonProfileService service, IHttpContextAccessor accessor, PersonProfileCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, null, cancellationToken))
+            g.MapPost("Create", (IPersonProfileService service, IHttpContextAccessor accessor, PersonProfileCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, null, cancellationToken))
                 .WithDescription("Person profile create / 创建人员档案").WithTags("PersonProfile");
 
             g.MapPost("CreateLink", (IPersonProfileService service, PersonProfileLinkCreateRQ rq, CancellationToken cancellationToken) => service.CreateLinkAsync(rq, cancellationToken))

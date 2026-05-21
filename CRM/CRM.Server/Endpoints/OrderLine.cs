@@ -14,7 +14,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("OrderLine");
 
-            g.MapPut("Complete", (IOrderLineService service, OrderLineCompleteRQ rq, CancellationToken cancellationToken) => service.CompleteAsync(rq, cancellationToken))
+            g.MapPost("Complete", (IOrderLineService service, OrderLineCompleteRQ rq, CancellationToken cancellationToken) => service.CompleteAsync(rq, cancellationToken))
                 .WithDescription("Complete order line / 完成订单行").WithTags("OrderLine");
 
             g.MapPut("Create", (IOrderLineService service, OrderLineCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))

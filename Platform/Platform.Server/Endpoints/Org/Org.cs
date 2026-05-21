@@ -22,7 +22,7 @@ namespace Platform.Server.Endpoints.Org
         {
             var g = builder.MapGroup("Org");
 
-            g.MapPut("Create", (IOrgService service, OrgCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IOrgService service, OrgCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create organization / 创建新机构").WithTags("Org");
 
             g.MapPost("CreateApi", [Roles(Constants.AdminRoles)] (IOrgService service, OrgCreateApiRQ rq, CancellationToken cancellationToken) => service.CreateApiAsync(rq, cancellationToken))

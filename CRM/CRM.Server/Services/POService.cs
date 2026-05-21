@@ -359,9 +359,9 @@ namespace CRM.Server.Services
                         q = q.Where(o => o.Source == rq.Source.ToUpper());
                     }
 
-                    if (rq.CustomerId.HasValue)
+                    if (rq.SupplierId.HasValue)
                     {
-                        q = q.Where(o => o.BuyerId == rq.CustomerId.Value);
+                        q = q.Where(o => o.SellerId == rq.SupplierId.Value);
                     }
 
                     if (!string.IsNullOrEmpty(rq.Currency))

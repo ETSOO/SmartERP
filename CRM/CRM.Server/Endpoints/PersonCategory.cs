@@ -16,7 +16,7 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("PersonCategory");
 
-            g.MapPut("Create", (IPersonCategoryService service, PersonCategoryCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IPersonCategoryService service, PersonCategoryCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create person category / 创建人员分类").WithTags("PersonCategory");
 
             g.MapPost("DuplicateTest", (IPersonCategoryService service, PersonCategoryDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))

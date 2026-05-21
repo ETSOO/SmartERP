@@ -46,6 +46,16 @@ export namespace LocalUtils {
   export const CURRENT_LOCATION_KEY = "etsoo-current-location";
 
   /**
+   * Data key for PO stock
+   */
+  export const STOCK_PO_DATA_KEY = "etsoo-stock-po-data";
+
+  /**
+   * Data key for order stock
+   */
+  export const STOCK_ORDER_DATA_KEY = "etsoo-stock-order-data";
+
+  /**
    * Customer query data, used for order creation
    */
   export type CustomerQueryData = Pick<

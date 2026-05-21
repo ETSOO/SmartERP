@@ -736,6 +736,21 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/inventory/order",
+            lazy: async () => {
+              const OrderStock =
+                await import("./pages/home/inventory/OrderStock");
+              return { Component: OrderStock.default };
+            }
+          },
+          {
+            path: "/home/inventory/po",
+            lazy: async () => {
+              const POStock = await import("./pages/home/inventory/POStock");
+              return { Component: POStock.default };
+            }
+          },
+          {
             path: "/home/inventory/take",
             lazy: async () => {
               const StockTake =

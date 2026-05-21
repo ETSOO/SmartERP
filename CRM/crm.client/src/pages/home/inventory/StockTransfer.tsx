@@ -313,6 +313,7 @@ export default function StockTransfer() {
       rowHeight={180}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
+          const qty = productsRef.current[data.id]?.qty ?? "";
           return [
             data.name,
             data.assignedId,
@@ -321,12 +322,25 @@ export default function StockTransfer() {
                 label: labels.view,
                 icon: <ArticleIcon />,
                 action: `./../../product/view/${data.id}`
+              },
+              {
+                label: labels.stockByWarehouse,
+                icon: <WidgetsIcon />,
+                action: () =>
+                  StockByWarehouse.show(data.id, locationRef.current)
               }
             ],
             <React.Fragment>
-              <Typography variant="body2">
-                {data.qty} {data.unitName}
-              </Typography>
+              <NumberInputField
+                fullWidth
+                step={data.stepQty ?? 1}
+                defaultValue={qty}
+                endSymbol={data.unitName}
+                max={data.qty}
+                onNumberChange={(value) => {
+                  updateQty(data, value);
+                }}
+              />
             </React.Fragment>
           ];
         })

@@ -55,7 +55,8 @@ export namespace StockByWarehouse {
           />
         </VBox>,
         undefined,
-        NotificationMessageType.Info
+        NotificationMessageType.Info,
+        { fullScreen: app.smDown }
       );
     });
   }

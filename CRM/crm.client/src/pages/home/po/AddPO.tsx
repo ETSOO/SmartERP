@@ -804,7 +804,8 @@ export default function AddPO() {
         // Load supplier
         return await loadSupplier(supplierId, currency, culture);
       },
-      inputs: <SupplierChooser data={data} />
+      inputs: <SupplierChooser data={data} />,
+      fullScreen: app.smDown
     });
   };
 

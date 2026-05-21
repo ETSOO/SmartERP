@@ -595,6 +595,16 @@ export default function Home() {
             hidden: true
           },
           {
+            segment: "order",
+            title: labels.stockKindOrder,
+            hidden: true
+          },
+          {
+            segment: "po",
+            title: labels.stockKindPO,
+            hidden: true
+          },
+          {
             segment: "take",
             title: labels.stockKindStockTaking,
             hidden: true

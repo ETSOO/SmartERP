@@ -27,6 +27,15 @@ namespace CRM.Server.RQ
             => items.DistinctBy(item => item.ProductId).Count() == items.Count();
 
         /// <summary>
+        /// Is order line unique in stock order items
+        /// 产品在库存订单项中是否唯一
+        /// </summary>
+        /// <param name="items">Stock order items</param>
+        /// <returns>Result</returns>
+        public static bool IsOrderLineUnique(this IEnumerable<StockOrderItem> items)
+            => items.DistinctBy(item => item.OrderLineId).Count() == items.Count();
+
+        /// <summary>
         /// Create person profile request from task
         /// 从任务创建人员档案请求
         /// </summary>

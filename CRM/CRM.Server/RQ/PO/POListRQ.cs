@@ -29,10 +29,10 @@ namespace CRM.Server.RQ.PO
         public string? Source { get; init; }
 
         /// <summary>
-        /// Customer id
-        /// 客户编号
+        /// Supplier id
+        /// 供应商编号
         /// </summary>
-        public long? CustomerId { get; init; }
+        public long? SupplierId { get; init; }
 
         /// <summary>
         /// Currency
