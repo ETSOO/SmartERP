@@ -671,6 +671,7 @@ namespace CRM.Server.Services
                 Title = p.Title,
                 Price = p.Price,
                 Qty = p.Qty,
+                QtyDelivered = p.QtyDelivered,
                 Amount = p.Amount,
                 Discount = p.Discount,
                 StartTime = p.StartTime,

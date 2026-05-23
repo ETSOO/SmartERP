@@ -1,6 +1,5 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import {
-  ButtonLink,
   CommonPage,
   FileUploadButton,
   HBox,
@@ -20,7 +19,11 @@ import EmailIcon from "@mui/icons-material/Email";
 import { app } from "../../../app/MyApp";
 import { OrgDownloadKind, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
-import { PersonProfileViewData } from "@etsoo/smarterp-crm";
+import {
+  OrderKind,
+  PersonProfileViewData,
+  Permissions
+} from "@etsoo/smarterp-crm";
 import Typography from "@mui/material/Typography";
 import { ImportanceText } from "@etsoo/smarterp-crm/components";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -82,6 +85,8 @@ export default function ViewProfile() {
     ? app.ownsIdentity(data.personIdentityType, "AddComment")
     : false;
 
+  const hasUser = app.owns(Permissions.User.View);
+
   // Page data hook
   usePageDataEmpty(app);
 
@@ -127,7 +132,11 @@ export default function ViewProfile() {
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography component="span">
                 {app.profile.getKind(data.kind)},{" "}
-                <LinkEx to={`./../../../contact/view/${data.userId}`}>
+                <LinkEx
+                  to={`./../../../contact/view/${data.userId}`}
+                  variant="body2"
+                  disabled={!hasUser}
+                >
                   {data.userName}
                 </LinkEx>
                 , {app.formatDate(data.creation)},{" "}
@@ -154,6 +163,7 @@ export default function ViewProfile() {
                                 key={p.id}
                                 to={`./../../../contact/view/${p.id}`}
                                 variant="body2"
+                                disabled={!hasUser}
                               >
                                 {p.name + (p.owner ? ` (${p.owner})` : "")}
                               </LinkEx>
@@ -162,6 +172,7 @@ export default function ViewProfile() {
                             <LinkEx
                               to={`./../../../contact/view/${item.assigneeId}`}
                               variant="body2"
+                              disabled={!hasUser}
                             >
                               {item.assigneeName} ({labels.assignee})
                             </LinkEx>
@@ -180,16 +191,26 @@ export default function ViewProfile() {
                   {
                     data: (item) =>
                       item.orderTitle ? (
-                        <ButtonLink
-                          href={`./../../../${item.isOrder ? "order" : "po"}/view/${item.orderId}`}
-                          size="small"
-                          variant="outlined"
+                        <LinkEx
+                          to={`./../../../${item.orderKind === OrderKind.Order ? "order" : "po"}/view/${item.orderId}`}
+                          variant="body2"
+                          disabled={
+                            !app.owns(
+                              item.orderKind === OrderKind.Order
+                                ? Permissions.Order.View
+                                : Permissions.PO.View
+                            )
+                          }
                         >
                           {item.orderTitle}
-                        </ButtonLink>
+                        </LinkEx>
                       ) : undefined,
-                    label: (item) => (item.isOrder ? labels.order : labels.po),
-                    singleRow: true
+                    label: (item) =>
+                      (item.orderKind === OrderKind.Order
+                        ? labels.order
+                        : labels.po) + ": ",
+                    singleRow: true,
+                    horizontal: true
                   },
                   {
                     data: (item) => app.getRoleLabel(item.userRole),
@@ -305,7 +326,11 @@ export default function ViewProfile() {
                     }}
                   >
                     {index + 1}.
-                    <LinkEx to={`./../../../../contact/view/${link.userId}`}>
+                    <LinkEx
+                      to={`./../../../../contact/view/${link.userId}`}
+                      variant="body2"
+                      disabled={!hasUser}
+                    >
                       {link.userName}
                     </LinkEx>
                     , {app.formatDate(link.creation)},{" "}

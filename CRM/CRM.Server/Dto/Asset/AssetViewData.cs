@@ -21,6 +21,12 @@ namespace CRM.Server.Dto.Asset
         public long PersonId { get; init; }
 
         /// <summary>
+        /// Identity type, employee, customer, or supplier
+        /// 标识类型，员工、客户或供应商
+        /// </summary>
+        public IdentityTypeFlags PersonIdentityType { get; set; }
+
+        /// <summary>
         /// Person name
         /// 人员名称
         /// </summary>

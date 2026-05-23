@@ -60,9 +60,10 @@ export function POLines(props: AllPOLinesProps) {
     "discount",
     "edit",
     "keywords",
-    "poLineStartTime",
+    "orderLineStartTime",
     "price",
     "qty",
+    "qtyDelivered",
     "qtyStart",
     "title",
     "view"
@@ -155,6 +156,12 @@ export function POLines(props: AllPOLinesProps) {
           width: 88
         },
         {
+          field: "qtyDelivered",
+          header: labels.qtyDelivered,
+          type: GridDataType.Number,
+          width: 88
+        },
+        {
           field: "discount",
           header: labels.discount,
           type: GridDataType.Money,
@@ -173,7 +180,7 @@ export function POLines(props: AllPOLinesProps) {
           field: "startTime",
           type: GridDataType.DateTime,
           width: 128,
-          header: labels.poLineStartTime,
+          header: labels.orderLineStartTime,
           sortable: true,
           sortAsc: false
         },
@@ -237,13 +244,14 @@ export function POLines(props: AllPOLinesProps) {
               </Typography>
               <Typography component="div" variant="caption">
                 {app.formatNumber(data.price)} x {app.formatNumber(data.qty)}
+                {data.qtyDelivered ? ` (${data.qtyDelivered})` : ""}
                 {data.discount == 0
                   ? ""
                   : ` - ${app.formatNumber(data.discount)}`}
               </Typography>
               {data.startTime && (
                 <Typography variant="body2">
-                  {labels.poLineStartTime}:{" "}
+                  {labels.orderLineStartTime}:{" "}
                   {app.formatDate(data.startTime, "ds")}
                 </Typography>
               )}

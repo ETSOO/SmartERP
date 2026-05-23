@@ -3,6 +3,7 @@ import {
   CustomFieldViewUI,
   HBox,
   IconButtonLink,
+  LinkEx,
   VBox,
   ViewContainer,
   ViewPageFieldType
@@ -39,6 +40,8 @@ export function PersonData(props: PersonDataProps) {
 
   // Editable
   const editable = app.ownsIdentity(data.identityType, "Edit");
+
+  const hasDept = !app.owns(Permissions.Dept.View);
 
   // Deletable
   const [deletable, setDeletable] = React.useState(false);
@@ -163,15 +166,16 @@ export function PersonData(props: PersonDataProps) {
           data: (item) =>
             item.contactOwners != null && item.contactOwners.length > 0 ? (
               <HBox spacing={0.5} sx={{ flexWrap: "wrap" }}>
-                {item.contactOwners.map((o) => (
-                  <ButtonLink
+                {item.contactOwners?.map((o) => (
+                  <LinkEx
                     key={o.id}
-                    href={`./../${o.id}`}
-                    size="small"
-                    variant="outlined"
+                    to={`./../${o.id}`}
+                    variant="body2"
+                    textClassName="linkText"
+                    disabled={hasDept}
                   >
                     {o.title}
-                  </ButtonLink>
+                  </LinkEx>
                 ))}
               </HBox>
             ) : undefined,

@@ -1,12 +1,18 @@
 import {
-  ButtonLink,
   HBox,
   InputField,
+  LinkEx,
   VBox,
-  ViewContainer
+  ViewContainer,
+  ViewPageFieldType
 } from "@etsoo/materialui";
 import { GridDataType } from "@etsoo/react";
-import { Permissions, StockUpdateRQ, StockViewData } from "@etsoo/smarterp-crm";
+import {
+  Permissions,
+  StockKind,
+  StockUpdateRQ,
+  StockViewData
+} from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -35,6 +41,8 @@ export function StockViewUI({
     "description",
     "edit",
     "noChanges",
+    "order",
+    "po",
     "receiving",
     "title",
     "trackingNumber"
@@ -175,6 +183,30 @@ export function StockViewUI({
     );
   }
 
+  const orders =
+    data.orders == null
+      ? []
+      : data.orders.map<ViewPageFieldType<StockViewData>>((o, index) => {
+          return {
+            data: () =>
+              app.owns(
+                data.kind === StockKind.PO
+                  ? Permissions.PO.View
+                  : Permissions.Order.View
+              ) ? (
+                <LinkEx
+                  variant="body2"
+                  to={`./../../../${data.kind === StockKind.PO ? "po" : "order"}/view/${o.id}`}
+                >
+                  {o.label}
+                </LinkEx>
+              ) : (
+                o.label
+              ),
+            label: `${data.kind === StockKind.PO ? labels.po : labels.order} ${index + 1}`
+          };
+        });
+
   return (
     <ViewContainer
       data={data}
@@ -222,15 +254,15 @@ export function StockViewUI({
             `${app.formatNumber(item.totalLines)} / ${app.formatNumber(item.totalQty)}`,
           label: "orderLines"
         },
+        ...orders,
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../contact/view/${item.personId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              variant="body2"
+              to={`./../../../contact/view/${item.personId}`}
             >
               {item.personName}
-            </ButtonLink>
+            </LinkEx>
           ),
           label: "relatedTarget"
         },
@@ -277,16 +309,17 @@ export function StockViewUI({
           horizontal: true
         },
         {
-          data: (item) => (
-            <ButtonLink
-              href={`./../../../contact/view/${item.userId}`}
-              size="small"
-              variant="outlined"
-              disabled={!app.owns(Permissions.User.View)}
-            >
-              {item.userName}
-            </ButtonLink>
-          ),
+          data: (item) =>
+            app.owns(Permissions.User.View) ? (
+              <LinkEx
+                variant="body2"
+                to={`./../../../contact/view/${item.userId}`}
+              >
+                {item.userName}
+              </LinkEx>
+            ) : (
+              item.userName
+            ),
           label: "user"
         },
         ["receiptTime", GridDataType.DateTime],

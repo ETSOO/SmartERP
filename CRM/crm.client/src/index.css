@@ -9,6 +9,10 @@ body {
   white-space: wrap !important;
 }
 
+.linkText {
+  font-weight: bold !important;
+}
+
 #page-container {
   align-self: center;
 }

@@ -25,7 +25,6 @@ import {
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import WidgetsIcon from "@mui/icons-material/Widgets";
 import { Permissions } from "@etsoo/smarterp-crm";
 import {

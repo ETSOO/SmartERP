@@ -9,7 +9,7 @@ import { app } from "../../../app/MyApp";
 import { useParamsEx } from "@etsoo/react";
 import { StockViewUI } from "./StockViewUI";
 import { StockLines } from "./StockLines";
-import { StockViewData } from "@etsoo/smarterp-crm";
+import { StockKind, StockViewData } from "@etsoo/smarterp-crm";
 
 export default function ViewStock() {
   // Route
@@ -52,6 +52,13 @@ export default function ViewStock() {
                 visible && (
                   <StockLines
                     stockId={id}
+                    kind={data.kind}
+                    personId={data.personId}
+                    locationId={
+                      data.kind === StockKind.Order
+                        ? data.locationFromId
+                        : data.locationToId
+                    }
                     isDeletable={data.isDeletable}
                     refresh={loadData}
                   />

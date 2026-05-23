@@ -60,6 +60,7 @@ export function OrderLines(props: AllOrderLinesProps) {
     "orderLineStartTime",
     "price",
     "qty",
+    "qtyDelivered",
     "qtyStart",
     "title",
     "view"
@@ -151,6 +152,12 @@ export function OrderLines(props: AllOrderLinesProps) {
           width: 88
         },
         {
+          field: "qtyDelivered",
+          header: labels.qtyDelivered,
+          type: GridDataType.Number,
+          width: 88
+        },
+        {
           field: "discount",
           header: labels.discount,
           type: GridDataType.Money,
@@ -234,6 +241,7 @@ export function OrderLines(props: AllOrderLinesProps) {
               </Typography>
               <Typography component="div" variant="caption">
                 {app.formatNumber(data.price)} x {app.formatNumber(data.qty)}
+                {data.qtyDelivered ? ` (${data.qtyDelivered})` : ""}
                 {data.discount == 0
                   ? ""
                   : ` - ${app.formatNumber(data.discount)}`}

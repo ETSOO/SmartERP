@@ -19,6 +19,7 @@ import {
 import { DateUtils, DomUtils, IdActionResult, Utils } from "@etsoo/shared";
 import { EOEditorElement, EOEditorEx } from "@etsoo/reacteditor";
 import {
+  OrderKind,
   PersonProfileCreateRQ,
   PersonProfileKind,
   PersonProfileUpdateReadData,
@@ -308,7 +309,7 @@ export default function AddProfile() {
           idValue={orderId}
           disabled={!!orderId}
           onValueChange={(o) => {
-            isOrderRef.current = o?.isOrder;
+            isOrderRef.current = o?.kind === OrderKind.Order;
             formik.setFieldValue("orderId", o?.id);
           }}
         />

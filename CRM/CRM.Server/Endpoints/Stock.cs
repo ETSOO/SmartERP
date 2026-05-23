@@ -55,6 +55,9 @@ namespace CRM.Server.Endpoints
             g.MapGet("Read/{id:long}", (IStockService service, long id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
                 .WithDescription("Read stock data for view / 读取用于浏览的库存数据").WithTags("Stock");
 
+            g.MapGet("ReadLine/{id:long}", (IStockService service, long id, CancellationToken cancellationToken) => service.ReadLineAsync(id, true, cancellationToken))
+                .WithDescription("Read stock line data / 读取库存行数据").WithTags("Stock");
+
             g.MapPost("Receive", (IStockService service, StockReceiveRQ rq, CancellationToken cancellationToken) => service.ReceiveAsync(rq, cancellationToken))
                 .WithDescription("Receive stock / 入库").WithTags("Stock");
 

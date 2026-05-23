@@ -24,6 +24,12 @@ namespace CRM.Server.RQ.Stock
         public int LocationId { get; init; }
 
         /// <summary>
+        /// Stock id
+        /// 库存编号
+        /// </summary>
+        public long? StockId { get; init; }
+
+        /// <summary>
         /// Order ids
         /// 订单编号
         /// </summary>

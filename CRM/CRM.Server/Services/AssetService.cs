@@ -304,6 +304,7 @@ namespace CRM.Server.Services
                 {
                     Id = a.Id,
                     PersonId = a.PersonId,
+                    PersonIdentityType = a.Person.IdentityType,
                     PersonName = a.Person.Name,
                     ProductId = a.ProductId,
                     ProductName = a.Product.Name,

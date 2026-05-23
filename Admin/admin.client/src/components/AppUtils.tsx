@@ -74,7 +74,7 @@ export namespace AppUtils {
         return false;
       },
       inputs: (
-        <VBox gap={2} width="100%" paddingTop={1}>
+        <VBox gap={2} paddingTop={1}>
           <UserTiplist
             name="requester"
             search={false}

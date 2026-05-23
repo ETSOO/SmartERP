@@ -5,6 +5,7 @@ import {
   HBox,
   IconButtonLink,
   InputField,
+  LinkEx,
   MenuButton,
   OptionBool,
   VBox,
@@ -330,28 +331,26 @@ export default function ViewPOLine() {
       fields={[
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../po/view/${item.poId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              to={`./../../../po/view/${item.poId}`}
+              variant="body2"
               disabled={!app.owns(Permissions.PO.View)}
             >
               {item.poTitle}
-            </ButtonLink>
+            </LinkEx>
           ),
           singleRow: "large",
           label: "po"
         },
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../product/view/${item.productId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              to={`./../../../product/view/${item.productId}`}
+              variant="body2"
               disabled={!app.owns(Permissions.Product.View)}
             >
               {item.productName}
-            </ButtonLink>
+            </LinkEx>
           ),
           singleRow: "large",
           label: "product"
@@ -418,13 +417,13 @@ export default function ViewPOLine() {
         {
           data: (item) =>
             item.assetId ? (
-              <ButtonLink
-                href={`./../../../customer/asset/view/${item.assetId}`}
-                size="small"
-                variant="outlined"
+              <LinkEx
+                to={`./../../../customer/asset/view/${item.assetId}`}
+                variant="body2"
+                disabled={!app.owns(Permissions.Customer.View)}
               >
                 {item.assetSn}
-              </ButtonLink>
+              </LinkEx>
             ) : undefined,
           label: "asset",
           singleRow: "large"
@@ -432,13 +431,13 @@ export default function ViewPOLine() {
         {
           data: (item) =>
             item.supplierId ? (
-              <ButtonLink
-                href={`./../../../contact/view/${item.supplierId}`}
-                size="small"
-                variant="outlined"
+              <LinkEx
+                to={`./../../../contact/view/${item.supplierId}`}
+                variant="body2"
+                disabled={!app.owns(Permissions.Supplier.View)}
               >
                 {item.supplierName}
-              </ButtonLink>
+              </LinkEx>
             ) : undefined,
           label: "supplier",
           singleRow: "large"
@@ -461,27 +460,22 @@ export default function ViewPOLine() {
         {
           data: (item) =>
             item.userId ? (
-              <ButtonLink
-                href={`./../../../person/view/${item.userId}`}
-                size="small"
-                variant="outlined"
+              <LinkEx
+                to={`./../../../person/view/${item.userId}`}
+                variant="body2"
                 disabled={!app.owns(Permissions.User.View)}
               >
                 {item.userName}
-              </ButtonLink>
+              </LinkEx>
             ) : undefined,
           label: "user"
         },
         {
           data: (item) =>
             item.bomId ? (
-              <ButtonLink
-                href={`./../${item.bomId}`}
-                size="small"
-                variant="outlined"
-              >
+              <LinkEx to={`./../${item.bomId}`} variant="body2">
                 {item.bomTitle}
-              </ButtonLink>
+              </LinkEx>
             ) : undefined,
           label: "bom"
         }

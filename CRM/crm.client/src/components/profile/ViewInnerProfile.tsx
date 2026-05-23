@@ -10,9 +10,11 @@ import ArticleIcon from "@mui/icons-material/Article";
 import EmailIcon from "@mui/icons-material/Email";
 import { app } from "../../app/MyApp";
 import {
+  OrderKind,
   PersonListItem,
   PersonProfileQueryData,
-  PersonProfileViewData
+  PersonProfileViewData,
+  Permissions
 } from "@etsoo/smarterp-crm";
 import React from "react";
 import {
@@ -135,6 +137,8 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
   // Add link
   const addLink = useAddLink(data?.id ?? 0, refreshData);
 
+  const hasUser = app.owns(Permissions.User.View);
+
   // Send email
   const sendEmail = useSendEmail(data?.id ?? 0, data?.personId ?? 0);
 
@@ -224,8 +228,9 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                         {persons.map((p) => (
                           <LinkEx
                             key={p.id}
-                            to={`./../${p.id}`}
+                            to={`./../../../contact/view/${p.id}`}
                             variant="body2"
+                            disabled={!hasUser}
                           >
                             {p.name + (p.owner ? ` (${p.owner})` : "")}
                           </LinkEx>
@@ -257,7 +262,7 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                     data: (item) =>
                       item.orderTitle && orderId == null ? (
                         <ButtonLink
-                          href={`./../../../${item.isOrder ? "order" : "po"}/view/${item.orderId}`}
+                          href={`./../../../${item.orderKind === OrderKind.Order ? "order" : "po"}/view/${item.orderId}`}
                           size="small"
                           variant="outlined"
                         >
@@ -265,7 +270,9 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                         </ButtonLink>
                       ) : undefined,
                     label: (item) =>
-                      (item.isOrder ? labels.order : labels.po) + ":",
+                      (item.orderKind === OrderKind.Order
+                        ? labels.order
+                        : labels.po) + ":",
                     singleRow: true,
                     horizontal: true
                   },
@@ -373,7 +380,11 @@ export function ViewInnerProfile(props: ViewInnerProfileProps) {
                     }}
                   >
                     {index + 1}.
-                    <LinkEx to={`./../../../../contact/view/${link.userId}`}>
+                    <LinkEx
+                      to={`./../../../../contact/view/${link.userId}`}
+                      variant="body2"
+                      disabled={!hasUser}
+                    >
                       {link.userName}
                     </LinkEx>
                     , {app.formatDate(link.creation)},{" "}

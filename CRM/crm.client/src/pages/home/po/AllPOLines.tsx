@@ -21,7 +21,6 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import {
-  CustomerList,
   PersonList,
   ProductList,
   UserTiplist

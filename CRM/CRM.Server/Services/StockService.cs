@@ -220,7 +220,7 @@ namespace CRM.Server.Services
             return ActionResult.Success;
         }
 
-        private async Task<IActionResult> CheckStockOrderItemsAsync(int orgId, List<long> orders, StockOrderItem[] items, CancellationToken cancellationToken)
+        private async Task<IActionResult> CheckStockOrderItemsAsync(int orgId, int? locationId, List<long> orders, StockOrderItem[] items, CancellationToken cancellationToken)
         {
             var lineIds = items.Select(i => i.OrderLineId).ToArray();
 
@@ -231,7 +231,13 @@ namespace CRM.Server.Services
                              && (ol.Product.Scope & ProductScope.Inventory) > 0
                              && ol.Order.Status < EntityStatus.Inactivated
                              && ol.Order.CoreOrganizationId == orgId)
-                .Select(ol => new { ol.Id, ol.ProductId, ol.Qty, ol.QtyDelivered })
+                .Select(ol => new StockCheckItemData
+                {
+                    Id = ol.Id,
+                    OrderId = ol.OrderId,
+                    Qty = ol.Qty,
+                    QtyDelivered = ol.QtyDelivered
+                })
                 .ToArrayAsync(cancellationToken);
 
             if (lines.Length != lineIds.Length)
@@ -248,7 +254,26 @@ namespace CRM.Server.Services
                         return ApplicationErrors.NoValidData.AsResult(nameof(item.Qty));
                     }
                 }
+
+                if (locationId.HasValue)
+                {
+                    // Check stock
+                    var stockItems = items.GroupBy(i => i.ProductId).Select(g => new StockItem
+                    {
+                        ProductId = g.Key,
+                        Qty = g.Sum(i => i.Qty)
+                    }).ToArray();
+
+                    var checkStockResult = await CheckStockAsync(locationId.Value, stockItems, cancellationToken);
+                    if (!checkStockResult.Ok)
+                    {
+                        return checkStockResult;
+                    }
+                }
             }
+
+            orders.Clear();
+            orders.AddRange(lines.Select(l => l.OrderId).Distinct());
 
             return ActionResult.Success;
         }
@@ -273,7 +298,16 @@ namespace CRM.Server.Services
 
             var stock = await _db.Stocks(orgId).AsNoTracking()
                                  .Where(s => s.Id == stockId && (s.Kind == StockKind.Order || s.Kind == StockKind.PO) && s.Creation >= validDate)
-                                 .Select(s => new StockHeader { Kind = s.Kind, LocationFromId = s.LocationFromId, LocationToId = s.LocationToId, OrderIds = s.OrderIds, TotalLines = s.TotalLines, TotalQty = s.TotalQty })
+                                 .Select(s => new StockHeader
+                                 {
+                                     Id = s.Id,
+                                     Kind = s.Kind,
+                                     LocationFromId = s.LocationFromId,
+                                     LocationToId = s.LocationToId,
+                                     OrderIds = s.OrderIds,
+                                     TotalLines = s.TotalLines,
+                                     TotalQty = s.TotalQty
+                                 })
                                  .FirstOrDefaultAsync(cancellationToken);
 
             if (stock == null)
@@ -281,21 +315,41 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.StockId));
             }
 
-            var locationId = stock.Kind == StockKind.Order ? stock.LocationFromId : stock.LocationToId;
-
-            // Check order line and product
             var orderLineId = rq.OrderLineId;
-            var productId = rq.ProductId;
-            var qty = rq.Qty;
 
-            var orderId = await _db.OrderLines.AsNoTracking()
-                .Where(ol => ol.Id == orderLineId && ol.ProductId == productId && ol.QtyDelivered + qty <= ol.Qty && ol.Order.CoreOrganizationId == orgId && (ol.Product.Scope & ProductScope.Inventory) > 0)
-                .Select(ol => ol.OrderId)
+            var orderLine = await _db.OrderLines.AsNoTracking()
+                .Where(ol => ol.Id == orderLineId)
+                .Select(ol => new { ol.OrderId, ol.ProductId, HasStockLine = ol.StockLines.Any() })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (orderId < 1)
+            if (orderLine == null)
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.OrderLineId));
+            }
+            else if (orderLine.HasStockLine)
+            {
+                return ApplicationErrors.ItemExists.AsResult(nameof(rq.OrderLineId));
+            }
+
+            var orderId = orderLine.OrderId;
+            var productId = orderLine.ProductId;
+
+            var qty = rq.Qty;
+
+            var isOrder = stock.Kind == StockKind.Order;
+            var locationId = isOrder ? stock.LocationFromId : stock.LocationToId;
+
+            var stockOrderItem = new StockOrderItem
+            {
+                OrderLineId = orderLineId,
+                ProductId = productId,
+                Qty = qty
+            };
+
+            var checkResult = await CheckStockOrderItemsAsync(orgId, isOrder ? locationId : null, [orderId], [stockOrderItem], cancellationToken);
+            if (!checkResult.Ok)
+            {
+                return checkResult;
             }
 
             _db.StockHeaders.Attach(stock);
@@ -485,7 +539,7 @@ namespace CRM.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> LoseAsync(StockLoseRQ rq,  CancellationToken cancellationToken = default)
+        public async Task<IActionResult> LoseAsync(StockLoseRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Manage, cancellationToken))
@@ -792,15 +846,22 @@ namespace CRM.Server.Services
             var personId = rq.PersonId;
             var locationId = rq.LocationId;
             var orders = rq.Orders.ToArray();
+            var stockId = rq.StockId;
 
             // Query all lines
-            var lines = await _db.OrderLines.AsNoTracking()
+            var query = _db.OrderLines.AsNoTracking()
                 .Where(ol => orders.Contains(ol.OrderId)
                     && (ol.QtyDelivered == null || ol.Qty > ol.QtyDelivered)
                     && ol.Order.CoreOrganizationId == orgId
                     && ol.Order.Status < EntityStatus.Inactivated
-                    && (ol.Order.SellerId == personId || ol.Order.BuyerId == personId))
-                .Select(ol => new
+                    && (ol.Order.SellerId == personId || ol.Order.BuyerId == personId));
+
+            if (stockId.HasValue)
+            {
+                query = query.Where(ol => !ol.StockLines.Any(sl => sl.StockId == stockId));
+            }
+
+            var lines = await query.Select(ol => new
                 {
                     ol.Id,
                     ol.ProductId,
@@ -1100,23 +1161,10 @@ namespace CRM.Server.Services
             // Items check
             var items = rq.Items.ToArray();
 
-            var checkResult = await CheckStockOrderItemsAsync(orgId, orders, items, cancellationToken);
+            var checkResult = await CheckStockOrderItemsAsync(orgId, locationFromId, orders, items, cancellationToken);
             if (!checkResult.Ok)
             {
                 return checkResult;
-            }
-
-            // Check stock
-            var stockItems = items.GroupBy(i => i.ProductId).Select(g => new StockItem
-            {
-                ProductId = g.Key,
-                Qty = g.Sum(i => i.Qty)
-            }).ToArray();
-
-            var checkStockResult = await CheckStockAsync(locationFromId, stockItems, cancellationToken);
-            if (!checkStockResult.Ok)
-            {
-                return checkStockResult;
             }
 
             var lines = items.Select(i => new StockLine
@@ -1208,7 +1256,7 @@ namespace CRM.Server.Services
 
             // Items check
             var items = rq.Items.ToArray();
-            var checkResult = await CheckStockOrderItemsAsync(orgId, pos, items, cancellationToken);
+            var checkResult = await CheckStockOrderItemsAsync(orgId, null, pos, items, cancellationToken);
             if (!checkResult.Ok)
             {
                 return checkResult;
@@ -1309,6 +1357,41 @@ namespace CRM.Server.Services
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// Read stock line
+        /// 读取库存行
+        /// </summary>
+        /// <param name="id">Line id</param>
+        /// <param name="checkPermission">Check permission or not</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<StockLineViewData?> ReadLineAsync(long id, bool checkPermission, CancellationToken cancellationToken = default)
+        {
+            if (checkPermission && !await _commonService.HasPermissionAsync((short)Permissions.Inventory.View, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            return await _db.StockLines.AsNoTracking()
+                .Where(sl => sl.Id == id && sl.Stock.OrganizationId == orgId)
+                .LeftJoin(_db.StockSites.AsNoTracking(), sl => new { sl.ProductId, LocationId = (int?)sl.LocationId }, s => new { s.ProductId, s.LocationId }, (sl, s) => new StockLineViewData
+                {
+                    Id = sl.Id,
+                    StockId = sl.StockId,
+                    StockKind = sl.Stock.Kind,
+                    ProductId = sl.ProductId,
+                    StepQty = sl.Product.StepQty,
+                    OrderLineId = sl.OrderLineId,
+                    Qty = sl.Qty,
+                    OrderQty = sl.OrderLine == null ? null : sl.OrderLine.Qty,
+                    PendingQty = sl.OrderLine == null ? null : sl.OrderLine.Qty - sl.OrderLine.QtyDelivered.GetValueOrDefault(),
+                    StockQty = s == null ? 0 : s.Qty
+                })
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>
@@ -1633,42 +1716,36 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
             var id = rq.Id;
 
-            var stockLine = await _db.StockLines.AsNoTracking()
-                .Where(l => l.Id == id && l.Stock.OrganizationId == orgId && (l.Stock.Kind == StockKind.Order || l.Stock.Kind == StockKind.PO) && l.OrderLineId != null)
-                .Select(l => new { l.StockId, l.Stock.Kind, CurrentQty = l.Qty, Qty = l.OrderLine == null ? 0 : l.OrderLine.Qty, QtyDelivered = l.OrderLine == null ? 0 : l.OrderLine.QtyDelivered })
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (stockLine == null || stockLine.Qty == 0)
+            var stockLine = await ReadLineAsync(id, false, cancellationToken);
+            if (stockLine == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
 
             var stockId = stockLine.StockId;
-            var kind = stockLine.Kind;
-            var currentQty = stockLine.CurrentQty;
-            var lineQty = stockLine.Qty;
-            var deliveredQty = stockLine.QtyDelivered;
+            var kind = stockLine.StockKind;
+
+            if (kind != StockKind.Order && kind != StockKind.PO)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(stockLine.StockKind));
+            }
+
+            // For order, it's negative
+            var currentQty = stockLine.Qty;
+            var pendingQty = stockLine.PendingQty;
+
+            // New qty is always positive or zero
             var qty = rq.Qty;
 
-            decimal adjustQty = 0;
+            var adjustQty = qty - Math.Abs(currentQty);
 
-            if (kind == StockKind.Order)
+            if (adjustQty == 0 || adjustQty > pendingQty)
             {
-                adjustQty = currentQty - qty;
-
-                if (qty > 0 || currentQty > 0 || deliveredQty + adjustQty > lineQty)
-                {
-                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.Qty));
-                }
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Qty));
             }
-            else if (kind == StockKind.PO)
+            else if (kind == StockKind.Order && adjustQty > stockLine.StockQty)
             {
-                adjustQty = qty - currentQty;
-
-                if (qty < 0 || currentQty < 0 || deliveredQty + adjustQty > lineQty)
-                {
-                    return ApplicationErrors.NoValidData.AsResult(nameof(rq.Qty));
-                }
+                return LocalAppErrors.InsufficientStock.AsResult();
             }
 
             await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
@@ -1681,16 +1758,37 @@ namespace CRM.Server.Services
                 }
                 else
                 {
-                    await _db.StockLines.AsNoTracking().Where(l => l.Id == id).ExecuteUpdateAsync(l => l.SetProperty(p => p.Qty, qty), cancellationToken);
+                    var newQty = kind == StockKind.Order ? -qty : qty;
+                    await _db.StockLines.AsNoTracking().Where(l => l.Id == id).ExecuteUpdateAsync(l => l.SetProperty(p => p.Qty, newQty), cancellationToken);
                 }
 
-                if (adjustQty != 0)
+                var orderIds = await _db.StockLines
+                    .Where(x => x.StockId == stockId && x.OrderLineId != null)
+                    .Join(
+                        _db.OrderLines,
+                        stockLine => stockLine.OrderLineId,
+                        orderLine => orderLine.Id,
+                        (stockLine, orderLine) => orderLine.OrderId
+                    )
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                var stock = await _db.Stocks(orgId).AsNoTracking()
+                    .Where(s => s.Id == stockId)
+                    .Select(s => new StockHeader { Id = s.Id, TotalLines = s.TotalLines, TotalQty = s.TotalQty, OrderIds = s.OrderIds })
+                    .FirstAsync(cancellationToken);
+
+                _db.StockHeaders.Attach(stock);
+
+                stock.TotalQty += adjustQty;
+                stock.OrderIds = orderIds;
+
+                if (qty == 0)
                 {
-                    await _db.Stocks(orgId).AsNoTracking()
-                        .Where(s => s.Id == stockId)
-                        .ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalLines, p => qty == 0 ? p.TotalLines - 1 : p.TotalLines)
-                                                  .SetProperty(p => p.TotalQty, p => p.TotalQty + adjustQty), cancellationToken);
+                    stock.TotalLines -= 1;
                 }
+
+                await _db.SaveChangesAsync(cancellationToken);
 
                 // Commit
                 await transaction.CommitAsync(cancellationToken);

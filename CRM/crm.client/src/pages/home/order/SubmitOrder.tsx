@@ -16,6 +16,7 @@ import { DateUtils, IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   FeatureTagKind,
   OrderCreateRQ,
+  OrderKind,
   OrderLineRQ,
   OrderUpdateRQ,
   PromotionSaleItemBase
@@ -352,7 +353,7 @@ export default function SubmitOrder() {
         <OrderTitleDuplicateTest
           fullWidth
           required
-          isOrder
+          kind={OrderKind.Order}
           excludedId={id}
           inputRef={refs.title}
         />
@@ -481,7 +482,7 @@ export default function SubmitOrder() {
       <Grid size={{ xs: 6, sm: 3 }}>
         <OrderSourceIdDuplicateTest
           excludedId={id}
-          isOrder
+          kind={OrderKind.Order}
           fullWidth
           inputRef={refs.sourceId}
         />
@@ -489,7 +490,7 @@ export default function SubmitOrder() {
       <Grid size={{ xs: 6, sm: 3 }}>
         <OrderAssignedIdDuplicateTest
           excludedId={id}
-          isOrder
+          kind={OrderKind.Order}
           fullWidth
           inputRef={refs.assignedId}
         />

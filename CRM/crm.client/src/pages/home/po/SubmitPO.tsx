@@ -15,6 +15,7 @@ import { StatusList } from "@etsoo/smarterp-core/components";
 import { DateUtils, IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   FeatureTagKind,
+  OrderKind,
   POCreateRQ,
   POLineRQ,
   POUpdateRQ,
@@ -349,7 +350,7 @@ export default function SubmitPO() {
         <OrderTitleDuplicateTest
           fullWidth
           required
-          isOrder={false}
+          kind={OrderKind.PO}
           excludedId={id}
           inputRef={refs.title}
         />
@@ -480,7 +481,7 @@ export default function SubmitPO() {
       <Grid size={{ xs: 6, sm: 3 }}>
         <OrderSourceIdDuplicateTest
           excludedId={id}
-          isOrder={false}
+          kind={OrderKind.PO}
           fullWidth
           inputRef={refs.sourceId}
         />
@@ -488,7 +489,7 @@ export default function SubmitPO() {
       <Grid size={{ xs: 6, sm: 3 }}>
         <OrderAssignedIdDuplicateTest
           excludedId={id}
-          isOrder={false}
+          kind={OrderKind.PO}
           fullWidth
           inputRef={refs.assignedId}
         />

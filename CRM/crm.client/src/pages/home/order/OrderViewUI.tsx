@@ -2,6 +2,7 @@ import {
   ButtonLink,
   HBox,
   IconButtonLink,
+  LinkEx,
   MenuButton,
   ViewContainer
 } from "@etsoo/materialui";
@@ -163,13 +164,13 @@ export function OrderViewUI(props: OrderViewUIProps) {
         "assignedId",
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../contact/view/${item.userId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              to={`./../../../contact/view/${item.userId}`}
+              variant="body2"
+              disabled={!app.owns(Permissions.User.View)}
             >
               {item.user}
-            </ButtonLink>
+            </LinkEx>
           ),
           label: "user"
         },
@@ -275,14 +276,13 @@ export function OrderViewUI(props: OrderViewUIProps) {
         },
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../contact/view/${item.customerId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              to={`./../../../contact/view/${item.customerId}`}
+              variant="body2"
               disabled={!app.owns(Permissions.Customer.View)}
             >
               {item.customerName}
-            </ButtonLink>
+            </LinkEx>
           ),
           singleRow: "large",
           label: "customer"

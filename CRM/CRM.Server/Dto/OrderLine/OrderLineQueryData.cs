@@ -33,6 +33,12 @@ namespace CRM.Server.Dto.OrderLine
         public decimal Qty { get; init; }
 
         /// <summary>
+        /// Qty delivered
+        /// 已交付数量
+        /// </summary>
+        public decimal? QtyDelivered { get; init; }
+
+        /// <summary>
         /// Amount
         /// 金额
         /// </summary>

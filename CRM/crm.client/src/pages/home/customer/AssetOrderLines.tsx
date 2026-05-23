@@ -12,7 +12,7 @@ import {
 } from "@etsoo/react";
 import { DataTypes, DateUtils } from "@etsoo/shared";
 import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
-import { OrderLineQueryAssetData } from "@etsoo/smarterp-crm";
+import { OrderKind, OrderLineQueryAssetData } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import { BoxProps } from "@mui/material/Box";
 import React from "react";
@@ -149,7 +149,7 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
               <React.Fragment>
                 <IconButtonLink
                   title={labels.view}
-                  href={`./../../../../${data.isOrder ? "order" : "po"}/viewline/${data.id}`}
+                  href={`./../../../../${data.kind == OrderKind.Order ? "order" : "po"}/viewline/${data.id}`}
                 >
                   <ArticleIcon />
                 </IconButtonLink>
@@ -167,7 +167,7 @@ export function AssetOrderLines(props: AssetOrderLinesProps) {
               {
                 label: labels.view,
                 icon: <ArticleIcon />,
-                action: `./../../../../${data.isOrder ? "order" : "po"}/viewline/${data.id}`
+                action: `./../../../../${data.kind == OrderKind.Order ? "order" : "po"}/viewline/${data.id}`
               }
             ],
             <React.Fragment>

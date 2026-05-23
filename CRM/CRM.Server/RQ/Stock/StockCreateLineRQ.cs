@@ -17,12 +17,6 @@ namespace CRM.Server.RQ.Stock
         public long StockId { get; init; }
 
         /// <summary>
-        /// Product id
-        /// 产品编号
-        /// </summary>
-        public int ProductId { get; init; }
-
-        /// <summary>
         /// Qty
         /// 数量
         /// </summary>

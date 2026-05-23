@@ -284,6 +284,7 @@ namespace CRM.Server
 
     // Stock
     [JsonSerializable(typeof(StockListData[]))]
+    [JsonSerializable(typeof(StockLineViewData))]
     [JsonSerializable(typeof(StockQueryData[]))]
     [JsonSerializable(typeof(StockQueryLineData[]))]
     [JsonSerializable(typeof(StockQueryOrderLineData[]))]

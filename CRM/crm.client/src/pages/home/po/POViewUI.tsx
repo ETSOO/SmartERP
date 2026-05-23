@@ -2,6 +2,7 @@ import {
   ButtonLink,
   HBox,
   IconButtonLink,
+  LinkEx,
   MenuButton,
   ViewContainer
 } from "@etsoo/materialui";
@@ -163,13 +164,13 @@ export function POViewUI(props: POViewUIProps) {
         "assignedId",
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../contact/view/${item.userId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              to={`./../../../contact/view/${item.userId}`}
+              variant="body2"
+              disabled={!app.owns(Permissions.User.View)}
             >
               {item.user}
-            </ButtonLink>
+            </LinkEx>
           ),
           label: "user"
         },
@@ -273,14 +274,13 @@ export function POViewUI(props: POViewUIProps) {
         },
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../contact/view/${item.supplierId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              to={`./../../../contact/view/${item.supplierId}`}
+              variant="body2"
               disabled={!app.owns(Permissions.Supplier.View)}
             >
               {item.supplierName}
-            </ButtonLink>
+            </LinkEx>
           ),
           singleRow: "large",
           label: "supplier"

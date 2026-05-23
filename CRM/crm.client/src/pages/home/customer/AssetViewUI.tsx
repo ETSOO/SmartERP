@@ -1,17 +1,11 @@
 import { AssetViewData, Permissions } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
-import {
-  ButtonLink,
-  HBox,
-  TooltipClick,
-  ViewContainer
-} from "@etsoo/materialui";
+import { ButtonLink, HBox, LinkEx, ViewContainer } from "@etsoo/materialui";
 import Typography from "@mui/material/Typography";
 import { GridDataType, NotificationMessageType } from "@etsoo/react";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import Button from "@mui/material/Button";
-import React from "react";
 
 export type AssetViewUIProps = {
   data: AssetViewData;
@@ -65,26 +59,28 @@ export function AssetViewUI(props: AssetViewUIProps) {
         },
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../../contact/view/${item.personId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              variant="body2"
+              textClassName="linkText"
+              to={`./../../../../contact/view/${item.personId}`}
+              disabled={!app.hasView(item.personIdentityType)}
             >
               {item.personName}
-            </ButtonLink>
+            </LinkEx>
           ),
           label: "relatedTarget",
           singleRow: "large"
         },
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../../product/view/${item.productId}`}
-              size="small"
-              variant="outlined"
+            <LinkEx
+              variant="body2"
+              textClassName="linkText"
+              to={`./../../../../product/view/${item.productId}`}
+              disabled={!app.owns(Permissions.Product.View)}
             >
               {item.productName}
-            </ButtonLink>
+            </LinkEx>
           ),
           label: "product",
           singleRow: "large"
@@ -142,13 +138,14 @@ export function AssetViewUI(props: AssetViewUIProps) {
         {
           data: (item) =>
             item.supplierId ? (
-              <ButtonLink
-                href={`./../../../../contact/view/${item.supplierId}`}
-                size="small"
-                variant="outlined"
+              <LinkEx
+                variant="body2"
+                textClassName="linkText"
+                to={`./../../../../contact/view/${item.supplierId}`}
+                disabled={!app.owns(Permissions.Supplier.View)}
               >
                 {item.supplierName}
-              </ButtonLink>
+              </LinkEx>
             ) : undefined,
           label: "supplier",
           singleRow: "large"
