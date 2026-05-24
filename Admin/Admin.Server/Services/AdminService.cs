@@ -1,4 +1,4 @@
-﻿using Admin.Server.RQ.Operation;
+﻿using Admin.Server.RQ.Admin;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
@@ -28,7 +28,7 @@ namespace Admin.Server.Services
             ILogger<AdminService> logger,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "operation", logger)
+            : base(app, userAccessor.UserSafe, "admin", logger)
         {
             _db = db;
             _queueService = queueService;

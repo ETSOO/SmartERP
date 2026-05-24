@@ -1,4 +1,4 @@
-﻿using Admin.Server.RQ.Operation;
+﻿using Admin.Server.RQ.Admin;
 using com.etsoo.Utils.Actions;
 
 namespace Admin.Server.Services

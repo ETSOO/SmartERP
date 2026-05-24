@@ -62,6 +62,12 @@ namespace Platform.Server
     [JsonSerializable(typeof(SendEmailData))]
     [JsonSerializable(typeof(SendSMSData))]
 
+    // Document
+    [JsonSerializable(typeof(PlatformShared.Dto.SystemDocumentListData[]))]
+    [JsonSerializable(typeof(PlatformShared.Dto.SystemDocumentViewData))]
+
+    [JsonSerializable(typeof(PlatformShared.RQ.SystemDocumentListRQ))]
+
     // Members
     [JsonSerializable(typeof(MemberAdjustReportToRQ))]
     [JsonSerializable(typeof(IEnumerable<MemberListRQ>))]

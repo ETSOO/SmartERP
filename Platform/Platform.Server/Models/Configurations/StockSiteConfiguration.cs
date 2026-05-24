@@ -17,7 +17,7 @@ namespace Platform.Server.Models.Configurations
 
             entity.ToTable("stock_site");
 
-            entity.HasIndex(e => new { e.ProductId, e.LocationId }, "stock_site_product_id_location_id_qty_key").IsUnique();
+            entity.HasIndex(e => new { e.ProductId, e.LocationId }, "stock_site_product_id_location_id_qty_refresh_time_key").IsUnique();
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()

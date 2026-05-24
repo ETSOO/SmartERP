@@ -133,6 +133,15 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Admin Create Business Document.
+        /// </summary>
+        internal static string AdminCreateDocument {
+            get {
+                return ResourceManager.GetString("AdminCreateDocument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admin Renew Application.
         /// </summary>
         internal static string AdminRenewApp {

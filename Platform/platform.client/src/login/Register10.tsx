@@ -180,7 +180,7 @@ export default function Register20() {
         }}
       />
       {isReady && (
-        <HBox gap={0.5} alignItems="flex-start">
+        <HBox spacing={0.5} sx={{ alignItems: "flex-start" }}>
           <TextFieldEx
             label={labels.oneTimePin}
             inputRef={codeRef}

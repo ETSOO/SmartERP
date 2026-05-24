@@ -46,7 +46,7 @@ export function BuyApp(props: BuyAppProps) {
 
   // Layout
   return (
-    <VBox gap={1} width="100%" paddingTop={1}>
+    <VBox spacing={1} sx={{ width: "100%", paddingTop: 1 }}>
       <OptionGroup
         name="kind"
         options={options}
@@ -60,7 +60,7 @@ export function BuyApp(props: BuyAppProps) {
       {kind === 1 && (
         <React.Fragment>
           <OrgTiplist idValue={app.userData?.organization} />
-          <VBox height="60px" />
+          <VBox sx={{ height: "60px" }} />
         </React.Fragment>
       )}
       {kind === 2 && (

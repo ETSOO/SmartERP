@@ -1,5 +1,5 @@
 import { DomUtils } from "@etsoo/shared";
-import { HBox, VBox } from "@etsoo/materialui";
+import { HBox, InputField, VBox } from "@etsoo/materialui";
 import React from "react";
 import { app } from "../app/MyApp";
 import { UserTiplist } from "./UserTiplist";
@@ -8,6 +8,102 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
+
+function RenewAppUI({ orgId }: { orgId: number }) {
+  // Labels
+  const labels = app.getLabels(
+    "applicant",
+    "approver",
+    "description",
+    "monthsUnit",
+    "renewLength",
+    "revoke"
+  );
+
+  const years = app.get<string[]>("years5");
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const revokeRef = React.useRef<HTMLInputElement>(null);
+
+  const setMonths = (index: number) => {
+    if (inputRef.current == null) return;
+    inputRef.current.value = `${
+      (revokeRef.current?.checked ? -1 : 1) * (index + 1) * 12
+    }`;
+  };
+
+  return (
+    <VBox spacing={2} sx={{ width: "100%", paddingTop: 1 }}>
+      <HBox spacing={1}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              slotProps={{ input: { ref: revokeRef } }}
+              onChange={() => {
+                setMonths(0);
+              }}
+            />
+          }
+          label={labels.revoke}
+          sx={{ wordBreak: "keep-all" }}
+        />
+        <TextField
+          name="months"
+          margin="dense"
+          variant="standard"
+          label={labels.renewLength}
+          defaultValue={12}
+          required
+          fullWidth
+          type="number"
+          inputRef={inputRef}
+          helperText={years?.map((y, index) => (
+            <Button key={index} onClick={() => setMonths(index)}>
+              {y}
+            </Button>
+          ))}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  {labels.monthsUnit}
+                </InputAdornment>
+              )
+            },
+            htmlInput: {
+              max: 120,
+              min: -120,
+              step: 1,
+              inputMode: "numeric"
+            }
+          }}
+        />
+      </HBox>
+      <UserTiplist
+        name="requester"
+        search={false}
+        label={labels.applicant}
+        rq={{ orgId, excludeSelf: true }}
+      />
+      <UserTiplist
+        name="approver"
+        search={false}
+        label={labels.approver}
+        rq={{
+          orgId: app.userData?.organization,
+          excludeSelf: true
+        }}
+      />
+      <InputField
+        name="comment"
+        label={labels.description}
+        multiline
+        rows={2}
+        slotProps={{ htmlInput: { maxLength: 255 } }}
+      />
+    </VBox>
+  );
+}
 
 /**
  * App utilities
@@ -74,7 +170,7 @@ export namespace AppUtils {
         return false;
       },
       inputs: (
-        <VBox gap={2} paddingTop={1}>
+        <VBox spacing={2} sx={{ paddingTop: 2 }}>
           <UserTiplist
             name="requester"
             search={false}
@@ -90,7 +186,7 @@ export namespace AppUtils {
               excludeSelf: true
             }}
           />
-          <TextField
+          <InputField
             name="comment"
             label={labels.description}
             multiline
@@ -108,25 +204,7 @@ export namespace AppUtils {
     callback: () => void
   ) {
     // Labels
-    const labels = app.getLabels(
-      "adminRenew",
-      "applicant",
-      "approver",
-      "description",
-      "monthsUnit",
-      "qty",
-      "renewLength",
-      "revoke"
-    );
-    const years = app.get<string[]>("years5");
-    const inputRef = React.createRef<HTMLInputElement>();
-    const revokeRef = React.createRef<HTMLInputElement>();
-    const setMonths = (index: number) => {
-      if (inputRef.current == null) return;
-      inputRef.current.value = `${
-        (revokeRef.current?.checked ? -1 : 1) * (index + 1) * 12
-      }`;
-    };
+    const labels = app.getLabels("adminRenew");
 
     const title = `${labels.adminRenew}`;
 
@@ -184,77 +262,7 @@ export namespace AppUtils {
         app.alertResult(result);
         return false;
       },
-      inputs: (
-        <VBox gap={2} width="100%" paddingTop={1}>
-          <HBox gap={1}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  inputRef={revokeRef}
-                  onChange={() => {
-                    setMonths(0);
-                  }}
-                />
-              }
-              label={labels.revoke}
-              sx={{ wordBreak: "keep-all" }}
-            />
-            <TextField
-              name="months"
-              margin="dense"
-              variant="standard"
-              label={labels.renewLength}
-              defaultValue={12}
-              required
-              fullWidth
-              type="number"
-              inputRef={inputRef}
-              helperText={years?.map((y, index) => (
-                <Button key={index} onClick={() => setMonths(index)}>
-                  {y}
-                </Button>
-              ))}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {labels.monthsUnit}
-                    </InputAdornment>
-                  )
-                },
-                htmlInput: {
-                  max: 120,
-                  min: -120,
-                  step: 1,
-                  inputMode: "numeric"
-                }
-              }}
-            />
-          </HBox>
-          <UserTiplist
-            name="requester"
-            search={false}
-            label={labels.applicant}
-            rq={{ orgId: data.orgId, excludeSelf: true }}
-          />
-          <UserTiplist
-            name="approver"
-            search={false}
-            label={labels.approver}
-            rq={{
-              orgId: app.userData?.organization,
-              excludeSelf: true
-            }}
-          />
-          <TextField
-            name="comment"
-            label={labels.description}
-            multiline
-            rows={2}
-            slotProps={{ htmlInput: { maxLength: 255 } }}
-          />
-        </VBox>
-      ),
+      inputs: <RenewAppUI orgId={data.orgId} />,
       fullScreen: app.smDown
     });
   }

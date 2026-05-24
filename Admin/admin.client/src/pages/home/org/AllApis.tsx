@@ -129,7 +129,7 @@ export default function AllApis() {
               textDecoration: data.enabled ? "none" : "line-through"
             };
             return (
-              <HBox gap={1}>
+              <HBox spacing={1}>
                 {data.title}{" "}
                 {data.inheritance ? <ShareIcon fontSize="small" /> : undefined}
               </HBox>

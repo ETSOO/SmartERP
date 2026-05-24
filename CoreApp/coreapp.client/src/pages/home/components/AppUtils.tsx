@@ -150,7 +150,7 @@ export namespace AppUtils {
         return false;
       },
       inputs: (
-        <VBox gap={1} width="100%" paddingTop={1}>
+        <VBox spacing={1} sx={{ width: "100%", paddingTop: 1 }}>
           <TextField
             name="months"
             margin="dense"

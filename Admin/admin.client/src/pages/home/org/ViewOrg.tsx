@@ -1,6 +1,6 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { BusinessTax } from "@etsoo/appscript";
-import { ButtonLink, HBox, ViewPage } from "@etsoo/materialui";
+import { ButtonLink, HBox, LinkEx, ViewPage } from "@etsoo/materialui";
 import SupportIcon from "@mui/icons-material/Support";
 import ApiIcon from "@mui/icons-material/Api";
 import { app } from "../../../app/MyApp";
@@ -33,8 +33,18 @@ export default function ViewOrg() {
     <ViewPage<ReadOrgData>
       paddings={0}
       titleBar={(item) => (
-        <HBox justifyContent="center" alignItems="center" marginBottom={2}>
-          <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
+        <HBox
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 2
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            align="center"
+            sx={{ paddingRight: 2 }}
+          >
             {item.name}
           </Typography>
         </HBox>
@@ -65,26 +75,18 @@ export default function ViewOrg() {
         "orders",
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../user/view/${item.ownerId}`}
-              size="small"
-              variant="outlined"
-            >
+            <LinkEx to={`./../../../user/view/${item.ownerId}`} variant="body2">
               {item.ownerName}
-            </ButtonLink>
+            </LinkEx>
           ),
           label: "owner"
         },
         {
           data: (item) =>
             item.parentName ? (
-              <ButtonLink
-                href={`./../${item.parentId}`}
-                size="small"
-                variant="outlined"
-              >
+              <LinkEx to={`./../${item.parentId}`} variant="body2">
                 {item.parentName}
-              </ButtonLink>
+              </LinkEx>
             ) : undefined,
           label: "parentOrg",
           singleRow: "medium"

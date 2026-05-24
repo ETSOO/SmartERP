@@ -3,8 +3,8 @@ import { defineConfig } from "vite";
 import plugin from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import fs from "fs";
-var keyFilePath = process.env.HTTPS_KEY_FILE || "./../../data/certs/dev.key";
-var certFilePath = process.env.HTTPS_CERT_FILE || "./../../data/certs/dev.pem";
+const keyFilePath = process.env.HTTPS_KEY_FILE || "./../../data/certs/dev.key";
+const certFilePath = process.env.HTTPS_CERT_FILE || "./../../data/certs/dev.pem";
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [

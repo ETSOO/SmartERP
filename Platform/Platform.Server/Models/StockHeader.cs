@@ -33,6 +33,10 @@ public partial class StockHeader
 
     public DateTime Creation { get; set; }
 
+    public int TotalLines { get; set; }
+
+    public decimal TotalQty { get; set; }
+
     public virtual PersonAddress LocationFrom { get; set; } = null!;
 
     public virtual PersonAddress LocationTo { get; set; } = null!;

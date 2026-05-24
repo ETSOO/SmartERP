@@ -69,13 +69,13 @@ public partial class OrderHeader
 
     public DateTime Creation { get; set; }
 
-    public bool IsOrder { get; set; }
-
     public decimal TaxAmount { get; set; }
 
     public decimal ApprovedDiscount { get; set; }
 
     public string? AddressFormatted { get; set; }
+
+    public short Kind { get; set; }
 
     public virtual PersonAddress? Address { get; set; }
 

@@ -33,6 +33,12 @@ namespace PlatformShared.Database
         public required DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
 
         /// <summary>
+        /// Document templates
+        /// 文档模板
+        /// </summary>
+        public required DbSet<CoreDocument> CoreDocuments { get; set; }
+
+        /// <summary>
         /// Core organizations
         /// 核心机构
         /// </summary>
@@ -262,6 +268,7 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new CoreApiConfiguration());
             modelBuilder.ApplyConfiguration(new CoreAppConfiguration());
             modelBuilder.ApplyConfiguration(new CoreAuthCodeConfiguration());
+            modelBuilder.ApplyConfiguration(new CoreDocumentConfiguration());
             modelBuilder.ApplyConfiguration(new CoreOrganizationConfiguration());
             modelBuilder.ApplyConfiguration(new CoreOrganizationAppConfiguration());
             modelBuilder.ApplyConfiguration(new CoreUserConfiguration());

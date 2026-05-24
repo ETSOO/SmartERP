@@ -1,8 +1,8 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
-import { ButtonLink, HBox, ViewPage } from "@etsoo/materialui";
+import { HBox, LinkEx, ViewPage } from "@etsoo/materialui";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import { app } from "../../../app/MyApp";
-import { usePageData } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadAppDto } from "../../../api/dto/query/ReadAppDto";
 import { AppUtils } from "../../../components/AppUtils";
@@ -23,7 +23,7 @@ export default function ViewApp() {
   const labels = app.getLabels("adminRenew", "view");
 
   // Page data hook
-  usePageData(app, labels.view, [loadData]);
+  usePageDataEmpty(app);
 
   return (
     <ViewPage<ReadAppDto>
@@ -31,11 +31,17 @@ export default function ViewApp() {
       fields={[
         {
           data: (item) => (
-            <HBox justifyContent="center" alignItems="center" marginBottom={2}>
+            <HBox
+              sx={{
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 2
+              }}
+            >
               <Typography
                 variant="subtitle2"
-                textAlign="center"
-                paddingRight={2}
+                align="center"
+                sx={{ paddingRight: 2 }}
                 title={item.name}
               >
                 {item.name}
@@ -46,13 +52,9 @@ export default function ViewApp() {
         },
         {
           data: (item) => (
-            <ButtonLink
-              href={`./../../../org/view/${item.orgId}`}
-              size="small"
-              variant="outlined"
-            >
+            <LinkEx to={`./../../../org/view/${item.orgId}`} variant="body2">
               {item.orgName}
-            </ButtonLink>
+            </LinkEx>
           ),
           label: "org",
           singleRow: "medium"

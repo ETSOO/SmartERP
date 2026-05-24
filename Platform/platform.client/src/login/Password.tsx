@@ -158,7 +158,7 @@ export default function Password() {
           defaultValue="SmartERP"
           autoComplete="username"
         />
-        <HBox spacing={1} alignItems="flex-start">
+        <HBox spacing={1} sx={{ alignItems: "flex-start" }}>
           <Box sx={{ paddingTop: 3 }}>
             <Lock color="primary" />
           </Box>

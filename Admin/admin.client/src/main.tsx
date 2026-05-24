@@ -148,9 +148,8 @@ const router = createDynamicRouter([
           {
             path: "/home/audithistory",
             lazy: async () => {
-              const AuditHistory = await import(
-                "./pages/home/system/AuditHistory"
-              );
+              const AuditHistory =
+                await import("./pages/home/system/AuditHistory");
               return { Component: AuditHistory.default };
             }
           },
@@ -164,27 +163,24 @@ const router = createDynamicRouter([
           {
             path: "/home/custom/resources",
             lazy: async () => {
-              const CustomResources = await import(
-                "./pages/home/custom/CustomResources"
-              );
+              const CustomResources =
+                await import("./pages/home/custom/CustomResources");
               return { Component: CustomResources.default };
             }
           },
           {
             path: "/home/custom/resources/add",
             lazy: async () => {
-              const AddCustomResource = await import(
-                "./pages/home/custom/AddCustomResource"
-              );
+              const AddCustomResource =
+                await import("./pages/home/custom/AddCustomResource");
               return { Component: AddCustomResource.default };
             }
           },
           {
             path: "/home/custom/resources/edit/:id",
             lazy: async () => {
-              const AddCustomResource = await import(
-                "./pages/home/custom/AddCustomResource"
-              );
+              const AddCustomResource =
+                await import("./pages/home/custom/AddCustomResource");
               return { Component: AddCustomResource.default };
             }
           }

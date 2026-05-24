@@ -44,7 +44,7 @@ export default function AuthFail() {
   return (
     <SharedLayout
       title={
-        <Stack direction="row" gap={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           {<SvgIcon component={AppUtils.getBrandIcon(type)} inheritViewBox />}
           {labels.authFail}
         </Stack>

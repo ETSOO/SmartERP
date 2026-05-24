@@ -31,6 +31,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "public.core_document",
+         "ObjectType": 0
+      },
+      {
          "Name": "public.core_organization",
          "ObjectType": 0
       },

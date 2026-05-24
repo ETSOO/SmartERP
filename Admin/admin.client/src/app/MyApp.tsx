@@ -9,6 +9,7 @@ import {
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
 import { AdminApi } from "../api/AdminApi";
 import { QueryApi } from "../api/QueryApi";
+import { DocumentApi } from "../api/DocumentApi";
 
 class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
   /**
@@ -34,6 +35,11 @@ class MyApp extends ServiceApp<MyUser> implements ICoreServiceApp {
    * Admin APIs
    */
   readonly adminApi = new AdminApi(this);
+
+  /**
+   * Document APIs
+   */
+  readonly documentApi = new DocumentApi(this);
 
   /**
    * Core application

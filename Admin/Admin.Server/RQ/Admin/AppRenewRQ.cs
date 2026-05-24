@@ -2,7 +2,7 @@
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 
-namespace Admin.Server.RQ.Operation
+namespace Admin.Server.RQ.Admin
 {
     /// <summary>
     /// Application renew request data

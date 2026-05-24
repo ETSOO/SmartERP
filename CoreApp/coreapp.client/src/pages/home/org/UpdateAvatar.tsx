@@ -23,7 +23,7 @@ export default function UpdateAvatar() {
   return (
     <CommonPage sx={{ width: "fit-content" }}>
       <Stack direction={{ xs: "column", sm: "column", md: "row" }} spacing={1}>
-        <VBox gap={1}>
+        <VBox spacing={1}>
           {state.avatar == null ? (
             <React.Fragment />
           ) : (

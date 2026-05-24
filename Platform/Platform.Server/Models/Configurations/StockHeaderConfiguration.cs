@@ -36,6 +36,10 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");
+            entity.Property(e => e.TotalLines).HasColumnName("total_lines");
+            entity.Property(e => e.TotalQty)
+                .HasPrecision(15, 2)
+                .HasColumnName("total_qty");
             entity.Property(e => e.TrackingNumber)
                 .HasMaxLength(20)
                 .HasColumnName("tracking_number");

@@ -63,10 +63,10 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnType("money")
                 .HasColumnName("discount");
             entity.Property(e => e.EndDate).HasColumnName("end_date");
-            entity.Property(e => e.IsOrder).HasColumnName("is_order");
             entity.Property(e => e.Items)
                 .HasPrecision(12, 2)
                 .HasColumnName("items");
+            entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.LineDiscount)
                 .HasDefaultValueSql("0")
                 .HasColumnType("money")

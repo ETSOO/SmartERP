@@ -261,4 +261,7 @@
   <data name="UserVerificationSMSCode" xml:space="preserve">
     <value>用戶手機號碼認證驗證碼</value>
   </data>
+  <data name="AdminCreateDocument" xml:space="preserve">
+    <value>管理員建立業務文檔</value>
+  </data>
 </root>

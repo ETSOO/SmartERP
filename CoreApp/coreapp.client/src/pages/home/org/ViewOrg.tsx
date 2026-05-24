@@ -53,8 +53,18 @@ export default function ViewOrg() {
     <ViewPage<OrgReadDto>
       paddings={0}
       titleBar={(item) => (
-        <HBox justifyContent="center" alignItems="center" marginBottom={2}>
-          <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
+        <HBox
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 2
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            align="center"
+            sx={{ paddingRight: 2 }}
+          >
             {item.name}
           </Typography>
           {item.isOwner && (

@@ -14,9 +14,19 @@ namespace Admin.Server
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
 
-    [JsonSerializable(typeof(Dto.Query.ReadUserDto))]
+    // Admin
+    [JsonSerializable(typeof(RQ.Admin.AppRenewRQ))]
 
-    [JsonSerializable(typeof(RQ.Operation.AppRenewRQ))]
+    // Document
+    [JsonSerializable(typeof(Dto.Document.DocumentQueryData[]))]
+    [JsonSerializable(typeof(Dto.Document.DocumentViewData))]
+
+    [JsonSerializable(typeof(RQ.Document.DocumentCreateRQ))]
+    [JsonSerializable(typeof(RQ.Document.DocumentQueryRQ))]
+    [JsonSerializable(typeof(RQ.Document.DocumentUpdateRQ))]
+
+    // Query
+    [JsonSerializable(typeof(Dto.Query.ReadUserDto))]
 
     [JsonSerializable(typeof(RQ.Query.AuditHistoryRQ))]
     [JsonSerializable(typeof(RQ.Query.AllAppRQ))]

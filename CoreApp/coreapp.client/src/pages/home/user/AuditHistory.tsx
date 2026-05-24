@@ -164,7 +164,7 @@ export default function LoginHistory() {
             data.title,
             app.formatDate(data.creation, "ds"),
             [],
-            <HBox alignItems="center">
+            <HBox sx={{ alignItems: "center" }}>
               <DialogButton
                 content={JSON.stringify(data, undefined, 2)}
                 contentPre

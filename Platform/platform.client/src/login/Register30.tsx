@@ -145,7 +145,7 @@ export default function RegisterPassword() {
         required
         showClear
       />
-      <HBox gap={1}>
+      <HBox spacing={1}>
         <TextFieldEx
           label={labels.familyName}
           inputRef={familyNameRef}

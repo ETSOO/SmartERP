@@ -96,6 +96,7 @@ services.AddSingleton<IMessageQueueProcessor, AcceptInvitationProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AddUserIdentifierProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AdjustReportToProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AdminClearUserFrozenProcessor>();
+services.AddSingleton<IMessageQueueProcessor, AdminCreateDocumentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AdminRenewAppProcessor>();
 services.AddSingleton<IMessageQueueProcessor, AdminSupportProcessor>();
 services.AddSingleton<IMessageQueueProcessor, BuyAppProcessor>();

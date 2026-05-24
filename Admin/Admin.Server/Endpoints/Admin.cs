@@ -1,12 +1,12 @@
-﻿using Admin.Server.RQ.Operation;
+﻿using Admin.Server.RQ.Admin;
 using Admin.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Admin.Server.Endpoints
 {
     /// <summary>
-    /// Operation service APIs
-    /// 操作服务API
+    /// Admin service APIs
+    /// 管理服务接口
     /// </summary>
     public static class Admin
     {

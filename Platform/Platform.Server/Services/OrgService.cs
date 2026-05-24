@@ -35,8 +35,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using static Google.Cloud.Iam.V1.AuditConfigDelta.Types;
 
 namespace Platform.Server.Services
 {

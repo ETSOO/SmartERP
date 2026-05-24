@@ -130,7 +130,7 @@ export default function Invite() {
       ]}
     >
       {data && (
-        <VBox gap={1} width="100%">
+        <VBox spacing={1} sx={{ width: "100%" }}>
           <TextField
             margin="dense"
             variant="standard"

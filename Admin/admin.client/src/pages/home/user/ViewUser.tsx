@@ -1,7 +1,7 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { ButtonLink, HBox, HBoxList, ViewPage } from "@etsoo/materialui";
 import HistoryIcon from "@mui/icons-material/History";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import { app } from "../../../app/MyApp";
 import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
@@ -35,8 +35,18 @@ export default function ViewUser() {
     <ViewPage<ReadUserDto>
       paddings={0}
       titleBar={(item) => (
-        <HBox justifyContent="center" alignItems="center" marginBottom={2}>
-          <Typography variant="subtitle2" textAlign="center" paddingRight={2}>
+        <HBox
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 2
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            align="center"
+            sx={{ paddingRight: 2 }}
+          >
             {item.name}
             {item.preferredName ? ` (${item.preferredName})` : ""}
           </Typography>
@@ -45,7 +55,7 @@ export default function ViewUser() {
       leftContainerLines={3}
       leftContainer={(item) =>
         item.avatar ? (
-          <HBox justifyContent={{ xs: "center", sm: "flex-start" }}>
+          <HBox sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}>
             <img
               src={item.avatar}
               alt={labels.logo}
@@ -126,7 +136,7 @@ export default function ViewUser() {
             DateUtils.parse(data.frozenTime)! >= new Date() && (
               <Button
                 variant="contained"
-                startIcon={<RemoveCircleOutlineIcon />}
+                startIcon={<RemoveCircleIcon />}
                 onClick={() => {
                   const title = `${labels.clearUserFrozen} (${data.name})`;
                   app.notifier.confirm(

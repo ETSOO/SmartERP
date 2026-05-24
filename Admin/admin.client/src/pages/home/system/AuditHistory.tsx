@@ -231,7 +231,7 @@ export default function LoginHistory() {
               action: `./../user/view/${data.userId}`
             }
           ],
-          <HBox alignItems="center">
+          <HBox sx={{ alignItems: "center" }}>
             <DialogButton
               content={JSON.stringify(data, undefined, 2)}
               contentPre

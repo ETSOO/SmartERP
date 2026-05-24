@@ -114,9 +114,11 @@ export function SharedLayout(props: SharedLayoutProps) {
         }}
       >
         <HBox
-          padding="16px 24px 12px 24px"
-          justifyContent="space-between"
-          alignItems="flex-end"
+          sx={{
+            padding: "16px 24px 12px 24px",
+            justifyContent: "space-between",
+            alignItems: "flex-end"
+          }}
         >
           <Box
             component="img"
@@ -129,13 +131,13 @@ export function SharedLayout(props: SharedLayoutProps) {
           {headerRight}
           <Context.Consumer>
             {(value) => (
-              <VBox alignItems="flex-end">
+              <VBox sx={{ alignItems: "flex-end" }}>
                 <Typography variant="subtitle1">
                   {value.get<string>("appName")} (AI+)
                 </Typography>
-                <Typography variant="subtitle2" fontWeight="bold">
+                <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
                   {appName
-                    ? value.get<string>(appName) ?? appName
+                    ? (value.get<string>(appName) ?? appName)
                     : app.get("login")}
                 </Typography>
               </VBox>
@@ -145,21 +147,28 @@ export function SharedLayout(props: SharedLayoutProps) {
         <Typography
           variant="caption"
           component="div"
-          textAlign="center"
-          paddingBottom="4px"
+          align="center"
+          sx={{ paddingBottom: "4px" }}
         >
           {app.get("slogan")}
         </Typography>
         <VBox
-          borderRadius={0.5}
-          padding={3}
           spacing={2}
-          boxShadow={1}
-          alignItems="flex-start"
-          sx={{ backgroundColor: "#fff" }}
+          sx={{
+            alignItems: "flex-start",
+            borderRadius: 0.5,
+            boxShadow: 1,
+            backgroundColor: "#fff",
+            padding: 3
+          }}
         >
-          <VBox width="100%">
-            <HBox justifyContent="space-between" alignItems="center">
+          <VBox sx={{ width: "100%" }}>
+            <HBox
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
               <Typography variant="h5">{title}</Typography>
               {pageRight}
             </HBox>
@@ -177,21 +186,25 @@ export function SharedLayout(props: SharedLayoutProps) {
           </VBox>
           {children}
           <HBox
-            justifyContent={
-              Array.isArray(buttons) && buttons.length > 1
-                ? "space-between"
-                : "flex-end"
-            }
+            sx={{
+              width: "100%",
+              justifyContent:
+                Array.isArray(buttons) && buttons.length > 1
+                  ? "space-between"
+                  : "flex-end"
+            }}
             spacing={2}
           >
             {buttons}
           </HBox>
         </VBox>
         <HBox
-          padding="8px 24px"
           spacing={2}
-          fontSize="smaller"
-          justifyContent="center"
+          sx={{
+            padding: "8px 24px",
+            fontSize: "smaller",
+            justifyContent: "center"
+          }}
         >
           {bottom}
         </HBox>

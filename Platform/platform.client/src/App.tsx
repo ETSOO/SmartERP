@@ -56,7 +56,7 @@ function formatLoginTip(
     <Typography
       component="span"
       key={index}
-      fontWeight={i[1] ? "bold" : undefined}
+      sx={{ fontWeight: i[1] ? "bold" : undefined }}
     >
       {i[0]}
     </Typography>
@@ -125,7 +125,7 @@ export default function App() {
   const userIdSaved =
     userIdEncrypted === "" || userIdEncrypted == null
       ? ""
-      : app.decrypt(userIdEncrypted) ?? "";
+      : (app.decrypt(userIdEncrypted) ?? "");
 
   let passedLoginId = params.loginid ?? auth?.loginHint ?? null;
   if (
@@ -239,7 +239,7 @@ export default function App() {
   // Get app name
   const getAppName = React.useCallback(() => {
     return appData?.appId
-      ? app.get(`app${appData.appId}`) ?? appData?.appName
+      ? (app.get(`app${appData.appId}`) ?? appData?.appName)
       : app.get("app1");
   }, [appData]);
 
@@ -330,7 +330,7 @@ export default function App() {
         <React.Fragment>
           {mobileQRCode && (
             <Box
-              gap={0.5}
+              component="div"
               sx={{
                 position: "absolute",
                 top: 0,
@@ -349,7 +349,10 @@ export default function App() {
             appName={getAppName()}
             visible={visible}
             pageRight={
-              <HBox width={200} spacing={0.5} justifyContent="flex-end">
+              <HBox
+                spacing={0.5}
+                sx={{ width: 200, justifyContent: "flex-end" }}
+              >
                 <ItemList
                   items={app.settings.cultures}
                   idField="name"
@@ -412,7 +415,7 @@ export default function App() {
                 )}
               </Alert>
             )}
-            <HBox spacing={1} alignItems="flex-start">
+            <HBox spacing={1} sx={{ width: "100%", alignItems: "flex-start" }}>
               <Box sx={{ paddingTop: 3 }}>
                 <AccountCircleIcon color="primary" />
               </Box>

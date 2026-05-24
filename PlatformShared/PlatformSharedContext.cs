@@ -1,5 +1,6 @@
 ﻿using PlatformShared.Dto;
 using PlatformShared.Messages;
+using PlatformShared.RQ;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

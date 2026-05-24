@@ -20,6 +20,8 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<CoreAuthCode> CoreAuthCodes { get; set; }
 
+    public virtual DbSet<CoreDocument> CoreDocuments { get; set; }
+
     public virtual DbSet<CoreOrganization> CoreOrganizations { get; set; }
 
     public virtual DbSet<CoreOrganizationApp> CoreOrganizationApps { get; set; }
@@ -93,6 +95,7 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.CoreApiConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreAppConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreAuthCodeConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.CoreDocumentConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreOrganizationConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreOrganizationAppConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserConfiguration());
