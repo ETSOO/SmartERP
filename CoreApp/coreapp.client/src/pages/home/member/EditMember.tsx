@@ -113,9 +113,7 @@ export default function EditMember() {
   return (
     <EditPage
       isEditing
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
+      onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       onDelete={
         data.status === EntityStatus.Deleted &&

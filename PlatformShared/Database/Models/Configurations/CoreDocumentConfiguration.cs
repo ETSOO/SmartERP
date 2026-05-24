@@ -26,6 +26,13 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("parameters");
             entity.Property(e => e.Template).HasColumnName("template");
             entity.Property(e => e.RefreshTime).HasColumnName("refresh_time");
+            entity.Property(e => e.Cultures)
+                .HasColumnType("character varying(20)[]")
+                .HasColumnName("cultures");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.Documents)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .HasConstraintName("core_document_core_organization_id_fkey");
         }
     }
 }

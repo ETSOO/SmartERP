@@ -51,6 +51,11 @@ namespace Platform.Server.Services
                         q = q.Where(d => d.Kind == kind);
                     }
 
+                    if (!string.IsNullOrEmpty(rq.Culture))
+                    {
+                        q = q.Where(d => d.Cultures == null || d.Cultures.Contains(rq.Culture));
+                    }
+
                     if (rq.Keyword?.Length > 1)
                     {
                         var keyword = rq.Keyword;

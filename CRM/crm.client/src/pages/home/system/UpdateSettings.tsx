@@ -82,12 +82,7 @@ export default function UpdateSettings() {
   usePageDataEmpty(app);
 
   return (
-    <EditPage
-      onUpdate={loadData}
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
-    >
+    <EditPage onUpdate={loadData} onSubmit={formik.handleSubmit}>
       <Grid size={{ xs: 12, sm: 6 }}>
         <CustomerTypeList
           name="mainCustomerType"

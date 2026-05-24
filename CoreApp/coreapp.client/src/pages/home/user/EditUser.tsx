@@ -89,13 +89,7 @@ export default function EditUser() {
   usePageDataEmpty(app);
 
   return (
-    <EditPage
-      isEditing
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
-      onUpdate={reloadData}
-    >
+    <EditPage isEditing onSubmit={formik.handleSubmit} onUpdate={reloadData}>
       <Grid size={{ xs: 8, md: 6, lg: 4 }}>
         <InputField
           fullWidth

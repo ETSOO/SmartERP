@@ -2,6 +2,7 @@
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using com.etsoo.WebUtils.Attributes;
 using System.Text.Json;
 
 namespace Admin.Server.RQ.Document
@@ -43,6 +44,12 @@ namespace Admin.Server.RQ.Document
         public string? Template { get; init; }
 
         /// <summary>
+        /// Cultures
+        /// 语言文化
+        /// </summary>
+        public IEnumerable<string>? Cultures { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -57,6 +64,15 @@ namespace Admin.Server.RQ.Document
             if (Title != null && Title.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Title));
+            }
+
+            if (Cultures != null)
+            {
+                var lc = new LanguageCodeAttribute();
+                if (Cultures.Any(c => !lc.IsValid(c)))
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(Cultures));
+                }
             }
 
             return null;

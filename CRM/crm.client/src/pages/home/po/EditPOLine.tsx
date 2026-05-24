@@ -132,9 +132,7 @@ export default function EditPOLine() {
   return (
     <EditPage
       isEditing
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
+      onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       onDelete={
         po?.isDeletable

@@ -43,5 +43,11 @@ namespace PlatformShared.Dto
         /// 刷新时间
         /// </summary>
         public DateTimeOffset RefreshTime { get; init; }
+
+        /// <summary>
+        /// Cultures
+        /// 文化
+        /// </summary>
+        public IEnumerable<string>? Cultures { get; init; }
     }
 }

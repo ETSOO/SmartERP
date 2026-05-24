@@ -6,6 +6,7 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AppsIcon from "@mui/icons-material/Apps";
 import TuneIcon from "@mui/icons-material/Tune";
 import LanguageIcon from "@mui/icons-material/Language";
+import ArticleIcon from "@mui/icons-material/Article";
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { app } from "../../app/MyApp";
@@ -52,6 +53,7 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "add",
     "addApi",
     "addResource",
     "allApps",
@@ -61,6 +63,7 @@ export default function Home() {
     "auditHistory",
     "customize",
     "customResources",
+    "documentTemplates",
     "edit",
     "editResource",
     "externalApis",
@@ -162,6 +165,24 @@ export default function Home() {
                   segment: "edit",
                   pattern: "edit/:id",
                   title: labels.editResource,
+                  hidden: true
+                }
+              ]
+            },
+            {
+              segment: "document",
+              title: labels.documentTemplates,
+              icon: <ArticleIcon />,
+              children: [
+                {
+                  segment: "add",
+                  title: labels.add,
+                  hidden: true
+                },
+                {
+                  segment: "edit",
+                  pattern: "edit/:id",
+                  title: labels.edit,
                   hidden: true
                 }
               ]

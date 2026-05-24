@@ -183,6 +183,30 @@ const router = createDynamicRouter([
                 await import("./pages/home/custom/AddCustomResource");
               return { Component: AddCustomResource.default };
             }
+          },
+          {
+            path: "/home/custom/document",
+            lazy: async () => {
+              const AllDocument =
+                await import("./pages/home/document/AllDocument");
+              return { Component: AllDocument.default };
+            }
+          },
+          {
+            path: "/home/custom/document/add",
+            lazy: async () => {
+              const AddDocument =
+                await import("./pages/home/document/AddDocument");
+              return { Component: AddDocument.default };
+            }
+          },
+          {
+            path: "/home/custom/document/edit/:id",
+            lazy: async () => {
+              const AddDocument =
+                await import("./pages/home/document/AddDocument");
+              return { Component: AddDocument.default };
+            }
           }
         ]
       }

@@ -33,6 +33,8 @@ public partial class CoreOrganization
 
     public virtual ICollection<CoreApi> CoreApis { get; set; } = new List<CoreApi>();
 
+    public virtual ICollection<CoreDocument> CoreDocuments { get; set; } = new List<CoreDocument>();
+
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
     public virtual ICollection<FeatureCulture> FeatureCultures { get; set; } = new List<FeatureCulture>();

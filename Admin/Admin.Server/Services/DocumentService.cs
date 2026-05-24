@@ -66,7 +66,8 @@ namespace Admin.Server.Services
                 Title = rq.Title,
                 Parameters = rq.Parameters,
                 Template = rq.Template,
-                RefreshTime = now
+                RefreshTime = now,
+                Cultures = rq.Cultures?.ToList()
             };
 
             _db.CoreDocuments.Add(document);
@@ -122,6 +123,11 @@ namespace Admin.Server.Services
                         q = q.Where(d => d.Kind == kind);
                     }
 
+                    if (!string.IsNullOrEmpty(rq.Culture))
+                    {
+                        q = q.Where(d => d.Cultures == null || d.Cultures.Contains(rq.Culture));
+                    }
+
                     if (rq.HasParameters.HasValue)
                     {
                         if (rq.HasParameters.Value)
@@ -153,6 +159,7 @@ namespace Admin.Server.Services
                 .Select(t => new DocumentQueryData
                 {
                     Id = t.Id,
+                    OrgName = t.CoreOrganization != null ? t.CoreOrganization.Name : null,
                     Title = t.Title,
                     HasParameters = t.Parameters != null,
                     RefreshTime = t.RefreshTime
@@ -179,7 +186,8 @@ namespace Admin.Server.Services
                     Title = d.Title,
                     Parameters = d.Parameters,
                     Template = d.Template,
-                    RefreshTime = d.RefreshTime
+                    RefreshTime = d.RefreshTime,
+                    Cultures = d.Cultures
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -232,6 +240,11 @@ namespace Admin.Server.Services
             if (rq.IsModified(nameof(rq.Template)) && rq.Template != null)
             {
                 document.Template = rq.Template;
+            }
+
+            if (rq.IsModified(nameof(rq.Cultures)))
+            {
+                document.Cultures = rq.Cultures?.ToList();
             }
 
             var now = DateTimeOffset.UtcNow;

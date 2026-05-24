@@ -21,6 +21,9 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+            entity.Property(e => e.Cultures)
+                .HasColumnType("character varying(20)[]")
+                .HasColumnName("cultures");
             entity.Property(e => e.Kind)
                 .HasMaxLength(20)
                 .HasColumnName("kind");
@@ -32,6 +35,10 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.CoreDocuments)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .HasConstraintName("core_document_core_organization_id_fkey");
 
             OnConfigurePartial(entity);
         }

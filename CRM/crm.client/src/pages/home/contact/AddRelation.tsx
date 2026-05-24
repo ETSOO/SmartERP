@@ -104,12 +104,7 @@ export default function AddRelation() {
   usePageDataEmpty(app);
 
   return (
-    <EditPage
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
-      paddings={0}
-    >
+    <EditPage onSubmit={formik.handleSubmit} paddings={0}>
       <Grid size={{ xs: 12, sm: 6 }}>
         <ButtonRadioContactRelations
           fullWidth

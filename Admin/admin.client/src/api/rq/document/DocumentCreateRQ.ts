@@ -32,4 +32,10 @@ export type DocumentCreateRQ = {
    * 模板
    */
   template: string;
+
+  /**
+   * Cultures
+   * 语言文化
+   */
+  cultures?: string[];
 };

@@ -96,9 +96,7 @@ export default function EditOrg() {
   return (
     <EditPage
       isEditing
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
+      onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       onDelete={
         data.status === EntityStatus.Deleted && deletePermission

@@ -13,6 +13,12 @@
         public int Id { get; init; }
 
         /// <summary>
+        /// Organization name
+        /// 机构名称
+        /// </summary>
+        public string? OrgName { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>

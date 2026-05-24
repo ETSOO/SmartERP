@@ -20,4 +20,8 @@ public partial class CoreDocument
     public string Template { get; set; } = null!;
 
     public DateTime RefreshTime { get; set; }
+
+    public List<string>? Cultures { get; set; }
+
+    public virtual CoreOrganization? CoreOrganization { get; set; }
 }

@@ -9,6 +9,8 @@ import { DocumentCreateRQ } from "./rq/document/DocumentCreateRQ";
 import { DocumentQueryRQ } from "./rq/document/DocumentQueryRQ";
 import { DocumentQueryData } from "./dto/document/DocumentQueryData";
 import { DocumentUpdateRQ } from "./rq/document/DocumentUpdateRQ";
+import { IdType } from "@etsoo/shared";
+import { DocumentViewData } from "./dto/document/DocumentViewData";
 
 /**
  * Document API
@@ -51,6 +53,16 @@ export class DocumentApi extends EntityApi {
    */
   query(rq: DocumentQueryRQ, payload?: IApiPayload<DocumentQueryData[]>) {
     return this.queryBase(rq, payload);
+  }
+
+  /**
+   * Read
+   * @param id Id
+   * @param payload Payload
+   * @returns Result
+   */
+  read(id: number, payload?: IApiPayload<DocumentViewData>) {
+    return super.readBase(id, payload);
   }
 
   /**

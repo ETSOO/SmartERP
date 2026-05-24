@@ -132,9 +132,7 @@ export default function EditOrderLine() {
   return (
     <EditPage
       isEditing
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
+      onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       onDelete={
         order?.isDeletable

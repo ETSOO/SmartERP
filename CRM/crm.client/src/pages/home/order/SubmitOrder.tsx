@@ -288,9 +288,7 @@ export default function SubmitOrder() {
   return (
     <EditPage
       isEditing={isEditing}
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
+      onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       paddings={0}
     >

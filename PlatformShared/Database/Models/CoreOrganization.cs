@@ -111,6 +111,12 @@ namespace PlatformShared.Database.Models
         public ICollection<CoreOrganizationApp> Apps { get; } = default!;
 
         /// <summary>
+        /// Documents
+        /// 机构文档
+        /// </summary>
+        public ICollection<CoreDocument> Documents { get; } = default!;
+
+        /// <summary>
         /// Core organization orders
         /// 核心机构订单
         /// </summary>

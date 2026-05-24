@@ -49,5 +49,17 @@ namespace PlatformShared.Database.Models
         /// 刷新时间
         /// </summary>
         public DateTimeOffset RefreshTime { get; set; }
+
+        /// <summary>
+        /// Cultures
+        /// 文化
+        /// </summary>
+        public List<string>? Cultures { get; set; }
+
+        /// <summary>
+        /// Organization
+        /// 机构
+        /// </summary>
+        public CoreOrganization? CoreOrganization { get; set; }
     }
 }

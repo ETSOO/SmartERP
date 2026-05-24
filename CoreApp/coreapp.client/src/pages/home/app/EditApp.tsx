@@ -120,13 +120,7 @@ export default function EditApp() {
   usePageDataEmpty(app);
 
   return (
-    <EditPage
-      isEditing
-      onSubmit={(event) => {
-        formik.handleSubmit(event);
-      }}
-      onUpdate={reloadData}
-    >
+    <EditPage isEditing onSubmit={formik.handleSubmit} onUpdate={reloadData}>
       <Grid size={{ xs: 12, sm: 6 }}>
         <InputField
           fullWidth
