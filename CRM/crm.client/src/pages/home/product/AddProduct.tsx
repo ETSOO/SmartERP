@@ -169,6 +169,10 @@ export default function AddProduct() {
         }
         rq.changedFields = fields;
 
+        if (rq.modifiers == null) {
+          delete rq.modifiers;
+        }
+
         redirectUrl = "./../..";
 
         result = await app.productApi.update(rq);

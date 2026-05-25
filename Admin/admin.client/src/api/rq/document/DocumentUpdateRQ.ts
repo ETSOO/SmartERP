@@ -1,4 +1,3 @@
-import { UpdateModel } from "@etsoo/appscript";
 import { DataTypes } from "@etsoo/shared";
 import { DocumentCreateRQ } from "./DocumentCreateRQ";
 

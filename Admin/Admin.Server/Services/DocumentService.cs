@@ -114,9 +114,33 @@ namespace Admin.Server.Services
         public Task<DocumentQueryData[]> QueryAsync(DocumentQueryRQ rq, CancellationToken cancellationToken = default)
         {
             return _db.CoreDocuments.AsNoTracking()
-                .Where(t => t.CoreOrganizationId == rq.OrgId)
                 .QueryEtsoo(rq, (d) => d.Id, null, (q) =>
                 {
+                    if (rq.OrgId.HasValue)
+                    {
+                        var orgId = rq.OrgId.Value;
+                        if (orgId < 1)
+                        {
+                            q = q.Where(d => d.CoreOrganizationId == null);
+                        }
+                        else
+                        {
+                            q = q.Where(d => d.CoreOrganizationId == orgId);
+                        }
+                    }
+
+                    if (rq.SystemTemplate.HasValue)
+                    {
+                        if (rq.SystemTemplate.Value)
+                        {
+                            q = q.Where(d => d.CoreOrganizationId == null);
+                        }
+                        else
+                        {
+                            q = q.Where(d => d.CoreOrganizationId != null);
+                        }
+                    }
+
                     if (!string.IsNullOrEmpty(rq.Kind))
                     {
                         var kind = rq.Kind.ToUpper();
@@ -160,6 +184,7 @@ namespace Admin.Server.Services
                 {
                     Id = t.Id,
                     OrgName = t.CoreOrganization != null ? t.CoreOrganization.Name : null,
+                    Kind = t.Kind,
                     Title = t.Title,
                     HasParameters = t.Parameters != null,
                     RefreshTime = t.RefreshTime

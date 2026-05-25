@@ -2,13 +2,18 @@ import {
   ResponsivePage,
   SearchField,
   MobileListItemRenderer,
-  IconButtonLink
+  IconButtonLink,
+  SelectBool
 } from "@etsoo/materialui";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
+import {
+  GridCellRendererProps,
+  GridDataType,
+  ScrollerListForwardRef
+} from "@etsoo/react";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
@@ -18,10 +23,12 @@ import { BoxProps } from "@mui/material/Box";
 import { OrgTiplist } from "../../../components/OrgTiplist";
 import { BusinessUtils } from "@etsoo/appscript";
 import { DocumentQueryData } from "../../../api/dto/document/DocumentQueryData";
+import { Typography } from "@mui/material";
 
 const template = {
   keyword: "string",
   kind: "string",
+  systemTemplate: "boolean",
   orgId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -36,7 +43,9 @@ export default function AllDocument() {
     "edit",
     "keywords",
     "org",
-    "refeshTime",
+    "parameters",
+    "refreshTime",
+    "systemTemplate",
     "title",
     "type"
   );
@@ -80,6 +89,7 @@ export default function AllDocument() {
           name="kind"
           defaultValue={data.kind}
         />,
+        <SelectBool label={labels.systemTemplate} name="systemTemplate" />,
         <OrgTiplist name="orgId" label={labels.org} idValue={data.orgId} />
       ]}
       loadData={(data, lastItem) =>
@@ -93,8 +103,30 @@ export default function AllDocument() {
       }
       columns={[
         {
+          field: "refreshTime",
+          type: GridDataType.Date,
+          width: 104,
+          header: labels.refreshTime,
+          renderProps: app.getDateFormatProps()
+        },
+        {
+          field: "kind",
+          header: labels.type,
+          width: 150
+        },
+        {
           field: "title",
           header: labels.title
+        },
+        {
+          field: "hasParameters",
+          header: labels.parameters,
+          width: 80
+        },
+        {
+          field: "orgName",
+          header: labels.org,
+          width: 250
         },
         {
           width: DefaultUI.Widths.icon1,
@@ -131,7 +163,12 @@ export default function AllDocument() {
                 action: `./edit/${data.id}`
               }
             ],
-            <React.Fragment></React.Fragment>
+            <React.Fragment>
+              {data.orgName && (
+                <Typography variant="body2">{data.orgName}</Typography>
+              )}
+              <Typography variant="body2">{data.kind}</Typography>
+            </React.Fragment>
           ];
         })
       }

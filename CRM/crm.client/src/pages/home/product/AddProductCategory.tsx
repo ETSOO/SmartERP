@@ -77,6 +77,10 @@ export default function AddProductCategory() {
         }
         rq.changedFields = fields;
 
+        if (rq.attributes == null) {
+          delete rq.attributes;
+        }
+
         redirectUrl = "./../..";
 
         result = await app.productCategoryApi.update(rq);

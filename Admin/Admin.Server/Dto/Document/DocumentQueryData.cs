@@ -19,6 +19,12 @@
         public string? OrgName { get; init; }
 
         /// <summary>
+        /// Kind
+        /// 类型
+        /// </summary>
+        public required string Kind { get; init; }
+
+        /// <summary>
         /// Title
         /// 标题
         /// </summary>

@@ -94,6 +94,10 @@ export default function AddCategory() {
         }
         rq.changedFields = fields;
 
+        if (rq.attributes == null) {
+          delete rq.attributes;
+        }
+
         redirectUrl = "./../..";
 
         result = await app.personCategoryApi.update(rq);

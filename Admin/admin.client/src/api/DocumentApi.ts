@@ -9,7 +9,6 @@ import { DocumentCreateRQ } from "./rq/document/DocumentCreateRQ";
 import { DocumentQueryRQ } from "./rq/document/DocumentQueryRQ";
 import { DocumentQueryData } from "./dto/document/DocumentQueryData";
 import { DocumentUpdateRQ } from "./rq/document/DocumentUpdateRQ";
-import { IdType } from "@etsoo/shared";
 import { DocumentViewData } from "./dto/document/DocumentViewData";
 
 /**

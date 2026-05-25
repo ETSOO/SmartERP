@@ -12,6 +12,12 @@ export type DocumentQueryRQ = SystemDocumentListRQ & {
   orgId?: number;
 
   /**
+   * System template or not
+   * 系统模板与否
+   */
+  systemTemplate?: boolean;
+
+  /**
    * Has parameters or not
    * 是否有参数
    */

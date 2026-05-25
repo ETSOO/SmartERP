@@ -11,6 +11,7 @@ import { IdActionResult, Utils } from "@etsoo/shared";
 import { DocumentUpdateRQ } from "../../../api/rq/document/DocumentUpdateRQ";
 import {
   ButtonCultures,
+  DocumentKindList,
   SystemDocumentTiplist
 } from "@etsoo/smarterp-core/components";
 import { useFormik } from "formik";
@@ -32,6 +33,7 @@ export default function AddDocument() {
     "noChanges",
     "org",
     "parameters",
+    "systemTemplateGuide",
     "template",
     "title",
     "type"
@@ -65,7 +67,6 @@ export default function AddDocument() {
 
       if (id > 0) {
         const rq: DocumentUpdateRQ = { ...c, id };
-        ReactUtils.updateRefValues(refs, rq);
 
         // Changed fields
         const fields = Utils.getDataChanges(rq, data);
@@ -75,12 +76,15 @@ export default function AddDocument() {
         }
         rq.changedFields = fields;
 
+        if (rq.parameters == null) {
+          delete rq.parameters;
+        }
+
         result = await app.documentApi.update(rq);
 
         url = "./../../";
       } else {
         const rq: DocumentCreateRQ = { ...c };
-        ReactUtils.updateRefValues(refs, rq);
 
         result = await app.documentApi.create(rq);
 
@@ -151,7 +155,7 @@ export default function AddDocument() {
           inputOnChange={formik.handleChange}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 4 }}>
+      <Grid size={{ xs: 6, sm: 3 }}>
         <InputField
           fullWidth
           name="kind"
@@ -161,7 +165,17 @@ export default function AddDocument() {
           inputRef={refs.kind}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 8 }}>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <DocumentKindList
+          fullWidth
+          value={data.kind}
+          onItemChange={(item) => {
+            if (item == null || refs.kind.current == null) return;
+            refs.kind.current.value = item.id;
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 6 }}>
         <InputField
           fullWidth
           name="title"
@@ -184,6 +198,25 @@ export default function AddDocument() {
             const kind = refs.kind.current?.value || "n/a";
             const culture = formik.values.cultures?.[0] || app.culture;
             return { ...rq, kind, culture };
+          }}
+          onValueChange={(item, _input, reason) => {
+            if (item == null || reason !== "selectOption") return;
+
+            app.notifier.confirm(
+              labels.systemTemplateGuide,
+              item.title,
+              async (ok) => {
+                if (!ok) return;
+
+                const data = await app.documentApi.read(item.id);
+                if (data == null) return;
+
+                refs.template.current!.value = data.template;
+                refs.parameters.current!.value = JSON.stringify(
+                  data.parameters
+                );
+              }
+            );
           }}
         />
       </Grid>

@@ -16,6 +16,12 @@ export type DocumentQueryData = {
   orgName?: string;
 
   /**
+   * Kind
+   * 类型
+   */
+  kind: string;
+
+  /**
    * Title
    * 标题
    */
