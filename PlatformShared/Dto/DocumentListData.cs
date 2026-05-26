@@ -1,10 +1,10 @@
 ﻿namespace PlatformShared.Dto
 {
     /// <summary>
-    /// System document list data
-    /// 系统文档列表数据
+    /// Document list data
+    /// 文档列表数据
     /// </summary>
-    public record SystemDocumentListData
+    public record DocumentListData
     {
         /// <summary>
         /// Id

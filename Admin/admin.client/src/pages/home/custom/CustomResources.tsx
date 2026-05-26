@@ -48,6 +48,8 @@ export default function CustomResource() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
+  const isAdmin = app.isAdminUser();
+
   // Page data hook
   usePageDataEmpty(app);
 
@@ -127,9 +129,14 @@ export default function CustomResource() {
 
             return (
               <React.Fragment>
-                <IconButtonLink title={labels.edit} href={`./edit/${data.id}`}>
-                  <EditIcon />
-                </IconButtonLink>
+                {isAdmin && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./edit/${data.id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
               </React.Fragment>
             );
           }
@@ -142,7 +149,7 @@ export default function CustomResource() {
             `${data.title} (${data.culture})`,
             data.key,
             [
-              {
+              isAdmin && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./edit/${data.id}`

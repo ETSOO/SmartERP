@@ -35,6 +35,8 @@ export default function AddCustomResource() {
   const [data, setData] = React.useState<OrgCreateResourceRQ>({});
   const itemsRef = React.useRef<OrgCreateResourceRQ["items"]>(null);
 
+  const isAdmin = app.isAdminUser();
+
   // Load data
   const reloadData = React.useCallback(async () => {
     if (id < 1) return;
@@ -52,30 +54,34 @@ export default function AddCustomResource() {
   return (
     <EditPage
       isEditing={isEditing}
-      onDelete={() => {
-        app.notifier.confirm(
-          labels.deleteConfirm.format(labels.item),
-          undefined,
-          async (ok) => {
-            if (!ok) return;
+      onDelete={
+        isAdmin
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.item),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
 
-            const result = await app.core.orgApi.createResource(
-              { id, items: [] },
-              {
-                showLoading: false
-              }
-            );
-            if (result == null) return;
+                  const result = await app.core.orgApi.createResource(
+                    { id, items: [] },
+                    {
+                      showLoading: false
+                    }
+                  );
+                  if (result == null) return;
 
-            if (result.ok) {
-              navigate("./../../");
-              return;
+                  if (result.ok) {
+                    navigate("./../../");
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
             }
-
-            app.alertResult(result);
-          }
-        );
-      }}
+          : undefined
+      }
       onSubmit={(event) => {
         event.preventDefault();
         const form = event.currentTarget;

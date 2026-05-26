@@ -1,4 +1,5 @@
 {
+  "addDocument": "添加模板",
   "addEmail": "添加邮箱",
   "addMobile": "添加手机号",
   "adjustReportFrom": "原汇报对象",
@@ -12,6 +13,7 @@
   "createApiKey": "创建API密钥",
   "currentOrg": "当前机构",
   "device": "设备",
+  "editDocument": "编辑模板",
   "existingOrg": "已有机构",
   "homeGuide": "点击右上角图标可切换您已加入的机构；点击左上角应用名称可切换已购买的应用。",
   "homeOrgGuide": "您可以通过左侧 “所有应用” 购买应用时选择 “新机构” 来创建新的机构；也可以通过接受他人的邀请加入新的机构。",

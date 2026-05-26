@@ -3,16 +3,22 @@
 namespace PlatformShared.Dto
 {
     /// <summary>
-    /// System document view data
-    /// 系统文档浏览数据
+    /// Document read data
+    /// 文档读取数据
     /// </summary>
-    public record SystemDocumentViewData
+    public record DocumentReadData
     {
         /// <summary>
         /// Id
         /// 编号
         /// </summary>
         public int Id { get; init; }
+
+        /// <summary>
+        /// Organizaton id
+        /// 机构编号
+        /// </summary>
+        public int? OrgId { get; init; }
 
         /// <summary>
         /// Kind

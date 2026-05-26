@@ -12,6 +12,7 @@ namespace Platform.Server.Services
 {
     public interface IOrgService
     {
+        ValueTask<IActionResult> FormatRQAsync(IOrgRQ rq, UserRole role, CancellationToken cancellationToken);
         Task<IActionResult> CreateAsync(OrgCreateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> CreateApiAsync(OrgCreateApiRQ rq, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> CreateResourceAsync(OrgCreateResourceRQ rq, CancellationToken cancellationToken = default);
@@ -24,7 +25,9 @@ namespace Platform.Server.Services
         Task GetMyAsync(OrgGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> LeaveAsync(int id, CancellationToken cancellationToken = default);
         Task ListAsync(OrgListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
-        Task<bool> OwnsAsync(int id, UserRole userRole = UserRole.Guest, CancellationToken cancellationToken = default);
+        bool IsAdmin();
+        Task<bool> OwnsAsync(OrgOwnsRQ rq, CancellationToken cancellationToken = default);
+        Task<bool> OwnsAsync(int id, UserRole userRole, CancellationToken cancellationToken = default);
         Task<IEnumerable<OrgQueryData>> QueryAsync(OrgQueryRQ rq, CancellationToken cancellationToken = default);
         Task QueryAsync(OrgQueryRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task QueryApiAsync(OrgQueryApiRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);

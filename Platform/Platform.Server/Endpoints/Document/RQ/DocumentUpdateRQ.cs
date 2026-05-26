@@ -1,34 +1,36 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using com.etsoo.WebUtils.Attributes;
+using Platform.Server.Endpoints.Org.RQ;
 using System.Text.Json;
 
-namespace Admin.Server.RQ.Document
+namespace Platform.Server.Endpoints.Document.RQ
 {
     /// <summary>
-    /// Document create request data
-    /// 文档创建请求数据
+    /// Document update request data
+    /// 文档更新请求数据
     /// </summary>
-    public record DocumentCreateRQ : IModelValidator
+    public record DocumentUpdateRQ : UpdateModel<int>, IModelValidator, IOrgRQ
     {
         /// <summary>
-        /// Organization id
+        /// Organizaton id
         /// 机构编号
         /// </summary>
-        public int? OrgId { get; init; }
+        public int? OrgId { get; set; }
 
         /// <summary>
         /// Kind
         /// 类型
         /// </summary>
-        public required string Kind { get; init; }
+        public string? Kind { get; init; }
 
         /// <summary>
         /// Title
         /// 标题
         /// </summary>
-        public required string Title { get; init; }
+        public string? Title { get; init; }
 
         /// <summary>
         /// Parameters
@@ -40,7 +42,7 @@ namespace Admin.Server.RQ.Document
         /// Template
         /// 模板
         /// </summary>
-        public required string Template { get; init; }
+        public string? Template { get; init; }
 
         /// <summary>
         /// Cultures
@@ -55,12 +57,12 @@ namespace Admin.Server.RQ.Document
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (Kind.Length is not (>= 1 and <= 20))
+            if (Kind != null && Kind.Length is not (>= 1 and <= 20))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Kind));
             }
 
-            if (Title.Length is not (>= 1 and <= 128))
+            if (Title != null && Title.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Title));
             }

@@ -1,4 +1,5 @@
 {
+  "addDocument": "Add template",
   "addEmail": "Add email",
   "addMobile": "Add mobile",
   "adjustReportFrom": "Original report to",
@@ -12,6 +13,7 @@
   "createApiKey": "Create API key",
   "currentOrg": "Current org.",
   "device": "Device",
+  "editDocument": "Edit template",
   "existingOrg": "Existing organization",
   "homeGuide": "Click the icon in the upper right corner to switch between organizations you have joined; click the application name in the upper left corner to switch between purchased applications.",
   "homeOrgGuide": "You can create a new organization by selecting \"New organization\" when purchasing an app from \"All apps\" on the left; you can also join a new organization by accepting an invitation from others.",

@@ -10,48 +10,51 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   GridCellRendererProps,
+  GridDataType,
   ScrollerListForwardRef,
   useParamsEx
 } from "@etsoo/react";
-import { app } from "../../../app/MyApp";
-import { OrgQueryResourceData, usePageData } from "@etsoo/smarterp-core";
+import { DocumentQueryData, usePageData } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
-import { CultureList, DefaultUI } from "@etsoo/smarterp-core/components";
+import { DefaultUI, DocumentKindList } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
 import { BusinessUtils } from "@etsoo/appscript";
-import { MyUtils } from "../../../app/MyUtils";
+import { Typography } from "@mui/material";
+import { app } from "../../../app/MyApp";
 
 const template = {
   keyword: "string",
-  culture: "string"
+  kind: "string"
 } as const satisfies DataTypes.BasicTemplate;
 
-export default function CustomResource() {
+export default function AllDocument() {
   // Route
   const navigate = useNavigate();
   const { id = 0 } = useParamsEx({ id: "number" });
-
-  const adminPermission = MyUtils.isAdmin(id);
 
   // Labels
   const labels = app.getLabels(
     "actions",
     "add",
-    "culture",
-    "description",
     "edit",
-    "key",
+    "keywords",
     "org",
-    "title"
+    "parameters",
+    "refreshTime",
+    "systemTemplate",
+    "title",
+    "type"
   );
 
   // Refs
   const ref =
-    React.useRef<ScrollerListForwardRef<OrgQueryResourceData>>(undefined);
+    React.useRef<ScrollerListForwardRef<DocumentQueryData>>(undefined);
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
+
+  const isAdmin = app.isAdminUser();
 
   usePageData(
     app,
@@ -68,34 +71,38 @@ export default function CustomResource() {
   );
 
   return (
-    <ResponsivePage<OrgQueryResourceData, typeof template>
+    <ResponsivePage<DocumentQueryData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: adminPermission && (
+        fabButtons: (
           <Fab
             title={labels.add}
             size="medium"
             color="primary"
-            onClick={() => navigate(`./../../addcustomresource?orgId=${id}`)}
+            onClick={() => navigate(`./../../adddocument?orgId=${id}`)}
           >
             <AddIcon />
           </Fab>
         )
       })}
       mRef={ref}
-      defaultOrderBy={[{ field: "key" }]}
       fieldTemplate={template}
       fields={(data) => [
         <SearchField
-          label={`${labels.key} / ${labels.title}`}
+          label={`${labels.keywords}`}
           name="keyword"
           minChars={2}
           defaultValue={data.keyword}
         />,
-        <CultureList search autoAddBlankItem />
+        <DocumentKindList
+          name="kind"
+          sx={{ width: 160 }}
+          search
+          value={data.kind}
+        />
       ]}
       loadData={(data, lastItem) =>
-        app.core.orgApi.queryResource(
+        app.core.documentApi.query(
           {
             ...BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
             orgId: id
@@ -108,23 +115,26 @@ export default function CustomResource() {
       }
       columns={[
         {
-          field: "key",
-          header: labels.key,
-          width: 150
+          field: "refreshTime",
+          type: GridDataType.Date,
+          width: 104,
+          header: labels.refreshTime,
+          renderProps: app.getDateFormatProps()
         },
         {
-          field: "culture",
-          header: labels.culture,
-          width: 90
+          field: "kind",
+          header: labels.type,
+          width: 200,
+          valueFormatter: ({ data }) => app.core.getDocumentKind(data?.kind)
         },
         {
           field: "title",
-          header: labels.title,
-          width: 200
+          header: labels.title
         },
         {
-          field: "description",
-          header: labels.description
+          field: "hasParameters",
+          header: labels.parameters,
+          width: 80
         },
         {
           width: DefaultUI.Widths.icon1,
@@ -135,15 +145,15 @@ export default function CustomResource() {
           },
           cellRenderer: ({
             data
-          }: GridCellRendererProps<OrgQueryResourceData, BoxProps>) => {
+          }: GridCellRendererProps<DocumentQueryData, BoxProps>) => {
             if (data == null) return undefined;
 
             return (
               <React.Fragment>
-                {adminPermission && (
+                {isAdmin && (
                   <IconButtonLink
                     title={labels.edit}
-                    href={`./../../editcustomresource/${data.id}?orgId=${id}`}
+                    href={`./../../editdocument/${data.id}?orgId=${id}`}
                   >
                     <EditIcon />
                   </IconButtonLink>
@@ -153,19 +163,25 @@ export default function CustomResource() {
           }
         }
       ]}
+      rowHeight={160}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [
-            data.title,
-            data.key,
+            `${data.title}`,
+            app.formatDate(data.refreshTime),
             [
-              adminPermission && {
+              isAdmin && {
                 label: labels.edit,
                 icon: <EditIcon />,
-                action: `./../../editcustomresource/${data.id}?orgId=${id}`
+                action: `./../../editdocument/${data.id}?orgId=${id}`
               }
             ],
-            <React.Fragment>{data.description}</React.Fragment>
+            <React.Fragment>
+              {data.orgName && (
+                <Typography variant="body2">{data.orgName}</Typography>
+              )}
+              <Typography variant="body2">{data.kind}</Typography>
+            </React.Fragment>
           ];
         })
       }

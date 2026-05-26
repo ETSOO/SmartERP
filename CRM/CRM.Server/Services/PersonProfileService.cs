@@ -759,7 +759,7 @@ namespace CRM.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, profile.Title),
                 Changes = changes
             };
-            await _queueService.FirePushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProfileMessage, cancellationToken);
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProfileMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);

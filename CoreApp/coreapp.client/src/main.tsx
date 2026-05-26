@@ -134,9 +134,8 @@ const router = createDynamicRouter([
           {
             path: "/home/member/avatar/:id",
             lazy: async () => {
-              const MemberUpdateAvatar = await import(
-                "./pages/home/member/MemberAvatar"
-              );
+              const MemberUpdateAvatar =
+                await import("./pages/home/member/MemberAvatar");
               return { Component: MemberUpdateAvatar.default };
             }
           },
@@ -164,36 +163,32 @@ const router = createDynamicRouter([
           {
             path: "/home/org/avatar/:id",
             lazy: async () => {
-              const OrgUpdateAvatar = await import(
-                "./pages/home/org/UpdateAvatar"
-              );
+              const OrgUpdateAvatar =
+                await import("./pages/home/org/UpdateAvatar");
               return { Component: OrgUpdateAvatar.default };
             }
           },
           {
             path: "/home/org/customresource/:id",
             lazy: async () => {
-              const CustomResource = await import(
-                "./pages/home/org/CustomResource"
-              );
+              const CustomResource =
+                await import("./pages/home/org/CustomResource");
               return { Component: CustomResource.default };
             }
           },
           {
             path: "/home/org/addcustomresource",
             lazy: async () => {
-              const AddCustomResource = await import(
-                "./pages/home/org/AddCustomResource"
-              );
+              const AddCustomResource =
+                await import("./pages/home/org/AddCustomResource");
               return { Component: AddCustomResource.default };
             }
           },
           {
             path: "/home/org/editcustomresource/:id",
             lazy: async () => {
-              const AddCustomResource = await import(
-                "./pages/home/org/AddCustomResource"
-              );
+              const AddCustomResource =
+                await import("./pages/home/org/AddCustomResource");
               return { Component: AddCustomResource.default };
             }
           },
@@ -219,20 +214,42 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/org/document/:id",
+            lazy: async () => {
+              const AllDocuments =
+                await import("./pages/home/document/AllDocument");
+              return { Component: AllDocuments.default };
+            }
+          },
+          {
+            path: "/home/org/adddocument",
+            lazy: async () => {
+              const AddDocument =
+                await import("./pages/home/document/AddDocument");
+              return { Component: AddDocument.default };
+            }
+          },
+          {
+            path: "/home/org/editdocument/:id",
+            lazy: async () => {
+              const EditDocument =
+                await import("./pages/home/document/AddDocument");
+              return { Component: EditDocument.default };
+            }
+          },
+          {
             path: "/home/user/audithistory",
             lazy: async () => {
-              const LoginHistory = await import(
-                "./pages/home/user/AuditHistory"
-              );
+              const LoginHistory =
+                await import("./pages/home/user/AuditHistory");
               return { Component: LoginHistory.default };
             }
           },
           {
             path: "/home/user/changepassword",
             lazy: async () => {
-              const ChangePassword = await import(
-                "./pages/home/user/ChangePassword"
-              );
+              const ChangePassword =
+                await import("./pages/home/user/ChangePassword");
               return { Component: ChangePassword.default };
             }
           },
@@ -267,9 +284,8 @@ const router = createDynamicRouter([
           {
             path: "/home/user/updateavatar",
             lazy: async () => {
-              const UpdateAvatar = await import(
-                "./pages/home/user/UpdateAvatar"
-              );
+              const UpdateAvatar =
+                await import("./pages/home/user/UpdateAvatar");
               return { Component: UpdateAvatar.default };
             }
           }

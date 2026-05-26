@@ -138,7 +138,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> CreateApiAsync(OrgCreateApiRQ rq, CancellationToken cancellationToken = default)
         {
             // Format request data
-            var result = await FormatRQAsync(rq, cancellationToken);
+            var result = await FormatRQAsync(rq, UserRole.Executive, cancellationToken);
             if (!result.Ok)
             {
                 return result;
@@ -206,7 +206,7 @@ namespace Platform.Server.Services
         public async ValueTask<IActionResult> CreateResourceAsync(OrgCreateResourceRQ rq, CancellationToken cancellationToken = default)
         {
             // Format request data
-            var result = await FormatRQAsync(rq, cancellationToken);
+            var result = await FormatRQAsync(rq, UserRole.Executive, cancellationToken);
             if (!result.Ok)
             {
                 return result;
@@ -719,11 +719,23 @@ namespace Platform.Server.Services
         /// Check if the user owns the organization
         /// 检查用户是否拥有机构
         /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public Task<bool> OwnsAsync(OrgOwnsRQ rq, CancellationToken cancellationToken = default)
+        {
+            return OwnsAsync(rq.Id, rq.MinRole, cancellationToken);
+        }
+
+        /// <summary>
+        /// Check if the user owns the organization
+        /// 检查用户是否拥有机构
+        /// </summary>
         /// <param name="id">Org id</param>
         /// <param name="userRole">Minimum user role</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<bool> OwnsAsync(int id, UserRole userRole = UserRole.Guest, CancellationToken cancellationToken = default)
+        public async Task<bool> OwnsAsync(int id, UserRole userRole, CancellationToken cancellationToken = default)
         {
             return await _db.Users(id).AsNoTracking()
                 .AnyAsync(ou => ou.CoreUserId == User.IdInt
@@ -812,24 +824,39 @@ namespace Platform.Server.Services
             }
         }
 
-        private async Task<IActionResult> FormatRQAsync(IOrgRQ rq, CancellationToken cancellationToken)
+        /// <summary>
+        /// Format request data
+        /// 格式化请求数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="role">Minimum user role to check</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<IActionResult> FormatRQAsync(IOrgRQ rq, UserRole role, CancellationToken cancellationToken)
         {
-            // Is admin
-            var isAdmin = User.AppId == MyAppConstants.AdminAppId;
-
-            if (!isAdmin)
+            if (!IsAdmin())
             {
                 if (!rq.OrgId.HasValue)
                 {
                     rq.OrgId = User.OrganizationInt;
                 }
-                else if (!await OwnsAsync(rq.OrgId.Value, cancellationToken: cancellationToken))
+                else if (!await OwnsAsync(rq.OrgId.Value, role, cancellationToken: cancellationToken))
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(rq.OrgId));
                 }
             }
 
             return ActionResult.Success;
+        }
+
+        /// <summary>
+        /// Is platform admin
+        /// 是否为平台管理员
+        /// </summary>
+        /// <returns>是否为平台管理员</returns>
+        public bool IsAdmin()
+        {
+            return User.AppId == MyAppConstants.AdminAppId;
         }
 
         /// <summary>
@@ -843,7 +870,7 @@ namespace Platform.Server.Services
         public async Task QueryApiAsync(OrgQueryApiRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             // Format request data
-            var result = await FormatRQAsync(rq, cancellationToken);
+            var result = await FormatRQAsync(rq, UserRole.Guest, cancellationToken);
             if (!result.Ok)
             {
                 return;
@@ -906,7 +933,7 @@ namespace Platform.Server.Services
         public async Task QueryResourceAsync(OrgQueryResourceRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             // Format request data
-            var result = await FormatRQAsync(rq, cancellationToken);
+            var result = await FormatRQAsync(rq, UserRole.Guest, cancellationToken);
             if (!result.Ok)
             {
                 return;
@@ -1308,7 +1335,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> UpdateApiAsync(OrgUpdateApiRQ rq, CancellationToken cancellationToken = default)
         {
             // Format request data
-            var result = await FormatRQAsync(rq, cancellationToken);
+            var result = await FormatRQAsync(rq, UserRole.Executive, cancellationToken);
             if (!result.Ok)
             {
                 return result;
@@ -1543,7 +1570,7 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            if (!isAdmin && (resource.CoreOrganizationId == null || !await OwnsAsync(resource.CoreOrganizationId.Value, cancellationToken: cancellationToken)))
+            if (!isAdmin && (resource.CoreOrganizationId == null || !await OwnsAsync(resource.CoreOrganizationId.Value, UserRole.Executive, cancellationToken: cancellationToken)))
             {
                 return null;
             }

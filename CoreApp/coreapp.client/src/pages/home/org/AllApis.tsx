@@ -23,6 +23,7 @@ import { DefaultUI } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
 import { BusinessUtils } from "@etsoo/appscript";
+import { MyUtils } from "../../../app/MyUtils";
 
 const template = {
   keyword: "string",
@@ -68,11 +69,13 @@ export default function AllApis() {
     []
   );
 
+  const adminPermission = MyUtils.isAdmin(id);
+
   return (
     <ResponsivePage<OrgQueryApiData, typeof template>
       {...DefaultUI.pageProps({
         onRefresh: reloadData,
-        fabButtons: (
+        fabButtons: adminPermission && (
           <Fab
             title={labels.add}
             size="medium"
@@ -167,12 +170,14 @@ export default function AllApis() {
 
             return (
               <React.Fragment>
-                <IconButtonLink
-                  title={labels.edit}
-                  href={`./../../editapi/${data.id}?orgId=${id}`}
-                >
-                  <EditIcon />
-                </IconButtonLink>
+                {adminPermission && (
+                  <IconButtonLink
+                    title={labels.edit}
+                    href={`./../../editapi/${data.id}?orgId=${id}`}
+                  >
+                    <EditIcon />
+                  </IconButtonLink>
+                )}
               </React.Fragment>
             );
           }
@@ -185,7 +190,7 @@ export default function AllApis() {
             data.title,
             app.formatDate(data.updatedAt, "d"),
             [
-              {
+              adminPermission && {
                 label: labels.edit,
                 icon: <EditIcon />,
                 action: `./../../editapi/${data.id}?orgId=${id}`

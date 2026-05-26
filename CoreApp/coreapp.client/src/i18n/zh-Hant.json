@@ -1,4 +1,5 @@
 {
+  "addDocument": "添加模板",
   "addEmail": "添加郵箱",
   "addMobile": "添加手機號",
   "adjustReportFrom": "原匯報對象",
@@ -12,6 +13,7 @@
   "createApiKey": "創建API密鑰",
   "currentOrg": "當前機構",
   "device": "設備",
+  "editDocument": "編輯模板",
   "existingOrg": "已有機構",
   "homeGuide": "點擊右上角圖標可切換您已加入的機構；點擊左上角應用名稱可切換已購買的應用。",
   "homeOrgGuide": "您可以通過左側 “所有應用” 購買應用時選擇 “新機構” 來創建新的機構；也可以通過接受他人的邀請加入新的機構。",

@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Platform.Server.Dto.App;
 using Platform.Server.Dto.Auth;
 using Platform.Server.Dto.AuthCode;
+using Platform.Server.Dto.Document;
 using Platform.Server.Dto.Member;
 using Platform.Server.Dto.Org;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.App.RQ;
 using Platform.Server.Endpoints.Auth.RQ;
 using Platform.Server.Endpoints.AuthCode.RQ;
+using Platform.Server.Endpoints.Document.RQ;
 using Platform.Server.Endpoints.Member.RQ;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Endpoints.Public.RQ;
@@ -63,10 +65,14 @@ namespace Platform.Server
     [JsonSerializable(typeof(SendSMSData))]
 
     // Document
-    [JsonSerializable(typeof(PlatformShared.Dto.SystemDocumentListData[]))]
-    [JsonSerializable(typeof(PlatformShared.Dto.SystemDocumentViewData))]
+    [JsonSerializable(typeof(DocumentCreateRQ))]
+    [JsonSerializable(typeof(DocumentListRQ))]
+    [JsonSerializable(typeof(DocumentQueryRQ))]
+    [JsonSerializable(typeof(DocumentUpdateRQ))]
 
-    [JsonSerializable(typeof(PlatformShared.RQ.SystemDocumentListRQ))]
+    [JsonSerializable(typeof(PlatformShared.Dto.DocumentListData[]))]
+    [JsonSerializable(typeof(PlatformShared.Dto.DocumentReadData))]
+    [JsonSerializable(typeof(DocumentQueryData[]))]
 
     // Members
     [JsonSerializable(typeof(MemberAdjustReportToRQ))]
@@ -82,6 +88,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(OrgCreateResourceRQ))]
     [JsonSerializable(typeof(OrgCreateRQ))]
     [JsonSerializable(typeof(OrgListRQ))]
+    [JsonSerializable(typeof(OrgOwnsRQ))]
     [JsonSerializable(typeof(OrgQueryApiRQ))]
     [JsonSerializable(typeof(OrgQueryResourceRQ))]
     [JsonSerializable(typeof(OrgGetMyRQ))]

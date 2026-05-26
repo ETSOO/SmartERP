@@ -15,20 +15,19 @@ import {
   ScrollerListForwardRef
 } from "@etsoo/react";
 import { app } from "../../../app/MyApp";
-import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { DocumentQueryData, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { DataTypes } from "@etsoo/shared";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import Fab from "@mui/material/Fab";
 import { BoxProps } from "@mui/material/Box";
 import { OrgTiplist } from "../../../components/OrgTiplist";
 import { BusinessUtils } from "@etsoo/appscript";
-import { DocumentQueryData } from "../../../api/dto/document/DocumentQueryData";
 import { Typography } from "@mui/material";
 
 const template = {
   keyword: "string",
   kind: "string",
-  systemTemplate: "boolean",
+  isSystem: "boolean",
   orgId: "number"
 } as const satisfies DataTypes.BasicTemplate;
 
@@ -89,11 +88,15 @@ export default function AllDocument() {
           name="kind"
           defaultValue={data.kind}
         />,
-        <SelectBool label={labels.systemTemplate} name="systemTemplate" />,
+        <SelectBool
+          label={labels.systemTemplate}
+          name="isSystem"
+          defaultValue={data.isSystem}
+        />,
         <OrgTiplist name="orgId" label={labels.org} idValue={data.orgId} />
       ]}
       loadData={(data, lastItem) =>
-        app.documentApi.query(
+        app.core.documentApi.query(
           BusinessUtils.setupPagingKeysets(data, lastItem, "id"),
           {
             defaultValue: [],
@@ -112,7 +115,8 @@ export default function AllDocument() {
         {
           field: "kind",
           header: labels.type,
-          width: 150
+          width: 180,
+          valueFormatter: ({ data }) => app.core.getDocumentKind(data?.kind)
         },
         {
           field: "title",

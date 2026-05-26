@@ -1,5 +1,7 @@
-﻿using Platform.Server.Services;
-using PlatformShared.RQ;
+﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
+using Platform.Server.Endpoints.Document.RQ;
+using Platform.Server.Services;
 
 namespace Platform.Server.Endpoints.Document
 {
@@ -13,11 +15,23 @@ namespace Platform.Server.Endpoints.Document
         {
             var g = builder.MapGroup("Document");
 
-            g.MapPost("List", (IDocumentService service, SystemDocumentListRQ rq, CancellationToken cancellationToken) => service.ListAsync(rq, cancellationToken))
-                .WithDescription("List system documents data / 系统文档列表数据").WithTags("Document");
+            g.MapPost("Create", [Roles(Constants.AdminRoles)] (IDocumentService service, DocumentCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+                .WithDescription("Create document / 创建文档").WithTags("Document");
+
+            g.MapDelete("Delete/{id:int}", [Roles(Constants.AdminRoles)] (IDocumentService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
+                .WithDescription("Delete document / 删除文档").WithTags("Document");
+
+            g.MapPost("List", (IDocumentService service, DocumentListRQ rq, CancellationToken cancellationToken) => service.ListAsync(rq, cancellationToken))
+                .WithDescription("List document data / 文档列表数据").WithTags("Document");
+
+            g.MapPost("Query", (IDocumentService service, DocumentQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
+            .WithDescription("Query documents / 查询文档").WithTags("Document");
 
             g.MapGet("Read/{id:int}", (IDocumentService service, int id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
-                .WithDescription("Read system document data / 读取系统文档数据").WithTags("Document");
+                .WithDescription("Read document data / 读取文档数据").WithTags("Document");
+
+            g.MapPut("Update", [Roles(Constants.AdminRoles)] (IDocumentService service, DocumentUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
+                .WithDescription("Update document / 更新文档").WithTags("Document");
 
             return builder;
         }

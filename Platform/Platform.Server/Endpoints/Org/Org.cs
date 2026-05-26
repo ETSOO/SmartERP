@@ -57,6 +57,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapPost("List", (IOrgService service, OrgListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("List organizations JSON data / 列出机构JSON数据").WithTags("Org");
 
+            g.MapPost("Owns", (IOrgService service, OrgOwnsRQ rq, CancellationToken cancellationToken) => service.OwnsAsync(rq, cancellationToken))
+                .WithDescription("Check organization ownership / 检查机构所有权").WithTags("Org");
+
             g.MapPost("Query", (IOrgService service, OrgQueryRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.QueryAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Query organizations JSON data / 查询机构JSON数据").WithTags("Org");
 

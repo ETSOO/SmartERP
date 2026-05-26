@@ -237,7 +237,6 @@ if (corsOptions.Required)
 // API services
 services.AddScoped<CurrentUserAccessor>();
 services.AddScoped<IAdminService, AdminService>();
-services.AddScoped<IDocumentService, DocumentService>();
 services.AddScoped<IQueryService, QueryService>();
 services.AddScoped<ISEAuthService, SEAuthService>();
 
@@ -301,7 +300,6 @@ var api = app.MapGroup("/api");
 // Endpoints
 api.MapAuth()
     .MapAdmin()
-    .MapDocument()
     .MapQuery()
     .AddModelValidators()
     .RequireAuthorization()

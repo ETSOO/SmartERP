@@ -58,6 +58,7 @@ export default function Home() {
   // Labels
   const labels = app.getLabels(
     "addApi",
+    "addDocument",
     "addEmail",
     "addMobile",
     "addResource",
@@ -68,8 +69,10 @@ export default function Home() {
     "changePassword",
     "currentOrg",
     "customResources",
+    "documentTemplates",
     "edit",
     "editAvatar",
+    "editDocument",
     "editResource",
     "externalApis",
     "joinedOrgs",
@@ -159,6 +162,23 @@ export default function Home() {
             segment: "editapi",
             pattern: "editapi/:id",
             title: labels.edit,
+            hidden: true
+          },
+          {
+            segment: "document",
+            pattern: "document/:id",
+            title: labels.documentTemplates,
+            hidden: true
+          },
+          {
+            segment: "adddocument",
+            title: labels.addDocument,
+            hidden: true
+          },
+          {
+            segment: "editdocument",
+            pattern: "editdocument/:id",
+            title: labels.editDocument,
             hidden: true
           }
         ]

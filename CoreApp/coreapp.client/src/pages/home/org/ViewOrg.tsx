@@ -3,6 +3,7 @@ import { BusinessTax } from "@etsoo/appscript";
 import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import ApiIcon from "@mui/icons-material/Api";
+import ArticleIcon from "@mui/icons-material/Article";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import LabelIcon from "@mui/icons-material/Label";
 import { app } from "../../../app/MyApp";
@@ -16,26 +17,23 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { MyUtils } from "../../../app/MyUtils";
 
 export default function ViewOrg() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
-  // Admin permission
-  const adminPermission = app.isAdminUser();
-
   // Route
   const navigate = useNavigate();
 
   // Load data
-  const loadData = React.useCallback(() => {
-    return app.core.orgApi.read(id);
-  }, [id]);
+  const loadData = React.useCallback(() => app.core.orgApi.read(id), [id]);
 
   // Labels
   const labels = app.getLabels(
     "confirmAction",
     "customResources",
+    "documentTemplates",
     "edit",
     "editLogo",
     "externalApis",
@@ -48,6 +46,10 @@ export default function ViewOrg() {
 
   // Page data hook
   usePageDataEmpty(app);
+
+  React.useEffect(() => {
+    MyUtils.checkOrg(id);
+  }, [id]);
 
   return (
     <ViewPage<OrgReadDto>
@@ -165,24 +167,27 @@ export default function ViewOrg() {
               {labels.leaveOrg}
             </Button>
           )}
-          {adminPermission && (
-            <React.Fragment>
-              <ButtonLink
-                variant="outlined"
-                href={`./../../customresource/${id}`}
-                startIcon={<LabelIcon />}
-              >
-                {labels.customResources}
-              </ButtonLink>
-              <ButtonLink
-                variant="outlined"
-                href={`./../../apis/${id}`}
-                startIcon={<ApiIcon />}
-              >
-                {labels.externalApis}
-              </ButtonLink>
-            </React.Fragment>
-          )}
+          <ButtonLink
+            variant="outlined"
+            href={`./../../customresource/${id}`}
+            startIcon={<LabelIcon />}
+          >
+            {labels.customResources}
+          </ButtonLink>
+          <ButtonLink
+            variant="outlined"
+            href={`./../../document/${id}`}
+            startIcon={<ArticleIcon />}
+          >
+            {labels.documentTemplates}
+          </ButtonLink>
+          <ButtonLink
+            variant="outlined"
+            href={`./../../apis/${id}`}
+            startIcon={<ApiIcon />}
+          >
+            {labels.externalApis}
+          </ButtonLink>
         </React.Fragment>
       )}
     ></ViewPage>

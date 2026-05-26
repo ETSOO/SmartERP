@@ -17,14 +17,6 @@ namespace Admin.Server
     // Admin
     [JsonSerializable(typeof(RQ.Admin.AppRenewRQ))]
 
-    // Document
-    [JsonSerializable(typeof(Dto.Document.DocumentQueryData[]))]
-    [JsonSerializable(typeof(Dto.Document.DocumentViewData))]
-
-    [JsonSerializable(typeof(RQ.Document.DocumentCreateRQ))]
-    [JsonSerializable(typeof(RQ.Document.DocumentQueryRQ))]
-    [JsonSerializable(typeof(RQ.Document.DocumentUpdateRQ))]
-
     // Query
     [JsonSerializable(typeof(Dto.Query.ReadUserDto))]
 

@@ -1,15 +1,24 @@
-import { ReactUtils, useParamsEx, useRefs } from "@etsoo/react";
+import {
+  ReactUtils,
+  useParamsEx,
+  useRefs,
+  useSearchParamsEx
+} from "@etsoo/react";
 import {
   DocumentCreateRQ,
   DocumentUpdateRQ,
-  usePageDataEmpty
+  usePageData
 } from "@etsoo/smarterp-core";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { CustomAttributeArea, EditPage, InputField } from "@etsoo/materialui";
+import {
+  CustomAttributeArea,
+  EditPage,
+  ErrorAlert,
+  InputField
+} from "@etsoo/materialui";
 import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
-import { OrgTiplist } from "../../../components/OrgTiplist";
 import { IdActionResult, Utils } from "@etsoo/shared";
 import {
   ButtonCultures,
@@ -25,11 +34,15 @@ export default function AddDocument() {
   const { id = 0 } = useParamsEx({
     id: "number"
   });
+  const { orgId = 0 } = useSearchParamsEx({
+    orgId: "number"
+  });
 
   // Labels
   const labels = app.getLabels(
     "add",
     "deleteConfirm",
+    "documentTemplates",
     "edit",
     "item",
     "noChanges",
@@ -49,7 +62,7 @@ export default function AddDocument() {
   });
 
   // Input refs
-  const refFields = ["kind", "parameters", "template", "title"] as const;
+  const refFields = ["parameters", "template", "title"] as const;
   const refs = useRefs(refFields);
 
   const formik = useFormik<DocumentCreateRQ>({
@@ -84,19 +97,19 @@ export default function AddDocument() {
 
         result = await app.core.documentApi.update(rq);
 
-        url = "./../../";
+        url = "./../..";
       } else {
         const rq: DocumentCreateRQ = { ...c };
 
         result = await app.core.documentApi.create(rq);
 
-        url = "./../";
+        url = "./..";
       }
 
       if (result == null) return;
 
       if (result.ok) {
-        navigate(url);
+        navigate(`${url}/document/${orgId}`);
         return;
       } else {
         app.alertResult(result);
@@ -117,7 +130,29 @@ export default function AddDocument() {
   }, [id]);
 
   // Page data hook
-  usePageDataEmpty(app);
+  const urlPart = id > 0 ? `./..` : `.`;
+  usePageData(
+    app,
+    {
+      breadcrumbs: (bc) => {
+        bc.splice(
+          bc.length - 1,
+          0,
+          { title: labels.org, path: `${urlPart}/my/${orgId}` },
+          {
+            title: labels.documentTemplates,
+            path: `${urlPart}/document/${orgId}`
+          }
+        );
+        return bc;
+      }
+    },
+    []
+  );
+
+  if (orgId < 1) {
+    return <ErrorAlert />;
+  }
 
   return (
     <EditPage
@@ -148,36 +183,16 @@ export default function AddDocument() {
       onUpdate={reloadData}
       paddings={0}
     >
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <OrgTiplist
-          name="orgId"
-          label={labels.org}
-          search={false}
-          idValue={data.orgId}
-          inputOnChange={formik.handleChange}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <InputField
-          fullWidth
-          name="kind"
-          required
-          slotProps={{ htmlInput: { maxLength: 20 } }}
-          label={labels.type}
-          inputRef={refs.kind}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
+      <Grid size={{ xs: 12, sm: 5 }}>
         <DocumentKindList
           fullWidth
           value={data.kind}
-          onItemChange={(item) => {
-            if (item == null || refs.kind.current == null) return;
-            refs.kind.current.value = item.id;
+          onItemChange={(item, useAction) => {
+            if (useAction) formik.setFieldValue("kind", item?.id);
           }}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 12, sm: 7 }}>
         <InputField
           fullWidth
           name="title"
@@ -196,11 +211,10 @@ export default function AddDocument() {
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
         <DocumentTiplist
-          kind={data.kind}
+          kind={formik.values.kind}
           onLoadData={(rq) => {
-            const kind = refs.kind.current?.value || data.kind;
-            const culture = formik.values.cultures?.[0] || app.culture;
-            return { ...rq, kind, culture, isSystem: true };
+            const culture = formik.values.cultures?.[0];
+            return { ...rq, culture, isSystem: true };
           }}
           onValueChange={(item, _input, reason) => {
             if (item == null || reason !== "selectOption") return;

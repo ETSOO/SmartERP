@@ -1,4 +1,4 @@
-﻿namespace Admin.Server.Dto.Document
+﻿namespace Platform.Server.Dto.Document
 {
     /// <summary>
     /// Document query data
