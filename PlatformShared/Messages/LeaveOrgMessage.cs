@@ -1,14 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record LeaveOrgMessageData
-    {
-        public required string OrgName { get; init; }
-        public string? InviterName { get; init; }
-    }
-
     /// <summary>
     /// Leave organization on user's own initiative message
     /// 用户主动离开机构消息
@@ -35,13 +28,10 @@ namespace PlatformShared.Messages
         /// </summary>
         public string? InviterName { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new LeaveOrgMessageData
-            {
-                OrgName = OrgName,
-                InviterName = InviterName
-            }, PlatformSharedContext.Default.LeaveOrgMessageData);
-        }
+            [nameof(OrgName)] = OrgName,
+            [nameof(InviterName)] = InviterName
+        };
     }
 }

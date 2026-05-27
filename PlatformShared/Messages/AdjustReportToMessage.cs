@@ -1,15 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record AdjustReportToMessageData
-    {
-        public required int Count { get; init; }
-        public required int NewReportTo { get; init; }
-        public required string NewReportToName { get; init; }
-    }
-
     /// <summary>
     /// Batch adjusting report to message
     /// 批量调整汇报对象消息
@@ -36,14 +28,11 @@ namespace PlatformShared.Messages
         /// </summary>
         public required string NewReportToName { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new AdjustReportToMessageData
-            {
-                Count = Count,
-                NewReportTo = NewReportTo,
-                NewReportToName = NewReportToName
-            }, PlatformSharedContext.Default.AdjustReportToMessageData);
-        }
+            [nameof(Count)] = Count,
+            [nameof(NewReportTo)] = NewReportTo,
+            [nameof(NewReportToName)] = NewReportToName
+        };
     }
 }

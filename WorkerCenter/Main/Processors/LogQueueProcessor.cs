@@ -3,9 +3,8 @@ using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using com.etsoo.Utils.Serialization;
 using PlatformShared.Database;
-using PlatformShared.LogDatabase.Models;
+using PlatformShared.Extentions;
 using PlatformShared.Messages;
-using System.Net;
 using System.Text.Json.Serialization.Metadata;
 
 namespace WorkerCenter.Main.Processors
@@ -53,31 +52,12 @@ namespace WorkerCenter.Main.Processors
 
         protected override async Task ProcessMessageAsync(T message, MessageReceivedProperties properties, CancellationToken cancellationToken)
         {
-            var data = message.Data;
-            var type = T.Type;
-
-            var ci = LocalizationUtils.SetCulture(data.Culture, true);
+            var ci = LocalizationUtils.SetCulture(message.Data.Culture, true);
             Properties.Resources.Culture = ci;
 
             var title = GetLogTitle(message);
 
-            var log = new CoreLog
-            {
-                AppId = data.AppId,
-                Culture = data.Culture,
-                Data = message.GetMoreData(),
-                DeviceId = data.DeviceId,
-                Ip = IPAddress.Parse(data.IP),
-                OrganizationId = data.OrganizationId,
-                Title = title,
-                UserId = data.UserId,
-                Kind = type,
-                TargetId = data.TargetId > 0 ? data.TargetId : null
-            };
-
-            _logDb.CoreLogs.Add(log);
-
-            await _logDb.SaveChangesAsync(cancellationToken);
+            await _logDb.LogAsync(message, title, cancellationToken);
         }
     }
 }

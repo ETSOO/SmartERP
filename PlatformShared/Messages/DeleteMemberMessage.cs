@@ -1,13 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record DeleteMemberMessageData
-    {
-        public string? InviterName { get; init; }
-    }
-
     /// <summary>
     /// Delete member message
     /// 删除成员消息
@@ -34,12 +28,9 @@ namespace PlatformShared.Messages
         /// </summary>
         public string? InviterName { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new DeleteMemberMessageData
-            {
-                InviterName = InviterName
-            }, PlatformSharedContext.Default.DeleteMemberMessageData);
-        }
+            [nameof(InviterName)] = InviterName
+        };
     }
 }

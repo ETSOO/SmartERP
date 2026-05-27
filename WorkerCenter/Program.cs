@@ -119,6 +119,7 @@ services.AddSingleton<IMessageQueueProcessor, SendSMSProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SwitchOrgProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateApiProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateAppProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateDocumentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateMemberAvatarProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateMemberProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateOrgAvatarProcessor>();

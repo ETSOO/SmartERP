@@ -1,17 +1,8 @@
 ﻿using com.etsoo.Utils.Serialization;
 using PlatformShared.Dto;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record AcceptInvitationMessageData
-    {
-        public required string Inviter { get; init; }
-        public required string Invitee { get; init; }
-        public required int OrgId { get; init; }
-        public required string OrgName { get; init; }
-    }
-
     /// <summary>
     /// Accept invitation message
     /// 接受邀请信息
@@ -26,15 +17,12 @@ namespace PlatformShared.Messages
         /// </summary>
         public required CodeUserData UserData { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new AcceptInvitationMessageData
-            {
-                Inviter = UserData.Name,
-                Invitee = Data.UserName,
-                OrgId = UserData.OrganizationId,
-                OrgName = UserData.OrganizationName
-            }, PlatformSharedContext.Default.AcceptInvitationMessageData);
-        }
+            ["Inviter"] = UserData.Name,
+            ["Invitee"] = Data.UserName,
+            ["OrgId"] = UserData.OrganizationId,
+            ["OrgName"] = UserData.OrganizationName
+        };
     }
 }

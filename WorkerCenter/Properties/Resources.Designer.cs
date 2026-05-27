@@ -133,15 +133,6 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Admin Create Business Document.
-        /// </summary>
-        internal static string AdminCreateDocument {
-            get {
-                return ResourceManager.GetString("AdminCreateDocument", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Admin Renew Application.
         /// </summary>
         internal static string AdminRenewApp {
@@ -223,6 +214,15 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Business Document.
+        /// </summary>
+        internal static string CreateDocument {
+            get {
+                return ResourceManager.GetString("CreateDocument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Organization.
         /// </summary>
         internal static string CreateOrg {
@@ -237,6 +237,15 @@ namespace WorkerCenter.Properties {
         internal static string CreateResource {
             get {
                 return ResourceManager.GetString("CreateResource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove Business Document.
+        /// </summary>
+        internal static string DeleteDocument {
+            get {
+                return ResourceManager.GetString("DeleteDocument", resourceCulture);
             }
         }
         
@@ -390,6 +399,15 @@ namespace WorkerCenter.Properties {
         internal static string UpdateApp {
             get {
                 return ResourceManager.GetString("UpdateApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Business Document.
+        /// </summary>
+        internal static string UpdateDocument {
+            get {
+                return ResourceManager.GetString("UpdateDocument", resourceCulture);
             }
         }
         

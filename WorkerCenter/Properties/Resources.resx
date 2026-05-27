@@ -261,7 +261,13 @@
   <data name="UserVerificationSMSCode" xml:space="preserve">
     <value>User mobile phone number verification code</value>
   </data>
-  <data name="AdminCreateDocument" xml:space="preserve">
-    <value>Admin Create Business Document</value>
+  <data name="CreateDocument" xml:space="preserve">
+    <value>Create Business Document</value>
+  </data>
+  <data name="UpdateDocument" xml:space="preserve">
+    <value>Update Business Document</value>
+  </data>
+  <data name="DeleteDocument" xml:space="preserve">
+    <value>Remove Business Document</value>
   </data>
 </root>

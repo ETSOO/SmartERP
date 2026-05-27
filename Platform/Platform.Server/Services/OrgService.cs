@@ -342,7 +342,7 @@ namespace Platform.Server.Services
             var message = new CreateResourceMessage
             {
                 Data = User.CreateMessageData(App.AppId, rq.Id ?? 0),
-                RequestData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrgCreateResourceRQ)
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrgCreateResourceRQ)
             };
 
             await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateResourceMessage, cancellationToken);

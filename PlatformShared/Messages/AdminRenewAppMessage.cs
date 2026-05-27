@@ -1,18 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record AdminRenewAppMessageData
-    {
-        public required int Months { get; init; }
-        public required string Comment { get; init; }
-        public required long ApproverLocalId { get; init; }
-        public required int Requester { get; init; }
-        public required long RequesterLocalId { get; init; }
-        public required string RequesterOrgName { get; init; }
-    }
-
     /// <summary>
     /// Admin renew app message
     /// 管理员应用续费消息
@@ -69,17 +58,14 @@ namespace PlatformShared.Messages
         /// </summary>
         public required string Comment { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new AdminRenewAppMessageData
-            {
-                Months = Months,
-                Comment = Comment,
-                ApproverLocalId = ApproverLocalId,
-                Requester = Requester,
-                RequesterLocalId = RequesterLocalId,
-                RequesterOrgName = RequesterOrgName
-            }, PlatformSharedContext.Default.AdminRenewAppMessageData);
-        }
+            [nameof(Months)] = Months,
+            [nameof(Comment)] = Comment,
+            [nameof(ApproverLocalId)] = ApproverLocalId,
+            [nameof(Requester)] = Requester,
+            [nameof(RequesterLocalId)] = RequesterLocalId,
+            [nameof(RequesterOrgName)] = RequesterOrgName
+        };
     }
 }

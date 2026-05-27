@@ -1,15 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record LoginFailedMessageData
-    {
-        public string? Reason { get; init; }
-        public string? UserAgent { get; init; }
-        public required string TimeZone { get; init; }
-    }
-
     /// <summary>
     /// Login failed message
     /// 登录失败消息
@@ -36,14 +28,11 @@ namespace PlatformShared.Messages
         /// </summary>
         public string? UserAgent { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new LoginFailedMessageData
-            {
-                Reason = Reason,
-                UserAgent = UserAgent,
-                TimeZone = Data.TimeZone
-            }, PlatformSharedContext.Default.LoginFailedMessageData);
-        }
+            [nameof(Reason)] = Reason,
+            [nameof(UserAgent)] = UserAgent,
+            [nameof(Data.TimeZone)] = Data.TimeZone
+        };
     }
 }

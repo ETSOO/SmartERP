@@ -14,6 +14,7 @@ using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
+using System.Text.Json;
 
 namespace Platform.Server.Services
 {
@@ -84,7 +85,8 @@ namespace Platform.Server.Services
             // Push message
             var message = new CreateDocumentMessage
             {
-                Data = User.CreateMessageData(App.AppId, document.Id, document.Title)
+                Data = User.CreateMessageData(App.AppId, document.Id, document.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.DocumentCreateRQ)
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateDocumentMessage, cancellationToken);
 

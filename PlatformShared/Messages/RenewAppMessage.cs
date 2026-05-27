@@ -1,13 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record RenewAppMessageData
-    {
-        public required int Months { get; init; }
-    }
-
     /// <summary>
     /// Renew app message
     /// 应用续费消息
@@ -22,12 +16,9 @@ namespace PlatformShared.Messages
         /// </summary>
         public required int Months { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new RenewAppMessageData
-            {
-                Months = Months
-            }, PlatformSharedContext.Default.RenewAppMessageData);
-        }
+            [nameof(Months)] = Months
+        };
     }
 }

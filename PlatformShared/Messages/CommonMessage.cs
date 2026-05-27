@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using com.etsoo.Utils.String;
+using System.Text.Json.Serialization;
 
 namespace PlatformShared.Messages
 {
@@ -93,6 +94,7 @@ namespace PlatformShared.Messages
     [JsonDerivedType(typeof(CreateDocumentMessage))]
     [JsonDerivedType(typeof(CreateOrgMessage))]
     [JsonDerivedType(typeof(CreateResourceMessage))]
+    [JsonDerivedType(typeof(DeleteDocumentMessage))]
     [JsonDerivedType(typeof(DeleteMemberMessage))]
     [JsonDerivedType(typeof(DeleteUserIdentifierMessage))]
     [JsonDerivedType(typeof(LeaveOrgMessage))]
@@ -104,6 +106,7 @@ namespace PlatformShared.Messages
     [JsonDerivedType(typeof(SwitchOrgMessage))]
     [JsonDerivedType(typeof(UpdateApiMessage))]
     [JsonDerivedType(typeof(UpdateAppMessage))]
+    [JsonDerivedType(typeof(UpdateDocumentMessage))]
     [JsonDerivedType(typeof(UpdateMemberAvatarMessage))]
     [JsonDerivedType(typeof(UpdateMemberMessage))]
     [JsonDerivedType(typeof(UpdateOrgAvatarMessage))]
@@ -120,11 +123,17 @@ namespace PlatformShared.Messages
         public required CommonMessageData Data { get; init; }
 
         /// <summary>
+        /// Json data for static log
+        /// 用于静态日志的 JSON 数据
+        /// </summary>
+        public string? JsonData { get; init; }
+
+        /// <summary>
         /// Get more JSON data
         /// 获取更多JSON数据
         /// </summary>
         /// <returns>Result</returns>
-        public virtual string? GetMoreData()
+        public virtual Dictionary<string, object?>? GetJsonData()
         {
             return null;
         }

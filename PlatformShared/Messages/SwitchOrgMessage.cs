@@ -1,14 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record SwitchOrgMessageData
-    {
-        public required int AppId { get; init; }
-        public int? FromOrganizationId { get; init; }
-    }
-
     /// <summary>
     /// Switch org message
     /// 机构切换消息
@@ -29,13 +22,10 @@ namespace PlatformShared.Messages
         /// </summary>
         public int? FromOrganizationId { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new SwitchOrgMessageData
-            {
-                AppId = AppId,
-                FromOrganizationId = FromOrganizationId
-            }, PlatformSharedContext.Default.SwitchOrgMessageData);
-        }
+            [nameof(AppId)] = AppId,
+            [nameof(FromOrganizationId)] = FromOrganizationId
+        };
     }
 }

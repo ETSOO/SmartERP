@@ -1,15 +1,8 @@
 ﻿using com.etsoo.Utils.Serialization;
 using PlatformShared.Database.Models;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record AddUserIdentifierMessageData
-    {
-        public required string IdentifierType { get; init; }
-        public required string IdentifierValue { get; init; }
-    }
-
     /// <summary>
     /// Add user identifier message
     /// 添加用户标识消息
@@ -30,13 +23,10 @@ namespace PlatformShared.Messages
         /// </summary>
         public required string IdentifierValue { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new AddUserIdentifierMessageData
-            {
-                IdentifierType = IdentifierType.ToString(),
-                IdentifierValue = IdentifierValue
-            }, PlatformSharedContext.Default.AddUserIdentifierMessageData);
-        }
+            ["IdentifierType"] = IdentifierType.ToString(),
+            ["IdentifierValue"] = IdentifierValue
+        };
     }
 }

@@ -1,15 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record BuyAppMessageData
-    {
-        public required int Months { get; init; }
-        public required int OrgId { get; init; }
-        public required bool NewOrg { get; init; }
-    }
-
     /// <summary>
     /// Buy app message
     /// 购买应用消息
@@ -36,14 +28,11 @@ namespace PlatformShared.Messages
         /// </summary>
         public required bool NewOrg { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new BuyAppMessageData
-            {
-                Months = Months,
-                OrgId = OrgId,
-                NewOrg = NewOrg
-            }, PlatformSharedContext.Default.BuyAppMessageData);
-        }
+            [nameof(Months)] = Months,
+            [nameof(OrgId)] = OrgId,
+            [nameof(NewOrg)] = NewOrg
+        };
     }
 }

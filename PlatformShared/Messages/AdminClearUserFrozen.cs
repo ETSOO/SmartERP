@@ -1,13 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record AdminClearUserFrozenMessageData
-    {
-        public required DateTimeOffset FrozenTime { get; init; }
-    }
-
     /// <summary>
     /// Admin clear user frozen time message
     /// 管理员清除用户冻结时间消息
@@ -22,12 +16,9 @@ namespace PlatformShared.Messages
         /// </summary>
         public required DateTimeOffset FrozenTime { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new AdminClearUserFrozenMessageData
-            {
-                FrozenTime = FrozenTime
-            }, PlatformSharedContext.Default.AdminClearUserFrozenMessageData);
-        }
+            [nameof(FrozenTime)] = FrozenTime
+        };
     }
 }

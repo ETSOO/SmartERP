@@ -1,14 +1,7 @@
 ﻿using com.etsoo.Utils.Serialization;
-using System.Text.Json;
 
 namespace PlatformShared.Messages
 {
-    public record LoginSuccessMessageData
-    {
-        public string? UserAgent { get; init; }
-        public required string TimeZone { get; init; }
-    }
-
     /// <summary>
     /// Login success message
     /// 成功登录消息
@@ -23,13 +16,10 @@ namespace PlatformShared.Messages
         /// </summary>
         public string? UserAgent { get; init; }
 
-        public override string? GetMoreData()
+        public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            return JsonSerializer.Serialize(new LoginSuccessMessageData
-            {
-                UserAgent = UserAgent,
-                TimeZone = Data.TimeZone
-            }, PlatformSharedContext.Default.LoginSuccessMessageData);
-        }
+            [nameof(UserAgent)] = UserAgent,
+            [nameof(Data.TimeZone)] = Data.TimeZone
+        };
     }
 }

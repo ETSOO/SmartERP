@@ -8,9 +8,7 @@ using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
-using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;
-using System.Net;
 using WorkerCenter.Templates;
 
 namespace WorkerCenter.Main.Processors
@@ -36,27 +34,12 @@ namespace WorkerCenter.Main.Processors
             _db = db;
         }
 
-        private async Task LogAsync(AdminRenewAppMessage message, int userId, int? orgId, CancellationToken cancellationToken)
+        private Task LogAsync(AdminRenewAppMessage message, int userId, int? orgId, CancellationToken cancellationToken)
         {
             var data = message.Data;
             var title = $"{Properties.Resources.AdminRenewApp} ({data.TargetName})";
 
-            var log = new CoreLog
-            {
-                Culture = data.Culture,
-                Data = message.GetMoreData(),
-                DeviceId = data.DeviceId,
-                Ip = IPAddress.Parse(data.IP),
-                OrganizationId = orgId,
-                Title = title,
-                UserId = userId,
-                TargetId = data.TargetId,
-                Kind = AdminRenewAppMessage.Type,
-                AppId = data.AppId
-            };
-            _logDb.CoreLogs.Add(log);
-
-            await _logDb.SaveChangesAsync(cancellationToken);
+            return _logDb.LogAsync(message, title, userId, orgId, null, cancellationToken);
         }
 
         protected override async Task ProcessMessageAsync(AdminRenewAppMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)

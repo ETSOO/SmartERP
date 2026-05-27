@@ -8,9 +8,7 @@ using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
-using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;
-using System.Net;
 using System.Web;
 using WorkerCenter.Templates;
 
@@ -37,13 +35,13 @@ namespace WorkerCenter.Main.Processors
             _db = db;
         }
 
-        private async Task LogAsync(AcceptInvitationMessage message, int userId, string kind, string kindText, CancellationToken cancellationToken)
+        private Task LogAsync(AcceptInvitationMessage message, int userId, string kind, string kindText, CancellationToken cancellationToken)
         {
             var data = message.Data;
             var orgId = message.UserData.OrganizationId;
 
             var title = kindText;
-            if (message.Data.UserId == userId)
+            if (data.UserId == userId)
             {
                 // Invitee
                 // 受邀人
@@ -51,24 +49,10 @@ namespace WorkerCenter.Main.Processors
             }
             else
             {
-                title = $"{title} - {message.Data.UserName}";
+                title = $"{title} - {data.UserName}";
             }
 
-            var log = new CoreLog
-            {
-                Culture = data.Culture,
-                Data = message.GetMoreData(),
-                DeviceId = data.DeviceId,
-                Ip = IPAddress.Parse(data.IP),
-                OrganizationId = orgId,
-                Title = title,
-                UserId = userId,
-                Kind = kind,
-                AppId = data.AppId
-            };
-            _logDb.CoreLogs.Add(log);
-
-            await _logDb.SaveChangesAsync(cancellationToken);
+            return _logDb.LogAsync(message, title, userId, orgId, kind, cancellationToken);
         }
 
         protected override async Task ProcessMessageAsync(AcceptInvitationMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)

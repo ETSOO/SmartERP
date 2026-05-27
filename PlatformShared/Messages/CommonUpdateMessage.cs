@@ -26,19 +26,18 @@ namespace PlatformShared.Messages
         /// Changes
         /// 更改
         /// </summary>
-        public required IEnumerable<EntityChangedProperty> Changes { get; init; }
-
-        /// <summary>
-        /// Get more JSON data
-        /// 获取更多JSON数据
-        /// </summary>
-        /// <returns>Result</returns>
-        public override string? GetMoreData()
+        public required IEnumerable<EntityChangedProperty> Changes
         {
-            return JsonSerializer.Serialize(new CommonUpdateMessageData
+            get;
+            init
             {
-                Changes = Changes
-            }, PlatformSharedContext.Default.CommonUpdateMessageData);
+                field = value;
+
+                JsonData = JsonSerializer.Serialize(new CommonUpdateMessageData
+                {
+                    Changes = value
+                }, PlatformSharedContext.Default.CommonUpdateMessageData);
+            }
         }
     }
 }
