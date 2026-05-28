@@ -102,9 +102,17 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            var orgId = await _db.CoreDocuments.Where(d => d.Id == id).Select(d => (int?)d.CoreOrganizationId).FirstOrDefaultAsync(cancellationToken);
+            var doc = await _db.CoreDocuments.Where(d => d.Id == id).Select(d => new { d.CoreOrganizationId, d.Title }).FirstOrDefaultAsync(cancellationToken);
 
-            if (orgId == null)
+            if (doc == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var orgId = doc.CoreOrganizationId;
+            var title = doc.Title;
+
+            if (!orgId.HasValue)
             {
                 // System template
                 if (!_orgService.IsAdmin())
@@ -123,6 +131,14 @@ namespace Platform.Server.Services
             {
                 return ApplicationErrors.NoId.AsResult();
             }
+
+            // Push message
+            var message = new DeleteDocumentMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, title),
+                OrganizationId = orgId
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteDocumentMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -368,8 +384,19 @@ namespace Platform.Server.Services
             var now = DateTimeOffset.UtcNow;
             document.RefreshTime = now;
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateDocumentMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, document.Title),
+                Changes = changes
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateDocumentMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);

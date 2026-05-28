@@ -338,7 +338,7 @@ namespace Platform.Server.Services
             {
                 Data = User.CreateMessageData(id, 0, appName)
             };
-            await _queueService.FirePushAsync(message, PlatformSharedContext.Default.CheckSessionMessage, cancellationToken);
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.CheckSessionMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }

@@ -93,5 +93,17 @@ namespace WorkerCenter.Templates
             TimeZone = data.TimeZone;
             TimeStamp = data.TimeStamp;
         }
+
+        /// <summary>
+        /// Format notice date time
+        /// 格式化通知日期时间
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public string FormatDateTime()
+        {
+            var localTime = TimeZoneInfo.ConvertTime(TimeStamp, TZ);
+            return $"{localTime} ({TZ.StandardName})";
+        }
     }
 }

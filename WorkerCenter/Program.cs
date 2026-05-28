@@ -106,6 +106,7 @@ services.AddSingleton<IMessageQueueProcessor, CreateApiKeyProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreateDocumentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreateOrgProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreateResourceProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeleteDocumentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeleteMemberProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeleteUserIdentifierProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LeaveOrgProcessor>();

@@ -91,8 +91,8 @@
 
   <ItemGroup>
     <PackageReference Include="com.etsoo.Localization" Version="1.0.42" />
-    <PackageReference Include="com.etsoo.SMTP" Version="1.0.91" />
-    <PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.10" />
+    <PackageReference Include="com.etsoo.SMTP" Version="1.0.92" />
+    <PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.11" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />

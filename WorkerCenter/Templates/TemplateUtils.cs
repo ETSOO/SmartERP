@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RazorEngineCore;
+﻿using RazorEngineCore;
 
 namespace WorkerCenter.Templates
 {
@@ -117,18 +116,6 @@ namespace WorkerCenter.Templates
             }
 
             return template.Replace("{culture}", c);
-        }
-
-        /// <summary>
-        /// Format notice date time
-        /// 格式化通知日期时间
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static string FormatDateTime(this ActionNoticeData data)
-        {
-            var localTime = TimeZoneInfo.ConvertTime(data.TimeStamp, data.TZ);
-            return $"{localTime} ({data.TZ.StandardName})";
         }
     }
 }

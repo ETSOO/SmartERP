@@ -60,7 +60,6 @@ export default function LoginHistory() {
         onRefresh: reloadData
       })}
       mRef={ref}
-      cacheKey="CoreApp-AuditHistory"
       defaultOrderBy={[{ field: "creation", desc: true }]}
       fieldTemplate={template}
       fields={(data) => [

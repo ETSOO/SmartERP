@@ -629,7 +629,7 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, name),
                 Changes = changes
             };
-            await _queueService.FirePushAsync(message, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(rq.Id);
