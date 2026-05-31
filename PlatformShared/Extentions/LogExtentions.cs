@@ -62,7 +62,7 @@ namespace PlatformShared.Extentions
                     dic.Add(nameof(message.JsonData), message.JsonData);
                 }
 
-                jsonData = JsonSerializer.Serialize(dic, CommonJsonSerializerContext.Default.StringKeyDictionaryObject);
+                jsonData = JsonSerializer.Serialize(dic, CommonJsonSerializerContext.Default.DictionaryStringObject);
             }
 
             var log = new CoreLog
@@ -76,7 +76,8 @@ namespace PlatformShared.Extentions
                 Title = title,
                 UserId = userId,
                 Kind = kind ?? type,
-                TargetId = data.TargetId > 0 ? data.TargetId : null
+                TargetId = data.TargetId > 0 ? data.TargetId : null,
+                Creation = data.TimeStamp.ToUniversalTime()
             };
 
             logDb.CoreLogs.Add(log);

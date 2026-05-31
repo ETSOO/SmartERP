@@ -18,6 +18,7 @@
   "brandMicrosoft": "Microsoft",
   "brandGoogle": "Google",
   "brandWechat": "Wechat",
+  "codeSent": "Verification code has been sent to {0}",
   "confirmClear": "Are you sure you want to modify the {0}?",
   "completeRegistration": "Complete Registration",
   "continueRegistration": "Continue Registration",

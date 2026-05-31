@@ -18,6 +18,7 @@
   "brandMicrosoft": "微软",
   "brandGoogle": "谷歌",
   "brandWechat": "微信",
+  "codeSent": "验证码已发送至 {0}",
   "confirmClear": "确定要修改 {0} 吗？",
   "completeRegistration": "完成注册",
   "continueRegistration": "继续注册",

@@ -23,7 +23,7 @@ namespace WebTemplates
         /// Action notice template
         /// 操作通知模板
         /// </summary>
-        private const string ActionNoticeTemplate = "Action/EmailActionNotice_{culture}.cshtml";
+        private const string ActionNoticeTemplate = "Action/EmailActionNotice_{culture}";
 
         /// <summary>
         /// Build template

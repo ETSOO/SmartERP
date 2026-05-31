@@ -8,6 +8,7 @@ using com.etsoo.Database.Converters;
 using com.etsoo.MessageQueue;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Crypto;
+using com.etsoo.Utils.String;
 using com.etsoo.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -218,6 +219,9 @@ namespace Platform.Server.Services
                     };
 
                     await _queueService.PushAsync(message, PlatformSharedContext.Default.SendAuthCodeEmailMessage, new MessageProperties { ContentType = additionalData?.Type }, cancellationToken);
+
+                    // Back the email info
+                    result.Data.Add("recipient", StringUtils.HideEmail(email));
                 }
             }
             catch (Exception ex)
@@ -346,6 +350,9 @@ namespace Platform.Server.Services
                     Body = code
                 };
                 await _queueService.PushAsync(message, ApiModelJsonSerializerContext.Default.SendSMSMessage, cancellationToken);
+
+                // Back the mobile info
+                result.Data.Add("recipient", StringUtils.HideData(mobileString));
             }
 
             // Return

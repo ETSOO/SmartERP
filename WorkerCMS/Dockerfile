@@ -10,21 +10,21 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["WorkerCenter/WorkerCenter.csproj", "WorkerCenter/"]
+COPY ["WorkerCMS/WorkerCMS.csproj", "WorkerCMS/"]
 COPY ["WebTemplates/WebTemplates.csproj", "WebTemplates/"]
 COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
-RUN dotnet restore "./WorkerCenter/WorkerCenter.csproj"
+RUN dotnet restore "./WorkerCMS/WorkerCMS.csproj"
 COPY . .
-WORKDIR "/src/WorkerCenter"
-RUN dotnet build "./WorkerCenter.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/WorkerCMS"
+RUN dotnet build "./WorkerCMS.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./WorkerCenter.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./WorkerCMS.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "WorkerCenter.dll"]
+ENTRYPOINT ["dotnet", "WorkerCMS.dll"]

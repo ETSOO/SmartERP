@@ -10,16 +10,16 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.65",
-    "@etsoo/materialui": "^1.6.66",
+    "@etsoo/materialui": "^1.6.68",
     "@etsoo/react": "^1.8.90",
     "@etsoo/shared": "^1.2.84",
-    "@etsoo/smarterp-core": "^1.1.44",
+    "@etsoo/smarterp-core": "^1.1.55",
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
     "formik": "^2.4.9",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.15.1",
+    "react-router-dom": "^7.16.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {

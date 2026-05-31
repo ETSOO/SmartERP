@@ -8,8 +8,11 @@ import {
 import { Constants } from "../app/Constants";
 import { app } from "../app/SmartApp";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { IdActionResult } from "@etsoo/shared";
-import { AuthCodeAction, ValidateRQ } from "@etsoo/smarterp-core";
+import {
+  AuthCodeAction,
+  AuthCodeSendResult,
+  ValidateRQ
+} from "@etsoo/smarterp-core";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
@@ -25,12 +28,16 @@ export default function RegisterVerify() {
 
   // Labels
   const labels = app.getLabels(
+    "codeSent",
     "enterCodeTip",
     "verification",
     "resending",
     "enterCode",
     "submit"
   );
+
+  // State
+  const [feedback, setFeedback] = React.useState<string>();
 
   // Refs
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -59,7 +66,7 @@ export default function RegisterVerify() {
 
   // Resending
   const resending = async () => {
-    let result: IdActionResult<string> | undefined;
+    let result: AuthCodeSendResult | undefined;
     if (isEmail) {
       result = await app.authCodeApi.sendEmail({
         email: usernameDecoded,
@@ -79,6 +86,9 @@ export default function RegisterVerify() {
       app.alertResult(result);
       return 180;
     }
+
+    const recipient = result.data.recipient;
+    setFeedback(labels.codeSent.format(recipient.hideEmail()));
 
     codeId = result.data.id;
     app.storage.setData(Constants.CodeFieldCallback, codeId);
@@ -152,6 +162,7 @@ export default function RegisterVerify() {
           submit();
           e.preventDefault();
         }}
+        helperText={feedback}
       />
     </SharedLayout>
   );

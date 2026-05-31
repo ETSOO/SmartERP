@@ -8,7 +8,6 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using PlatformShared.Database;
 using PlatformShared.Services;
-using WebTemplates;
 using WorkerCenter.Main.Processors;
 using WorkerCenter.Periods;
 
@@ -24,9 +23,6 @@ if (otlpExportOptions == null)
 {
     throw new NullReferenceException(nameof(otlpExportOptions));
 }
-
-var template = TemplateUtils.Get("Action/EmailActionNotice_en");
-
 
 builder.Logging.ClearProviders();
 services.AddOpenTelemetry()
