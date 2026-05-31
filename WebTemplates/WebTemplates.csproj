@@ -1,0 +1,77 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <SatelliteResourceLanguages>en;zh-Hans;zh-Hant</SatelliteResourceLanguages>
+        <OutputType>Library</OutputType>
+    </PropertyGroup>
+
+	<PropertyGroup>
+		<!-- Enable automatic template compilation before build -->
+		<RazorEngineCore_EnableCompileTemplates>true</RazorEngineCore_EnableCompileTemplates>
+		<RazorEngineCore_TemplateDir>$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
+	</PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\PlatformShared\PlatformShared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+	    <EmbeddedResource Include="Templates\**\*.bin" />
+    </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.21" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="Templates\Action\EmailActionNotice_en.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Action\EmailActionNotice_zh-Hans.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Action\EmailActionNotice_zh-Hant.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Callback\EmailCallback_en.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Callback\EmailCallback_zh-Hans.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Callback\EmailCallback_zh-Hant.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Invitation\EmailMemberInvitation_en.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Invitation\EmailMemberInvitation_zh-Hans.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Invitation\EmailMemberInvitation_zh-Hant.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Registration\EmailRegistration_en.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Registration\EmailRegistration_zh-Hans.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Registration\EmailRegistration_zh-Hant.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Verification\EmailVerification_en.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Verification\EmailVerification_zh-Hans.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Verification\EmailVerification_zh-Hant.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+</Project>

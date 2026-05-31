@@ -9,7 +9,8 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
-using WorkerCenter.Templates;
+using WebTemplates;
+using PlatformShared.Dto;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -81,7 +82,7 @@ namespace WorkerCenter.Main.Processors
                 string.Format(detail, message.Data.TargetName, message.Months, message.Comment, message.RequesterOrgName)
             );
 
-            var body = await TemplateUtils.BuildNoticeTemplateAsync(message.Data.Culture, data, cancellationToken);
+            var body = await TemplateUtils.BuildActionNoticeAsync(message.Data.Culture, data);
 
             // Send email notice
             var inviteeeEmail = new SendEmailMessage

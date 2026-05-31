@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@model PlatformShared.Dto.AuthCodeEmailTemplateView
+
+@{
+    Model.Subject = "[司有云ERP] 找回密码验证码";
+}
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -6,14 +11,11 @@
     <title>@Model.Subject</title>
 </head>
 <body>
-    <p>尊敬的用户 <b>@Model.UserName</b>：</p>
-    <p>在 @Model.FormatDateTime()，<b>@Model.Action</b>.</p>
-    @if (!string.IsNullOrEmpty(Model.Detail))
-    {
-        <p>@Html.Raw(Model.Detail)</p>
-    }
-    <p>如果这不是您本人的操作，请第一时间联系我们进行干预！</p>
-    <p>IP地址：<b>@Model.IP</b></p>
+    <p>尊敬的用户：</p>
+    <p>我们收到您找回密码的请求，请使用下面的验证码继续操作。<font color="#ff0000">如果不是您本人的操作，请直接忽略。</font></p>
+    <p>
+        您的验证码为：<strong style="font-size: 15pt;">@Model.Code</strong>，<strong>@Model.Action.Minutes</strong>分钟内有效 - 请勿告知任何人。
+    </p>
     <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
     <table border="0" width="100%">
         <tr>

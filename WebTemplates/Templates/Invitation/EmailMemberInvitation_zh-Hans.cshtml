@@ -1,7 +1,9 @@
-﻿@{
-    Model.Subject = $"[司有云ERP] {Data.UserData.Name}的邀请";
+﻿@model PlatformShared.Dto.InvitationAuthCodeEmailTemplateView
 
-    var url = Data.WebUrl + $"/invite/{Model.Id}?code={Model.Code}";
+@{
+    Model.Subject = $"[司有云ERP] {Model.DataObj.UserData.Name}的邀请";
+
+    var url = Model.DataObj.WebUrl + $"/invite/{Model.Id}?code={Model.Code}";
 }
 <!DOCTYPE html>
 
@@ -12,10 +14,10 @@
 </head>
 <body>
     <p>您好！</p>
-    <p><b>@Data.UserData.Name</b> 邀请您加入司有云ERP平台上的 <b>@Data.UserData.OrganizationName</b>。</p>
-    @if (!string.IsNullOrWhiteSpace(Data.Message))
+    <p><b>@Model.DataObj.UserData.Name</b> 邀请您加入司有云ERP平台上的 <b>@Model.DataObj.UserData.OrganizationName</b>。</p>
+    @if (!string.IsNullOrWhiteSpace(Model.DataObj.Message))
     {
-        <p>留言：<q style="font-style:italic">@Data.Message</q></p>
+        <p>留言：<q style="font-style:italic">@Model.DataObj.Message</q></p>
     }
     <p><a href="@url">点击这里</a>打开程序，或者复制字符串 <pre>"@url"</pre> 在浏览器中访问，注册登陆后请接受邀请，<b>@Model.LocalExpiry.ToString("f")</b> 前有效。</p>
     <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />

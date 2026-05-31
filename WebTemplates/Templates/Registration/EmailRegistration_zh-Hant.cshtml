@@ -1,18 +1,20 @@
-﻿@{
-    Model.Subject = "[司有雲ERP] 使用者信箱認證驗證碼";
+﻿@model PlatformShared.Dto.AuthCodeEmailTemplateView
+
+@{
+    Model.Subject = "[司有雲ERP] 使用者註冊驗證碼";
 }
 <!DOCTYPE html>
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@data.Subject</title>
+    <title>@Model.Subject</title>
 </head>
 <body>
     <p>尊敬的用戶：</p>
-    <p>我們收到您認證信箱位址的請求，請使用下面的驗證碼繼續操作。 <font color="#ff0000">如果不是您本人的操作，請直接忽略。</font></p>
+    <p>您好，歡迎加入我們！</p>
     <p>
-        您的驗證碼為：<strong style="font-size: 15pt;">@data.Code</strong>，<strong>@data.Action.Minutes</strong>分鐘內有效 - 請勿告知任何人。
+        您的驗證碼為：<strong style="font-size: 15pt;">@Model.Code</strong>，<strong>@Model.Action.Minutes</strong>分鐘內有效 - 請勿告知任何人。
     </p>
     <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
     <table border="0" width="100%">

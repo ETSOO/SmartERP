@@ -1,7 +1,9 @@
-﻿@{
-    Model.Subject = $"[SmartERP] Invitation from {Data.UserData.Name}";
+﻿@model PlatformShared.Dto.InvitationAuthCodeEmailTemplateView
 
-    var url = Data.WebUrl + $"/invite/{Model.Id}?code={Model.Code}";
+@{
+    Model.Subject = $"[SmartERP] Invitation from {Model.DataObj.UserData.Name}";
+
+    var url = Model.DataObj.WebUrl + $"/invite/{Model.Id}?code={Model.Code}";
 }
 <!DOCTYPE html>
 
@@ -12,10 +14,10 @@
 </head>
 <body>
     <p>Hi there,</p>
-    <p><b>@Data.UserData.Name</b> invites you to join <b>@Data.UserData.OrganizationName</b> on SmartERP platform, valid before <b>@Model.LocalExpiry.ToString("f")</b>. Please accept the invitation after registering and logging in.</p>
-    @if (!string.IsNullOrWhiteSpace(Data.Message))
+    <p><b>@Model.DataObj.UserData.Name</b> invites you to join <b>@Model.DataObj.UserData.OrganizationName</b> on SmartERP platform, valid before <b>@Model.LocalExpiry.ToString("f")</b>. Please accept the invitation after registering and logging in.</p>
+    @if (!string.IsNullOrWhiteSpace(Model.DataObj.Message))
     {
-        <p>Message: <q style="font-style:italic">@Data.Message</q></p>
+        <p>Message: <q style="font-style:italic">@Model.DataObj.Message</q></p>
     }
     <p><a href="@url">Click here</a> to open the program, or copy the string <pre>"@url"</pre> to access in the browser.</p>
     <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />

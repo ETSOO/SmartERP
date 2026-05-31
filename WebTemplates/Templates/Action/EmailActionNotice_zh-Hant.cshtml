@@ -1,6 +1,5 @@
-﻿@{
-    Model.Subject = "[司有雲ERP] 使用者註冊驗證碼";
-}
+﻿@model PlatformShared.Dto.ActionNoticeData
+
 <!DOCTYPE html>
 
 <html>
@@ -9,11 +8,14 @@
     <title>@Model.Subject</title>
 </head>
 <body>
-    <p>尊敬的用戶：</p>
-    <p>您好，歡迎加入我們！</p>
-    <p>
-        您的驗證碼為：<strong style="font-size: 15pt;">@Model.Code</strong>，<strong>@Model.Action.Minutes</strong>分鐘內有效 - 請勿告知任何人。
-    </p>
+    <p>尊敬的使用者 <b>@Model.UserName</b>：</p>
+    <p>在 @Model.FormatDateTime()，<b>@Model.Action</b>.</p>
+    @if (!string.IsNullOrEmpty(Model.Detail))
+    {
+        <p>@Html.Raw(Model.Detail)</p>
+    }
+    <p>如果這不是您本人的操作，請第一時間聯絡我們進行幹預！</p>
+    <p>IP位址：<b>@Model.IP</b></p>
     <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
     <table border="0" width="100%">
         <tr>

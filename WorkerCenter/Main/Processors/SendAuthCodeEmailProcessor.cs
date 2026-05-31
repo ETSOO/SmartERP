@@ -5,18 +5,11 @@ using com.etsoo.MessageQueue.QueueProcessors;
 using PlatformShared;
 using PlatformShared.Dto;
 using PlatformShared.Messages;
-using RazorEngineCore;
 using System.Text.Json;
-using WorkerCenter.Templates;
+using WebTemplates;
 
 namespace WorkerCenter.Main.Processors
 {
-    public class MemberTemplate : RazorEngineTemplateBase<AuthCodeEmailTemplateView>
-    {
-        public AuthCodeMemberInvitationData Data { get; set; } = default!;
-    }
-
-
     /// <summary>
     /// Sending authentication code email processor
     /// 发送验证码邮件处理器
@@ -40,7 +33,7 @@ namespace WorkerCenter.Main.Processors
             var template = model.Action.Template;
             if (!string.IsNullOrEmpty(template))
             {
-                template = TemplateUtils.FormatCultureTemplate(template, model.Language);
+                template = TemplateUtils.FormatCulture(template, model.Language);
 
                 string body;
                 if (contentType == nameof(AuthCodeMemberInvitationData))
@@ -50,16 +43,12 @@ namespace WorkerCenter.Main.Processors
                     var jsonData = model.Data ?? throw new ArgumentNullException(nameof(model.Data));
 
                     var data = JsonSerializer.Deserialize(jsonData, PlatformSharedContext.Default.AuthCodeMemberInvitationData) ?? throw new ArgumentNullException(nameof(model.Data));
-                    
-                    body = await TemplateUtils.BuildTemplateAsync<MemberTemplate, AuthCodeEmailTemplateView>(template, (t) =>
-                    {
-                        t.Data = data;
-                        t.Model = model;
-                    }, [AuthCodeMemberInvitationDataType], cancellationToken);
+
+                    body = await TemplateUtils.BuildAsync(template, new InvitationAuthCodeEmailTemplateView(model, data));
                 }
                 else
                 {
-                    body = await TemplateUtils.BuildTemplateAsync(template, model, cancellationToken);
+                    body = await TemplateUtils.BuildAsync(template, model);
                 }
 
                 var labelId = model.Action.Id.ToString();

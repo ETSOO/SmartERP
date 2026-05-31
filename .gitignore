@@ -364,4 +364,6 @@ FodyWeavers.xsd
 
 # Mapping data folder
 data/
-/WebTemplates/Templates/Action/EmailActionNotice_en.bin
+
+# Templates bin
+/WebTemplates/Templates/**/*.bin

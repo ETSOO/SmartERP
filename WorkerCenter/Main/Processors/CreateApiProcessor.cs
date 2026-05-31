@@ -7,7 +7,8 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
-using WorkerCenter.Templates;
+using WebTemplates;
+using PlatformShared.Dto;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -63,7 +64,7 @@ namespace WorkerCenter.Main.Processors
                     action
                 );
 
-                var body = await TemplateUtils.BuildNoticeTemplateAsync(message.Data.Culture, data, cancellationToken);
+                var body = await TemplateUtils.BuildActionNoticeAsync(message.Data.Culture, data);
 
                 // Send email notice
                 var email = new SendEmailMessage

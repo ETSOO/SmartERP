@@ -2,7 +2,7 @@
 using PlatformShared.Messages;
 using System.Diagnostics.CodeAnalysis;
 
-namespace WorkerCenter.Templates
+namespace PlatformShared.Dto
 {
     /// <summary>
     /// Action notice data

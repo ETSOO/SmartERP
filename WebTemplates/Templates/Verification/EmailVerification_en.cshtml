@@ -1,16 +1,18 @@
-﻿@{
-    Model.Subject = "[SmartERP] User Registration Code";
+﻿@model PlatformShared.Dto.AuthCodeEmailTemplateView
+
+@{
+    Model.Subject = "[SmartERP] User email address verification code";
 }
 <!DOCTYPE html>
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@data.Subject</title>
+    <title>@Model.Subject</title>
 </head>
 <body>
-    <p>Dear applicant,</p>
-    <p>Welcome to join us.</p>
+    <p>Dear user,</p>
+    <p>We received your request to verify your email address, please use the code below to continue. <font color="#ff0000">If it is not your own operation, please ignore it.</font></p>
     <p>
         Your verification code is: <strong style="font-size: larger">@Model.Code</strong> and effective within <strong>@Model.Action.Minutes</strong> minutes. Do not share it with anyone.
     </p>

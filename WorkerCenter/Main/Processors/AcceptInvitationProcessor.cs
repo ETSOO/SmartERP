@@ -7,10 +7,11 @@ using com.etsoo.MessageQueue.QueueProcessors;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Web;
-using WorkerCenter.Templates;
+using WebTemplates;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -101,7 +102,7 @@ namespace WorkerCenter.Main.Processors
                     string.Format(detail, invitee, orgName)
                 );
 
-                var body = await TemplateUtils.BuildNoticeTemplateAsync(message.Data.Culture, data, cancellationToken);
+                var body = await TemplateUtils.BuildActionNoticeAsync(message.Data.Culture, data);
 
                 // Send email notice
                 var email = new SendEmailMessage
@@ -132,7 +133,7 @@ namespace WorkerCenter.Main.Processors
                     string.Format(detail, inviter, orgName)
                 );
 
-                var inviteeBody = await TemplateUtils.BuildNoticeTemplateAsync(message.Data.Culture, inviteeData, cancellationToken);
+                var inviteeBody = await TemplateUtils.BuildActionNoticeAsync(message.Data.Culture, inviteeData);
 
                 // Send email notice
                 var inviteeeEmail = new SendEmailMessage
