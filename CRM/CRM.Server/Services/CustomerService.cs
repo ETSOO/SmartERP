@@ -12,11 +12,14 @@ using CRM.Server.Dto.PersonInfo;
 using CRM.Server.RQ;
 using CRM.Server.RQ.Customer;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -28,18 +31,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public CustomerService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<CustomerService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "customer", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -198,7 +204,17 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(customer.Id);
+            var id = customer.Id;
+
+            // Push message
+            var message = new CreateCustomerMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, customer.Name),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.CustomerCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateCustomerMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<Person> CreateQuery(CustomerListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
@@ -523,8 +539,21 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateCustomerMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, customer.Name),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateCustomerMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

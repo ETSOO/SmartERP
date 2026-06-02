@@ -28,6 +28,7 @@ using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Globalization;
 using System.Web;
+using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 
 namespace Platform.Server.Services
 {
@@ -115,6 +116,8 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoValidData.AsResult();
             }
 
+            var tasks = new List<Task>();
+
             var orgId = data.UserData.OrganizationId;
             var userId = User.IdInt;
             var inviterId = code.UserId.Value;
@@ -149,7 +152,7 @@ namespace Platform.Server.Services
                     }
                 }
 
-                await _db.SaveChangesAsync(cancellationToken);
+                var task1 = _db.SaveChangesAsync(cancellationToken);
 
                 // Log
                 var message = new AcceptInvitationMessage
@@ -157,11 +160,16 @@ namespace Platform.Server.Services
                     Data = User.CreateMessageData(App.AppId, inviterId),
                     UserData = data.UserData
                 };
-                await _queueService.PushAsync(message, PlatformSharedContext.Default.AcceptInvitationMessage, cancellationToken);
+                var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.AcceptInvitationMessage, cancellationToken);
+
+                tasks.AddRange(task1, task2);
             }
 
             // Delete the code
-            await _db.CoreAuthCodes.Where(c => c.Id == rq.Id).ExecuteDeleteAsync(cancellationToken);
+            var task3 = _db.CoreAuthCodes.Where(c => c.Id == rq.Id).ExecuteDeleteAsync(cancellationToken);
+            tasks.Add(task3);
+
+            await Task.WhenAll(tasks);
 
             return ActionResult.Success;
         }

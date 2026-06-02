@@ -17,6 +17,7 @@ using PlatformShared.Extentions;
 using System.Buffers;
 using System.Text.Json;
 using System.Web;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using BusinessProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
@@ -170,7 +171,9 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(asset.Id);
+            var id = asset.Id;
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<PersonAsset> CreateQuery(AssetListRQ rq, Func<IQueryable<PersonAsset>, IQueryable<PersonAsset>>? filters = null)

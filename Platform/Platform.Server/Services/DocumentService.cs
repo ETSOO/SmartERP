@@ -82,15 +82,17 @@ namespace Platform.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = document.Id;
+
             // Push message
             var message = new CreateDocumentMessage
             {
-                Data = User.CreateMessageData(App.AppId, document.Id, document.Title),
+                Data = User.CreateMessageData(App.AppId, id, document.Title),
                 JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.DocumentCreateRQ)
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateDocumentMessage, cancellationToken);
 
-            return ActionResult.Succeed(document.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -102,7 +104,10 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            var doc = await _db.CoreDocuments.Where(d => d.Id == id).Select(d => new { d.CoreOrganizationId, d.Title }).FirstOrDefaultAsync(cancellationToken);
+            var doc = await _db.CoreDocuments.AsNoTracking()
+                .Where(d => d.Id == id)
+                .Select(d => new { d.CoreOrganizationId, d.Title })
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (doc == null)
             {
@@ -125,12 +130,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
-            var result = await _db.CoreDocuments.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
-
-            if (result == 0)
-            {
-                return ApplicationErrors.NoId.AsResult();
-            }
+            var task1 = _db.CoreDocuments.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             // Push message
             var message = new DeleteDocumentMessage
@@ -138,7 +138,9 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, id, title),
                 OrganizationId = orgId
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteDocumentMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteDocumentMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return ActionResult.Succeed(id);
         }
@@ -388,7 +390,7 @@ namespace Platform.Server.Services
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new UpdateDocumentMessage
@@ -396,7 +398,9 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, document.Title),
                 Changes = changes
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateDocumentMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateDocumentMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

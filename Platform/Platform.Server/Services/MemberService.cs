@@ -135,7 +135,7 @@ namespace Platform.Server.Services
             }
 
             // Delete
-            await _db.Persons.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
+            var task1 = _db.Persons.Where(ou => ou.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             // Push message
             var message = new DeleteMemberMessage
@@ -145,7 +145,9 @@ namespace Platform.Server.Services
                 InviterId = ou.InviterId,
                 InviterName = ou.InviterName
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteMemberMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteMemberMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return ActionResult.Succeed(id);
         }
@@ -460,7 +462,7 @@ namespace Platform.Server.Services
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new UpdateMemberMessage
@@ -468,7 +470,9 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, name),
                 Changes = changes
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -524,18 +528,19 @@ namespace Platform.Server.Services
                 var url = storage.GetUrl(path);
 
                 // Update
-                await _db.Persons.Where(ou => ou.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Avatar, url), cancellationToken);
+                var task1 = _db.Persons.Where(ou => ou.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Avatar, url), cancellationToken);
 
                 // Remove current avatar
-                if (!string.IsNullOrEmpty(ou.LocalAvatar))
-                    await storage.DeleteUrlAsync(ou.LocalAvatar, cancellationToken);
+                var task2 = !string.IsNullOrEmpty(ou.LocalAvatar) ? storage.DeleteUrlAsync(ou.LocalAvatar, cancellationToken).AsTask() : Task.CompletedTask;
 
                 // Push message
                 var message = new UpdateMemberAvatarMessage
                 {
                     Data = User.CreateMessageData(App.AppId, id, ou.Name)
                 };
-                await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberAvatarMessage, cancellationToken);
+                var task3 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberAvatarMessage, cancellationToken);
+
+                await Task.WhenAll(task1, task2, task3);
 
                 // Return
                 return ActionResult.Succeed(url);

@@ -1,5 +1,4 @@
-﻿using com.etsoo.Utils.String;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace PlatformShared.Messages
 {
@@ -103,6 +102,7 @@ namespace PlatformShared.Messages
     [JsonDerivedType(typeof(RenewAppMessage))]
     [JsonDerivedType(typeof(ResetPasswordMessage))]
     [JsonDerivedType(typeof(SendAuthCodeEmailMessage))]
+    [JsonDerivedType(typeof(SendProfileEmailMessage))]
     [JsonDerivedType(typeof(SwitchOrgMessage))]
     [JsonDerivedType(typeof(UpdateApiMessage))]
     [JsonDerivedType(typeof(UpdateAppMessage))]

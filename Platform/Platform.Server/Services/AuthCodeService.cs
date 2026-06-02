@@ -11,7 +11,6 @@ using com.etsoo.Utils.Crypto;
 using com.etsoo.Utils.String;
 using com.etsoo.Web;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Platform.Server.Application;
 using Platform.Server.Dto.AuthCode;
 using Platform.Server.Endpoints.AuthCode.RQ;

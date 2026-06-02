@@ -376,6 +376,15 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Send Profile Email.
+        /// </summary>
+        internal static string SendProfileEmail {
+            get {
+                return ResourceManager.GetString("SendProfileEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Switch Organization.
         /// </summary>
         internal static string SwitchOrg {

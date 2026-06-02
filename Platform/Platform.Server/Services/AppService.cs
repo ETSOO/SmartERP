@@ -205,7 +205,7 @@ namespace Platform.Server.Services
             var appSecret = await App.HashPasswordAsync(id + CryptographyUtils.CreateRandString(RandStringKind.All, 32).ToString());
             var appSecretDB = App.EncriptData(appSecret, "Token" + app.AppId);
 
-            await _db.CoreOrganizationApps.Where(oa => oa.Id == id)
+            var task1 = _db.CoreOrganizationApps.Where(oa => oa.Id == id)
                 .ExecuteUpdateAsync(oa => oa.SetProperty(oa => oa.AppKey, appKey).SetProperty(oa => oa.AppSecret, appSecretDB), cancellationToken);
 
             // Push message
@@ -213,7 +213,9 @@ namespace Platform.Server.Services
             {
                 Data = User.CreateMessageData(App.AppId, id, app.Name)
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateApiKeyMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.CreateApiKeyMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             var result = ActionResult.Success;
             result.Data[nameof(appKey)] = appKey;
@@ -554,7 +556,7 @@ namespace Platform.Server.Services
             }
 
             // Update the expiry
-            await _db.CoreOrganizationApps.AsNoTracking()
+            var task1 = _db.CoreOrganizationApps.AsNoTracking()
                 .Where(oa => oa.Id == rq.Id)
                 .ExecuteUpdateAsync(oa => oa.SetProperty(a => a.Expiry, a => a.Expiry == null ? DateTimeOffset.UtcNow.AddMonths(rq.Months) : a.Expiry.Value.AddMonths(rq.Months)), cancellationToken);
 
@@ -564,7 +566,9 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, app.Name),
                 Months = rq.Months
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.RenewAppMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.RenewAppMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return ActionResult.Success;
         }
@@ -621,7 +625,7 @@ namespace Platform.Server.Services
             });
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new UpdateAppMessage
@@ -629,7 +633,9 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, name),
                 Changes = changes
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateAppMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

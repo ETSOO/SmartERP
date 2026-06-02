@@ -331,14 +331,16 @@ namespace Platform.Server.Services
             }
 
             // Save changes
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new CheckSessionMessage
             {
                 Data = User.CreateMessageData(id, 0, appName)
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.CheckSessionMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.CheckSessionMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return ActionResult.Succeed(id);
         }
@@ -363,7 +365,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            await _db.CoreUserIdentifiers.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
+            var task1 = _db.CoreUserIdentifiers.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             // Push message
             var message = new DeleteUserIdentifierMessage
@@ -372,7 +374,9 @@ namespace Platform.Server.Services
                 IdentifierType = data.Type,
                 IdentifierValue = data.Value
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteUserIdentifierMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.DeleteUserIdentifierMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return ActionResult.Succeed(id);
         }
@@ -530,7 +534,7 @@ namespace Platform.Server.Services
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new UpdateMemberMessage
@@ -538,7 +542,9 @@ namespace Platform.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id),
                 Changes = changes
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateMemberMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -578,18 +584,19 @@ namespace Platform.Server.Services
                 var url = _storage.GetUrl(path);
 
                 // Update
-                await _db.CoreUsers.Where(u => u.Id == User.IdInt).ExecuteUpdateAsync(u => u.SetProperty(u => u.Avatar, url), cancellationToken);
+                var task1 = _db.CoreUsers.Where(u => u.Id == User.IdInt).ExecuteUpdateAsync(u => u.SetProperty(u => u.Avatar, url), cancellationToken);
 
                 // Remove current avatar
-                if (!string.IsNullOrEmpty(User.Avatar))
-                    await _storage.DeleteUrlAsync(User.Avatar, cancellationToken);
+                var task2 = !string.IsNullOrEmpty(User.Avatar) ? _storage.DeleteUrlAsync(User.Avatar, cancellationToken).AsTask() : Task.CompletedTask;
 
                 // Push message
                 var message = new UpdateUserAvatarMessage
                 {
                     Data = User.CreateMessageData(App.AppId, 0)
                 };
-                await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateUserAvatarMessage, cancellationToken);
+                var task3 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateUserAvatarMessage, cancellationToken);
+
+                await Task.WhenAll(task1, task2, task3);
 
                 // Return
                 return ActionResult.Succeed(url);

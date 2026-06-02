@@ -35,6 +35,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Channels;
 
 namespace Platform.Server.Services
 {
@@ -180,15 +181,17 @@ namespace Platform.Server.Services
             _db.CoreApis.Add(api);
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = api.Id;
+
             // Push message
             var message = new CreateApiMessage
             {
-                Data = User.CreateMessageData(App.AppId, api.Id, rq.Title),
+                Data = User.CreateMessageData(App.AppId, id, rq.Title),
                 OrganizationId = api.CoreOrganizationId
             };
             await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateApiMessage, cancellationToken);
 
-            return ActionResult.Succeed(api.Id);
+            return ActionResult.Succeed(id);
         }
 
         private string EncryptAppSecret(string appSecret)
@@ -1246,7 +1249,31 @@ namespace Platform.Server.Services
 
             try
             {
-                return await SendEmailAsync(message, cancellationToken);
+                // Push message
+                var mq = new SendProfileEmailMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, rq.Id, profile.Title),
+                    RelatedTarget = relatedTarget,
+                    Persons = rq.Persons,
+                    Emails = emails,
+                    Message = rq.Message,
+                    IncludeAttachments = rq.IncludeAttachments,
+                    IncludeComments = rq.IncludeComments
+                };
+
+                var task1 = SendEmailAsync(message, cancellationToken);
+                var task2 = _queueService.PushAsync(mq, PlatformSharedContext.Default.SendProfileEmailMessage, cancellationToken);
+                await Task.WhenAll(task1, task2);
+
+                var result = task1.Result;
+
+                if (result.Ok)
+                {
+
+                    await _queueService.PushAsync(mq, PlatformSharedContext.Default.SendProfileEmailMessage, cancellationToken);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -1406,7 +1433,7 @@ namespace Platform.Server.Services
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new UpdateApiMessage
@@ -1415,7 +1442,9 @@ namespace Platform.Server.Services
                 Changes = changes,
                 OrganizationId = api.CoreOrganizationId
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateApiMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateApiMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -1469,18 +1498,19 @@ namespace Platform.Server.Services
                 var url = storage.GetUrl(path);
 
                 // Update
-                await _db.CoreOrganizations.Where(o => o.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Logo, url), cancellationToken);
+                var task1 = _db.CoreOrganizations.Where(o => o.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.Logo, url), cancellationToken);
 
                 // Remove current avatar
-                if (!string.IsNullOrEmpty(org.Logo))
-                    await storage.DeleteUrlAsync(org.Logo, cancellationToken);
+                var task2 = !string.IsNullOrEmpty(org.Logo) ? storage.DeleteUrlAsync(org.Logo, cancellationToken).AsTask() : Task.CompletedTask;
 
                 // Push message
                 var message = new UpdateOrgAvatarMessage
                 {
                     Data = User.CreateMessageData(App.AppId, id, org.Name)
                 };
-                await _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgAvatarMessage, cancellationToken);
+                var task3 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgAvatarMessage, cancellationToken);
+
+                await Task.WhenAll(task1, task2, task3);
 
                 // Return
                 return ActionResult.Succeed(url);

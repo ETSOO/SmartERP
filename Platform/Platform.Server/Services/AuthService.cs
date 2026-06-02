@@ -363,10 +363,7 @@ namespace Platform.Server.Services
                 }
             };
 
-            var token = await CreateAppTokenDataAsync(newUser, appId, appData.AppSecret, true, tokenQueryData, cancellationToken);
-            var tokenJson = JsonSerializer.Serialize(token, ModelJsonSerializerContext.Default.AppTokenData);
-            uri.Append($"token={HttpUtility.UrlEncode(tokenJson)}");
-            uri.Append($"&state={HttpUtility.UrlEncode(stateEncrypted)}");
+            var task1 = CreateAppTokenDataAsync(newUser, appId, appData.AppSecret, true, tokenQueryData, cancellationToken);
 
             // Push message
             var message = new AdminSupportMessage
@@ -381,7 +378,14 @@ namespace Platform.Server.Services
                 ApproverName = data.Approver.ApproverName,
                 OwnerId = data.OwnerId
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.AdminSupportMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.AdminSupportMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var token = task1.Result;
+            var tokenJson = JsonSerializer.Serialize(token, ModelJsonSerializerContext.Default.AppTokenData);
+            uri.Append($"token={HttpUtility.UrlEncode(tokenJson)}");
+            uri.Append($"&state={HttpUtility.UrlEncode(stateEncrypted)}");
 
             var result = ActionResult.Success;
             result.Data[nameof(uri)] = uri.ToString();
@@ -827,14 +831,16 @@ namespace Platform.Server.Services
 
             // Update password
             var newPassword = await App.HashPasswordAsync(user.Id + data.Password);
-            await _db.CoreUsers.AsNoTracking().Where(u => u.Id == user.Id).ExecuteUpdateAsync(u => u.SetProperty(u => u.Password, newPassword), cancellationToken);
+            var task1 = _db.CoreUsers.AsNoTracking().Where(u => u.Id == user.Id).ExecuteUpdateAsync(u => u.SetProperty(u => u.Password, newPassword), cancellationToken);
 
             // Log
             var message = new ChangePasswordMessage
             {
                 Data = User.CreateMessageData(App.AppId, 0)
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.ChangePasswordMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.ChangePasswordMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return ActionResult.Success;
         }
@@ -2107,7 +2113,7 @@ namespace Platform.Server.Services
                 return null;
             }
 
-            var token = await CreateAppTokenDataAsync(tokenUser, rq.AppId, appData.AppSecret, true, data, cancellationToken);
+            var task1 = CreateAppTokenDataAsync(tokenUser, rq.AppId, appData.AppSecret, true, data, cancellationToken);
 
             // Push message
             var message = new SwitchOrgMessage
@@ -2116,7 +2122,11 @@ namespace Platform.Server.Services
                 FromOrganizationId = tokenUser.ChannelOrganizationInt,
                 AppId = rq.AppId
             };
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.SwitchOrgMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.SwitchOrgMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var token = task1.Result;
 
             return token;
         }
@@ -2166,7 +2176,8 @@ namespace Platform.Server.Services
 
                 // Update password
                 var newPassword = await App.HashPasswordAsync(_regUser.Id + password);
-                await _db.CoreUsers.AsNoTracking().Where(u => u.Id == _regUser.IdInt)
+                
+                var task1 = _db.CoreUsers.AsNoTracking().Where(u => u.Id == _regUser.IdInt)
                     .ExecuteUpdateAsync(u => u.SetProperty(u => u.Password, newPassword), cancellationToken);
 
                 // Log
@@ -2186,7 +2197,9 @@ namespace Platform.Server.Services
                     },
                     UserAgent = userAgent
                 };
-                await _queueService.PushAsync(message, PlatformSharedContext.Default.ResetPasswordMessage, cancellationToken);
+                var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.ResetPasswordMessage, cancellationToken);
+
+                await Task.WhenAll(task1, task2);
 
                 return ActionResult.Success;
             }

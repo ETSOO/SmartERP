@@ -61,11 +61,74 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Customer.
+        /// </summary>
+        internal static string CreateCustomer {
+            get {
+                return ResourceManager.GetString("CreateCustomer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Person Profile.
+        /// </summary>
+        internal static string CreatePersonProfile {
+            get {
+                return ResourceManager.GetString("CreatePersonProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Person Profile Link.
+        /// </summary>
+        internal static string CreatePersonProfileLink {
+            get {
+                return ResourceManager.GetString("CreatePersonProfileLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Person Profile Attachment.
+        /// </summary>
+        internal static string DeletePersonProfileAttachment {
+            get {
+                return ResourceManager.GetString("DeletePersonProfileAttachment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Person Profile Link.
+        /// </summary>
+        internal static string DeletePersonProfileLink {
+            get {
+                return ResourceManager.GetString("DeletePersonProfileLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read Person Profile.
+        /// </summary>
+        internal static string ReadPersonProfile {
+            get {
+                return ResourceManager.GetString("ReadPersonProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update Profile.
         /// </summary>
         internal static string UpdatePersonProfile {
             get {
                 return ResourceManager.GetString("UpdatePersonProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Profile Link.
+        /// </summary>
+        internal static string UpdatePersonProfileLink {
+            get {
+                return ResourceManager.GetString("UpdatePersonProfileLink", resourceCulture);
             }
         }
     }

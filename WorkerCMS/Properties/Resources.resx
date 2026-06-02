@@ -117,7 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CreateCustomer" xml:space="preserve">
+    <value>Create Customer</value>
+  </data>
+  <data name="CreatePersonProfile" xml:space="preserve">
+    <value>Create Person Profile</value>
+  </data>
+  <data name="CreatePersonProfileLink" xml:space="preserve">
+    <value>Create Person Profile Link</value>
+  </data>
+  <data name="DeletePersonProfileAttachment" xml:space="preserve">
+    <value>Delete Person Profile Attachment</value>
+  </data>
+  <data name="DeletePersonProfileLink" xml:space="preserve">
+    <value>Delete Person Profile Link</value>
+  </data>
+  <data name="ReadPersonProfile" xml:space="preserve">
+    <value>Read Person Profile</value>
+  </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>Update Profile</value>
+  </data>
+  <data name="UpdatePersonProfileLink" xml:space="preserve">
+    <value>Update Profile Link</value>
   </data>
 </root>

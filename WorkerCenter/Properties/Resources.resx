@@ -270,4 +270,7 @@
   <data name="DeleteDocument" xml:space="preserve">
     <value>Remove Business Document</value>
   </data>
+  <data name="SendProfileEmail" xml:space="preserve">
+    <value>Send Profile Email</value>
+  </data>
 </root>

@@ -19,6 +19,7 @@ using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using PlatformShared.Services;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -145,8 +146,18 @@ namespace CRM.Server.Services
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = profile.Id;
+
+            // Push message
+            var message = new CreatePersonProfileMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, profile.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.PersonProfileCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePersonProfileMessage, cancellationToken);
+
             // Return
-            return ActionResult.Succeed(profile.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -322,7 +333,17 @@ namespace CRM.Server.Services
             _db.PersonProfileLinks.Add(link);
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(link.Id);
+            var id = link.Id;
+
+            // Push message
+            var message = new CreatePersonProfileLinkMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, link.Content),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.PersonProfileLinkCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePersonProfileLinkMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -334,18 +355,28 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAttachmentAsync(long id, CancellationToken cancellationToken = default)
         {
-            var result = await _db.PersonProfileAttachments.AsNoTracking()
+            var fileName = await _db.PersonProfileAttachments.AsNoTracking()
                 .CheckAttachmentEditable(User, id)
-                .ExecuteDeleteAsync(cancellationToken);
+                .Select(a => a.FileName)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (result == 0)
+            if (fileName == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
-            else
+
+            var task1 = _db.PersonProfileAttachments.Where(a => a.Id == id).ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeletePersonProfileAttachmentMessage
             {
-                return ActionResult.Succeed(id);
-            }
+                Data = User.CreateMessageData(App.AppId, id, fileName)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePersonProfileAttachmentMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -357,18 +388,28 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteLinkAsync(long id, CancellationToken cancellationToken = default)
         {
-            var result = await _db.PersonProfileLinks.AsNoTracking()
+            var link = await _db.PersonProfileLinks.AsNoTracking()
                 .CheckLinkEditable(User, id)
-                .ExecuteDeleteAsync(cancellationToken);
+                .Select(l => l.Content)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (result == 0)
+            if (link == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
-            else
+
+            var task1 = _db.PersonProfileLinks.Where(l => l.Id == id).ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeletePersonProfileLinkMessage
             {
-                return ActionResult.Succeed(id);
-            }
+                Data = User.CreateMessageData(App.AppId, id, link)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePersonProfileLinkMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -496,7 +537,7 @@ namespace CRM.Server.Services
             var oid = User.Oid;
             var isAdmin = User.Role >= UserRole.Admin;
 
-            return await _db.UserProfiles(User, id).AsNoTracking()
+            var data = await _db.UserProfiles(User, id).AsNoTracking()
                 .Select(p => new PersonProfileViewData
                 {
                     Id = p.Id,
@@ -554,6 +595,15 @@ namespace CRM.Server.Services
                         IsSelf = a.UserId == oid
                     }).Take(16).ToList()
                 }).FirstOrDefaultAsync(cancellationToken);
+
+            // Push message
+            var message = new ReadPersonProfileMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, data?.Title ?? "Not Found")
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadPersonProfileMessage, cancellationToken);
+
+            return data;
         }
 
         /// <summary>
@@ -566,15 +616,29 @@ namespace CRM.Server.Services
         public async Task<PersonProfileInnerViewData?> ReadInnerAsync(long id, CancellationToken cancellationToken = default)
         {
             // Person identity type
-            var identityType = await _db.PersonProfiles.AsNoTracking()
+            var data = await _db.PersonProfiles.AsNoTracking()
                 .Where(p => p.Id == id)
-                .Select(p => p.Person.IdentityType)
+                .Select(p => new { p.Title, p.Person.IdentityType })
                 .FirstOrDefaultAsync(cancellationToken);
 
+            if (data == null)
+            {
+                return null;
+            }
+
+            var identityType = data.IdentityType;
             if (!await _commonService.HasIdentityPermissionAsync(identityType, nameof(Permissions.Org.ViewProfile), cancellationToken))
             {
                 return null;
             }
+
+            // Push message
+            var message = new ReadPersonProfileMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, data.Title),
+                IsInner = true
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadPersonProfileMessage, cancellationToken);
 
             var orgId = User.OrganizationInt;
             var oid = User.Oid;
@@ -751,7 +815,7 @@ namespace CRM.Server.Services
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new UpdatePersonProfileMessage
@@ -759,7 +823,9 @@ namespace CRM.Server.Services
                 Data = User.CreateMessageData(App.AppId, rq.Id, profile.Title),
                 Changes = changes
             };
-            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProfileMessage, cancellationToken);
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProfileMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -828,10 +894,20 @@ namespace CRM.Server.Services
             }
 
             // Changes
-            // var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdatePersonProfileLinkMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, link.Content),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProfileLinkMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
