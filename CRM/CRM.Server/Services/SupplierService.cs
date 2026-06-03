@@ -7,18 +7,19 @@ using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
-using CRM.Server.Dto.Customer;
 using CRM.Server.Dto.PersonInfo;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.RQ;
-using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Supplier;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -30,18 +31,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public SupplierService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<SupplierService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "supplier", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -200,7 +204,17 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(supplier.Id);
+            var id = supplier.Id;
+
+            // Push message
+            var message = new CreateSupplierMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, supplier.Name),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.SupplierCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateSupplierMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<Person> CreateQuery(SupplierListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
@@ -493,8 +507,21 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateSupplierMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, supplier.Name),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateSupplierMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

@@ -118,13 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CreateCustomer" xml:space="preserve">
-    <value>添加客户</value>
+    <value>创建客户</value>
   </data>
   <data name="CreatePersonProfile" xml:space="preserve">
     <value>创建档案</value>
   </data>
   <data name="CreatePersonProfileLink" xml:space="preserve">
     <value>创建档案链接</value>
+  </data>
+  <data name="CreateSupplier" xml:space="preserve">
+    <value>创建供应商</value>
   </data>
   <data name="DeletePersonProfileAttachment" xml:space="preserve">
     <value>移除档案附件</value>
@@ -135,10 +138,16 @@
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>浏览档案</value>
   </data>
+  <data name="UpdateCustomer" xml:space="preserve">
+    <value>更新客户</value>
+  </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>更新档案</value>
   </data>
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>更新档案链接</value>
+  </data>
+  <data name="UpdateSupplier" xml:space="preserve">
+    <value>更新供应商</value>
   </data>
 </root>

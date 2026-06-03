@@ -11,6 +11,8 @@ using CRM.Server.Dto.Person;
 using CRM.Server.RQ.Person;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
@@ -27,18 +29,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public PersonService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "person", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -215,17 +220,34 @@ namespace CRM.Server.Services
 
             try
             {
+                // Read info
+                var task1 = _db.Persons.Where(p => p.Id == id).Select(p => new { p.IdentityType, p.Name }).FirstOrDefaultAsync(cancellationToken);
+
                 // Remove infos
-                await _db.PersonInfos.Where(pi => pi.PersonId == id).ExecuteDeleteAsync(cancellationToken);
+                var task2 = _db.PersonInfos.Where(pi => pi.PersonId == id).ExecuteDeleteAsync(cancellationToken);
+
+                // Remove addresses
+                var task3 = _db.PersonAddresses.Where(pa => pa.PersonId == id).ExecuteDeleteAsync(cancellationToken);
 
                 // More safe deletes
                 // ...
+                await Task.WhenAll(task1, task2, task3);
+
+                var person = task1.Result ?? throw new Exception($"Person {id} not found");
 
                 // Remove
                 await _db.Persons.Where(p => p.Id == id).ExecuteDeleteAsync(cancellationToken);
 
                 // Commit
                 await transaction.CommitAsync(cancellationToken);
+
+                // Push message
+                var message = new DeletePersonMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, person.Name),
+                    IdentityType = person.IdentityType
+                };
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePersonMessage, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -235,7 +257,6 @@ namespace CRM.Server.Services
                 // Log and return the result
                 return LogException(ex);
             }
-
 
             return ActionResult.Succeed(id);
         }

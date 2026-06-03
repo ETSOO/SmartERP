@@ -25,8 +25,8 @@ namespace PlatformShared.Messages
 
         public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            ["IdentifierType"] = IdentifierType.ToString(),
-            ["IdentifierValue"] = IdentifierValue
+            [nameof(IdentifierType)] = IdentifierType.ToString(),
+            [nameof(IdentifierValue)] = IdentifierValue
         };
     }
 }

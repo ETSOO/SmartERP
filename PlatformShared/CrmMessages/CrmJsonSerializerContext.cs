@@ -18,12 +18,15 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(CreateCustomerMessage))]
     [JsonSerializable(typeof(CreatePersonProfileLinkMessage))]
     [JsonSerializable(typeof(CreatePersonProfileMessage))]
+    [JsonSerializable(typeof(CreateSupplierMessage))]
+    [JsonSerializable(typeof(DeletePersonMessage))]
     [JsonSerializable(typeof(DeletePersonProfileAttachmentMessage))]
     [JsonSerializable(typeof(DeletePersonProfileLinkMessage))]
     [JsonSerializable(typeof(ReadPersonProfileMessage))]
     [JsonSerializable(typeof(UpdateCustomerMessage))]
     [JsonSerializable(typeof(UpdatePersonProfileLinkMessage))]
     [JsonSerializable(typeof(UpdatePersonProfileMessage))]
+    [JsonSerializable(typeof(UpdateSupplierMessage))]
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {
     }

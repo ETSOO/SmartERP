@@ -126,6 +126,9 @@
   <data name="CreatePersonProfileLink" xml:space="preserve">
     <value>Create Person Profile Link</value>
   </data>
+  <data name="CreateSupplier" xml:space="preserve">
+    <value>Create Supplier</value>
+  </data>
   <data name="DeletePersonProfileAttachment" xml:space="preserve">
     <value>Delete Person Profile Attachment</value>
   </data>
@@ -135,10 +138,16 @@
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>Read Person Profile</value>
   </data>
+  <data name="UpdateCustomer" xml:space="preserve">
+    <value>Update Customer</value>
+  </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>Update Profile</value>
   </data>
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>Update Profile Link</value>
+  </data>
+  <data name="UpdateSupplier" xml:space="preserve">
+    <value>Update Supplier</value>
   </data>
 </root>
