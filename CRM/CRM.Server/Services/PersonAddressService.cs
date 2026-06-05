@@ -10,10 +10,13 @@ using CRM.Server.RQ;
 using CRM.Server.RQ.PersonAddress;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -25,18 +28,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public PersonAddressService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonAddressService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "person_address", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -101,6 +107,14 @@ namespace CRM.Server.Services
 
                 // Get the id
                 addressId = addr.Id;
+
+                // Push message
+                var message = new CreatePersonAddressMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, addressId, addr.FormattedAddress),
+                    JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.AddressCreateRQ)
+                };
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePersonAddressMessage, cancellationToken);
             }
 
             // Return
@@ -182,7 +196,17 @@ namespace CRM.Server.Services
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(newAddr.Id);
+            var id = newAddr.Id;
+
+            // Push message
+            var message = new CreatePersonLocationMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, newAddr.Name),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.AddressLocationCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePersonLocationMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -199,7 +223,7 @@ namespace CRM.Server.Services
 
             var addr = await _db.PersonAddresses
                .Where(a => a.Id == id && a.Person.OrgId == orgId)
-               .Select(a => new { a.Person.IdentityType })
+               .Select(a => new { a.FormattedAddress, a.Person.IdentityType })
                .FirstOrDefaultAsync(cancellationToken);
 
             if (addr == null)
@@ -212,9 +236,20 @@ namespace CRM.Server.Services
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
-            var result = await _db.PersonAddresses.AsNoTracking()
+            var task1 = _db.PersonAddresses.AsNoTracking()
                 .Where(p => p.Id == id)
                 .ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeletePersonAddressMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, addr.FormattedAddress)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePersonAddressMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var result = task1.Result;
 
             if (result == 0)
             {
@@ -505,8 +540,21 @@ namespace CRM.Server.Services
                 addr.ParentId = rq.ParentId;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdatePersonAddressMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, addr.Name),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonAddressMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

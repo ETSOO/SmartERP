@@ -221,13 +221,20 @@ namespace CRM.Server.Services
             try
             {
                 // Read info
-                var task1 = _db.Persons.Where(p => p.Id == id).Select(p => new { p.IdentityType, p.Name }).FirstOrDefaultAsync(cancellationToken);
+                var task1 = _db.Persons.AsNoTracking()
+                    .Where(p => p.Id == id)
+                    .Select(p => new { p.IdentityType, p.Name, p.ReportTo, p.UserId })
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 // Remove infos
-                var task2 = _db.PersonInfos.Where(pi => pi.PersonId == id).ExecuteDeleteAsync(cancellationToken);
+                var task2 = _db.PersonInfos.AsNoTracking()
+                    .Where(pi => pi.PersonId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
 
                 // Remove addresses
-                var task3 = _db.PersonAddresses.Where(pa => pa.PersonId == id).ExecuteDeleteAsync(cancellationToken);
+                var task3 = _db.PersonAddresses.AsNoTracking()
+                    .Where(pa => pa.PersonId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
 
                 // More safe deletes
                 // ...
@@ -236,7 +243,9 @@ namespace CRM.Server.Services
                 var person = task1.Result ?? throw new Exception($"Person {id} not found");
 
                 // Remove
-                await _db.Persons.Where(p => p.Id == id).ExecuteDeleteAsync(cancellationToken);
+                await _db.Persons.AsNoTracking()
+                    .Where(p => p.Id == id)
+                    .ExecuteDeleteAsync(cancellationToken);
 
                 // Commit
                 await transaction.CommitAsync(cancellationToken);
@@ -245,7 +254,9 @@ namespace CRM.Server.Services
                 var message = new DeletePersonMessage
                 {
                     Data = User.CreateMessageData(App.AppId, id, person.Name),
-                    IdentityType = person.IdentityType
+                    IdentityType = person.IdentityType,
+                    UserId = person.UserId,
+                    ReportTo = person.ReportTo
                 };
                 await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePersonMessage, cancellationToken);
             }
@@ -561,7 +572,15 @@ namespace CRM.Server.Services
                     InviterName = p.Inviter == null ? null : p.Inviter.Name,
                     RefreshTime = p.RefreshTime
 
-                }).FirstOrDefaultAsync(cancellationToken);
+                }).FirstAsync(cancellationToken);
+
+            // Push message
+            var message = new ReadPersonMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, data.Name),
+                IdentityType = data.IdentityType
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadPersonMessage, cancellationToken);
 
             return data;
         }
@@ -783,10 +802,20 @@ namespace CRM.Server.Services
             }
 
             // Changes
-            // var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdatePersonMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, person.Name),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

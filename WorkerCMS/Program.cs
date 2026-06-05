@@ -69,17 +69,29 @@ services.AddDbContext<LogDbContext>((provider, options) =>
 }, ServiceLifetime.Singleton);
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
+
+// Person
+services.AddSingleton<IMessageQueueProcessor, CreatePersonAddressProcessor>();
+services.AddSingleton<IMessageQueueProcessor, CreatePersonLocationProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeletePersonAddressProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePersonAddressProcessor>();
+
 services.AddSingleton<IMessageQueueProcessor, CreateCustomerProcessor>();
+services.AddSingleton<IMessageQueueProcessor, CreateSupplierProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeletePersonProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReadPersonProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateCustomerProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePersonProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateSupplierProcessor>();
+
 services.AddSingleton<IMessageQueueProcessor, CreatePersonProfileLinkProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreatePersonProfileProcessor>();
-services.AddSingleton<IMessageQueueProcessor, CreateSupplierProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeletePersonProfileAttachmentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreatePersonProfileProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadPersonProfileProcessor>();
-services.AddSingleton<IMessageQueueProcessor, UpdateCustomerProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePersonProfileLinkProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePersonProfileProcessor>();
-services.AddSingleton<IMessageQueueProcessor, UpdateSupplierProcessor>();
+
 services.AddLocalRabbitMQConsumer(consumerOptions);
 
 var producerOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer Options Not Found");

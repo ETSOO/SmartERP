@@ -594,12 +594,12 @@ namespace CRM.Server.Services
                         Creation = a.Creation,
                         IsSelf = a.UserId == oid
                     }).Take(16).ToList()
-                }).FirstOrDefaultAsync(cancellationToken);
+                }).FirstAsync(cancellationToken);
 
             // Push message
             var message = new ReadPersonProfileMessage
             {
-                Data = User.CreateMessageData(App.AppId, id, data?.Title ?? "Not Found")
+                Data = User.CreateMessageData(App.AppId, id, data.Title)
             };
             await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadPersonProfileMessage, cancellationToken);
 

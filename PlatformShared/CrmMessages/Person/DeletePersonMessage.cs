@@ -18,9 +18,23 @@ namespace PlatformShared.CrmMessages.Person
         /// </summary>
         public IdentityTypeFlags IdentityType { get; init; }
 
+        /// <summary>
+        /// User id
+        /// 用户编号
+        /// </summary>
+        public long UserId { get; init; }
+
+        /// <summary>
+        /// Report to user id
+        /// 汇报用户编号
+        /// </summary>
+        public long? ReportTo { get; init; }
+
         public override Dictionary<string, object?>? GetJsonData() => new()
         {
-            [nameof(IdentityType)] = IdentityType.ToString()
+            [nameof(IdentityType)] = IdentityType.ToString(),
+            [nameof(UserId)] = UserId,
+            [nameof(ReportTo)] = ReportTo
         };
     }
 }

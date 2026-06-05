@@ -135,11 +135,17 @@
   <data name="DeletePersonProfileLink" xml:space="preserve">
     <value>Delete Person Profile Link</value>
   </data>
+  <data name="ReadPerson" xml:space="preserve">
+    <value>Read Person</value>
+  </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>Read Person Profile</value>
   </data>
   <data name="UpdateCustomer" xml:space="preserve">
     <value>Update Customer</value>
+  </data>
+  <data name="UpdatePerson" xml:space="preserve">
+    <value>Update Person</value>
   </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>Update Profile</value>

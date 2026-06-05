@@ -115,6 +115,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Read Person.
+        /// </summary>
+        internal static string ReadPerson {
+            get {
+                return ResourceManager.GetString("ReadPerson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read Person Profile.
         /// </summary>
         internal static string ReadPersonProfile {
@@ -129,6 +138,15 @@ namespace WorkerCMS.Properties {
         internal static string UpdateCustomer {
             get {
                 return ResourceManager.GetString("UpdateCustomer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Person.
+        /// </summary>
+        internal static string UpdatePerson {
+            get {
+                return ResourceManager.GetString("UpdatePerson", resourceCulture);
             }
         }
         

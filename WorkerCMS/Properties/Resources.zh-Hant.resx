@@ -135,11 +135,17 @@
   <data name="DeletePersonProfileLink" xml:space="preserve">
     <value>移除檔案鏈接</value>
   </data>
+  <data name="ReadPerson" xml:space="preserve">
+    <value>瀏覽人員</value>
+  </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>瀏覽檔案</value>
   </data>
   <data name="UpdateCustomer" xml:space="preserve">
     <value>更新客戶</value>
+  </data>
+  <data name="UpdatePerson" xml:space="preserve">
+    <value>更新人員</value>
   </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>更新檔案</value>
