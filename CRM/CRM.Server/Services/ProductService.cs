@@ -11,11 +11,14 @@ using CRM.Server.Dto.Product;
 using CRM.Server.Dto.System;
 using CRM.Server.RQ.Product;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Product;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -30,18 +33,21 @@ namespace CRM.Server.Services
 
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public ProductService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<ProductService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "product", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         private async ValueTask<ActionResult> ValidateAssetQtyAsync(int orgId, int? unitId, int? assetQty, CancellationToken cancellationToken)
@@ -226,7 +232,17 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(product.Id);
+            var id = product.Id;
+
+            // Push message
+            var message = new CreateProductMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, product.Name),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.ProductCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateProductMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<Product> CreateQuery(ProductListRQ rq, Func<IQueryable<Product>, IQueryable<Product>>? filters = null)
@@ -317,15 +333,15 @@ namespace CRM.Server.Services
 
             var orgId = User.OrganizationInt;
 
-            var hasOrderLines = await _db.Products(orgId).AsNoTracking()
-                .Where(p => p.Id == id).Select(p => (bool?)p.OrderLines.Any())
+            var product = await _db.Products(orgId).AsNoTracking()
+                .Where(p => p.Id == id).Select(p => new { p.Name, HasOrderLines = p.OrderLines.Any() })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (hasOrderLines == null)
+            if (product == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
-            else if (hasOrderLines.Value)
+            else if (product.HasOrderLines)
             {
                 return ApplicationErrors.DeleteReferencedData.AsResult("Order");
             }
@@ -335,13 +351,21 @@ namespace CRM.Server.Services
             try
             {
                 // Price
-                await _db.ProductPrices.Where(pp => pp.ProductId == id).ExecuteDeleteAsync(cancellationToken);
+                var task1 = _db.ProductPrices.AsNoTracking()
+                    .Where(pp => pp.ProductId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
 
                 // Bom
-                await _db.ProductBoms.Where(pb => pb.ParentId == id).ExecuteDeleteAsync(cancellationToken);
+                var task2 = _db.ProductBoms.AsNoTracking()
+                    .Where(pb => pb.ParentId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                await Task.WhenAll(task1, task2);
 
                 // Product itself
-                await _db.Products(orgId).Where(p => p.Id == id).ExecuteDeleteAsync(cancellationToken);
+                await _db.Products(orgId).AsNoTracking()
+                    .Where(p => p.Id == id)
+                    .ExecuteDeleteAsync(cancellationToken);
 
                 // Commit
                 await transaction.CommitAsync(cancellationToken);
@@ -357,6 +381,12 @@ namespace CRM.Server.Services
                 return ApplicationErrors.DeleteReferencedData.AsResult();
             }
 
+            // Push message
+            var message = new DeleteProductMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, product.Name)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeleteProductMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -423,7 +453,7 @@ namespace CRM.Server.Services
             // Check product
             var product = await _db.Products(orgId)
                 .Where(p => p.Id == parentId)
-                .Select(p => new Product { Id = p.Id, Boms = p.Boms })
+                .Select(p => new Product { Id = p.Id, Name = p.Name, Boms = p.Boms })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (product == null)
@@ -471,6 +501,14 @@ namespace CRM.Server.Services
                 // Delete
                 await _db.ProductBoms.Where(pb => pb.ParentId == parentId).ExecuteDeleteAsync(cancellationToken);
             }
+
+            // Push message
+            var message = new ProductEditBomsMessage
+            {
+                Data = User.CreateMessageData(App.AppId, parentId, product.Name),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.ProductEditBomsRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ProductEditBomsMessage, cancellationToken);
 
             return ActionResult.Succeed(parentId);
         }
@@ -1347,8 +1385,21 @@ namespace CRM.Server.Services
                 return assetQtyResult;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateProductMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, product.Name),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateProductMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -1456,7 +1507,17 @@ namespace CRM.Server.Services
                 index++;
             }
 
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateProductUnitMessage
+            {
+                Data = User.CreateMessageData(App.AppId, orgId),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.ProductUnitUpdateRQ)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateProductUnitMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return result;
         }
@@ -1655,6 +1716,14 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
+            // Push message
+            var message = new UpdateProductLogoMessage
+            {
+                Data = User.CreateMessageData(App.AppId, orgId),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.ProductUpdateLogoRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateProductLogoMessage, cancellationToken);
+
             return ActionResult.Succeed(rq.Id);
         }
 
@@ -1718,11 +1787,13 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             // Validate product
-            var hasProduct = await _db.Products(orgId)
+            var productName = await _db.Products(orgId)
                 .AsNoTracking()
-                .AnyAsync(p => p.Id == id && p.CoreOrganizationId == orgId, cancellationToken);
+                .Where(p => p.Id == id && p.CoreOrganizationId == orgId)
+                .Select(p => p.Name)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (!hasProduct)
+            if (string.IsNullOrEmpty(productName))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(id));
             }
@@ -1756,7 +1827,18 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateProductPriceMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, productName),
+                Changes = changes
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateProductPriceMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }

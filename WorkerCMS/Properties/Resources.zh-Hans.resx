@@ -153,6 +153,9 @@
   <data name="CreatePersonProfileLink" xml:space="preserve">
     <value>创建档案链接</value>
   </data>
+  <data name="CreateProduct" xml:space="preserve">
+    <value>创建产品</value>
+  </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>创建供应商</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="MergePersonCategory" xml:space="preserve">
     <value>合并人员分类</value>
+  </data>
+  <data name="ProductEditBoms" xml:space="preserve">
+    <value>编辑产品物流清单</value>
   </data>
   <data name="ReadAssetSensitiveData" xml:space="preserve">
     <value>读取资产敏感信息</value>
@@ -218,6 +224,18 @@
   </data>
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>更新档案链接</value>
+  </data>
+  <data name="UpdateProduct" xml:space="preserve">
+    <value>更新产品</value>
+  </data>
+  <data name="UpdateProductLogo" xml:space="preserve">
+    <value>更新产品图标</value>
+  </data>
+  <data name="UpdateProductPrice" xml:space="preserve">
+    <value>更新产品价格</value>
+  </data>
+  <data name="UpdateProductUnit" xml:space="preserve">
+    <value>更新产品单位</value>
   </data>
   <data name="UpdateSettings" xml:space="preserve">
     <value>更新系统设置</value>

@@ -7,6 +7,7 @@ using OpenTelemetry.Resources;
 using PlatformShared.Database;
 using WorkerCMS.Processors.Org;
 using WorkerCMS.Processors.Person;
+using WorkerCMS.Processors.Product;
 
 var builder = Host.CreateApplicationBuilder(args);
 var configuration = builder.Configuration;
@@ -123,6 +124,15 @@ services.AddSingleton<IMessageQueueProcessor, CreatePersonProfileProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadPersonProfileProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePersonProfileLinkProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePersonProfileProcessor>();
+
+// Product
+services.AddSingleton<IMessageQueueProcessor, CreateProductProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeleteProductProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ProductEditBomsProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateProductProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateProductLogoProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateProductPriceProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateProductUnitProcessor>();
 
 services.AddLocalRabbitMQConsumer(consumerOptions);
 

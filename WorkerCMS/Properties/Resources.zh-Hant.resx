@@ -153,6 +153,9 @@
   <data name="CreatePersonProfileLink" xml:space="preserve">
     <value>建立檔案鏈接</value>
   </data>
+  <data name="CreateProduct" xml:space="preserve">
+    <value>創建產品</value>
+  </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>創建供應商</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="MergePersonCategory" xml:space="preserve">
     <value>合併人員分類</value>
+  </data>
+  <data name="ProductEditBoms" xml:space="preserve">
+    <value>編輯產品物流清單</value>
   </data>
   <data name="ReadAssetSensitiveData" xml:space="preserve">
     <value>讀取資產敏感資訊</value>
@@ -218,6 +224,18 @@
   </data>
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>更新檔案鏈接</value>
+  </data>
+  <data name="UpdateProduct" xml:space="preserve">
+    <value>更新產品</value>
+  </data>
+  <data name="UpdateProductLogo" xml:space="preserve">
+    <value>更新產品圖標</value>
+  </data>
+  <data name="UpdateProductPrice" xml:space="preserve">
+    <value>更新產品價格</value>
+  </data>
+  <data name="UpdateProductUnit" xml:space="preserve">
+    <value>更新產品單位</value>
   </data>
   <data name="UpdateSettings" xml:space="preserve">
     <value>更新系統設定</value>

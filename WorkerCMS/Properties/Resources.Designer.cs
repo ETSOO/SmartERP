@@ -169,6 +169,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Product.
+        /// </summary>
+        internal static string CreateProduct {
+            get {
+                return ResourceManager.GetString("CreateProduct", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Supplier.
         /// </summary>
         internal static string CreateSupplier {
@@ -228,6 +237,15 @@ namespace WorkerCMS.Properties {
         internal static string MergePersonCategory {
             get {
                 return ResourceManager.GetString("MergePersonCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Product Edit BOMs.
+        /// </summary>
+        internal static string ProductEditBoms {
+            get {
+                return ResourceManager.GetString("ProductEditBoms", resourceCulture);
             }
         }
         
@@ -363,6 +381,42 @@ namespace WorkerCMS.Properties {
         internal static string UpdatePersonProfileLink {
             get {
                 return ResourceManager.GetString("UpdatePersonProfileLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Product.
+        /// </summary>
+        internal static string UpdateProduct {
+            get {
+                return ResourceManager.GetString("UpdateProduct", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Product Logo.
+        /// </summary>
+        internal static string UpdateProductLogo {
+            get {
+                return ResourceManager.GetString("UpdateProductLogo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Product Price.
+        /// </summary>
+        internal static string UpdateProductPrice {
+            get {
+                return ResourceManager.GetString("UpdateProductPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Product Unit.
+        /// </summary>
+        internal static string UpdateProductUnit {
+            get {
+                return ResourceManager.GetString("UpdateProductUnit", resourceCulture);
             }
         }
         

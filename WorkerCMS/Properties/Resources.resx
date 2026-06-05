@@ -153,6 +153,9 @@
   <data name="CreatePersonProfileLink" xml:space="preserve">
     <value>Create Profile Link</value>
   </data>
+  <data name="CreateProduct" xml:space="preserve">
+    <value>Create Product</value>
+  </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>Create Supplier</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="MergePersonCategory" xml:space="preserve">
     <value>Merge Person Category</value>
+  </data>
+  <data name="ProductEditBoms" xml:space="preserve">
+    <value>Product Edit BOMs</value>
   </data>
   <data name="ReadAssetSensitiveData" xml:space="preserve">
     <value>Read Asset Sensitive Data</value>
@@ -218,6 +224,18 @@
   </data>
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>Update Profile Link</value>
+  </data>
+  <data name="UpdateProduct" xml:space="preserve">
+    <value>Update Product</value>
+  </data>
+  <data name="UpdateProductLogo" xml:space="preserve">
+    <value>Update Product Logo</value>
+  </data>
+  <data name="UpdateProductPrice" xml:space="preserve">
+    <value>Update Product Price</value>
+  </data>
+  <data name="UpdateProductUnit" xml:space="preserve">
+    <value>Update Product Unit</value>
   </data>
   <data name="UpdateSettings" xml:space="preserve">
     <value>Update System Settings</value>

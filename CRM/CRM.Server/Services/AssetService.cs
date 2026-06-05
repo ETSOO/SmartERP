@@ -562,7 +562,8 @@ namespace CRM.Server.Services
             // Push message
             var message = new UpdateAssetMessage
             {
-                Data = User.CreateMessageData(App.AppId, rq.Id, asset.Sn)
+                Data = User.CreateMessageData(App.AppId, rq.Id, asset.Sn),
+                Changes = changes
             };
             var task3 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateAssetMessage, cancellationToken);
 

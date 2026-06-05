@@ -1,5 +1,6 @@
 ﻿using PlatformShared.CrmMessages.Org;
 using PlatformShared.CrmMessages.Person;
+using PlatformShared.CrmMessages.Product;
 using System.Text.Json.Serialization;
 
 namespace PlatformShared.CrmMessages
@@ -67,6 +68,15 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(ReadPersonProfileMessage))]
     [JsonSerializable(typeof(UpdatePersonProfileLinkMessage))]
     [JsonSerializable(typeof(UpdatePersonProfileMessage))]
+
+    // Product
+    [JsonSerializable(typeof(CreateProductMessage))]
+    [JsonSerializable(typeof(DeleteProductMessage))]
+    [JsonSerializable(typeof(ProductEditBomsMessage))]
+    [JsonSerializable(typeof(UpdateProductMessage))]
+    [JsonSerializable(typeof(UpdateProductLogoMessage))]
+    [JsonSerializable(typeof(UpdateProductPriceMessage))]
+    [JsonSerializable(typeof(UpdateProductUnitMessage))]
 
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {
