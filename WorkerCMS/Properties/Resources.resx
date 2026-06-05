@@ -129,6 +129,9 @@
   <data name="CreateCustomer" xml:space="preserve">
     <value>Create Customer</value>
   </data>
+  <data name="CreateDept" xml:space="preserve">
+    <value>Create Dept</value>
+  </data>
   <data name="CreatePersonAddress" xml:space="preserve">
     <value>Create Address</value>
   </data>
@@ -189,8 +192,14 @@
   <data name="UpdateContactRelation" xml:space="preserve">
     <value>Update Contact Relation</value>
   </data>
+  <data name="UpdateCulture" xml:space="preserve">
+    <value>Update Culture Label</value>
+  </data>
   <data name="UpdateCustomer" xml:space="preserve">
     <value>Update Customer</value>
+  </data>
+  <data name="UpdateDept" xml:space="preserve">
+    <value>Update Dept</value>
   </data>
   <data name="UpdatePerson" xml:space="preserve">
     <value>Update Person</value>
@@ -210,7 +219,13 @@
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>Update Profile Link</value>
   </data>
+  <data name="UpdateSettings" xml:space="preserve">
+    <value>Update System Settings</value>
+  </data>
   <data name="UpdateSupplier" xml:space="preserve">
     <value>Update Supplier</value>
+  </data>
+  <data name="UpdateUser" xml:space="preserve">
+    <value>Update User</value>
   </data>
 </root>

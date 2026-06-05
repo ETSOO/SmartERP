@@ -97,6 +97,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Dept.
+        /// </summary>
+        internal static string CreateDept {
+            get {
+                return ResourceManager.GetString("CreateDept", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Address.
         /// </summary>
         internal static string CreatePersonAddress {
@@ -277,11 +286,29 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update Culture Label.
+        /// </summary>
+        internal static string UpdateCulture {
+            get {
+                return ResourceManager.GetString("UpdateCulture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update Customer.
         /// </summary>
         internal static string UpdateCustomer {
             get {
                 return ResourceManager.GetString("UpdateCustomer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Dept.
+        /// </summary>
+        internal static string UpdateDept {
+            get {
+                return ResourceManager.GetString("UpdateDept", resourceCulture);
             }
         }
         
@@ -340,11 +367,29 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update System Settings.
+        /// </summary>
+        internal static string UpdateSettings {
+            get {
+                return ResourceManager.GetString("UpdateSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update Supplier.
         /// </summary>
         internal static string UpdateSupplier {
             get {
                 return ResourceManager.GetString("UpdateSupplier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update User.
+        /// </summary>
+        internal static string UpdateUser {
+            get {
+                return ResourceManager.GetString("UpdateUser", resourceCulture);
             }
         }
     }

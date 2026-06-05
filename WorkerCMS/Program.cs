@@ -4,7 +4,6 @@ using com.etsoo.MessageQueue.QueueProcessors;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
-using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using WorkerCMS.Processors.Org;
 using WorkerCMS.Processors.Person;
@@ -76,6 +75,14 @@ var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabb
 services.AddSingleton<IMessageQueueProcessor, CreateAssetProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadAssetSensitiveDataProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateAssetProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, CreateDeptProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateDeptProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, UpdateCultureProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateSettingsProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, UpdateUserProcessor>();
 
 // Person
 services.AddSingleton<IMessageQueueProcessor, CreatePersonAddressProcessor>();

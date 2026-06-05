@@ -7,7 +7,7 @@ namespace PlatformShared.CrmMessages.Org
     /// Update asset message
     /// 更新资产消息
     /// </summary>
-    public record UpdateAssetMessage : CommonMessage, IMessageQueueMessage
+    public record UpdateAssetMessage : CommonUpdateMessage, IMessageQueueMessage
     {
         public static string Type => "UpdateAsset";
     }

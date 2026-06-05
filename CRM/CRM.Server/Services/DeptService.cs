@@ -9,10 +9,13 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Dept;
 using CRM.Server.RQ.Dept;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Org;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -24,18 +27,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public DeptService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<DeptService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "dept", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -85,8 +91,18 @@ namespace CRM.Server.Services
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = dept.Id;
+
+            // Push message
+            var message = new CreateDeptMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, dept.Name),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.DeptCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateDeptMessage, cancellationToken);
+
             // Return
-            return ActionResult.Succeed(dept.Id);
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<Person> CreateQuery(DeptListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
@@ -228,10 +244,20 @@ namespace CRM.Server.Services
             }
 
             // Changes
-            // var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateDeptMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, dept.Name),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateDeptMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

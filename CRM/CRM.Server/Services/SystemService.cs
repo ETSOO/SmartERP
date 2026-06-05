@@ -8,8 +8,11 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.System;
 using CRM.Server.RQ.System;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Org;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
 
 namespace CRM.Server.Services
 {
@@ -46,18 +49,21 @@ namespace CRM.Server.Services
 
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public SystemService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<SystemService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "system", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -164,9 +170,22 @@ namespace CRM.Server.Services
                 culture.JsonData = rq.JsonData;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(culture.Id);
+            var id = culture.Id;
+
+            // Push message
+            var message = new UpdateCultureMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, culture.Title),
+                Changes = changes
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateCultureMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -268,7 +287,20 @@ namespace CRM.Server.Services
                 }
             }
 
-            await _db.SaveChangesAsync(cancellationToken);
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateSettingsMessage
+            {
+                Data = User.CreateMessageData(App.AppId, orgId),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateSettingsMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Success;

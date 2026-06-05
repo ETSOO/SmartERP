@@ -129,6 +129,9 @@
   <data name="CreateCustomer" xml:space="preserve">
     <value>創建客戶</value>
   </data>
+  <data name="CreateDept" xml:space="preserve">
+    <value>創建部門</value>
+  </data>
   <data name="CreatePersonAddress" xml:space="preserve">
     <value>建立地址</value>
   </data>
@@ -189,8 +192,14 @@
   <data name="UpdateContactRelation" xml:space="preserve">
     <value>更新聯絡人關係</value>
   </data>
+  <data name="UpdateCulture" xml:space="preserve">
+    <value>更新語言標籤</value>
+  </data>
   <data name="UpdateCustomer" xml:space="preserve">
     <value>更新客戶</value>
+  </data>
+  <data name="UpdateDept" xml:space="preserve">
+    <value>更新部門</value>
   </data>
   <data name="UpdatePerson" xml:space="preserve">
     <value>更新人員</value>
@@ -210,7 +219,13 @@
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>更新檔案鏈接</value>
   </data>
+  <data name="UpdateSettings" xml:space="preserve">
+    <value>更新系統設定</value>
+  </data>
   <data name="UpdateSupplier" xml:space="preserve">
     <value>更新供應商</value>
+  </data>
+  <data name="UpdateUser" xml:space="preserve">
+    <value>更新用戶</value>
   </data>
 </root>

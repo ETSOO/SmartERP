@@ -20,6 +20,14 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(ReadAssetSensitiveDataMessage))]
     [JsonSerializable(typeof(UpdateAssetMessage))]
 
+    [JsonSerializable(typeof(CreateDeptMessage))]
+    [JsonSerializable(typeof(UpdateDeptMessage))]
+
+    [JsonSerializable(typeof(UpdateCultureMessage))]
+    [JsonSerializable(typeof(UpdateSettingsMessage))]
+
+    [JsonSerializable(typeof(UpdateUserMessage))]
+
     // Person
     [JsonSerializable(typeof(CreatePersonAddressMessage))]
     [JsonSerializable(typeof(CreatePersonLocationMessage))]

@@ -12,6 +12,8 @@ using CRM.Server.Dto.User;
 using CRM.Server.RQ.User;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Org;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
@@ -27,18 +29,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public UserService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<UserService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "user", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         private IQueryable<Person> CreateQuery(UserListRQ rq, Func<IQueryable<Person>, IQueryable<Person>>? filters = null)
@@ -313,10 +318,20 @@ namespace CRM.Server.Services
             }
 
             // Changes
-            // var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateUserMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, user.Name),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateUserMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
