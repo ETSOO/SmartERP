@@ -70,6 +70,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Asset.
+        /// </summary>
+        internal static string CreateAsset {
+            get {
+                return ResourceManager.GetString("CreateAsset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Contact.
         /// </summary>
         internal static string CreateContact {
@@ -214,6 +223,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Read Asset Sensitive Data.
+        /// </summary>
+        internal static string ReadAssetSensitiveData {
+            get {
+                return ResourceManager.GetString("ReadAssetSensitiveData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read Person.
         /// </summary>
         internal static string ReadPerson {
@@ -237,6 +255,15 @@ namespace WorkerCMS.Properties {
         internal static string SortPersonCategory {
             get {
                 return ResourceManager.GetString("SortPersonCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Asset.
+        /// </summary>
+        internal static string UpdateAsset {
+            get {
+                return ResourceManager.GetString("UpdateAsset", resourceCulture);
             }
         }
         

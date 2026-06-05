@@ -11,6 +11,8 @@ using CRM.Server.Dto.Product;
 using CRM.Server.Properties;
 using CRM.Server.RQ.Asset;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Org;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
@@ -29,18 +31,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public AssetService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<AssetService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "asset", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         private string GetEncryptionKey(int productId)
@@ -171,6 +176,14 @@ namespace CRM.Server.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             var id = asset.Id;
+
+            // Push message
+            var message = new CreateAssetMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, asset.Sn),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.AssetCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateAssetMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -341,10 +354,21 @@ namespace CRM.Server.Services
 
             var orgId = User.OrganizationInt;
 
-            var data = await _db.Assets(orgId).AsNoTracking()
+            var task1 = _db.Assets(orgId).AsNoTracking()
                 .Where(p => p.Id == id)
                 .Select(a => new { a.ProductId, a.SensitiveData })
                 .FirstOrDefaultAsync(cancellationToken);
+
+            // Push message
+            var message = new ReadAssetSensitiveDataMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadAssetSensitiveDataMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var data = task1.Result;
 
             if (data != null && !string.IsNullOrEmpty(data.SensitiveData))
             {
@@ -510,8 +534,9 @@ namespace CRM.Server.Services
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
 
+            Task task2;
             if (hasFinanceChange)
             {
                 // Add profile
@@ -527,8 +552,21 @@ namespace CRM.Server.Services
                     Comment = comment,
                     Data = data
                 };
-                await _commonService.AddProfileAsync(profile, cancellationToken);
+                task2 = _commonService.AddProfileAsync(profile, cancellationToken);
             }
+            else
+            {
+                task2 = Task.CompletedTask;
+            }
+
+            // Push message
+            var message = new UpdateAssetMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, asset.Sn)
+            };
+            var task3 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateAssetMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2, task3);
 
             // Return
             return ActionResult.Succeed(rq.Id);

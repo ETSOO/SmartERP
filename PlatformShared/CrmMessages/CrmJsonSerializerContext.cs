@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages.Person;
+﻿using PlatformShared.CrmMessages.Org;
+using PlatformShared.CrmMessages.Person;
 using System.Text.Json.Serialization;
 
 namespace PlatformShared.CrmMessages
@@ -13,6 +14,11 @@ namespace PlatformShared.CrmMessages
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
+
+    // Org
+    [JsonSerializable(typeof(CreateAssetMessage))]
+    [JsonSerializable(typeof(ReadAssetSensitiveDataMessage))]
+    [JsonSerializable(typeof(UpdateAssetMessage))]
 
     // Person
     [JsonSerializable(typeof(CreatePersonAddressMessage))]

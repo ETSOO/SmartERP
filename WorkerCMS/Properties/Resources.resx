@@ -120,6 +120,9 @@
   <data name="AddContactRelation" xml:space="preserve">
     <value>Add Contact Relation</value>
   </data>
+  <data name="CreateAsset" xml:space="preserve">
+    <value>Create Asset</value>
+  </data>
   <data name="CreateContact" xml:space="preserve">
     <value>Create Contact</value>
   </data>
@@ -168,6 +171,9 @@
   <data name="MergePersonCategory" xml:space="preserve">
     <value>Merge Person Category</value>
   </data>
+  <data name="ReadAssetSensitiveData" xml:space="preserve">
+    <value>Read Asset Sensitive Data</value>
+  </data>
   <data name="ReadPerson" xml:space="preserve">
     <value>Read Person</value>
   </data>
@@ -176,6 +182,9 @@
   </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>Sort Person Category</value>
+  </data>
+  <data name="UpdateAsset" xml:space="preserve">
+    <value>Update Asset</value>
   </data>
   <data name="UpdateContactRelation" xml:space="preserve">
     <value>Update Contact Relation</value>

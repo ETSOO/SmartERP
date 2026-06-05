@@ -36,8 +36,4 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Processors\Org\" />
-  </ItemGroup>
 </Project>

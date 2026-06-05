@@ -120,6 +120,9 @@
   <data name="AddContactRelation" xml:space="preserve">
     <value>添加联系人关系</value>
   </data>
+  <data name="CreateAsset" xml:space="preserve">
+    <value>创建资产</value>
+  </data>
   <data name="CreateContact" xml:space="preserve">
     <value>创建联系人</value>
   </data>
@@ -168,6 +171,9 @@
   <data name="MergePersonCategory" xml:space="preserve">
     <value>合并人员分类</value>
   </data>
+  <data name="ReadAssetSensitiveData" xml:space="preserve">
+    <value>读取资产敏感信息</value>
+  </data>
   <data name="ReadPerson" xml:space="preserve">
     <value>浏览人员</value>
   </data>
@@ -176,6 +182,9 @@
   </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>排序人员类别</value>
+  </data>
+  <data name="UpdateAsset" xml:space="preserve">
+    <value>更新资产</value>
   </data>
   <data name="UpdateContactRelation" xml:space="preserve">
     <value>更新联系人关系</value>

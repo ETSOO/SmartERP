@@ -6,6 +6,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
+using WorkerCMS.Processors.Org;
 using WorkerCMS.Processors.Person;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -70,6 +71,11 @@ services.AddDbContext<LogDbContext>((provider, options) =>
 }, ServiceLifetime.Singleton);
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
+
+// Org
+services.AddSingleton<IMessageQueueProcessor, CreateAssetProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReadAssetSensitiveDataProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateAssetProcessor>();
 
 // Person
 services.AddSingleton<IMessageQueueProcessor, CreatePersonAddressProcessor>();
