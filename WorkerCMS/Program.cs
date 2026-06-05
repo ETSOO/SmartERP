@@ -4,6 +4,7 @@ using com.etsoo.MessageQueue.QueueProcessors;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using WorkerCMS.Processors.Person;
 
@@ -75,6 +76,15 @@ services.AddSingleton<IMessageQueueProcessor, CreatePersonAddressProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreatePersonLocationProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeletePersonAddressProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePersonAddressProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, CreatePersonCategoryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, MergePersonCategoryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, SortPersonCategoryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePersonCategoryProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, CreatePersonInfoProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeletePersonInfoProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePersonInfoProcessor>();
 
 services.AddSingleton<IMessageQueueProcessor, CreateCustomerProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreateSupplierProcessor>();

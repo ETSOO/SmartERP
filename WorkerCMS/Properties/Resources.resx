@@ -126,6 +126,9 @@
   <data name="CreatePersonCategory" xml:space="preserve">
     <value>Create Person Category</value>
   </data>
+  <data name="CreatePersonInfo" xml:space="preserve">
+    <value>Create Person Info</value>
+  </data>
   <data name="CreatePersonLocation" xml:space="preserve">
     <value>Create Location</value>
   </data>
@@ -140,6 +143,9 @@
   </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>Create Supplier</value>
+  </data>
+  <data name="DeletePersonInfo" xml:space="preserve">
+    <value>Delete Person Info</value>
   </data>
   <data name="DeletePersonProduct" xml:space="preserve">
     <value>Delete Person Product</value>
@@ -170,6 +176,9 @@
   </data>
   <data name="UpdatePersonCategory" xml:space="preserve">
     <value>Update Person Category</value>
+  </data>
+  <data name="UpdatePersonInfo" xml:space="preserve">
+    <value>Update Person Info</value>
   </data>
   <data name="UpdatePersonProduct" xml:space="preserve">
     <value>Update Person Product</value>
