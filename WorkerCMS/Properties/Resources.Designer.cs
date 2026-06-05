@@ -70,7 +70,34 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create Person Profile.
+        ///   Looks up a localized string similar to Create Address.
+        /// </summary>
+        internal static string CreatePersonAddress {
+            get {
+                return ResourceManager.GetString("CreatePersonAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Person Category.
+        /// </summary>
+        internal static string CreatePersonCategory {
+            get {
+                return ResourceManager.GetString("CreatePersonCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Location.
+        /// </summary>
+        internal static string CreatePersonLocation {
+            get {
+                return ResourceManager.GetString("CreatePersonLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Profile.
         /// </summary>
         internal static string CreatePersonProfile {
             get {
@@ -79,7 +106,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create Person Profile Link.
+        ///   Looks up a localized string similar to Create Profile Link.
         /// </summary>
         internal static string CreatePersonProfileLink {
             get {
@@ -97,7 +124,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Person Profile Attachment.
+        ///   Looks up a localized string similar to Delete Profile Attachment.
         /// </summary>
         internal static string DeletePersonProfileAttachment {
             get {
@@ -106,11 +133,20 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Person Profile Link.
+        ///   Looks up a localized string similar to Delete Profile Link.
         /// </summary>
         internal static string DeletePersonProfileLink {
             get {
                 return ResourceManager.GetString("DeletePersonProfileLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Merge Person Category.
+        /// </summary>
+        internal static string MergePersonCategory {
+            get {
+                return ResourceManager.GetString("MergePersonCategory", resourceCulture);
             }
         }
         
@@ -124,11 +160,20 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Read Person Profile.
+        ///   Looks up a localized string similar to Read Profile.
         /// </summary>
         internal static string ReadPersonProfile {
             get {
                 return ResourceManager.GetString("ReadPersonProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sort Person Category.
+        /// </summary>
+        internal static string SortPersonCategory {
+            get {
+                return ResourceManager.GetString("SortPersonCategory", resourceCulture);
             }
         }
         
@@ -147,6 +192,15 @@ namespace WorkerCMS.Properties {
         internal static string UpdatePerson {
             get {
                 return ResourceManager.GetString("UpdatePerson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Person Category.
+        /// </summary>
+        internal static string UpdatePersonCategory {
+            get {
+                return ResourceManager.GetString("UpdatePersonCategory", resourceCulture);
             }
         }
         

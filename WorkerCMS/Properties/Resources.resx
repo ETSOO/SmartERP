@@ -120,32 +120,50 @@
   <data name="CreateCustomer" xml:space="preserve">
     <value>Create Customer</value>
   </data>
+  <data name="CreatePersonAddress" xml:space="preserve">
+    <value>Create Address</value>
+  </data>
+  <data name="CreatePersonCategory" xml:space="preserve">
+    <value>Create Person Category</value>
+  </data>
+  <data name="CreatePersonLocation" xml:space="preserve">
+    <value>Create Location</value>
+  </data>
   <data name="CreatePersonProfile" xml:space="preserve">
-    <value>Create Person Profile</value>
+    <value>Create Profile</value>
   </data>
   <data name="CreatePersonProfileLink" xml:space="preserve">
-    <value>Create Person Profile Link</value>
+    <value>Create Profile Link</value>
   </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>Create Supplier</value>
   </data>
   <data name="DeletePersonProfileAttachment" xml:space="preserve">
-    <value>Delete Person Profile Attachment</value>
+    <value>Delete Profile Attachment</value>
   </data>
   <data name="DeletePersonProfileLink" xml:space="preserve">
-    <value>Delete Person Profile Link</value>
+    <value>Delete Profile Link</value>
+  </data>
+  <data name="MergePersonCategory" xml:space="preserve">
+    <value>Merge Person Category</value>
   </data>
   <data name="ReadPerson" xml:space="preserve">
     <value>Read Person</value>
   </data>
   <data name="ReadPersonProfile" xml:space="preserve">
-    <value>Read Person Profile</value>
+    <value>Read Profile</value>
+  </data>
+  <data name="SortPersonCategory" xml:space="preserve">
+    <value>Sort Person Category</value>
   </data>
   <data name="UpdateCustomer" xml:space="preserve">
     <value>Update Customer</value>
   </data>
   <data name="UpdatePerson" xml:space="preserve">
     <value>Update Person</value>
+  </data>
+  <data name="UpdatePersonCategory" xml:space="preserve">
+    <value>Update Person Category</value>
   </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>Update Profile</value>

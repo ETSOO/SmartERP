@@ -120,6 +120,15 @@
   <data name="CreateCustomer" xml:space="preserve">
     <value>创建客户</value>
   </data>
+  <data name="CreatePersonAddress" xml:space="preserve">
+    <value>创建地址</value>
+  </data>
+  <data name="CreatePersonCategory" xml:space="preserve">
+    <value>创建人员分类</value>
+  </data>
+  <data name="CreatePersonLocation" xml:space="preserve">
+    <value>创建位置</value>
+  </data>
   <data name="CreatePersonProfile" xml:space="preserve">
     <value>创建档案</value>
   </data>
@@ -135,17 +144,26 @@
   <data name="DeletePersonProfileLink" xml:space="preserve">
     <value>移除档案链接</value>
   </data>
+  <data name="MergePersonCategory" xml:space="preserve">
+    <value>合并人员分类</value>
+  </data>
   <data name="ReadPerson" xml:space="preserve">
     <value>浏览人员</value>
   </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>浏览档案</value>
   </data>
+  <data name="SortPersonCategory" xml:space="preserve">
+    <value>排序人员类别</value>
+  </data>
   <data name="UpdateCustomer" xml:space="preserve">
     <value>更新客户</value>
   </data>
   <data name="UpdatePerson" xml:space="preserve">
     <value>更新人员</value>
+  </data>
+  <data name="UpdatePersonCategory" xml:space="preserve">
+    <value>更新人员类别</value>
   </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>更新档案</value>

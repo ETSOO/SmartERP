@@ -356,6 +356,8 @@ namespace CRM.Server
     [JsonSerializable(typeof(ProblemDetails))]
     [JsonSerializable(typeof(JsonDocument[]))]
 
+    [JsonSerializable(typeof(Dictionary<int, short>))]
+
     [JsonSerializable(typeof(com.etsoo.Utils.Actions.ActionResult))]
 
     public partial class MyJsonSerializerContext : JsonSerializerContext

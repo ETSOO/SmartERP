@@ -20,6 +20,11 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(DeletePersonAddressMessage))]
     [JsonSerializable(typeof(UpdatePersonAddressMessage))]
 
+    [JsonSerializable(typeof(CreatePersonCategoryMessage))]
+    [JsonSerializable(typeof(MergePersonCategoryMessage))]
+    [JsonSerializable(typeof(SortPersonCategoryMessage))]
+    [JsonSerializable(typeof(UpdatePersonCategoryMessage))]
+
     [JsonSerializable(typeof(CreateCustomerMessage))]
     [JsonSerializable(typeof(CreateSupplierMessage))]
     [JsonSerializable(typeof(DeletePersonMessage))]
