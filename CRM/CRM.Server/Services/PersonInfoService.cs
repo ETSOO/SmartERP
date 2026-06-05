@@ -6,9 +6,13 @@ using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using CRM.Server.RQ.PersonInfo;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -20,18 +24,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public PersonInfoService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonInfoService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "person_info", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -94,7 +101,17 @@ namespace CRM.Server.Services
             }
 
             // Save changes
-            var affected = await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new CreatePersonInfoMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.PersonId),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.PersonInfoCreateRQ)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePersonInfoMessage, cancellationToken);
+
+            var affected = task1.Result;
 
             if (affected == 0)
             {
@@ -119,7 +136,7 @@ namespace CRM.Server.Services
 
             var info = await _db.PersonInfos
                .Where(i => i.Id == id && i.Person.OrgId == orgId)
-               .Select(i => new { i.Person.IdentityType })
+               .Select(i => new { i.Identifier, i.Person.IdentityType })
                .FirstOrDefaultAsync(cancellationToken);
 
             if (info == null)
@@ -132,9 +149,20 @@ namespace CRM.Server.Services
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
-            var result = await _db.PersonInfos.AsNoTracking()
+            var task1 = _db.PersonInfos.AsNoTracking()
                 .Where(p => p.Id == id)
                 .ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeletePersonInfoMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, info.Identifier)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePersonInfoMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var result = task1.Result;
 
             if (result == 0)
             {
@@ -307,8 +335,21 @@ namespace CRM.Server.Services
                 info.Subscribed = rq.Subscribed;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdatePersonInfoMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, info.Identifier),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonInfoMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

@@ -9,10 +9,13 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.PersonContact;
 using CRM.Server.RQ.PersonContact;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -24,18 +27,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public PersonContactService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonInfoService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "person_contact", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -83,14 +89,24 @@ namespace CRM.Server.Services
             _db.PersonRelations.Add(cr);
             await _db.SaveChangesAsync(cancellationToken);
 
-            if (rq.IsDefault is true)
-            {
-                await _db.PersonRelations.AsNoTracking()
-                    .Where(r => r.PersonId == personId && r.RelationType == rq.RelationType && r.IsDefault == true && r.ContactId != contactId)
-                    .ExecuteUpdateAsync(r => r.SetProperty(r => r.IsDefault, false), cancellationToken);
-            }
+            var id = cr.Id;
 
-            return ActionResult.Succeed(cr.Id);
+            var task1 = rq.IsDefault is true ? _db.PersonRelations.AsNoTracking()
+                    .Where(r => r.PersonId == personId && r.RelationType == rq.RelationType && r.IsDefault == true && r.ContactId != contactId)
+                    .ExecuteUpdateAsync(r => r.SetProperty(r => r.IsDefault, false), cancellationToken)
+                : Task.CompletedTask;
+
+            // Push message
+            var message = new AddContactRelationMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.ContactRelationAddRQ)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.AddContactRelationMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -224,7 +240,17 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(contact.Id);
+            var id = contact.Id;
+
+            // Push message
+            var message = new CreateContactMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, contact.Name),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.ContactCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateContactMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<PersonRelation> CreateQuery(ContactListRQ rq, Func<IQueryable<PersonRelation>, IQueryable<PersonRelation>>? filters = null)
@@ -315,9 +341,18 @@ namespace CRM.Server.Services
             }
 
             // Delete
-            await _db.PersonRelations.AsNoTracking()
+            var task1 = _db.PersonRelations.AsNoTracking()
                 .Where(r => r.Id == id)
                 .ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeleteContactRelationMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeleteContactRelationMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(id);
@@ -512,8 +547,21 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateContactRelationMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateContactRelationMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

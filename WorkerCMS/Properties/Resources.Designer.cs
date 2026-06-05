@@ -61,6 +61,24 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add Contact Relation.
+        /// </summary>
+        internal static string AddContactRelation {
+            get {
+                return ResourceManager.GetString("AddContactRelation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Contact.
+        /// </summary>
+        internal static string CreateContact {
+            get {
+                return ResourceManager.GetString("CreateContact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Customer.
         /// </summary>
         internal static string CreateCustomer {
@@ -142,6 +160,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete Contact Relation.
+        /// </summary>
+        internal static string DeleteContactRelation {
+            get {
+                return ResourceManager.GetString("DeleteContactRelation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete Person Info.
         /// </summary>
         internal static string DeletePersonInfo {
@@ -210,6 +237,15 @@ namespace WorkerCMS.Properties {
         internal static string SortPersonCategory {
             get {
                 return ResourceManager.GetString("SortPersonCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Contact Relation.
+        /// </summary>
+        internal static string UpdateContactRelation {
+            get {
+                return ResourceManager.GetString("UpdateContactRelation", resourceCulture);
             }
         }
         

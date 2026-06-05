@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddContactRelation" xml:space="preserve">
+    <value>添加联系人关系</value>
+  </data>
+  <data name="CreateContact" xml:space="preserve">
+    <value>创建联系人</value>
+  </data>
   <data name="CreateCustomer" xml:space="preserve">
     <value>创建客户</value>
   </data>
@@ -144,6 +150,9 @@
   <data name="CreateSupplier" xml:space="preserve">
     <value>创建供应商</value>
   </data>
+  <data name="DeleteContactRelation" xml:space="preserve">
+    <value>移除联系人关系</value>
+  </data>
   <data name="DeletePersonInfo" xml:space="preserve">
     <value>移除人员信息</value>
   </data>
@@ -167,6 +176,9 @@
   </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>排序人员类别</value>
+  </data>
+  <data name="UpdateContactRelation" xml:space="preserve">
+    <value>更新联系人关系</value>
   </data>
   <data name="UpdateCustomer" xml:space="preserve">
     <value>更新客户</value>

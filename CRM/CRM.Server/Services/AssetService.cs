@@ -17,7 +17,6 @@ using PlatformShared.Extentions;
 using System.Buffers;
 using System.Text.Json;
 using System.Web;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using BusinessProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
