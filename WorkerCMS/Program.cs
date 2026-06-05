@@ -84,6 +84,10 @@ services.AddSingleton<IMessageQueueProcessor, UpdateCustomerProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePersonProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateSupplierProcessor>();
 
+services.AddSingleton<IMessageQueueProcessor, CreatePersonProductProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeletePersonProductProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePersonProductProcessor>();
+
 services.AddSingleton<IMessageQueueProcessor, CreatePersonProfileLinkProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreatePersonProfileProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeletePersonProfileAttachmentProcessor>();

@@ -6,9 +6,12 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.PersonProduct;
 using CRM.Server.RQ.PersonProduct;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -20,18 +23,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public PersonProductService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonProductService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "person_product", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -100,6 +106,14 @@ namespace CRM.Server.Services
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
+            // Push message
+            var message = new CreatePersonProductMessage
+            {
+                Data = User.CreateMessageData(App.AppId, personId),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.PersonCategoryCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePersonProductMessage, cancellationToken);
+
             return ActionResult.Success;
         }
 
@@ -122,9 +136,20 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             // Remove
-            var results = await _db.PersonProducts.AsNoTracking()
+            var task1 = _db.PersonProducts.AsNoTracking()
                 .Where(p => p.PersonId == personId && p.ProductId == productId && p.Product.CoreOrganizationId == orgId)
                 .ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeletePersonProductMessage
+            {
+                Data = User.CreateMessageData(App.AppId, personId)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePersonProductMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var results = task1.Result;
 
             return results > 0 ? ActionResult.Success : ApplicationErrors.NoId.AsResult();
         }
@@ -210,8 +235,21 @@ namespace CRM.Server.Services
                 product.JsonData = rq.JsonData;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdatePersonProductMessage
+            {
+                Data = User.CreateMessageData(App.AppId, product.PersonId),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePersonProductMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Success;

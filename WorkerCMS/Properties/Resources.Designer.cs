@@ -97,6 +97,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Person Product.
+        /// </summary>
+        internal static string CreatePersonProduct {
+            get {
+                return ResourceManager.GetString("CreatePersonProduct", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Profile.
         /// </summary>
         internal static string CreatePersonProfile {
@@ -120,6 +129,15 @@ namespace WorkerCMS.Properties {
         internal static string CreateSupplier {
             get {
                 return ResourceManager.GetString("CreateSupplier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Person Product.
+        /// </summary>
+        internal static string DeletePersonProduct {
+            get {
+                return ResourceManager.GetString("DeletePersonProduct", resourceCulture);
             }
         }
         
@@ -201,6 +219,15 @@ namespace WorkerCMS.Properties {
         internal static string UpdatePersonCategory {
             get {
                 return ResourceManager.GetString("UpdatePersonCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Person Product.
+        /// </summary>
+        internal static string UpdatePersonProduct {
+            get {
+                return ResourceManager.GetString("UpdatePersonProduct", resourceCulture);
             }
         }
         

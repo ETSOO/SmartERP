@@ -129,6 +129,9 @@
   <data name="CreatePersonLocation" xml:space="preserve">
     <value>建立位置</value>
   </data>
+  <data name="CreatePersonProduct" xml:space="preserve">
+    <value>建立人員個人化產品</value>
+  </data>
   <data name="CreatePersonProfile" xml:space="preserve">
     <value>建立檔案</value>
   </data>
@@ -137,6 +140,9 @@
   </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>創建供應商</value>
+  </data>
+  <data name="DeletePersonProduct" xml:space="preserve">
+    <value>移除人員個人化產品</value>
   </data>
   <data name="DeletePersonProfileAttachment" xml:space="preserve">
     <value>移除檔案附件</value>
@@ -164,6 +170,9 @@
   </data>
   <data name="UpdatePersonCategory" xml:space="preserve">
     <value>更新人員類別</value>
+  </data>
+  <data name="UpdatePersonProduct" xml:space="preserve">
+    <value>更新人員個人化產品</value>
   </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>更新檔案</value>
