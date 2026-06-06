@@ -86,7 +86,7 @@ export default function Assets() {
                 title={labels.add}
                 size="medium"
                 color="primary"
-                onClick={() => navigate("./add")}
+                onClick={() => navigate(`./add?personId=${personId ?? ""}`)}
               >
                 <AddIcon />
               </Fab>

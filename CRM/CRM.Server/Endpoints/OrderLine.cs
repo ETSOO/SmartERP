@@ -14,10 +14,10 @@ namespace CRM.Server.Endpoints
         {
             var g = builder.MapGroup("OrderLine");
 
-            g.MapPost("Complete", (IOrderLineService service, OrderLineCompleteRQ rq, CancellationToken cancellationToken) => service.CompleteAsync(rq, cancellationToken))
+            g.MapPut("Complete", (IOrderLineService service, OrderLineCompleteRQ rq, CancellationToken cancellationToken) => service.CompleteAsync(rq, cancellationToken))
                 .WithDescription("Complete order line / 完成订单行").WithTags("OrderLine");
 
-            g.MapPut("Create", (IOrderLineService service, OrderLineCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
+            g.MapPost("Create", (IOrderLineService service, OrderLineCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create order line / 创建订单行").WithTags("OrderLine");
 
             g.MapDelete("Delete/{id:long}", (IOrderLineService service, long id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))

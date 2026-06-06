@@ -77,6 +77,7 @@ var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabb
 
 // Order
 services.AddSingleton<IMessageQueueProcessor, CreateOrderProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReadOrderProcessor>();
 services.AddSingleton<IMessageQueueProcessor, RecalculateOrderProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateOrderProcessor>();
 

@@ -4,6 +4,7 @@ using PlatformShared.CrmMessages.Person;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.CrmMessages.Product;
 using PlatformShared.CrmMessages.Stock;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PlatformShared.CrmMessages
@@ -140,6 +141,9 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(StockTransferMessage))]
     [JsonSerializable(typeof(UpdateStockMessage))]
     [JsonSerializable(typeof(UpdateStockLineMessage))]
+
+    [JsonSerializable(typeof(decimal))]
+    [JsonSerializable(typeof(JsonElement))]
 
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {
