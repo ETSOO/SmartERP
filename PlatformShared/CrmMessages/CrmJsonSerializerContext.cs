@@ -3,6 +3,7 @@ using PlatformShared.CrmMessages.Org;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.CrmMessages.Product;
+using PlatformShared.CrmMessages.Stock;
 using System.Text.Json.Serialization;
 
 namespace PlatformShared.CrmMessages
@@ -124,6 +125,21 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(RollbackPOLineMessage))]
     [JsonSerializable(typeof(StartPOLineMessage))]
     [JsonSerializable(typeof(UpdatePOLineMessage))]
+
+    // Stock
+    [JsonSerializable(typeof(StockAssembleMessage))]
+    [JsonSerializable(typeof(StockCreateLineMessage))]
+    [JsonSerializable(typeof(DeleteStockMessage))]
+    [JsonSerializable(typeof(StockLoseMessage))]
+    [JsonSerializable(typeof(StockInitMessage))]
+    [JsonSerializable(typeof(StockOrderOutMessage))]
+    [JsonSerializable(typeof(StockPOInMessage))]
+    [JsonSerializable(typeof(ReadStockMessage))]
+    [JsonSerializable(typeof(StockReceiveMessage))]
+    [JsonSerializable(typeof(StockTakeMessage))]
+    [JsonSerializable(typeof(StockTransferMessage))]
+    [JsonSerializable(typeof(UpdateStockMessage))]
+    [JsonSerializable(typeof(UpdateStockLineMessage))]
 
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {

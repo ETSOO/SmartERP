@@ -10,6 +10,7 @@ using WorkerCMS.Processors.Org;
 using WorkerCMS.Processors.Person;
 using WorkerCMS.Processors.PO;
 using WorkerCMS.Processors.Product;
+using WorkerCMS.Processors.Stock;
 
 var builder = Host.CreateApplicationBuilder(args);
 var configuration = builder.Configuration;
@@ -179,6 +180,21 @@ services.AddSingleton<IMessageQueueProcessor, UpdateProductCategoryProcessor>();
 services.AddSingleton<IMessageQueueProcessor, CreatePromotionProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SortPromotionProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePromotionProcessor>();
+
+// Stock
+services.AddSingleton<IMessageQueueProcessor, DeleteStockProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReadStockProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockAssembleProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockCreateLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockInitProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockLoseProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockOrderOutProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockPOInProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockReceiveProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockTakeProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StockTransferProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateStockLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateStockProcessor>();
 
 services.AddLocalRabbitMQConsumer(consumerOptions);
 

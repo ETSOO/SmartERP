@@ -9,11 +9,14 @@ using com.etsoo.Utils.Models;
 using CRM.Server.Dto.Stock;
 using CRM.Server.RQ.Stock;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Stock;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -25,18 +28,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public StockService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<StockService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "stock", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -150,8 +156,18 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = stock.Id;
+
+            // Push message
+            var message = new StockAssembleMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockAssembleRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockAssembleMessage, cancellationToken);
+
             // Return result
-            return ActionResult.Succeed(stock.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -381,7 +397,17 @@ namespace CRM.Server.Services
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(line.Id);
+            var id = line.Id;
+
+            // Push message
+            var message = new StockCreateLineMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockCreateLineRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockCreateLineMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<StockHeader> CreateQuery(StockListRQ rq, Func<IQueryable<StockHeader>, IQueryable<StockHeader>>? filters = null)
@@ -494,11 +520,12 @@ namespace CRM.Server.Services
 
             var validDate = GetDeletableDate();
 
-            var hasStock = await _db.Stocks(orgId).AsNoTracking()
+            var stock = await _db.Stocks(orgId).AsNoTracking()
                 .Where(s => s.Id == id && s.Creation >= validDate)
-                .AnyAsync(cancellationToken);
+                .Select(s => new { s.Title })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (!hasStock)
+            if (stock == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
@@ -528,6 +555,13 @@ namespace CRM.Server.Services
                 // Log
                 return LogException(ex);
             }
+
+            // Push message
+            var message = new DeleteStockMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeleteStockMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -612,8 +646,18 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = stock.Id;
+
+            // Push message
+            var message = new StockLoseMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockLoseRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockLoseMessage, cancellationToken);
+
             // Return result
-            return ActionResult.Succeed(stock.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -689,8 +733,18 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = stock.Id;
+
+            // Push message
+            var message = new StockInitMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockInitRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockInitMessage, cancellationToken);
+
             // Return result
-            return ActionResult.Succeed(stock.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -1206,8 +1260,18 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = stock.Id;
+
+            // Push message
+            var message = new StockOrderOutMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockOrderOutRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockOrderOutMessage, cancellationToken);
+
             // Return result
-            return ActionResult.Succeed(stock.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -1301,6 +1365,16 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = stock.Id;
+
+            // Push message
+            var message = new StockPOInMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockPOInRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockPOInMessage, cancellationToken);
+
             // Return result
             return ActionResult.Succeed(stock.Id);
         }
@@ -1351,9 +1425,16 @@ namespace CRM.Server.Services
                      Creation = s.Creation
                  }).FirstOrDefaultAsync(cancellationToken);
 
-            if(data != null)
+            if (data != null)
             {
                 data.IsDeletable = data.Creation >= GetDeletableDate();
+
+                // Push message
+                var message = new ReadStockMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, data.Title)
+                };
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadStockMessage, cancellationToken);
             }
 
             return data;
@@ -1414,7 +1495,7 @@ namespace CRM.Server.Services
 
             var stock = await _db.Stocks(orgId).AsNoTracking()
                 .Where(s => s.Id == id && s.ReceiptTime == null)
-                .Select(s => new { s.LocationFromId, s.LocationToId })
+                .Select(s => new { s.Title, s.LocationFromId, s.LocationToId })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (stock == null)
@@ -1471,6 +1552,14 @@ namespace CRM.Server.Services
                 // Log
                 return LogException(ex);
             }
+
+            // Push message
+            var message = new StockReceiveMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockReceiveRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockReceiveMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -1560,8 +1649,18 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = stock.Id;
+
+            // Push message
+            var message = new StockTakeMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockTakeRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockTakeMessage, cancellationToken);
+
             // Return result
-            return ActionResult.Succeed(stock.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -1646,8 +1745,18 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = stock.Id;
+
+            // Push message
+            var message = new StockTransferMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, stock.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockTransferRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockTransferMessage, cancellationToken);
+
             // Return result
-            return ActionResult.Succeed(stock.Id);
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -1691,8 +1800,20 @@ namespace CRM.Server.Services
                 stock.TrackingNumber = rq.TrackingNumber?.Trim().ToUpper();
             }
 
-            // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateStockMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, stock.Title),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateStockMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -1801,6 +1922,14 @@ namespace CRM.Server.Services
                 // Log
                 return LogException(ex);
             }
+
+            // Push message
+            var message = new UpdateStockLineMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.StockUpdateLineRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateStockLineMessage, cancellationToken);
 
             // Return
             return ActionResult.Succeed(id);

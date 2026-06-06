@@ -331,6 +331,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delect Stock Record.
+        /// </summary>
+        internal static string DeleteStock {
+            get {
+                return ResourceManager.GetString("DeleteStock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Merge Person Category.
         /// </summary>
         internal static string MergePersonCategory {
@@ -417,6 +426,15 @@ namespace WorkerCMS.Properties {
         internal static string ReadPOLine {
             get {
                 return ResourceManager.GetString("ReadPOLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read Stock.
+        /// </summary>
+        internal static string ReadStock {
+            get {
+                return ResourceManager.GetString("ReadStock", resourceCulture);
             }
         }
         
@@ -516,6 +534,87 @@ namespace WorkerCMS.Properties {
         internal static string StartPOLine {
             get {
                 return ResourceManager.GetString("StartPOLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Assemble.
+        /// </summary>
+        internal static string StockAssemble {
+            get {
+                return ResourceManager.GetString("StockAssemble", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Create Line.
+        /// </summary>
+        internal static string StockCreateLine {
+            get {
+                return ResourceManager.GetString("StockCreateLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Init.
+        /// </summary>
+        internal static string StockInit {
+            get {
+                return ResourceManager.GetString("StockInit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Lose.
+        /// </summary>
+        internal static string StockLose {
+            get {
+                return ResourceManager.GetString("StockLose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Order Out.
+        /// </summary>
+        internal static string StockOrderOut {
+            get {
+                return ResourceManager.GetString("StockOrderOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock PO In.
+        /// </summary>
+        internal static string StockPOIn {
+            get {
+                return ResourceManager.GetString("StockPOIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Receive.
+        /// </summary>
+        internal static string StockReceive {
+            get {
+                return ResourceManager.GetString("StockReceive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Take.
+        /// </summary>
+        internal static string StockTake {
+            get {
+                return ResourceManager.GetString("StockTake", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock Transfer.
+        /// </summary>
+        internal static string StockTransfer {
+            get {
+                return ResourceManager.GetString("StockTransfer", resourceCulture);
             }
         }
         
@@ -714,6 +813,24 @@ namespace WorkerCMS.Properties {
         internal static string UpdateSettings {
             get {
                 return ResourceManager.GetString("UpdateSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Stock.
+        /// </summary>
+        internal static string UpdateStock {
+            get {
+                return ResourceManager.GetString("UpdateStock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Stock Line.
+        /// </summary>
+        internal static string UpdateStockLine {
+            get {
+                return ResourceManager.GetString("UpdateStockLine", resourceCulture);
             }
         }
         

@@ -207,6 +207,9 @@
   <data name="DeletePOLine" xml:space="preserve">
     <value>移除採購行</value>
   </data>
+  <data name="DeleteStock" xml:space="preserve">
+    <value>移除庫存記錄</value>
+  </data>
   <data name="MergePersonCategory" xml:space="preserve">
     <value>合併人員分類</value>
   </data>
@@ -236,6 +239,9 @@
   </data>
   <data name="ReadPOLine" xml:space="preserve">
     <value>瀏覽採購行</value>
+  </data>
+  <data name="ReadStock" xml:space="preserve">
+    <value>瀏覽庫存</value>
   </data>
   <data name="RecalculateOrder" xml:space="preserve">
     <value>重新計算訂單</value>
@@ -269,6 +275,33 @@
   </data>
   <data name="StartPOLine" xml:space="preserve">
     <value>開始採購行執行</value>
+  </data>
+  <data name="StockAssemble" xml:space="preserve">
+    <value>庫存組裝</value>
+  </data>
+  <data name="StockCreateLine" xml:space="preserve">
+    <value>庫存創建行</value>
+  </data>
+  <data name="StockInit" xml:space="preserve">
+    <value>庫存初始化</value>
+  </data>
+  <data name="StockLose" xml:space="preserve">
+    <value>庫存報損</value>
+  </data>
+  <data name="StockOrderOut" xml:space="preserve">
+    <value>訂單出貨</value>
+  </data>
+  <data name="StockPOIn" xml:space="preserve">
+    <value>採購入庫</value>
+  </data>
+  <data name="StockReceive" xml:space="preserve">
+    <value>庫存入庫</value>
+  </data>
+  <data name="StockTake" xml:space="preserve">
+    <value>庫存盤點</value>
+  </data>
+  <data name="StockTransfer" xml:space="preserve">
+    <value>庫存調貨</value>
   </data>
   <data name="UpdateAsset" xml:space="preserve">
     <value>更新資產</value>
@@ -335,6 +368,12 @@
   </data>
   <data name="UpdateSettings" xml:space="preserve">
     <value>更新系統設定</value>
+  </data>
+  <data name="UpdateStock" xml:space="preserve">
+    <value>更新庫存</value>
+  </data>
+  <data name="UpdateStockLine" xml:space="preserve">
+    <value>更新庫存行</value>
   </data>
   <data name="UpdateSupplier" xml:space="preserve">
     <value>更新供應商</value>

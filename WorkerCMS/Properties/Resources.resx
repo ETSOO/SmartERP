@@ -207,6 +207,9 @@
   <data name="DeletePOLine" xml:space="preserve">
     <value>Delete PO Line</value>
   </data>
+  <data name="DeleteStock" xml:space="preserve">
+    <value>Delect Stock Record</value>
+  </data>
   <data name="MergePersonCategory" xml:space="preserve">
     <value>Merge Person Category</value>
   </data>
@@ -236,6 +239,9 @@
   </data>
   <data name="ReadPOLine" xml:space="preserve">
     <value>Read PO Line</value>
+  </data>
+  <data name="ReadStock" xml:space="preserve">
+    <value>Read Stock</value>
   </data>
   <data name="RecalculateOrder" xml:space="preserve">
     <value>Recalculate Order</value>
@@ -269,6 +275,33 @@
   </data>
   <data name="StartPOLine" xml:space="preserve">
     <value>Start PO Line Execution</value>
+  </data>
+  <data name="StockAssemble" xml:space="preserve">
+    <value>Stock Assemble</value>
+  </data>
+  <data name="StockCreateLine" xml:space="preserve">
+    <value>Stock Create Line</value>
+  </data>
+  <data name="StockInit" xml:space="preserve">
+    <value>Stock Init</value>
+  </data>
+  <data name="StockLose" xml:space="preserve">
+    <value>Stock Lose</value>
+  </data>
+  <data name="StockOrderOut" xml:space="preserve">
+    <value>Stock Order Out</value>
+  </data>
+  <data name="StockPOIn" xml:space="preserve">
+    <value>Stock PO In</value>
+  </data>
+  <data name="StockReceive" xml:space="preserve">
+    <value>Stock Receive</value>
+  </data>
+  <data name="StockTake" xml:space="preserve">
+    <value>Stock Take</value>
+  </data>
+  <data name="StockTransfer" xml:space="preserve">
+    <value>Stock Transfer</value>
   </data>
   <data name="UpdateAsset" xml:space="preserve">
     <value>Update Asset</value>
@@ -335,6 +368,12 @@
   </data>
   <data name="UpdateSettings" xml:space="preserve">
     <value>Update System Settings</value>
+  </data>
+  <data name="UpdateStock" xml:space="preserve">
+    <value>Update Stock</value>
+  </data>
+  <data name="UpdateStockLine" xml:space="preserve">
+    <value>Update Stock Line</value>
   </data>
   <data name="UpdateSupplier" xml:space="preserve">
     <value>Update Supplier</value>
