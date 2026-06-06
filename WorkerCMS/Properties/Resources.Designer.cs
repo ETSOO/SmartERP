@@ -160,7 +160,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create Person Category.
+        ///   Looks up a localized string similar to Create Entity Category.
         /// </summary>
         internal static string CreatePersonCategory {
             get {
@@ -169,7 +169,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create Person Info.
+        ///   Looks up a localized string similar to Create Entity Info.
         /// </summary>
         internal static string CreatePersonInfo {
             get {
@@ -187,7 +187,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create Person Product.
+        ///   Looks up a localized string similar to Create Entity Product.
         /// </summary>
         internal static string CreatePersonProduct {
             get {
@@ -286,7 +286,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Person Info.
+        ///   Looks up a localized string similar to Delete Entity Info.
         /// </summary>
         internal static string DeletePersonInfo {
             get {
@@ -295,7 +295,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Person Product.
+        ///   Looks up a localized string similar to Delete Entity Product.
         /// </summary>
         internal static string DeletePersonProduct {
             get {
@@ -340,7 +340,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Merge Person Category.
+        ///   Looks up a localized string similar to Merge Entity Category.
         /// </summary>
         internal static string MergePersonCategory {
             get {
@@ -394,7 +394,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Read Person.
+        ///   Looks up a localized string similar to Read Entity.
         /// </summary>
         internal static string ReadPerson {
             get {
@@ -691,7 +691,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update Person.
+        ///   Looks up a localized string similar to Update Entity.
         /// </summary>
         internal static string UpdatePerson {
             get {
@@ -700,7 +700,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update Person Category.
+        ///   Looks up a localized string similar to Update Entity Category.
         /// </summary>
         internal static string UpdatePersonCategory {
             get {
@@ -709,7 +709,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update Person Info.
+        ///   Looks up a localized string similar to Update Entity Info.
         /// </summary>
         internal static string UpdatePersonInfo {
             get {
@@ -718,7 +718,7 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update Person Product.
+        ///   Looks up a localized string similar to Update Entity Product.
         /// </summary>
         internal static string UpdatePersonProduct {
             get {

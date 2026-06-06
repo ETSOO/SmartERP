@@ -25,6 +25,7 @@ namespace CRM.Server.Services
         Task<int> ReadTagIdAsync(string tag, int orgId, CancellationToken cancellationToken = default);
         Task<IActionResult> SyncAssetAsync(long personId, int assetId, int assetQty, decimal qty, CancellationToken cancellationToken = default);
         ValueTask UpdateTagAsync(IQueryTag tag, int orgId, CancellationToken cancellationToken = default);
-        ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidateCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default);
+        ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidatePersonCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default);
+        ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidateProductCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default);
     }
 }

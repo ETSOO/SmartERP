@@ -33,8 +33,11 @@ export function AddressCreator(props: AddressCreatorProps) {
   // Data
   const addressRef = React.useRef<AddressCreateRQ | undefined>(undefined);
 
+  const [hasAddress, setHasAddress] = React.useState(false);
+
   function updateAddress(address?: AddressCreateRQ) {
     addressRef.current = address;
+    setHasAddress(!!address);
     onAddressChange(address);
   }
 
@@ -85,6 +88,7 @@ export function AddressCreator(props: AddressCreatorProps) {
         title={labels.edit}
         sx={{ flex: 0, mt: 1 }}
         onClick={() => edit()}
+        disabled={!hasAddress}
       >
         <EditIcon />
       </IconButton>

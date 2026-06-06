@@ -691,7 +691,7 @@ namespace CRM.Server.Services
 
             if (rq.IsModified(nameof(rq.Categories)))
             {
-                var (result, ids) = await _commonService.ValidateCategoriesAsync(rq.Categories, orgId, cancellationToken);
+                var (result, ids) = await _commonService.ValidatePersonCategoriesAsync(rq.Categories, orgId, cancellationToken);
                 if (!result.Ok)
                 {
                     return result;

@@ -151,16 +151,16 @@
     <value>创建地址</value>
   </data>
   <data name="CreatePersonCategory" xml:space="preserve">
-    <value>创建人员分类</value>
+    <value>创建实体分类</value>
   </data>
   <data name="CreatePersonInfo" xml:space="preserve">
-    <value>创建人员信息</value>
+    <value>创建实体信息</value>
   </data>
   <data name="CreatePersonLocation" xml:space="preserve">
     <value>创建位置</value>
   </data>
   <data name="CreatePersonProduct" xml:space="preserve">
-    <value>创建人员个性化产品</value>
+    <value>创建实体个性化产品</value>
   </data>
   <data name="CreatePersonProfile" xml:space="preserve">
     <value>创建档案</value>
@@ -193,10 +193,10 @@
     <value>移除订单行</value>
   </data>
   <data name="DeletePersonInfo" xml:space="preserve">
-    <value>移除人员信息</value>
+    <value>移除实体信息</value>
   </data>
   <data name="DeletePersonProduct" xml:space="preserve">
-    <value>移除人员个性化产品</value>
+    <value>移除实体个性化产品</value>
   </data>
   <data name="DeletePersonProfileAttachment" xml:space="preserve">
     <value>移除档案附件</value>
@@ -211,7 +211,7 @@
     <value>移除库存记录</value>
   </data>
   <data name="MergePersonCategory" xml:space="preserve">
-    <value>合并人员分类</value>
+    <value>合并实体分类</value>
   </data>
   <data name="MergeProductCategory" xml:space="preserve">
     <value>合并产品类目</value>
@@ -229,7 +229,7 @@
     <value>浏览订单行</value>
   </data>
   <data name="ReadPerson" xml:space="preserve">
-    <value>浏览人员</value>
+    <value>浏览实体</value>
   </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>浏览档案</value>
@@ -262,7 +262,7 @@
     <value>排序订单支付方式</value>
   </data>
   <data name="SortPersonCategory" xml:space="preserve">
-    <value>排序人员类别</value>
+    <value>排序实体类别</value>
   </data>
   <data name="SortProductCategory" xml:space="preserve">
     <value>排序产品类目</value>
@@ -328,16 +328,16 @@
     <value>更新订单行</value>
   </data>
   <data name="UpdatePerson" xml:space="preserve">
-    <value>更新人员</value>
+    <value>更新实体</value>
   </data>
   <data name="UpdatePersonCategory" xml:space="preserve">
-    <value>更新人员类别</value>
+    <value>更新实体类别</value>
   </data>
   <data name="UpdatePersonInfo" xml:space="preserve">
-    <value>更新人员信息</value>
+    <value>更新实体信息</value>
   </data>
   <data name="UpdatePersonProduct" xml:space="preserve">
-    <value>更新人员个性化产品</value>
+    <value>更新实体个性化产品</value>
   </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>更新档案</value>

@@ -501,14 +501,45 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Validate categories
-        /// 验证类目
+        /// Validate person categories
+        /// 验证人员类目
         /// </summary>
         /// <param name="ids">Ids</param>
         /// <param name="orgId">Organization id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidateCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default)
+        public async ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidatePersonCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return (ActionResult.Success, null);
+            }
+
+            var items = await _db.PersonCategories(orgId)
+                .AsNoTracking()
+                .Where(c => ids.Contains(c.Id))
+                .Select(c => new { c.Id, c.ParentIds })
+                .ToArrayAsync(cancellationToken);
+
+            if (items.Length != ids.Count())
+            {
+                return (ApplicationErrors.NoId.AsResult(), null);
+            }
+
+            var allIds = items.SelectMany(i => i.ParentIds == null ? [i.Id] : new[] { i.Id }.Concat(i.ParentIds)).Distinct();
+
+            return (ActionResult.Success, allIds);
+        }
+
+        /// <summary>
+        /// Validate product categories
+        /// 验证产品类目
+        /// </summary>
+        /// <param name="ids">Ids</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async ValueTask<(ActionResult result, IEnumerable<int>? ids)> ValidateProductCategoriesAsync(IEnumerable<int>? ids, int orgId, CancellationToken cancellationToken = default)
         {
             if (ids == null || !ids.Any())
             {

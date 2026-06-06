@@ -22,6 +22,7 @@ const refFields = [
   "kind",
   "rawAddress",
   "name",
+  "region",
   "state",
   "city",
   "district",
@@ -71,7 +72,7 @@ export function createAddressFromForm(
     personId,
     placeId,
     provider,
-    kind,
+    kind = "1",
     name,
     region,
     state,
@@ -90,7 +91,11 @@ export function createAddressFromForm(
     DataTypes.getEnumByValue(MapApiProvider, provider as any) ??
     MapApiProvider.Google;
 
-  const kindValue = DataTypes.getEnumByValue(AddressKind, kind as any);
+  const kindValue = DataTypes.getEnumByValue(
+    AddressKind,
+    parseInt(kind) as any
+  );
+
   if (!kindValue) {
     form.querySelector<HTMLInputElement>('input[name="kindInput"]')?.focus();
     return;

@@ -66,7 +66,7 @@ namespace CRM.Server.Services
 
             // Categories
             var categoryIds = rq.Categories;
-            var (result, ids) = await _commonService.ValidateCategoriesAsync(categoryIds, orgId, cancellationToken);
+            var (result, ids) = await _commonService.ValidatePersonCategoriesAsync(categoryIds, orgId, cancellationToken);
             if (!result.Ok)
             {
                 return result;
@@ -474,7 +474,7 @@ namespace CRM.Server.Services
             {
                 // Categories
                 var categoryIds = rq.Categories;
-                var (result, ids) = await _commonService.ValidateCategoriesAsync(categoryIds, orgId, cancellationToken);
+                var (result, ids) = await _commonService.ValidatePersonCategoriesAsync(categoryIds, orgId, cancellationToken);
                 if (!result.Ok)
                 {
                     return result;

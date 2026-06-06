@@ -151,16 +151,16 @@
     <value>Create Address</value>
   </data>
   <data name="CreatePersonCategory" xml:space="preserve">
-    <value>Create Person Category</value>
+    <value>Create Entity Category</value>
   </data>
   <data name="CreatePersonInfo" xml:space="preserve">
-    <value>Create Person Info</value>
+    <value>Create Entity Info</value>
   </data>
   <data name="CreatePersonLocation" xml:space="preserve">
     <value>Create Location</value>
   </data>
   <data name="CreatePersonProduct" xml:space="preserve">
-    <value>Create Person Product</value>
+    <value>Create Entity Product</value>
   </data>
   <data name="CreatePersonProfile" xml:space="preserve">
     <value>Create Profile</value>
@@ -193,10 +193,10 @@
     <value>Delete Order Line</value>
   </data>
   <data name="DeletePersonInfo" xml:space="preserve">
-    <value>Delete Person Info</value>
+    <value>Delete Entity Info</value>
   </data>
   <data name="DeletePersonProduct" xml:space="preserve">
-    <value>Delete Person Product</value>
+    <value>Delete Entity Product</value>
   </data>
   <data name="DeletePersonProfileAttachment" xml:space="preserve">
     <value>Delete Profile Attachment</value>
@@ -211,7 +211,7 @@
     <value>Delect Stock Record</value>
   </data>
   <data name="MergePersonCategory" xml:space="preserve">
-    <value>Merge Person Category</value>
+    <value>Merge Entity Category</value>
   </data>
   <data name="MergeProductCategory" xml:space="preserve">
     <value>Merge Product Category</value>
@@ -229,7 +229,7 @@
     <value>Read Order Line</value>
   </data>
   <data name="ReadPerson" xml:space="preserve">
-    <value>Read Person</value>
+    <value>Read Entity</value>
   </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>Read Profile</value>
@@ -328,16 +328,16 @@
     <value>Update Order Line</value>
   </data>
   <data name="UpdatePerson" xml:space="preserve">
-    <value>Update Person</value>
+    <value>Update Entity</value>
   </data>
   <data name="UpdatePersonCategory" xml:space="preserve">
-    <value>Update Person Category</value>
+    <value>Update Entity Category</value>
   </data>
   <data name="UpdatePersonInfo" xml:space="preserve">
-    <value>Update Person Info</value>
+    <value>Update Entity Info</value>
   </data>
   <data name="UpdatePersonProduct" xml:space="preserve">
-    <value>Update Person Product</value>
+    <value>Update Entity Product</value>
   </data>
   <data name="UpdatePersonProfile" xml:space="preserve">
     <value>Update Profile</value>
