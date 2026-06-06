@@ -8,6 +8,7 @@ using PlatformShared.Database;
 using WorkerCMS.Processors.Order;
 using WorkerCMS.Processors.Org;
 using WorkerCMS.Processors.Person;
+using WorkerCMS.Processors.PO;
 using WorkerCMS.Processors.Product;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -85,6 +86,20 @@ services.AddSingleton<IMessageQueueProcessor, ReadOrderLineProcessor>();
 services.AddSingleton<IMessageQueueProcessor, RollbackOrderLineProcessor>();
 services.AddSingleton<IMessageQueueProcessor, StartOrderLineProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateOrderLineProcessor>();
+
+// PO
+services.AddSingleton<IMessageQueueProcessor, CreatePOProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReadPOProcessor>();
+services.AddSingleton<IMessageQueueProcessor, RecalculatePOProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePOProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, CompletePOLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, CreatePOLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeletePOLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReadPOLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, RollbackPOLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StartPOLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePOLineProcessor>();
 
 // Org
 services.AddSingleton<IMessageQueueProcessor, CreateAssetProcessor>();

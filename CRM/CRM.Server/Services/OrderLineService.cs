@@ -910,7 +910,7 @@ namespace CRM.Server.Services
                     Data = User.CreateMessageData(App.AppId, id, data.Title),
                     Changes = changes
                 };
-                var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.RollbackOrderLineMessage, cancellationToken);
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.RollbackOrderLineMessage, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -965,7 +965,7 @@ namespace CRM.Server.Services
                     Data = User.CreateMessageData(App.AppId, id),
                     JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrderLineStartRQ)
                 };
-                var task = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StartOrderLineMessage, cancellationToken);
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StartOrderLineMessage, cancellationToken);
             }
 
             return result > 0 ? ActionResult.Succeed(id) : ApplicationErrors.NoId.AsResult();

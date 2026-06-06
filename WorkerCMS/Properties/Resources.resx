@@ -123,6 +123,9 @@
   <data name="CompleteOrderLine" xml:space="preserve">
     <value>Complete Order Line</value>
   </data>
+  <data name="CompletePOLine" xml:space="preserve">
+    <value>Complete PO Line</value>
+  </data>
   <data name="CreateAsset" xml:space="preserve">
     <value>Create Asset</value>
   </data>
@@ -159,6 +162,12 @@
   <data name="CreatePersonProfileLink" xml:space="preserve">
     <value>Create Profile Link</value>
   </data>
+  <data name="CreatePO" xml:space="preserve">
+    <value>Create PO</value>
+  </data>
+  <data name="CreatePOLine" xml:space="preserve">
+    <value>Create PO Line</value>
+  </data>
   <data name="CreateProduct" xml:space="preserve">
     <value>Create Product</value>
   </data>
@@ -189,6 +198,9 @@
   <data name="DeletePersonProfileLink" xml:space="preserve">
     <value>Delete Profile Link</value>
   </data>
+  <data name="DeletePOLine" xml:space="preserve">
+    <value>Delete PO Line</value>
+  </data>
   <data name="MergePersonCategory" xml:space="preserve">
     <value>Merge Person Category</value>
   </data>
@@ -204,14 +216,32 @@
   <data name="ReadOrder" xml:space="preserve">
     <value>Read Order</value>
   </data>
+  <data name="ReadOrderLine" xml:space="preserve">
+    <value>Read Order Line</value>
+  </data>
   <data name="ReadPerson" xml:space="preserve">
     <value>Read Person</value>
   </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>Read Profile</value>
   </data>
+  <data name="ReadPO" xml:space="preserve">
+    <value>Read PO</value>
+  </data>
+  <data name="ReadPOLine" xml:space="preserve">
+    <value>Read PO Line</value>
+  </data>
+  <data name="RecalculateOrder" xml:space="preserve">
+    <value>Recalculate Order</value>
+  </data>
+  <data name="RecalculatePO" xml:space="preserve">
+    <value>Recalculate PO</value>
+  </data>
   <data name="RollbackOrderLine" xml:space="preserve">
     <value>Rollback Order Line</value>
+  </data>
+  <data name="RollbackPOLine" xml:space="preserve">
+    <value>Rollback PO Line</value>
   </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>Sort Person Category</value>
@@ -224,6 +254,9 @@
   </data>
   <data name="StartOrderLine" xml:space="preserve">
     <value>Start Order Line Execution</value>
+  </data>
+  <data name="StartPOLine" xml:space="preserve">
+    <value>Start PO Line Execution</value>
   </data>
   <data name="UpdateAsset" xml:space="preserve">
     <value>Update Asset</value>
@@ -263,6 +296,12 @@
   </data>
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>Update Profile Link</value>
+  </data>
+  <data name="UpdatePO" xml:space="preserve">
+    <value>Update PO</value>
+  </data>
+  <data name="UpdatePOLine" xml:space="preserve">
+    <value>Update PO Line</value>
   </data>
   <data name="UpdateProduct" xml:space="preserve">
     <value>Update Product</value>

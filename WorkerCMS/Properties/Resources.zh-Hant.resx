@@ -123,6 +123,9 @@
   <data name="CompleteOrderLine" xml:space="preserve">
     <value>完成訂單行</value>
   </data>
+  <data name="CompletePOLine" xml:space="preserve">
+    <value>完成採購行</value>
+  </data>
   <data name="CreateAsset" xml:space="preserve">
     <value>創建資產</value>
   </data>
@@ -159,6 +162,12 @@
   <data name="CreatePersonProfileLink" xml:space="preserve">
     <value>建立檔案鏈接</value>
   </data>
+  <data name="CreatePO" xml:space="preserve">
+    <value>建立採購</value>
+  </data>
+  <data name="CreatePOLine" xml:space="preserve">
+    <value>建立採購行</value>
+  </data>
   <data name="CreateProduct" xml:space="preserve">
     <value>創建產品</value>
   </data>
@@ -189,6 +198,9 @@
   <data name="DeletePersonProfileLink" xml:space="preserve">
     <value>移除檔案鏈接</value>
   </data>
+  <data name="DeletePOLine" xml:space="preserve">
+    <value>移除採購行</value>
+  </data>
   <data name="MergePersonCategory" xml:space="preserve">
     <value>合併人員分類</value>
   </data>
@@ -204,14 +216,32 @@
   <data name="ReadOrder" xml:space="preserve">
     <value>讀取訂單</value>
   </data>
+  <data name="ReadOrderLine" xml:space="preserve">
+    <value>瀏覽訂單行</value>
+  </data>
   <data name="ReadPerson" xml:space="preserve">
     <value>瀏覽人員</value>
   </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>瀏覽檔案</value>
   </data>
+  <data name="ReadPO" xml:space="preserve">
+    <value>瀏覽採購</value>
+  </data>
+  <data name="ReadPOLine" xml:space="preserve">
+    <value>瀏覽採購行</value>
+  </data>
+  <data name="RecalculateOrder" xml:space="preserve">
+    <value>重新計算訂單</value>
+  </data>
+  <data name="RecalculatePO" xml:space="preserve">
+    <value>重新計算採購</value>
+  </data>
   <data name="RollbackOrderLine" xml:space="preserve">
     <value>回滾訂單行</value>
+  </data>
+  <data name="RollbackPOLine" xml:space="preserve">
+    <value>回滾採購行</value>
   </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>排序人員類別</value>
@@ -224,6 +254,9 @@
   </data>
   <data name="StartOrderLine" xml:space="preserve">
     <value>開始訂單行執行</value>
+  </data>
+  <data name="StartPOLine" xml:space="preserve">
+    <value>開始採購行執行</value>
   </data>
   <data name="UpdateAsset" xml:space="preserve">
     <value>更新資產</value>
@@ -263,6 +296,12 @@
   </data>
   <data name="UpdatePersonProfileLink" xml:space="preserve">
     <value>更新檔案鏈接</value>
+  </data>
+  <data name="UpdatePO" xml:space="preserve">
+    <value>更新採購</value>
+  </data>
+  <data name="UpdatePOLine" xml:space="preserve">
+    <value>更新採購行</value>
   </data>
   <data name="UpdateProduct" xml:space="preserve">
     <value>更新產品</value>

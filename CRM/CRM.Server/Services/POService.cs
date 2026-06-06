@@ -12,17 +12,20 @@ using CRM.Server.RQ.PO;
 using CRM.Server.RQ.Product;
 using CRM.Server.RQ.Supplier;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.PO;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
     /// <summary>
-    /// Order service
-    /// 订单服务
+    /// Purchase order service
+    /// 采购订单服务
     /// </summary>
     public class POService : SEUserService, IPOService
     {
@@ -30,6 +33,7 @@ namespace CRM.Server.Services
         readonly ICommonService _commonService;
         readonly ISupplierService _supplierService;
         readonly IProductService _productService;
+        readonly IQueueService _queueService;
 
         public POService(
             MyDbContext db,
@@ -38,7 +42,8 @@ namespace CRM.Server.Services
             ILogger<POService> logger,
             ICommonService commonService,
             ISupplierService supplierService,
-            IProductService productService
+            IProductService productService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "po", logger)
         {
@@ -46,6 +51,7 @@ namespace CRM.Server.Services
             _commonService = commonService;
             _supplierService = supplierService;
             _productService = productService;
+            _queueService = queueService;
         }
 
         IActionResult CreateNoValidDataResult(string field, decimal targetValue, decimal currentValue, string product)
@@ -341,7 +347,17 @@ namespace CRM.Server.Services
                 return LogException(ex);
             }
 
-            return ActionResult.Succeed(po.Id);
+            var id = po.Id;
+
+            // Push message
+            var message = new CreatePOMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, po.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.POCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePOMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<OrderHeader> CreateQuery(POListRQ rq, Func<IQueryable<OrderHeader>, IQueryable<OrderHeader>>? filters = null)
@@ -561,7 +577,7 @@ namespace CRM.Server.Services
 
             var orgId = User.OrganizationInt;
 
-            return await _db.POs(orgId).AsNoTracking()
+            var po = await _db.POs(orgId).AsNoTracking()
                  .Where(p => p.Id == id)
                  .Select(p => new POViewData
                  {
@@ -599,6 +615,18 @@ namespace CRM.Server.Services
                      Status = p.Status,
                      Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
                  }).FirstOrDefaultAsync(cancellationToken);
+
+            if (po != null)
+            {
+                // Push message
+                var message = new ReadPOMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, po.Title)
+                };
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadPOMessage, cancellationToken);
+            }
+
+            return po;
         }
 
         /// <summary>
@@ -690,8 +718,21 @@ namespace CRM.Server.Services
             po.Discount = orderDiscount;
             po.Promotions = promotions;
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new RecalculatePOMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, po.Title),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.RecalculatePOMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(id);
@@ -893,8 +934,21 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdatePOMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, order.Title),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePOMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

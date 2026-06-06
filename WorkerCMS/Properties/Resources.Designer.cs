@@ -79,6 +79,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Complete PO Line.
+        /// </summary>
+        internal static string CompletePOLine {
+            get {
+                return ResourceManager.GetString("CompletePOLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Asset.
         /// </summary>
         internal static string CreateAsset {
@@ -187,6 +196,24 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create PO.
+        /// </summary>
+        internal static string CreatePO {
+            get {
+                return ResourceManager.GetString("CreatePO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create PO Line.
+        /// </summary>
+        internal static string CreatePOLine {
+            get {
+                return ResourceManager.GetString("CreatePOLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Product.
         /// </summary>
         internal static string CreateProduct {
@@ -277,6 +304,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete PO Line.
+        /// </summary>
+        internal static string DeletePOLine {
+            get {
+                return ResourceManager.GetString("DeletePOLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Merge Person Category.
         /// </summary>
         internal static string MergePersonCategory {
@@ -322,6 +358,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Read Order Line.
+        /// </summary>
+        internal static string ReadOrderLine {
+            get {
+                return ResourceManager.GetString("ReadOrderLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read Person.
         /// </summary>
         internal static string ReadPerson {
@@ -340,11 +385,56 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Read PO.
+        /// </summary>
+        internal static string ReadPO {
+            get {
+                return ResourceManager.GetString("ReadPO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read PO Line.
+        /// </summary>
+        internal static string ReadPOLine {
+            get {
+                return ResourceManager.GetString("ReadPOLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recalculate Order.
+        /// </summary>
+        internal static string RecalculateOrder {
+            get {
+                return ResourceManager.GetString("RecalculateOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recalculate PO.
+        /// </summary>
+        internal static string RecalculatePO {
+            get {
+                return ResourceManager.GetString("RecalculatePO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rollback Order Line.
         /// </summary>
         internal static string RollbackOrderLine {
             get {
                 return ResourceManager.GetString("RollbackOrderLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rollback PO Line.
+        /// </summary>
+        internal static string RollbackPOLine {
+            get {
+                return ResourceManager.GetString("RollbackPOLine", resourceCulture);
             }
         }
         
@@ -381,6 +471,15 @@ namespace WorkerCMS.Properties {
         internal static string StartOrderLine {
             get {
                 return ResourceManager.GetString("StartOrderLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start PO Line Execution.
+        /// </summary>
+        internal static string StartPOLine {
+            get {
+                return ResourceManager.GetString("StartPOLine", resourceCulture);
             }
         }
         
@@ -498,6 +597,24 @@ namespace WorkerCMS.Properties {
         internal static string UpdatePersonProfileLink {
             get {
                 return ResourceManager.GetString("UpdatePersonProfileLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update PO.
+        /// </summary>
+        internal static string UpdatePO {
+            get {
+                return ResourceManager.GetString("UpdatePO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update PO Line.
+        /// </summary>
+        internal static string UpdatePOLine {
+            get {
+                return ResourceManager.GetString("UpdatePOLine", resourceCulture);
             }
         }
         

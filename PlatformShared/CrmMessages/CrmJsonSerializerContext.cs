@@ -1,6 +1,7 @@
 ﻿using PlatformShared.CrmMessages.Order;
 using PlatformShared.CrmMessages.Org;
 using PlatformShared.CrmMessages.Person;
+using PlatformShared.CrmMessages.PO;
 using PlatformShared.CrmMessages.Product;
 using System.Text.Json.Serialization;
 
@@ -101,6 +102,20 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(CreatePromotionMessage))]
     [JsonSerializable(typeof(SortPromotionMessage))]
     [JsonSerializable(typeof(UpdatePromotionMessage))]
+
+    // PO
+    [JsonSerializable(typeof(CreatePOMessage))]
+    [JsonSerializable(typeof(ReadPOMessage))]
+    [JsonSerializable(typeof(RecalculatePOMessage))]
+    [JsonSerializable(typeof(UpdatePOMessage))]
+
+    [JsonSerializable(typeof(CompletePOLineMessage))]
+    [JsonSerializable(typeof(CreatePOLineMessage))]
+    [JsonSerializable(typeof(DeletePOLineMessage))]
+    [JsonSerializable(typeof(ReadPOLineMessage))]
+    [JsonSerializable(typeof(RollbackPOLineMessage))]
+    [JsonSerializable(typeof(StartPOLineMessage))]
+    [JsonSerializable(typeof(UpdatePOLineMessage))]
 
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {
