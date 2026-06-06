@@ -141,6 +141,12 @@
   <data name="CreateOrder" xml:space="preserve">
     <value>Create Order</value>
   </data>
+  <data name="CreateOrderDelivery" xml:space="preserve">
+    <value>Create Order Delivery</value>
+  </data>
+  <data name="CreateOrderPayment" xml:space="preserve">
+    <value>Create Order Payment</value>
+  </data>
   <data name="CreatePersonAddress" xml:space="preserve">
     <value>Create Address</value>
   </data>
@@ -243,6 +249,12 @@
   <data name="RollbackPOLine" xml:space="preserve">
     <value>Rollback PO Line</value>
   </data>
+  <data name="SortOrderDelivery" xml:space="preserve">
+    <value>Sort Order Delivery</value>
+  </data>
+  <data name="SortOrderPayment" xml:space="preserve">
+    <value>Sort Order Payment</value>
+  </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>Sort Person Category</value>
   </data>
@@ -275,6 +287,9 @@
   </data>
   <data name="UpdateOrder" xml:space="preserve">
     <value>Update Order</value>
+  </data>
+  <data name="UpdateOrderDelivery" xml:space="preserve">
+    <value>Update Order Delivery</value>
   </data>
   <data name="UpdateOrderLine" xml:space="preserve">
     <value>Update Order Line</value>

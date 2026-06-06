@@ -32,6 +32,14 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(StartOrderLineMessage))]
     [JsonSerializable(typeof(UpdateOrderLineMessage))]
 
+    [JsonSerializable(typeof(CreateOrderDeliveryMessage))]
+    [JsonSerializable(typeof(SortOrderDeliveryMessage))]
+    [JsonSerializable(typeof(UpdateOrderDeliveryMessage))]
+
+    [JsonSerializable(typeof(CreateOrderPaymentMessage))]
+    [JsonSerializable(typeof(SortOrderPaymentMessage))]
+    [JsonSerializable(typeof(UpdateOrderPaymentMessage))]
+
     // Org
     [JsonSerializable(typeof(CreateAssetMessage))]
     [JsonSerializable(typeof(ReadAssetSensitiveDataMessage))]

@@ -133,6 +133,24 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Order Delivery.
+        /// </summary>
+        internal static string CreateOrderDelivery {
+            get {
+                return ResourceManager.GetString("CreateOrderDelivery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Order Payment.
+        /// </summary>
+        internal static string CreateOrderPayment {
+            get {
+                return ResourceManager.GetString("CreateOrderPayment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Address.
         /// </summary>
         internal static string CreatePersonAddress {
@@ -439,6 +457,24 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sort Order Delivery.
+        /// </summary>
+        internal static string SortOrderDelivery {
+            get {
+                return ResourceManager.GetString("SortOrderDelivery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sort Order Payment.
+        /// </summary>
+        internal static string SortOrderPayment {
+            get {
+                return ResourceManager.GetString("SortOrderPayment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sort Person Category.
         /// </summary>
         internal static string SortPersonCategory {
@@ -534,6 +570,15 @@ namespace WorkerCMS.Properties {
         internal static string UpdateOrder {
             get {
                 return ResourceManager.GetString("UpdateOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Order Delivery.
+        /// </summary>
+        internal static string UpdateOrderDelivery {
+            get {
+                return ResourceManager.GetString("UpdateOrderDelivery", resourceCulture);
             }
         }
         

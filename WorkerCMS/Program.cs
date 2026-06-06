@@ -87,6 +87,14 @@ services.AddSingleton<IMessageQueueProcessor, RollbackOrderLineProcessor>();
 services.AddSingleton<IMessageQueueProcessor, StartOrderLineProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateOrderLineProcessor>();
 
+services.AddSingleton<IMessageQueueProcessor, CreateOrderDeliveryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, SortOrderDeliveryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateOrderDeliveryProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, CreateOrderPaymentProcessor>();
+services.AddSingleton<IMessageQueueProcessor, SortOrderPaymentProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateOrderPaymentProcessor>();
+
 // PO
 services.AddSingleton<IMessageQueueProcessor, CreatePOProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadPOProcessor>();

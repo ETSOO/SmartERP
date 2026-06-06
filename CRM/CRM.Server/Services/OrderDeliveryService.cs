@@ -7,10 +7,13 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.OrderDelivery;
 using CRM.Server.RQ.OrderDelivery;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -22,18 +25,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public OrderDeliveryService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<OrderDeliveryService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "order_delivery", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         private IQueryable<OrderDelivery> CreateQuery(OrderDeliveryListRQ rq)
@@ -97,7 +103,17 @@ namespace CRM.Server.Services
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(delivery.Id);
+            var id = delivery.Id;
+
+            // Push message
+            var message = new CreateOrderDeliveryMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, delivery.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrderDeliveryCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateOrderDeliveryMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -161,13 +177,25 @@ namespace CRM.Server.Services
             var indices = rq.Values.ToArray();
 
 #pragma warning disable EF1002 // No risk of vulnerability to SQL injection.
-            return await _db.Database.ExecuteSqlRawAsync($"""
+            var task1 = _db.Database.ExecuteSqlRawAsync($"""
                 UPDATE "order_delivery"
                     SET "order_index" = t."sorder_index"
                 FROM (VALUES {string.Join(", ", ids.Select((id, i) => $"({id}, {indices[i]})"))}) AS t("sid", "sorder_index")
                 WHERE "core_organization_id" = {orgId} AND "id" = t."sid";
             """, cancellationToken);
 #pragma warning restore EF1002 // No risk of vulnerability to SQL injection.
+
+            // Push message
+            var message = new SortOrderDeliveryMessage
+            {
+                Data = User.CreateMessageData(App.AppId, 0),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.DictionaryInt32Int16)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.SortOrderDeliveryMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            return task1.Result;
         }
 
         /// <summary>
@@ -215,7 +243,20 @@ namespace CRM.Server.Services
                 delivery.OrderIndex = rq.OrderIndex.Value;
             }
 
-            await _db.SaveChangesAsync(cancellationToken);
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateOrderDeliveryMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, delivery.Title),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateOrderDeliveryMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             return ActionResult.Succeed(rq.Id);
         }

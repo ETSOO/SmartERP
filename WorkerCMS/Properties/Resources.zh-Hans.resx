@@ -141,6 +141,12 @@
   <data name="CreateOrder" xml:space="preserve">
     <value>创建订单</value>
   </data>
+  <data name="CreateOrderDelivery" xml:space="preserve">
+    <value>创建订单配送方式</value>
+  </data>
+  <data name="CreateOrderPayment" xml:space="preserve">
+    <value>创建订单付款方式</value>
+  </data>
   <data name="CreatePersonAddress" xml:space="preserve">
     <value>创建地址</value>
   </data>
@@ -243,6 +249,12 @@
   <data name="RollbackPOLine" xml:space="preserve">
     <value>回滚采购行</value>
   </data>
+  <data name="SortOrderDelivery" xml:space="preserve">
+    <value>排序订单配送方式</value>
+  </data>
+  <data name="SortOrderPayment" xml:space="preserve">
+    <value>排序订单支付方式</value>
+  </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>排序人员类别</value>
   </data>
@@ -275,6 +287,9 @@
   </data>
   <data name="UpdateOrder" xml:space="preserve">
     <value>更新订单</value>
+  </data>
+  <data name="UpdateOrderDelivery" xml:space="preserve">
+    <value>更新订单配送方式</value>
   </data>
   <data name="UpdateOrderLine" xml:space="preserve">
     <value>更新订单行</value>
