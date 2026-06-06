@@ -78,6 +78,11 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(UpdateProductPriceMessage))]
     [JsonSerializable(typeof(UpdateProductUnitMessage))]
 
+    [JsonSerializable(typeof(CreateProductCategoryMessage))]
+    [JsonSerializable(typeof(MergeProductCategoryMessage))]
+    [JsonSerializable(typeof(SortProductCategoryMessage))]
+    [JsonSerializable(typeof(UpdateProductCategoryMessage))]
+
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {
     }

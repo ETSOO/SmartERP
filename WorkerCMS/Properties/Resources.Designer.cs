@@ -178,6 +178,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Product Category.
+        /// </summary>
+        internal static string CreateProductCategory {
+            get {
+                return ResourceManager.GetString("CreateProductCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Supplier.
         /// </summary>
         internal static string CreateSupplier {
@@ -241,6 +250,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Merge Product Category.
+        /// </summary>
+        internal static string MergeProductCategory {
+            get {
+                return ResourceManager.GetString("MergeProductCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Product Edit BOMs.
         /// </summary>
         internal static string ProductEditBoms {
@@ -282,6 +300,15 @@ namespace WorkerCMS.Properties {
         internal static string SortPersonCategory {
             get {
                 return ResourceManager.GetString("SortPersonCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sort Product Category.
+        /// </summary>
+        internal static string SortProductCategory {
+            get {
+                return ResourceManager.GetString("SortProductCategory", resourceCulture);
             }
         }
         

@@ -134,6 +134,11 @@ services.AddSingleton<IMessageQueueProcessor, UpdateProductLogoProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateProductPriceProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateProductUnitProcessor>();
 
+services.AddSingleton<IMessageQueueProcessor, CreateProductCategoryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, MergeProductCategoryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, SortProductCategoryProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateProductCategoryProcessor>();
+
 services.AddLocalRabbitMQConsumer(consumerOptions);
 
 var producerOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer Options Not Found");

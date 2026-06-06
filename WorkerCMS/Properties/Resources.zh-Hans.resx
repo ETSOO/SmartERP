@@ -156,6 +156,9 @@
   <data name="CreateProduct" xml:space="preserve">
     <value>创建产品</value>
   </data>
+  <data name="CreateProductCategory" xml:space="preserve">
+    <value>创建产品类目</value>
+  </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>创建供应商</value>
   </data>
@@ -177,6 +180,9 @@
   <data name="MergePersonCategory" xml:space="preserve">
     <value>合并人员分类</value>
   </data>
+  <data name="MergeProductCategory" xml:space="preserve">
+    <value>合并产品类目</value>
+  </data>
   <data name="ProductEditBoms" xml:space="preserve">
     <value>编辑产品物流清单</value>
   </data>
@@ -191,6 +197,9 @@
   </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>排序人员类别</value>
+  </data>
+  <data name="SortProductCategory" xml:space="preserve">
+    <value>排序产品类目</value>
   </data>
   <data name="UpdateAsset" xml:space="preserve">
     <value>更新资产</value>

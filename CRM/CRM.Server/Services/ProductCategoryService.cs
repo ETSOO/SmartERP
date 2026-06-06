@@ -7,6 +7,8 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.ProductCategory;
 using CRM.Server.RQ.ProductCategory;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Product;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
@@ -23,18 +25,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public ProductCategoryService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<ProductCategoryService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "product_category", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         /// <summary>
@@ -109,8 +114,18 @@ namespace CRM.Server.Services
             // Save
             await _db.SaveChangesAsync(cancellationToken);
 
+            var id = category.Id;
+
+            // Push message
+            var message = new CreateProductCategoryMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, String.Join(" -> ", category.Names)),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.ProductCategoryCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateProductCategoryMessage, cancellationToken);
+
             // Return
-            return ActionResult.Succeed(category.Id);
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<ProductCategory> CreateQuery(ProductCategoryListRQ rq, Func<IQueryable<ProductCategory>, IQueryable<ProductCategory>>? filters = null)
@@ -328,6 +343,16 @@ namespace CRM.Server.Services
                     .ExecuteDeleteAsync(cancellationToken);
             }
 
+            // Push message
+            var message = new MergeProductCategoryMessage
+            {
+                Data = User.CreateMessageData(App.AppId, target.Id, string.Join(" -> ", target.Names)),
+                SourceId = source.Id,
+                SourceName = string.Join(" -> ", source.Names),
+                DeleteSource = rq.DeleteSource
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.MergeProductCategoryMessage, cancellationToken);
+
             return ActionResult.Succeed(rq.TargetId);
         }
 
@@ -374,13 +399,25 @@ namespace CRM.Server.Services
             var indices = rq.Values.ToArray();
 
 #pragma warning disable EF1002 // No risk of vulnerability to SQL injection.
-            return await _db.Database.ExecuteSqlRawAsync($"""
+            var task1 = _db.Database.ExecuteSqlRawAsync($"""
                 UPDATE "product_category"
                     SET "order_index" = t."sorder_index"
                 FROM (VALUES {string.Join(", ", ids.Select((id, i) => $"({id}, {indices[i]})"))}) AS t("sid", "sorder_index")
                 WHERE "core_organization_id" = {orgId} AND "id" = t."sid";
             """, cancellationToken);
 #pragma warning restore EF1002 // No risk of vulnerability to SQL injection.
+
+            // Push message
+            var message = new SortProductCategoryMessage
+            {
+                Data = User.CreateMessageData(App.AppId, 0),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.DictionaryInt32Int16)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.SortProductCategoryMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            return task1.Result;
         }
 
         /// <summary>
@@ -496,10 +533,20 @@ namespace CRM.Server.Services
             }
 
             // Changes
-            // var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateProductCategoryMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, string.Join(" -> ", category.Names)),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateProductCategoryMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);
