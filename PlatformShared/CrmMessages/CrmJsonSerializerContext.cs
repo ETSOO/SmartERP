@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages.Org;
+﻿using PlatformShared.CrmMessages.Order;
+using PlatformShared.CrmMessages.Org;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.CrmMessages.Product;
 using System.Text.Json.Serialization;
@@ -15,6 +16,20 @@ namespace PlatformShared.CrmMessages
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
+
+    // Order
+    [JsonSerializable(typeof(CreateOrderMessage))]
+    [JsonSerializable(typeof(ReadOrderMessage))]
+    [JsonSerializable(typeof(RecalculateOrderMessage))]
+    [JsonSerializable(typeof(UpdateOrderMessage))]
+
+    [JsonSerializable(typeof(CompleteOrderLineMessage))]
+    [JsonSerializable(typeof(CreateOrderLineMessage))]
+    [JsonSerializable(typeof(DeleteOrderLineMessage))]
+    [JsonSerializable(typeof(ReadOrderLineMessage))]
+    [JsonSerializable(typeof(RollbackOrderLineMessage))]
+    [JsonSerializable(typeof(StartOrderLineMessage))]
+    [JsonSerializable(typeof(UpdateOrderLineMessage))]
 
     // Org
     [JsonSerializable(typeof(CreateAssetMessage))]
@@ -82,6 +97,10 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(MergeProductCategoryMessage))]
     [JsonSerializable(typeof(SortProductCategoryMessage))]
     [JsonSerializable(typeof(UpdateProductCategoryMessage))]
+
+    [JsonSerializable(typeof(CreatePromotionMessage))]
+    [JsonSerializable(typeof(SortPromotionMessage))]
+    [JsonSerializable(typeof(UpdatePromotionMessage))]
 
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {

@@ -10,11 +10,14 @@ using CRM.Server.RQ.OrderLine;
 using CRM.Server.RQ.Product;
 using CRM.Server.Utils;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -28,6 +31,7 @@ namespace CRM.Server.Services
         readonly ICommonService _commonService;
         readonly IProductService _productService;
         readonly IOrderService _orderService;
+        readonly IQueueService _queueService;
 
         public OrderLineService(
             MyDbContext db,
@@ -36,7 +40,8 @@ namespace CRM.Server.Services
             ILogger<OrderLineService> logger,
             ICommonService commonService,
             IProductService productService,
-            IOrderService orderService
+            IOrderService orderService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "order_line", logger)
         {
@@ -44,6 +49,7 @@ namespace CRM.Server.Services
             _commonService = commonService;
             _productService = productService;
             _orderService = orderService;
+            _queueService = queueService;
         }
 
         private IQueryable<OrderLine> CreateQuery(OrderLineListRQ rq, Func<IQueryable<OrderLine>, IQueryable<OrderLine>>? filters = null, OrderKind? kind = null)
@@ -153,6 +159,7 @@ namespace CRM.Server.Services
                           && (p.StartTime < now || (p.AssetQty > 0 && p.AssetId == null)))
                 .Select(a => new
                 {
+                    a.Title,
                     a.Order.BuyerId,
                     a.ProductId,
                     a.Qty,
@@ -231,6 +238,14 @@ namespace CRM.Server.Services
                 // Log and return the result
                 return LogException(ex);
             }
+
+            // Push message
+            var message = new CompleteOrderLineMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, line.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrderLineCompleteRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CompleteOrderLineMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -383,7 +398,17 @@ namespace CRM.Server.Services
                 return LogException(ex);
             }
 
-            return ActionResult.Succeed(orderLine.Id);
+            var id = orderLine.Id;
+
+            // Push message
+            var message = new CreateOrderLineMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, orderLine.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrderLineCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateOrderLineMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -409,17 +434,17 @@ namespace CRM.Server.Services
 
             var orgId = User.OrganizationInt;
 
-            var orderId = await _db.OrderLines
+            var orderLine = await _db.OrderLines
                 .Where(q => q.Id == id && q.Order.CoreOrganizationId == orgId
                             && q.Order.Kind == OrderKind.Order
                             && q.Order.Status < EntityStatus.Inactivated
                             && q.Status < EntityStatus.Inactivated
                             && (isManage || q.Order.UserId == User.Oid)
                             && q.AssetId == null)
-                .Select(q => q.OrderId)
+                .Select(q => new { q.Title, q.OrderId })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (orderId == 0)
+            if (orderLine == null)
             {
                 return ApplicationErrors.NoId.AsResult(nameof(id));
             }
@@ -437,11 +462,15 @@ namespace CRM.Server.Services
 
             try
             {
-                await _db.OrderLines.Where(q => q.BomId == id).ExecuteDeleteAsync(cancellationToken);
+                var task1 = _db.OrderLines.Where(q => q.BomId == id).ExecuteDeleteAsync(cancellationToken);
 
-                await _db.OrderLines.Where(q => q.Id == id).ExecuteDeleteAsync(cancellationToken);
+                var task2 = _db.OrderLines.Where(q => q.Id == id).ExecuteDeleteAsync(cancellationToken);
 
-                var result = await _orderService.RecalculateAsync(orderId, false, cancellationToken);
+                var task3 = _orderService.RecalculateAsync(orderLine.OrderId, false, cancellationToken);
+
+                await Task.WhenAll(task1, task2, task3);
+
+                var result = task3.Result;
 
                 if (!result.Ok)
                 {
@@ -460,6 +489,13 @@ namespace CRM.Server.Services
                 // Log and return the result
                 return LogException(ex);
             }
+
+            // Push message
+            var message = new DeleteOrderLineMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, orderLine.Title)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeleteOrderLineMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
         }
@@ -764,6 +800,13 @@ namespace CRM.Server.Services
                 data.IsRestorable = isExecute
                         && (isManage || data.OrderUserId == userId || data.UserId == userId)
                         && data.Status != EntityStatus.Completed && data.Status != EntityStatus.Normal;
+
+                // Push message
+                var message = new ReadOrderLineMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, data.Title)
+                };
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadOrderLineMessage, cancellationToken);
             }
 
             return data;
@@ -790,7 +833,8 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
             var userId = User.Oid;
 
-            var line = await _db.OrderLines
+            var data = await _db.OrderLines
+                .AsNoTracking()
                 .Where(p => p.Id == id
                           && p.Order.CoreOrganizationId == orgId
                           && p.Order.Kind == OrderKind.Order
@@ -799,14 +843,20 @@ namespace CRM.Server.Services
                 ).Select(p => new
                 {
                     p.Order.BuyerId,
+                    p.Title,
                     p.ProductId,
                     p.Qty,
                     p.AssetId,
-                    p.AssetQty
+                    p.AssetQty,
+                    p.StartTime,
+                    p.EndTime,
+                    p.UserId,
+                    p.SupplierId,
+                    p.Status
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (line == null)
+            if (data == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
@@ -815,9 +865,9 @@ namespace CRM.Server.Services
 
             try
             {
-                if (line.AssetId.HasValue)
+                if (data.AssetId.HasValue)
                 {
-                    var assetResult = await _commonService.SyncAssetAsync(line.BuyerId, line.AssetId.Value, -line.AssetQty, line.Qty, cancellationToken);
+                    var assetResult = await _commonService.SyncAssetAsync(data.BuyerId, data.AssetId.Value, -data.AssetQty, data.Qty, cancellationToken);
                     if (!assetResult.Ok)
                     {
                         await transaction.RollbackAsync(cancellationToken);
@@ -826,16 +876,41 @@ namespace CRM.Server.Services
                     }
                 }
 
-                await _db.OrderLines
-                    .Where(p => p.Id == id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, (DateTimeOffset?)null)
-                                            .SetProperty(ol => ol.EndTime, (DateTimeOffset?)null)
-                                            .SetProperty(ol => ol.UserId, (long?)null)
-                                            .SetProperty(ol => ol.AssetId, (int?)null)
-                                            .SetProperty(ol => ol.SupplierId, (int?)null)
-                                            .SetProperty(ol => ol.Status, EntityStatus.Normal), cancellationToken);
+                var line = new OrderLine
+                {
+                    Id = id,
+                    StartTime = data.StartTime,
+                    EndTime = data.EndTime,
+                    UserId = data.UserId,
+                    AssetId = data.AssetId,
+                    SupplierId = data.SupplierId,
+                    Status = data.Status
+                };
+                _db.OrderLines.Attach(line);
+
+                // Update
+                line.StartTime = null;
+                line.EndTime = null;
+                line.UserId = null;
+                line.AssetId = null;
+                line.SupplierId = null;
+                line.Status = EntityStatus.Normal;
+
+                // Changes
+                var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
+                // Save
+                await _db.SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
+
+                // Push message
+                var message = new RollbackOrderLineMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, data.Title),
+                    Changes = changes
+                };
+                var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.RollbackOrderLineMessage, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -882,6 +957,16 @@ namespace CRM.Server.Services
                 .ExecuteUpdateAsync(p => p.SetProperty(ol => ol.StartTime, ol => initStart || ol.StartTime == null ? now : ol.StartTime)
                                         .SetProperty(ol => ol.UserId, ol => (isManage || ol.Order.UserId == userId) ? rq.UserId ?? ol.UserId ?? userId : ol.UserId ?? userId)
                                         .SetProperty(ol => ol.Status, ol => ol.Status == EntityStatus.Normal ? EntityStatus.Doing : ol.Status), cancellationToken);
+
+            if (result > 0)
+            {
+                var message = new StartOrderLineMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id),
+                    JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrderLineStartRQ)
+                };
+                var task = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StartOrderLineMessage, cancellationToken);
+            }
 
             return result > 0 ? ActionResult.Succeed(id) : ApplicationErrors.NoId.AsResult();
         }
@@ -1011,6 +1096,9 @@ namespace CRM.Server.Services
                 orderLine.Status = rq.Status.Value;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             if (amountUpdated)
             {
                 await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
@@ -1048,6 +1136,14 @@ namespace CRM.Server.Services
             {
                 await _db.SaveChangesAsync(cancellationToken);
             }
+
+            // Push message
+            var message = new UpdateOrderLineMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, orderLine.Title),
+                Changes = changes
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateOrderLineMessage, cancellationToken);
 
             return ActionResult.Succeed(rq.Id);
         }

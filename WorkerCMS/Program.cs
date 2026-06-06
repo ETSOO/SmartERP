@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using PlatformShared.Database;
+using WorkerCMS.Processors.Order;
 using WorkerCMS.Processors.Org;
 using WorkerCMS.Processors.Person;
 using WorkerCMS.Processors.Product;
@@ -72,6 +73,19 @@ services.AddDbContext<LogDbContext>((provider, options) =>
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
 
+// Order
+services.AddSingleton<IMessageQueueProcessor, CreateOrderProcessor>();
+services.AddSingleton<IMessageQueueProcessor, RecalculateOrderProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateOrderProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, CompleteOrderLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, CreateOrderLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeleteOrderLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReadOrderLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, RollbackOrderLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, StartOrderLineProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateOrderLineProcessor>();
+
 // Org
 services.AddSingleton<IMessageQueueProcessor, CreateAssetProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadAssetSensitiveDataProcessor>();
@@ -138,6 +152,10 @@ services.AddSingleton<IMessageQueueProcessor, CreateProductCategoryProcessor>();
 services.AddSingleton<IMessageQueueProcessor, MergeProductCategoryProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SortProductCategoryProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateProductCategoryProcessor>();
+
+services.AddSingleton<IMessageQueueProcessor, CreatePromotionProcessor>();
+services.AddSingleton<IMessageQueueProcessor, SortPromotionProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdatePromotionProcessor>();
 
 services.AddLocalRabbitMQConsumer(consumerOptions);
 

@@ -8,10 +8,13 @@ using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Promotion;
 using CRM.Server.RQ.Promotion;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Product;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -23,18 +26,21 @@ namespace CRM.Server.Services
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
+        readonly IQueueService _queueService;
 
         public PromotionService(
             MyDbContext db,
             ISEServiceApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PromotionService> logger,
-            ICommonService commonService
+            ICommonService commonService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "promotion", logger)
         {
             _db = db;
             _commonService = commonService;
+            _queueService = queueService;
         }
 
         private IQueryable<Promotion> CreateQuery(PromotionListRQ rq, Func<IQueryable<Promotion>, IQueryable<Promotion>>? filters = null)
@@ -179,7 +185,17 @@ namespace CRM.Server.Services
             // Save changes
             await _db.SaveChangesAsync(cancellationToken);
 
-            return ActionResult.Succeed(promotion.Id);
+            var id = promotion.Id;
+
+            // Push message
+            var message = new CreatePromotionMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, promotion.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.PromotionCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreatePromotionMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>
@@ -265,13 +281,25 @@ namespace CRM.Server.Services
             var indices = rq.Values.ToArray();
 
 #pragma warning disable EF1002 // No risk of vulnerability to SQL injection.
-            return await _db.Database.ExecuteSqlRawAsync($"""
+            var task1 = _db.Database.ExecuteSqlRawAsync($"""
                 UPDATE "promotion"
                     SET "order_index" = t."sorder_index"
                 FROM (VALUES {string.Join(", ", ids.Select((id, i) => $"({id}, {indices[i]})"))}) AS t("sid", "sorder_index")
                 WHERE "core_organization_id" = {orgId} AND "id" = t."sid";
             """, cancellationToken);
 #pragma warning restore EF1002 // No risk of vulnerability to SQL injection.
+
+            // Push message
+            var message = new SortPromotionMessage
+            {
+                Data = User.CreateMessageData(App.AppId, 0),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.DictionaryInt32Int16)
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.SortPromotionMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            return task1.Result;
         }
 
         /// <summary>
@@ -426,8 +454,21 @@ namespace CRM.Server.Services
                 promotion.OrderIndex = rq.OrderIndex.Value;
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdatePromotionMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, promotion.Title),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdatePromotionMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

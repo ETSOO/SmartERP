@@ -70,6 +70,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Complete Order Line.
+        /// </summary>
+        internal static string CompleteOrderLine {
+            get {
+                return ResourceManager.GetString("CompleteOrderLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Asset.
         /// </summary>
         internal static string CreateAsset {
@@ -102,6 +111,15 @@ namespace WorkerCMS.Properties {
         internal static string CreateDept {
             get {
                 return ResourceManager.GetString("CreateDept", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Order.
+        /// </summary>
+        internal static string CreateOrder {
+            get {
+                return ResourceManager.GetString("CreateOrder", resourceCulture);
             }
         }
         
@@ -187,6 +205,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create Promotion.
+        /// </summary>
+        internal static string CreatePromotion {
+            get {
+                return ResourceManager.GetString("CreatePromotion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Supplier.
         /// </summary>
         internal static string CreateSupplier {
@@ -201,6 +228,15 @@ namespace WorkerCMS.Properties {
         internal static string DeleteContactRelation {
             get {
                 return ResourceManager.GetString("DeleteContactRelation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Order Line.
+        /// </summary>
+        internal static string DeleteOrderLine {
+            get {
+                return ResourceManager.GetString("DeleteOrderLine", resourceCulture);
             }
         }
         
@@ -277,6 +313,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Read Order.
+        /// </summary>
+        internal static string ReadOrder {
+            get {
+                return ResourceManager.GetString("ReadOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read Person.
         /// </summary>
         internal static string ReadPerson {
@@ -295,6 +340,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rollback Order Line.
+        /// </summary>
+        internal static string RollbackOrderLine {
+            get {
+                return ResourceManager.GetString("RollbackOrderLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sort Person Category.
         /// </summary>
         internal static string SortPersonCategory {
@@ -309,6 +363,24 @@ namespace WorkerCMS.Properties {
         internal static string SortProductCategory {
             get {
                 return ResourceManager.GetString("SortProductCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sort Promotion.
+        /// </summary>
+        internal static string SortPromotion {
+            get {
+                return ResourceManager.GetString("SortPromotion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start Order Line Execution.
+        /// </summary>
+        internal static string StartOrderLine {
+            get {
+                return ResourceManager.GetString("StartOrderLine", resourceCulture);
             }
         }
         
@@ -354,6 +426,24 @@ namespace WorkerCMS.Properties {
         internal static string UpdateDept {
             get {
                 return ResourceManager.GetString("UpdateDept", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Order.
+        /// </summary>
+        internal static string UpdateOrder {
+            get {
+                return ResourceManager.GetString("UpdateOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Order Line.
+        /// </summary>
+        internal static string UpdateOrderLine {
+            get {
+                return ResourceManager.GetString("UpdateOrderLine", resourceCulture);
             }
         }
         
@@ -444,6 +534,15 @@ namespace WorkerCMS.Properties {
         internal static string UpdateProductUnit {
             get {
                 return ResourceManager.GetString("UpdateProductUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Promotion.
+        /// </summary>
+        internal static string UpdatePromotion {
+            get {
+                return ResourceManager.GetString("UpdatePromotion", resourceCulture);
             }
         }
         

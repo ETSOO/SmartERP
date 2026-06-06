@@ -36,4 +36,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Processors\Stock\" />
+    <Folder Include="Processors\PO\" />
+  </ItemGroup>
 </Project>

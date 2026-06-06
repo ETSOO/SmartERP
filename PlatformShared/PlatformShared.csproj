@@ -42,4 +42,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CrmMessages\Stock\" />
+    <Folder Include="CrmMessages\PO\" />
+  </ItemGroup>
+
 </Project>

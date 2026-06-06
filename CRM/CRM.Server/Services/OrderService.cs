@@ -13,11 +13,14 @@ using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Product;
 using CRM.Server.Utils;
 using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using System.Buffers;
+using System.Text.Json;
 
 namespace CRM.Server.Services
 {
@@ -31,6 +34,7 @@ namespace CRM.Server.Services
         readonly ICommonService _commonService;
         readonly ICustomerService _customerService;
         readonly IProductService _productService;
+        readonly IQueueService _queueService;
 
         public OrderService(
             MyDbContext db,
@@ -39,7 +43,8 @@ namespace CRM.Server.Services
             ILogger<OrderService> logger,
             ICommonService commonService,
             ICustomerService customerService,
-            IProductService productService
+            IProductService productService,
+            IQueueService queueService
         )
             : base(app, userAccessor.UserSafe, "order", logger)
         {
@@ -47,6 +52,7 @@ namespace CRM.Server.Services
             _commonService = commonService;
             _customerService = customerService;
             _productService = productService;
+            _queueService = queueService;
         }
 
         IActionResult CreateNoValidDataResult(string field, decimal targetValue, decimal currentValue, string product)
@@ -364,7 +370,17 @@ namespace CRM.Server.Services
                 return LogException(ex);
             }
 
-            return ActionResult.Succeed(order.Id);
+            var id = order.Id;
+
+            // Push message
+            var message = new CreateOrderMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, order.Title),
+                JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrderCreateRQ)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.CreateOrderMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         private IQueryable<OrderHeader> CreateQuery(OrderListRQ rq, Func<IQueryable<OrderHeader>, IQueryable<OrderHeader>>? filters = null)
@@ -676,7 +692,7 @@ namespace CRM.Server.Services
 
             var orgId = User.OrganizationInt;
 
-            return await _db.Orders(orgId).AsNoTracking()
+            var order = await _db.Orders(orgId).AsNoTracking()
                  .Where(p => p.Id == id)
                  .Select(p => new OrderViewData
                  {
@@ -714,6 +730,18 @@ namespace CRM.Server.Services
                      Status = p.Status,
                      Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
                  }).FirstOrDefaultAsync(cancellationToken);
+
+            if (order != null)
+            {
+                // Push message
+                var message = new ReadOrderMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, order.Title)
+                };
+                await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ReadOrderMessage, cancellationToken);
+            }
+
+            return order;
         }
 
         /// <summary>
@@ -805,8 +833,22 @@ namespace CRM.Server.Services
             order.Discount = orderDiscount;
             order.Promotions = promotions;
 
+
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new RecalculateOrderMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, order.Title),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.RecalculateOrderMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(id);
@@ -1007,8 +1049,21 @@ namespace CRM.Server.Services
                 }
             }
 
+            // Changes
+            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+
             // Save
-            await _db.SaveChangesAsync(cancellationToken);
+            var task1 = _db.SaveChangesAsync(cancellationToken);
+
+            // Push message
+            var message = new UpdateOrderMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, order.Title),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateOrderMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
 
             // Return
             return ActionResult.Succeed(rq.Id);

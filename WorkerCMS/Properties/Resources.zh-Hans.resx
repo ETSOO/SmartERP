@@ -120,6 +120,9 @@
   <data name="AddContactRelation" xml:space="preserve">
     <value>添加联系人关系</value>
   </data>
+  <data name="CompleteOrderLine" xml:space="preserve">
+    <value>完成订单行</value>
+  </data>
   <data name="CreateAsset" xml:space="preserve">
     <value>创建资产</value>
   </data>
@@ -131,6 +134,9 @@
   </data>
   <data name="CreateDept" xml:space="preserve">
     <value>创建部门</value>
+  </data>
+  <data name="CreateOrder" xml:space="preserve">
+    <value>创建订单</value>
   </data>
   <data name="CreatePersonAddress" xml:space="preserve">
     <value>创建地址</value>
@@ -159,11 +165,17 @@
   <data name="CreateProductCategory" xml:space="preserve">
     <value>创建产品类目</value>
   </data>
+  <data name="CreatePromotion" xml:space="preserve">
+    <value>创建促销活动</value>
+  </data>
   <data name="CreateSupplier" xml:space="preserve">
     <value>创建供应商</value>
   </data>
   <data name="DeleteContactRelation" xml:space="preserve">
     <value>移除联系人关系</value>
+  </data>
+  <data name="DeleteOrderLine" xml:space="preserve">
+    <value>移除订单行</value>
   </data>
   <data name="DeletePersonInfo" xml:space="preserve">
     <value>移除人员信息</value>
@@ -189,17 +201,29 @@
   <data name="ReadAssetSensitiveData" xml:space="preserve">
     <value>读取资产敏感信息</value>
   </data>
+  <data name="ReadOrder" xml:space="preserve">
+    <value>读取订单</value>
+  </data>
   <data name="ReadPerson" xml:space="preserve">
     <value>浏览人员</value>
   </data>
   <data name="ReadPersonProfile" xml:space="preserve">
     <value>浏览档案</value>
   </data>
+  <data name="RollbackOrderLine" xml:space="preserve">
+    <value>回滚订单行</value>
+  </data>
   <data name="SortPersonCategory" xml:space="preserve">
     <value>排序人员类别</value>
   </data>
   <data name="SortProductCategory" xml:space="preserve">
     <value>排序产品类目</value>
+  </data>
+  <data name="SortPromotion" xml:space="preserve">
+    <value>排序促销活动</value>
+  </data>
+  <data name="StartOrderLine" xml:space="preserve">
+    <value>开始订单行执行</value>
   </data>
   <data name="UpdateAsset" xml:space="preserve">
     <value>更新资产</value>
@@ -215,6 +239,12 @@
   </data>
   <data name="UpdateDept" xml:space="preserve">
     <value>更新部门</value>
+  </data>
+  <data name="UpdateOrder" xml:space="preserve">
+    <value>更新订单</value>
+  </data>
+  <data name="UpdateOrderLine" xml:space="preserve">
+    <value>更新订单行</value>
   </data>
   <data name="UpdatePerson" xml:space="preserve">
     <value>更新人员</value>
@@ -245,6 +275,9 @@
   </data>
   <data name="UpdateProductUnit" xml:space="preserve">
     <value>更新产品单位</value>
+  </data>
+  <data name="UpdatePromotion" xml:space="preserve">
+    <value>更新促销活动</value>
   </data>
   <data name="UpdateSettings" xml:space="preserve">
     <value>更新系统设置</value>
