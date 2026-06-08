@@ -462,15 +462,9 @@ namespace CRM.Server.Services
 
             try
             {
-                var task1 = _db.OrderLines.Where(q => q.BomId == id).ExecuteDeleteAsync(cancellationToken);
+                await _db.OrderLines.Where(q => q.Id == id || q.BomId == id).ExecuteDeleteAsync(cancellationToken);
 
-                var task2 = _db.OrderLines.Where(q => q.Id == id).ExecuteDeleteAsync(cancellationToken);
-
-                var task3 = _orderService.RecalculateAsync(orderLine.OrderId, false, cancellationToken);
-
-                await Task.WhenAll(task1, task2, task3);
-
-                var result = task3.Result;
+                var result = await _orderService.RecalculateAsync(orderLine.OrderId, false, cancellationToken);
 
                 if (!result.Ok)
                 {

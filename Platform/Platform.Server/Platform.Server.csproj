@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\PlatformShared\PlatformShared.csproj" />
+    <ProjectReference Include="..\..\WebTemplates\WebTemplates.csproj" />
     <ProjectReference Include="..\platform.client\platform.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

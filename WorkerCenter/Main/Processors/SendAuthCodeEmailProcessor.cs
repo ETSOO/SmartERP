@@ -16,8 +16,6 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class SendAuthCodeEmailProcessor : CommonQueueProcessor<SendAuthCodeEmailMessage>
     {
-        private static readonly Type AuthCodeMemberInvitationDataType = typeof(AuthCodeMemberInvitationData);
-
         private readonly IMessageQueueProducer _producer;
 
         public SendAuthCodeEmailProcessor(ILogger<SendAuthCodeEmailProcessor> logger, IMessageQueueProducer producer)

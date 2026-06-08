@@ -19,6 +19,7 @@ using PlatformShared.Extentions;
 using System.Buffers;
 using System.Text.Json;
 using System.Web;
+using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 using BusinessProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
@@ -161,6 +162,7 @@ namespace CRM.Server.Services
                 Sn = sn,
                 Description = rq.Description,
                 Expiry = rq.Expiry,
+                ExpiryCheck = rq.ExpiryCheck,
                 Times = rq.Times,
                 Amount = rq.Amount,
                 SensitiveData = sensitiveData,
@@ -207,6 +209,18 @@ namespace CRM.Server.Services
                     if (rq.SupplierId.HasValue)
                     {
                         q = q.Where(a => a.SupplierId == rq.SupplierId.Value);
+                    }
+
+                    if (rq.ExpiryCheck.HasValue)
+                    {
+                        if (rq.ExpiryCheck.Value)
+                        {
+                            q = q.Where(a => a.ExpiryCheck == true);
+                        }
+                        else
+                        {
+                            q = q.Where(a => a.ExpiryCheck == null || !a.ExpiryCheck.Value);
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(rq.Sn))
@@ -328,11 +342,13 @@ namespace CRM.Server.Services
                     Sn = a.Sn,
                     Description = a.Description,
                     Expiry = a.Expiry,
+                    ExpiryCheck = a.ExpiryCheck,
                     Times = a.Times,
                     Amount = a.Amount,
                     SensitiveData = a.SensitiveData == null ? null : "***",
                     HealthCheckUrl = a.HealthCheckUrl,
                     HealthCheckSchedule = a.HealthCheckSchedule,
+                    Data = a.Data,
                     Status = a.Status,
                     Creation = a.Creation
                 }).FirstOrDefaultAsync(cancellationToken);
@@ -490,6 +506,11 @@ namespace CRM.Server.Services
                 hasFinanceChange = true;
             }
 
+            if (rq.IsModified(nameof(rq.ExpiryCheck)))
+            {
+                asset.ExpiryCheck = rq.ExpiryCheck;
+            }
+
             if (rq.IsModified(nameof(rq.Times)))
             {
                 asset.Times = rq.Times;
@@ -536,7 +557,16 @@ namespace CRM.Server.Services
             // Save
             var task1 = _db.SaveChangesAsync(cancellationToken);
 
-            Task task2;
+            // Push message
+            var message = new UpdateAssetMessage
+            {
+                Data = User.CreateMessageData(App.AppId, rq.Id, asset.Sn),
+                Changes = changes
+            };
+            var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateAssetMessage, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
             if (hasFinanceChange)
             {
                 // Add profile
@@ -552,22 +582,8 @@ namespace CRM.Server.Services
                     Comment = comment,
                     Data = data
                 };
-                task2 = _commonService.AddProfileAsync(profile, cancellationToken);
+                await _commonService.AddProfileAsync(profile, cancellationToken);
             }
-            else
-            {
-                task2 = Task.CompletedTask;
-            }
-
-            // Push message
-            var message = new UpdateAssetMessage
-            {
-                Data = User.CreateMessageData(App.AppId, rq.Id, asset.Sn),
-                Changes = changes
-            };
-            var task3 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.UpdateAssetMessage, cancellationToken);
-
-            await Task.WhenAll(task1, task2, task3);
 
             // Return
             return ActionResult.Succeed(rq.Id);
@@ -602,6 +618,7 @@ namespace CRM.Server.Services
                     Sn = a.Sn,
                     Description = a.Description,
                     Expiry = a.Expiry,
+                    ExpiryCheck = a.ExpiryCheck,
                     Times = a.Times,
                     Amount = a.Amount,
                     SensitiveData = a.SensitiveData == null ? null : "***",

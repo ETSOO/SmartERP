@@ -79,6 +79,24 @@ namespace Platform.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Order Product List.
+        /// </summary>
+        public static string OrderProductList {
+            get {
+                return ResourceManager.GetString("OrderProductList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Order Standard Contract.
+        /// </summary>
+        public static string OrderStandardContract {
+            get {
+                return ResourceManager.GetString("OrderStandardContract", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The password cannot be less than 4 characters or more than 30 characters.
         /// </summary>
         public static string PasswordLengthInvalid {

@@ -12,6 +12,7 @@ using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
+using PlatformShared.Dto.Document;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Text.Json;
@@ -152,10 +153,12 @@ namespace Platform.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task<DocumentListData[]> ListAsync(DocumentListRQ rq, CancellationToken cancellationToken = default)
+        public async Task<DocumentListData[]> ListAsync(DocumentListRQ rq, CancellationToken cancellationToken = default)
         {
-            return _db.CoreDocuments.AsNoTracking()
-                .Where(t => t.Kind == rq.Kind)
+            var kind = rq.Kind;
+
+            var items = await _db.CoreDocuments.AsNoTracking()
+                .Where(t => t.Kind == kind)
                 .QueryEtsoo(rq, (d) => d.Id, null, (q) =>
                 {
                     if (rq.IsSystem.HasValue)
@@ -195,9 +198,15 @@ namespace Platform.Server.Services
                 .Select(d => new DocumentListData
                 {
                     Id = d.Id,
-                    Title = d.Title
+                    Title = d.Title,
+                    Parameters = d.Parameters
                 })
-                .ToArrayAsync(cancellationToken);
+                .ToListAsync(cancellationToken);
+
+            var systemItems = DocumentTemplateUtils.GetTemplates(kind, t => Properties.Resources.ResourceManager.GetString(t) ?? t);
+            items.AddRange(systemItems);
+
+            return [.. items];
         }
 
         /// <summary>

@@ -123,6 +123,12 @@
   <data name="MemberInvitationEmailCode" xml:space="preserve">
     <value>Member email invitation code</value>
   </data>
+  <data name="OrderProductList" xml:space="preserve">
+    <value>Order Product List</value>
+  </data>
+  <data name="OrderStandardContract" xml:space="preserve">
+    <value>Order Standard Contract</value>
+  </data>
   <data name="PasswordLengthInvalid" xml:space="preserve">
     <value>The password cannot be less than 4 characters or more than 30 characters</value>
   </data>

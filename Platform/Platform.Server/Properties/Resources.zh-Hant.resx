@@ -123,6 +123,12 @@
   <data name="MemberInvitationEmailCode" xml:space="preserve">
     <value>用戶邀請驗證碼</value>
   </data>
+  <data name="OrderProductList" xml:space="preserve">
+    <value>訂單產品清單</value>
+  </data>
+  <data name="OrderStandardContract" xml:space="preserve">
+    <value>訂單標準合約</value>
+  </data>
   <data name="PasswordLengthInvalid" xml:space="preserve">
     <value>密碼不能少於4個字符，也不能多於30個字符</value>
   </data>

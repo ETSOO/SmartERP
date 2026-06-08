@@ -596,6 +596,7 @@ namespace Platform.Server.Services
                 };
                 var task3 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateUserAvatarMessage, cancellationToken);
 
+                // 3 kinds of tasks, safe to do
                 await Task.WhenAll(task1, task2, task3);
 
                 // Return

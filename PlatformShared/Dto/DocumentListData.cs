@@ -1,4 +1,6 @@
-﻿namespace PlatformShared.Dto
+﻿using System.Text.Json;
+
+namespace PlatformShared.Dto
 {
     /// <summary>
     /// Document list data
@@ -17,5 +19,11 @@
         /// 标题
         /// </summary>
         public required string Title { get; init; }
+
+        /// <summary>
+        /// Parameters
+        /// 参数
+        /// </summary>
+        public JsonDocument? Parameters { get; init; }
     }
 }

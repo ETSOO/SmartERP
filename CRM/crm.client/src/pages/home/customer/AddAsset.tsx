@@ -25,6 +25,9 @@ import {
   ProductList,
   SupplierList
 } from "@etsoo/smarterp-crm/components";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import FormGroup from "@mui/material/FormGroup";
 
 export default function AddAsset() {
   // Route
@@ -44,8 +47,11 @@ export default function AddAsset() {
     "balance",
     "description",
     "expiry",
+    "expiryCheck",
     "healthCheckUrl",
+    "intervalMinutes",
     "noChanges",
+    "noticeOwner",
     "relatedTarget",
     "sensitiveData",
     "sn",
@@ -57,7 +63,9 @@ export default function AddAsset() {
     "amount",
     "description",
     "expiry",
+    "expiryCheck",
     "healthCheckUrl",
+    "intervalMinutes",
     "sensitiveData",
     "sn",
     "times"
@@ -72,7 +80,8 @@ export default function AddAsset() {
     personId,
     productId: 0,
     sn: "",
-    expiry: ""
+    expiry: "",
+    expiryCheck: true
   });
 
   // Formik
@@ -239,6 +248,32 @@ export default function AddAsset() {
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formik.values.expiryCheck ?? false}
+              onChange={(e) =>
+                formik.setFieldValue("expiryCheck", e.target.checked)
+              }
+            />
+          }
+          label={labels.expiryCheck}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formik.values.data?.noticeOwner ?? false}
+              onChange={(e) =>
+                formik.setFieldValue("data.noticeOwner", e.target.checked)
+              }
+            />
+          }
+          label={labels.noticeOwner}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
         <StatusList
           inputRequired
           idValue={formik.values.status ?? EntityStatus.Normal}
@@ -262,6 +297,14 @@ export default function AddAsset() {
           slotProps={{ htmlInput: { maxLength: 1280, type: "url" } }}
           label={labels.healthCheckUrl}
           inputRef={refs.healthCheckUrl}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <IntInputField
+          fullWidth
+          name="data.intervalMinutes"
+          label={labels.intervalMinutes}
+          inputRef={refs.intervalMinutes}
         />
       </Grid>
     </EditPage>

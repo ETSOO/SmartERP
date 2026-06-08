@@ -77,6 +77,18 @@ services.AddDbContext<MyDbContext>((provider, options) =>
     }
 }, ServiceLifetime.Singleton);
 
+// Support DbContextFactory for multi-threaded scenarios, such as in background services or parallel processing
+services.AddPooledDbContextFactory<MyDbContext>((provider, options) =>
+{
+    options.UseNpgsql(connectonString);
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
+
 services.AddDbContext<LogDbContext>((provider, options) =>
 {
     options.UseNpgsql(logConnectionString);
@@ -132,8 +144,10 @@ services.AddLocalRabbitMQConsumer(consumerOptions);
 var producerOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer Options Not Found");
 services.AddLocalRabbitMQProducer(producerOptions);
 
-services.Configure<DailyWorkerOptions>(configuration.GetSection("DailyWorker"));
-services.AddHostedService<DailyWorker>();
+services.AddHostedService<AssetCheckWorker>();
+
+services.Configure<AssetExiryWorkerOptions>(configuration.GetSection("AssetExiryWorker"));
+services.AddHostedService<AssetExiryWorker>();
 
 var host = builder.Build();
 host.Run();

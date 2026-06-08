@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Database.Models;
 
 namespace CRM.Server.Dto.Asset
 {
@@ -75,6 +76,12 @@ namespace CRM.Server.Dto.Asset
         public DateTimeOffset Expiry { get; init; }
 
         /// <summary>
+        /// Expiry check
+        /// 到期检查
+        /// </summary>
+        public bool? ExpiryCheck { get; init; }
+
+        /// <summary>
         /// Remaining times
         /// 剩余次数
         /// </summary>
@@ -103,6 +110,12 @@ namespace CRM.Server.Dto.Asset
         /// 健康检查计划
         /// </summary>
         public DateTimeOffset? HealthCheckSchedule { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public PersonAssetData? Data { get; init; }
 
         /// <summary>
         /// Status

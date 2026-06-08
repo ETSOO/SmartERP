@@ -27,6 +27,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
+            entity.Property(e => e.ExpiryCheck).HasColumnName("expiry_check");
             entity.Property(e => e.Times).HasColumnName("times");
             entity.Property(e => e.Amount)
                 .HasColumnType("money")
@@ -47,9 +48,10 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("health_check_url");
             entity.Property(e => e.HealthCheckSchedule)
                 .HasColumnName("health_check_schedule");
-            entity.Property(e => e.Data)
-                .HasColumnType("jsonb")
-                .HasColumnName("data");
+            entity.OwnsOne(e => e.Data, p => p.ToJson("data"));
+            //entity.Property(e => e.Data)
+            //    .HasColumnType("jsonb")
+            //    .HasColumnName("data");
 
             entity.HasOne(d => d.Person).WithMany(p => p.OwnedAssets)
                 .HasForeignKey(d => d.PersonId)

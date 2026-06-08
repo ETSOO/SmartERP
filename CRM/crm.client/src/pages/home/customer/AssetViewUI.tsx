@@ -20,6 +20,9 @@ export function AssetViewUI(props: AssetViewUIProps) {
     "completeTip",
     "copy",
     "edit",
+    "intervalMinutes",
+    "lastError",
+    "noticeOwner",
     "sensitiveData",
     "view"
   );
@@ -92,6 +95,14 @@ export function AssetViewUI(props: AssetViewUIProps) {
         ],
         ["times", GridDataType.Number],
         ["expiry", GridDataType.DateTime],
+        "expiryCheck",
+        {
+          data: (item) =>
+            item.data?.noticeOwner == null
+              ? undefined
+              : `${item.data.noticeOwner}`,
+          label: labels.noticeOwner
+        },
         {
           data: (item) =>
             item.sensitiveData ? (
@@ -132,8 +143,7 @@ export function AssetViewUI(props: AssetViewUIProps) {
         },
         {
           data: "healthCheckUrl",
-          singleRow: true,
-          horizontal: true
+          singleRow: true
         },
         {
           data: (item) =>
@@ -151,6 +161,15 @@ export function AssetViewUI(props: AssetViewUIProps) {
           singleRow: "large"
         },
         ["healthCheckSchedule", GridDataType.DateTime],
+        {
+          data: (item) => item.data?.intervalMinutes,
+          label: labels.intervalMinutes
+        },
+        {
+          data: (item) => item.data?.lastError,
+          label: labels.lastError,
+          singleRow: "large"
+        },
         {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"

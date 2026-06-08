@@ -1,8 +1,32 @@
 ﻿using com.etsoo.CoreFramework.Business;
-using System.Text.Json;
 
 namespace PlatformShared.Database.Models
 {
+    /// <summary>
+    /// Person asset data
+    /// 个人资产数据
+    /// </summary>
+    public record PersonAssetData
+    {
+        /// <summary>
+        /// Whether to notify the owner
+        /// 是否通知所有者
+        /// </summary>
+        public bool? NoticeOwner { get; set;  }
+
+        /// <summary>
+        /// Check interval minutes
+        /// 检查间隔分钟
+        /// </summary>
+        public int? IntervalMinutes { get; set; }
+
+        /// <summary>
+        /// Last error
+        /// 上次错误
+        /// </summary>
+        public string? LastError { get; set; }
+    }
+
     /// <summary>
     /// Person asset
     /// 个人资产
@@ -58,6 +82,12 @@ namespace PlatformShared.Database.Models
         public DateTimeOffset Expiry { get; set; }
 
         /// <summary>
+        /// Expiry check
+        /// 到期检查
+        /// </summary>
+        public bool? ExpiryCheck { get; set; }
+
+        /// <summary>
         /// Remaining times
         /// 剩余次数
         /// </summary>
@@ -109,7 +139,7 @@ namespace PlatformShared.Database.Models
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public JsonDocument? Data { get; set; }
+        public PersonAssetData? Data { get; set; }
 
         /// <summary>
         /// Person (owner)

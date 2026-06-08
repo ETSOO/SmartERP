@@ -216,32 +216,34 @@ namespace CRM.Server.Services
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
+            // Read info
+            var person = await _db.Persons.AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => new { p.IdentityType, p.Name, p.ReportTo, p.UserId })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
             await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                // Read info
-                var task1 = _db.Persons.AsNoTracking()
-                    .Where(p => p.Id == id)
-                    .Select(p => new { p.IdentityType, p.Name, p.ReportTo, p.UserId })
-                    .FirstOrDefaultAsync(cancellationToken);
-
                 // Remove infos
-                var task2 = _db.PersonInfos.AsNoTracking()
+                await _db.PersonInfos.AsNoTracking()
                     .Where(pi => pi.PersonId == id)
                     .ExecuteDeleteAsync(cancellationToken);
 
                 // Remove addresses
-                var task3 = _db.PersonAddresses.AsNoTracking()
+                await _db.PersonAddresses.AsNoTracking()
                     .Where(pa => pa.PersonId == id)
                     .ExecuteDeleteAsync(cancellationToken);
 
                 // More safe deletes
                 // ...
-                await Task.WhenAll(task1, task2, task3);
-
-                var person = task1.Result ?? throw new Exception($"Person {id} not found");
-
+  
                 // Remove
                 await _db.Persons.AsNoTracking()
                     .Where(p => p.Id == id)

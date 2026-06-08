@@ -32,5 +32,11 @@ namespace CRM.Server.RQ.Asset
         /// 序列号
         /// </summary>
         public string? Sn { get; init; }
+
+        /// <summary>
+        /// Expiry check
+        /// 到期检查
+        /// </summary>
+        public bool? ExpiryCheck { get; init; }
     }
 }

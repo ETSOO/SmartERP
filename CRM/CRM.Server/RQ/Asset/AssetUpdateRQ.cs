@@ -4,6 +4,7 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using com.etsoo.Utils.String;
+using PlatformShared.Database.Models;
 using System.Text.Json;
 
 namespace CRM.Server.RQ.Asset
@@ -51,6 +52,12 @@ namespace CRM.Server.RQ.Asset
         public DateTimeOffset? Expiry { get; init; }
 
         /// <summary>
+        /// Expiry check
+        /// 到期检查
+        /// </summary>
+        public bool? ExpiryCheck { get; init; }
+
+        /// <summary>
         /// Remaining times
         /// 剩余次数
         /// </summary>
@@ -78,7 +85,7 @@ namespace CRM.Server.RQ.Asset
         /// JSON data
         /// JSON 数据
         /// </summary>
-        public JsonDocument? Data { get; init; }
+        public PersonAssetData? Data { get; init; }
 
         /// <summary>
         /// Status

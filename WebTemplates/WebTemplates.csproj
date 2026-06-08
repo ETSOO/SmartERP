@@ -54,6 +54,15 @@
 	  <Content Update="Templates\Invitation\EmailMemberInvitation_zh-Hant.cshtml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Update="Templates\Order\StandardContract_zh-Hant.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Order\StandardContract_zh-Hans.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="Templates\Order\StandardContract_en.cshtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Update="Templates\Registration\EmailRegistration_en.cshtml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
