@@ -24,11 +24,11 @@ using Platform.Server.Endpoints.Public.RQ;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Globalization;
 using System.Web;
-using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 
 namespace Platform.Server.Services
 {
@@ -223,18 +223,22 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<CurrencyItem>> GetCurrenciesAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default)
         {
-            var currencies = await CacheFactory.DoAsync(
-                _cache,
-                App.Configuration.CacheHours,
-                () => $"{nameof(PublicService)}.{nameof(GetCurrenciesAsync)}.{CultureInfo.CurrentCulture.LCID}",
-                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions().GetCurrencies()),
-                CommonJsonSerializerContext.Default.IEnumerableCurrencyItem,
-                null, cancellationToken);
+            var key = $"{nameof(PublicService)}.{nameof(GetCurrenciesAsync)}.{CultureInfo.CurrentCulture.LCID}";
+            var currencies = await _cache.GetOrCreateAsync(key, async (options) =>
+            {
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+                return await Task.Run(() => LocalizationUtils.GetAllRegions().GetCurrencies(), cancellationToken);
+            }, CommonJsonSerializerContext.Default.IEnumerableCurrencyItem, cancellationToken);
+
+            if (currencies == null)
+            {
+                return [];
+            }
 
             if (ids != null)
             {
                 var sortIds = ids.ToList();
-                currencies = currencies.Where(c => sortIds.Contains(c.Id)).OrderBy(c => sortIds.IndexOf(c.Id));
+                return currencies.Where(c => sortIds.Contains(c.Id)).OrderBy(c => sortIds.IndexOf(c.Id));
             }
 
             return currencies;
@@ -247,15 +251,13 @@ namespace Platform.Server.Services
         /// <param name="culture">Culture</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task<IEnumerable<CustomResourceData>> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default)
+        public ValueTask<CustomResourceData[]?> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default)
         {
-            return CacheFactory.DoAsync(
-                _cache,
-                App.Configuration.CacheHours,
-                () => $"{nameof(PublicService)}.{nameof(GetCustomResourcesAsync)}.{CultureInfo.CurrentCulture.LCID}",
-                async (typeInfo) =>
-                {
-                    return await _db.FeatureCultures.AsNoTracking()
+            var key = $"{nameof(PublicService)}.{nameof(GetCustomResourcesAsync)}.{culture}";
+            return _cache.GetOrCreateAsync(key, async (options) =>
+            {
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+                return await _db.FeatureCultures.AsNoTracking()
                     .Where(c => c.Culture == culture && c.CoreOrganizationId == null)
                     .Select(c => new CustomResourceData
                     {
@@ -264,9 +266,7 @@ namespace Platform.Server.Services
                         Description = c.Description,
                         JsonData = c.JsonData
                     }).ToArrayAsync(cancellationToken);
-                },
-                MyJsonSerializerContext.Default.IEnumerableCustomResourceData,
-                null, cancellationToken);
+            }, PlatformSharedContext.Default.CustomResourceDataArray, cancellationToken);
         }
 
         /// <summary>
@@ -278,18 +278,23 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IEnumerable<RegionItem>> GetRegionsAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default)
         {
-            var regions = await CacheFactory.DoAsync(
-                _cache,
-                App.Configuration.CacheHours,
-                () => $"{nameof(PublicService)}.{nameof(GetRegionsAsync)}.{CultureInfo.CurrentCulture.LCID}",
-                (typeInfo) => Task.Run(() => LocalizationUtils.GetAllRegions().GetRegions()),
-                CommonJsonSerializerContext.Default.IEnumerableRegionItem,
-                null, cancellationToken);
+            var key = $"{nameof(PublicService)}.{nameof(GetRegionsAsync)}.{CultureInfo.CurrentCulture.LCID}";
+
+            var regions = await _cache.GetOrCreateAsync(key, async (options) =>
+            {
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+                return await Task.Run(() => LocalizationUtils.GetAllRegions().GetRegions(), cancellationToken);
+            }, CommonJsonSerializerContext.Default.IEnumerableRegionItem, cancellationToken);
+
+            if (regions == null)
+            {
+                return [];
+            }
 
             if (ids != null)
             {
                 var sortIds = ids.ToList();
-                regions = regions.Where(r => sortIds.Contains(r.Id)).OrderBy(r => sortIds.IndexOf(r.Id));
+                return regions.Where(r => sortIds.Contains(r.Id)).OrderBy(r => sortIds.IndexOf(r.Id));
             }
 
             return regions;

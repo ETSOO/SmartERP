@@ -60,7 +60,7 @@ namespace PlatformShared.Dto.Document.Asset
         /// Whether to notify the owner
         /// 是否通知所有者
         /// </summary>
-        public bool? NoticeOwner { get; init; }
+        public bool NoticeOwner { get; init; }
 
         /// <summary>
         /// Serial number
@@ -72,13 +72,13 @@ namespace PlatformShared.Dto.Document.Asset
         /// Remaining times
         /// 剩余次数
         /// </summary>
-        public int? Times { get; init; }
+        public int Times { get; init; }
 
         /// <summary>
         /// Remaining amount
         /// 剩余金额
         /// </summary>
-        public decimal? Amount { get; init; }
+        public decimal Amount { get; init; }
 
         /// <summary>
         /// Expiry

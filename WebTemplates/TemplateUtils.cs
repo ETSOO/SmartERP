@@ -54,6 +54,7 @@ namespace WebTemplates
         public static Task<string> BuildAsync(string template, object model)
         {
             var obj = Get(template) ?? throw new Exception($"Template not found: {template}");
+            obj.EnableDebugging();
             return obj.RunAsync(model);
         }
 

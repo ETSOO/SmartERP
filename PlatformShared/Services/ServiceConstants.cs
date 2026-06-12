@@ -17,5 +17,11 @@
         /// 核心接口应用密钥加密键
         /// </summary>
         public const string CoreApiAppSecretEncryptionKey = "AppSecret";
+
+        /// <summary>
+        /// System resource key prefix
+        /// 系统资源键前缀
+        /// </summary>
+        public const string SysResourceKeyPrefix = "etsoo";
     }
 }

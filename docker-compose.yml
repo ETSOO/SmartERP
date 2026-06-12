@@ -7,7 +7,7 @@ services:
   # for 17, volumes, ./data/postgres:/var/lib/postgresql/data
   # 司友云ERP(SmartERP)的 Postgres 数据库
   postgres:
-    image: postgres:18.1-alpine
+    image: postgres:18.4-alpine
     container_name: postgres.app.local
     restart: unless-stopped
     environment:
@@ -43,7 +43,7 @@ services:
   # RabbitMQ for message queue
   # 消息队列的 RabbitMQ
   rabbitmq:
-    image: rabbitmq:4.2.1-management-alpine
+    image: rabbitmq:4.3.1-management-alpine
     container_name: rabbitmq.app.local
     restart: unless-stopped
     ports:

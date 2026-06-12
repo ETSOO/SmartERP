@@ -1,5 +1,9 @@
 import { useParamsEx, useSearchParamsEx } from "@etsoo/react";
-import { OrgCreateResourceRQ, usePageDataEmpty } from "@etsoo/smarterp-core";
+import {
+  OrgApi,
+  OrgCreateResourceRQ,
+  usePageDataEmpty
+} from "@etsoo/smarterp-core";
 import React from "react";
 import { app } from "../../../app/MyApp";
 import {
@@ -92,7 +96,7 @@ export default function AddCustomResource() {
         const formData = new FormData(form);
 
         var key = formData.get("key")?.toString().trim();
-        if (!key || key.startsWith("etsoo") || key.startsWith("smarterp")) {
+        if (!key || key.startsWith(OrgApi.SysResourceKeyPrefix)) {
           DomUtils.setFocus("key");
           return;
         }

@@ -27,6 +27,7 @@ namespace PlatformShared
     [JsonSerializable(typeof(AuthCodeActionItem))]
     [JsonSerializable(typeof(AuthCodeData))]
     [JsonSerializable(typeof(CommonUpdateMessageData))]
+    [JsonSerializable(typeof(CustomResourceData[]))]
     [JsonSerializable(typeof(PersonProductJsonData))]
     [JsonSerializable(typeof(SendAuthCodeEmailMessage))]
 

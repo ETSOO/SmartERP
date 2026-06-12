@@ -47,6 +47,9 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(2)
                 .IsFixedLength(true)
                 .HasColumnName("region");
+            entity.Property(e => e.Slogan)
+                .HasMaxLength(128)
+                .HasColumnName("slogan");
 
             entity.HasOne(d => d.Owner).WithMany(u => u.OwnedOrganizations)
                 .HasForeignKey(d => d.OwnerId)

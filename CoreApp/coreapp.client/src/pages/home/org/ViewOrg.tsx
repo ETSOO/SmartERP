@@ -101,6 +101,10 @@ export default function ViewOrg() {
         </HBox>
       )}
       fields={[
+        {
+          data: "slogan",
+          singleRow: "large"
+        },
         "brand",
         {
           data: "pin",

@@ -11,6 +11,7 @@
 	<PropertyGroup>
 		<!-- Enable automatic template compilation before build -->
 		<RazorEngineCore_EnableCompileTemplates>true</RazorEngineCore_EnableCompileTemplates>
+		<RazorEngineCore_IncludeDebuggingInfo>true</RazorEngineCore_IncludeDebuggingInfo>
 		<RazorEngineCore_TemplateDir>$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
 	</PropertyGroup>
 
@@ -18,69 +19,8 @@
         <ProjectReference Include="..\PlatformShared\PlatformShared.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-	    <EmbeddedResource Include="Templates\**\*.bin" />
-    </ItemGroup>
-
 	<ItemGroup>
-		<PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.23" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Update="Templates\Action\EmailActionNotice_en.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Action\EmailActionNotice_zh-Hans.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Action\EmailActionNotice_zh-Hant.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Callback\EmailCallback_en.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Callback\EmailCallback_zh-Hans.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Callback\EmailCallback_zh-Hant.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Invitation\EmailMemberInvitation_en.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Invitation\EmailMemberInvitation_zh-Hans.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Invitation\EmailMemberInvitation_zh-Hant.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Order\StandardContract_zh-Hant.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Order\StandardContract_zh-Hans.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Order\StandardContract_en.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Registration\EmailRegistration_en.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Registration\EmailRegistration_zh-Hans.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Registration\EmailRegistration_zh-Hant.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Verification\EmailVerification_en.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Verification\EmailVerification_zh-Hans.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="Templates\Verification\EmailVerification_zh-Hant.cshtml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+		<PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.38" />
 	</ItemGroup>
 
 </Project>

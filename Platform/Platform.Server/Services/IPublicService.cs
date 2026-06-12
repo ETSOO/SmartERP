@@ -9,6 +9,7 @@ using com.etsoo.Utils.Serialization.Country;
 using Platform.Server.Dto.Member;
 using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Public.RQ;
+using PlatformShared.Dto;
 
 namespace Platform.Server.Services
 {
@@ -18,7 +19,7 @@ namespace Platform.Server.Services
         Task<string> CreateBarcodeAsync(BarcodeOptions rq, CancellationToken cancellationToken = default);
         Task<IEnumerable<CultureItem>> GetCulturesAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default);
         Task<IEnumerable<CurrencyItem>> GetCurrenciesAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default);
-        Task<IEnumerable<CustomResourceData>> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default);
+        ValueTask<CustomResourceData[]?> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default);
         Task<IEnumerable<RegionItem>> GetRegionsAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default);
         string GetPinyin(PinyinRQ rq);
         ValueTask<string> MobileQRCodeAsync(MobileQRCodeRQ rq, CancellationToken cancellationToken = default);

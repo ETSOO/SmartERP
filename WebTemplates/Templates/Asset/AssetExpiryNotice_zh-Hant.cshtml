@@ -1,0 +1,64 @@
+﻿@model PlatformShared.Dto.Document.Asset.AssetTemplateData
+
+@{
+    Model.Subject ??= $"{Model.Asset.ProductName} ({Model.Asset.Sn}) 到期通知";
+
+    var noticeOwner = Model.Asset.NoticeOwner;
+}
+<!DOCTYPE html>
+
+<html lang="zh-hant">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.Subject</title>
+</head>
+<body>
+    @if (noticeOwner)
+    {
+        <p>尊敬的用戶 <b>@Model.Asset.PersonName</b>：</p>
+    }
+    else
+    {
+        <p>用戶 <b>@Model.Asset.PersonName</b></p>
+    }
+    <p>
+        名下資產 - @Model.Asset.ProductName (@Model.Asset.Sn) 即將於 <b>@Model.Asset.Expiry.ToString("f")</b> 到期。我們將盡快與您聯繫，協助續訂或處理相關事宜，以免影響您的使用體驗。
+        @if (Model.Asset.Amount != 0)
+        {
+            <br /><span>餘額：</span><b>@Model.Asset.Amount.ToString("N2")</b>
+        }
+        @if (Model.Asset.Times != 0)
+        {
+            <br /><span>剩餘次數：</span><b>@Model.Asset.Times.ToString("N0")</b>
+        }
+    </p>
+    <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+    <table border="0" width="100%">
+        <tr>
+            <td valign="middle">
+                @if (!string.IsNullOrWhiteSpace(Model.Org.Logo))
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.Org.Website))
+                    {
+                        <a href="@Model.Org.Website"><img src="@Model.Org.Logo" height="42" /></a>
+                    }
+                    else
+                    {
+                        <img src="@Model.Org.Logo" height="42" />
+                    }
+                }
+            </td>
+            <td valign="middle" align="right">
+                <small>
+                    @(Model.Org.GetLabel("orgName") ?? Model.Org.Name)
+                    @if (!string.IsNullOrWhiteSpace(Model.Org.Slogan))
+                    {
+                        <br />
+                        @(Model.Org.GetLabel("orgSlogan") ?? Model.Org.Slogan)
+                    }
+                </small>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

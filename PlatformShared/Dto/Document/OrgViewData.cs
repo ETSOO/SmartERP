@@ -45,6 +45,12 @@ namespace PlatformShared.Dto.Document
         public string? Brand { get; init; }
 
         /// <summary>
+        /// Slogan
+        /// 标语
+        /// </summary>
+        public string? Slogan { get; init; }
+
+        /// <summary>
         /// PIN, unique code
         /// PIN，唯一代码
         /// </summary>
@@ -67,6 +73,12 @@ namespace PlatformShared.Dto.Document
         /// 税号
         /// </summary>
         public string? TaxId { get; init; }
+
+        /// <summary>
+        /// Website
+        /// 网站
+        /// </summary>
+        public string? Website { get; init; }
 
         /// <summary>
         /// Address
@@ -102,12 +114,40 @@ namespace PlatformShared.Dto.Document
         /// Whether has inventory management
         /// 是否有库存管理
         /// </summary>
-        public bool? HasInventory { get; init; }
+        public bool HasInventory { get; init; }
 
         /// <summary>
         /// Default tax rate
         /// 默认税率
         /// </summary>
-        public decimal? TaxRate { get; init; }
+        public decimal TaxRate { get; init; }
+
+        /// <summary>
+        /// Labels
+        /// 标签
+        /// </summary>
+        public List<CustomResourceData> Labels { get; } = [];
+
+        /// <summary>
+        /// Get label by key
+        /// 通过键获取标签
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Result</returns>
+        public string? GetLabel(string key)
+        {
+            return Labels.FirstOrDefault(l => l.Key == key)?.Title;
+        }
+
+        /// <summary>
+        /// Get label item by key
+        /// 通过键获取标签项
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Result</returns>
+        public CustomResourceData? GetLabelItem(string key)
+        {
+            return Labels.FirstOrDefault(l => l.Key == key);
+        }
     }
 }

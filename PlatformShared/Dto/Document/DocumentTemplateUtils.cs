@@ -1,11 +1,12 @@
 ﻿using com.etsoo.CoreFramework.User;
 using com.etsoo.Utils.String;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto.Document.Order;
 using PlatformShared.Extentions;
-using Microsoft.Extensions.Caching.Memory;
+using PlatformShared.Services;
 using System.Collections.Frozen;
 
 namespace PlatformShared.Dto.Document
@@ -51,6 +52,42 @@ namespace PlatformShared.Dto.Document
         }
 
         /// <summary>
+        /// Create organization cultures
+        /// 创建机构标签信息
+        /// </summary>
+        /// <param name="dbFactory">Database context factory</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="culture">Culture</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static Task<CustomResourceData[]?> CreateOrgCulturesAsync(IDbContextFactory<MyDbContext> dbFactory, int orgId, string culture, CancellationToken cancellationToken = default)
+        {
+            var cacheKey = $"{nameof(CreateOrgCulturesAsync)}:{orgId}:{culture}";
+            return cache.GetOrCreateAsync(cacheKey, async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(OrgCacheMinutes);
+
+                await using var db = await dbFactory.CreateDbContextAsync(cancellationToken);
+
+                var allItems = await db.FeatureCultures.AsNoTracking()
+                    .Where(c => (c.CoreOrganizationId == null || c.CoreOrganizationId == orgId) && c.Culture == culture && !c.Key.StartsWith(ServiceConstants.SysResourceKeyPrefix))
+                    .Select(c => new CustomResourceData
+                    {
+                        Key = c.Key,
+                        OrgId = c.CoreOrganizationId,
+                        Title = c.Title,
+                        Description = c.Description,
+                        JsonData = c.JsonData
+                    })
+                    .ToArrayAsync(cancellationToken);
+
+                // When OrgId is not null, remove the same key item with OrgId equals to null
+                var orgSpecificKeys = allItems.Where(item => item.OrgId != null).Select(item => item.Key).ToHashSet();
+                return allItems.Where(item => item.OrgId != null || !orgSpecificKeys.Contains(item.Key)).ToArray();
+            });
+        }
+
+        /// <summary>
         /// Create organization view data
         /// 创建组织视图数据
         /// </summary>
@@ -85,12 +122,13 @@ namespace PlatformShared.Dto.Document
                         o.Logo,
                         o.Pin,
                         o.Uid,
-                        o.Region
+                        o.Region,
+                        o.Slogan
                     }).FirstAsync(cancellationToken);
 
                 await using var db2 = await dbFactory.CreateDbContextAsync(cancellationToken);
                 var task2 = db2.PersonInfos.AsNoTracking()
-                    .Where(i => i.PersonId == personId && (i.Kind == PersonInfoKind.Email || i.Kind == PersonInfoKind.Phone || i.Kind == PersonInfoKind.Pin || i.Kind == PersonInfoKind.TaxId))
+                    .Where(i => i.PersonId == personId && (i.Kind == PersonInfoKind.Email || i.Kind == PersonInfoKind.Phone || i.Kind == PersonInfoKind.Pin || i.Kind == PersonInfoKind.TaxId || i.Kind == PersonInfoKind.Website))
                     .OrderBy(i => i.Kind).ThenByDescending(i => i.IsDefault)
                     .Select(i => new { i.Kind, i.Identifier })
                     .ToArrayAsync(cancellationToken);
@@ -117,17 +155,19 @@ namespace PlatformShared.Dto.Document
                     Uid = orgData.Uid,
                     Name = orgData.Name,
                     Brand = orgData.Brand,
+                    Slogan = orgData.Slogan,
                     Logo = orgData.Logo,
                     Pin = pin,
                     Region = orgData.Region,
                     Cultures = settings?.Cultures,
                     Currencies = settings?.Currencies,
                     MainCustomerType = settings?.MainCustomerType,
-                    HasInventory = settings?.HasInventory,
-                    TaxRate = settings?.TaxRate,
+                    HasInventory = settings?.HasInventory ?? false,
+                    TaxRate = settings?.TaxRate ?? 0,
                     Email = personInfos.GetValueOrDefault(PersonInfoKind.Email),
                     Phone = personInfos.GetValueOrDefault(PersonInfoKind.Phone),
-                    TaxId = personInfos.GetValueOrDefault(PersonInfoKind.TaxId)
+                    TaxId = personInfos.GetValueOrDefault(PersonInfoKind.TaxId),
+                    Website = personInfos.GetValueOrDefault(PersonInfoKind.Website)
                 };
             });
         }

@@ -81,6 +81,12 @@ namespace PlatformShared.Database.Models
         public required string Region { get; set; }
 
         /// <summary>
+        /// Slogan
+        /// 标语
+        /// </summary>
+        public string? Slogan { get; set; }
+
+        /// <summary>
         /// Owner
         /// 所有者
         /// </summary>

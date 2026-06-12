@@ -1,0 +1,64 @@
+﻿@model PlatformShared.Dto.Document.Asset.AssetTemplateData
+
+@{
+    Model.Subject ??= $"{Model.Asset.ProductName} ({Model.Asset.Sn}) Expiry Notice";
+
+    var noticeOwner = Model.Asset.NoticeOwner;
+}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.Subject</title>
+</head>
+<body>
+    @if (noticeOwner)
+    {
+        <p>Dear <b>@Model.Asset.PersonName</b>,</p>
+    }
+    else
+    {
+        <p>User <b>@Model.Asset.PersonName</b></p>
+    }
+    <p>
+        Asset - @Model.Asset.ProductName (@Model.Asset.Sn) is about to expire on <b>@Model.Asset.Expiry.ToString("f")</b>. We will contact you as soon as possible to assist with renewal or related matters to avoid affecting your experience.
+        @if (Model.Asset.Amount != 0)
+        {
+            <br /><span>Balance:</span><b>@Model.Asset.Amount.ToString("N2")</b>
+        }
+        @if (Model.Asset.Times != 0)
+        {
+            <br /><span>Remaining times:</span><b>@Model.Asset.Times.ToString("N0")</b>
+        }
+    </p>
+    <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+    <table border="0" width="100%">
+        <tr>
+            <td valign="middle">
+                @if (!string.IsNullOrWhiteSpace(Model.Org.Logo))
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.Org.Website))
+                    {
+                        <a href="@Model.Org.Website"><img src="@Model.Org.Logo" height="42" /></a>
+                    }
+                    else
+                    {
+                        <img src="@Model.Org.Logo" height="42" />
+                    }
+                }
+            </td>
+            <td valign="middle" align="right">
+                <small>
+                    @(Model.Org.GetLabel("orgName") ?? Model.Org.Name)
+                    @if (!string.IsNullOrWhiteSpace(Model.Org.Slogan))
+                    {
+                        <br />
+                        @(Model.Org.GetLabel("orgSlogan") ?? Model.Org.Slogan)
+                    }
+                </small>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

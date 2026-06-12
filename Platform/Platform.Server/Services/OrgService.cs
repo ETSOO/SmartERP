@@ -19,7 +19,6 @@ using Json.Schema;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.Org;
-using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Schemas;
 using PlatformShared;
@@ -35,7 +34,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Channels;
 
 namespace Platform.Server.Services
 {
@@ -45,8 +43,6 @@ namespace Platform.Server.Services
     /// </summary>
     public class OrgService : CommonUserService, IOrgService
     {
-        const string SysResourceKeyPrefix = "etsoo";
-
         static readonly ConcurrentDictionary<CoreApiService, JsonSchemaCreator> apiSchemas = new()
         {
             [CoreApiService.SMTP] = CoreApiServiceSMTPSchema.Create,
@@ -307,7 +303,7 @@ namespace Platform.Server.Services
             }
             else
             {
-                if (string.IsNullOrEmpty(rq.Key) || rq.Key.StartsWith(SysResourceKeyPrefix, StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrEmpty(rq.Key) || rq.Key.StartsWith(ServiceConstants.SysResourceKeyPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(rq.Key));
                 }
@@ -382,6 +378,7 @@ namespace Platform.Server.Services
                 OwnerId = userId,
                 Name = rq.Name,
                 Brand = rq.Brand,
+                Slogan = rq.Slogan,
                 Pin = rq.Pin,
                 ParentId = rq.ParentId,
                 Status = rq.Status.GetValueOrDefault(),
@@ -515,7 +512,7 @@ namespace Platform.Server.Services
             var orgId = User.OrganizationInt;
 
             return await _db.FeatureCultures.AsNoTracking()
-            .Where(c => c.CoreOrganizationId == orgId && c.Culture == culture && !c.Key.StartsWith(SysResourceKeyPrefix))
+            .Where(c => c.CoreOrganizationId == orgId && c.Culture == culture && !c.Key.StartsWith(ServiceConstants.SysResourceKeyPrefix))
             .Select(c => new CustomResourceData
             {
                 Key = c.Key,
@@ -944,7 +941,7 @@ namespace Platform.Server.Services
 
             var (hasContent, commandText) = await _db.FeatureCultures
                 .AsNoTracking()
-                .Where(c => !c.Key.StartsWith(SysResourceKeyPrefix))
+                .Where(c => !c.Key.StartsWith(ServiceConstants.SysResourceKeyPrefix))
                 .QueryEtsoo(rq, (c) => c.Id, null, (q) =>
                 {
                     if (rq.OrgId.HasValue)
@@ -1002,6 +999,7 @@ namespace Platform.Server.Services
                     OwnerName = MyDbFunctions.HideData(ou.Organization.Owner.Name, default),
                     ou.Organization.Name,
                     ou.Organization.Brand,
+                    ou.Organization.Slogan,
                     ou.Organization.Logo,
                     ou.Organization.Pin,
                     ParentName = (ou.Organization.Parent == null ? null : ou.Organization.Parent.Name),
@@ -1314,6 +1312,11 @@ namespace Platform.Server.Services
                 org.Brand = rq.Brand;
             }
 
+            if (rq.IsModified(nameof(rq.Slogan)))
+            {
+                org.Slogan = rq.Slogan;
+            }
+
             if (rq.IsModified(nameof(rq.Pin)))
             {
                 org.Pin = rq.Pin;
@@ -1542,6 +1545,7 @@ namespace Platform.Server.Services
                 o.Id,
                 o.Name,
                 o.Brand,
+                o.Slogan,
                 o.Pin,
                 o.ParentId,
                 o.Status,

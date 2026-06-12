@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.66",
-    "@etsoo/materialui": "^1.6.69",
+    "@etsoo/materialui": "^1.6.70",
     "@etsoo/react": "^1.8.91",
     "@etsoo/shared": "^1.2.84",
-    "@etsoo/smarterp-core": "^1.1.56",
-    "@mui/icons-material": "^9.0.1",
-    "@mui/material": "^9.0.1",
+    "@etsoo/smarterp-core": "^1.1.59",
+    "@mui/icons-material": "^9.1.1",
+    "@mui/material": "^9.1.1",
     "formik": "^2.4.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -23,7 +23,7 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@types/node": "^25.9.2",
+    "@types/node": "^25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",

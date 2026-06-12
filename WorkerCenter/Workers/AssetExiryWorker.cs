@@ -66,12 +66,12 @@ namespace WorkerCenter.Periods
 
                     ProductName = a.Product.Name,
                     Sn = a.Sn,
-                    Times = a.Times,
-                    Amount = a.Amount,
+                    Times = a.Times ?? 0,
+                    Amount = a.Amount ?? 0,
                     Expiry = a.Expiry,
                     OrgId = a.OrgId,
 
-                    NoticeOwner = a.Data == null ? false : a.Data.NoticeOwner
+                    NoticeOwner = a.Data == null ? false : a.Data.NoticeOwner ?? false
                 })
                 .ToArrayAsync(cancellationToken);
 
@@ -89,7 +89,7 @@ namespace WorkerCenter.Periods
                 var userId = asset.PersonUserId;
                 var userEmails = await DocumentTemplateUtils.GetPersonAndLineIdentifiersAsync(_dbFactory, orgId, userId, CoreUserIdentifierType.Email, cancellationToken);
 
-                var noticeOwner = asset.NoticeOwner.GetValueOrDefault(false);
+                var noticeOwner = asset.NoticeOwner;
 
                 List<string> to = [];
                 List<string> bcc = [];
@@ -127,6 +127,12 @@ namespace WorkerCenter.Periods
                     Properties.Resources.Culture = ci;
                 }
 
+                var labels = await DocumentTemplateUtils.CreateOrgCulturesAsync(_dbFactory, orgId, culture, cancellationToken);
+                if (labels != null)
+                {
+                    orgData.Labels.AddRange(labels);
+                }
+
                 var model = new AssetTemplateData
                 {
                     Asset = asset,
@@ -135,7 +141,7 @@ namespace WorkerCenter.Periods
 
                 var body = await TemplateUtils.BuildAssetExpiryNoticeAsync(culture, model);
 
-                var subject = model.Subject ?? "";
+                var subject = model.Subject ?? "Asset Expiry Notice";
 
                 // Send email notice
                 var email = new SendEmailMessage

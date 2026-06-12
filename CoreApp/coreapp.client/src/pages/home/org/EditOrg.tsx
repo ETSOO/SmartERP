@@ -30,6 +30,7 @@ export default function EditOrg() {
     "noChanges",
     "orgName",
     "parentOrg",
+    "slogan",
     "status"
   );
 
@@ -145,6 +146,16 @@ export default function EditOrg() {
           slotProps={{ htmlInput: { maxLength: 30 } }}
           label={labels.brand}
           value={formik.values.brand ?? ""}
+          onChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <InputField
+          fullWidth
+          name="slogan"
+          slotProps={{ htmlInput: { maxLength: 128 } }}
+          label={labels.slogan}
+          value={formik.values.slogan ?? ""}
           onChange={formik.handleChange}
         />
       </Grid>

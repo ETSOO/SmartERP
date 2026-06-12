@@ -1,4 +1,4 @@
-﻿namespace Platform.Server.Dto.Public
+﻿namespace PlatformShared.Dto
 {
     /// <summary>
     /// Custom resource data

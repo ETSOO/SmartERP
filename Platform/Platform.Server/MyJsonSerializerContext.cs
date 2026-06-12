@@ -112,7 +112,6 @@ namespace Platform.Server
     [JsonSerializable(typeof(NameData))]
     [JsonSerializable(typeof(OrgPublicInfo))]
     [JsonSerializable(typeof(IEnumerable<PlaceCommon>))]
-    [JsonSerializable(typeof(IEnumerable<CustomResourceData>))]
 
     // User
     [JsonSerializable(typeof(AuditHistoryRQ))]

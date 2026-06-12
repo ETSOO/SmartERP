@@ -3,9 +3,9 @@ using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.Utils.Actions;
 using Json.Schema;
 using Platform.Server.Dto.Org;
-using Platform.Server.Dto.Public;
 using Platform.Server.Endpoints.Org.RQ;
 using PlatformShared.Database.Models;
+using PlatformShared.Dto;
 using System.Buffers;
 
 namespace Platform.Server.Services

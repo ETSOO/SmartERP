@@ -31,6 +31,12 @@ namespace Platform.Server.Endpoints.Org.RQ
         public string? Brand { get; init; }
 
         /// <summary>
+        /// Slogan
+        /// 标语
+        /// </summary>
+        public string? Slogan { get; init; }
+
+        /// <summary>
         /// PIN, unique code
         /// PIN，唯一代码
         /// </summary>
