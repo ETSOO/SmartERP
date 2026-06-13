@@ -11,7 +11,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS with-node
 RUN apt-get update
 RUN apt-get install curl
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash
+RUN curl -sL https://deb.nodesource.com/setup_24.x | bash
 RUN apt-get -y install nodejs
 
 # When no wwwroot is present, always caused by the client project's SDK version

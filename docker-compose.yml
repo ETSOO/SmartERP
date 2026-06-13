@@ -248,7 +248,7 @@ services:
   # Nginx 用于反向代理
   # 修改根目录下的 nginx.conf 文件以适应你的需求，确保(80, 443)端口没有被其他服务占用（如 IIS）
   nginx:
-    image: nginx:1.29.4-alpine
+    image: nginx:1.31.1-alpine
     container_name: nginx
     depends_on:
       - etsoo-coreapp

@@ -11,7 +11,7 @@
 	<PropertyGroup>
 		<!-- Enable automatic template compilation before build -->
 		<RazorEngineCore_EnableCompileTemplates>true</RazorEngineCore_EnableCompileTemplates>
-		<RazorEngineCore_IncludeDebuggingInfo>true</RazorEngineCore_IncludeDebuggingInfo>
+		<RazorEngineCore_IncludeDebuggingInfo>false</RazorEngineCore_IncludeDebuggingInfo>
 		<RazorEngineCore_TemplateDir>$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
 	</PropertyGroup>
 
