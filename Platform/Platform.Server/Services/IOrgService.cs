@@ -20,7 +20,7 @@ namespace Platform.Server.Services
         Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task<IResult> DownloadFileAsync(OrgDownloadKind kind, long id, CancellationToken cancellationToken = default);
         Task<string?> FormatHtmlContentAsync(string content, CancellationToken cancellationToken = default);
-        Task<IEnumerable<CustomResourceData>> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default);
+        Task<CustomResourceData[]> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default);
         Task<IEnumerable<OrgGetMyData>> GetMyAsync(OrgGetMyRQ rq, CancellationToken cancellationToken = default);
         Task GetMyAsync(OrgGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> LeaveAsync(int id, CancellationToken cancellationToken = default);

@@ -41,6 +41,7 @@ using Platform.Server.Endpoints.Storage;
 using Platform.Server.Endpoints.User;
 using Platform.Server.OAuth2;
 using Platform.Server.Services;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Extentions;
 using PlatformShared.Services;
@@ -260,6 +261,7 @@ services.ConfigureHttpJsonOptions(options =>
         ModelJsonSerializerContext.Default,
         ApiModelJsonSerializerContext.Default,
         WeiXinJsonSerializerContext.Default,
+        PlatformSharedContext.Default,
         MyJsonSerializerContext.Default
     );
 });

@@ -507,7 +507,7 @@ namespace Platform.Server.Services
         /// <param name="culture">Culture</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IEnumerable<CustomResourceData>> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default)
+        public async Task<CustomResourceData[]> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
 
