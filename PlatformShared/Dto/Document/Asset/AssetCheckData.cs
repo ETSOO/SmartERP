@@ -1,12 +1,13 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using PlatformShared.Database.Models;
 
 namespace PlatformShared.Dto.Document.Asset
 {
     /// <summary>
-    /// Asset view data
-    /// 资产视图数据
+    /// Asset check data
+    /// 资产检查数据
     /// </summary>
-    public record AssetViewData
+    public record AssetCheckData
     {
         /// <summary>
         /// Id
@@ -75,22 +76,28 @@ namespace PlatformShared.Dto.Document.Asset
         public required string Sn { get; init; }
 
         /// <summary>
-        /// Remaining times
-        /// 剩余次数
+        /// Health check URL
+        /// 健康检查网址
         /// </summary>
-        public int Times { get; init; }
+        public required string HealthCheckUrl { get; set; }
 
         /// <summary>
-        /// Remaining amount
-        /// 剩余金额
+        /// Health check message
+        /// 健康检查消息
         /// </summary>
-        public decimal Amount { get; init; }
+        public string? HealthCheckMessage { get; set; }
 
         /// <summary>
-        /// Expiry
-        /// 到期时间
+        /// Health check schedule
+        /// 健康检查计划
         /// </summary>
-        public DateTimeOffset Expiry { get; init; }
+        public DateTimeOffset? HealthCheckSchedule { get; set; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public PersonAssetData? Data { get; init; }
 
         /// <summary>
         /// Core organization id

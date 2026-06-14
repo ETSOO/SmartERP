@@ -1,0 +1,46 @@
+﻿@model PlatformShared.Dto.Document.Asset.AssetCheckTemplateData
+
+@{
+    Model.Subject ??= $"[Fault Notification] {Model.Asset.ProductName} ({Model.Asset.Sn})";
+}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.Subject</title>
+</head>
+<body>
+    <p>Dear <b>@Model.Asset.PersonName</b>:</p>
+    <p>@Model.Asset.ProductName (@Model.Asset.Sn) has encountered a fault during the routine health check: <b>@Model.Asset.HealthCheckMessage</b></p>
+    <p>The technical team is working on this issue, please be patient. Once the problem is resolved, we will notify you via email as soon as possible.</p>
+    <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+    <table border="0" width="100%">
+        <tr>
+            <td valign="middle">
+                @if (!string.IsNullOrWhiteSpace(Model.Org.Logo))
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.Org.Website))
+                    {
+                        <a href="@Model.Org.Website"><img src="@Model.Org.Logo" height="42" /></a>
+                    }
+                    else
+                    {
+                        <img src="@Model.Org.Logo" height="42" />
+                    }
+                }
+            </td>
+            <td valign="middle" align="right">
+                <small>
+                    @(Model.Org.GetLabel("orgName") ?? Model.Org.Name)
+                    @if (!string.IsNullOrWhiteSpace(Model.Org.Slogan))
+                    {
+                        <br />
+                        @(Model.Org.GetLabel("orgSlogan") ?? Model.Org.Slogan)
+                    }
+                </small>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

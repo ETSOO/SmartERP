@@ -56,6 +56,7 @@ namespace WorkerCenter.Periods
                 .Where(a => a.ExpiryCheck == true && a.Status < EntityStatus.Inactivated && a.Expiry > now && a.Expiry <= earlyDate)
                 .Select(a => new AssetViewData
                 {
+                    Id = a.Id,
                     PersonId = a.PersonId,
                     PersonName = a.Person.Name,
                     IsLegalPerson = a.Person.IsLegalPerson,
@@ -76,18 +77,17 @@ namespace WorkerCenter.Periods
                 .ToArrayAsync(cancellationToken);
 
             // DbContext is not thread-safe, so multiple parallel operations cannot share the same DbContext instance
-            // await Parallel.ForEachAsync
-            foreach (var asset in assets)
+            await Parallel.ForEachAsync(assets, cancellationToken, async (asset, token) =>
             {
                 var orgId = asset.OrgId;
 
-                var orgData = await DocumentTemplateUtils.CreateOrgDataAsync(_dbFactory, orgId, 0, cancellationToken);
+                var orgData = await DocumentTemplateUtils.CreateOrgDataAsync(_dbFactory, orgId, 0, token);
                 if (orgData == null) return;
 
                 var personId = asset.PersonId;
 
                 var userId = asset.PersonUserId;
-                var userEmails = await DocumentTemplateUtils.GetPersonAndLineIdentifiersAsync(_dbFactory, orgId, userId, CoreUserIdentifierType.Email, cancellationToken);
+                var userEmails = await DocumentTemplateUtils.GetPersonAndLineIdentifiersAsync(_dbFactory, orgId, userId, CoreUserIdentifierType.Email, token);
 
                 var noticeOwner = asset.NoticeOwner;
 
@@ -96,8 +96,8 @@ namespace WorkerCenter.Periods
 
                 if (noticeOwner)
                 {
-                    var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-                    var personEmails = (await _db.QueryPersonIdentifiersAsync(orgId, CoreUserIdentifierType.Email, cancellationToken, [personId]))[0];
+                    var _db = await _dbFactory.CreateDbContextAsync(token);
+                    var personEmails = (await _db.QueryPersonIdentifiersAsync(orgId, CoreUserIdentifierType.Email, token, [personId]))[0];
                     if (personEmails.Length > 0)
                     {
                         to.AddRange(personEmails);
@@ -127,7 +127,7 @@ namespace WorkerCenter.Periods
                     Properties.Resources.Culture = ci;
                 }
 
-                var labels = await DocumentTemplateUtils.CreateOrgCulturesAsync(_dbFactory, orgId, culture, cancellationToken);
+                var labels = await DocumentTemplateUtils.CreateOrgCulturesAsync(_dbFactory, orgId, culture, token);
                 if (labels != null)
                 {
                     orgData.Labels.AddRange(labels);
@@ -153,8 +153,8 @@ namespace WorkerCenter.Periods
                     Importance = EmailImportance.High
                 };
 
-                await _producer.SendJsonAsync(email, ApiModelJsonSerializerContext.Default.SendEmailMessage, SendEmailMessage.Type, cancellationToken);
-            }
+                await _producer.SendJsonAsync(email, ApiModelJsonSerializerContext.Default.SendEmailMessage, SendEmailMessage.Type, token);
+            });
         }
     }
 }

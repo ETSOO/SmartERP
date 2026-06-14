@@ -1,0 +1,46 @@
+﻿@model PlatformShared.Dto.Document.Asset.AssetCheckTemplateData
+
+@{
+    Model.Subject ??= $"[故障通知] {Model.Asset.ProductName} ({Model.Asset.Sn})";
+}
+<!DOCTYPE html>
+
+<html lang="zh-hant">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.Subject</title>
+</head>
+<body>
+    <p>尊敬的用戶 <b>@Model.Asset.PersonName</b>：</p>
+    <p>@Model.Asset.ProductName (@Model.Asset.Sn) 在日常健康檢查中發現故障：<b>@Model.Asset.HealthCheckMessage</b></p>
+    <p>技術團隊正在處理此問題，請您耐心等待。故障解除後，我們會第一時間透過電子郵件通知您。</p>
+    <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
+    <table border="0" width="100%">
+        <tr>
+            <td valign="middle">
+                @if (!string.IsNullOrWhiteSpace(Model.Org.Logo))
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.Org.Website))
+                    {
+                        <a href="@Model.Org.Website"><img src="@Model.Org.Logo" height="42" /></a>
+                    }
+                    else
+                    {
+                        <img src="@Model.Org.Logo" height="42" />
+                    }
+                }
+            </td>
+            <td valign="middle" align="right">
+                <small>
+                    @(Model.Org.GetLabel("orgName") ?? Model.Org.Name)
+                    @if (!string.IsNullOrWhiteSpace(Model.Org.Slogan))
+                    {
+                        <br />
+                        @(Model.Org.GetLabel("orgSlogan") ?? Model.Org.Slogan)
+                    }
+                </small>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

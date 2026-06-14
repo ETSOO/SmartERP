@@ -18,6 +18,12 @@ namespace PlatformShared.Database
         public required DbSet<CoreLog> CoreLogs { get; set; }
 
         /// <summary>
+        /// Core log usages
+        /// 核心日志使用量
+        /// </summary>
+        public required DbSet<CoreLogUsage> CoreLogUsages { get; set; }
+
+        /// <summary>
         /// Is sensitive data logging enabled
         /// 敏感数据日志是否启用
         /// </summary>
@@ -71,6 +77,20 @@ namespace PlatformShared.Database
                 entity.Property(e => e.Creation)
                     .HasDefaultValueSql("now()")
                     .HasColumnName("creation");
+            });
+
+            modelBuilder.Entity<CoreLogUsage>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("core_log_usage_pkey");
+
+                entity.ToTable("core_log_usage");
+
+                entity.Property(e => e.Id)
+                    .UseIdentityAlwaysColumn()
+                    .HasColumnName("id");
+                entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+                entity.Property(e => e.Period).HasColumnName("period");
+                entity.Property(e => e.Qty).HasColumnName("qty");
             });
         }
     }

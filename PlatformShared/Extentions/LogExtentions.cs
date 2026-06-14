@@ -1,4 +1,5 @@
 ﻿using com.etsoo.Utils.Serialization;
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;
@@ -41,7 +42,7 @@ namespace PlatformShared.Extentions
         /// <param name="kind">Kind</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public static Task LogAsync<T>(this LogDbContext logDb, T message, string title, int userId, int? orgId, string? kind, CancellationToken cancellationToken = default)
+        public static async Task LogAsync<T>(this LogDbContext logDb, T message, string title, int userId, int? orgId, string? kind, CancellationToken cancellationToken = default)
             where T : CommonMessage, IMessageQueueMessage
         {
             var data = message.Data;
@@ -82,7 +83,31 @@ namespace PlatformShared.Extentions
 
             logDb.CoreLogs.Add(log);
 
-            return logDb.SaveChangesAsync(cancellationToken);
+            await logDb.SaveChangesAsync(cancellationToken);
+
+            // Usage
+            var date = log.Creation;
+            var period = date.Year * 100 + date.Month;
+            if (orgId.HasValue)
+            {
+                await logDb.Database.ExecuteSqlAsync($"""
+                    INSERT INTO core_log_usage
+                    (
+                        organization_id,
+                        period,
+                        qty
+                    )
+                    VALUES
+                    (
+                        {orgId},
+                        {period},
+                        1
+                    )
+                    ON CONFLICT (organization_id, period)
+                    DO UPDATE
+                        SET qty = core_log_usage.qty + EXCLUDED.qty
+                """, cancellationToken);
+            }
         }
     }
 }

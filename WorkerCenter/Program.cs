@@ -10,6 +10,7 @@ using PlatformShared.Database;
 using PlatformShared.Services;
 using WorkerCenter.Main.Processors;
 using WorkerCenter.Periods;
+using WorkerCenter.Workers;
 
 var builder = Host.CreateApplicationBuilder(args);
 var configuration = builder.Configuration;
@@ -144,6 +145,7 @@ services.AddLocalRabbitMQConsumer(consumerOptions);
 var producerOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer Options Not Found");
 services.AddLocalRabbitMQProducer(producerOptions);
 
+services.Configure<AssetCheckWorkerOptions>(configuration.GetSection("AssetCheckWorker"));
 services.AddHostedService<AssetCheckWorker>();
 
 services.Configure<AssetExiryWorkerOptions>(configuration.GetSection("AssetExiryWorker"));

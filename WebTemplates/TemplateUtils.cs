@@ -91,7 +91,7 @@ namespace WebTemplates
         /// <param name="culture">Culture</param>
         /// <param name="data">Model data</param>
         /// <returns>Result</returns>
-        public static Task<string> BuildAssetCheckFailureNoticeAsync(string culture, AssetTemplateData data)
+        public static Task<string> BuildAssetCheckFailureNoticeAsync(string culture, AssetCheckTemplateData data)
         {
             var template = FormatCulture(AssetCheckFailureTemplate, culture);
             return BuildAsync(template, data);
@@ -104,7 +104,7 @@ namespace WebTemplates
         /// <param name="culture">Culture</param>
         /// <param name="data">Model data</param>
         /// <returns>Result</returns>
-        public static Task<string> BuildAssetCheckSuccessNoticeAsync(string culture, AssetTemplateData data)
+        public static Task<string> BuildAssetCheckSuccessNoticeAsync(string culture, AssetCheckTemplateData data)
         {
             var template = FormatCulture(AssetCheckSuccessTemplate, culture);
             return BuildAsync(template, data);
