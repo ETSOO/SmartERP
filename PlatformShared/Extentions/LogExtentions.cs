@@ -1,4 +1,5 @@
-﻿using com.etsoo.Utils.Serialization;
+﻿using com.etsoo.Utils;
+using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.LogDatabase.Models;
@@ -87,7 +88,7 @@ namespace PlatformShared.Extentions
 
             // Usage
             var date = log.Creation;
-            var period = date.Year * 100 + date.Month;
+            var period = NumUtils.GetMonthPeriod(date);
             if (orgId.HasValue)
             {
                 await logDb.Database.ExecuteSqlAsync($"""

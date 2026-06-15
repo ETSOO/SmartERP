@@ -45,5 +45,6 @@ namespace Platform.Server.Services
         Task<IActionResult> UploadFilesAsync(IEnumerable<IFormFile> files, long id, string folder, string sign, CancellationToken cancellationToken = default);
         Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, string action, CancellationToken cancellationToken = default);
         Task<OrgUpdateResourceReadData?> UpdateResourceReadAsync(int id, CancellationToken cancellationToken = default);
+        Task<OrgUsageReportData[]> UsageReportAsync(OrgUsageReportRQ rq, CancellationToken cancellationToken = default);
     }
 }

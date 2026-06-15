@@ -19,6 +19,7 @@ using CRM.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using PlatformShared.Database;
@@ -131,7 +132,36 @@ services.AddHealthChecks();
 
 // Add services to the container.
 // services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
-services.AddOpenApi();
+services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        // Ensure instances exist
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+        document.Components.SecuritySchemes["Bearer"] =
+            new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme.ToLower(),
+                BearerFormat = "JWT",
+                Description = "Input your JWT token"
+            };
+
+        var securityRequirement = new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+        };
+
+        document.Security ??= [];
+        document.Security.Add(securityRequirement);
+
+        return Task.CompletedTask;
+    });
+});
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 services.ConfigureHttpJsonOptions(options =>

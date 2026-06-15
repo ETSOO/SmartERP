@@ -120,6 +120,9 @@ namespace Platform.Server.Endpoints.Org
             g.MapGet("UpdateResourceRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, CancellationToken cancellationToken) => service.UpdateResourceReadAsync(id, cancellationToken))
                 .WithDescription("Read JSON data for upate resource / 浏览JSON数据用于更新资源").WithTags("Org");
 
+            g.MapPost("UsageReport", (IOrgService service, OrgUsageReportRQ rq, CancellationToken cancellationToken) => service.UsageReportAsync(rq, cancellationToken))
+                .WithDescription("Get organization usage / 获取机构使用情况").WithTags("Org");
+
             return builder;
         }
     }

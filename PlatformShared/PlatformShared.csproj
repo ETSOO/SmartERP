@@ -11,7 +11,7 @@
     <PackageReference Include="com.etsoo.DI" Version="1.0.33" />
     <PackageReference Include="com.etsoo.MessageQueue" Version="1.1.9" />
     <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.30" />
-    <PackageReference Include="com.etsoo.Web" Version="1.3.83" />
+    <PackageReference Include="com.etsoo.Web" Version="1.3.84" />
     <PackageReference Include="EFCore.BulkExtensions.MIT.PostgreSql" Version="10.22.0" />
   </ItemGroup>
 

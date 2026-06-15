@@ -94,12 +94,14 @@ namespace Platform.Server
     [JsonSerializable(typeof(OrgGetMyRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
     [JsonSerializable(typeof(OrgUpdateApiRQ))]
+    [JsonSerializable(typeof(OrgUsageReportRQ))]
     [JsonSerializable(typeof(SendProfileEmailRQ))]
 
     [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryResourceData>))]
     [JsonSerializable(typeof(OrgUpdateResourceReadData))]
+    [JsonSerializable(typeof(OrgUsageReportData[]))]
 
     // Public
     [JsonSerializable(typeof(AcceptInvitationRQ))]
