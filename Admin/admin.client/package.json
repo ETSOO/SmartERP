@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.66",
-    "@etsoo/materialui": "^1.6.70",
+    "@etsoo/materialui": "^1.6.71",
     "@etsoo/react": "^1.8.91",
-    "@etsoo/shared": "^1.2.84",
-    "@etsoo/smarterp-core": "^1.1.59",
+    "@etsoo/shared": "^1.2.86",
+    "@etsoo/smarterp-core": "^1.1.60",
     "@etsoo/toolpad": "^1.0.50",
     "@mui/material": "^9.1.1",
     "formik": "^2.4.9",
@@ -31,6 +31,6 @@
     "vite": "^8.0.16"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.61.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.62.0"
   }
 }

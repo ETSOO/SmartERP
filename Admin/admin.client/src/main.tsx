@@ -132,6 +132,13 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/org/usage/:id",
+            lazy: async () => {
+              const UsageReport = await import("./pages/home/org/UsageReport");
+              return { Component: UsageReport.default };
+            }
+          },
+          {
             path: "/home/user",
             lazy: async () => {
               const AllUsers = await import("./pages/home/user/AllUsers");

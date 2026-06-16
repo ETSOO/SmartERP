@@ -69,6 +69,7 @@ export default function Home() {
     "externalApis",
     "menuHome",
     "signoutSuccess",
+    "usageReport",
     "view"
   );
 
@@ -124,6 +125,12 @@ export default function Home() {
               segment: "editapi",
               pattern: "editapi/:id",
               title: labels.edit,
+              hidden: true
+            },
+            {
+              segment: "usage",
+              pattern: "usage/:id",
+              title: labels.usageReport,
               hidden: true
             }
           ]

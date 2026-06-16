@@ -17,6 +17,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import BarChartIcon from "@mui/icons-material/BarChart";
 import { MyUtils } from "../../../app/MyUtils";
 
 export default function ViewOrg() {
@@ -38,7 +39,8 @@ export default function ViewOrg() {
     "editLogo",
     "externalApis",
     "leaveOrg",
-    "logo"
+    "logo",
+    "usageReport"
   );
 
   // Tax
@@ -191,6 +193,13 @@ export default function ViewOrg() {
             startIcon={<ApiIcon />}
           >
             {labels.externalApis}
+          </ButtonLink>
+          <ButtonLink
+            variant="outlined"
+            href={`./../../usage/${id}`}
+            startIcon={<BarChartIcon />}
+          >
+            {labels.usageReport}
           </ButtonLink>
         </React.Fragment>
       )}

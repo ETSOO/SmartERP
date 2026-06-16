@@ -3,6 +3,7 @@ import { BusinessTax } from "@etsoo/appscript";
 import { ButtonLink, HBox, LinkEx, ViewPage } from "@etsoo/materialui";
 import SupportIcon from "@mui/icons-material/Support";
 import ApiIcon from "@mui/icons-material/Api";
+import BarChartIcon from "@mui/icons-material/BarChart";
 import { app } from "../../../app/MyApp";
 import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
@@ -21,7 +22,12 @@ export default function ViewOrg() {
   }, [id]);
 
   // Labels
-  const labels = app.getLabels("adminSupport", "externalApis", "logo");
+  const labels = app.getLabels(
+    "adminSupport",
+    "externalApis",
+    "logo",
+    "usageReport"
+  );
 
   // Tax
   const tax = BusinessTax.getById(app.region);
@@ -113,6 +119,13 @@ export default function ViewOrg() {
             startIcon={<ApiIcon />}
           >
             {labels.externalApis}
+          </ButtonLink>
+          <ButtonLink
+            variant="outlined"
+            href={`./../../usage/${id}`}
+            startIcon={<BarChartIcon />}
+          >
+            {labels.usageReport}
           </ButtonLink>
         </React.Fragment>
       )}

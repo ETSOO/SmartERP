@@ -83,6 +83,7 @@ export default function Home() {
     "signoutSuccess",
     "switchOrg",
     "updateAvator",
+    "usageReport",
     "view"
   );
 
@@ -179,6 +180,12 @@ export default function Home() {
             segment: "editdocument",
             pattern: "editdocument/:id",
             title: labels.editDocument,
+            hidden: true
+          },
+          {
+            segment: "usage",
+            pattern: "usage/:id",
+            title: labels.usageReport,
             hidden: true
           }
         ]

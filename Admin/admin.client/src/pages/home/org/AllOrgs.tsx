@@ -26,6 +26,7 @@ import Typography from "@mui/material/Typography";
 import { BusinessUtils } from "@etsoo/appscript";
 
 const template = {
+  id: "number",
   keyword: "string",
   ownerId: "number",
   pin: "string",
@@ -83,6 +84,13 @@ export default function AllOrgs() {
       quickAction={(data) => navigate(`./view/${data.id}`)}
       fieldTemplate={template}
       fields={(data) => [
+        <SearchField
+          label={labels.id}
+          name="id"
+          minChars={2}
+          defaultValue={data.id}
+          type="number"
+        />,
         <SearchField
           label={labels.orgName}
           name="keyword"
