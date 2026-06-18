@@ -96,6 +96,7 @@ namespace PlatformShared.Messages
     [JsonDerivedType(typeof(DeleteDocumentMessage))]
     [JsonDerivedType(typeof(DeleteMemberMessage))]
     [JsonDerivedType(typeof(DeleteUserIdentifierMessage))]
+    [JsonDerivedType(typeof(GenerateDocumentMessage))]
     [JsonDerivedType(typeof(LeaveOrgMessage))]
     [JsonDerivedType(typeof(LoginFailedMessage))]
     [JsonDerivedType(typeof(LoginSuccessMessage))]

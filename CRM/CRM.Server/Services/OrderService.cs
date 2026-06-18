@@ -833,7 +833,6 @@ namespace CRM.Server.Services
             order.Discount = orderDiscount;
             order.Promotions = promotions;
 
-
             // Changes
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 

@@ -9,6 +9,7 @@ using com.etsoo.BaiduApi.Maps;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
+using com.etsoo.Database.Converters;
 using com.etsoo.ImageUtils.Barcode;
 using com.etsoo.Localization;
 using com.etsoo.Utils.Actions;
@@ -28,6 +29,7 @@ using PlatformShared.Dto;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using System.Globalization;
+using System.Text.Json;
 using System.Web;
 
 namespace Platform.Server.Services
@@ -38,7 +40,7 @@ namespace Platform.Server.Services
     /// </summary>
     public class PublicService : CommonService, IPublicService
     {
-        readonly MyDbContext _db;
+        readonly IDbContextFactory<MyDbContext> _dbFactory;
         readonly IDistributedCache _cache;
         readonly IHttpContextAccessor _accessor;
         readonly IMapPlaceService _baidu;
@@ -51,7 +53,6 @@ namespace Platform.Server.Services
         /// Constructor
         /// 构造函数
         /// </summary>
-        /// <param name="db">Database EF</param>
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
@@ -62,7 +63,8 @@ namespace Platform.Server.Services
         /// <param name="proxy">Proxy API</param>
         /// <param name="authCodeService">Authcode service</param>
         /// <param name="queueService">Queue service</param>
-        public PublicService(MyDbContext db,
+        public PublicService(
+            IDbContextFactory<MyDbContext> dbFactory,
             IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PublicService> logger,
@@ -75,7 +77,7 @@ namespace Platform.Server.Services
             IQueueService queueService)
             : base(app, userAccessor.User, "public", logger)
         {
-            _db = db;
+            _dbFactory = dbFactory;
             _cache = cache;
             _accessor = accessor;
             _baidu = baidu;
@@ -121,6 +123,9 @@ namespace Platform.Server.Services
             var orgId = data.UserData.OrganizationId;
             var userId = User.IdInt;
             var inviterId = code.UserId.Value;
+
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             var exists = await _db.Users(orgId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
             if (!exists)
             {
@@ -138,9 +143,13 @@ namespace Platform.Server.Services
                     UserId = User.Oid
                 });
 
-                var user = await _db.CoreUsers.FindAsync([userId], cancellationToken: cancellationToken);
+                var user = await _db.CoreUsers.Where(u => u.Id == userId)
+                    .Select(u => new CoreUser { Id = u.Id, LatestOrganizationIds = u.LatestOrganizationIds })
+                    .FirstOrDefaultAsync(cancellationToken);
                 if (user != null)
                 {
+                    _db.Attach(user);
+
                     if (user.LatestOrganizationIds == null)
                     {
                         user.LatestOrganizationIds = [orgId];
@@ -166,7 +175,8 @@ namespace Platform.Server.Services
             }
 
             // Delete the code
-            var task3 = _db.CoreAuthCodes.Where(c => c.Id == rq.Id).ExecuteDeleteAsync(cancellationToken);
+            await using var codeDb = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            var task3 = codeDb.CoreAuthCodes.Where(c => c.Id == rq.Id).ExecuteDeleteAsync(cancellationToken);
             tasks.Add(task3);
 
             await Task.WhenAll(tasks);
@@ -257,6 +267,8 @@ namespace Platform.Server.Services
             return _cache.GetOrCreateAsync(key, async (options) =>
             {
                 options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+
+                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
                 return await _db.FeatureCultures.AsNoTracking()
                     .Where(c => c.Culture == culture && c.CoreOrganizationId == null)
                     .Select(c => new CustomResourceData
@@ -298,6 +310,125 @@ namespace Platform.Server.Services
             }
 
             return regions;
+        }
+
+        /// <summary>
+        /// Get time zones
+        /// 获取时区
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IEnumerable<TimeZoneItem>> GetTimeZonesAsync(TimeZoneRQ rq, CancellationToken cancellationToken = default)
+        {
+            var culture = rq.Culture;
+            if (string.IsNullOrEmpty(culture))
+            {
+                culture = CultureInfo.CurrentCulture.IsNeutralCulture ? CultureInfo.CurrentCulture.Name : CultureInfo.CurrentCulture.Parent.Name;
+            }
+            else
+            {
+                LocalizationUtils.SetCulture(culture);
+            }
+
+            var all = rq.All ?? false;
+            var key = $"{nameof(PublicService)}.{nameof(GetTimeZonesAsync)}.{culture}";
+            if (all) key += ".All";
+
+            var timeZones = await _cache.GetOrCreateAsync(key, async (options) =>
+            {
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+
+                if (all)
+                {
+                    return await Task.Run(() => TimeZoneInfo.GetSystemTimeZones().Select(s => TimeZoneUtils.CreateFrom(s)), cancellationToken);
+                }
+
+                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
+                var jsonData = await _db.FeatureCultures.AsNoTracking()
+                    .Where(c => c.Culture == culture && c.CoreOrganizationId == null && c.Key == MyAppConstants.TimeZoneResourceKey)
+                    .Select(c => c.JsonData)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                TimeZoneResourceItem[]? items = null;
+                if (!string.IsNullOrEmpty(jsonData))
+                {
+                    try
+                    {
+                        items = JsonSerializer.Deserialize(jsonData, MyJsonSerializerContext.Default.IEnumerableTimeZoneResourceItem)?.ToArray();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogException(ex);
+                    }
+                }
+
+                var timeZones = new List<TimeZoneItem>();
+
+                if (items != null)
+                {
+                    foreach (var item in items)
+                    {
+                        var tz = TimeZoneUtils.CreateFrom(item.Id);
+                        if (tz == null) continue;
+
+                        if (!string.IsNullOrEmpty(item.Label))
+                        {
+                            tz.DisplayName = item.Label;
+                        }
+
+                        timeZones.Add(tz);
+                    }
+                }
+
+                return [.. timeZones];
+            }, CommonJsonSerializerContext.Default.IEnumerableTimeZoneItem, cancellationToken);
+
+            if (timeZones == null || !timeZones.Any())
+            {
+                timeZones = [TimeZoneUtils.CreateFrom(TimeZoneInfo.Local)];
+            }
+
+            if (rq.Id != null)
+            {
+                timeZones = timeZones.Where(tz => tz.Id == rq.Id);
+            }
+
+            if (rq.Ids != null)
+            {
+                var sortIds = rq.Ids.ToList();
+                timeZones = timeZones.Where(tz => sortIds.Contains(tz.Id)).OrderBy(tz => sortIds.IndexOf(tz.Id));
+            }
+
+            if (rq.ExcludedIds != null)
+            {
+                timeZones = timeZones.Where(tz => !rq.ExcludedIds.Contains(tz.Id));
+            }
+
+            var keyword = rq.Keyword;
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                if (int.TryParse(keyword, out var offset))
+                {
+                    timeZones = timeZones.Where(tz => Math.Abs(tz.UtcOffset.TotalHours) == offset);
+                }
+                else
+                {
+                    timeZones = timeZones.Where(tz => tz.DisplayName.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                        || tz.StandardName.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                        || tz.Id.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                    );
+                }
+            }
+
+            var page = rq.QueryPaging?.CurrentPage ?? 1;
+            var batchSize = rq.QueryPaging?.BatchSize ?? 16;
+            
+            var skip = Convert.ToInt32((page - 1) * batchSize);
+            if (skip < 0) skip = 0;
+
+            return timeZones.Skip(skip).Take(batchSize);
         }
 
         /// <summary>
@@ -347,6 +478,8 @@ namespace Platform.Server.Services
             string? orgName = null;
             if (rq.OrgUid != null)
             {
+                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
                 var data = await _db.CoreOrganizations.Where(o => o.Uid == rq.OrgUid).Select(o => new { o.Id, o.Name }).FirstOrDefaultAsync(cancellationToken);
                 if (data != null)
                 {
@@ -358,6 +491,8 @@ namespace Platform.Server.Services
             string? appName = null;
             if (rq.AppId != null)
             {
+                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
                 if (string.IsNullOrEmpty(rq.AppKey))
                 {
                     // Get app name from root
@@ -472,6 +607,8 @@ namespace Platform.Server.Services
 
             var data = code.DeserializeData(PlatformSharedContext.Default.AuthCodeMemberInvitationData);
             if (data == null) return null;
+
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
             var userId = await _db.CoreUserIdentifiers.Where(ui => ui.Type == CoreUserIdentifierType.Email
                 && ui.Value == code.OpenId

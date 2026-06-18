@@ -29,9 +29,9 @@
     <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.25" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
     <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.42" />
-    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.79" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.98" />
-    <PackageReference Include="com.etsoo.Localization" Version="1.0.44" />
+    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.80" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.0.99" />
+    <PackageReference Include="com.etsoo.Localization" Version="1.0.46" />
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.8" />
     <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />

@@ -273,4 +273,7 @@
   <data name="SendProfileEmail" xml:space="preserve">
     <value>Send Profile Email</value>
   </data>
+  <data name="GenerateDocument" xml:space="preserve">
+    <value>Generate Business Document</value>
+  </data>
 </root>

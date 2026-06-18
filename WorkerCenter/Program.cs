@@ -66,8 +66,7 @@ if (string.IsNullOrEmpty(logConnectionString))
     throw new Exception("SmartERPLog connection string not found");
 }
 
-// services.AddDbContextPool
-services.AddDbContext<MyDbContext>((provider, options) =>
+void OptionsAction(IServiceProvider provider, DbContextOptionsBuilder options)
 {
     options.UseNpgsql(connectonString);
 
@@ -76,19 +75,13 @@ services.AddDbContext<MyDbContext>((provider, options) =>
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-}, ServiceLifetime.Singleton);
+}
+
+// services.AddDbContextPool
+services.AddDbContext<MyDbContext>(OptionsAction, ServiceLifetime.Singleton);
 
 // Support DbContextFactory for multi-threaded scenarios, such as in background services or parallel processing
-services.AddPooledDbContextFactory<MyDbContext>((provider, options) =>
-{
-    options.UseNpgsql(connectonString);
-
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-    }
-});
+services.AddPooledDbContextFactory<MyDbContext>(OptionsAction);
 
 services.AddDbContext<LogDbContext>((provider, options) =>
 {
@@ -122,6 +115,7 @@ services.AddSingleton<IMessageQueueProcessor, CreateResourceProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeleteDocumentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeleteMemberProcessor>();
 services.AddSingleton<IMessageQueueProcessor, DeleteUserIdentifierProcessor>();
+services.AddSingleton<IMessageQueueProcessor, GenerateDocumentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LeaveOrgProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginFailedProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginSuccessProcessor>();

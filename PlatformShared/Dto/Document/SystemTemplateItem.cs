@@ -7,6 +7,24 @@ using System.Text.Json;
 namespace PlatformShared.Dto.Document
 {
     /// <summary>
+    /// System template data delegate
+    /// 系统模板数据委托
+    /// </summary>
+    /// <param name="dbContextFactory">Database context factory</param>
+    /// <param name="id">Target id</param>
+    /// <param name="parameters">Additional parameters</param>
+    /// <param name="currentUser">Current user</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result</returns>
+    public delegate Task<object?> SystemTemplateDataDelegate(
+        IDbContextFactory<MyDbContext> dbContextFactory,
+        long id,
+        StringKeyDictionaryObject parameters,
+        CurrentUser currentUser,
+        CancellationToken cancellationToken
+    );
+
+    /// <summary>
     /// System template item
     /// 系统模板项目
     /// </summary>
@@ -40,6 +58,6 @@ namespace PlatformShared.Dto.Document
         /// Data function
         /// 数据函数
         /// </summary>
-        public required Func<IDbContextFactory<MyDbContext>, long, StringKeyDictionaryObject, CurrentUser, CancellationToken, Task<object?>> Data { get; init; }
+        public required SystemTemplateDataDelegate Data { get; init; }
     }
 }

@@ -42,7 +42,9 @@ namespace CRM.Server.Services
                     SupplierCurrencies = s.SupplierCurrencies,
                     Cultures = s.Cultures,
                     HasInventory = s.HasInventory,
-                    TaxRate = s.TaxRate
+                    TaxRate = s.TaxRate,
+                    OrderMonthlyReportEnabled = s.OrderMonthlyReportEnabled,
+                    OrderDailyReportHour = s.OrderDailyReportHour
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -249,7 +251,9 @@ namespace CRM.Server.Services
                     Cultures = rq.Cultures?.ToList() ?? [App.Configuration.Cultures[0]],
                     SupplierCurrencies = rq.SupplierCurrencies?.ToList() ?? [currencies.First()],
                     HasInventory = rq.HasInventory.GetValueOrDefault(),
-                    TaxRate = rq.TaxRate
+                    TaxRate = rq.TaxRate,
+                    OrderMonthlyReportEnabled = rq.OrderMonthlyReportEnabled,
+                    OrderDailyReportHour = rq.OrderDailyReportHour
                 };
 
                 _db.SettingCrms.Add(settings);
@@ -284,6 +288,16 @@ namespace CRM.Server.Services
                 if (rq.IsModified(nameof(rq.TaxRate)))
                 {
                     settings.TaxRate = rq.TaxRate;
+                }
+
+                if (rq.IsModified(nameof(rq.OrderMonthlyReportEnabled)))
+                {
+                    settings.OrderMonthlyReportEnabled = rq.OrderMonthlyReportEnabled;
+                }
+
+                if (rq.IsModified(nameof(rq.OrderDailyReportHour)))
+                {
+                    settings.OrderDailyReportHour = rq.OrderDailyReportHour;
                 }
             }
 

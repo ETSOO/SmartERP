@@ -10,16 +10,16 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.66",
-    "@etsoo/materialui": "^1.6.70",
+    "@etsoo/materialui": "^1.6.71",
     "@etsoo/react": "^1.8.91",
-    "@etsoo/shared": "^1.2.84",
-    "@etsoo/smarterp-core": "^1.1.59",
+    "@etsoo/shared": "^1.2.86",
+    "@etsoo/smarterp-core": "^1.1.61",
     "@mui/icons-material": "^9.1.1",
     "@mui/material": "^9.1.1",
     "formik": "^2.4.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.17.0",
+    "react-router-dom": "^7.18.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {
@@ -32,6 +32,6 @@
     "vite-plugin-svgr": "^5.2.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.61.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.62.0"
   }
 }

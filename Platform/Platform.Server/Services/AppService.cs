@@ -154,7 +154,8 @@ namespace Platform.Server.Services
             {
                 Name = rq.OrgName,
                 Pin = rq.OrgPin,
-                Region = rq.Region
+                Region = rq.Region,
+                TimeZone = rq.TimeZone
             };
 
             var (result, id) = await _orgService.CreateWithIdAsync(orgRq, cancellationToken);

@@ -75,6 +75,7 @@ export default function ViewOrg() {
           label: app.get(tax?.labelKey ?? "taxId"),
           singleRow: false
         },
+        "timeZone",
         "apps",
         "users",
         "persons",

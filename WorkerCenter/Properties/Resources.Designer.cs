@@ -277,6 +277,15 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Generate Business Document.
+        /// </summary>
+        internal static string GenerateDocument {
+            get {
+                return ResourceManager.GetString("GenerateDocument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invitation Accepted.
         /// </summary>
         internal static string InvitationAccepted {

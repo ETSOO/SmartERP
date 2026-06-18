@@ -47,6 +47,10 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(2)
                 .IsFixedLength(true)
                 .HasColumnName("region");
+            entity.Property(e => e.TimeZone)
+                .IsRequired()
+                .HasMaxLength(64)
+                .HasColumnName("time_zone");
             entity.Property(e => e.Slogan)
                 .HasMaxLength(128)
                 .HasColumnName("slogan");

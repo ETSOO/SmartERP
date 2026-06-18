@@ -86,6 +86,18 @@
         public decimal? TaxRate { get; set; }
 
         /// <summary>
+        /// Whether order monthly report enabled
+        /// 订单月报是否启用
+        /// </summary>
+        public bool? OrderMonthlyReportEnabled { get; set; }
+
+        /// <summary>
+        /// Order daily report start hour, 0-23
+        /// 订单日报开始小时
+        /// </summary>
+        public short? OrderDailyReportHour { get; set; }
+
+        /// <summary>
         /// Organization
         /// 机构
         /// </summary>

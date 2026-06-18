@@ -100,6 +100,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryData>))]
     [JsonSerializable(typeof(IEnumerable<OrgQueryResourceData>))]
+    [JsonSerializable(typeof(IEnumerable<TimeZoneResourceItem>))]
     [JsonSerializable(typeof(OrgUpdateResourceReadData))]
     [JsonSerializable(typeof(OrgUsageReportData[]))]
 
@@ -109,6 +110,7 @@ namespace Platform.Server
     [JsonSerializable(typeof(OrgInfoRQ))]
     [JsonSerializable(typeof(ParseNameRQ))]
     [JsonSerializable(typeof(PlaceQueryRQ))]
+    [JsonSerializable(typeof(TimeZoneRQ))]
 
     [JsonSerializable(typeof(BarcodeOptions))]
     [JsonSerializable(typeof(NameData))]

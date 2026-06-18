@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.Database.Converters;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 
@@ -60,6 +61,12 @@ namespace Platform.Server.Endpoints.Org.RQ
         public required string Region { get; init; }
 
         /// <summary>
+        /// Time zone
+        /// 时区
+        /// </summary>
+        public string? TimeZone { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -89,6 +96,11 @@ namespace Platform.Server.Endpoints.Org.RQ
             if (Region.Length is not 2)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Region));
+            }
+
+            if (TimeZone != null && !TimeZoneUtils.IsTimeZone(TimeZone))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(TimeZone));
             }
 
             return null;

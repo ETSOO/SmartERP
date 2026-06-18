@@ -273,4 +273,7 @@
   <data name="SendProfileEmail" xml:space="preserve">
     <value>发送档案邮件</value>
   </data>
+  <data name="GenerateDocument" xml:space="preserve">
+    <value>输出业务文档</value>
+  </data>
 </root>

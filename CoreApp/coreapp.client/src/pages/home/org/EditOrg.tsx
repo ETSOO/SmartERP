@@ -12,7 +12,11 @@ import {
   OrgUpdateRQ,
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
-import { OrgTiplist, StatusList } from "@etsoo/smarterp-core/components";
+import {
+  OrgTiplist,
+  StatusList,
+  TimeZoneTiplist
+} from "@etsoo/smarterp-core/components";
 import Grid from "@mui/material/Grid";
 
 export default function EditOrg() {
@@ -184,6 +188,14 @@ export default function EditOrg() {
             formik.touched.parentId && Boolean(formik.errors.parentId)
           }
           inputHelperText={formik.touched.parentId && formik.errors.parentId}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <TimeZoneTiplist
+          fullWidth
+          inputRequired
+          idValue={formik.values.timeZone}
+          inputOnChange={formik.handleChange}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>

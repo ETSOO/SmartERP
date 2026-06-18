@@ -40,7 +40,8 @@ export namespace AppUtils {
           kind: "number",
           organizationId: "number",
           name: "string",
-          pin: "string"
+          pin: "string",
+          timeZone: "string"
         });
 
         let result: IActionResult | undefined;
@@ -70,7 +71,8 @@ export namespace AppUtils {
               id: data.id,
               orgName: formData.name,
               orgPin: formData.pin,
-              region: app.region
+              region: app.region,
+              timeZone: formData.timeZone
             },
             { showLoading: false }
           );

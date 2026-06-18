@@ -41,5 +41,11 @@
         /// 注册令牌方案
         /// </summary>
         public const string RegistrationTokenScheme = "Bearer";
+
+        /// <summary>
+        /// Time zone resource key
+        /// 时区资源键
+        /// </summary>
+        public const string TimeZoneResourceKey = "sysTimeZones";
     }
 }

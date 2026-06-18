@@ -81,6 +81,12 @@ namespace PlatformShared.Database.Models
         public required string Region { get; set; }
 
         /// <summary>
+        /// Time zone
+        /// 时区
+        /// </summary>
+        public required string TimeZone { get; set; }
+
+        /// <summary>
         /// Slogan
         /// 标语
         /// </summary>

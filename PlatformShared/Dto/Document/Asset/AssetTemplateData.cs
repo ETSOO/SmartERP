@@ -4,7 +4,7 @@
     /// Asset template data
     /// 资产模板数据
     /// </summary>
-    public record AssetTemplateData
+    public record AssetTemplateData : IDocumentTemplateData
     {
         /// <summary>
         /// Subject
@@ -23,5 +23,11 @@
         /// 资产视图数据
         /// </summary>
         public required AssetViewData Asset { get; init; }
+
+        /// <summary>
+        /// Target name
+        /// 目标对象名称
+        /// </summary>
+        public string TargetName => Asset.Sn;
     }
 }

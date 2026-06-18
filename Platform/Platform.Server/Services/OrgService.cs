@@ -9,6 +9,7 @@ using com.etsoo.CoreFramework.Json;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.Database.Converters;
 using com.etsoo.HtmlIO;
 using com.etsoo.HTTP;
 using com.etsoo.Utils;
@@ -17,6 +18,7 @@ using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Storage;
 using Json.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Platform.Server.Application;
 using Platform.Server.Dto.Org;
 using Platform.Server.Endpoints.Org.RQ;
@@ -84,6 +86,7 @@ namespace Platform.Server.Services
         readonly IStorageFactory _storageFactory;
         readonly IQueueService _queueService;
         readonly ISmartERPCoordinator _erp;
+        readonly IDistributedCache _cache;
 
         /// <summary>
         /// Constructor
@@ -95,7 +98,6 @@ namespace Platform.Server.Services
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="publicService">Public service</param>
-        /// <param name="storage">Storage</param>
         /// <param name="queueService">Queue service</param>
         public OrgService(MyDbContext db,
             LogDbContext logDb,
@@ -105,7 +107,8 @@ namespace Platform.Server.Services
             IPublicService publicService,
             IStorageFactory storageFactory,
             IQueueService queueService,
-            ISmartERPCoordinator erp)
+            ISmartERPCoordinator erp,
+            IDistributedCache cache)
             : base(app, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
@@ -114,6 +117,7 @@ namespace Platform.Server.Services
             _storageFactory = storageFactory;
             _queueService = queueService;
             _erp = erp;
+            _cache = cache;
         }
 
         /// <summary>
@@ -216,6 +220,8 @@ namespace Platform.Server.Services
                 return result;
             }
 
+            string key;
+
             if (rq.Id.HasValue)
             {
                 var id = rq.Id.Value;
@@ -230,6 +236,8 @@ namespace Platform.Server.Services
                 {
                     return ApplicationErrors.NoId.AsResult();
                 }
+
+                key = resource.Key;
 
                 // Remove all items
                 if (rq.Items != null && !rq.Items.Any())
@@ -340,6 +348,18 @@ namespace Platform.Server.Services
 
                 // Save
                 await _db.SaveChangesAsync(cancellationToken);
+
+                key = rq.Key;
+            }
+
+            var tasks = new List<Task>();
+
+            // Remove keys
+            if (key == MyAppConstants.TimeZoneResourceKey)
+            {
+                var cacheKey = $"{nameof(PublicService)}.{nameof(PublicService.GetTimeZonesAsync)}.";
+                var tzTasks = App.Configuration.Cultures.Select(c => _cache.RemoveAsync(cacheKey + c, cancellationToken));
+                tasks.AddRange(tzTasks);
             }
 
             // Push message
@@ -349,7 +369,10 @@ namespace Platform.Server.Services
                 JsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.OrgCreateResourceRQ)
             };
 
-            await _queueService.PushAsync(message, PlatformSharedContext.Default.CreateResourceMessage, cancellationToken);
+            var queueTask = _queueService.PushAsync(message, PlatformSharedContext.Default.CreateResourceMessage, cancellationToken);
+            tasks.Add(queueTask);
+
+            await Task.WhenAll(tasks);
 
             return ActionResult.Success;
         }
@@ -376,6 +399,8 @@ namespace Platform.Server.Services
                 : rq.QueryKeyword
             ;
 
+            var timezone = TimeZoneUtils.CreateFrom(TimeZoneUtils.GetTimeZone(rq.TimeZone)).Id;
+
             // Create organization
             var userId = User.IdInt;
             var org = new CoreOrganization
@@ -389,6 +414,7 @@ namespace Platform.Server.Services
                 Status = rq.Status.GetValueOrDefault(),
                 QueryKeyword = queryKeyword,
                 Region = rq.Region,
+                TimeZone = timezone,
                 Persons = [
                     new Person
                     {
@@ -1016,6 +1042,7 @@ namespace Platform.Server.Services
                     ou.Organization.Creation,
                     ou.Organization.Status,
                     ou.Organization.QueryKeyword,
+                    ou.Organization.TimeZone,
                     Persons = ou.Organization.Persons.Count,
                     Users = ou.Organization.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),
                     UserStatus = ou.Status,
@@ -1346,6 +1373,11 @@ namespace Platform.Server.Services
                 org.QueryKeyword = rq.QueryKeyword;
             }
 
+            if (rq.IsModified(nameof(rq.TimeZone)) && rq.TimeZone != null)
+            {
+                org.TimeZone = TimeZoneUtils.CreateFrom(TimeZoneUtils.GetTimeZone(rq.TimeZone)).Id;
+            }
+
             // Changes
             var changes = _db.ChangeTracker.Entries().GetChangedProperties();
 
@@ -1558,7 +1590,8 @@ namespace Platform.Server.Services
                 o.Pin,
                 o.ParentId,
                 o.Status,
-                o.QueryKeyword
+                o.QueryKeyword,
+                o.TimeZone
             }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
 

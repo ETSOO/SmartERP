@@ -49,5 +49,17 @@ namespace CRM.Server.Dto.System
         /// 默认税率
         /// </summary>
         public decimal? TaxRate { get; init; }
+
+        /// <summary>
+        /// Whether order monthly report enabled
+        /// 订单月报是否启用
+        /// </summary>
+        public bool? OrderMonthlyReportEnabled { get; init; }
+
+        /// <summary>
+        /// Order daily report start hour, 0-23
+        /// 订单日报开始小时
+        /// </summary>
+        public short? OrderDailyReportHour { get; init; }
     }
 }

@@ -3,7 +3,7 @@ import { app } from "../../../app/MyApp";
 import React from "react";
 import { InputField, MaskInput, OptionGroup, VBox } from "@etsoo/materialui";
 import { BusinessTax } from "@etsoo/appscript";
-import { OrgTiplist } from "@etsoo/smarterp-core/components";
+import { OrgTiplist, TimeZoneTiplist } from "@etsoo/smarterp-core/components";
 
 /**
  * Buy kind
@@ -46,7 +46,7 @@ export function BuyApp(props: BuyAppProps) {
 
   // Layout
   return (
-    <VBox spacing={1} sx={{ width: "100%", paddingTop: 1 }}>
+    <VBox spacing={2} sx={{ width: "100%", paddingTop: 1 }}>
       <OptionGroup
         name="kind"
         options={options}
@@ -71,7 +71,6 @@ export function BuyApp(props: BuyAppProps) {
             name="name"
             label={labels.orgName}
             fullWidth
-            variant="standard"
             required
             slotProps={{ htmlInput: { maxLength: 128 } }}
           />
@@ -81,7 +80,6 @@ export function BuyApp(props: BuyAppProps) {
             name="pin"
             label={app.get(tax?.labelKey ?? "taxId")}
             fullWidth
-            variant="standard"
             helperText={app.get((tax?.labelKey ?? "taxId") + "Help")}
             slotProps={{
               htmlInput: {
@@ -89,6 +87,11 @@ export function BuyApp(props: BuyAppProps) {
                 style: { textTransform: "uppercase" }
               }
             }}
+          />
+          <TimeZoneTiplist
+            fullWidth
+            inputRequired
+            idValue={app.getTimeZone()}
           />
         </React.Fragment>
       )}

@@ -29,6 +29,8 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("cultures");
             entity.Property(e => e.HasInventory).HasColumnName("has_inventory");
             entity.Property(e => e.TaxRate).HasColumnName("tax_rate");
+            entity.Property(e => e.OrderMonthlyReportEnabled).HasColumnName("order_monthly_report_enabled");
+            entity.Property(e => e.OrderDailyReportHour).HasColumnName("order_daily_report_hour");
 
             entity.HasOne(d => d.Organization).WithOne(p => p.SettingCrm)
                 .HasForeignKey<SettingCrm>(d => d.Id)

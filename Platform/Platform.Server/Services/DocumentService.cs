@@ -3,8 +3,11 @@ using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Platform.Server.Application;
 using Platform.Server.Dto.Document;
 using Platform.Server.Endpoints.Document.RQ;
@@ -15,7 +18,10 @@ using PlatformShared.Dto;
 using PlatformShared.Dto.Document;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
+using PlatformShared.Services;
+using RazorEngineCore;
 using System.Text.Json;
+using WebTemplates;
 
 namespace Platform.Server.Services
 {
@@ -25,27 +31,31 @@ namespace Platform.Server.Services
     /// </summary>
     public class DocumentService : CommonUserService, IDocumentService
     {
-        readonly MyDbContext _db;
+        readonly IDbContextFactory<MyDbContext> _dbFactory;
         readonly IQueueService _queueService;
         readonly IOrgService _orgService;
+        readonly ISmartERPCoordinator _erp;
+        readonly IDistributedCache _cache;
 
         /// <summary>
         /// Constructor
         /// 构造函数
         /// </summary>
-        /// <param name="db">Database EF</param>
+        /// <param name="dbFactory">Database context factory</param>
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="orgService">Organization service</param>
         /// <param name="queueService">Queue service</param>
-        public DocumentService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<DocumentService> logger,
-            IOrgService orgService, IQueueService queueService)
+        public DocumentService(IDbContextFactory<MyDbContext> dbFactory, IMyApp app, CurrentUserAccessor userAccessor, ILogger<DocumentService> logger,
+            IOrgService orgService, IQueueService queueService, ISmartERPCoordinator erp, IDistributedCache cache)
             : base(app, userAccessor.UserSafe, "document", logger)
         {
-            _db = db;
+            _dbFactory = dbFactory;
             _orgService = orgService;
             _queueService = queueService;
+            _erp = erp;
+            _cache = cache;
         }
 
         /// <summary>
@@ -78,6 +88,8 @@ namespace Platform.Server.Services
                 Cultures = rq.Cultures?.ToList()
             };
 
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             _db.CoreDocuments.Add(document);
 
             // Save changes
@@ -105,6 +117,8 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             var doc = await _db.CoreDocuments.AsNoTracking()
                 .Where(d => d.Id == id)
                 .Select(d => new { d.CoreOrganizationId, d.Title })
@@ -146,6 +160,130 @@ namespace Platform.Server.Services
             return ActionResult.Succeed(id);
         }
 
+        string GetDocumentCacheKey(long id)
+        {
+            return $"{nameof(DocumentService)}:{id}";
+        }
+
+        public async Task<(IActionResult, string?)> GenerateAsync(DocumentGenerateRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Validate the action
+            var actionResult = await _erp.ValidateActionAsync(rq.Action, cancellationToken);
+            if (!actionResult.Ok)
+            {
+                return (actionResult, null);
+            }
+
+            var id = rq.Id;
+            var culture = rq.Culture ?? User.Language.Name;
+            var targetId = rq.Action.TargetId;
+
+            if (id < 1)
+            {
+                // System document
+                var template = DocumentTemplateUtils.GetTemplate(id);
+                if (template == null)
+                {
+                    return (ApplicationErrors.NoId.AsResult(), null);
+                }
+
+                var model = await template.Data(_dbFactory, targetId, rq.Data, User, cancellationToken);
+                if (model == null || model is not IDocumentTemplateData tData)
+                {
+                    return (ApplicationErrors.NoId.AsResult(nameof(rq.Action.TargetId)), null);
+                }
+
+                var formattedPath = TemplateUtils.FormatCulture(template.Template, culture);
+
+                var content = await TemplateUtils.BuildAsync(formattedPath, model);
+
+                // Push message
+                var title = $"{template.Subject} - {tData.TargetName}";
+                var message = new GenerateDocumentMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, title),
+                    Culture = culture,
+                    TargetId = targetId,
+                    TargetName = tData.TargetName,
+                    Parameters = rq.Data.Count > 0 ? JsonSerializer.Serialize(rq.Data, CommonJsonSerializerContext.Default.StringKeyDictionaryObject) : null
+                };
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.GenerateDocumentMessage, cancellationToken);
+
+                return (ActionResult.Success, content);
+            }
+            else
+            {
+                var orgId = User.OrganizationInt;
+
+                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
+                var doc = await _db.CoreDocuments.AsNoTracking()
+                    .Where(d => d.Id == id && d.CoreOrganizationId == orgId)
+                    .Select(d => new { d.Kind, d.Title, d.Template })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (doc == null)
+                {
+                    return (ApplicationErrors.NoId.AsResult(), null);
+                }
+
+                var kind = doc.Kind;
+                var title = doc.Title;
+                var template = doc.Template;
+
+                var model = await DocumentTemplateUtils.GetTemplateModelAsync(_dbFactory, rq.Data, kind, targetId, User, cancellationToken);
+                if (model == null || model is not IDocumentTemplateData tData)
+                {
+                    return (ApplicationErrors.NoId.AsResult(nameof(rq.Action.TargetId)), null);
+                }
+
+                var cacheKey = GetDocumentCacheKey(id);
+                if (rq.NoCache is true)
+                {
+                    await _cache.RemoveAsync(cacheKey, cancellationToken);
+                }
+
+                var bytes = await _cache.GetOrCreateAsync(cacheKey, async (options) =>
+                {
+                    // Cache 30 mins
+                    // 缓存30分钟
+                    options.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+
+                    var razorEngine = new RazorEngine();
+
+                    var meta = razorEngine.CompileMeta<object>(template);
+
+                    await using var memoryStream = new MemoryStream();
+                    await meta.WriteAsync(memoryStream);
+
+                    return memoryStream.ToArray();
+                }, cancellationToken);
+
+                if (bytes == null)
+                {
+                    return (ApplicationErrors.NoValidData.AsResult(), null);
+                }
+
+                var compiledTemplate = await RazorEngineCompiledTemplate<object>.LoadFromStreamAsync(SharedUtils.GetStream(bytes));
+
+                var content = await compiledTemplate.RunAsync(model);
+
+                // Push message
+                var messageTitle = $"{title} - {tData.TargetName}";
+                var message = new GenerateDocumentMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, messageTitle),
+                    Culture = culture,
+                    TargetId = targetId,
+                    TargetName = tData.TargetName,
+                    Parameters = rq.Data.Count > 0 ? JsonSerializer.Serialize(rq.Data, CommonJsonSerializerContext.Default.StringKeyDictionaryObject) : null
+                };
+                await _queueService.PushAsync(message, PlatformSharedContext.Default.GenerateDocumentMessage, cancellationToken);
+
+                return (ActionResult.Success, content);
+            }
+        }
+
         /// <summary>
         /// List
         /// 列表
@@ -156,6 +294,8 @@ namespace Platform.Server.Services
         public async Task<DocumentListData[]> ListAsync(DocumentListRQ rq, CancellationToken cancellationToken = default)
         {
             var kind = rq.Kind;
+
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
             var items = await _db.CoreDocuments.AsNoTracking()
                 .Where(t => t.Kind == kind)
@@ -226,6 +366,8 @@ namespace Platform.Server.Services
             }
 
             var orgId = rq.OrgId;
+
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
             return await _db.CoreDocuments.AsNoTracking()
                 .QueryEtsoo(rq, (d) => d.Id, null, (q) =>
@@ -305,11 +447,13 @@ namespace Platform.Server.Services
         /// <param name="id">Id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public Task<DocumentReadData?> ReadAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<DocumentReadData?> ReadAsync(int id, CancellationToken cancellationToken = default)
         {
             var orgId = User.OrganizationInt;
 
-            return _db.CoreDocuments.AsNoTracking()
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
+            return await _db.CoreDocuments.AsNoTracking()
                 .Where(d => d.Id == id && (d.CoreOrganizationId == null || d.CoreOrganizationId == orgId))
                 .Select(d => new DocumentReadData
                 {
@@ -341,11 +485,17 @@ namespace Platform.Server.Services
                 return orgCheck;
             }
 
-            var document = await _db.CoreDocuments.FirstOrDefaultAsync(d => d.Id == rq.Id, cancellationToken);
+            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
+            var id = rq.Id;
+            var document = await _db.CoreDocuments.FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
             if (document == null)
             {
                 return ApplicationErrors.NoId.AsResult();
             }
+
+            // Remove cache
+            var removeCache = false;
 
             // Check org
             var orgId = document.CoreOrganizationId;
@@ -369,6 +519,7 @@ namespace Platform.Server.Services
 
             if (rq.IsModified(nameof(rq.Kind)) && rq.Kind != null)
             {
+                removeCache = true;
                 document.Kind = rq.Kind.ToUpper();
             }
 
@@ -384,6 +535,7 @@ namespace Platform.Server.Services
 
             if (rq.IsModified(nameof(rq.Template)) && rq.Template != null)
             {
+                removeCache = true;
                 document.Template = rq.Template;
             }
 
@@ -409,7 +561,9 @@ namespace Platform.Server.Services
             };
             var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateDocumentMessage, cancellationToken);
 
-            await Task.WhenAll(task1, task2);
+            var task3 = removeCache ? _cache.RemoveAsync(GetDocumentCacheKey(id), cancellationToken) : Task.CompletedTask;
+
+            await Task.WhenAll(task1, task2, task3);
 
             // Return
             return ActionResult.Succeed(rq.Id);

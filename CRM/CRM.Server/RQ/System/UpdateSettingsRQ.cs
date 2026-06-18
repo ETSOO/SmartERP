@@ -1,5 +1,11 @@
-﻿using com.etsoo.CoreFramework.Models;
+﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Models;
+using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Models;
+using com.etsoo.WebUtils.Attributes;
+using Json.Schema;
 using PlatformShared.Database.Models;
+using System.Text.RegularExpressions;
 
 namespace CRM.Server.RQ.System
 {
@@ -7,7 +13,7 @@ namespace CRM.Server.RQ.System
     /// Update settings request data
     /// 更新设置请求数据
     /// </summary>
-    public record UpdateSettingsRQ : UpdateModel
+    public record UpdateSettingsRQ : UpdateModel, IModelValidator
     {
         /// <summary>
         /// Main customer type
@@ -44,5 +50,32 @@ namespace CRM.Server.RQ.System
         /// 默认税率
         /// </summary>
         public decimal? TaxRate { get; init; }
+
+        /// <summary>
+        /// Whether order monthly report enabled
+        /// 订单月报是否启用
+        /// </summary>
+        public bool? OrderMonthlyReportEnabled { get; init; }
+
+        /// <summary>
+        /// Order daily report start hour, 0-23
+        /// 订单日报开始小时
+        /// </summary>
+        public short? OrderDailyReportHour { get; init; }
+
+        /// <summary>
+        /// Validate the model
+        /// 验证模块
+        /// </summary>
+        /// <returns>Result</returns>
+        public IActionResult? Validate()
+        {
+            if (OrderDailyReportHour.HasValue && OrderDailyReportHour.Value is not (>= 0 and <= 23))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(OrderDailyReportHour));
+            }
+
+            return null;
+        }
     }
 }

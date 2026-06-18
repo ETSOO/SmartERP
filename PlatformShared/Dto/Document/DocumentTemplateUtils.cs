@@ -17,7 +17,7 @@ namespace PlatformShared.Dto.Document
     /// </summary>
     public static class DocumentTemplateUtils
     {
-        private const int OrgCacheMinutes = 5;
+        private const int CacheMinutes = 2;
         private static readonly MemoryCache cache = new(new MemoryCacheOptions());
 
         private static readonly FrozenDictionary<int, SystemTemplateItem> systemTemplates = new Dictionary<int, SystemTemplateItem>
@@ -27,14 +27,14 @@ namespace PlatformShared.Dto.Document
                 Kind = DocumentKind.CmsOrderData,
                 Subject = "OrderStandardContract",
                 Template = "Order/StandardContract_{culture}",
-                Data = (dbFactory, id, dic, user, cancellationToken) => CreateOrderViewAsync(dbFactory, id, dic, user, cancellationToken)
+                Data = (dbFactory, id, dic, user, cancellationToken) => CreateOrderViewObjectAsync(dbFactory, id, dic, user, cancellationToken)
             },
             [-2] = new SystemTemplateItem
             {
                 Kind = DocumentKind.CmsOrderData,
                 Subject = "OrderProductList",
                 Template = "Order/ProductList_{culture}",
-                Data = (dbFactory, id, dic, user, cancellationToken) => CreateOrderViewAsync(dbFactory, id, dic, user, cancellationToken)
+                Data = (dbFactory, id, dic, user, cancellationToken) => CreateOrderViewObjectAsync(dbFactory, id, dic, user, cancellationToken)
             }
         }.ToFrozenDictionary();
 
@@ -65,7 +65,7 @@ namespace PlatformShared.Dto.Document
             var cacheKey = $"{nameof(CreateOrgCulturesAsync)}:{orgId}:{culture}";
             return cache.GetOrCreateAsync(cacheKey, async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(OrgCacheMinutes);
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(CacheMinutes));
 
                 await using var db = await dbFactory.CreateDbContextAsync(cancellationToken);
 
@@ -88,6 +88,122 @@ namespace PlatformShared.Dto.Document
         }
 
         /// <summary>
+        /// Create order view data
+        /// 创建订单视图数据
+        /// </summary>
+        /// <param name="dbFactory">Database context factory</param>
+        /// <param name="orderId">Order id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static Task<OrderViewData?> CreateOrderDataAsync(IDbContextFactory<MyDbContext> dbFactory, long orderId, CurrentUser user, CancellationToken cancellationToken = default)
+        {
+            var cacheKey = $"{nameof(CreateOrderDataAsync)}:{orderId}";
+
+            return cache.GetOrCreateAsync(cacheKey, async entry =>
+            {
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(CacheMinutes));
+
+                var orgId = user.OrganizationInt;
+
+                var orderDb = await dbFactory.CreateDbContextAsync(cancellationToken);
+                var order = await orderDb.Orders(orgId).AsNoTracking()
+                    .Where(o => o.Id == orderId)
+                    .Select(o => new OrderViewData
+                    {
+                        Id = orderId,
+                        Source = o.Source,
+                        SourceId = o.SourceId,
+                        AssignedId = o.AssignedId,
+                        Title = o.Title,
+                        Description = o.Description,
+                        StartDate = o.StartDate,
+                        EndDate = o.EndDate,
+                        Currency = o.Currency,
+                        Amount = o.Amount,
+                        PaidAmount = o.PaidAmount,
+                        Discount = o.Discount,
+                        LineDiscount = o.LineDiscount,
+                        ApprovedDiscount = o.ApprovedDiscount,
+                        TaxAmount = o.TaxAmount,
+                        Lines = o.Lines,
+                        Items = o.Items,
+                        Promotions = o.Promotions == null ? Array.Empty<PromotionSaleItem>() : o.Promotions.ToArray(),
+                        Culture = o.Culture,
+                        Payment = o.Payment == null ? null : o.Payment.Title,
+                        PaymentKind = o.Payment == null ? null : o.Payment.Kind,
+                        PaymentInstruction = o.PaymentInstruction,
+                        Delivery = o.Delivery == null ? null : o.Delivery.Title,
+                        DeliveryKind = o.Delivery == null ? null : o.Delivery.Kind,
+                        DeliveryInstruction = o.DeliveryInstruction,
+                        AddressFormatted = o.AddressFormatted,
+                        Contact = o.Contact == null ? null : o.Contact.Name,
+                        ContactId = o.ContactId,
+                        User = o.User.Name,
+                        UserId = o.UserId,
+                        Creation = o.Creation,
+                        Status = o.Status,
+                        Tags = o.Tags == null ? null : orderDb.FeatureTags.Where(k => k.CoreOrganizationId == orgId && o.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+
+                        Customer = new OrderCustomerData
+                        {
+                            Id = o.BuyerId,
+                            IsLegalPerson = o.Buyer.IsLegalPerson,
+                            Name = o.Buyer.Name,
+                            PreferredName = o.Buyer.PreferredName,
+                            AssignedId = o.Buyer.AssignedId,
+                            Description = o.Buyer.Description,
+                            Birthday = o.Buyer.Birthday,
+                            Categories = o.Buyer.CategoryIds,
+                            Infos = o.Buyer.Infos
+                                .Where(i => i.PersonId == o.Buyer.Id)
+                                .Select(i => new PersonInfoViewItem
+                                {
+                                    Kind = i.Kind,
+                                    Identifier = MyDbFunctions.HideData(i.Identifier, default),
+                                    IsDefault = i.IsDefault,
+                                    IsVerified = i.IsVerified ?? false
+                                })
+                                .ToList()
+                        },
+
+                        OrderLines = o.OrderLines.Select(l => new OrderLineViewData
+                        {
+                            Id = l.Id,
+                            ProductId = l.ProductId,
+                            ProductName = l.Product.Name,
+                            ProductAssignedId = l.Product.AssignedId,
+                            ProductDescription = l.Product.Description,
+                            ProductLogo = l.Product.Logo,
+                            UnitName = l.Product.Unit.Name,
+                            BaseUnit = l.Product.Unit.BaseUnit,
+                            Title = l.Title,
+                            Description = l.Description,
+                            OriginalPrice = l.OriginalPrice,
+                            CostPrice = l.CostPrice,
+                            Price = l.Price,
+                            Qty = l.Qty,
+                            QtyDelivered = l.QtyDelivered ?? 0,
+                            AssetQty = l.AssetQty,
+                            Amount = l.Amount,
+                            Discount = l.Discount,
+                            Promotions = l.Promotions == null ? Array.Empty<PromotionSaleItem>() : l.Promotions.ToArray(),
+                            StartTime = l.StartTime,
+                            EndTime = l.EndTime,
+                            AssetId = l.AssetId,
+                            AssetSn = l.Asset == null ? null : l.Asset.Sn,
+                            Status = l.Status,
+                            Creation = l.Creation,
+                            BomId = l.BomId,
+                            BomTitle = l.Bom == null ? null : l.Bom.Title
+                        }).ToArray()
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                return order;
+            });
+        }
+
+        /// <summary>
         /// Create organization view data
         /// 创建组织视图数据
         /// </summary>
@@ -102,7 +218,7 @@ namespace PlatformShared.Dto.Document
 
             return cache.GetOrCreateAsync(cacheKey, async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(OrgCacheMinutes);
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(CacheMinutes));
 
                 if (personId < 1)
                 {
@@ -182,16 +298,26 @@ namespace PlatformShared.Dto.Document
         /// <param name="user">Current user</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public static async Task<object?> CreateOrderViewAsync(IDbContextFactory<MyDbContext> dbFactory, long id, StringKeyDictionaryObject dic, CurrentUser user, CancellationToken cancellationToken = default)
+        public static async Task<OrderTemplateData?> CreateOrderViewAsync(IDbContextFactory<MyDbContext> dbFactory, long id, StringKeyDictionaryObject dic, CurrentUser user, CancellationToken cancellationToken = default)
         {
             var org = await CreateOrgDataAsync(dbFactory, user, cancellationToken);
             if (org == null) return null;
 
+            var order = await CreateOrderDataAsync(dbFactory, id, user, cancellationToken);
+            if (order == null) return null;
+
             return new OrderTemplateData
             {
                 Subject = dic.Get(nameof(OrderTemplateData.Subject)),
-                Org = org
+                Org = org,
+                Order = order,
+                Dic = dic
             };
+        }
+
+        static async Task<object?> CreateOrderViewObjectAsync(IDbContextFactory<MyDbContext> dbFactory, long id, StringKeyDictionaryObject dic, CurrentUser user, CancellationToken cancellationToken = default)
+        {
+            return await CreateOrderViewAsync(dbFactory, id, dic, user, cancellationToken);
         }
 
         /// <summary>
@@ -208,7 +334,7 @@ namespace PlatformShared.Dto.Document
 
             return cache.GetOrCreateAsync(cacheKey, async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(OrgCacheMinutes);
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10 * CacheMinutes);
 
                 await using var db = await dbFactory.CreateDbContextAsync(cancellationToken);
 
@@ -233,7 +359,7 @@ namespace PlatformShared.Dto.Document
 
             return cache.GetOrCreateAsync(cacheKey, async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(OrgCacheMinutes);
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(CacheMinutes));
 
                 await using var db = await dbFactory.CreateDbContextAsync(cancellationToken);
 
@@ -262,8 +388,8 @@ namespace PlatformShared.Dto.Document
 
             return cache.GetOrCreateAsync(cacheKey, async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(OrgCacheMinutes);
-                
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(CacheMinutes));
+
                 var reportTo = await GetPersonReportToIdAsync(dbFactory, personId, cancellationToken);
 
                 var ids = new List<long> { personId };
@@ -294,6 +420,40 @@ namespace PlatformShared.Dto.Document
                 Title = getLabel(t.Value.Subject),
                 Parameters = t.Value.Parameters
             });
+        }
+
+        /// <summary>
+        /// Get template by id
+        /// 通过编号获取模板
+        /// </summary>
+        /// <param name="id">Template id</param>
+        /// <returns>Result</returns>
+        public static SystemTemplateItem? GetTemplate(int id)
+        {
+            systemTemplates.TryGetValue(id, out var item);
+            return item;
+        }
+
+        /// <summary>
+        /// Get template model
+        /// 获取模板模型
+        /// </summary>
+        /// <param name="dbFactory">Database context factory</param>
+        /// <param name="dic">Dictionary</param>
+        /// <param name="kind">Template kind</param>
+        /// <param name="targetId">Target id</param>
+        /// <param name="user">User</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Result</returns>
+        public static async Task<object?> GetTemplateModelAsync(IDbContextFactory<MyDbContext> dbFactory, StringKeyDictionaryObject dic, string kind, long targetId, CurrentUser user, CancellationToken cancellationToken = default)
+        {
+            object? model = kind switch
+            {
+                DocumentKind.CmsOrderData => await CreateOrderViewObjectAsync(dbFactory, targetId, dic, user, cancellationToken),
+                _ => null
+            };
+
+            return model;
         }
     }
 }

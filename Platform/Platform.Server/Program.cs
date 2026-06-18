@@ -131,17 +131,20 @@ if (string.IsNullOrEmpty(logConnectionString))
     throw new Exception("SmartERPLog connection string not found");
 }
 
-// services.AddDbContextPool
-services.AddDbContext<MyDbContext>((provider, options) =>
+void OptionsAction(IServiceProvider provider, DbContextOptionsBuilder options)
 {
     options.UseNpgsql(connectonString);
 
-    if (isDevelopment)
+    if (builder.Environment.IsDevelopment())
     {
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-});
+}
+
+// services.AddDbContextPool
+services.AddDbContext<MyDbContext>(OptionsAction);
+services.AddPooledDbContextFactory<MyDbContext>(OptionsAction);
 
 services.AddDbContext<LogDbContext>((provider, options) =>
 {

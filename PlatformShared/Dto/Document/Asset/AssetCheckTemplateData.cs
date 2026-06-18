@@ -4,7 +4,7 @@
     /// Asset check template data
     /// 资产检查模板数据
     /// </summary>
-    public record AssetCheckTemplateData
+    public record AssetCheckTemplateData : IDocumentTemplateData
     {
         /// <summary>
         /// Subject
@@ -23,5 +23,11 @@
         /// 资产检查数据
         /// </summary>
         public required AssetCheckData Asset { get; init; }
+
+        /// <summary>
+        /// Target name
+        /// 目标对象名称
+        /// </summary>
+        public string TargetName => Asset.Sn;
     }
 }
