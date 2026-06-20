@@ -81,6 +81,7 @@ void OptionsAction(IServiceProvider provider, DbContextOptionsBuilder options)
 services.AddDbContext<MyDbContext>(OptionsAction, ServiceLifetime.Singleton);
 
 // Support DbContextFactory for multi-threaded scenarios, such as in background services or parallel processing
+// It will also inject DbContext in scoped services
 services.AddPooledDbContextFactory<MyDbContext>(OptionsAction);
 
 services.AddDbContext<LogDbContext>((provider, options) =>

@@ -1,9 +1,16 @@
 import React from "react";
-import { HBox, MUGlobal, VBox } from "@etsoo/materialui";
+import {
+  ButtonLink,
+  HBox,
+  IconButtonLink,
+  MUGlobal,
+  VBox
+} from "@etsoo/materialui";
 import logo from "./../images/etsoo.png";
 import { app } from "../app/SmartApp";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import HomeIcon from "@mui/icons-material/Home";
 
 /**
  * Shared layout props
@@ -45,6 +52,11 @@ export type SharedLayoutProps = {
   bottomAdd?: React.ReactNode;
 
   /**
+   * Home URL
+   */
+  homeUrl?: string;
+
+  /**
    * Title
    */
   title: React.ReactNode;
@@ -80,6 +92,7 @@ export function SharedLayout(props: SharedLayoutProps) {
     children,
     bottom,
     bottomAdd,
+    homeUrl,
     title,
     subTitle,
     visible = true,
@@ -89,17 +102,25 @@ export function SharedLayout(props: SharedLayoutProps) {
   // Culture context
   const Context = app.cultureState.context;
 
+  if (homeUrl && Array.isArray(buttons) && buttons.length === 0) {
+    buttons.push(
+      <ButtonLink key="home" href={homeUrl}>
+        {app.get("home")}
+      </ButtonLink>
+    );
+  }
+
   React.useEffect(() => {
     if (liveMinutes > 0) {
       const timer = setTimeout(() => {
-        app.navigate("./../");
+        app.navigate(homeUrl ?? "./../../");
       }, liveMinutes * 60000);
 
       return () => {
         clearTimeout(timer);
       };
     }
-  }, [liveMinutes]);
+  }, [liveMinutes, homeUrl]);
 
   return (
     <React.Fragment>
@@ -171,6 +192,11 @@ export function SharedLayout(props: SharedLayoutProps) {
             >
               <Typography variant="h5">{title}</Typography>
               {pageRight}
+              {homeUrl ? (
+                <IconButtonLink href={homeUrl} title={app.get("home")}>
+                  <HomeIcon />
+                </IconButtonLink>
+              ) : undefined}
             </HBox>
             {subTitle &&
               (typeof subTitle === "string" ? (

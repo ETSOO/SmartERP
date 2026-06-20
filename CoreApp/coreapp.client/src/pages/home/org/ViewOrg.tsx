@@ -143,6 +143,7 @@ export default function ViewOrg() {
           data: (item) => app.getStatusLabel(item.userStatus),
           label: "userStatus"
         },
+        "timeZone",
         ["userExpiry", GridDataType.DateTime],
         ["creation", GridDataType.DateTime]
       ]}

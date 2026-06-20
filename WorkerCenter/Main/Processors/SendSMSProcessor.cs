@@ -38,10 +38,6 @@ namespace WorkerCenter.Main.Processors
                 throw new ArgumentException("Invalid SMS message kind");
             }
 
-            // Template
-            var template = _smsClient.GetTemplate(kind.Value, region: message.Region, language: message.Culture)
-                ?? throw new ArgumentException("Invalid SMS template");
-
             // Send
             if (!message.To.Any())
             {
@@ -54,7 +50,7 @@ namespace WorkerCenter.Main.Processors
             {
                 foreach (var phone in phones)
                 {
-                    var result = await _smsClient.SendCodeAsync(phone, message.Body, template, cancellationToken);
+                    var result = await _smsClient.SendCodeAsync(phone, message.Body, (TemplateItem?)null, cancellationToken);
                     if (!result.Ok)
                     {
                         // Log

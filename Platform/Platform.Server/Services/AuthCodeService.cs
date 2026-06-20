@@ -188,6 +188,9 @@ namespace Platform.Server.Services
             // Auth code
             var authCode = CreateAuthCode(action, email, out var code);
 
+            // Store the JSON data
+            authCode.Data = additionalData?.Json;
+
             // Time zone
             var tz = TimeZoneUtils.GetTimeZone(data.TimeZone);
 
@@ -358,7 +361,15 @@ namespace Platform.Server.Services
             return result;
         }
 
-        private string HashAuthCode(AuthCodeAction id, string code, DateTime expiry)
+        /// <summary>
+        /// Hash authorization code
+        /// 哈希授权码
+        /// </summary>
+        /// <param name="id">Action id</param>
+        /// <param name="code">Source code</param>
+        /// <param name="expiry">Expiry</param>
+        /// <returns>Result</returns>
+        public string HashAuthCode(AuthCodeAction id, string code, DateTime expiry)
         {
             return App.HashPassword($"{(short)id}-{code}-{expiry.ToBinary()}");
         }

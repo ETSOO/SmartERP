@@ -10,6 +10,7 @@ namespace Platform.Server.Services
     public interface IAuthCodeService : ICommonService
     {
         (IActionResult result, ValidateCodeData? data) CreateValidateCodeData(CodeValidateRQ rq, string? userAgent);
+        string HashAuthCode(AuthCodeAction id, string code, DateTime expiry);
         Task<ValidateResultData?> ReadAsync(Guid id, AuthCodeAction action, CancellationToken cancellationToken = default);
 
         ValueTask<IActionResult> SendEmailAsync(EmailCodeRQ rq, string? userAgent, CancellationToken cancellationToken = default);

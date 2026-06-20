@@ -42,5 +42,11 @@ namespace Platform.Server.Application
         /// </summary>
         [Url]
         public string CoreAppAuthApiUrl { get; set; } = default!;
+
+        /// <summary>
+        /// Simple registration (email or mobile)
+        /// 简洁注册（邮箱或者手机号注册）
+        /// </summary>
+        public bool SimpleRegistration { get; set; }
     }
 }

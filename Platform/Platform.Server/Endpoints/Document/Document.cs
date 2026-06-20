@@ -21,6 +21,19 @@ namespace Platform.Server.Endpoints.Document
             g.MapDelete("Delete/{id:int}", [Roles(Constants.AdminRoles)] (IDocumentService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete document / 删除文档").WithTags("Document");
 
+            g.MapPost("Generate", async (IDocumentService service, DocumentGenerateRQ rq, CancellationToken cancellationToken) =>
+            {
+                var (result, content) = await service.GenerateAsync(rq, cancellationToken);
+                if (!string.IsNullOrEmpty(content))
+                {
+                    return Results.Content(content, "text/html");
+                }
+                else
+                {
+                    return Results.Json(result);
+                }
+            }).WithDescription("Gene / 文档列表数据").WithTags("Document");
+
             g.MapPost("List", (IDocumentService service, DocumentListRQ rq, CancellationToken cancellationToken) => service.ListAsync(rq, cancellationToken))
                 .WithDescription("List document data / 文档列表数据").WithTags("Document");
 

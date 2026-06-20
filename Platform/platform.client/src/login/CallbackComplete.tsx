@@ -104,6 +104,7 @@ export default function CallbackComplete() {
     <SharedLayout
       title={labels.createPassword}
       subTitle={<Typography variant="subtitle2">{id}</Typography>}
+      homeUrl={"./../../../"}
       buttons={[
         <Button variant="contained" key="next" onClick={submitClick}>
           {labels.submit}

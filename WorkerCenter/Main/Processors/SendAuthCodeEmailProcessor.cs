@@ -1,5 +1,6 @@
 ﻿using com.etsoo.ApiModel;
 using com.etsoo.ApiModel.Dto.SmartERP.MessageQueue;
+using com.etsoo.Localization;
 using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using PlatformShared;
@@ -31,9 +32,15 @@ namespace WorkerCenter.Main.Processors
             var template = model.Action.Template;
             if (!string.IsNullOrEmpty(template))
             {
-                template = TemplateUtils.FormatCulture(template, model.Language);
+                var culture = model.Language;
+
+                var ci = LocalizationUtils.SetCulture(culture, true);
+                Properties.Resources.Culture = ci;
+
+                template = TemplateUtils.FormatCulture(template, culture);
 
                 string body;
+                string? subject;
                 if (contentType == nameof(AuthCodeMemberInvitationData))
                 {
                     // Distinguish different data types by ContentType
@@ -42,15 +49,18 @@ namespace WorkerCenter.Main.Processors
 
                     var data = JsonSerializer.Deserialize(jsonData, PlatformSharedContext.Default.AuthCodeMemberInvitationData) ?? throw new ArgumentNullException(nameof(model.Data));
 
-                    body = await TemplateUtils.BuildAsync(template, new InvitationAuthCodeEmailTemplateView(model, data));
+                    var newModel = new InvitationAuthCodeEmailTemplateView(model, data);
+                    body = await TemplateUtils.BuildAsync(template, newModel);
+                    subject = newModel.Subject;
                 }
                 else
                 {
                     body = await TemplateUtils.BuildAsync(template, model);
+                    subject = model.Subject;
                 }
 
                 var labelId = model.Action.Id.ToString();
-                var subject = model.Subject ?? Properties.Resources.ResourceManager.GetString(labelId) ?? labelId;
+                subject ??= Properties.Resources.ResourceManager.GetString(labelId) ?? labelId;
 
                 // Send email
                 var inviteeeEmail = new SendEmailMessage

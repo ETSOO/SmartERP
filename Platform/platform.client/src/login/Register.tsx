@@ -2,7 +2,7 @@ import React from "react";
 import { HBox, LoadingButton } from "@etsoo/materialui";
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AppUtils } from "../app/AppUtils";
 import { useSearchParamsEx } from "@etsoo/react";
 import Button from "@mui/material/Button";
@@ -44,14 +44,7 @@ export function Register() {
   }, [authType]);
 
   return (
-    <SharedLayout
-      title={labels.register}
-      buttons={[
-        <Button variant="outlined" component={Link} key="back" to={"./../../"}>
-          {labels.back}
-        </Button>
-      ]}
-    >
+    <SharedLayout title={labels.register} homeUrl="./../../">
       <HBox>
         <Button
           variant="contained"

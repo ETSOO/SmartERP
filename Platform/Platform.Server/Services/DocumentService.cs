@@ -165,6 +165,13 @@ namespace Platform.Server.Services
             return $"{nameof(DocumentService)}:{id}";
         }
 
+        /// <summary>
+        /// Generate document
+        /// 输出业务文档
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
         public async Task<(IActionResult, string?)> GenerateAsync(DocumentGenerateRQ rq, CancellationToken cancellationToken = default)
         {
             // Validate the action

@@ -42,6 +42,12 @@ export type ReadOrgData = {
   region: string;
 
   /**
+   * Time zone
+   * 时区
+   */
+  timeZone: string;
+
+  /**
    * PIN
    */
   pin?: string;

@@ -2,6 +2,7 @@
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
+using System.Collections.Concurrent;
 
 namespace WorkerCMS.Processors.Order
 {

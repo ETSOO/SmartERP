@@ -13,6 +13,8 @@ import { AuthCodeAction } from "@etsoo/smarterp-core";
 import { UserIdentifierType } from "@etsoo/appscript";
 import { DataTypes } from "@etsoo/shared";
 
+const homeUrl = "./../../";
+
 export default function Register20() {
   // Navigate
   const navigate = useNavigate();
@@ -130,12 +132,15 @@ export default function Register20() {
     }
   };
 
+  // Allow register without email verification
+  /*
   React.useEffect(() => {
     // Check authorized
     if (!app.registrationAuthorized) {
-      navigate("./../../");
+      navigate(homeUrl);
     }
   }, [app.registrationAuthorized]);
+  */
 
   React.useEffect(() => {
     // Focus
@@ -146,6 +151,7 @@ export default function Register20() {
   return (
     <SharedLayout
       title={labels.verifyMobileNumber}
+      homeUrl={homeUrl}
       buttons={[
         <LoadingButton variant="contained" key="next" onClick={nextClick}>
           {labels.nextStep}

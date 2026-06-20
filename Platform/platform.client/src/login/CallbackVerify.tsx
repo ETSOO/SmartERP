@@ -134,6 +134,7 @@ export default function RegisterVerify() {
     <SharedLayout
       title={labels.verification}
       subTitle={<Typography variant="subtitle2">{enterCodeTip}</Typography>}
+      homeUrl={"./../../../"}
       buttons={[
         <CountdownButton
           variant="outlined"

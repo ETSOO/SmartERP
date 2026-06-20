@@ -562,6 +562,7 @@ namespace Admin.Server.Services
                     o.ParentId,
                     ParentName = o.Parent == null ? null : o.Parent.Name,
                     o.Region,
+                    o.TimeZone,
                     o.Status,
                     o.Creation,
 

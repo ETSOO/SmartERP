@@ -9,6 +9,7 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Messages;
+using System.Collections;
 
 namespace PlatformShared.Extentions
 {
@@ -58,6 +59,25 @@ namespace PlatformShared.Extentions
                 .CountAsync(cancellationToken);
 
             return count == ids.Count();
+        }
+
+        /// <summary>
+        /// Check user person ids
+        /// 检查用户人员编号
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id</param>
+        /// <param name="userIds">User ids</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static async Task<long?[]> CheckUserPersonIdsAsync(this MyDbContext db, int orgId, IEnumerable<int> userIds, CancellationToken cancellationToken = default)
+        {
+            var items = await db.Users(orgId).AsNoTracking()
+                .Where(u => userIds.Contains(u.CoreUserId!.Value))
+                .Select(u => new { u.Id, u.CoreUserId })
+                .ToArrayAsync(cancellationToken);
+
+            return [.. userIds.Select(u => items.FirstOrDefault(i => i.CoreUserId == u)?.Id)];
         }
 
         private static short GetBaseId(this short permissionId)

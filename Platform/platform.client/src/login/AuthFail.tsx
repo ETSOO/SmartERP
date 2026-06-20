@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { app } from "../app/SmartApp";
 import { SharedLayout } from "./SharedLayout";
 import { AppUtils } from "../app/AppUtils";
@@ -16,8 +16,11 @@ export default function AuthFail() {
     "back",
     "continueRegistration",
     "authFailContinue",
-    "authFailTip"
+    "authFailTip",
+    "home"
   );
+
+  const navigate = useNavigate();
 
   const { type, error, errorType, errorField } = useSearchParamsEx({
     type: "string",
@@ -52,16 +55,11 @@ export default function AuthFail() {
       buttons={
         error ? (
           <Button variant="outlined" component={Link} to="./../../">
-            {labels.back}
+            {labels.home}
           </Button>
         ) : (
           [
-            <Button
-              variant="outlined"
-              key="back"
-              component={Link}
-              to="./../../"
-            >
+            <Button variant="outlined" key="back" onClick={() => navigate(-1)}>
               {labels.back}
             </Button>,
             <Button

@@ -9,6 +9,8 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Utils } from "@etsoo/shared";
 
+const homeUrl = "./../../";
+
 export default function RegisterPassword() {
   // Router
   const navigate = useNavigate();
@@ -103,7 +105,7 @@ export default function RegisterPassword() {
     } else {
       app.alertResult(result, () => {
         // Back to home
-        navigate("./../../");
+        navigate(homeUrl);
       });
     }
   };
@@ -111,13 +113,14 @@ export default function RegisterPassword() {
   React.useEffect(() => {
     // Check authorized
     if (!app.registrationAuthorized) {
-      navigate("./../../");
+      navigate(homeUrl);
     }
   }, [app.registrationAuthorized]);
 
   return (
     <SharedLayout
       title={labels.createPassword}
+      homeUrl={homeUrl}
       buttons={[
         <Button variant="contained" key="next" onClick={completeClick}>
           {labels.completeRegistration}

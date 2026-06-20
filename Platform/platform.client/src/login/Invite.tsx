@@ -112,11 +112,15 @@ export default function Invite() {
       subTitle={subTitle}
       buttons={[
         data?.isAccepted ? (
-          <Button variant="contained" onClick={() => navigate("./../../")}>
+          <Button
+            key="done"
+            variant="contained"
+            onClick={() => navigate("./../../")}
+          >
             {labels.inviteMemberDone}
           </Button>
         ) : (
-          <></>
+          <React.Fragment key="none" />
         ),
         <Button
           key="submit"

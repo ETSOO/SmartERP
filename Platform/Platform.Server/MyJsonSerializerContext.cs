@@ -66,6 +66,7 @@ namespace Platform.Server
 
     // Document
     [JsonSerializable(typeof(DocumentCreateRQ))]
+    [JsonSerializable(typeof(DocumentGenerateRQ))]
     [JsonSerializable(typeof(DocumentListRQ))]
     [JsonSerializable(typeof(DocumentQueryRQ))]
     [JsonSerializable(typeof(DocumentUpdateRQ))]

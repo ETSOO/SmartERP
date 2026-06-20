@@ -9,6 +9,7 @@ namespace Platform.Server.Services
     {
         Task<IActionResult> CreateAsync(DocumentCreateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<(IActionResult, string?)> GenerateAsync(DocumentGenerateRQ rq, CancellationToken cancellationToken = default);
         Task<DocumentListData[]> ListAsync(DocumentListRQ rq, CancellationToken cancellationToken = default);
         Task<DocumentQueryData[]> QueryAsync(DocumentQueryRQ rq, CancellationToken cancellationToken = default);
         Task<DocumentReadData?> ReadAsync(int id, CancellationToken cancellationToken = default);

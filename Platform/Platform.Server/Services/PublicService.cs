@@ -13,6 +13,7 @@ using com.etsoo.Database.Converters;
 using com.etsoo.ImageUtils.Barcode;
 using com.etsoo.Localization;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.Crypto;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Serialization.Country;
 using com.etsoo.Utils.String;
@@ -31,6 +32,7 @@ using PlatformShared.Messages;
 using System.Globalization;
 using System.Text.Json;
 using System.Web;
+using static Google.Cloud.Iam.V1.AuditConfigDelta.Types;
 
 namespace Platform.Server.Services
 {
@@ -126,8 +128,16 @@ namespace Platform.Server.Services
 
             await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            var exists = await _db.Users(orgId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
-            if (!exists)
+            var personIds = await _db.CheckUserPersonIdsAsync(orgId, [userId, inviterId], cancellationToken);
+            var userPersonId = personIds[0];
+            var inviterPersonId = personIds[1];
+
+            if (inviterPersonId == null)
+            {
+                return ApplicationErrors.NoValidData.AsResult("InviterPersonId");
+            }
+
+            if (userPersonId == null)
             {
                 _db.Persons.Add(new Person
                 {
@@ -140,7 +150,7 @@ namespace Platform.Server.Services
                     IdentityType = IdentityTypeFlags.User,
                     QueryKeyword = ChineseUtils.GetPinyin(User.Name, true).ToInitials(),
                     InviterId = inviterId,
-                    UserId = User.Oid
+                    UserId = inviterPersonId.Value // User.Oid is a user's person id in a specific organization
                 });
 
                 var user = await _db.CoreUsers.Where(u => u.Id == userId)
@@ -602,16 +612,21 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<MemberInvitationData?> ReadInvitationAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var code = await _authCodeService.ReadAsync(id, AuthCodeAction.MemberInvitationEmailCode, cancellationToken);
-            if (code == null) return null;
+            var action = AuthCodeAction.MemberInvitationEmailCode;
 
-            var data = code.DeserializeData(PlatformSharedContext.Default.AuthCodeMemberInvitationData);
+            var actionItem = AuthCodeActionItem.Actions.FirstOrDefault(a => a.Id == action);
+            if (actionItem == null) return null;
+
+            var auth = await _authCodeService.ReadAsync(id, action, cancellationToken);
+            if (auth == null) return null;
+
+            var data = auth.DeserializeData(PlatformSharedContext.Default.AuthCodeMemberInvitationData);
             if (data == null) return null;
 
             await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
             var userId = await _db.CoreUserIdentifiers.Where(ui => ui.Type == CoreUserIdentifierType.Email
-                && ui.Value == code.OpenId
+                && ui.Value == auth.OpenId
                 && ui.CoreUser.Step == 0)
             .Select(ui => ui.CoreUserId).FirstOrDefaultAsync(cancellationToken);
 
@@ -625,10 +640,10 @@ namespace Platform.Server.Services
 
             return new MemberInvitationData
             {
-                Email = EncryptWeb(code.OpenId, id.ToString()[..4]),
+                Email = EncryptWeb(auth.OpenId, id.ToString()[..4]),
                 Inviter = StringUtils.HideData(data.UserData.Name),
                 OrgName = data.UserData.OrganizationName,
-                IsExpired = code.Expiry < DateTime.UtcNow,
+                IsExpired = auth.Expiry < DateTime.UtcNow,
                 IsAccepted = isAccepted,
                 UserExists = userExists
             };

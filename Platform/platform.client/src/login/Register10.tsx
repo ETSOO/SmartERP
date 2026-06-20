@@ -7,7 +7,7 @@ import {
 } from "@etsoo/materialui";
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSearchParamsEx } from "@etsoo/react";
 import { AuthCodeAction } from "@etsoo/smarterp-core";
 import Button from "@mui/material/Button";
@@ -33,6 +33,7 @@ export default function Register20() {
     "oneTimePin",
     "oneTimePinEmailTip",
     "resending",
+    "useMobile",
     "verifyEmail"
   );
 
@@ -100,7 +101,10 @@ export default function Register20() {
 
       if (result.ok) {
         app.setLoginToken(result.data?.token);
-        navigate("./../register20");
+        const nextUrl = result.data?.simpleRegistration
+          ? "./../register30"
+          : "./../register20";
+        navigate(nextUrl);
       } else {
         app.alertResult(result);
       }
@@ -136,8 +140,9 @@ export default function Register20() {
   return (
     <SharedLayout
       title={labels.verifyEmail}
+      homeUrl="./../../"
       buttons={[
-        <Button variant="outlined" component={Link} key="back" to={"./../../"}>
+        <Button variant="outlined" key="back" onClick={() => navigate(-1)}>
           {labels.back}
         </Button>,
         <LoadingButton variant="contained" key="next" onClick={nextClick}>
@@ -203,6 +208,11 @@ export default function Register20() {
           </CountdownButton>
         </HBox>
       )}
+      <HBox sx={{ justifyContent: "center", width: "100%", paddingTop: 2 }}>
+        <Button onClick={() => navigate("./../register20")}>
+          {labels.useMobile}
+        </Button>
+      </HBox>
     </SharedLayout>
   );
 }

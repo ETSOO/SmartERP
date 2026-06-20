@@ -716,8 +716,12 @@ namespace Platform.Server.Services
 
             // Update the user
             var user = await _db.CoreUsers
-                .Where(u => u.Id == _regUser.IdInt)
-                .Select(u => new CoreUser { Id = u.Id })
+                .Where(u => u.Id == _regUser.IdInt && u.Step > 0)
+                .Select(u => new CoreUser
+                {
+                    Id = u.Id,
+                    Step = u.Step // For update tracking
+                })
                 .FirstOrDefaultAsync(cancellationToken);
             if (user == null)
             {
@@ -2305,10 +2309,9 @@ namespace Platform.Server.Services
                     var user = new CoreUser
                     {
                         Name = string.Empty,
-                        Step = step
+                        Step = step,
+                        CoreUserIdentifiers = [identifier]
                     };
-
-                    user.CoreUserIdentifiers.Add(identifier);
 
                     // AddAsync vs Add
                     _db.CoreUsers.Add(user);
@@ -2369,6 +2372,7 @@ namespace Platform.Server.Services
 
             if (userId > 0)
             {
+                result.Data["simpleRegistration"] = App.Configuration.SimpleRegistration;
                 result.Data["token"] = CreateRegistrationToken(userId);
             }
 

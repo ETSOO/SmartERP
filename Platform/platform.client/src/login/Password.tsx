@@ -145,6 +145,7 @@ export default function Password() {
   return (
     <SharedLayout
       title={id.hideEmail()}
+      homeUrl={homeUrl}
       buttons={
         <Button variant="contained" onClick={submit} disabled={buttonDisabled}>
           {labels.submit}
