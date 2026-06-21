@@ -1,4 +1,5 @@
-﻿using PlatformShared;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Messages;
 
@@ -10,8 +11,8 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class UpdateAppProcessor : LogQueueProcessor<UpdateAppMessage>
     {
-        public UpdateAppProcessor(ILogger<UpdateAppProcessor> logger, LogDbContext logDb)
-            : base(logger, PlatformSharedContext.Default.UpdateAppMessage, logDb)
+        public UpdateAppProcessor(ILogger<UpdateAppProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, PlatformSharedContext.Default.UpdateAppMessage, logDbFactory)
         {
         }
     }

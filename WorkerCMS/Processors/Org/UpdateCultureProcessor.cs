@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Org;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Org
     /// </summary>
     public class UpdateCultureProcessor : LogQueueProcessor<UpdateCultureMessage>
     {
-        public UpdateCultureProcessor(ILogger<UpdateCultureProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.UpdateCultureMessage, logDb)
+        public UpdateCultureProcessor(ILogger<UpdateCultureProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.UpdateCultureMessage, logDbFactory)
         {
         }
     }

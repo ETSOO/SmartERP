@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Person
     /// </summary>
     public class CreatePersonLocationProcessor : LogQueueProcessor<CreatePersonLocationMessage>
     {
-        public CreatePersonLocationProcessor(ILogger<CreatePersonLocationProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.CreatePersonLocationMessage, logDb)
+        public CreatePersonLocationProcessor(ILogger<CreatePersonLocationProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.CreatePersonLocationMessage, logDbFactory)
         {
         }
     }

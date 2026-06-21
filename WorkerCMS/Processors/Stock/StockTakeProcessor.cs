@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Stock;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Stock
     /// </summary>
     public class StockTakeProcessor : LogQueueProcessor<StockTakeMessage>
     {
-        public StockTakeProcessor(ILogger<StockTakeProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.StockTakeMessage, logDb)
+        public StockTakeProcessor(ILogger<StockTakeProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.StockTakeMessage, logDbFactory)
         {
         }
     }

@@ -66,7 +66,9 @@ if (string.IsNullOrEmpty(logConnectionString))
     throw new Exception("SmartERPLog connection string not found");
 }
 
-void OptionsAction(IServiceProvider provider, DbContextOptionsBuilder options)
+// Support DbContextFactory for multi-threaded scenarios, such as in background services or parallel processing
+// It will also inject DbContext in scoped services
+services.AddPooledDbContextFactory<MyDbContext>((IServiceProvider provider, DbContextOptionsBuilder options) =>
 {
     options.UseNpgsql(connectonString);
 
@@ -75,16 +77,9 @@ void OptionsAction(IServiceProvider provider, DbContextOptionsBuilder options)
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-}
+});
 
-// services.AddDbContextPool
-services.AddDbContext<MyDbContext>(OptionsAction, ServiceLifetime.Singleton);
-
-// Support DbContextFactory for multi-threaded scenarios, such as in background services or parallel processing
-// It will also inject DbContext in scoped services
-services.AddPooledDbContextFactory<MyDbContext>(OptionsAction);
-
-services.AddDbContext<LogDbContext>((provider, options) =>
+services.AddPooledDbContextFactory<LogDbContext>((provider, options) =>
 {
     options.UseNpgsql(logConnectionString);
 
@@ -93,7 +88,7 @@ services.AddDbContext<LogDbContext>((provider, options) =>
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-}, ServiceLifetime.Singleton);
+});
 
 services.Configure<SmartERPCoordinatorOptions>(configuration.GetSection("SmartERPCoordinator"));
 services.AddSingleton<ISmartERPCoordinator, SmartERPCoordinator>();

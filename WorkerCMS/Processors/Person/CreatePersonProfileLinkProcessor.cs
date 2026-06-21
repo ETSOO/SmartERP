@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Person
     /// </summary>
     public class CreatePersonProfileLinkProcessor : LogQueueProcessor<CreatePersonProfileLinkMessage>
     {
-        public CreatePersonProfileLinkProcessor(ILogger<CreatePersonProfileLinkProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.CreatePersonProfileLinkMessage, logDb)
+        public CreatePersonProfileLinkProcessor(ILogger<CreatePersonProfileLinkProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.CreatePersonProfileLinkMessage, logDbFactory)
         {
         }
     }

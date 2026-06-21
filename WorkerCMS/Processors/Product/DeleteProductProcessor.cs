@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Product;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Product
     /// </summary>
     public class DeleteProductProcessor : LogQueueProcessor<DeleteProductMessage>
     {
-        public DeleteProductProcessor(ILogger<DeleteProductProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.DeleteProductMessage, logDb)
+        public DeleteProductProcessor(ILogger<DeleteProductProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.DeleteProductMessage, logDbFactory)
         {
         }
     }

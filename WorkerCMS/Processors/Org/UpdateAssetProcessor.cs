@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Org;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Org
     /// </summary>
     public class UpdateAssetProcessor : LogQueueProcessor<UpdateAssetMessage>
     {
-        public UpdateAssetProcessor(ILogger<UpdateAssetProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.UpdateAssetMessage, logDb)
+        public UpdateAssetProcessor(ILogger<UpdateAssetProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.UpdateAssetMessage, logDbFactory)
         {
         }
     }

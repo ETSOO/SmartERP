@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Order
     /// </summary>
     public class StartOrderLineProcessor : LogQueueProcessor<StartOrderLineMessage>
     {
-        public StartOrderLineProcessor(ILogger<StartOrderLineProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.StartOrderLineMessage, logDb)
+        public StartOrderLineProcessor(ILogger<StartOrderLineProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.StartOrderLineMessage, logDbFactory)
         {
         }
     }

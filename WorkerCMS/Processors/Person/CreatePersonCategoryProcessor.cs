@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Person
     /// </summary>
     public class CreatePersonCategoryProcessor : LogQueueProcessor<CreatePersonCategoryMessage>
     {
-        public CreatePersonCategoryProcessor(ILogger<CreatePersonCategoryProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.CreatePersonCategoryMessage, logDb)
+        public CreatePersonCategoryProcessor(ILogger<CreatePersonCategoryProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.CreatePersonCategoryMessage, logDbFactory)
         {
         }
     }

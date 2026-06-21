@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.PO
     /// </summary>
     public class DeletePOLineProcessor : LogQueueProcessor<DeletePOLineMessage>
     {
-        public DeletePOLineProcessor(ILogger<DeletePOLineProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.DeletePOLineMessage, logDb)
+        public DeletePOLineProcessor(ILogger<DeletePOLineProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.DeletePOLineMessage, logDbFactory)
         {
         }
     }

@@ -8,20 +8,21 @@ using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using WebTemplates;
 using PlatformShared.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace WorkerCenter.Main.Processors
 {
     public class ResetPasswordProcessor : LogQueueProcessor<ResetPasswordMessage>
     {
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly IMessageQueueProducer _producer;
 
-        public ResetPasswordProcessor(ILogger<ResetPasswordProcessor> logger, LogDbContext logDb,
-            MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.ResetPasswordMessage, logDb)
+        public ResetPasswordProcessor(ILogger<ResetPasswordProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory, IMessageQueueProducer producer)
+            : base(logger, PlatformSharedContext.Default.ResetPasswordMessage, logDbFactory)
         {
             _producer = producer;
-            _db = db;
+            _dbFactory = dbFactory;
         }
 
         protected override async Task ProcessMessageAsync(ResetPasswordMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -32,7 +33,8 @@ namespace WorkerCenter.Main.Processors
             var userId = message.Data.UserId;
 
             // Send email notice
-            var emails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId]))[0];
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            var emails = (await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId]))[0];
 
             if (emails.Length > 0)
             {

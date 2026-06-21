@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Order
     /// </summary>
     public class CreateOrderDeliveryProcessor : LogQueueProcessor<CreateOrderDeliveryMessage>
     {
-        public CreateOrderDeliveryProcessor(ILogger<CreateOrderDeliveryProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.CreateOrderDeliveryMessage, logDb)
+        public CreateOrderDeliveryProcessor(ILogger<CreateOrderDeliveryProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.CreateOrderDeliveryMessage, logDbFactory)
         {
         }
     }

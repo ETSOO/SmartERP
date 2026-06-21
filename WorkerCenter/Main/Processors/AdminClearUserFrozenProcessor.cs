@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Extentions;
-using PlatformShared.LogDatabase.Models;
 using PlatformShared.Messages;
-using System.Net;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -17,23 +15,24 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class AdminClearUserFrozenProcessor : CommonQueueProcessor<AdminClearUserFrozenMessage>
     {
-        private readonly LogDbContext _logDb;
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<LogDbContext> _logDbFactory;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
 
         public AdminClearUserFrozenProcessor(ILogger<AdminClearUserFrozenProcessor> logger,
-            LogDbContext logDb,
-            MyDbContext db)
+            IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory)
             : base(logger, PlatformSharedContext.Default.AdminClearUserFrozenMessage)
         {
-            _logDb = logDb;
-            _db = db;
+            _logDbFactory = logDbFactory;
+            _dbFactory = dbFactory;
         }
 
-        private Task LogAsync(AdminClearUserFrozenMessage message, int userId, int? orgId, CancellationToken cancellationToken)
+        private async Task LogAsync(AdminClearUserFrozenMessage message, int userId, int? orgId, CancellationToken cancellationToken)
         {
             var title = $"{Properties.Resources.AdminClearUserFrozen} ({message.Data.TargetName})";
 
-            return _logDb.LogAsync(message, title, userId, orgId, null, cancellationToken);
+            await using var logDb = await _logDbFactory.CreateDbContextAsync(cancellationToken);
+            await logDb.LogAsync(message, title, userId, orgId, null, cancellationToken);
         }
 
         protected override async Task ProcessMessageAsync(AdminClearUserFrozenMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -46,18 +45,22 @@ namespace WorkerCenter.Main.Processors
             var userId = (int)message.Data.TargetId;
 
             // Transaction for business logic related processing
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var logDb = await _logDbFactory.CreateDbContextAsync(cancellationToken);
+
+            // Begin transaction
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
 
             // Clear the frozen time
             // Change the last 3 failed login records to clear type
             var clearStartTime = message.FrozenTime.AddMinutes(-60);
-            await _logDb.CoreLogs
+            await logDb.CoreLogs
                 .Where(l => l.Kind == LoginFailedMessage.Type && l.UserId == userId && l.Creation >= clearStartTime)
                 .OrderByDescending(l => l.Id)
                 .Take(3)
                 .ExecuteUpdateAsync(l => l.SetProperty(l => l.Kind, LoginFailedMessage.ClearType), cancellationToken);
 
-            await _db.CoreUsers.AsNoTracking()
+            await db.CoreUsers.AsNoTracking()
                 .Where(u => u.Id == userId)
                 .ExecuteUpdateAsync(u => u.SetProperty(u => u.FrozenTime, (DateTimeOffset?)null), cancellationToken);
 
@@ -68,6 +71,7 @@ namespace WorkerCenter.Main.Processors
             // For the requester
             await LogAsync(message, userId, null, cancellationToken);
 
+            // Make sure the log is commited before the transaction is commited
             // Commit
             await transaction.CommitAsync(cancellationToken);
         }

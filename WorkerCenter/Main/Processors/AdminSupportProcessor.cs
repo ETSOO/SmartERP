@@ -10,6 +10,7 @@ using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using WebTemplates;
 using PlatformShared.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -19,27 +20,28 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class AdminSupportProcessor : CommonQueueProcessor<AdminSupportMessage>
     {
-        private readonly LogDbContext _logDb;
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<LogDbContext> _logDbFactory;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly IMessageQueueProducer _producer;
 
         public AdminSupportProcessor(ILogger<AdminSupportProcessor> logger,
-            LogDbContext logDb,
-            MyDbContext db,
+            IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory,
             IMessageQueueProducer producer)
             : base(logger, PlatformSharedContext.Default.AdminSupportMessage)
         {
             _producer = producer;
-            _logDb = logDb;
-            _db = db;
+            _logDbFactory = logDbFactory;
+            _dbFactory = dbFactory;
         }
 
-        private Task LogAsync(AdminSupportMessage message, int userId, int? orgId, CancellationToken cancellationToken)
+        private async Task LogAsync(AdminSupportMessage message, int userId, int? orgId, CancellationToken cancellationToken)
         {
             var data = message.Data;
             var title = $"{Properties.Resources.AdminSupport} ({data.TargetName})";
 
-            return _logDb.LogAsync(message, title, userId, orgId, null, cancellationToken);
+            await using var logDb = await _logDbFactory.CreateDbContextAsync(cancellationToken);
+            await logDb.LogAsync(message, title, userId, orgId, null, cancellationToken);
         }
 
         protected override async Task ProcessMessageAsync(AdminSupportMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -49,7 +51,8 @@ namespace WorkerCenter.Main.Processors
             Properties.Resources.Culture = ci;
 
             // Transaction for business logic related processing
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
 
             // Log the operation
             // For the operator
@@ -63,7 +66,7 @@ namespace WorkerCenter.Main.Processors
 
             // Email notice
             // Emails
-            var emails = await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [message.Requester, message.OwnerId], [message.Data.UserId], [message.Approver]);
+            var emails = await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [message.Requester, message.OwnerId], [message.Data.UserId], [message.Approver]);
 
             var subject = Properties.Resources.ActionNoticeSubject;
             var action = Properties.Resources.AdminSupport;

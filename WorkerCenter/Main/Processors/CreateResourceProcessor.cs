@@ -1,4 +1,5 @@
-﻿using PlatformShared;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Messages;
 
@@ -10,8 +11,8 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class CreateResourceProcessor : LogQueueProcessor<CreateResourceMessage>
     {
-        public CreateResourceProcessor(ILogger<CreateResourceProcessor> logger, LogDbContext logDb)
-            : base(logger, PlatformSharedContext.Default.CreateResourceMessage, logDb)
+        public CreateResourceProcessor(ILogger<CreateResourceProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, PlatformSharedContext.Default.CreateResourceMessage, logDbFactory)
         {
         }
     }

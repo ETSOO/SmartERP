@@ -95,6 +95,12 @@ export default function AllSystem() {
                   {
                     data: "taxRate",
                     label: "defaultTaxRate"
+                  },
+                  {
+                    data: "orderMonthlyReportEnabled"
+                  },
+                  {
+                    data: "orderDailyReportHour"
                   }
                 ]}
               ></ViewContainer>

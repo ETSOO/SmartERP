@@ -10,6 +10,7 @@ using PlatformShared.Messages;
 using System.Web;
 using WebTemplates;
 using PlatformShared.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -19,17 +20,17 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class LeaveOrgProcessor : LogQueueProcessor<LeaveOrgMessage>
     {
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly IMessageQueueProducer _producer;
 
         public LeaveOrgProcessor(ILogger<AcceptInvitationProcessor> logger,
-            LogDbContext logDb,
-            MyDbContext db,
+            IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory,
             IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.LeaveOrgMessage, logDb)
+            : base(logger, PlatformSharedContext.Default.LeaveOrgMessage, logDbFactory)
         {
             _producer = producer;
-            _db = db;
+            _dbFactory = dbFactory;
         }
 
         protected override async Task ProcessMessageAsync(LeaveOrgMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -49,8 +50,10 @@ namespace WorkerCenter.Main.Processors
             // Organization owner
             var organizationId = (int)message.Data.TargetId;
 
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             // Owners
-            var owners = await _db.QueryUsersAsync(organizationId, UserRole.Founder, cancellationToken);
+            var owners = await db.QueryUsersAsync(organizationId, UserRole.Founder, cancellationToken);
 
             if (message.InviterId.HasValue)
             {
@@ -61,7 +64,7 @@ namespace WorkerCenter.Main.Processors
             var subject = Properties.Resources.ActionNoticeSubject;
 
             // Emails
-            var allEmails = await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [message.Data.UserId], owners);
+            var allEmails = await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [message.Data.UserId], owners);
 
             var emails = allEmails[0];
             var ownerEmails = allEmails[1];

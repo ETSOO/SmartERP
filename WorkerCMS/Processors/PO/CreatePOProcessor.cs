@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.PO
     /// </summary>
     public class CreatePOProcessor : LogQueueProcessor<CreatePOMessage>
     {
-        public CreatePOProcessor(ILogger<CreatePOProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.CreatePOMessage, logDb)
+        public CreatePOProcessor(ILogger<CreatePOProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.CreatePOMessage, logDbFactory)
         {
         }
     }

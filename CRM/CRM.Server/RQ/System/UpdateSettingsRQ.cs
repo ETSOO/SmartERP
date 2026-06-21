@@ -61,7 +61,7 @@ namespace CRM.Server.RQ.System
         /// Order daily report start hour, 0-23
         /// 订单日报开始小时
         /// </summary>
-        public short? OrderDailyReportHour { get; init; }
+        public byte? OrderDailyReportHour { get; init; }
 
         /// <summary>
         /// Validate the model

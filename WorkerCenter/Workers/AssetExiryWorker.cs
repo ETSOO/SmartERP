@@ -96,8 +96,8 @@ namespace WorkerCenter.Periods
 
                 if (noticeOwner)
                 {
-                    await using var _db = await _dbFactory.CreateDbContextAsync(token);
-                    var personEmails = (await _db.QueryPersonIdentifiersAsync(orgId, CoreUserIdentifierType.Email, token, [personId]))[0];
+                    await using var db = await _dbFactory.CreateDbContextAsync(token);
+                    var personEmails = (await db.QueryPersonIdentifiersAsync(orgId, CoreUserIdentifierType.Email, token, [personId]))[0];
                     if (personEmails.Length > 0)
                     {
                         to.AddRange(personEmails);

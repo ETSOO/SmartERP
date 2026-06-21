@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Order
     /// </summary>
     public class ReadOrderProcessor : LogQueueProcessor<ReadOrderMessage>
     {
-        public ReadOrderProcessor(ILogger<ReadOrderProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.ReadOrderMessage, logDb)
+        public ReadOrderProcessor(ILogger<ReadOrderProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.ReadOrderMessage, logDbFactory)
         {
         }
     }

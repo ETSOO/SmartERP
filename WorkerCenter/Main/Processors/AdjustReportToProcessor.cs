@@ -8,6 +8,7 @@ using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using WebTemplates;
 using PlatformShared.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -17,15 +18,15 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class AdjustReportToProcessor : LogQueueProcessor<AdjustReportToMessage>
     {
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly IMessageQueueProducer _producer;
 
-        public AdjustReportToProcessor(ILogger<AdjustReportToProcessor> logger, LogDbContext logDb,
-            MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.AdjustReportToMessage, logDb)
+        public AdjustReportToProcessor(ILogger<AdjustReportToProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory, IMessageQueueProducer producer)
+            : base(logger, PlatformSharedContext.Default.AdjustReportToMessage, logDbFactory)
         {
             _producer = producer;
-            _db = db;
+            _dbFactory = dbFactory;
         }
 
         protected override async Task ProcessMessageAsync(AdjustReportToMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -38,7 +39,8 @@ namespace WorkerCenter.Main.Processors
 
             // Send email notice
             // Emails
-            var emails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], [originalId, message.NewReportTo]));
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            var emails = (await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], [originalId, message.NewReportTo]));
             var authorEmails = emails[0];
             var targetEmails = emails[1];
 

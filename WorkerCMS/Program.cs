@@ -51,7 +51,7 @@ if (string.IsNullOrEmpty(logConnectionString))
 }
 
 // services.AddDbContextPool
-services.AddDbContext<MyDbContext>((provider, options) =>
+services.AddPooledDbContextFactory<MyDbContext>((provider, options) =>
 {
     options.UseNpgsql(connectonString);
 
@@ -60,9 +60,9 @@ services.AddDbContext<MyDbContext>((provider, options) =>
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-}, ServiceLifetime.Singleton);
+});
 
-services.AddDbContext<LogDbContext>((provider, options) =>
+services.AddPooledDbContextFactory<LogDbContext>((provider, options) =>
 {
     options.UseNpgsql(logConnectionString);
 
@@ -71,7 +71,7 @@ services.AddDbContext<LogDbContext>((provider, options) =>
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-}, ServiceLifetime.Singleton);
+});
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
 

@@ -21,19 +21,19 @@ namespace PlatformShared.Services
     /// </summary>
     public class SmartERPCoordinator : ISmartERPCoordinator
     {
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly SmartERPCoordinatorOptions _options;
 
         /// <summary>
         /// Constructor
         /// 构造函数
         /// </summary>
-        /// <param name="db">Database context</param>
+        /// <param name="dbFactory">Database context factory</param>
         /// <param name="options">Options</param>
-        public SmartERPCoordinator(MyDbContext db,
+        public SmartERPCoordinator(IDbContextFactory<MyDbContext> dbFactory,
             IOptions<SmartERPCoordinatorOptions> options)
         {
-            _db = db;
+            _dbFactory = dbFactory;
             _options = options.Value;
         }
 
@@ -62,13 +62,15 @@ namespace PlatformShared.Services
         {
             AppData? data;
 
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             if (string.IsNullOrEmpty(appKey))
             {
-                data = await _db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, Urls = a.Urls }).FirstOrDefaultAsync(cancellationToken);
+                data = await db.CoreApps.AsNoTracking().Where(a => a.Id == appId).Select(a => new AppData { AppSecret = a.AppSecret, Urls = a.Urls }).FirstOrDefaultAsync(cancellationToken);
             }
             else
             {
-                data = await _db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey && oa.AppSecret != null).Select(oa => new AppData { AppSecret = oa.AppSecret!, Urls = oa.LocalUrls ?? oa.CoreApp.Urls }).FirstOrDefaultAsync(cancellationToken);
+                data = await db.CoreOrganizationApps.AsNoTracking().Where(oa => oa.CoreAppId == appId && oa.AppKey == appKey && oa.AppSecret != null).Select(oa => new AppData { AppSecret = oa.AppSecret!, Urls = oa.LocalUrls ?? oa.CoreApp.Urls }).FirstOrDefaultAsync(cancellationToken);
             }
 
             data?.AppSecret = DecriptData(data.AppSecret, "Token" + appId);
@@ -90,7 +92,8 @@ namespace PlatformShared.Services
             var serviceSP = new NpgsqlParameter<short>("p_service", (short)service);
 
             // The returned columns naming should be the same as the model, otherwise EFCore.NamingConventions need to be used
-            var data = (await _db.Database.SqlQuery<ApiItem>($"SELECT * FROM get_core_api({orgIdSP}, {serviceSP})")
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            var data = (await db.Database.SqlQuery<ApiItem>($"SELECT * FROM get_core_api({orgIdSP}, {serviceSP})")
                 .ToListAsync(cancellationToken)).FirstOrDefault();
 
             return data;

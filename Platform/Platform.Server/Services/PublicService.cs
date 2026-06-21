@@ -126,9 +126,9 @@ namespace Platform.Server.Services
             var userId = User.IdInt;
             var inviterId = code.UserId.Value;
 
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            var personIds = await _db.CheckUserPersonIdsAsync(orgId, [userId, inviterId], cancellationToken);
+            var personIds = await db.CheckUserPersonIdsAsync(orgId, [userId, inviterId], cancellationToken);
             var userPersonId = personIds[0];
             var inviterPersonId = personIds[1];
 
@@ -139,7 +139,7 @@ namespace Platform.Server.Services
 
             if (userPersonId == null)
             {
-                _db.Persons.Add(new Person
+                db.Persons.Add(new Person
                 {
                     OrgId = orgId,
                     CoreUserId = userId,
@@ -153,12 +153,12 @@ namespace Platform.Server.Services
                     UserId = inviterPersonId.Value // User.Oid is a user's person id in a specific organization
                 });
 
-                var user = await _db.CoreUsers.Where(u => u.Id == userId)
+                var user = await db.CoreUsers.Where(u => u.Id == userId)
                     .Select(u => new CoreUser { Id = u.Id, LatestOrganizationIds = u.LatestOrganizationIds })
                     .FirstOrDefaultAsync(cancellationToken);
                 if (user != null)
                 {
-                    _db.Attach(user);
+                    db.Attach(user);
 
                     if (user.LatestOrganizationIds == null)
                     {
@@ -171,7 +171,7 @@ namespace Platform.Server.Services
                     }
                 }
 
-                var task1 = _db.SaveChangesAsync(cancellationToken);
+                var task1 = db.SaveChangesAsync(cancellationToken);
 
                 // Log
                 var message = new AcceptInvitationMessage
@@ -278,8 +278,8 @@ namespace Platform.Server.Services
             {
                 options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
 
-                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-                return await _db.FeatureCultures.AsNoTracking()
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                return await db.FeatureCultures.AsNoTracking()
                     .Where(c => c.Culture == culture && c.CoreOrganizationId == null)
                     .Select(c => new CustomResourceData
                     {
@@ -354,9 +354,9 @@ namespace Platform.Server.Services
                     return await Task.Run(() => TimeZoneInfo.GetSystemTimeZones().Select(s => TimeZoneUtils.CreateFrom(s)), cancellationToken);
                 }
 
-                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-                var jsonData = await _db.FeatureCultures.AsNoTracking()
+                var jsonData = await db.FeatureCultures.AsNoTracking()
                     .Where(c => c.Culture == culture && c.CoreOrganizationId == null && c.Key == MyAppConstants.TimeZoneResourceKey)
                     .Select(c => c.JsonData)
                     .FirstOrDefaultAsync(cancellationToken);
@@ -488,9 +488,9 @@ namespace Platform.Server.Services
             string? orgName = null;
             if (rq.OrgUid != null)
             {
-                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-                var data = await _db.CoreOrganizations.Where(o => o.Uid == rq.OrgUid).Select(o => new { o.Id, o.Name }).FirstOrDefaultAsync(cancellationToken);
+                var data = await db.CoreOrganizations.Where(o => o.Uid == rq.OrgUid).Select(o => new { o.Id, o.Name }).FirstOrDefaultAsync(cancellationToken);
                 if (data != null)
                 {
                     orgId = data.Id;
@@ -501,19 +501,19 @@ namespace Platform.Server.Services
             string? appName = null;
             if (rq.AppId != null)
             {
-                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
                 if (string.IsNullOrEmpty(rq.AppKey))
                 {
                     // Get app name from root
-                    appName = await _db.CoreApps.AsNoTracking()
+                    appName = await db.CoreApps.AsNoTracking()
                         .Where(a => a.Id == rq.AppId)
                         .Select(a => a.Name)
                         .FirstOrDefaultAsync(cancellationToken);
                 }
                 else
                 {
-                    appName = await _db.CoreOrganizationApps.AsNoTracking()
+                    appName = await db.CoreOrganizationApps.AsNoTracking()
                         .Where(oa => oa.CoreAppId == rq.AppId && oa.AppKey == rq.AppKey)
                         .Select(oa => oa.LocalName ?? oa.CoreApp.Name)
                         .FirstOrDefaultAsync(cancellationToken);
@@ -623,9 +623,9 @@ namespace Platform.Server.Services
             var data = auth.DeserializeData(PlatformSharedContext.Default.AuthCodeMemberInvitationData);
             if (data == null) return null;
 
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            var userId = await _db.CoreUserIdentifiers.Where(ui => ui.Type == CoreUserIdentifierType.Email
+            var userId = await db.CoreUserIdentifiers.Where(ui => ui.Type == CoreUserIdentifierType.Email
                 && ui.Value == auth.OpenId
                 && ui.CoreUser.Step == 0)
             .Select(ui => ui.CoreUserId).FirstOrDefaultAsync(cancellationToken);

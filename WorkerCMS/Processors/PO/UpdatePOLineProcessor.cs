@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.PO
     /// </summary>
     public class UpdatePOLineProcessor : LogQueueProcessor<UpdatePOLineMessage>
     {
-        public UpdatePOLineProcessor(ILogger<UpdatePOLineProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.UpdatePOLineMessage, logDb)
+        public UpdatePOLineProcessor(ILogger<UpdatePOLineProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.UpdatePOLineMessage, logDbFactory)
         {
         }
     }

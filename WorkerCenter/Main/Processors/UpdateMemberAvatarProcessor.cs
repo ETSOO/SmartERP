@@ -1,4 +1,5 @@
-﻿using PlatformShared;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Messages;
 
@@ -10,8 +11,8 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class UpdateMemberAvatarProcessor : LogQueueProcessor<UpdateMemberAvatarMessage>
     {
-        public UpdateMemberAvatarProcessor(ILogger<UpdateOrgAvatarProcessor> logger, LogDbContext logDb)
-            : base(logger, PlatformSharedContext.Default.UpdateMemberAvatarMessage, logDb)
+        public UpdateMemberAvatarProcessor(ILogger<UpdateMemberAvatarProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, PlatformSharedContext.Default.UpdateMemberAvatarMessage, logDbFactory)
         {
         }
     }

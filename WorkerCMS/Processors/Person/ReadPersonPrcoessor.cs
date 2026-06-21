@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Person
     /// </summary>
     public class ReadPersonProcessor : LogQueueProcessor<ReadPersonMessage>
     {
-        public ReadPersonProcessor(ILogger<ReadPersonProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.ReadPersonMessage, logDb)
+        public ReadPersonProcessor(ILogger<ReadPersonProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.ReadPersonMessage, logDbFactory)
         {
         }
     }

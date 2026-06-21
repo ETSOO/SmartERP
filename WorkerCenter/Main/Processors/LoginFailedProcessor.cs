@@ -20,14 +20,16 @@ namespace WorkerCenter.Main.Processors
     {
         private const int FreezeMinutes = 30;
 
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
+        private readonly IDbContextFactory<LogDbContext> _logDbFactory;
         private readonly IMessageQueueProducer _producer;
 
         public LoginFailedProcessor(ILogger<LoginFailedProcessor> logger,
-            LogDbContext logDb, MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.LoginFailedMessage, logDb)
+            IDbContextFactory<LogDbContext> logDbFactory, IDbContextFactory<MyDbContext> dbFactory, IMessageQueueProducer producer)
+            : base(logger, PlatformSharedContext.Default.LoginFailedMessage, logDbFactory)
         {
-            _db = db;
+            _dbFactory = dbFactory;
+            _logDbFactory = logDbFactory;
             _producer = producer;
         }
 
@@ -40,19 +42,22 @@ namespace WorkerCenter.Main.Processors
 
             // 6 consecutive login failures, freeze the user
             var dateAgo = DateTimeOffset.UtcNow.AddMinutes(-FreezeMinutes);
-            var count = await LogDb.CoreLogs
+            await using var logDb = await _logDbFactory.CreateDbContextAsync(cancellationToken);
+            var count = await logDb.CoreLogs
                 .Where(l => l.Kind == LoginFailedMessage.Type && l.UserId == userId && l.Creation >= dateAgo)
                 .CountAsync(cancellationToken);
 
             if (count > 5)
             {
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
                 // Freeze user
-                var affacted = await _db.CoreUsers.Where(u => u.Id == userId).ExecuteUpdateAsync(u => u.SetProperty(u => u.FrozenTime, DateTimeOffset.UtcNow.AddMinutes(FreezeMinutes)), cancellationToken);
+                var affacted = await db.CoreUsers.Where(u => u.Id == userId).ExecuteUpdateAsync(u => u.SetProperty(u => u.FrozenTime, DateTimeOffset.UtcNow.AddMinutes(FreezeMinutes)), cancellationToken);
 
                 if (affacted > 0)
                 {
                     // Emails
-                    var emails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId]))[0];
+                    var emails = (await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId]))[0];
 
                     if (emails.Length > 0)
                     {

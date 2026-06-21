@@ -2,6 +2,7 @@
 using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
 using com.etsoo.Utils.Serialization;
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using PlatformShared.Extentions;
 using PlatformShared.Messages;
@@ -16,17 +17,12 @@ namespace WorkerCenter.Main.Processors
     /// <typeparam name="T">Generic message type</typeparam>
     public abstract class LogQueueProcessor<T> : CommonQueueProcessor<T> where T : CommonMessage, IMessageQueueMessage
     {
-        private readonly LogDbContext _logDb;
+        private readonly IDbContextFactory<LogDbContext> _logDbFactory;
 
-        /// <summary>
-        /// Log database context
-        /// </summary>
-        protected LogDbContext LogDb => _logDb;
-
-        protected LogQueueProcessor(ILogger logger, JsonTypeInfo<T> typeInfo, LogDbContext logDb)
+        protected LogQueueProcessor(ILogger logger, JsonTypeInfo<T> typeInfo, IDbContextFactory<LogDbContext> logDbFactory)
             : base(logger, typeInfo)
         {
-            _logDb = logDb;
+            _logDbFactory = logDbFactory;
         }
 
         /// <summary>
@@ -57,7 +53,8 @@ namespace WorkerCenter.Main.Processors
 
             var title = GetLogTitle(message);
 
-            await _logDb.LogAsync(message, title, cancellationToken);
+            await using var logDb = await _logDbFactory.CreateDbContextAsync(cancellationToken);
+            await logDb.LogAsync(message, title, cancellationToken);
         }
     }
 }

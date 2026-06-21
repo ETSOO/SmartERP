@@ -9,6 +9,7 @@ using PlatformShared.Extentions;
 using PlatformShared.Messages;
 using WebTemplates;
 using PlatformShared.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace WorkerCenter.Main.Processors
 {
@@ -18,15 +19,15 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class CreateApiProcessor : LogQueueProcessor<CreateApiMessage>
     {
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly IMessageQueueProducer _producer;
 
-        public CreateApiProcessor(ILogger<CreateApiProcessor> logger, LogDbContext logDb,
-            MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.CreateApiMessage, logDb)
+        public CreateApiProcessor(ILogger<CreateApiProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory, IMessageQueueProducer producer)
+            : base(logger, PlatformSharedContext.Default.CreateApiMessage, logDbFactory)
         {
             _producer = producer;
-            _db = db;
+            _dbFactory = dbFactory;
         }
 
         protected override async Task ProcessMessageAsync(CreateApiMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -39,12 +40,14 @@ namespace WorkerCenter.Main.Processors
             // Organization id
             var orgId = message.OrganizationId;
 
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             // All admins
-            var admins = await _db.QueryUsersAsync(orgId, UserRole.Admin, cancellationToken);
+            var admins = await db.QueryUsersAsync(orgId, UserRole.Admin, cancellationToken);
 
             // Send email notice
             // Emails
-            var allEmails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], admins));
+            var allEmails = (await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], admins));
             var emails = allEmails[0];
             var adminEmails = allEmails[1];
 

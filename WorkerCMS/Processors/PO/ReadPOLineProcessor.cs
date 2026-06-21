@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.PO
     /// </summary>
     public class ReadPOLineProcessor : LogQueueProcessor<ReadPOLineMessage>
     {
-        public ReadPOLineProcessor(ILogger<ReadPOLineProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.ReadPOLineMessage, logDb)
+        public ReadPOLineProcessor(ILogger<ReadPOLineProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.ReadPOLineMessage, logDbFactory)
         {
         }
     }

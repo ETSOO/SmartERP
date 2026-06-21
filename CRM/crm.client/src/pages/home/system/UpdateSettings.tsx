@@ -26,6 +26,8 @@ export default function UpdateSettings() {
     "hasInventory",
     "mainCustomerType",
     "noChanges",
+    "orderDailyReportHour",
+    "orderMonthlyReportEnabled",
     "supplier",
     "supplierCurrencies"
   );
@@ -43,10 +45,16 @@ export default function UpdateSettings() {
       const rq: UpdateSettingsRQ = { ...values };
 
       rq.hasInventory ??= false;
+      rq.orderMonthlyReportEnabled ??= false;
+
+      if (!rq.orderMonthlyReportEnabled) {
+        delete rq.orderDailyReportHour;
+      }
 
       // Correct for types safety
       Utils.correctTypes(rq, {
-        hasInventory: "boolean"
+        hasInventory: "boolean",
+        orderMonthlyReportEnabled: "boolean"
       });
 
       if (settings) {
@@ -78,6 +86,8 @@ export default function UpdateSettings() {
     if (data == null) return;
     setSettings(data);
   }, []);
+
+  const orderMonthlyReportEnabled = formik.values.orderMonthlyReportEnabled;
 
   usePageDataEmpty(app);
 
@@ -129,7 +139,7 @@ export default function UpdateSettings() {
           onValueChange={(ids) => formik.setFieldValue("cultures", ids)}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
+      <Grid size={{ xs: 6, sm: 4 }}>
         <NumberInputField
           fullWidth
           name="taxRate"
@@ -137,6 +147,30 @@ export default function UpdateSettings() {
           step={0.01}
           label={labels.defaultTaxRate}
           value={formik.values.taxRate ?? ""}
+          onChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 4 }}>
+        <OptionBool
+          name="orderMonthlyReportEnabled"
+          label={labels.orderMonthlyReportEnabled}
+          fullWidth
+          defaultValue={orderMonthlyReportEnabled}
+          onChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 4 }}>
+        <NumberInputField
+          fullWidth
+          name="orderDailyReportHour"
+          max={23}
+          step={1}
+          label={labels.orderDailyReportHour}
+          value={formik.values.orderDailyReportHour ?? ""}
+          disabled={
+            !orderMonthlyReportEnabled ||
+            (orderMonthlyReportEnabled as unknown) == "false"
+          }
           onChange={formik.handleChange}
         />
       </Grid>

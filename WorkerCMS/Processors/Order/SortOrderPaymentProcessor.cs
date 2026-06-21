@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Order
     /// </summary>
     public class SortOrderPaymentProcessor : LogQueueProcessor<SortOrderPaymentMessage>
     {
-        public SortOrderPaymentProcessor(ILogger<SortOrderPaymentProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.SortOrderPaymentMessage, logDb)
+        public SortOrderPaymentProcessor(ILogger<SortOrderPaymentProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.SortOrderPaymentMessage, logDbFactory)
         {
         }
     }

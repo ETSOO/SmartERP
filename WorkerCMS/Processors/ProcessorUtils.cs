@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
-using PlatformShared.Database.Models;
-using PlatformShared.Extentions;
 
 namespace WorkerCMS.Processors
 {
@@ -31,10 +29,6 @@ namespace WorkerCMS.Processors
                 .FirstOrDefaultAsync(cancellationToken);
 
             return (settings?.OrderMonthlyReportEnabled ?? false, settings?.OrderDailyReportHour);
-        }
-
-        public static Task GetOrderDailyReportDataAsync(MyDbContext db, int orgId, short hour, CancellationToken cancellationToken = default)
-        {
         }
     }
 }

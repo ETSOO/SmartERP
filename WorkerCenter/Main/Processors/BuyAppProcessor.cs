@@ -19,15 +19,15 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class BuyAppProcessor : LogQueueProcessor<BuyAppMessage>
     {
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly IMessageQueueProducer _producer;
 
-        public BuyAppProcessor(ILogger<BuyAppProcessor> logger, LogDbContext logDb,
-            MyDbContext db, IMessageQueueProducer producer)
-            : base(logger, PlatformSharedContext.Default.BuyAppMessage, logDb)
+        public BuyAppProcessor(ILogger<BuyAppProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory, IMessageQueueProducer producer)
+            : base(logger, PlatformSharedContext.Default.BuyAppMessage, logDbFactory)
         {
             _producer = producer;
-            _db = db;
+            _dbFactory = dbFactory;
         }
 
         protected override async Task ProcessMessageAsync(BuyAppMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -40,11 +40,13 @@ namespace WorkerCenter.Main.Processors
             // Organization id
             var orgId = message.OrgId;
 
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             // New organization
             if (message.NewOrg)
             {
                 // Organization name
-                var orgName = await _db.CoreOrganizations
+                var orgName = await db.CoreOrganizations
                     .AsNoTracking()
                     .Where(o => o.Id == orgId)
                     .Select(o => o.Name)
@@ -60,11 +62,11 @@ namespace WorkerCenter.Main.Processors
             }
 
             // All admins
-            var admins = await _db.QueryUsersAsync(orgId, UserRole.Admin, cancellationToken);
+            var admins = await db.QueryUsersAsync(orgId, UserRole.Admin, cancellationToken);
 
             // Send email notice
             // Emails
-            var allEmails = (await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], admins));
+            var allEmails = (await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], admins));
             var emails = allEmails[0];
             var adminEmails = allEmails[1];
 

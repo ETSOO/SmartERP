@@ -4,6 +4,7 @@ using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.Localization;
 using com.etsoo.MessageQueue;
 using com.etsoo.MessageQueue.QueueProcessors;
+using Microsoft.EntityFrameworkCore;
 using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -21,22 +22,22 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class AcceptInvitationProcessor : CommonQueueProcessor<AcceptInvitationMessage>
     {
-        private readonly LogDbContext _logDb;
-        private readonly MyDbContext _db;
+        private readonly IDbContextFactory<LogDbContext> _logDbFactory;
+        private readonly IDbContextFactory<MyDbContext> _dbFactory;
         private readonly IMessageQueueProducer _producer;
 
         public AcceptInvitationProcessor(ILogger<AcceptInvitationProcessor> logger,
-            LogDbContext logDb,
-            MyDbContext db,
+            IDbContextFactory<LogDbContext> logDbFactory,
+            IDbContextFactory<MyDbContext> dbFactory,
             IMessageQueueProducer producer)
             : base(logger, PlatformSharedContext.Default.AcceptInvitationMessage)
         {
             _producer = producer;
-            _logDb = logDb;
-            _db = db;
+            _logDbFactory = logDbFactory;
+            _dbFactory = dbFactory;
         }
 
-        private Task LogAsync(AcceptInvitationMessage message, int userId, string kind, string kindText, CancellationToken cancellationToken)
+        private async Task LogAsync(AcceptInvitationMessage message, int userId, string kind, string kindText, CancellationToken cancellationToken)
         {
             var data = message.Data;
             var orgId = message.UserData.OrganizationId;
@@ -53,7 +54,8 @@ namespace WorkerCenter.Main.Processors
                 title = $"{title} - {data.UserName}";
             }
 
-            return _logDb.LogAsync(message, title, userId, orgId, kind, cancellationToken);
+            await using var logDb = await _logDbFactory.CreateDbContextAsync(cancellationToken);
+            await logDb.LogAsync(message, title, userId, orgId, kind, cancellationToken);
         }
 
         protected override async Task ProcessMessageAsync(AcceptInvitationMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -73,8 +75,10 @@ namespace WorkerCenter.Main.Processors
             // Organization owner
             var organizationId = message.UserData.OrganizationId;
 
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+
             // Owners
-            var owners = await _db.QueryUsersAsync(organizationId, UserRole.Founder, cancellationToken);
+            var owners = await db.QueryUsersAsync(organizationId, UserRole.Founder, cancellationToken);
 
             var ci = LocalizationUtils.SetCulture(message.Data.Culture, true);
             Properties.Resources.Culture = ci;
@@ -82,7 +86,7 @@ namespace WorkerCenter.Main.Processors
             var subject = Properties.Resources.ActionNoticeSubject;
 
             // Emails
-            var emails = await _db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], [inviterId], owners);
+            var emails = await db.QueryUserIdentifiersAsync(CoreUserIdentifierType.Email, cancellationToken, [userId], [inviterId], owners);
 
             // Log
             await LogAsync(message, inviterId, nameof(Properties.Resources.InvitationAccepted), Properties.Resources.InvitationAccepted, cancellationToken);

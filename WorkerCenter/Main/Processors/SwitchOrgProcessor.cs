@@ -1,4 +1,5 @@
-﻿using PlatformShared;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Messages;
 
@@ -10,8 +11,8 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class SwitchOrgProcessor : LogQueueProcessor<SwitchOrgMessage>
     {
-        public SwitchOrgProcessor(ILogger<SwitchOrgProcessor> logger, LogDbContext logDb)
-            : base(logger, PlatformSharedContext.Default.SwitchOrgMessage, logDb)
+        public SwitchOrgProcessor(ILogger<SwitchOrgProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, PlatformSharedContext.Default.SwitchOrgMessage, logDbFactory)
         {
         }
     }

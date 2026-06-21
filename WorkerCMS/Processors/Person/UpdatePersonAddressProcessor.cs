@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Person
     /// </summary>
     public class UpdatePersonAddressProcessor : LogQueueProcessor<UpdatePersonAddressMessage>
     {
-        public UpdatePersonAddressProcessor(ILogger<UpdatePersonAddressProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.UpdatePersonAddressMessage, logDb)
+        public UpdatePersonAddressProcessor(ILogger<UpdatePersonAddressProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.UpdatePersonAddressMessage, logDbFactory)
         {
         }
     }

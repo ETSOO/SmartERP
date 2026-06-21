@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Stock;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Stock
     /// </summary>
     public class UpdateStockProcessor : LogQueueProcessor<UpdateStockMessage>
     {
-        public UpdateStockProcessor(ILogger<UpdateStockProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.UpdateStockMessage, logDb)
+        public UpdateStockProcessor(ILogger<UpdateStockProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.UpdateStockMessage, logDbFactory)
         {
         }
     }

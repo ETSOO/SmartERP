@@ -1,4 +1,5 @@
-﻿using PlatformShared;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared;
 using PlatformShared.Database;
 using PlatformShared.Messages;
 
@@ -10,8 +11,8 @@ namespace WorkerCenter.Main.Processors
     /// </summary>
     public class LoginSuccessProcessor : LogQueueProcessor<LoginSuccessMessage>
     {
-        public LoginSuccessProcessor(ILogger<LoginSuccessProcessor> logger, LogDbContext logDb)
-            : base(logger, PlatformSharedContext.Default.LoginSuccessMessage, logDb)
+        public LoginSuccessProcessor(ILogger<LoginSuccessProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, PlatformSharedContext.Default.LoginSuccessMessage, logDbFactory)
         {
         }
     }

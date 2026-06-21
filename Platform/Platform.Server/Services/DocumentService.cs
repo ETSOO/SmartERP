@@ -88,12 +88,12 @@ namespace Platform.Server.Services
                 Cultures = rq.Cultures?.ToList()
             };
 
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            _db.CoreDocuments.Add(document);
+            db.CoreDocuments.Add(document);
 
             // Save changes
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
 
             var id = document.Id;
 
@@ -117,9 +117,9 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            var doc = await _db.CoreDocuments.AsNoTracking()
+            var doc = await db.CoreDocuments.AsNoTracking()
                 .Where(d => d.Id == id)
                 .Select(d => new { d.CoreOrganizationId, d.Title })
                 .FirstOrDefaultAsync(cancellationToken);
@@ -145,7 +145,7 @@ namespace Platform.Server.Services
                 return ApplicationErrors.AccessDenied.AsResult();
             }
 
-            var task1 = _db.CoreDocuments.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
+            var task1 = db.CoreDocuments.Where(d => d.Id == id).ExecuteDeleteAsync(cancellationToken);
 
             // Push message
             var message = new DeleteDocumentMessage
@@ -222,9 +222,9 @@ namespace Platform.Server.Services
             {
                 var orgId = User.OrganizationInt;
 
-                await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-                var doc = await _db.CoreDocuments.AsNoTracking()
+                var doc = await db.CoreDocuments.AsNoTracking()
                     .Where(d => d.Id == id && d.CoreOrganizationId == orgId)
                     .Select(d => new { d.Kind, d.Title, d.Template })
                     .FirstOrDefaultAsync(cancellationToken);
@@ -302,9 +302,9 @@ namespace Platform.Server.Services
         {
             var kind = rq.Kind;
 
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            var items = await _db.CoreDocuments.AsNoTracking()
+            var items = await db.CoreDocuments.AsNoTracking()
                 .Where(t => t.Kind == kind)
                 .QueryEtsoo(rq, (d) => d.Id, null, (q) =>
                 {
@@ -374,9 +374,9 @@ namespace Platform.Server.Services
 
             var orgId = rq.OrgId;
 
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            return await _db.CoreDocuments.AsNoTracking()
+            return await db.CoreDocuments.AsNoTracking()
                 .QueryEtsoo(rq, (d) => d.Id, null, (q) =>
                 {
                     if (orgId.HasValue)
@@ -458,9 +458,9 @@ namespace Platform.Server.Services
         {
             var orgId = User.OrganizationInt;
 
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
-            return await _db.CoreDocuments.AsNoTracking()
+            return await db.CoreDocuments.AsNoTracking()
                 .Where(d => d.Id == id && (d.CoreOrganizationId == null || d.CoreOrganizationId == orgId))
                 .Select(d => new DocumentReadData
                 {
@@ -492,10 +492,10 @@ namespace Platform.Server.Services
                 return orgCheck;
             }
 
-            await using var _db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
 
             var id = rq.Id;
-            var document = await _db.CoreDocuments.FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
+            var document = await db.CoreDocuments.FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
             if (document == null)
             {
                 return ApplicationErrors.NoId.AsResult();
@@ -555,10 +555,10 @@ namespace Platform.Server.Services
             document.RefreshTime = now;
 
             // Changes
-            var changes = _db.ChangeTracker.Entries().GetChangedProperties();
+            var changes = db.ChangeTracker.Entries().GetChangedProperties();
 
             // Save
-            var task1 = _db.SaveChangesAsync(cancellationToken);
+            var task1 = db.SaveChangesAsync(cancellationToken);
 
             // Push message
             var message = new UpdateDocumentMessage

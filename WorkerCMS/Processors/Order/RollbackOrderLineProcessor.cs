@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Order;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Order
     /// </summary>
     public class RollbackOrderLineProcessor : LogQueueProcessor<RollbackOrderLineMessage>
     {
-        public RollbackOrderLineProcessor(ILogger<RollbackOrderLineProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.RollbackOrderLineMessage, logDb)
+        public RollbackOrderLineProcessor(ILogger<RollbackOrderLineProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.RollbackOrderLineMessage, logDbFactory)
         {
         }
     }

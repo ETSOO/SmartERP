@@ -1,4 +1,5 @@
-﻿using PlatformShared.CrmMessages;
+﻿using Microsoft.EntityFrameworkCore;
+using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Product;
 using PlatformShared.Database;
 
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.Product
     /// </summary>
     public class SortPromotionProcessor : LogQueueProcessor<SortPromotionMessage>
     {
-        public SortPromotionProcessor(ILogger<SortPromotionProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.SortPromotionMessage, logDb)
+        public SortPromotionProcessor(ILogger<SortPromotionProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.SortPromotionMessage, logDbFactory)
         {
         }
     }

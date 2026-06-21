@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.Database;
@@ -10,8 +11,8 @@ namespace WorkerCMS.Processors.PO
     /// </summary>
     public class RecalculatePOProcessor : LogQueueProcessor<RecalculatePOMessage>
     {
-        public RecalculatePOProcessor(ILogger<RecalculatePOProcessor> logger, LogDbContext logDb)
-            : base(logger, CrmJsonSerializerContext.Default.RecalculatePOMessage, logDb)
+        public RecalculatePOProcessor(ILogger<RecalculatePOProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory)
+            : base(logger, CrmJsonSerializerContext.Default.RecalculatePOMessage, logDbFactory)
         {
         }
     }
