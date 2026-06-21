@@ -635,7 +635,7 @@ namespace Platform.Server.Services
             if (userId > 0)
             {
                 userExists = true;
-                isAccepted = await _db.Users(data.UserData.OrganizationId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
+                isAccepted = await db.Users(data.UserData.OrganizationId).AnyAsync(ou => ou.CoreUserId == userId, cancellationToken);
             }
 
             return new MemberInvitationData

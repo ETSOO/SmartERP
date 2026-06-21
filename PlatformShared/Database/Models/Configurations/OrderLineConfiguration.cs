@@ -25,13 +25,10 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.OriginalPrice)
-                .HasColumnType("money")
                 .HasColumnName("original_price");
             entity.Property(e => e.CostPrice)
-                .HasColumnType("money")
                 .HasColumnName("cost_price");
             entity.Property(e => e.Price)
-                .HasColumnType("money")
                 .HasColumnName("price");
             entity.Property(e => e.Qty)
                 .HasPrecision(12, 2)
@@ -41,10 +38,8 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("qty_delivered");
             entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
             entity.Property(e => e.Amount)
-                .HasColumnType("money")
                 .HasColumnName("amount");
             entity.Property(e => e.Discount)
-                .HasColumnType("money")
                 .HasColumnName("discount");
             entity.OwnsMany(e => e.Promotions,
                 p => p.ToJson("promotions"));

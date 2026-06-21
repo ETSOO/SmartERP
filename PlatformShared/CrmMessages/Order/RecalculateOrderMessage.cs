@@ -10,5 +10,11 @@ namespace PlatformShared.CrmMessages.Order
     public record RecalculateOrderMessage : CommonUpdateMessage, IMessageQueueMessage
     {
         public static string Type => "RecalculateOrder";
+
+        /// <summary>
+        /// Order creation
+        /// 订单登记时间
+        /// </summary>
+        public DateTimeOffset OrderCreation { get; init; }
     }
 }

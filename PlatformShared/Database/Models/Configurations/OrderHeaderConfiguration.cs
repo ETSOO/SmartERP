@@ -48,16 +48,12 @@ namespace PlatformShared.Database.Models.Configurations
                 .IsFixedLength()
                 .HasColumnName("currency");
             entity.Property(e => e.Amount)
-                .HasColumnType("money")
                 .HasColumnName("amount");
             entity.Property(e => e.PaidAmount)
-                .HasColumnType("money")
                 .HasColumnName("paid_amount");
             entity.Property(e => e.Discount)
-                .HasColumnType("money")
                 .HasColumnName("discount");
             entity.Property(e => e.LineDiscount)
-                .HasColumnType("money")
                 .HasColumnName("line_discount");
             entity.Property(e => e.Lines).HasColumnName("lines");
             entity.Property(e => e.Items)
@@ -86,10 +82,8 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(512)
                 .HasColumnName("delivery_instruction");
             entity.Property(e => e.TaxAmount)
-                .HasColumnType("money")
                 .HasColumnName("tax_amount");
             entity.Property(e => e.ApprovedDiscount)
-                .HasColumnType("money")
                 .HasColumnName("approved_discount");
             entity.Property(e => e.Data)
                 .HasColumnType("jsonb")

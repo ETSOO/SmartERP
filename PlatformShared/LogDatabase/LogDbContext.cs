@@ -24,6 +24,18 @@ namespace PlatformShared.Database
         public required DbSet<CoreLogUsage> CoreLogUsages { get; set; }
 
         /// <summary>
+        /// Order daily reports
+        /// 订单日报表
+        /// </summary>
+        public required DbSet<OrderDailyReport> OrderDailyReports { get; set; }
+
+        /// <summary>
+        /// Order monthly reports
+        /// 订单月报表
+        /// </summary>
+        public required DbSet<OrderMonthlyReport> OrderMonthlyReports { get; set; }
+
+        /// <summary>
         /// Is sensitive data logging enabled
         /// 敏感数据日志是否启用
         /// </summary>
@@ -91,6 +103,48 @@ namespace PlatformShared.Database
                 entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
                 entity.Property(e => e.Period).HasColumnName("period");
                 entity.Property(e => e.Qty).HasColumnName("qty");
+            });
+
+            modelBuilder.Entity<OrderDailyReport>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("order_daily_report_pkey");
+
+                entity.ToTable("order_daily_report");
+
+                entity.Property(e => e.Id)
+                    .UseIdentityAlwaysColumn()
+                    .HasColumnName("id");
+                entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+                entity.Property(e => e.Period).HasColumnName("period");
+                entity.Property(e => e.Items).HasColumnName("items");
+                entity.Property(e => e.Amount).HasColumnName("amount");
+                entity.Property(e => e.PaidAmount).HasColumnName("paid_amount");
+                entity.Property(e => e.Discount).HasColumnName("discount");
+                entity.Property(e => e.LineDiscount).HasColumnName("line_discount");
+                entity.Property(e => e.ApprovedDiscount).HasColumnName("approved_discount");
+                entity.Property(e => e.Qty).HasColumnName("qty");
+                entity.Property(e => e.Customers).HasColumnName("customers");
+            });
+
+            modelBuilder.Entity<OrderMonthlyReport>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("order_monthly_report_pkey");
+
+                entity.ToTable("order_monthly_report");
+
+                entity.Property(e => e.Id)
+                    .UseIdentityAlwaysColumn()
+                    .HasColumnName("id");
+                entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+                entity.Property(e => e.Period).HasColumnName("period");
+                entity.Property(e => e.Items).HasColumnName("items");
+                entity.Property(e => e.Amount).HasColumnName("amount");
+                entity.Property(e => e.PaidAmount).HasColumnName("paid_amount");
+                entity.Property(e => e.Discount).HasColumnName("discount");
+                entity.Property(e => e.LineDiscount).HasColumnName("line_discount");
+                entity.Property(e => e.ApprovedDiscount).HasColumnName("approved_discount");
+                entity.Property(e => e.Qty).HasColumnName("qty");
+                entity.Property(e => e.Customers).HasColumnName("customers");
             });
         }
     }

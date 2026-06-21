@@ -32,7 +32,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.PersonCategoryIds).HasColumnName("person_category_ids");
             entity.Property(e => e.Code).HasColumnName("code");
             entity.Property(e => e.MinAmount)
-                .HasColumnType("money")
                 .HasColumnName("min_amount");
             entity.Property(e => e.Discount).HasColumnName("discount");
             entity.Property(e => e.ValidStart).HasColumnName("valid_start");

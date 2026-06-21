@@ -773,7 +773,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             // Fetch order with calculated aggregates in a single query
-            var result = await _db.Orders(orgId)
+            var result = await _db.Orders(orgId).AsNoTracking()
                 .Where(p => p.Id == id && (isLocalManage || p.UserId == User.Oid) && p.Status < EntityStatus.Inactivated)
                 .Select(o => new
                 {
@@ -782,7 +782,19 @@ namespace CRM.Server.Services
                 })
                 .Select(o => new
                 {
-                    o.Order,
+                    Order = new OrderHeader
+                    {
+                        Id = o.Order.Id,
+                        Title = o.Order.Title,
+                        BuyerId = o.Order.BuyerId,
+                        Currency = o.Order.Currency,
+                        Lines = o.Order.Lines,
+                        LineDiscount = o.Order.LineDiscount,
+                        Amount = o.Order.Amount,
+                        Discount = o.Order.Discount,
+                        Promotions = o.Order.Promotions,
+                        Creation = o.Order.Creation
+                    },
                     Lines = (short)o.Lines.Count(),
                     Items = o.Lines.Sum(l => l.Qty),
                     LineDiscount = o.Lines.Sum(l => l.Discount),
@@ -843,7 +855,8 @@ namespace CRM.Server.Services
             var message = new RecalculateOrderMessage
             {
                 Data = User.CreateMessageData(App.AppId, id, order.Title),
-                Changes = changes
+                Changes = changes,
+                OrderCreation = order.Creation
             };
             var task2 = _queueService.PushAsync(message, CrmJsonSerializerContext.Default.RecalculateOrderMessage, cancellationToken);
 

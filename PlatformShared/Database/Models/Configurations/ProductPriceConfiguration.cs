@@ -17,16 +17,12 @@ namespace PlatformShared.Database.Models.Configurations
                 .IsFixedLength()
                 .HasColumnName("currency");
             entity.Property(e => e.RetailPrice)
-                .HasColumnType("money")
                 .HasColumnName("retail_price");
             entity.Property(e => e.PromotionPrice)
-                .HasColumnType("money")
                 .HasColumnName("promotion_price");
             entity.Property(e => e.ChannelPrice)
-                .HasColumnType("money")
                 .HasColumnName("channel_price");
             entity.Property(e => e.CostPrice)
-                .HasColumnType("money")
                 .HasColumnName("cost_price");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")

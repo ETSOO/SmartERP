@@ -32,6 +32,10 @@ namespace PlatformShared
     [JsonSerializable(typeof(SendAuthCodeEmailMessage))]
 
     [JsonSerializable(typeof(JsonElement))]
+    [JsonSerializable(typeof(IEnumerable<decimal>))]
+    [JsonSerializable(typeof(IEnumerable<byte>))]
+    [JsonSerializable(typeof(IEnumerable<short>))]
+    [JsonSerializable(typeof(IEnumerable<ushort>))]
 
     public partial class PlatformSharedContext : JsonSerializerContext
     {

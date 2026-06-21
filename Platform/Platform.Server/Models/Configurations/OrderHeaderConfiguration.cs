@@ -26,11 +26,9 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("address_formatted");
             entity.Property(e => e.AddressId).HasColumnName("address_id");
             entity.Property(e => e.Amount)
-                .HasColumnType("money")
                 .HasColumnName("amount");
             entity.Property(e => e.ApprovedDiscount)
                 .HasDefaultValueSql("0")
-                .HasColumnType("money")
                 .HasColumnName("approved_discount");
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)

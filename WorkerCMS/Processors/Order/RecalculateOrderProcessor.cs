@@ -13,11 +13,13 @@ namespace WorkerCMS.Processors.Order
     public class RecalculateOrderProcessor : LogQueueProcessor<RecalculateOrderMessage>
     {
         private readonly IDbContextFactory<MyDbContext> _dbFactory;
+        private readonly IDbContextFactory<LogDbContext> _logDbFactory;
 
         public RecalculateOrderProcessor(ILogger<RecalculateOrderProcessor> logger, IDbContextFactory<LogDbContext> logDbFactory, IDbContextFactory<MyDbContext> dbFactory)
             : base(logger, CrmJsonSerializerContext.Default.RecalculateOrderMessage, logDbFactory)
         {
             _dbFactory = dbFactory;
+            _logDbFactory = logDbFactory;
         }
 
         protected override async Task ProcessMessageAsync(RecalculateOrderMessage message, MessageReceivedProperties properties, CancellationToken cancellationToken)
@@ -29,26 +31,21 @@ namespace WorkerCMS.Processors.Order
             if (!orgId.HasValue) return;
 
             await using var db = _dbFactory.CreateDbContext();
-            var (orderMonthlyReportEnabled, orderDailyReportHour) = await ProcessorUtils.ReadReportSettingsAsync(db, orgId.Value, cancellationToken);
+            var (orderMonthlyReportEnabled, orderDailyReportHour, timeZone) = await ProcessorUtils.ReadReportSettingsAsync(db, orgId.Value, cancellationToken);
             if (!orderMonthlyReportEnabled) return;
 
-            // Order id
-            var orderId = message.Data.TargetId;
+            await using var logDb = await _logDbFactory.CreateDbContextAsync(cancellationToken);
 
             // Add it to the daily report
             if (orderDailyReportHour.HasValue)
             {
-
-            }
-
-            // Add it to the monthly report
-            if (orderDailyReportHour.HasValue)
-            {
-                // Summary from daily report
+                // Daily report
+                await ProcessorUtils.CreateOrderDailyReportAsync(db, logDb, orgId.Value, orderDailyReportHour.Value, message.OrderCreation, timeZone, cancellationToken);
             }
             else
             {
-
+                // Monthly report
+                await ProcessorUtils.CreateOrderMonthlyReportAsync(db, logDb, orgId.Value, 0, message.OrderCreation, timeZone, cancellationToken);
             }
         }
     }

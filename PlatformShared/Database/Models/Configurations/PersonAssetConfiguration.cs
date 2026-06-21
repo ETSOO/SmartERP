@@ -30,7 +30,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.ExpiryCheck).HasColumnName("expiry_check");
             entity.Property(e => e.Times).HasColumnName("times");
             entity.Property(e => e.Amount)
-                .HasColumnType("money")
                 .HasColumnName("amount");
             entity.Property(e => e.SensitiveData)
                 .HasMaxLength(1280)

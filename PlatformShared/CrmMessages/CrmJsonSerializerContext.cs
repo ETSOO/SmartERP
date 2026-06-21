@@ -142,8 +142,11 @@ namespace PlatformShared.CrmMessages
     [JsonSerializable(typeof(UpdateStockMessage))]
     [JsonSerializable(typeof(UpdateStockLineMessage))]
 
-    [JsonSerializable(typeof(decimal))]
     [JsonSerializable(typeof(JsonElement))]
+    [JsonSerializable(typeof(IEnumerable<decimal>))]
+    [JsonSerializable(typeof(IEnumerable<byte>))]
+    [JsonSerializable(typeof(IEnumerable<short>))]
+    [JsonSerializable(typeof(IEnumerable<ushort>))]
 
     public partial class CrmJsonSerializerContext : JsonSerializerContext
     {
