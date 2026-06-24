@@ -1,4 +1,5 @@
-﻿using com.etsoo.Utils.Actions;
+﻿using com.etsoo.CoreFramework.Models;
+using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Stock;
 using CRM.Server.RQ.Stock;
 using System.Buffers;
@@ -25,6 +26,7 @@ namespace CRM.Server.Services
         Task<StockViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
         Task<StockLineViewData?> ReadLineAsync(long id, bool checkPermission, CancellationToken cancellationToken = default);
         Task<IActionResult> ReceiveAsync(StockReceiveRQ rq, CancellationToken cancellationToken = default);
+        Task<AppActionData?> ReportActionAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> TakeAsync(StockTakeRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> TransferAsync(StockTransferRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(StockUpdateRQ rq, CancellationToken cancellationToken = default);

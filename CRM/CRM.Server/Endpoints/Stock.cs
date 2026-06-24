@@ -61,6 +61,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Receive", (IStockService service, StockReceiveRQ rq, CancellationToken cancellationToken) => service.ReceiveAsync(rq, cancellationToken))
                 .WithDescription("Receive stock / 入库").WithTags("Stock");
 
+            g.MapGet("ReportAction", (IStockService service, CancellationToken cancellationToken) => service.ReportActionAsync(cancellationToken))
+                .WithDescription("Get stock report action / 获取库存报表操作").WithTags("Stock");
+
             g.MapPost("Take", (IStockService service, StockTakeRQ rq, CancellationToken cancellationToken) => service.TakeAsync(rq, cancellationToken))
                 .WithDescription("Stock take / 库存盘点").WithTags("Stock");
 

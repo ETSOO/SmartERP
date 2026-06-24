@@ -101,6 +101,9 @@ namespace WorkerCenter.Periods
                     _logger.LogError(ex, "Exception when checking asset - {ProductName} ({Sn}) from {PersonName}", asset.ProductName, asset.Sn, asset.PersonName);
                 }
 
+                // HTTP call may be cancelled
+                if (token.IsCancellationRequested) return;
+
                 // Update asset
                 var data = asset.Data ?? new PersonAssetData();
 
@@ -108,7 +111,7 @@ namespace WorkerCenter.Periods
                 var lastError = data.LastError;
                 data.LastError = errorMessage;
 
-                var nextScheduleMinutes = data.IntervalMinutes == null || data.IntervalMinutes < 1 ? 5 : data.IntervalMinutes.Value;
+                var nextScheduleMinutes = (data.IntervalMinutes == null || data.IntervalMinutes < 1) ? 5 : data.IntervalMinutes.Value;
                 if (lastError != null)
                 {
                     // If there was a previous error, increase the interval
@@ -132,7 +135,7 @@ namespace WorkerCenter.Periods
 
                 await updateDb.SaveChangesAsync(token);
 
-                if (isException)
+                if (isException || token.IsCancellationRequested)
                 {
                     // No necessary to report the exception
                     return;

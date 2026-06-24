@@ -86,8 +86,10 @@ export default function Home() {
     "menuHome",
     "newTask",
     "offerings",
+    "orderDailyReport",
     "orderDeliveries",
     "orderLine",
+    "orderMonthlyReport",
     "orderPayments",
     "orders",
     "org",
@@ -97,6 +99,7 @@ export default function Home() {
     "promotions",
     "purchases",
     "realtimeInventory",
+    "reports",
     "signoutSuccess",
     "sortCategory",
     "sortOrderDelivery",
@@ -148,6 +151,33 @@ export default function Home() {
         title: labels.menuHome,
         icon: <HomeIcon />,
         pageHeader: false
+      },
+      {
+        segment: "home/report",
+        title: labels.reports,
+        hidden: true,
+        children: [
+          {
+            segment: "order/daily",
+            title: labels.orderDailyReport,
+            hidden: true
+          },
+          {
+            segment: "order/dailychart",
+            title: labels.orderDailyReport,
+            hidden: true
+          },
+          {
+            segment: "order/monthly",
+            title: labels.orderMonthlyReport,
+            hidden: true
+          },
+          {
+            segment: "order/monthlychart",
+            title: labels.orderMonthlyReport,
+            hidden: true
+          }
+        ]
       },
       {
         segment: "home/contact",

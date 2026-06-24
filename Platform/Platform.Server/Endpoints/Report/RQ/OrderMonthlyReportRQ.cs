@@ -1,16 +1,18 @@
-﻿namespace Platform.Server.Endpoints.Org.RQ
+﻿using com.etsoo.CoreFramework.Models;
+
+namespace Platform.Server.Endpoints.Report.RQ
 {
     /// <summary>
-    /// Organization usage report request data
-    /// 机构使用报告请求数据
+    /// Order monthly report request data
+    /// 订单月报表请求数据
     /// </summary>
-    public record OrgUsageReportRQ : IOrgRQ
+    public record OrderMonthlyReportRQ
     {
         /// <summary>
-        /// Organization id
-        /// 机构编号
+        /// Action signed data
+        /// 操作签名数据
         /// </summary>
-        public int? OrgId { get; set; }
+        public required AppActionData Action { get; init; }
 
         /// <summary>
         /// Year

@@ -22,6 +22,16 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Is platform admin
+        /// 是否为平台管理员
+        /// </summary>
+        /// <returns>是否为平台管理员</returns>
+        protected bool IsAdmin()
+        {
+            return User.AppId == MyAppConstants.AdminAppId;
+        }
+
+        /// <summary>
         /// Is valid photo stream
         /// 是否为有效的照片流
         /// </summary>

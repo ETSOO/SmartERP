@@ -19,6 +19,24 @@
         public const string CoreApiAppSecretEncryptionKey = "AppSecret";
 
         /// <summary>
+        /// Customer report action
+        /// 客户报表操作
+        /// </summary>
+        public const string ReportCustomerAction = "Customer.Report";
+
+        /// <summary>
+        /// Inventory report action
+        /// 库存报表操作
+        /// </summary>
+        public const string ReportInventoryAction = "Inventory.Report";
+
+        /// <summary>
+        /// Order report action
+        /// 订单报表操作
+        /// </summary>
+        public const string ReportOrderAction = "Order.Report";
+
+        /// <summary>
         /// System resource key prefix
         /// 系统资源键前缀
         /// </summary>

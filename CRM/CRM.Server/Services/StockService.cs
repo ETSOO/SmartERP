@@ -15,6 +15,7 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
+using PlatformShared.Services;
 using System.Buffers;
 using System.Text.Json;
 
@@ -1562,6 +1563,23 @@ namespace CRM.Server.Services
             await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.StockReceiveMessage, cancellationToken);
 
             return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// Report action data
+        /// 报表操作数据
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AppActionData?> ReportActionAsync(CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Inventory.Report, cancellationToken))
+            {
+                return null;
+            }
+
+            return App.SignAction(ServiceConstants.ReportInventoryAction, User.Pid);
         }
 
         /// <summary>

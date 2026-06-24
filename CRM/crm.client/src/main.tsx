@@ -363,6 +363,38 @@ const router = createDynamicRouter([
               return { Component: AllReports.default };
             }
           },
+          {
+            path: "/home/report/order/daily",
+            lazy: async () => {
+              const OrderDailyReport =
+                await import("./pages/home/report/order/OrderDailyReport");
+              return { Component: OrderDailyReport.default };
+            }
+          },
+          {
+            path: "/home/report/order/dailychart",
+            lazy: async () => {
+              const OrderDailyReportChart =
+                await import("./pages/home/report/order/OrderDailyReportChart");
+              return { Component: OrderDailyReportChart.default };
+            }
+          },
+          {
+            path: "/home/report/order/monthly",
+            lazy: async () => {
+              const OrderMonthlyReport =
+                await import("./pages/home/report/order/OrderMonthlyReport");
+              return { Component: OrderMonthlyReport.default };
+            }
+          },
+          {
+            path: "/home/report/order/monthlychart",
+            lazy: async () => {
+              const OrderMonthlyReportChart =
+                await import("./pages/home/report/order/OrderMonthlyReportChart");
+              return { Component: OrderMonthlyReportChart.default };
+            }
+          },
 
           {
             path: "/home/po",

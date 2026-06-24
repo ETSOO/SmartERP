@@ -1,5 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
@@ -127,6 +128,23 @@ namespace CRM.Server.Services
         public Task<SystemSettings?> ReadSettingsAsync(CancellationToken cancellationToken = default)
         {
             return ReadSystemSettingsAsync(_db, User.OrganizationInt, cancellationToken);
+        }
+
+        /// <summary>
+        /// Report action data
+        /// 报表操作数据
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AppActionData?> ReportActionAsync(CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Customer.Report, cancellationToken))
+            {
+                return null;
+            }
+
+            return App.SignAction("Customer.Report", User.OrganizationInt);
         }
 
         /// <summary>

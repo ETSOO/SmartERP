@@ -38,6 +38,7 @@ using Platform.Server.Endpoints.Document;
 using Platform.Server.Endpoints.Member;
 using Platform.Server.Endpoints.Org;
 using Platform.Server.Endpoints.Public;
+using Platform.Server.Endpoints.Report;
 using Platform.Server.Endpoints.Storage;
 using Platform.Server.Endpoints.User;
 using Platform.Server.OAuth2;
@@ -430,6 +431,7 @@ services.AddScoped<IDocumentService, DocumentService>();
 services.AddScoped<IMemberService, MemberService>();
 services.AddScoped<IOrgService, OrgService>();
 services.AddScoped<IPublicService, PublicService>();
+services.AddScoped<IReportService, ReportService>();
 services.AddScoped<IStorageService, StorageService>();
 services.AddScoped<IUserService, UserService>();
 
@@ -531,6 +533,7 @@ api.MapAuth()
     .MapMember()
     .MapOrg()
     .MapPublic()
+    .MapReport()
     .MapStorage()
     .MapUser()
     .AddModelValidators()

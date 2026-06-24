@@ -135,7 +135,7 @@ namespace Platform.Server.Services
             if (!orgId.HasValue)
             {
                 // System template
-                if (!_orgService.IsAdmin())
+                if (!IsAdmin())
                 {
                     return ApplicationErrors.AccessDenied.AsResult("Admin");
                 }
@@ -509,7 +509,7 @@ namespace Platform.Server.Services
             if (orgId == null)
             {
                 // System template
-                if (!_orgService.IsAdmin())
+                if (!IsAdmin())
                 {
                     return ApplicationErrors.AccessDenied.AsResult("Admin");
                 }

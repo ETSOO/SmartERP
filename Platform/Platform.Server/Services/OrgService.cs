@@ -81,7 +81,6 @@ namespace Platform.Server.Services
         }
 
         readonly MyDbContext _db;
-        readonly LogDbContext _logDb;
         readonly IPublicService _publicService;
         readonly IStorageFactory _storageFactory;
         readonly IQueueService _queueService;
@@ -93,14 +92,12 @@ namespace Platform.Server.Services
         /// 构造函数
         /// </summary>
         /// <param name="db">Database EF</param>
-        /// <param name="logDb">Log database EF</param>
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="publicService">Public service</param>
         /// <param name="queueService">Queue service</param>
         public OrgService(MyDbContext db,
-            LogDbContext logDb,
             IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<OrgService> logger,
@@ -112,7 +109,6 @@ namespace Platform.Server.Services
             : base(app, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
-            _logDb = logDb;
             _publicService = publicService;
             _storageFactory = storageFactory;
             _queueService = queueService;
@@ -882,16 +878,6 @@ namespace Platform.Server.Services
             }
 
             return ActionResult.Success;
-        }
-
-        /// <summary>
-        /// Is platform admin
-        /// 是否为平台管理员
-        /// </summary>
-        /// <returns>是否为平台管理员</returns>
-        public bool IsAdmin()
-        {
-            return User.AppId == MyAppConstants.AdminAppId;
         }
 
         /// <summary>
@@ -1851,53 +1837,6 @@ namespace Platform.Server.Services
             }
 
             return ActionResult.Success;
-        }
-
-        private Task<List<OrgUsageReportData>> UsageReportLoadAsync(int orgId, int year, CancellationToken cancellationToken)
-        {
-            var (start, end) = NumUtils.GetMonthPeriodRange(year);
-
-            return _logDb.CoreLogUsages.AsNoTracking()
-                .Where(u => u.OrganizationId == orgId && u.Period >= start && u.Period <= end)
-                .Select(u => new OrgUsageReportData
-                {
-                    Period = u.Period,
-                    Qty = u.Qty
-                })
-                .ToListAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// Get usage report data
-        /// 获取使用报告数据
-        /// </summary>
-        /// <param name="rq">Request data</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Result</returns>
-        public async Task<OrgUsageReportData[]> UsageReportAsync(OrgUsageReportRQ rq, CancellationToken cancellationToken = default)
-        {
-            // Format request data
-            var result = await FormatRQAsync(rq, UserRole.User, cancellationToken);
-            if (!result.Ok)
-            {
-                return [];
-            }
-
-            var orgId = rq.OrgId ?? User.OrganizationInt;
-
-            var year = rq.Year ?? DateTime.UtcNow.Year;
-
-            var hasLastYear = rq.HasLastYear ?? true;
-
-            var data = await UsageReportLoadAsync(orgId, year, cancellationToken);
-
-            if (hasLastYear)
-            {
-                var lastYearData = await UsageReportLoadAsync(orgId, year - 1, cancellationToken);
-                data.AddRange(lastYearData);
-            }
-
-            return [..data];
         }
     }
 }

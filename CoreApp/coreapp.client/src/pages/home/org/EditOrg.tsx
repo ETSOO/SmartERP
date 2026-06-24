@@ -47,7 +47,8 @@ export default function EditOrg() {
   const [data, setData] = React.useState<OrgUpdateReadDto>({
     id,
     name: "",
-    status: EntityStatus.Normal
+    status: EntityStatus.Normal,
+    timeZone: app.getTimeZone()
   });
 
   // Formik

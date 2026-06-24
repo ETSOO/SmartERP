@@ -11,6 +11,7 @@ using Platform.Server.Dto.Document;
 using Platform.Server.Dto.Member;
 using Platform.Server.Dto.Org;
 using Platform.Server.Dto.Public;
+using Platform.Server.Dto.Report;
 using Platform.Server.Endpoints.App.RQ;
 using Platform.Server.Endpoints.Auth.RQ;
 using Platform.Server.Endpoints.AuthCode.RQ;
@@ -18,6 +19,7 @@ using Platform.Server.Endpoints.Document.RQ;
 using Platform.Server.Endpoints.Member.RQ;
 using Platform.Server.Endpoints.Org.RQ;
 using Platform.Server.Endpoints.Public.RQ;
+using Platform.Server.Endpoints.Report.RQ;
 using Platform.Server.Endpoints.User.RQ;
 using System.Text.Json.Serialization;
 
@@ -95,7 +97,6 @@ namespace Platform.Server
     [JsonSerializable(typeof(OrgGetMyRQ))]
     [JsonSerializable(typeof(OrgUpdateRQ))]
     [JsonSerializable(typeof(OrgUpdateApiRQ))]
-    [JsonSerializable(typeof(OrgUsageReportRQ))]
     [JsonSerializable(typeof(SendProfileEmailRQ))]
 
     [JsonSerializable(typeof(IEnumerable<OrgGetMyData>))]
@@ -103,7 +104,20 @@ namespace Platform.Server
     [JsonSerializable(typeof(IEnumerable<OrgQueryResourceData>))]
     [JsonSerializable(typeof(IEnumerable<TimeZoneResourceItem>))]
     [JsonSerializable(typeof(OrgUpdateResourceReadData))]
-    [JsonSerializable(typeof(OrgUsageReportData[]))]
+
+    // Report
+    [JsonSerializable(typeof(OrderDailyReportQueryRQ))]
+    [JsonSerializable(typeof(OrderDailyReportRQ))]
+    [JsonSerializable(typeof(OrderMonthlyReportQueryRQ))]
+    [JsonSerializable(typeof(OrderMonthlyReportRQ))]
+    [JsonSerializable(typeof(OrgUsageReportRQ))]
+
+    [JsonSerializable(typeof(IEnumerable<OrderDailyReportData>))]
+    [JsonSerializable(typeof(IEnumerable<OrderDailyReportQueryData>))]
+    [JsonSerializable(typeof(IEnumerable<OrderMonthlyReportData>))]
+    [JsonSerializable(typeof(IEnumerable<OrderMonthlyReportQueryData>))]
+    [JsonSerializable(typeof(IEnumerable<PeriodReportData>))]
+    [JsonSerializable(typeof(IEnumerable<TitleReportData>))]
 
     // Public
     [JsonSerializable(typeof(AcceptInvitationRQ))]

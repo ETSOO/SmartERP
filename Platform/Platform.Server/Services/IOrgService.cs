@@ -25,7 +25,6 @@ namespace Platform.Server.Services
         Task GetMyAsync(OrgGetMyRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> LeaveAsync(int id, CancellationToken cancellationToken = default);
         Task ListAsync(OrgListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
-        bool IsAdmin();
         Task<bool> OwnsAsync(OrgOwnsRQ rq, CancellationToken cancellationToken = default);
         Task<bool> OwnsAsync(int id, UserRole userRole, CancellationToken cancellationToken = default);
         Task<IEnumerable<OrgQueryData>> QueryAsync(OrgQueryRQ rq, CancellationToken cancellationToken = default);
@@ -45,6 +44,5 @@ namespace Platform.Server.Services
         Task<IActionResult> UploadFilesAsync(IEnumerable<IFormFile> files, long id, string folder, string sign, CancellationToken cancellationToken = default);
         Task<IActionResult> UploadProfileFilesAsync(long id, IEnumerable<IFormFile> files, string action, CancellationToken cancellationToken = default);
         Task<OrgUpdateResourceReadData?> UpdateResourceReadAsync(int id, CancellationToken cancellationToken = default);
-        Task<OrgUsageReportData[]> UsageReportAsync(OrgUsageReportRQ rq, CancellationToken cancellationToken = default);
     }
 }

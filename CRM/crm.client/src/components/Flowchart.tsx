@@ -18,10 +18,10 @@ export function Flowchart({ visible }: { visible: boolean }) {
     "products",
     "purchases",
     "reports",
-    "simpleInventory",
+    "inventory",
     "stakeholders",
-    "stockIn",
-    "stockOut",
+    "stockKindOrder",
+    "stockKindPO",
     "suppliers",
     "employees"
   );
@@ -188,7 +188,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
       // Inventory nodes
       nodes.push({
         id: "inventory",
-        data: { label: labels.simpleInventory },
+        data: { label: labels.inventory },
         className: app.owns(Permissions.Inventory.All)
           ? undefined
           : "node-disabled",
@@ -200,7 +200,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
           id: "poToInventory",
           source: "po",
           target: "inventory",
-          label: labels.stockIn,
+          label: labels.stockKindPO,
           animated: true,
           markerEnd: {
             type: MarkerType.ArrowClosed
@@ -210,7 +210,7 @@ export function Flowchart({ visible }: { visible: boolean }) {
           id: "inventoryToOrder",
           source: "inventory",
           target: "order",
-          label: labels.stockOut,
+          label: labels.stockKindOrder,
           animated: true,
           markerEnd: {
             type: MarkerType.ArrowClosed

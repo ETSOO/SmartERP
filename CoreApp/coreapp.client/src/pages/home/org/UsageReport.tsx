@@ -26,7 +26,7 @@ export default function UsageReport() {
 
   // Load data
   const reloadData = React.useCallback(async () => {
-    const result = await app.core.orgApi.usageReport({ orgId: id });
+    const result = await app.core.reportApi.usageReport({ orgId: id });
     if (result == null) return;
 
     const { labels, currentYearData, lastYearData } =

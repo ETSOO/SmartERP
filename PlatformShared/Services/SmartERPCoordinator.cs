@@ -195,6 +195,11 @@ namespace PlatformShared.Services
                 return ApplicationErrors.NoValidData.AsResult("sign");
             }
 
+            if (data.TotalMinutes() > 30)
+            {
+                return ApplicationErrors.SignExpired.AsResult();
+            }
+
             return ActionResult.Success;
         }
     }

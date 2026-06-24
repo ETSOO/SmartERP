@@ -47,6 +47,7 @@ export default function AllSystem() {
     "depts",
     "org",
     "permissionGroups",
+    "reports",
     "settings",
     "updateSystemSettings"
   );
@@ -65,6 +66,7 @@ export default function AllSystem() {
                 {labels.org}
               </ButtonLink>
             )}
+            <ButtonLink href="./../report">{labels.reports}</ButtonLink>
             <ButtonLink href="./dept">{labels.depts}</ButtonLink>
             <ButtonLink href="./group">{labels.permissionGroups}</ButtonLink>
           </Paper>

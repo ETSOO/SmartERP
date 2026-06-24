@@ -19,6 +19,7 @@ using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Dto;
 using PlatformShared.Extentions;
+using PlatformShared.Services;
 using System.Buffers;
 using System.Text.Json;
 
@@ -773,7 +774,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             // Fetch order with calculated aggregates in a single query
-            var result = await _db.Orders(orgId).AsNoTracking()
+            var result = await _db.Orders(orgId)
                 .Where(p => p.Id == id && (isLocalManage || p.UserId == User.Oid) && p.Status < EntityStatus.Inactivated)
                 .Select(o => new
                 {
@@ -782,19 +783,7 @@ namespace CRM.Server.Services
                 })
                 .Select(o => new
                 {
-                    Order = new OrderHeader
-                    {
-                        Id = o.Order.Id,
-                        Title = o.Order.Title,
-                        BuyerId = o.Order.BuyerId,
-                        Currency = o.Order.Currency,
-                        Lines = o.Order.Lines,
-                        LineDiscount = o.Order.LineDiscount,
-                        Amount = o.Order.Amount,
-                        Discount = o.Order.Discount,
-                        Promotions = o.Order.Promotions,
-                        Creation = o.Order.Creation
-                    },
+                    o.Order,
                     Lines = (short)o.Lines.Count(),
                     Items = o.Lines.Sum(l => l.Qty),
                     LineDiscount = o.Lines.Sum(l => l.Discount),
@@ -864,6 +853,23 @@ namespace CRM.Server.Services
 
             // Return
             return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
+        /// Report action data
+        /// 报表操作数据
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AppActionData?> ReportActionAsync(CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Order.Report, cancellationToken))
+            {
+                return null;
+            }
+
+            return App.SignAction(ServiceConstants.ReportOrderAction, User.Pid);
         }
 
         /// <summary>

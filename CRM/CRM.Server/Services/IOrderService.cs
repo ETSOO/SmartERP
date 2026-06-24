@@ -1,4 +1,5 @@
-﻿using com.etsoo.Utils.Actions;
+﻿using com.etsoo.CoreFramework.Models;
+using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Order;
 using CRM.Server.RQ.Order;
 using System.Buffers;
@@ -15,6 +16,7 @@ namespace CRM.Server.Services
         Task<OrderQueryData[]> QueryAsync(OrderQueryRQ rq, CancellationToken cancellationToken = default);
         Task<OrderViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);
         Task<IActionResult> RecalculateAsync(long id, bool checkPermission, CancellationToken cancellationToken = default);
+        Task<AppActionData?> ReportActionAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(OrderUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<OrderUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default);
     }
