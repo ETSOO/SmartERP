@@ -321,7 +321,19 @@ namespace Platform.Server.Services
 
             var hasLastYear = rq.HasLastYear ?? true;
 
-            var data = await UsageReportLoadAsync(orgId, year, cancellationToken);
+            var parameters = new Dictionary<string, object?>
+            {
+                { nameof(year), year },
+                { nameof(hasLastYear), hasLastYear }
+            };
+
+            var task1 = SendReportMessageAsync("OrgUsage", orgId, parameters, cancellationToken);
+
+            var task2 = UsageReportLoadAsync(orgId, year, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var data = task2.Result;
 
             if (hasLastYear)
             {

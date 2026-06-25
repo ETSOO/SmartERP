@@ -59,7 +59,13 @@ export default function UsageReport() {
 
   return (
     <CommonPage paddings={0} onRefresh={reloadData}>
-      {data == null ? <LinearProgress /> : <BarChart data={data} />}
+      {data == null ? (
+        <LinearProgress />
+      ) : (
+        <div style={{ height: "calc(100vh - 136px)" }}>
+          <BarChart data={data} options={{ maintainAspectRatio: false }} />
+        </div>
+      )}
     </CommonPage>
   );
 }
