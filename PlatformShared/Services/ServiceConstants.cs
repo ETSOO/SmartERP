@@ -41,5 +41,13 @@
         /// 系统资源键前缀
         /// </summary>
         public const string SysResourceKeyPrefix = "etsoo";
+
+        /// <summary>
+        /// Document generation action
+        /// 文档生成操作
+        /// </summary>
+        /// <param name="documentId">Document ID</param>
+        /// <returns>Action name</returns>
+        public static string DocumentGenerationAction(int documentId) => $"Document.Generation.{documentId}";
     }
 }

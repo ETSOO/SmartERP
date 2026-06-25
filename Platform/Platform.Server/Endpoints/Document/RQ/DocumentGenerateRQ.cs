@@ -16,6 +16,12 @@ namespace Platform.Server.Endpoints.Document.RQ
         public int Id { get; init; }
 
         /// <summary>
+        /// Related target id
+        /// 关联对象编号
+        /// </summary>
+        public long TargetId { get; init; }
+
+        /// <summary>
         /// No cache
         /// 禁用缓存
         /// </summary>

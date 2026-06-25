@@ -8,6 +8,7 @@ using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.String;
 using CRM.Server.Dto;
 using CRM.Server.Dto.Order;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Order;
 using CRM.Server.RQ.Product;
@@ -469,6 +470,34 @@ namespace CRM.Server.Services
                 });
 
             return query;
+        }
+
+        /// <summary>
+        /// Document action data
+        /// 文档操作数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AppActionData?> DocumentActionAsync(DocumentActionRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Order.Document, cancellationToken))
+            {
+                return null;
+            }
+
+            var targetId = rq.TargetId;
+
+            var hasTarget = await _db.Orders(User.OrganizationInt).AsNoTracking().AnyAsync(p => p.Id == targetId, cancellationToken);
+            if (!hasTarget)
+            {
+                return null;
+            }
+
+            var actionName = ServiceConstants.DocumentGenerationAction(rq.Id);
+
+            return App.SignAction(actionName, targetId);
         }
 
         /// <summary>

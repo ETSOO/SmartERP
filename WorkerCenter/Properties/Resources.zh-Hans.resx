@@ -276,4 +276,7 @@
   <data name="GenerateDocument" xml:space="preserve">
     <value>输出业务文档</value>
   </data>
+  <data name="Report" xml:space="preserve">
+    <value>浏览报表</value>
+  </data>
 </root>

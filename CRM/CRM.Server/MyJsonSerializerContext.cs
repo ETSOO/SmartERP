@@ -2,9 +2,10 @@
 using CRM.Server.Dto.Customer;
 using CRM.Server.Dto.Dept;
 using CRM.Server.Dto.Group;
-using CRM.Server.Dto.OrderDelivery;
-using CRM.Server.Dto.OrderPayment;
 using CRM.Server.Dto.Order;
+using CRM.Server.Dto.OrderDelivery;
+using CRM.Server.Dto.OrderLine;
+using CRM.Server.Dto.OrderPayment;
 using CRM.Server.Dto.Person;
 using CRM.Server.Dto.PersonAddress;
 using CRM.Server.Dto.PersonCategory;
@@ -12,20 +13,25 @@ using CRM.Server.Dto.PersonContact;
 using CRM.Server.Dto.PersonProduct;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.PO;
+using CRM.Server.Dto.POLine;
 using CRM.Server.Dto.Product;
 using CRM.Server.Dto.ProductCategory;
 using CRM.Server.Dto.Promotion;
+using CRM.Server.Dto.Stock;
+using CRM.Server.Dto.StockSite;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.Dto.System;
 using CRM.Server.Dto.Tag;
 using CRM.Server.Dto.User;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Asset;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Dept;
 using CRM.Server.RQ.Group;
-using CRM.Server.RQ.OrderDelivery;
-using CRM.Server.RQ.OrderPayment;
 using CRM.Server.RQ.Order;
+using CRM.Server.RQ.OrderDelivery;
+using CRM.Server.RQ.OrderLine;
+using CRM.Server.RQ.OrderPayment;
 using CRM.Server.RQ.Person;
 using CRM.Server.RQ.PersonAddress;
 using CRM.Server.RQ.PersonCategory;
@@ -34,9 +40,12 @@ using CRM.Server.RQ.PersonInfo;
 using CRM.Server.RQ.PersonProduct;
 using CRM.Server.RQ.PersonProfile;
 using CRM.Server.RQ.PO;
+using CRM.Server.RQ.POLine;
 using CRM.Server.RQ.Product;
 using CRM.Server.RQ.ProductCategory;
 using CRM.Server.RQ.Promotion;
+using CRM.Server.RQ.Stock;
+using CRM.Server.RQ.StockSite;
 using CRM.Server.RQ.Supplier;
 using CRM.Server.RQ.System;
 using CRM.Server.RQ.Tag;
@@ -44,14 +53,6 @@ using CRM.Server.RQ.User;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using CRM.Server.Dto.OrderLine;
-using CRM.Server.RQ.OrderLine;
-using CRM.Server.RQ.POLine;
-using CRM.Server.Dto.POLine;
-using CRM.Server.Dto.StockSite;
-using CRM.Server.RQ.StockSite;
-using CRM.Server.Dto.Stock;
-using CRM.Server.RQ.Stock;
 
 namespace CRM.Server
 {
@@ -349,6 +350,8 @@ namespace CRM.Server
 
     [JsonSerializable(typeof(UserListRQ))]
     [JsonSerializable(typeof(UserUpdateRQ))]
+
+    [JsonSerializable(typeof(DocumentActionRQ))]
 
     // Results.ValidationProblem
     [JsonSerializable(typeof(HttpValidationProblemDetails))]

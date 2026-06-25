@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Stock;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Stock;
 using System.Buffers;
 
@@ -13,6 +14,7 @@ namespace CRM.Server.Services
         Task<IActionResult> CheckStockAsync(int locationId, StockItem[] items, CancellationToken cancellationToken = default);
         Task<IActionResult> CreateLineAsync(StockCreateLineRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
+        Task<AppActionData?> DocumentActionAsync(DocumentActionRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> LoseAsync(StockLoseRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> InitAsync(StockInitRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(StockListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);

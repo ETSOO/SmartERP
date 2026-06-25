@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Models;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Dto.Order;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Order;
 using System.Buffers;
 
@@ -10,6 +11,7 @@ namespace CRM.Server.Services
     {
         Task<(bool IsEdit, bool IsManage)> CheckEditPermissionsAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> CreateAsync(OrderCreateRQ rq, CancellationToken cancellationToken = default);
+        Task<AppActionData?> DocumentActionAsync(DocumentActionRQ rq, CancellationToken cancellationToken = default);
         ValueTask<OrderDuplicateTestData[]?> DuplicateTestAsync(OrderDuplicateTestRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(OrderListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<OrderListAllData[]> ListAllAsync(OrderListAllRQ rq, CancellationToken cancellationToken = default);

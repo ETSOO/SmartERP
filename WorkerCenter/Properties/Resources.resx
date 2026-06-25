@@ -276,4 +276,7 @@
   <data name="GenerateDocument" xml:space="preserve">
     <value>Generate Business Document</value>
   </data>
+  <data name="Report" xml:space="preserve">
+    <value>View Report</value>
+  </data>
 </root>

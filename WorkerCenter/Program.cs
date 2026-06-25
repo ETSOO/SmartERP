@@ -10,7 +10,6 @@ using PlatformShared.Database;
 using PlatformShared.Services;
 using WorkerCenter.Main.Processors;
 using WorkerCenter.Periods;
-using WorkerCenter.Workers;
 
 var builder = Host.CreateApplicationBuilder(args);
 var configuration = builder.Configuration;
@@ -116,6 +115,7 @@ services.AddSingleton<IMessageQueueProcessor, LeaveOrgProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginFailedProcessor>();
 services.AddSingleton<IMessageQueueProcessor, LoginSuccessProcessor>();
 services.AddSingleton<IMessageQueueProcessor, RenewAppProcessor>();
+services.AddSingleton<IMessageQueueProcessor, ReportProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ResetPasswordProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendAuthCodeEmailProcessor>();
 services.AddSingleton<IMessageQueueProcessor, SendEmailProcessor>();

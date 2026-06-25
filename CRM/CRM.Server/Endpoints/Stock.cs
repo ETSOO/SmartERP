@@ -1,4 +1,5 @@
 ﻿using com.etsoo.WebUtils;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Stock;
 using CRM.Server.Services;
 
@@ -21,6 +22,9 @@ namespace CRM.Server.Endpoints
 
             g.MapDelete("Delete/{id:long}", (IStockService service, long id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
                 .WithDescription("Delete stock / 删除库存").WithTags("Stock");
+
+            g.MapPost("DocumentAction", (IOrderService service, DocumentActionRQ rq, CancellationToken cancellationToken) => service.DocumentActionAsync(rq, cancellationToken))
+                .WithDescription("Get document action data / 获取文档操作签名数据").WithTags("Stock");
 
             g.MapPost("Lose", (IStockService service, StockLoseRQ rq, CancellationToken cancellationToken) => service.LoseAsync(rq, cancellationToken))
                 .WithDescription("Stock loss / 库存报损").WithTags("Stock");

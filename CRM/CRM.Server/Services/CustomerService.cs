@@ -276,6 +276,34 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Document action data
+        /// 文档操作数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<AppActionData?> DocumentActionAsync(DocumentActionRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Customer.Document, cancellationToken))
+            {
+                return null;
+            }
+
+            var targetId = rq.TargetId;
+
+            var hasTarget = await _db.Customers(User.OrganizationInt).AsNoTracking().AnyAsync(p => p.Id == targetId, cancellationToken);
+            if (!hasTarget)
+            {
+                return null;
+            }
+
+            var actionName = ServiceConstants.DocumentGenerationAction(rq.Id);
+
+            return App.SignAction(actionName, targetId);
+        }
+
+        /// <summary>
         /// List customer JSON data
         /// 客户列表JSON数据
         /// </summary>

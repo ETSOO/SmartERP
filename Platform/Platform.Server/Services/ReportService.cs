@@ -2,11 +2,15 @@
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Utils;
+using Microsoft.Azure.Amqp.Framing;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.Report;
 using Platform.Server.Endpoints.Report.RQ;
+using PlatformShared;
 using PlatformShared.Database;
+using PlatformShared.Extentions;
+using PlatformShared.Messages;
 using PlatformShared.Services;
 
 namespace Platform.Server.Services
@@ -20,6 +24,7 @@ namespace Platform.Server.Services
         readonly LogDbContext _logDb;
         readonly ISmartERPCoordinator _erp;
         readonly IOrgService _orgService;
+        readonly IQueueService _queueService;
 
         public ReportService(
             IMyApp app,
@@ -27,11 +32,24 @@ namespace Platform.Server.Services
             ILogger<OrgService> logger,
             LogDbContext logDb,
             ISmartERPCoordinator erp,
-            IOrgService orgService) : base(app, userAccessor.UserSafe, "report", logger)
+            IOrgService orgService,
+            IQueueService queueService) : base(app, userAccessor.UserSafe, "report", logger)
         {
             _logDb = logDb;
             _erp = erp;
             _orgService = orgService;
+            _queueService = queueService;
+        }
+
+        private Task SendReportMessageAsync(string title, int orgId, Dictionary<string, object?>? parameters, CancellationToken cancellationToken)
+        {
+            var message = new ReportMessage
+            {
+                Data = User.CreateMessageData(App.AppId, orgId),
+                Title = title,
+                Parameters = parameters
+            };
+            return _queueService.PushAsync(message, PlatformSharedContext.Default.ReportMessage, cancellationToken);
         }
 
         private AppActionData CreateOrderReportAction(AppActionData action)
@@ -68,7 +86,16 @@ namespace Platform.Server.Services
             var start = rq.StartDate ?? DateOnly.FromDateTime(DateTime.Now).AddDays(-days);
             var end = start.AddDays(days);
 
-            return await _logDb.OrderDailyReports.AsNoTracking()
+            var parameters = new Dictionary<string, object?>
+            {
+                { nameof(days), days },
+                { nameof(start), start },
+                { nameof(end), end }
+            };
+
+            var task1 = SendReportMessageAsync("OrderDailyReport", orgId, parameters, cancellationToken);
+
+            var task2 = _logDb.OrderDailyReports.AsNoTracking()
                 .Where(r => r.OrganizationId == orgId && r.Period >= start && r.Period <= end)
                 .Select(r => new OrderDailyReportData
                 {
@@ -79,6 +106,10 @@ namespace Platform.Server.Services
                 })
                 .OrderBy(r => r.Period)
                 .ToArrayAsync(cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            return task2.Result;
         }
 
         /// <summary>
@@ -175,7 +206,19 @@ namespace Platform.Server.Services
 
             var hasLastYear = rq.HasLastYear ?? true;
 
-            var data = await OrderMonthlyReportLoadAsync(orgId, year, cancellationToken);
+            var parameters = new Dictionary<string, object?>
+            {
+                { nameof(year), year },
+                { nameof(hasLastYear), hasLastYear }
+            };
+
+            var task1 = SendReportMessageAsync("OrderMonthlyReport", orgId, parameters, cancellationToken);
+
+            var task2 = OrderMonthlyReportLoadAsync(orgId, year, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
+
+            var data = task2.Result;
 
             if (hasLastYear)
             {

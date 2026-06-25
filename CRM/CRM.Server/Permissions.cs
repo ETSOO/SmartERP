@@ -97,6 +97,7 @@
         Add = 6011,
         Edit = 6012,
         Delete = 6013,
+        Document = 6015,
 
         QueryContact = 6081,
         AddContact = 6083,
@@ -171,6 +172,7 @@
         Add = 9011,
         Edit = 9012,
         Delete = 9013,
+        Document = 9015,
 
         Manage = 9200,
         Execute = 9202
@@ -208,6 +210,7 @@
         Add = 11011,
         Edit = 11012,
         Delete = 11013,
+        Document = 11015,
 
         Manage = 11200
     }

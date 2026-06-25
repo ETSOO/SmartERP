@@ -174,16 +174,23 @@ namespace Platform.Server.Services
         /// <returns>Result</returns>
         public async Task<(IActionResult, string?)> GenerateAsync(DocumentGenerateRQ rq, CancellationToken cancellationToken = default)
         {
+            // Document id
+            var id = rq.Id;
+
+            var targetId = rq.TargetId;
+
+            var action = rq.Action;
+            action.Action = ServiceConstants.DocumentGenerationAction(id);
+            action.TargetId = targetId;
+
             // Validate the action
-            var actionResult = await _erp.ValidateActionAsync(rq.Action, cancellationToken);
+            var actionResult = await _erp.ValidateActionAsync(action, cancellationToken);
             if (!actionResult.Ok)
             {
                 return (actionResult, null);
             }
 
-            var id = rq.Id;
             var culture = rq.Culture ?? User.Language.Name;
-            var targetId = rq.Action.TargetId;
 
             if (id < 1)
             {

@@ -1,4 +1,5 @@
 ﻿using com.etsoo.WebUtils;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Customer;
 using CRM.Server.Services;
 
@@ -16,6 +17,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("Create", (ICustomerService service, CustomerCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create customer / 创建客户").WithTags("Customer");
+
+            g.MapPost("DocumentAction", (ICustomerService service, DocumentActionRQ rq, CancellationToken cancellationToken) => service.DocumentActionAsync(rq, cancellationToken))
+                .WithDescription("Get document action data / 获取文档操作签名数据").WithTags("Customer");
 
             g.MapPost("List", (ICustomerService service, CustomerListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get customer list / 获取客户列表").WithTags("Customer");

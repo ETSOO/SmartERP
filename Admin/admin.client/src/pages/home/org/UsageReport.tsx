@@ -1,5 +1,5 @@
 import { BarChart, CommonPage } from "@etsoo/materialui";
-import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import React from "react";
 import { ChartData } from "chart.js";
@@ -30,7 +30,7 @@ export default function UsageReport() {
     if (result == null) return;
 
     const { labels, currentYearData, lastYearData } =
-      app.core.transformReportData(result);
+      CoreUtils.transformReportData(app, result);
 
     // Datasets
     const datasets = [

@@ -1,4 +1,5 @@
 ﻿using com.etsoo.WebUtils;
+using CRM.Server.RQ;
 using CRM.Server.RQ.Order;
 using CRM.Server.Services;
 
@@ -16,6 +17,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("Create", (IOrderService service, OrderCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create order / 创建订单").WithTags("Order");
+
+            g.MapPost("DocumentAction", (IOrderService service, DocumentActionRQ rq, CancellationToken cancellationToken) => service.DocumentActionAsync(rq, cancellationToken))
+                .WithDescription("Get document action data / 获取文档操作签名数据").WithTags("Order");
 
             g.MapPost("DuplicateTest", (IOrderService service, OrderDuplicateTestRQ rq, CancellationToken cancellationToken) => service.DuplicateTestAsync(rq, cancellationToken))
                 .WithDescription("Test for duplicate order or POs / 测试重复的订单或采购").WithTags("Order");
