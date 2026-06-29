@@ -62,7 +62,7 @@ namespace Admin.Server.RQ.Admin
                 return ApplicationErrors.NoValidData.AsResult(nameof(Approver));
             }
 
-            if (Comment.Length is not > 0 and < 256)
+            if (Comment.Length is not (> 0 and < 256))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Comment));
             }

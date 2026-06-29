@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.68",
-    "@etsoo/materialui": "^1.6.72",
-    "@etsoo/react": "^1.8.92",
-    "@etsoo/shared": "^1.2.86",
-    "@etsoo/smarterp-core": "^1.1.71",
-    "@etsoo/toolpad": "^1.0.50",
+    "@etsoo/appscript": "^1.6.69",
+    "@etsoo/materialui": "^1.6.73",
+    "@etsoo/react": "^1.8.93",
+    "@etsoo/shared": "^1.2.87",
+    "@etsoo/smarterp-core": "^1.1.72",
+    "@etsoo/toolpad": "^1.0.51",
     "@mui/material": "^9.1.2",
     "formik": "^2.4.9",
     "react": "^19.2.7",
@@ -36,5 +36,8 @@
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.62.2"
+  },
+  "allowScripts": {
+    "core-js-pure@3.49.0": true
   }
 }
