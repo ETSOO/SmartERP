@@ -50,6 +50,10 @@ namespace Platform.Server.Endpoints.User
                 .DisableAntiforgery()
                 .WithDescription("Update user avatar / 更新用户头像").WithTags("User");
 
+            g.MapPut("UpdateSignature", (IUserService service, IFormFile signature, CancellationToken cancellationToken) => service.UpdateSignatureAsync(signature.OpenReadStream(), signature.ContentType, cancellationToken))
+                .DisableAntiforgery()
+                .WithDescription("Update user signature / 更新用户签名").WithTags("User");
+
             g.MapGet("UpdateRead", (IUserService service, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read JSON data for update / 浏览JSON数据用于更新").WithTags("User");
 

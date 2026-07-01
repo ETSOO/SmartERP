@@ -1,15 +1,12 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
-import { HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
+import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import { app } from "../../../app/MyApp";
-import {
-  AvatarState,
-  CoreUtils,
-  MemberReadDto,
-  usePageDataEmpty
-} from "@etsoo/smarterp-core";
+import { MemberReadDto, usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import Typography from "@mui/material/Typography";
+import { ImagePreviewButton } from "./ImagePreviewButton";
+import ButtonGroup from "@mui/material/ButtonGroup";
 
 export default function ViewMember() {
   // Route
@@ -60,23 +57,23 @@ export default function ViewMember() {
       )}
       leftContainerLines={3}
       leftContainer={(item) => (
-        <HBox sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}>
-          <img
-            src={item.localAvatar ?? item.avatar}
-            alt={labels.logo}
-            style={CoreUtils.avatarStyles(false)}
+        <ButtonGroup
+          sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}
+        >
+          <ImagePreviewButton
+            size={160}
+            image={item.localAvatar ?? item.avatar}
           />
           {editPermission && (
-            <IconButtonLink<AvatarState>
+            <ButtonLink
+              title={labels.editAvatar}
               href={`./../../avatar/${item.id}`}
               state={{ title: item.name, avatar: item.localAvatar }}
-              title={labels.editAvatar}
-              size="small"
             >
               <EditIcon />
-            </IconButtonLink>
+            </ButtonLink>
           )}
-        </HBox>
+        </ButtonGroup>
       )}
       fields={[
         {

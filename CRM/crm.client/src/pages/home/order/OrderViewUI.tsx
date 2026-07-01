@@ -23,6 +23,8 @@ import { EntityStatus } from "@etsoo/appscript";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { OrderUIUtils } from "./OrderUIUtils";
+import { DocumentGeneratorButton } from "../../../components/DocumentGeneratorButton";
+import { DocumentKind } from "@etsoo/smarterp-core";
 
 export type OrderViewUIProps = {
   data: OrderViewData;
@@ -241,6 +243,15 @@ export function OrderViewUI(props: OrderViewUIProps) {
                 >
                   {labels.addOrderLine}
                 </Button>
+              )}
+              {app.owns(Permissions.Order.Document) && (
+                <DocumentGeneratorButton
+                  action={(id, targetId) =>
+                    app.orderApi.documentAction({ id, targetId })
+                  }
+                  kind={DocumentKind.CMSORDERDATA}
+                  targetId={item.id}
+                />
               )}
             </HBox>
           ),

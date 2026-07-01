@@ -36,11 +36,20 @@ namespace Platform.Server.Services
         /// 是否为有效的照片流
         /// </summary>
         /// <param name="stream">Stream</param>
+        /// <param name="small">Is small file</param>
         /// <returns>Result</returns>
-        protected bool IsValidPhoto(Stream stream)
+        protected bool IsValidPhoto(Stream stream, bool small = false)
         {
-            // 10KB - 10MB
-            return stream.Length is (>= 10_240 and <= 10_485_760);
+            if(small)
+            {
+                // 4KB - 2MB
+                return stream.Length is (>= 4_096 and <= 2_097_152);
+            }
+            else
+            {
+                // 10KB - 10MB
+                return stream.Length is (>= 10_240 and <= 10_485_760);
+            }
         }
     }
 }

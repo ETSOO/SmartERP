@@ -1,0 +1,10 @@
+.table-noborder {
+  width: 100%;
+  border-collapse: collapse;
+  border: none;
+}
+
+.title {
+  font-weight: bold;
+  text-align: center;
+}

@@ -51,6 +51,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Pin)
                 .HasMaxLength(20)
                 .HasColumnName("pin");
+            entity.Property(e => e.Signature)
+                .HasMaxLength(256)
+                .HasColumnName("signature");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");

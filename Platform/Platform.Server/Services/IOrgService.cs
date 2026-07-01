@@ -39,6 +39,7 @@ namespace Platform.Server.Services
         Task<IActionResult> UpdateAsync(OrgUpdateRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateApiAsync(OrgUpdateApiRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAvatarAsync(int id, Stream avatarStream, string contentType, CancellationToken cancellationToken = default);
+        Task<IActionResult> UpdateCompanySealAsync(int id, Stream stream, string contentType, CancellationToken cancellationToken = default);
         Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task UpdateApiReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<IActionResult> UploadFilesAsync(IEnumerable<IFormFile> files, long id, string folder, string sign, CancellationToken cancellationToken = default);

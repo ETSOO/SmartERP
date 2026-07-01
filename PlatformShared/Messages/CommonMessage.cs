@@ -112,9 +112,11 @@ namespace PlatformShared.Messages
     [JsonDerivedType(typeof(UpdateMemberAvatarMessage))]
     [JsonDerivedType(typeof(UpdateMemberMessage))]
     [JsonDerivedType(typeof(UpdateOrgAvatarMessage))]
+    [JsonDerivedType(typeof(UpdateOrgCompanySealMessage))]
     [JsonDerivedType(typeof(UpdateOrgMessage))]
     [JsonDerivedType(typeof(UpdateUserAvatarMessage))]
     [JsonDerivedType(typeof(UpdateUserSelfMessage))]
+    [JsonDerivedType(typeof(UpdateUserSignatureMessage))]
 
     public abstract record CommonMessage
     {

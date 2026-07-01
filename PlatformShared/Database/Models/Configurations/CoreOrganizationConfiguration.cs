@@ -54,6 +54,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Slogan)
                 .HasMaxLength(128)
                 .HasColumnName("slogan");
+            entity.Property(e => e.CompanySeal)
+                .HasMaxLength(256)
+                .HasColumnName("company_seal");
 
             entity.HasOne(d => d.Owner).WithMany(u => u.OwnedOrganizations)
                 .HasForeignKey(d => d.OwnerId)

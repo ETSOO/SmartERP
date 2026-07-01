@@ -1022,6 +1022,7 @@ namespace Platform.Server.Services
                     ou.Organization.Brand,
                     ou.Organization.Slogan,
                     ou.Organization.Logo,
+                    ou.Organization.CompanySeal,
                     ou.Organization.Pin,
                     ParentName = (ou.Organization.Parent == null ? null : ou.Organization.Parent.Name),
                     ou.Organization.ParentId,
@@ -1549,6 +1550,79 @@ namespace Platform.Server.Services
             else
             {
                 Logger.LogError("Avatar write path is {path}", path);
+                return ApplicationErrors.DataProcessingFailed.AsResult();
+            }
+        }
+
+        /// <summary>
+        /// Update company seal
+        /// 更新公司印章
+        /// </summary>
+        /// <param name="id">Organization id</param>
+        /// <param name="stream">Company seal stream</param>
+        /// <param name="contentType">Content type</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>New URL</returns>
+        public async Task<IActionResult> UpdateCompanySealAsync(int id, Stream stream, string contentType, CancellationToken cancellationToken = default)
+        {
+            // Check the stream
+            if (!IsValidPhoto(stream, true))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(stream));
+            }
+
+            // Check the organization id
+            var org = await _db.CoreOrganizations.AsNoTracking()
+                .Where(o => o.Id == id && o.OwnerId == User.IdInt)
+                .Select(o => new { o.CompanySeal, o.Name })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (org == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            var extension = MimeTypeMap.TryGetExtension(contentType);
+            if (string.IsNullOrEmpty(extension))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(contentType));
+            }
+
+            // File path
+            var path = "/OrgSeal/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
+
+            // Storage
+            var storage = await _storageFactory.CreateAsync(null, cancellationToken);
+
+            // Save the stream to file directly
+            var saveResult = await storage.WriteAsync(path, stream, WriteCase.CreateNew, cancellationToken: cancellationToken);
+
+            if (saveResult)
+            {
+                // New company seal URL
+                var url = storage.GetUrl(path);
+
+                // Update
+                var task1 = _db.CoreOrganizations.Where(o => o.Id == id).ExecuteUpdateAsync(o => o.SetProperty(o => o.CompanySeal, url), cancellationToken);
+
+                // Remove current company seal
+                var task2 = !string.IsNullOrEmpty(org.CompanySeal) ? storage.DeleteUrlAsync(org.CompanySeal, cancellationToken).AsTask() : Task.CompletedTask;
+
+                // Push message
+                var message = new UpdateOrgCompanySealMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, id, org.Name)
+                };
+                var task3 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateOrgCompanySealMessage, cancellationToken);
+
+                // 3 kinds of tasks, safe to do
+                await Task.WhenAll(task1, task2, task3);
+
+                // Return
+                return ActionResult.Succeed(url);
+            }
+            else
+            {
+                Logger.LogError("Company seal write path is {path}", path);
                 return ApplicationErrors.DataProcessingFailed.AsResult();
             }
         }

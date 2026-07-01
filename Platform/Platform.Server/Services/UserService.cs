@@ -614,6 +614,67 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Update signature
+        /// 更新签名
+        /// </summary>
+        /// <param name="stream">Signature stream</param>
+        /// <param name="contentType">Content type</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>New URL</returns>
+        public async ValueTask<IActionResult> UpdateSignatureAsync(Stream stream, string contentType, CancellationToken cancellationToken = default)
+        {
+            // Check the stream
+            if (!IsValidPhoto(stream, true))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(stream));
+            }
+
+            var extension = MimeTypeMap.TryGetExtension(contentType);
+            if (string.IsNullOrEmpty(extension))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(contentType));
+            }
+
+            // File path
+            var path = "/UserSignature/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
+
+            // Save the stream to file directly
+            var saveResult = await _storage.WriteAsync(path, stream, WriteCase.CreateNew, cancellationToken: cancellationToken);
+
+            if (saveResult)
+            {
+                // New signature URL
+                var url = _storage.GetUrl(path);
+
+                // Update
+                var task1 = _db.CoreUsers.Where(u => u.Id == User.IdInt).ExecuteUpdateAsync(u => u.SetProperty(u => u.Signature, url), cancellationToken);
+
+                // Keep previous signature for reference
+
+                // Push message
+                var message = new UpdateUserSignatureMessage
+                {
+                    Data = User.CreateMessageData(App.AppId, 0)
+                };
+                var task2 = _queueService.PushAsync(message, PlatformSharedContext.Default.UpdateUserSignatureMessage, cancellationToken);
+
+                await Task.WhenAll(task1, task2);
+
+                // Return
+                return ActionResult.Succeed(url);
+            }
+            else
+            {
+                if (Logger.IsEnabled(LogLevel.Error))
+                {
+                    Logger.LogError("Signature write path is {path}", path);
+                }
+
+                return ApplicationErrors.DataProcessingFailed.AsResult();
+            }
+        }
+
+        /// <summary>
         /// Read user data for update
         /// 读取用于更新的用户数据
         /// </summary>
@@ -632,7 +693,8 @@ namespace Platform.Server.Services
                     u.FamilyName,
                     u.GivenName,
                     u.LatinFamilyName,
-                    u.LatinGivenName
+                    u.LatinGivenName,
+                    u.Signature
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
     }

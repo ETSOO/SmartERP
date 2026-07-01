@@ -139,6 +139,12 @@ namespace PlatformShared.Database.Models
         public string? Pin { get; set; }
 
         /// <summary>
+        /// Signature
+        /// 签名
+        /// </summary>
+        public string? Signature { get; set; }
+
+        /// <summary>
         /// Creation
         /// 创建时间
         /// </summary>

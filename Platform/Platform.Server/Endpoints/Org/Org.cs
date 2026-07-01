@@ -103,6 +103,10 @@ namespace Platform.Server.Endpoints.Org
                 .DisableAntiforgery()
                 .WithDescription("Update organization avatar / 更新机构头像").WithTags("Org");
 
+            g.MapPut("UpdateCompanySeal/{id:int}", [Roles(UserRole.Founder)] (IOrgService service, [FromRoute] int id, IFormFile companySeal, CancellationToken cancellationToken) => service.UpdateCompanySealAsync(id, companySeal.OpenReadStream(), companySeal.ContentType, cancellationToken))
+                .DisableAntiforgery()
+                .WithDescription("Update organization company seal / 更新机构公司印章").WithTags("Org");
+
             g.MapGet("UpdateRead/{id:int}", [Roles(Constants.AdminRoles)] (IOrgService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read JSON data for upate / 浏览JSON数据用于更新").WithTags("Org");
 

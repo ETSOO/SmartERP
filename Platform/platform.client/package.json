@@ -10,25 +10,25 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.69",
-    "@etsoo/materialui": "^1.6.73",
+    "@etsoo/materialui": "^1.6.74",
     "@etsoo/react": "^1.8.93",
     "@etsoo/shared": "^1.2.87",
-    "@etsoo/smarterp-core": "^1.1.72",
+    "@etsoo/smarterp-core": "^1.1.76",
     "@mui/icons-material": "^9.1.1",
     "@mui/material": "^9.1.2",
     "formik": "^2.4.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.0",
+    "react-router-dom": "^7.18.1",
     "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "typescript": "^6.0.3",
-    "vite": "^8.1.0",
+    "vite": "^8.1.2",
     "vite-plugin-svgr": "^5.2.0"
   },
   "optionalDependencies": {

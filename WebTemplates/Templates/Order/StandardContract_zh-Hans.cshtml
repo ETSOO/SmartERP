@@ -7,10 +7,55 @@
 
 <html lang="zh-hans">
 <head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>@Model.Subject</title>
+    <link rel="stylesheet" href="/resources/pdf.css" />
 </head>
 <body>
-    <p>@Model.Org.Name</p>
+    <h1 class="title">合同</h1>
+
+    <table style="width: 100%; margin-top: 1.5em; " border="0">
+        <tr>
+            <td style="width: 9%">甲方：</td>
+            <td style="width: 41%">
+                <erp:FollowRenderer runat="server">
+                    <ItemTemplate>
+                        <b><%# Container["name"] %></b><br /><span class="smallfont"><%# FormatAddress(Container) %><br /><%# Container["phones"] %></span>
+                    </ItemTemplate>
+                </erp:FollowRenderer>
+            </td>
+            <td style="width: 9%">乙方：</td>
+            <td style="width: 41%">
+                <erp:FollowRenderer runat="server" id="FollowRendererYF">
+                    <ItemTemplate>
+                        <b><%# Container["name"] %></b><br /><span class="smallfont"><%# FormatAddress(Container) %><br /><%# Container["phones"] %></span>
+                    </ItemTemplate>
+                </erp:FollowRenderer>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="font-size: 9pt; padding: 0.5em 0em;">编号：<%=this.TargetId %> (<%=this.Pin %>)</td>
+        </tr>
+    </table>
+
+    <p>甲方委托乙方提供相关服务。经双方充分协商一致，依据中华人民共和国现行法律法规，在平等、自愿、公平、诚实信用的原则基础上，订立本合同。双方同意严格按照本协议约定履行各自义务，并享有相应权利。 </p>
+
+    <table class="table-noborder" border="0">
+        <tr>
+            <td style="width: 30%">甲方代表：</td>
+            <td style="width: 40%"></td>
+            <td style="width: 30%">乙方代表：</td>
+        </tr>
+        <tr>
+            <td>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;月&nbsp;&nbsp;日</p>
+            </td>
+            <td></td>
+            <td>
+                <p><%= DateTime.Now.ToLongDateString() %><div class="signature"><img src="/fileManager/home/documents/signature.png" style="width: 200px;" /></div></p>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

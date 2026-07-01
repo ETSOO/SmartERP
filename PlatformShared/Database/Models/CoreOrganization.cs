@@ -93,6 +93,12 @@ namespace PlatformShared.Database.Models
         public string? Slogan { get; set; }
 
         /// <summary>
+        /// Company seal
+        /// 电子公章
+        /// </summary>
+        public string? CompanySeal { get; set; }
+
+        /// <summary>
         /// Owner
         /// 所有者
         /// </summary>

@@ -127,9 +127,11 @@ services.AddSingleton<IMessageQueueProcessor, UpdateDocumentProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateMemberAvatarProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateMemberProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateOrgAvatarProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateOrgCompanySealProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateOrgProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateUserAvatarProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateUserSelfProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateUserSignatureProcessor>();
 services.AddLocalRabbitMQConsumer(consumerOptions);
 
 var producerOptions = configuration.GetSection("RabbitMQProducer").Get<LocalRabbitMQProducerOptions>() ?? throw new Exception("RabbitMQ producer Options Not Found");

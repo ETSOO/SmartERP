@@ -21,6 +21,7 @@ namespace Platform.Server.Services
         Task<AppData> GetLatestAppAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(UserUpdateRQ rq, CancellationToken cancellationToken = default);
         ValueTask<IActionResult> UpdateAvatarAsync(Stream avatarStream, string contentType, CancellationToken cancellationToken = default);
+        ValueTask<IActionResult> UpdateSignatureAsync(Stream stream, string contentType, CancellationToken cancellationToken = default);
         Task UpdateReadAsync(IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
     }
 }
