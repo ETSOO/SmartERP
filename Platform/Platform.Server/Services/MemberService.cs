@@ -347,7 +347,7 @@ namespace Platform.Server.Services
                 Creation = ou.Creation
             }).ToJsonAsync(writer, cancellationToken: cancellationToken);
 
-            if (_db.IsSensitiveDataLoggingEnabled)
+            if (_db.IsSensitiveDataLoggingEnabled && Logger.IsEnabled(LogLevel.Information))
             {
                 Logger.LogInformation("QueryAsync is {hasContent} with {commandText}", hasContent, commandText);
             }

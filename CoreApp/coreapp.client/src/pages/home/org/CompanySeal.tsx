@@ -12,7 +12,7 @@ import { AvatarState, usePageDataEmpty } from "@etsoo/smarterp-core";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-export default function UpdateAvatar() {
+export default function CompanySeal() {
   // Route
   const navigate = useNavigate();
   const { id = 0 } = useParamsEx({ id: "number" });
@@ -20,7 +20,7 @@ export default function UpdateAvatar() {
   const state = useLocationState<AvatarState>();
 
   // Labels
-  const labels = app.getLabels("avatar", "imageSizeTooSmall", "logo");
+  const labels = app.getLabels("companySeal", "imageSizeTooSmall");
 
   // Page data hook
   usePageDataEmpty(app);
@@ -33,9 +33,9 @@ export default function UpdateAvatar() {
             <React.Fragment />
           ) : (
             <ImagePreviewButton
-              size={[160, 80]}
+              size={160}
               image={state.avatar}
-              buttonProps={{ title: labels.logo }}
+              buttonProps={{ title: labels.companySeal }}
             />
           )}
           <Typography variant="caption">{state.title}</Typography>
@@ -53,9 +53,9 @@ export default function UpdateAvatar() {
 
             // Form data
             const form = new FormData();
-            form.append("avatar", blob);
+            form.append("companySeal", blob);
 
-            const result = await app.core.orgApi.updateAvatar(id, form);
+            const result = await app.core.orgApi.updateCompanySeal(id, form);
             if (result == null) return;
 
             // To view page
@@ -65,7 +65,7 @@ export default function UpdateAvatar() {
             return true;
           }}
           width={320}
-          height={160}
+          height={320}
           maxWidth={640}
         />
       </Stack>

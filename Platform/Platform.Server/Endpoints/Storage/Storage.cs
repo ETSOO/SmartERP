@@ -33,6 +33,10 @@ namespace Platform.Server.Endpoints.Storage
                 service.DownloadFileAsync($"/UserAvatar/{folder}/{file}", null, cancellationToken)
             ).WithDescription("Read user avatar / 读取用户头像").WithTags("Storage");
 
+            g.MapGet("UserSignature/{userId}/{folder}/{file}", (IStorageService service, string userId, string folder, string file, CancellationToken cancellationToken) =>
+                service.DownloadUserFileAsync($"/UserSignature/{userId}/{folder}/{file}", userId, cancellationToken)
+            ).WithDescription("Read user signature / 读取用户签名").WithTags("Storage");
+
             return builder;
         }
     }

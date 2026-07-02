@@ -1588,10 +1588,10 @@ namespace Platform.Server.Services
             }
 
             // File path
-            var path = "/OrgSeal/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
+            var path = _storageFactory.GetOrgPath(id, "OrgSeals") + Path.GetRandomFileName() + extension;
 
             // Storage
-            var storage = await _storageFactory.CreateAsync(null, cancellationToken);
+            var storage = await _storageFactory.CreateAsync(id, cancellationToken);
 
             // Save the stream to file directly
             var saveResult = await storage.WriteAsync(path, stream, WriteCase.CreateNew, cancellationToken: cancellationToken);

@@ -1,6 +1,12 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { BusinessTax } from "@etsoo/appscript";
-import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
+import {
+  ButtonLink,
+  HBox,
+  IconButtonLink,
+  ImagePreviewButton,
+  ViewPage
+} from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import ApiIcon from "@mui/icons-material/Api";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -9,7 +15,6 @@ import LabelIcon from "@mui/icons-material/Label";
 import { app } from "../../../app/MyApp";
 import {
   AvatarState,
-  CoreUtils,
   OrgReadDto,
   usePageDataEmpty
 } from "@etsoo/smarterp-core";
@@ -19,6 +24,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import { MyUtils } from "../../../app/MyUtils";
+import ButtonGroup from "@mui/material/ButtonGroup";
 
 export default function ViewOrg() {
   // Route
@@ -84,23 +90,20 @@ export default function ViewOrg() {
       )}
       leftContainerLines={2}
       leftContainer={(item) => (
-        <HBox>
-          <img
-            src={item.logo}
-            alt={labels.logo}
-            style={CoreUtils.avatarStyles(true)}
-          />
+        <ButtonGroup
+          sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}
+        >
+          <ImagePreviewButton size={[160, 80]} image={item.logo} />
           {item.isOwner && (
-            <IconButtonLink<AvatarState>
+            <ButtonLink<AvatarState>
+              title={labels.editLogo}
               href={`./../../avatar/${item.id}`}
               state={{ title: item.name, avatar: item.logo }}
-              title={labels.editLogo}
-              size="small"
             >
               <EditIcon />
-            </IconButtonLink>
+            </ButtonLink>
           )}
-        </HBox>
+        </ButtonGroup>
       )}
       fields={[
         {
@@ -145,7 +148,24 @@ export default function ViewOrg() {
         },
         "timeZone",
         ["userExpiry", GridDataType.DateTime],
-        ["creation", GridDataType.DateTime]
+        ["creation", GridDataType.DateTime],
+        {
+          data: (item) => (
+            <ButtonGroup>
+              <ImagePreviewButton size={[60, 60]} image={item.companySeal} />
+              {item.isOwner && (
+                <ButtonLink<AvatarState>
+                  title={labels.edit}
+                  href={`./../../companySeal/${item.id}`}
+                  state={{ title: item.name, avatar: item.companySeal }}
+                >
+                  <EditIcon />
+                </ButtonLink>
+              )}
+            </ButtonGroup>
+          ),
+          label: "companySeal"
+        }
       ]}
       loadData={loadData}
       actions={(data, _refresh) => (

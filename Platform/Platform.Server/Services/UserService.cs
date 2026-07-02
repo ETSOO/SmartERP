@@ -636,7 +636,7 @@ namespace Platform.Server.Services
             }
 
             // File path
-            var path = "/UserSignature/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
+            var path = "/UserSignature/U" + $"{User.Id}/" + DateTime.UtcNow.ToString("yyyyMM") + "/" + Path.GetRandomFileName() + extension;
 
             // Save the stream to file directly
             var saveResult = await _storage.WriteAsync(path, stream, WriteCase.CreateNew, cancellationToken: cancellationToken);

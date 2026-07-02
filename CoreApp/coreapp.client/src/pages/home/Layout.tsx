@@ -67,6 +67,7 @@ export default function Home() {
     "app1",
     "auditHistory",
     "changePassword",
+    "companySeal",
     "currentOrg",
     "customResources",
     "documentTemplates",
@@ -129,6 +130,12 @@ export default function Home() {
             segment: "avatar",
             pattern: "avatar/:id",
             title: labels.editAvatar,
+            hidden: true
+          },
+          {
+            segment: "companyseal",
+            pattern: "companyseal/:id",
+            title: labels.companySeal,
             hidden: true
           },
           {

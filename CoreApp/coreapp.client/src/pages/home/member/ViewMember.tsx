@@ -1,11 +1,20 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
-import { ButtonLink, HBox, IconButtonLink, ViewPage } from "@etsoo/materialui";
+import {
+  ButtonLink,
+  HBox,
+  IconButtonLink,
+  ImagePreviewButton,
+  ViewPage
+} from "@etsoo/materialui";
 import EditIcon from "@mui/icons-material/Edit";
 import { app } from "../../../app/MyApp";
-import { MemberReadDto, usePageDataEmpty } from "@etsoo/smarterp-core";
+import {
+  AvatarState,
+  MemberReadDto,
+  usePageDataEmpty
+} from "@etsoo/smarterp-core";
 import React from "react";
 import Typography from "@mui/material/Typography";
-import { ImagePreviewButton } from "./ImagePreviewButton";
 import ButtonGroup from "@mui/material/ButtonGroup";
 
 export default function ViewMember() {
@@ -65,7 +74,7 @@ export default function ViewMember() {
             image={item.localAvatar ?? item.avatar}
           />
           {editPermission && (
-            <ButtonLink
+            <ButtonLink<AvatarState>
               title={labels.editAvatar}
               href={`./../../avatar/${item.id}`}
               state={{ title: item.name, avatar: item.localAvatar }}

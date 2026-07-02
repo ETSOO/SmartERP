@@ -83,6 +83,25 @@ namespace Platform.Server.Services
         }
 
         /// <summary>
+        /// Download user file
+        /// 下载用户文件
+        /// </summary>
+        /// <param name="path">File path</param>
+        /// <param name="userId">User id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Task</returns>
+        public async Task DownloadUserFileAsync(string path, string userId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(userId) || userId.Equals("U" + User?.Id))
+            {
+                await _accessor.SetStatusCodeAsync(HttpStatusCode.BadRequest, "Invalid user path");
+                return;
+            }
+
+            await DownloadFileAsync(path, null, cancellationToken);
+        }
+
+        /// <summary>
         /// Editor styles
         /// 编辑器样式
         /// </summary>

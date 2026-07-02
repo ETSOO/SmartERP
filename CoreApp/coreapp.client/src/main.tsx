@@ -169,6 +169,13 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/org/companyseal/:id",
+            lazy: async () => {
+              const CompanySeal = await import("./pages/home/org/CompanySeal");
+              return { Component: CompanySeal.default };
+            }
+          },
+          {
             path: "/home/org/customresource/:id",
             lazy: async () => {
               const CustomResource =

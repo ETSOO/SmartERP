@@ -1,4 +1,4 @@
-import { EditPage, InputField } from "@etsoo/materialui";
+import { EditPage, ImagePreviewButton, InputField } from "@etsoo/materialui";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -11,6 +11,8 @@ import {
   UserUpdateRQ
 } from "@etsoo/smarterp-core";
 import Grid from "@mui/material/Grid";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Button from "@mui/material/Button";
 
 export default function EditUser() {
   // Route
@@ -18,13 +20,15 @@ export default function EditUser() {
 
   // Labels
   const labels = app.getLabels(
+    "edit",
     "familyName",
     "fullName",
     "givenName",
     "latinFamilyName",
     "latinGivenName",
     "noChanges",
-    "preferredName"
+    "preferredName",
+    "signature"
   );
 
   // Form validation schema
@@ -152,6 +156,14 @@ export default function EditUser() {
           value={formik.values.latinGivenName ?? ""}
           onChange={formik.handleChange}
         />
+      </Grid>
+      <Grid size={{ xs: 6, md: 3 }}>
+        <ButtonGroup>
+          <ImagePreviewButton size={[90, 45]} image={data.signature} />
+          <Button>
+            {labels.signature} ({labels.edit})
+          </Button>
+        </ButtonGroup>
       </Grid>
     </EditPage>
   );
