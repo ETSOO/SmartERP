@@ -10,16 +10,17 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.70",
-    "@etsoo/materialui": "^1.6.76",
+    "@etsoo/materialui": "^1.6.78",
     "@etsoo/react": "^1.8.94",
     "@etsoo/shared": "^1.2.87",
-    "@etsoo/smarterp-core": "^1.1.77",
-    "@etsoo/toolpad": "^1.0.52",
-    "@mui/material": "^9.1.2",
+    "@etsoo/smarterp-core": "^1.1.78",
+    "@etsoo/toolpad": "^1.0.53",
+    "@mui/material": "^9.2.0",
     "formik": "^2.4.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1",
+    "signature_pad": "^5.1.3",
     "yup": "^1.7.1"
   },
   "overrides": {

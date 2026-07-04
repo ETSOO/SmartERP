@@ -1,11 +1,17 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
 import { BusinessTax } from "@etsoo/appscript";
-import { ButtonLink, HBox, LinkEx, ViewPage } from "@etsoo/materialui";
+import {
+  ButtonLink,
+  HBox,
+  ImagePreviewButton,
+  LinkEx,
+  ViewPage
+} from "@etsoo/materialui";
 import SupportIcon from "@mui/icons-material/Support";
 import ApiIcon from "@mui/icons-material/Api";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import { app } from "../../../app/MyApp";
-import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadOrgData } from "../../../api/dto/query/ReadOrgDto";
 import { AppUtils } from "../../../components/AppUtils";
@@ -58,13 +64,7 @@ export default function ViewOrg() {
       leftContainerLines={2}
       leftContainer={(item) =>
         item.logo ? (
-          <HBox>
-            <img
-              src={item.logo}
-              alt={labels.logo}
-              style={CoreUtils.avatarStyles(true)}
-            />
-          </HBox>
+          <ImagePreviewButton size={[160, 80]} image={item.logo} />
         ) : undefined
       }
       fields={[
@@ -102,7 +102,13 @@ export default function ViewOrg() {
           data: (item) => app.getStatusLabel(item.status),
           label: "status"
         },
-        ["creation", GridDataType.DateTime]
+        ["creation", GridDataType.DateTime],
+        {
+          data: (item) => (
+            <ImagePreviewButton size={60} image={item.companySeal} />
+          ),
+          label: "companySeal"
+        }
       ]}
       loadData={loadData}
       actions={(data, _refresh) => (

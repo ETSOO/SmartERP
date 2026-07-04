@@ -1,4 +1,11 @@
-import { EditPage, ImagePreviewButton, InputField } from "@etsoo/materialui";
+import {
+  CanvasUtils,
+  EditPage,
+  ImagePreviewButton,
+  InputField,
+  SignaturePadFull,
+  SignaturePadFullMethods
+} from "@etsoo/materialui";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -27,6 +34,7 @@ export default function EditUser() {
     "latinFamilyName",
     "latinGivenName",
     "noChanges",
+    "noData",
     "preferredName",
     "signature"
   );
@@ -88,6 +96,50 @@ export default function EditUser() {
     if (data == null) return;
     setData(data);
   }, []);
+
+  const handleSignatureClick = () => {
+    const mRef = React.createRef<SignaturePadFullMethods>();
+
+    app.showInputDialog({
+      title: labels.signature,
+      message: "",
+      callback: async (form) => {
+        if (form == null || mRef.current == null) return;
+
+        const signaturePad = mRef.current.getInstance();
+        if (signaturePad == null) return;
+
+        if (signaturePad.isEmpty()) {
+          return labels.noData;
+        }
+
+        const blob = await CanvasUtils.toBlob(
+          signaturePad.trim(),
+          CanvasUtils.PNG
+        );
+
+        // Form data
+        const sf = new FormData();
+        sf.append("signature", blob);
+
+        const result = await app.core.userApi.updateSignature(sf);
+        if (result == null) return;
+
+        if (!result.ok) {
+          return app.formatResult(result);
+        }
+
+        // Refresh the data
+        await reloadData();
+
+        return true;
+      },
+      inputs: (
+        <SignaturePadFull mRef={mRef} placement={["bottom"]} width="100%" />
+      ),
+      fullScreen: app.smDown
+    });
+  };
 
   // Page data hook
   usePageDataEmpty(app);
@@ -160,7 +212,7 @@ export default function EditUser() {
       <Grid size={{ xs: 6, md: 3 }}>
         <ButtonGroup>
           <ImagePreviewButton size={[90, 45]} image={data.signature} />
-          <Button>
+          <Button onClick={handleSignatureClick}>
             {labels.signature} ({labels.edit})
           </Button>
         </ButtonGroup>

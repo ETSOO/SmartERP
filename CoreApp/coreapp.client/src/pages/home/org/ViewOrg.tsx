@@ -152,7 +152,7 @@ export default function ViewOrg() {
         {
           data: (item) => (
             <ButtonGroup>
-              <ImagePreviewButton size={[60, 60]} image={item.companySeal} />
+              <ImagePreviewButton size={60} image={item.companySeal} />
               {item.isOwner && (
                 <ButtonLink<AvatarState>
                   title={labels.edit}

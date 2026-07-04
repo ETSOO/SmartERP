@@ -36,6 +36,12 @@ export type ReadOrgData = {
   logo?: string;
 
   /**
+   * Company seal
+   * 公司印章
+   */
+  companySeal?: string;
+
+  /**
    * Region
    * 地区
    */

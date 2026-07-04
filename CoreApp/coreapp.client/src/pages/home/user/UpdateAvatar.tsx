@@ -1,7 +1,11 @@
-import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
+import {
+  CommonPage,
+  ImagePreviewButton,
+  UserAvatarEditor
+} from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import Stack from "@mui/material/Stack";
 
 export default function UpdateAvatar() {
@@ -23,10 +27,10 @@ export default function UpdateAvatar() {
             return avatar == null ? (
               <React.Fragment />
             ) : (
-              <img
-                src={avatar}
-                alt={labels.avatar}
-                style={CoreUtils.avatarStyles(false)}
+              <ImagePreviewButton
+                size={[130, 160]}
+                image={avatar}
+                buttonProps={{ title: labels.avatar }}
               />
             );
           }}
@@ -55,6 +59,8 @@ export default function UpdateAvatar() {
             // Reset the UI
             return true;
           }}
+          width={260}
+          height={320}
           maxWidth={640}
         />
       </Stack>

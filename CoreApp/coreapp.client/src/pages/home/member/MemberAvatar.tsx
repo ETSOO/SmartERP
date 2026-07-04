@@ -1,9 +1,14 @@
-import { CommonPage, UserAvatarEditor, VBox } from "@etsoo/materialui";
+import {
+  CommonPage,
+  ImagePreviewButton,
+  UserAvatarEditor,
+  VBox
+} from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
 import { useNavigate } from "react-router-dom";
 import { useLocationState, useParamsEx } from "@etsoo/react";
-import { AvatarState, CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { AvatarState, usePageDataEmpty } from "@etsoo/smarterp-core";
 import Stack from "@mui/material/Stack";
 import { Typography } from "@mui/material";
 
@@ -27,10 +32,10 @@ export default function MemberAvatar() {
           {state.avatar == null ? (
             <React.Fragment />
           ) : (
-            <img
-              src={state.avatar}
-              alt={labels.logo}
-              style={CoreUtils.avatarStyles(false)}
+            <ImagePreviewButton
+              size={[130, 160]}
+              image={state.avatar}
+              buttonProps={{ title: labels.logo }}
             />
           )}
           <Typography variant="caption">{state.title}</Typography>
@@ -59,6 +64,8 @@ export default function MemberAvatar() {
             // Reset the UI
             return true;
           }}
+          width={260}
+          height={320}
           maxWidth={640}
         />
       </Stack>

@@ -565,6 +565,7 @@ namespace Admin.Server.Services
                     o.TimeZone,
                     o.Status,
                     o.Creation,
+                    o.CompanySeal,
 
                     Apps = o.Apps.Count,
                     Users = o.Persons.Where(p => p.CoreUserId != null && p.IdentityType.HasFlag(IdentityTypeFlags.User)).Count(),

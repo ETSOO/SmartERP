@@ -1,9 +1,15 @@
 import { GridDataType, useParamsEx } from "@etsoo/react";
-import { ButtonLink, HBox, HBoxList, ViewPage } from "@etsoo/materialui";
+import {
+  ButtonLink,
+  HBox,
+  HBoxList,
+  ImagePreviewButton,
+  ViewPage
+} from "@etsoo/materialui";
 import HistoryIcon from "@mui/icons-material/History";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import { app } from "../../../app/MyApp";
-import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import React from "react";
 import { ReadUserDto } from "../../../api/dto/query/ReadUserDto";
 import { DateUtils } from "@etsoo/shared";
@@ -22,10 +28,10 @@ export default function ViewUser() {
 
   // Labels
   const labels = app.getLabels(
+    "avatar",
     "auditHistory",
     "clearUserFrozen",
-    "confirmAction",
-    "logo"
+    "confirmAction"
   );
 
   // Page data hook
@@ -55,13 +61,11 @@ export default function ViewUser() {
       leftContainerLines={3}
       leftContainer={(item) =>
         item.avatar ? (
-          <HBox sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}>
-            <img
-              src={item.avatar}
-              alt={labels.logo}
-              style={CoreUtils.avatarStyles(false)}
-            />
-          </HBox>
+          <ImagePreviewButton
+            size={[130, 160]}
+            image={item.avatar}
+            buttonProps={{ title: labels.avatar }}
+          />
         ) : undefined
       }
       fields={[
