@@ -18,8 +18,12 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasConversion<byte>()
                 .HasColumnName("kind");
             entity.Property(e => e.Title)
-                .HasMaxLength(256)
+                .HasMaxLength(128)
+                .IsRequired()
                 .HasColumnName("title");
+            entity.Property(e => e.Description)
+                .HasMaxLength(1280)
+                .HasColumnName("description");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.IsValid)
                 .HasDefaultValue(true)

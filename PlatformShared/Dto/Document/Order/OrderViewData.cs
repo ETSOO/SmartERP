@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using com.etsoo.Utils.String;
 using PlatformShared.Database.Models;
 
 namespace PlatformShared.Dto.Document.Order
@@ -62,6 +63,18 @@ namespace PlatformShared.Dto.Document.Order
         /// 币种
         /// </summary>
         public required string Currency { get; init; }
+
+        /// <summary>
+        /// Currency symbole
+        /// 币种符号
+        /// </summary>
+        public string? CurrencySymbol
+        {
+            get
+            {
+                return OrderUtils.GetCurrencySymbol(Currency);
+            }
+        }
 
         /// <summary>
         /// Amount
@@ -136,6 +149,12 @@ namespace PlatformShared.Dto.Document.Order
         public OrderPaymentKind? PaymentKind { get; init; }
 
         /// <summary>
+        /// Payment way description
+        /// 付款方式描述
+        /// </summary>
+        public string? PaymentDescription { get; init; }
+
+        /// <summary>
         /// Payment instruction
         /// 付款说明
         /// </summary>
@@ -152,6 +171,12 @@ namespace PlatformShared.Dto.Document.Order
         /// 交付类型
         /// </summary>
         public OrderDeliveryKind? DeliveryKind { get; set; }
+
+        /// <summary>
+        /// Delivery way description
+        /// 交付方式描述
+        /// </summary>
+        public string? DeliveryDescription { get; init; }
 
         /// <summary>
         /// Delivery instruction
@@ -218,5 +243,53 @@ namespace PlatformShared.Dto.Document.Order
         /// 订单项目
         /// </summary>
         public required OrderLineViewData[] OrderLines { get; init; }
+
+        /// <summary>
+        /// Is simple order without additional discounts and tax amount
+        /// 是否为简单订单，没有额外折扣和税额
+        /// </summary>
+        public bool IsSimpleOrder
+        {
+            get
+            {
+                return Discount == 0 && ApprovedDiscount == 0 && TaxAmount == 0;
+            }
+        }
+
+        /// <summary>
+        /// Total amount
+        /// 总金额
+        /// </summary>
+        public decimal TotalAmount
+        {
+            get
+            {
+                return Amount + TaxAmount - ApprovedDiscount;
+            }
+        }
+
+        /// <summary>
+        /// Total discount
+        /// 总折扣额
+        /// </summary>
+        public decimal TotalDiscount
+        {
+            get
+            {
+                return LineDiscount + Discount + ApprovedDiscount;
+            }
+        }
+
+        /// <summary>
+        /// Total amount in Chinese
+        /// 中文大写金额
+        /// </summary>
+        public string ChineseAmount
+        {
+            get
+            {
+                return StringUtils.ConvertToChineseNumber(TotalAmount);
+            }
+        }
     }
 }

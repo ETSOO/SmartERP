@@ -132,8 +132,8 @@ namespace PlatformShared.Database.Models
         public string Currency { get; set; } = default!;
 
         /// <summary>
-        /// Amount
-        /// 总金额
+        /// Amount without discount
+        /// 总金额（不含折扣）
         /// </summary>
         public decimal Amount { get; set; }
 
@@ -144,8 +144,8 @@ namespace PlatformShared.Database.Models
         public decimal PaidAmount { get; set; }
 
         /// <summary>
-        /// Discount amount
-        /// 折扣金额
+        /// Order discount amount
+        /// 订单折扣金额
         /// </summary>
         public decimal Discount { get; set; }
 

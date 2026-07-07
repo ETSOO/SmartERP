@@ -1,3 +1,81 @@
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.company-seal {
+  position: absolute;
+  left: -60px;
+  top: -90px;
+  z-index: 1;
+  width: 180px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.company-seal-wrapper {
+  padding-top: 4em;
+  padding-bottom: 4em;
+  break-inside: avoid;
+}
+
+.hr {
+  border-color: red;
+  opacity: 0.5;
+}
+
+.line-title ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  font-size: x-small;
+  color: gray;
+}
+
+.line-title ul span {
+  font-weight: bold;
+}
+
+.party {
+  font-size: large;
+  font-weight: bold;
+}
+
+.relative-container {
+  position: relative;
+}
+
+.signature {
+  height: 36px;
+  margin-bottom: -10px;
+}
+
+.small-tip {
+  font-size: x-small;
+  color: gray;
+}
+
+.table-list {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+.table-list td,
+.table-list th {
+  border: 1px solid black;
+  vertical-align: top;
+  padding: 0.5em;
+}
+
 .table-noborder {
   width: 100%;
   border-collapse: collapse;
@@ -7,4 +85,30 @@
 .title {
   font-weight: bold;
   text-align: center;
+}
+
+.watermark {
+  position: fixed;
+  font-size: 2em;
+  opacity: 0.1;
+  z-index: -1;
+  white-space: nowrap;
+}
+
+.watermark1 {
+  left: 8%;
+  top: 30%;
+  transform: translateY(-30%) rotate(-45deg);
+}
+
+.watermark2 {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.watermark3 {
+  right: 8%;
+  top: 70%;
+  transform: translateY(-70%) rotate(-45deg);
 }

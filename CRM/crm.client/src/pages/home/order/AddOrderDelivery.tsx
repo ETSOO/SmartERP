@@ -22,9 +22,9 @@ export default function AddOrderDelivery() {
 
   const isOrder = useIsOrder();
 
-  const labels = app.getLabels("enabled", "noChanges", "title");
+  const labels = app.getLabels("description", "enabled", "noChanges", "title");
 
-  const refFields = ["title"] as const;
+  const refFields = ["description", "title"] as const;
   const refs = useRefs(refFields);
 
   type DataType = OrderDeliveryCreateRQ;
@@ -125,6 +125,18 @@ export default function AddOrderDelivery() {
           slotProps={{ htmlInput: { maxLength: 128 } }}
           label={labels.title}
           inputRef={refs.title}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <InputField
+          fullWidth
+          required
+          name="description"
+          multiline
+          rows={3}
+          slotProps={{ htmlInput: { maxLength: 1280 } }}
+          label={labels.description}
+          inputRef={refs.description}
         />
       </Grid>
     </EditPage>

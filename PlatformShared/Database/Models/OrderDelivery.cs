@@ -80,6 +80,12 @@ namespace PlatformShared.Database.Models
         public string Title { get; set; } = default!;
 
         /// <summary>
+        /// Description
+        /// 描述
+        /// </summary>
+        public string? Description { get; set; }
+
+        /// <summary>
         /// Core organization id
         /// 核心机构编号
         /// </summary>

@@ -1,7 +1,9 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace PlatformShared.Dto.Document.Order
 {
@@ -46,6 +48,12 @@ namespace PlatformShared.Dto.Document.Order
         /// 产品图标
         /// </summary>
         public string? ProductLogo { get; init; }
+
+        /// <summary>
+        /// Product modifiers
+        /// 产品定制选项
+        /// </summary>
+        public JsonDocument? ProductModifiers { get; init; }
 
         /// <summary>
         /// Unit name
@@ -138,6 +146,12 @@ namespace PlatformShared.Dto.Document.Order
         public DateTimeOffset? EndTime { get; init; }
 
         /// <summary>
+        /// JSON data
+        /// JSON 扩展数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
+
+        /// <summary>
         /// User name
         /// 用户姓名
         /// </summary>
@@ -184,5 +198,15 @@ namespace PlatformShared.Dto.Document.Order
         /// BOM行标题
         /// </summary>
         public string? BomTitle { get; init; }
+
+        /// <summary>
+        /// Get modifiers
+        /// 获取定制选项
+        /// </summary>
+        /// <returns></returns>
+        public CustomFieldItem[] GetModifiers()
+        {
+            return OrderUtils.ParseModifiers(ProductModifiers, Data);
+        }
     }
 }

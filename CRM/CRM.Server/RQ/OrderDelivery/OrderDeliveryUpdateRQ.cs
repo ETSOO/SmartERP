@@ -25,6 +25,12 @@ namespace CRM.Server.RQ.OrderDelivery
         public string? Title { get; init; }
 
         /// <summary>
+        /// Description
+        /// 描述
+        /// </summary>
+        public string? Description { get; init; }
+
+        /// <summary>
         /// Is valid
         /// 是否有效
         /// </summary>
@@ -43,9 +49,14 @@ namespace CRM.Server.RQ.OrderDelivery
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
-            if (Title != null && Title.Length is not (>= 1 and <= 256))
+            if (Title != null && Title.Length is not (>= 1 and <= 128))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Title));
+            }
+
+            if (Description != null && Description.Length is not (>= 1 and <= 1280))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
             return null;

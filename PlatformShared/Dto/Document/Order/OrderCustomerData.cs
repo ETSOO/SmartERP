@@ -1,4 +1,6 @@
-﻿namespace PlatformShared.Dto.Document.Order
+﻿using PlatformShared.Database.Models;
+
+namespace PlatformShared.Dto.Document.Order
 {
     /// <summary>
     /// Order view's customer data
@@ -59,5 +61,25 @@
         /// 信息项目
         /// </summary>
         public required IEnumerable<PersonInfoViewItem> Infos { get; init; }
+
+        /// <summary>
+        /// Get tax id
+        /// 获取税号
+        /// </summary>
+        /// <returns>Result</returns>
+        public string? GetTaxId()
+        {
+            return Infos.FirstOrDefault(i => i.Kind == PersonInfoKind.TaxId)?.Identifier;
+        }
+
+        /// <summary>
+        /// Get pin
+        /// 获取个人识别码
+        /// </summary>
+        /// <returns>Result</returns>
+        public string? GetPin()
+        {
+            return Infos.FirstOrDefault(i => i.Kind == PersonInfoKind.Pin)?.Identifier;
+        }
     }
 }

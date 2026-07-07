@@ -1,4 +1,5 @@
 ﻿using PlatformShared.Dto;
+using PlatformShared.Dto.Document.Order;
 using PlatformShared.Messages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -30,6 +31,8 @@ namespace PlatformShared
     [JsonSerializable(typeof(CustomResourceData[]))]
     [JsonSerializable(typeof(PersonProductJsonData))]
     [JsonSerializable(typeof(SendAuthCodeEmailMessage))]
+
+    [JsonSerializable(typeof(OrderLineData))]
 
     [JsonSerializable(typeof(JsonElement))]
     [JsonSerializable(typeof(IEnumerable<decimal>))]

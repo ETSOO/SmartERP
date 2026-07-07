@@ -13,6 +13,12 @@
         public string? Subject { get; set; }
 
         /// <summary>
+        /// Web URL
+        /// Web 网址
+        /// </summary>
+        public string WebUrl { get; set; } = string.Empty;
+
+        /// <summary>
         /// Organization view data
         /// 机构视图数据
         /// </summary>

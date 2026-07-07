@@ -64,7 +64,7 @@ namespace CRM.Server.Services
                     if (rq.Keyword?.Length > 1)
                     {
                         var keyword = rq.Keyword;
-                        q = q.Where(p => EF.Functions.ILike(p.Title, $"%{keyword}%"));
+                        q = q.Where(p => EF.Functions.ILike(p.Title, $"%{keyword}%") || (p.Description != null && EF.Functions.ILike(p.Description, $"%{keyword}%")));
                     }
 
                     return q;
@@ -94,6 +94,7 @@ namespace CRM.Server.Services
                 CoreOrganizationId = orgId,
                 Kind = rq.Kind,
                 Title = rq.Title,
+                Description = rq.Description,
                 IsOrder = rq.IsOrder,
                 IsValid = rq.IsValid.GetValueOrDefault(true),
                 OrderIndex = rq.OrderIndex.GetValueOrDefault()
@@ -152,6 +153,7 @@ namespace CRM.Server.Services
                     Id = p.Id,
                     Kind = p.Kind,
                     Title = p.Title,
+                    Description = p.Description,
                     IsValid = p.IsValid
                 })
                 .ToArrayAsync(cancellationToken);
@@ -233,6 +235,11 @@ namespace CRM.Server.Services
                 payment.Title = rq.Title;
             }
 
+            if (rq.IsModified(nameof(rq.Description)))
+            {
+                payment.Description = rq.Description;
+            }
+
             if (rq.IsModified(nameof(rq.IsValid)) && rq.IsValid.HasValue)
             {
                 payment.IsValid = rq.IsValid.Value;
@@ -284,6 +291,7 @@ namespace CRM.Server.Services
                     Id = p.Id,
                     Kind = p.Kind,
                     Title = p.Title,
+                    Description = p.Description,
                     IsOrder = p.IsOrder,
                     IsValid = p.IsValid,
                     OrderIndex = p.OrderIndex

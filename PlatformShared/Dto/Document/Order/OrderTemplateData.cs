@@ -15,6 +15,18 @@ namespace PlatformShared.Dto.Document.Order
         public string? Subject { get; set; }
 
         /// <summary>
+        /// Web URL
+        /// Web 网址
+        /// </summary>
+        public string WebUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Current user data
+        /// 当前用户数据
+        /// </summary>
+        public required CurrentUserData User { get; init; }
+
+        /// <summary>
         /// Organization view data
         /// 机构视图数据
         /// </summary>

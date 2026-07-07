@@ -207,6 +207,9 @@ namespace Platform.Server.Services
                     return (ApplicationErrors.NoId.AsResult(nameof(rq.Action.TargetId)), null);
                 }
 
+                // Set the web URl
+                tData.WebUrl = App.Configuration.WebUrl;
+
                 var formattedPath = TemplateUtils.FormatCulture(template.Template, culture);
 
                 var content = await TemplateUtils.BuildAsync(formattedPath, model);
@@ -250,6 +253,9 @@ namespace Platform.Server.Services
                 {
                     return (ApplicationErrors.NoId.AsResult(nameof(rq.Action.TargetId)), null);
                 }
+
+                // Set the web URl
+                tData.WebUrl = App.Configuration.WebUrl;
 
                 var cacheKey = GetDocumentCacheKey(id);
                 if (rq.NoCache is true)

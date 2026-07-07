@@ -27,6 +27,12 @@ namespace CRM.Server.Dto.OrderPayment
         public required string Title { get; init; }
 
         /// <summary>
+        /// Description
+        /// 描述
+        /// </summary>
+        public string? Description { get; init; }
+
+        /// <summary>
         /// Is valid
         /// 是否有效
         /// </summary>

@@ -34,6 +34,7 @@ export default function OrderPayments() {
   const labels = app.getLabels(
     "actions",
     "add",
+    "description",
     "edit",
     "enabled",
     "isAvailable",
@@ -109,7 +110,12 @@ export default function OrderPayments() {
         },
         {
           field: "title",
-          header: labels.title
+          header: labels.title,
+          width: 250
+        },
+        {
+          field: "description",
+          header: labels.description
         },
         {
           field: "isValid",

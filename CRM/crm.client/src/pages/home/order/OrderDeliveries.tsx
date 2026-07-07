@@ -34,6 +34,7 @@ export default function OrderDeliveries() {
   const labels = app.getLabels(
     "actions",
     "add",
+    "description",
     "edit",
     "enabled",
     "isAvailable",
@@ -109,7 +110,12 @@ export default function OrderDeliveries() {
         },
         {
           field: "title",
-          header: labels.title
+          header: labels.title,
+          width: 250
+        },
+        {
+          field: "description",
+          header: labels.description
         },
         {
           field: "isValid",

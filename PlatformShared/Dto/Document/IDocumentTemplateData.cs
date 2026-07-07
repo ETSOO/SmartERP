@@ -23,5 +23,11 @@
         /// 目标对象名称
         /// </summary>
         public string TargetName { get; }
+
+        /// <summary>
+        /// Web URL
+        /// Web 网址
+        /// </summary>
+        public string WebUrl { get; set; }
     }
 }

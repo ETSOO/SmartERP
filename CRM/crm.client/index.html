@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -11,7 +11,13 @@
     />
     <meta
       http-equiv="Content-Security-Policy"
-      content="script-src 'self' 'unsafe-inline' %VITE_APP_UNSAFE_INLINES%; img-src 'self' https: data:; frame-src 'self' https:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob: ;"
+      content="
+        script-src 'self' 'unsafe-inline' %VITE_APP_UNSAFE_INLINES%;
+        img-src 'self' https: data: %VITE_APP_UNSAFE_INLINES%;
+        frame-src 'self' https: %VITE_APP_UNSAFE_INLINES%;
+        style-src 'self' 'unsafe-inline' %VITE_APP_UNSAFE_INLINES%;
+        worker-src 'self' blob: %VITE_APP_UNSAFE_INLINES%;
+      "
     />
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />

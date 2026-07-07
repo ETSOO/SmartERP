@@ -131,9 +131,11 @@ namespace PlatformShared.Dto.Document
                         Culture = o.Culture,
                         Payment = o.Payment == null ? null : o.Payment.Title,
                         PaymentKind = o.Payment == null ? null : o.Payment.Kind,
+                        PaymentDescription = o.Payment == null ? null : o.Payment.Description,
                         PaymentInstruction = o.PaymentInstruction,
                         Delivery = o.Delivery == null ? null : o.Delivery.Title,
                         DeliveryKind = o.Delivery == null ? null : o.Delivery.Kind,
+                        DeliveryDescription = o.Delivery == null ? null : o.Delivery.Description,
                         DeliveryInstruction = o.DeliveryInstruction,
                         AddressFormatted = o.AddressFormatted,
                         Contact = o.Contact == null ? null : o.Contact.Name,
@@ -155,11 +157,10 @@ namespace PlatformShared.Dto.Document
                             Birthday = o.Buyer.Birthday,
                             Categories = o.Buyer.CategoryIds,
                             Infos = o.Buyer.Infos
-                                .Where(i => i.PersonId == o.Buyer.Id)
                                 .Select(i => new PersonInfoViewItem
                                 {
                                     Kind = i.Kind,
-                                    Identifier = MyDbFunctions.HideData(i.Identifier, default),
+                                    Identifier = i.Identifier,
                                     IsDefault = i.IsDefault,
                                     IsVerified = i.IsVerified ?? false
                                 })
@@ -174,6 +175,7 @@ namespace PlatformShared.Dto.Document
                             ProductAssignedId = l.Product.AssignedId,
                             ProductDescription = l.Product.Description,
                             ProductLogo = l.Product.Logo,
+                            ProductModifiers = l.Product.Modifiers,
                             UnitName = l.Product.Unit.Name,
                             BaseUnit = l.Product.Unit.BaseUnit,
                             Title = l.Title,
@@ -189,6 +191,7 @@ namespace PlatformShared.Dto.Document
                             Promotions = l.Promotions == null ? Array.Empty<PromotionSaleItem>() : l.Promotions.ToArray(),
                             StartTime = l.StartTime,
                             EndTime = l.EndTime,
+                            Data = l.Data,
                             AssetId = l.AssetId,
                             AssetSn = l.Asset == null ? null : l.Asset.Sn,
                             Status = l.Status,
@@ -239,7 +242,8 @@ namespace PlatformShared.Dto.Document
                         o.Pin,
                         o.Uid,
                         o.Region,
-                        o.Slogan
+                        o.Slogan,
+                        o.CompanySeal
                     }).FirstAsync(cancellationToken);
 
                 await using var db2 = await dbFactory.CreateDbContextAsync(cancellationToken);
@@ -272,6 +276,7 @@ namespace PlatformShared.Dto.Document
                     Name = orgData.Name,
                     Brand = orgData.Brand,
                     Slogan = orgData.Slogan,
+                    CompanySeal = orgData.CompanySeal,
                     Logo = orgData.Logo,
                     Pin = pin,
                     Region = orgData.Region,
@@ -306,9 +311,13 @@ namespace PlatformShared.Dto.Document
             var order = await CreateOrderDataAsync(dbFactory, id, user, cancellationToken);
             if (order == null) return null;
 
+            var currentUser = await CreateUserDataAsync(dbFactory, user, cancellationToken);
+            if (currentUser == null) return null;
+
             return new OrderTemplateData
             {
                 Subject = dic.Get(nameof(OrderTemplateData.Subject)),
+                User = currentUser,
                 Org = org,
                 Order = order,
                 Dic = dic
@@ -318,6 +327,41 @@ namespace PlatformShared.Dto.Document
         static async Task<object?> CreateOrderViewObjectAsync(IDbContextFactory<MyDbContext> dbFactory, long id, StringKeyDictionaryObject dic, CurrentUser user, CancellationToken cancellationToken = default)
         {
             return await CreateOrderViewAsync(dbFactory, id, dic, user, cancellationToken);
+        }
+
+        /// <summary>
+        /// Create current user view data
+        /// 创建当前用户视图数据
+        /// </summary>
+        /// <param name="dbFactory">Database context factory</param>
+        /// <param name="user">Current user</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public static async Task<CurrentUserData?> CreateUserDataAsync(IDbContextFactory<MyDbContext> dbFactory, CurrentUser user, CancellationToken cancellationToken = default)
+        {
+            await using var db = await dbFactory.CreateDbContextAsync(cancellationToken);
+
+            return await db.Persons.AsNoTracking()
+                .Where(p => p.Id == user.Oid)
+                .Select(p => new CurrentUserData
+                {
+                    Name = p.Name,
+                    PreferredName = p.PreferredName,
+                    GivenName = p.GivenName,
+                    FamilyName = p.FamilyName,
+                    LatinFamilyName = p.LatinFamilyName,
+                    LatinGivenName = p.LatinGivenName,
+                    Avatar = p.Avatar,
+                    Signature = p.CoreUser == null ? null : p.CoreUser.Signature,
+                    Infos = p.Infos.Select(i => new PersonInfoViewItem
+                    {
+                        Kind = i.Kind,
+                        Identifier = i.Identifier,
+                        IsDefault = i.IsDefault,
+                        IsVerified = i.IsVerified ?? false
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>

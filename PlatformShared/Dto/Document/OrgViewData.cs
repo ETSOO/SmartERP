@@ -51,6 +51,12 @@ namespace PlatformShared.Dto.Document
         public string? Slogan { get; init; }
 
         /// <summary>
+        /// Company seal
+        /// 公章
+        /// </summary>
+        public string? CompanySeal { get; init; }
+
+        /// <summary>
         /// PIN, unique code
         /// PIN，唯一代码
         /// </summary>
