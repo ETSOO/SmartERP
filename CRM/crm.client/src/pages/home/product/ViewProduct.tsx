@@ -6,6 +6,7 @@ import {
   GridRowId,
   HBox,
   IconButtonLink,
+  ImagePreviewButton,
   LinkEx,
   MoneyInputField,
   NotificationMUDataMethods,
@@ -18,11 +19,7 @@ import {
   ViewPage
 } from "@etsoo/materialui";
 import { GridDataType, ReactUtils, useParamsEx, useRefs } from "@etsoo/react";
-import {
-  CoreUtils,
-  CurrencyItem,
-  usePageDataEmpty
-} from "@etsoo/smarterp-core";
+import { CurrencyItem, usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
 import {
   CustomCultureKind,
@@ -485,17 +482,11 @@ export default function ViewProduct() {
       leftContainer={(item) =>
         item.logo ? (
           <HBox sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}>
-            <a href={item.logo} target="_blank" rel="noopener noreferrer">
-              <img
-                src={item.logo}
-                alt={labels.logo}
-                style={CoreUtils.avatarStyles()}
-              />
-            </a>
+            <ImagePreviewButton size={180} image={item.logo} />
             {editable && (
               <IconButtonLink
                 href={`./../../logo/${item.id}`}
-                state={item.logo}
+                state={{ title: item.name, avatar: item.logo }}
                 title={labels.editLogo}
                 size="small"
               >

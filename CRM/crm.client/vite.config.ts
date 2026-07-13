@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import plugin from "@vitejs/plugin-react";
 import fs from "fs";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const keyFilePath = process.env.HTTPS_KEY_FILE || "./../../data/certs/dev.key";
 const certFilePath =
@@ -10,7 +11,16 @@ const certFilePath =
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [plugin()],
+  plugins: [
+    plugin(),
+    visualizer({
+      open: true,
+      filename: "dist/stats.html",
+      gzipSize: true,
+      brotliSize: true,
+      template: "treemap" // 也可以是 sunburst 或 network
+    })
+  ],
   define: {
     "process.env.DRAGGABLE_DEBUG": false
   },

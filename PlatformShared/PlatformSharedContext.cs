@@ -35,10 +35,23 @@ namespace PlatformShared
     [JsonSerializable(typeof(OrderLineData))]
 
     [JsonSerializable(typeof(JsonElement))]
-    [JsonSerializable(typeof(IEnumerable<decimal>))]
-    [JsonSerializable(typeof(IEnumerable<byte>))]
+    [JsonSerializable(typeof(IEnumerable<long>))]
+    [JsonSerializable(typeof(IEnumerable<ulong>))]
+    [JsonSerializable(typeof(IEnumerable<int>))]
+    [JsonSerializable(typeof(IEnumerable<uint>))]
     [JsonSerializable(typeof(IEnumerable<short>))]
     [JsonSerializable(typeof(IEnumerable<ushort>))]
+    [JsonSerializable(typeof(IEnumerable<byte>))]
+    [JsonSerializable(typeof(IEnumerable<Guid>))]
+    [JsonSerializable(typeof(IEnumerable<string>))]
+    [JsonSerializable(typeof(IEnumerable<double>))]
+    [JsonSerializable(typeof(IEnumerable<decimal>))]
+    [JsonSerializable(typeof(IEnumerable<float>))]
+    [JsonSerializable(typeof(IEnumerable<DateOnly>))]
+    [JsonSerializable(typeof(IEnumerable<TimeOnly>))]
+    [JsonSerializable(typeof(bool))]
+    [JsonSerializable(typeof(DateTime))]
+    [JsonSerializable(typeof(DateTimeOffset))]
 
     public partial class PlatformSharedContext : JsonSerializerContext
     {

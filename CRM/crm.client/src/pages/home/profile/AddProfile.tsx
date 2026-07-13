@@ -17,7 +17,7 @@ import {
   PersonsList
 } from "@etsoo/smarterp-crm/components";
 import { DateUtils, DomUtils, IdActionResult, Utils } from "@etsoo/shared";
-import { EOEditorElement, EOEditorEx } from "@etsoo/reacteditor";
+import { EOEditorEx, EOEditorElement } from "@etsoo/reacteditor";
 import {
   OrderKind,
   PersonProfileCreateRQ,

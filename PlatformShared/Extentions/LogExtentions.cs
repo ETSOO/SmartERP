@@ -64,7 +64,7 @@ namespace PlatformShared.Extentions
                     dic.Add(nameof(message.JsonData), message.JsonData);
                 }
 
-                jsonData = JsonSerializer.Serialize(dic, CommonJsonSerializerContext.Default.DictionaryStringObject);
+                jsonData = JsonSerializer.Serialize(dic, CommonJsonSerializerContext.Default.StringKeyDictionaryObject);
             }
 
             var log = new CoreLog

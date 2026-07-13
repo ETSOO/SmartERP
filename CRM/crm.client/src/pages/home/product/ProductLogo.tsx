@@ -1,18 +1,23 @@
-import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
+import {
+  CommonPage,
+  ImagePreviewButton,
+  UserAvatarEditor,
+  VBox
+} from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useParamsEx } from "@etsoo/react";
+import { useNavigate } from "react-router-dom";
+import { useLocationState, useParamsEx } from "@etsoo/react";
 import Stack from "@mui/material/Stack";
-import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { AvatarState, usePageDataEmpty } from "@etsoo/smarterp-core";
+import Typography from "@mui/material/Typography";
 
 export default function ProductLogo() {
   // Route
   const navigate = useNavigate();
   const { id = 0 } = useParamsEx({ id: "number" });
 
-  const location = useLocation();
-  const logo: string | undefined = location.state;
+  const { avatar, title } = useLocationState<AvatarState>();
 
   // Labels
   const labels = app.getLabels("imageSizeTooSmall", "logo");
@@ -23,11 +28,18 @@ export default function ProductLogo() {
   return (
     <CommonPage sx={{ width: "fit-content" }}>
       <Stack direction={{ xs: "column", sm: "column", md: "row" }} spacing={1}>
-        {logo == null ? (
-          <React.Fragment />
-        ) : (
-          <img src={logo} alt={labels.logo} style={CoreUtils.avatarStyles()} />
-        )}
+        <VBox spacing={1}>
+          {avatar == null ? (
+            <React.Fragment />
+          ) : (
+            <ImagePreviewButton
+              size={160}
+              image={avatar}
+              buttonProps={{ title: labels.logo }}
+            />
+          )}
+          <Typography variant="caption">{title}</Typography>
+        </VBox>
         <UserAvatarEditor
           onDone={async (canvas, toBlob, type) => {
             // Check size

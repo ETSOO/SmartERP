@@ -1,6 +1,7 @@
 import {
   ButtonLink,
   HBox,
+  HtmlDiv,
   IconButtonLink,
   LinkEx,
   MenuButton,
@@ -258,7 +259,10 @@ export function OrderViewUI(props: OrderViewUIProps) {
           singleRow: true
         },
         {
-          data: "description",
+          data: (item) =>
+            item.description ? (
+              <HtmlDiv>{item.description}</HtmlDiv>
+            ) : undefined,
           singleRow: true,
           horizontal: true
         },

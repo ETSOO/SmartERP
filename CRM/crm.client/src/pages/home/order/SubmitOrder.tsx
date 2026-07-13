@@ -37,6 +37,7 @@ import {
 import { LocalUtils } from "../../../app/LocalUtils";
 import { CurrencyList } from "../../../components/CurrencyList";
 import { CultureList } from "../../../components/CultureList";
+import { HtmlDescription } from "../../../components/HtmlDescription";
 
 type OrderData = {
   customerId: number;
@@ -67,7 +68,6 @@ export default function SubmitOrder() {
     "amount",
     "deliveryAddress",
     "deliveryInstruction",
-    "description",
     "discount",
     "endDate",
     "items",
@@ -436,17 +436,7 @@ export default function SubmitOrder() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
-        <InputField
-          fullWidth
-          name="description"
-          slotProps={{
-            htmlInput: { maxLength: 1280 }
-          }}
-          label={labels.description}
-          inputRef={refs.description}
-          multiline
-          rows={2}
-        />
+        <HtmlDescription inputRef={refs.description} rows={2} />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
         <InputField

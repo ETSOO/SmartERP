@@ -1,10 +1,15 @@
-import { CommonPage, UserAvatarEditor } from "@etsoo/materialui";
+import {
+  CommonPage,
+  ImagePreviewButton,
+  UserAvatarEditor
+} from "@etsoo/materialui";
 import React from "react";
 import { app } from "../../../app/MyApp";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParamsEx } from "@etsoo/react";
 import Stack from "@mui/material/Stack";
-import { CoreUtils, usePageDataEmpty } from "@etsoo/smarterp-core";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { PersonAvatarState } from "../../../components/person/PersonAvatarState";
 
 export default function ContactAvatar() {
   // Route
@@ -12,7 +17,7 @@ export default function ContactAvatar() {
   const { id = 0 } = useParamsEx({ id: "number" });
 
   const location = useLocation();
-  const avatar: string | undefined = location.state;
+  const { avatar, isLegalPerson } = location.state as PersonAvatarState;
 
   // Labels
   const labels = app.getLabels("avatar", "imageSizeTooSmall", "logo");
@@ -26,10 +31,9 @@ export default function ContactAvatar() {
         {avatar == null ? (
           <React.Fragment />
         ) : (
-          <img
-            src={avatar}
-            alt={labels.logo}
-            style={CoreUtils.avatarStyles(false)}
+          <ImagePreviewButton
+            size={isLegalPerson ? 120 : [130, 160]}
+            image={avatar}
           />
         )}
         <UserAvatarEditor
@@ -56,6 +60,8 @@ export default function ContactAvatar() {
             // Reset the UI
             return true;
           }}
+          width={isLegalPerson ? 320 : 260}
+          height={isLegalPerson ? 160 : 320}
           maxWidth={640}
         />
       </Stack>

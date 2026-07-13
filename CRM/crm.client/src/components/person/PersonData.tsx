@@ -3,6 +3,7 @@ import {
   CustomFieldViewUI,
   HBox,
   IconButtonLink,
+  ImagePreviewButton,
   LinkEx,
   VBox,
   ViewContainer,
@@ -18,13 +19,13 @@ import { Permissions, PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
 import Divider from "@mui/material/Divider";
-import { CoreUtils } from "@etsoo/smarterp-core";
 import React from "react";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import { CustomFieldData } from "@etsoo/appscript";
 import { DataTypes } from "@etsoo/shared";
+import { PersonAvatarState } from "./PersonAvatarState";
 
 type PersonDataProps = {
   data: PersonViewData;
@@ -93,17 +94,17 @@ export function PersonData(props: PersonDataProps) {
       leftContainer={(item) =>
         item.avatar ? (
           <HBox sx={{ justifyContent: { xs: "center", sm: "flex-start" } }}>
-            <a href={item.avatar} target="_blank" rel="noopener noreferrer">
-              <img
-                src={item.avatar}
-                alt={labels.logo}
-                style={CoreUtils.avatarStyles(item.isLegalPerson)}
-              />
-            </a>
+            <ImagePreviewButton
+              size={item.isLegalPerson ? [120, 60] : [130, 160]}
+              image={item.avatar}
+            />
             {editable && (
-              <IconButtonLink
+              <IconButtonLink<PersonAvatarState>
                 href={`./../../avatar/${item.id}`}
-                state={item.avatar}
+                state={{
+                  avatar: item.avatar,
+                  isLegalPerson: item.isLegalPerson
+                }}
                 title={labels.editAvatar}
                 size="small"
               >

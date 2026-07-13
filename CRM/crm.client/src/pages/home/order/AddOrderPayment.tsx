@@ -14,6 +14,7 @@ import {
   OrderPaymentUpdateRQ
 } from "@etsoo/smarterp-crm";
 import { useIsOrder } from "./useIsOrder";
+import { HtmlDescription } from "../../../components/HtmlDescription";
 
 export default function AddOrderPayment() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ export default function AddOrderPayment() {
 
   const isOrder = useIsOrder();
 
-  const labels = app.getLabels("description", "enabled", "noChanges", "title");
+  const labels = app.getLabels("enabled", "noChanges", "title");
 
   const refFields = ["description", "title"] as const;
   const refs = useRefs(refFields);
@@ -124,16 +125,7 @@ export default function AddOrderPayment() {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
-        <InputField
-          fullWidth
-          required
-          name="description"
-          multiline
-          rows={3}
-          slotProps={{ htmlInput: { maxLength: 1280 } }}
-          label={labels.description}
-          inputRef={refs.description}
-        />
+        <HtmlDescription inputRef={refs.description} rows={3} />
       </Grid>
     </EditPage>
   );
