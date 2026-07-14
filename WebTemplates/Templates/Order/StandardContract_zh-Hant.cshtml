@@ -2,6 +2,8 @@
 
 @{
     Model.Subject ??= "合約";
+
+    var symbol = Model.Order.CurrencySymbol;
 }
 <!DOCTYPE html>
 
@@ -9,8 +11,207 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>@Model.Subject</title>
+    <title>@Model.Subject - @Model.Order.Title</title>
+    <link rel="stylesheet" href="@Model.WebUrl/resources/pdf.css" />
 </head>
 <body>
+    @if (!string.IsNullOrEmpty(Model.Org.Brand))
+    {
+        var watermark = $"{Model.Org.Brand} {DateTime.Now.Year}";
+
+        <div class="watermark watermark1">@watermark</div>
+        <div class="watermark watermark2">@watermark</div>
+        <div class="watermark watermark3">@watermark</div>
+    }
+
+    <h1 class="title">@Model.Subject</h1>
+
+    <hr class="hr" />
+
+    <table style="width: 100%; margin-top: 1.5em; " border="0">
+        <tr>
+            <td style="width: 9%" valign="top">甲方：</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Order.Customer.Name</div>
+                <div>@(Model.Order.Customer.GetTaxId() ?? Model.Order.Customer.GetPin() ?? "&nbsp;")</div>
+            </td>
+            <td style="width: 9%" valign="top">乙方：</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Org.Name</div>
+                <div>@(Model.Org.TaxId ?? Model.Org.Pin ?? "&nbsp;")</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="font-size: 9pt; padding: 0.5em 0em;">編號：@Model.Order.Id</td>
+        </tr>
+    </table>
+
+    <p>甲方委託乙方提供相關服務。經雙方充分協商一致，依據中華人民共和國現行法律法規，在平等、自願、公平、誠實信用的原則基礎上，訂立本合約。雙方同意嚴格按照本協議約定履行各自義務，並享有相應權利。</p>
+
+    <h3>價格</h3>
+
+    <table class="table-list">
+        <tr>
+            <th class="align-left">項目</th>
+            <th class="align-right">單價</th>
+            <th class="align-center">單位</th>
+            <th class="align-right">數量</th>
+            <th class="align-right">優惠</th>
+            <th class="align-right">總價</th>
+        </tr>
+        @foreach (var item in Model.Order.OrderLines)
+        {
+            <tr>
+                <td class="line-title">
+                    @item.Title
+                    @if (item.AssetQty > 0)
+                    {
+                        <sup>@item.AssetQty</sup>
+                    }
+
+                    @{
+                        var modifiers = item.GetModifiers();
+                        if (modifiers.Length > 0)
+                        {
+                            <ul>
+                                @foreach (var modifier in modifiers)
+                                {
+                                    <li>@(modifier.Label ?? modifier.Name): <span>@modifier.Value</span></li>
+                                }
+                            </ul>
+                        }
+                    }
+                </td>
+                <td class="align-right">@item.Price.ToString("N2")</td>
+                <td class="align-center">@item.UnitName</td>
+                <td class="align-right">@item.Qty</td>
+                <td class="align-right">
+                    @(item.Discount == 0 ? "" : (-item.Discount).ToString("N2"))
+                    @foreach (var p in item.Promotions)
+                    {
+                        <br /><span class="small-tip">@p.Title (@p.Amount.ToString("N2"))</span>
+                    }
+                </td>
+                <td class="align-right">@item.Amount.ToString("N2")</td>
+            </tr>
+        }
+        @if (!Model.Order.IsSimpleOrder)
+        {
+            <tr>
+                <td colspan="4" class="bold">小計：</td>
+                <td class="align-right">@((-Model.Order.LineDiscount).ToString("N2"))</td>
+                <td class="align-right bold">@symbol@((Model.Order.Amount + Model.Order.Discount).ToString("N2"))</td>
+            </tr>
+            @if (Model.Order.Discount != 0)
+            {
+                <tr>
+                    <td colspan="4" class="align-right">訂單優惠：</td>
+                    <td class="align-right">
+                        @((-Model.Order.Discount).ToString("N2"))
+                        @foreach (var p in Model.Order.Promotions)
+                        {
+                            <br /><span class="small-tip">@p.Title (@p.Amount.ToString("N2"))</span>
+                        }
+                    </td>
+                    <td class="align-right"></td>
+                </tr>
+            }
+            @if (Model.Order.ApprovedDiscount != 0)
+            {
+                <tr>
+                    <td colspan="4" class="align-right">特批優惠：</td>
+                    <td class="align-right">@((-Model.Order.ApprovedDiscount).ToString("N2"))</td>
+                    <td class="align-right"></td>
+                </tr>
+            }
+            @if (Model.Order.TaxAmount != 0)
+            {
+                <tr>
+                    <td colspan="4" class="align-right">稅額：</td>
+                    <td class="align-right"></td>
+                    <td class="align-right">@Model.Order.TaxAmount.ToString("N2")</td>
+                </tr>
+            }
+        }
+        <tr>
+            <td colspan="3" class="bold">總計：</td>
+            <td class="align-right">@Model.Order.Items</td>
+            <td class="align-right">@((-Model.Order.TotalDiscount).ToString("N2"))</td>
+            <td class="align-right bold">@symbol@Model.Order.TotalAmount.ToString("N2")</td>
+        </tr>
+    </table>
+
+    @if (!string.IsNullOrEmpty(Model.Order.Description))
+    {
+        <p>@Html.Raw(Model.Order.Description)</p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Order.AddressFormatted) && !string.IsNullOrEmpty(Model.Order.Delivery))
+    {
+        <h3>交付</h3>
+        <ol>
+            <li>地址：@Model.Order.AddressFormatted</li>
+            <li>方式：@Model.Order.Delivery</li>
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryDescription))
+            {
+                <li>@Html.Raw(Model.Order.DeliveryDescription)</li>
+            }
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryInstruction))
+            {
+                <li>指示：@Model.Order.DeliveryInstruction</li>
+            }
+        </ol>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Order.Payment))
+    {
+        <h3>付款</h3>
+        <ol>
+            <li>合約金額大寫：<b>@Model.Order.ChineseAmount</b></li>
+            <li>方式：@Model.Order.Payment</li>
+            @if (!string.IsNullOrEmpty(Model.Order.PaymentDescription))
+            {
+                <li>@Html.Raw(Model.Order.PaymentDescription)</li>
+            }
+            @if (!string.IsNullOrEmpty(Model.Order.PaymentInstruction))
+            {
+                <li>指示：@Model.Order.PaymentInstruction</li>
+            }
+        </ol>
+    }
+
+    <div class="company-seal-wrapper">
+        <table class="table-noborder" border="0">
+            <tr>
+                <td style="width: 33%">甲方代表：</td>
+                <td style="width: 17%" class="small-tip">（公章）</td>
+                <td style="width: 33%">
+                    乙方代表：
+                    @if (!string.IsNullOrEmpty(Model.User.Signature))
+                    {
+                        <span>
+                            <img src="@Model.User.Signature" alt="Signature" class="signature" />
+                        </span>
+                    }
+                </td>
+                <td style="width: 17%"></td>
+            </tr>
+            <tr>
+                <td>
+                    <p>________ 年 ____ 月 ____ 日</p>
+                </td>
+                <td></td>
+                <td>
+                    @DateTime.Now.ToLongDateString()
+                </td>
+                <td class="relative-container">
+                    @if (!string.IsNullOrEmpty(Model.Org.CompanySeal))
+                    {
+                        <img src="@Model.Org.CompanySeal" alt="Company Seal" class="company-seal" />
+                    }
+                </td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

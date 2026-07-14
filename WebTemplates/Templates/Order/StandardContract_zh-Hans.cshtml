@@ -1,7 +1,7 @@
 ﻿@model PlatformShared.Dto.Document.Order.OrderTemplateData
 
 @{
-    Model.Subject ??= "合同 - " + Model.Order.Title;
+    Model.Subject ??= "合同";
 
     var symbol = Model.Order.CurrencySymbol;
 }
@@ -11,7 +11,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>@Model.Subject</title>
+    <title>@Model.Subject - @Model.Order.Title</title>
     <link rel="stylesheet" href="@Model.WebUrl/resources/pdf.css" />
 </head>
 <body>
@@ -24,7 +24,7 @@
         <div class="watermark watermark3">@watermark</div>
     }
 
-    <h1 class="title">合同</h1>
+    <h1 class="title">@Model.Subject</h1>
 
     <hr class="hr" />
 
@@ -46,7 +46,7 @@
         </tr>
     </table>
 
-    <p>甲方委托乙方提供相关服务。经双方充分协商一致，依据中华人民共和国现行法律法规，在平等、自愿、公平、诚实信用的原则基础上，订立本合同。双方同意严格按照本协议约定履行各自义务，并享有相应权利。 </p>
+    <p>甲方委托乙方提供相关服务。经双方充分协商一致，依据中华人民共和国现行法律法规，在平等、自愿、公平、诚实信用的原则基础上，订立本合同。双方同意严格按照本协议约定履行各自义务，并享有相应权利。</p>
 
     <h3>价格</h3>
 
@@ -181,7 +181,7 @@
         <table class="table-noborder" border="0">
             <tr>
                 <td style="width: 33%">甲方代表：</td>
-                <td style="width: 17%">（公章）</td>
+                <td style="width: 17%" class="small-tip">（公章）</td>
                 <td style="width: 33%">乙方代表：
                     @if (!string.IsNullOrEmpty(Model.User.Signature))
                     {
@@ -190,7 +190,7 @@
                         </span>
                     }
                 </td>
-                <td style="width: 17%">（公章）</td>
+                <td style="width: 17%"></td>
             </tr>
             <tr>
                 <td>

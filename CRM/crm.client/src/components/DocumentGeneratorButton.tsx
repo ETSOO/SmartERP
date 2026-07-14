@@ -108,13 +108,6 @@ function DocumentGenerator({
             paddingTop: 1
           }}
         >
-          <InputField
-            fullWidth
-            name="title"
-            slotProps={{ htmlInput: { maxLength: 128 } }}
-            label={labels.title}
-            onChange={(e) => (dataRef.current.subject = e.target.value)}
-          />
           <HBox spacing={2}>
             <CultureList
               onItemChange={(item) => (dataRef.current.culture = item?.id)}
@@ -128,6 +121,13 @@ function DocumentGenerator({
               label={labels.noCache}
             />
           </HBox>
+          <InputField
+            fullWidth
+            name="title"
+            slotProps={{ htmlInput: { maxLength: 128 } }}
+            label={labels.title}
+            onChange={(e) => (dataRef.current.subject = e.target.value)}
+          />
           {selectedDocument?.parameters?.length && (
             <CustomFieldUI
               fields={selectedDocument.parameters}

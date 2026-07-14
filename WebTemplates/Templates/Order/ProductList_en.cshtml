@@ -1,0 +1,114 @@
+﻿@model PlatformShared.Dto.Document.Order.OrderTemplateData
+
+@{
+    Model.Subject ??= "Order Product List";
+
+    var symbol = Model.Order.CurrencySymbol;
+}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.Subject - @Model.Order.Title</title>
+    <link rel="stylesheet" href="@Model.WebUrl/resources/pdf.css" />
+</head>
+<body>
+    @if (!string.IsNullOrEmpty(Model.Org.Brand))
+    {
+        var watermark = $"{Model.Org.Brand} {DateTime.Now.Year}";
+
+        <div class="watermark watermark1">@watermark</div>
+        <div class="watermark watermark2">@watermark</div>
+        <div class="watermark watermark3">@watermark</div>
+    }
+
+    <h1 class="title">@Model.Subject</h1>
+
+    <hr class="hr" />
+
+    <table style="width: 100%; margin-top: 1.5em; " border="0">
+        <tr>
+            <td style="width: 9%" valign="top">Party A:</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Order.Customer.Name</div>
+                <div>@(Model.Order.Customer.GetTaxId() ?? Model.Order.Customer.GetPin() ?? "&nbsp;")</div>
+            </td>
+            <td style="width: 9%" valign="top">Party B:</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Org.Name</div>
+                <div>@(Model.Org.TaxId ?? Model.Org.Pin ?? "&nbsp;")</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="font-size: 9pt; padding: 0.5em 0em;">编号：@Model.Order.Id</td>
+        </tr>
+    </table>
+
+    <p>This product list outlines the products or services provided by Party B to Party A, including items, specifications, quantities, and other information for both parties' confirmation and reference. In case of any other contracts or written agreements between the parties, the relevant documents shall prevail.</p>
+
+    <h3>Products</h3>
+
+    <table class="table-list">
+        <tr>
+            <th class="align-left">Item</th>
+            <th class="align-right">Quantity</th>
+            <th class="align-center">Unit</th>
+        </tr>
+        @foreach (var item in Model.Order.OrderLines)
+        {
+            <tr>
+                <td class="line-title">@item.Title
+                    @if (item.AssetQty > 0)
+                    {
+                        <sup>@item.AssetQty</sup>
+                    }
+                    
+                    @{
+                        var modifiers = item.GetModifiers();
+                        if (modifiers.Length > 0)
+                        {
+                            <ul>
+                                @foreach (var modifier in modifiers)
+                                {
+                                    <li>@(modifier.Label ?? modifier.Name): <span>@modifier.Value</span></li>
+                                }
+                            </ul>
+                        }
+                    }
+                </td>
+                <td class="align-right">@item.Qty</td>
+                <td class="align-center">@item.UnitName</td>
+            </tr>
+        }
+        <tr>
+            <td class="bold">Total:</td>
+            <td class="align-right">@Model.Order.Items</td>
+            <td class="align-center"></td>
+        </tr>
+    </table>
+
+    @if (!string.IsNullOrEmpty(Model.Order.Description))
+    {
+        <p>@Html.Raw(Model.Order.Description)</p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Order.AddressFormatted) && !string.IsNullOrEmpty(Model.Order.Delivery))
+    {
+        <h3>Delivery</h3>
+        <ol>
+            <li>Address: @Model.Order.AddressFormatted</li>
+            <li>Method: @Model.Order.Delivery</li>
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryDescription))
+            {
+                <li>@Html.Raw(Model.Order.DeliveryDescription)</li>
+            }
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryInstruction))
+            {
+                <li>Instruction: @Model.Order.DeliveryInstruction</li>
+            }
+        </ol>
+    }
+</body>
+</html>

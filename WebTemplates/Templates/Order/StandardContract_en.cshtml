@@ -2,6 +2,8 @@
 
 @{
     Model.Subject ??= "Contract";
+
+    var symbol = Model.Order.CurrencySymbol;
 }
 <!DOCTYPE html>
 
@@ -9,8 +11,207 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>@Model.Subject</title>
+    <title>@Model.Subject - @Model.Order.Title</title>
+    <link rel="stylesheet" href="@Model.WebUrl/resources/pdf.css" />
 </head>
 <body>
+    @if (!string.IsNullOrEmpty(Model.Org.Brand))
+    {
+        var watermark = $"{Model.Org.Brand} {DateTime.Now.Year}";
+
+        <div class="watermark watermark1">@watermark</div>
+        <div class="watermark watermark2">@watermark</div>
+        <div class="watermark watermark3">@watermark</div>
+    }
+
+    <h1 class="title">@Model.Subject</h1>
+
+    <hr class="hr" />
+
+    <table style="width: 100%; margin-top: 1.5em; " border="0">
+        <tr>
+            <td style="width: 9%" valign="top">Party A:</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Order.Customer.Name</div>
+                <div>@(Model.Order.Customer.GetTaxId() ?? Model.Order.Customer.GetPin() ?? "&nbsp;")</div>
+            </td>
+            <td style="width: 9%" valign="top">Party B:</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Org.Name</div>
+                <div>@(Model.Org.TaxId ?? Model.Org.Pin ?? "&nbsp;")</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="font-size: 9pt; padding: 0.5em 0em;">ID: @Model.Order.Id</td>
+        </tr>
+    </table>
+
+    <p>Party A entrusts Party B to provide relevant services. After full consultation and agreement between both parties, and in accordance with the current laws and regulations of the People's Republic of China, this contract is concluded on the basis of equality, voluntariness, fairness, and good faith. Both parties agree to strictly perform their respective obligations in accordance with this agreement and enjoy the corresponding rights.</p>
+
+    <h3>Price</h3>
+
+    <table class="table-list">
+        <tr>
+            <th class="align-left">Item</th>
+            <th class="align-right">Unit Price</th>
+            <th class="align-center">Unit</th>
+            <th class="align-right">Quantity</th>
+            <th class="align-right">Discount</th>
+            <th class="align-right">Total</th>
+        </tr>
+        @foreach (var item in Model.Order.OrderLines)
+        {
+            <tr>
+                <td class="line-title">
+                    @item.Title
+                    @if (item.AssetQty > 0)
+                    {
+                        <sup>@item.AssetQty</sup>
+                    }
+
+                    @{
+                        var modifiers = item.GetModifiers();
+                        if (modifiers.Length > 0)
+                        {
+                            <ul>
+                                @foreach (var modifier in modifiers)
+                                {
+                                    <li>@(modifier.Label ?? modifier.Name): <span>@modifier.Value</span></li>
+                                }
+                            </ul>
+                        }
+                    }
+                </td>
+                <td class="align-right">@item.Price.ToString("N2")</td>
+                <td class="align-center">@item.UnitName</td>
+                <td class="align-right">@item.Qty</td>
+                <td class="align-right">
+                    @(item.Discount == 0 ? "" : (-item.Discount).ToString("N2"))
+                    @foreach (var p in item.Promotions)
+                    {
+                        <br /><span class="small-tip">@p.Title (@p.Amount.ToString("N2"))</span>
+                    }
+                </td>
+                <td class="align-right">@item.Amount.ToString("N2")</td>
+            </tr>
+        }
+        @if (!Model.Order.IsSimpleOrder)
+        {
+            <tr>
+                <td colspan="4" class="bold">Subtotal:</td>
+                <td class="align-right">@((-Model.Order.LineDiscount).ToString("N2"))</td>
+                <td class="align-right bold">@symbol@((Model.Order.Amount + Model.Order.Discount).ToString("N2"))</td>
+            </tr>
+            @if (Model.Order.Discount != 0)
+            {
+                <tr>
+                    <td colspan="4" class="align-right">Order Discount:</td>
+                    <td class="align-right">
+                        @((-Model.Order.Discount).ToString("N2"))
+                        @foreach (var p in Model.Order.Promotions)
+                        {
+                            <br /><span class="small-tip">@p.Title (@p.Amount.ToString("N2"))</span>
+                        }
+                    </td>
+                    <td class="align-right"></td>
+                </tr>
+            }
+            @if (Model.Order.ApprovedDiscount != 0)
+            {
+                <tr>
+                    <td colspan="4" class="align-right">Approved Discount:</td>
+                    <td class="align-right">@((-Model.Order.ApprovedDiscount).ToString("N2"))</td>
+                    <td class="align-right"></td>
+                </tr>
+            }
+            @if (Model.Order.TaxAmount != 0)
+            {
+                <tr>
+                    <td colspan="4" class="align-right">Tax:</td>
+                    <td class="align-right"></td>
+                    <td class="align-right">@Model.Order.TaxAmount.ToString("N2")</td>
+                </tr>
+            }
+        }
+        <tr>
+            <td colspan="3" class="bold">Total:</td>
+            <td class="align-right">@Model.Order.Items</td>
+            <td class="align-right">@((-Model.Order.TotalDiscount).ToString("N2"))</td>
+            <td class="align-right bold">@symbol@Model.Order.TotalAmount.ToString("N2")</td>
+        </tr>
+    </table>
+
+    @if (!string.IsNullOrEmpty(Model.Order.Description))
+    {
+        <p>@Html.Raw(Model.Order.Description)</p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Order.AddressFormatted) && !string.IsNullOrEmpty(Model.Order.Delivery))
+    {
+        <h3>Delivery</h3>
+        <ol>
+            <li>Address: @Model.Order.AddressFormatted</li>
+            <li>Method: @Model.Order.Delivery</li>
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryDescription))
+            {
+                <li>@Html.Raw(Model.Order.DeliveryDescription)</li>
+            }
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryInstruction))
+            {
+                <li>Instruction: @Model.Order.DeliveryInstruction</li>
+            }
+        </ol>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Order.Payment))
+    {
+        <h3>Payment</h3>
+        <ol>
+            <li>Amount in Words: <b>@Model.Order.ChineseAmount</b></li>
+            <li>Method: @Model.Order.Payment</li>
+            @if (!string.IsNullOrEmpty(Model.Order.PaymentDescription))
+            {
+                <li>@Html.Raw(Model.Order.PaymentDescription)</li>
+            }
+            @if (!string.IsNullOrEmpty(Model.Order.PaymentInstruction))
+            {
+                <li>Instruction: @Model.Order.PaymentInstruction</li>
+            }
+        </ol>
+    }
+
+    <div class="company-seal-wrapper">
+        <table class="table-noborder" border="0">
+            <tr>
+                <td style="width: 33%">Party A:</td>
+                <td style="width: 17%" class="small-tip">（Seal）</td>
+                <td style="width: 33%">
+                    Party B:
+                    @if (!string.IsNullOrEmpty(Model.User.Signature))
+                    {
+                        <span>
+                            <img src="@Model.User.Signature" alt="Signature" class="signature" />
+                        </span>
+                    }
+                </td>
+                <td style="width: 17%"></td>
+            </tr>
+            <tr>
+                <td>
+                    <p>____________________________</p>
+                </td>
+                <td></td>
+                <td>
+                    @DateTime.Now.ToLongDateString()
+                </td>
+                <td class="relative-container">
+                    @if (!string.IsNullOrEmpty(Model.Org.CompanySeal))
+                    {
+                        <img src="@Model.Org.CompanySeal" alt="Company Seal" class="company-seal" />
+                    }
+                </td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

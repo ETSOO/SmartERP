@@ -1,0 +1,114 @@
+﻿@model PlatformShared.Dto.Document.Order.OrderTemplateData
+
+@{
+    Model.Subject ??= "订单产品清单";
+
+    var symbol = Model.Order.CurrencySymbol;
+}
+<!DOCTYPE html>
+
+<html lang="zh-hans">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@Model.Subject - @Model.Order.Title</title>
+    <link rel="stylesheet" href="@Model.WebUrl/resources/pdf.css" />
+</head>
+<body>
+    @if (!string.IsNullOrEmpty(Model.Org.Brand))
+    {
+        var watermark = $"{Model.Org.Brand} {DateTime.Now.Year}";
+
+        <div class="watermark watermark1">@watermark</div>
+        <div class="watermark watermark2">@watermark</div>
+        <div class="watermark watermark3">@watermark</div>
+    }
+
+    <h1 class="title">@Model.Subject</h1>
+
+    <hr class="hr" />
+
+    <table style="width: 100%; margin-top: 1.5em; " border="0">
+        <tr>
+            <td style="width: 9%" valign="top">甲方：</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Order.Customer.Name</div>
+                <div>@(Model.Order.Customer.GetTaxId() ?? Model.Order.Customer.GetPin() ?? "&nbsp;")</div>
+            </td>
+            <td style="width: 9%" valign="top">乙方：</td>
+            <td style="width: 41%">
+                <div class="party">@Model.Org.Name</div>
+                <div>@(Model.Org.TaxId ?? Model.Org.Pin ?? "&nbsp;")</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="font-size: 9pt; padding: 0.5em 0em;">编号：@Model.Order.Id</td>
+        </tr>
+    </table>
+
+    <p>本产品清单列明乙方向甲方提供的产品或服务内容，包括项目、规格、数量等信息，供双方确认和参考。如双方另有合同或其他书面约定，以相关文件为准。</p>
+
+    <h3>产品</h3>
+
+    <table class="table-list">
+        <tr>
+            <th class="align-left">项目</th>
+            <th class="align-right">数量</th>
+            <th class="align-center">单位</th>
+        </tr>
+        @foreach (var item in Model.Order.OrderLines)
+        {
+            <tr>
+                <td class="line-title">@item.Title
+                    @if (item.AssetQty > 0)
+                    {
+                        <sup>@item.AssetQty</sup>
+                    }
+                    
+                    @{
+                        var modifiers = item.GetModifiers();
+                        if (modifiers.Length > 0)
+                        {
+                            <ul>
+                                @foreach (var modifier in modifiers)
+                                {
+                                    <li>@(modifier.Label ?? modifier.Name): <span>@modifier.Value</span></li>
+                                }
+                            </ul>
+                        }
+                    }
+                </td>
+                <td class="align-right">@item.Qty</td>
+                <td class="align-center">@item.UnitName</td>
+            </tr>
+        }
+        <tr>
+            <td class="bold">总计：</td>
+            <td class="align-right">@Model.Order.Items</td>
+            <td class="align-center"></td>
+        </tr>
+    </table>
+
+    @if (!string.IsNullOrEmpty(Model.Order.Description))
+    {
+        <p>@Html.Raw(Model.Order.Description)</p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Order.AddressFormatted) && !string.IsNullOrEmpty(Model.Order.Delivery))
+    {
+        <h3>交付</h3>
+        <ol>
+            <li>地址：@Model.Order.AddressFormatted</li>
+            <li>方式：@Model.Order.Delivery</li>
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryDescription))
+            {
+                <li>@Html.Raw(Model.Order.DeliveryDescription)</li>
+            }
+            @if (!string.IsNullOrEmpty(Model.Order.DeliveryInstruction))
+            {
+                <li>指示：@Model.Order.DeliveryInstruction</li>
+            }
+        </ol>
+    }
+</body>
+</html>
