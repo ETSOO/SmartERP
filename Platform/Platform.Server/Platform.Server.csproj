@@ -23,22 +23,22 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageReference Include="com.etsoo.AliAmapApi" Version="1.0.1" />
-    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.10" />
+    <PackageReference Include="com.etsoo.AliAmapApi" Version="1.0.2" />
+    <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.11" />
     <PackageReference Include="com.etsoo.ApiProxy" Version="1.0.62" />
-    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.25" />
-    <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.2" />
-    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.42" />
-    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.82" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.1.0" />
-    <PackageReference Include="com.etsoo.Localization" Version="1.0.47" />
-    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.11" />
-    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.8" />
-    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.40" />
+    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.26" />
+    <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.3" />
+    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.43" />
+    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.83" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.1.1" />
+    <PackageReference Include="com.etsoo.Localization" Version="1.0.48" />
+    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.12" />
+    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.10" />
+    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.41" />
     <PackageReference Include="EfCore.SchemaCompare" Version="10.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>10.0.9</Version>
+      <Version>10.0.10</Version>
     </PackageReference>
 	<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />

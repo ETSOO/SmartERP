@@ -13,7 +13,6 @@ using com.etsoo.Database.Converters;
 using com.etsoo.ImageUtils.Barcode;
 using com.etsoo.Localization;
 using com.etsoo.Utils.Actions;
-using com.etsoo.Utils.Crypto;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Utils.Serialization.Country;
 using com.etsoo.Utils.String;

@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="com.etsoo.ApiModel" Version="1.0.82" />
-    <PackageReference Include="com.etsoo.DI" Version="1.0.34" />
-    <PackageReference Include="com.etsoo.MessageQueue" Version="1.1.12" />
-    <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.31" />
-    <PackageReference Include="com.etsoo.Web" Version="1.3.94" />
+    <PackageReference Include="com.etsoo.ApiModel" Version="1.0.83" />
+    <PackageReference Include="com.etsoo.DI" Version="1.0.35" />
+    <PackageReference Include="com.etsoo.MessageQueue" Version="1.1.13" />
+    <PackageReference Include="com.etsoo.SendCloudSDK" Version="1.0.32" />
+    <PackageReference Include="com.etsoo.Web" Version="1.3.95" />
     <PackageReference Include="EFCore.BulkExtensions.MIT.PostgreSql" Version="10.22.0" />
   </ItemGroup>
 
