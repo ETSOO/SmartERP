@@ -328,7 +328,7 @@ namespace Platform.Server.Services
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IEnumerable<TimeZoneItem>> GetTimeZonesAsync(TimeZoneRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TimeZoneItem>> GetTimeZonesAsync(Endpoints.Public.RQ.TimeZoneRQ rq, CancellationToken cancellationToken = default)
         {
             var culture = rq.Culture;
             if (string.IsNullOrEmpty(culture))

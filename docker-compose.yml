@@ -243,6 +243,28 @@ services:
     networks:
       - etsoo
 
+  # CRM site
+  etsoo-crm:
+    image: ${DOCKER_REGISTRY-}etsoo-crm
+    depends_on:
+      - etsoo-platform
+    build:
+      context: .
+      dockerfile: CRM/CRM.Server/Dockerfile
+    container_name: crm.app.local
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080;80
+      - ASPNETCORE_HTTPS_PORTS=8081;443
+      - ETSOO_ENVIRONMENT=Docker
+    ports:
+      - "9711:8081"
+    volumes:
+      - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - certs:/etc/etsoo/certs
+    networks:
+      - etsoo
+
   # Nginx for reverse proxy
   # Change the nginx.conf under root for your needs, make sure the ports (80, 443) are not used by other services (like IIS)
   # Nginx 用于反向代理

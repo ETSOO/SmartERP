@@ -21,7 +21,7 @@ namespace Platform.Server.Services
         Task<IEnumerable<CurrencyItem>> GetCurrenciesAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default);
         ValueTask<CustomResourceData[]?> GetCustomResourcesAsync(string culture, CancellationToken cancellationToken = default);
         Task<IEnumerable<RegionItem>> GetRegionsAsync(IEnumerable<string>? ids = null, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TimeZoneItem>> GetTimeZonesAsync(TimeZoneRQ rq, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TimeZoneItem>> GetTimeZonesAsync(Endpoints.Public.RQ.TimeZoneRQ rq, CancellationToken cancellationToken = default);
         string GetPinyin(PinyinRQ rq);
         ValueTask<string> MobileQRCodeAsync(MobileQRCodeRQ rq, CancellationToken cancellationToken = default);
         Task<OrgPublicInfo> OrgInfoAsync(OrgInfoRQ rq, CancellationToken cancellationToken = default);

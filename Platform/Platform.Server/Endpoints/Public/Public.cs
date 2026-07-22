@@ -53,7 +53,7 @@ namespace Platform.Server.Endpoints.Public
             g.MapPost("GetPinyin", (IPublicService service, PinyinRQ rq) => service.GetPinyin(rq))
                 .WithDescription("Get Chinese Pinyin / 获取汉字拼音").WithTags("Public");
 
-            g.MapPost("GetTimeZones", (IPublicService service, TimeZoneRQ rq, CancellationToken cancellationToken) => service.GetTimeZonesAsync(rq, cancellationToken))
+            g.MapPost("GetTimeZones", (IPublicService service, RQ.TimeZoneRQ rq, CancellationToken cancellationToken) => service.GetTimeZonesAsync(rq, cancellationToken))
                 .WithDescription("Get time zones / 获取时区列表").WithTags("Public");
 
             g.MapPost("MobileQRCode", (IPublicService service, MobileQRCodeRQ rq, CancellationToken cancellationToken) => service.MobileQRCodeAsync(rq, cancellationToken))

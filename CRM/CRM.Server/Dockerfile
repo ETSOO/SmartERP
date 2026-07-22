@@ -6,7 +6,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS with-node
 RUN apt-get update
@@ -21,7 +20,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["CRM/CRM.Server/CRM.Server.csproj", "CRM/CRM.Server/"]
 COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
-COPY ["crm.client/crm.client.esproj", "crm.client/"]
+COPY ["CRM/crm.client/crm.client.esproj", "CRM/crm.client/"]
 RUN dotnet restore "./CRM/CRM.Server/CRM.Server.csproj"
 COPY . .
 WORKDIR "/src/CRM/CRM.Server"

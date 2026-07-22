@@ -1,4 +1,4 @@
-﻿using com.etsoo.Database;
+﻿using com.etsoo.Utils.Models;
 
 namespace CRM.Server.RQ.PersonProduct
 {
