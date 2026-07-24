@@ -1,0 +1,13 @@
+name: Build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show build info
+        run: |
+          echo "Build version: ${{ inputs.version }}"
+
+      - name: Checkout
+        uses: actions/checkout@v5

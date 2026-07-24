@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "Target region"
+        required: true
+        type: choice
+        options:
+          - CN
+          - AU
+        default: CN
+
+jobs:
+  show-info:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show deployment info
+        run: |
+          echo "Deploy version: ${{ inputs.version }}"
+          echo "Region: ${{ inputs.region }}"
+
+  deploy-cn:
+    if: inputs.region == 'CN'
+
+    uses: ./.github/workflows/deploy-CN.yml
+
+    with:
+      version: ${{ inputs.version }}
+
+  deploy-au:
+    if: inputs.region == 'AU'
+
+    uses: ./.github/workflows/deploy-AU.yml
+
+    with:
+      version: ${{ inputs.version }}

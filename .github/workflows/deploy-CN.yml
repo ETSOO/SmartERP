@@ -1,0 +1,10 @@
+name: Deploy CN
+
+jobs:
+  show-info:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show deployment info
+        run: |
+          echo "Deploy version: ${{ inputs.version }}"

@@ -1,0 +1,98 @@
+name: Main CI
+
+on:
+  push:
+    branches:
+      - main
+      - "release/**"
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Optional release version (e.g. 1.2.3)"
+        required: false
+        type: string
+
+jobs:
+  parse-version:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      has_version: ${{ steps.version.outputs.has_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Parse version
+        id: version
+        shell: bash
+        run: |
+
+          VERSION=""
+
+          # 1. Manual input
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          fi
+
+
+          # 2. Branch name: release/x.y.z
+          if [ -z "$VERSION" ]; then
+            BRANCH=${GITHUB_REF#refs/heads/}
+
+            if [[ "$BRANCH" =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              VERSION="${BASH_REMATCH[1]}"
+            fi
+          fi
+
+
+          # 3. Commit message: release/x.y.z: xxx
+          if [ -z "$VERSION" ]; then
+
+            MESSAGE=$(git log -1 --pretty=%B)
+
+            if [[ "$MESSAGE" =~ release/([0-9]+\.[0-9]+\.[0-9]+): ]]; then
+              VERSION="${BASH_REMATCH[1]}"
+            fi
+
+          fi
+
+          if [ -z "$VERSION" ]; then
+
+            echo "No version found"
+
+            echo "has_version=false" >> $GITHUB_OUTPUT
+
+            echo "version=" >> $GITHUB_OUTPUT
+
+          else
+
+            echo "Version detected: $VERSION"
+
+            echo "has_version=true" >> $GITHUB_OUTPUT
+
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          fi
+
+  build:
+    needs: parse-version
+
+    if: needs.parse-version.outputs.has_version == 'true'
+
+    uses: ./.github/workflows/build.yml
+
+    with:
+      version: ${{ needs.parse-version.outputs.version }}
+
+  deploy:
+    needs:
+      - parse-version
+      - build
+
+    uses: ./.github/workflows/deploy.yml
+
+    with:
+      version: ${{ needs.parse-version.outputs.version }}
