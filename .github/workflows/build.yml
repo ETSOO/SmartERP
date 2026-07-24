@@ -1,5 +1,13 @@
 name: Build
 
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Build version
+        required: true
+        type: string
+
 jobs:
   build:
     runs-on: ubuntu-latest

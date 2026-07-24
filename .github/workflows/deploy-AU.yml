@@ -1,5 +1,13 @@
 name: Deploy AU
 
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Deploy version
+        required: true
+        type: string
+
 jobs:
   show-info:
     runs-on: ubuntu-latest
