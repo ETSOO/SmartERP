@@ -83,6 +83,6 @@ jobs:
     if: needs.parse-version.outputs.has_version == 'true'
 
     uses: ./.github/workflows/build.yml
-
+    secrets: inherit
     with:
       version: ${{ needs.parse-version.outputs.version }}
