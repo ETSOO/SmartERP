@@ -21,12 +21,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Show deployment info
-        run: |
-          echo "Deploy version: ${{ inputs.version }}"
-          echo "Region: ${{ inputs.region }}"
-
       - name: Validate version
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           VERSION=${{ inputs.version }}
@@ -46,6 +43,11 @@ jobs:
             exit 1
 
           fi
+
+      - name: Show deployment info
+        run: |
+          echo "Deploy version: ${{ inputs.version }}"
+          echo "Region: ${{ inputs.region }}"
 
   deploy-cn:
     if: inputs.region == 'CN'
