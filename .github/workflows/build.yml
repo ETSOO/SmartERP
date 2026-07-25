@@ -51,7 +51,7 @@ jobs:
       - name: Login to Aliyun Container Registry (ACR)
         uses: aliyun/acr-login@v1
         with:
-          login-server: https://${{ secrets.ACR_REGISTRY }}
+          login-server: https://${{ vars.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
@@ -67,8 +67,8 @@ jobs:
           tags: |
             ghcr.io/etsoo/${{ matrix.name }}:${{ inputs.version }}
             ghcr.io/etsoo/${{ matrix.name }}:latest
-            ${{ secrets.ACR_REGISTRY }}/smarterp/${{ matrix.name }}:${{ inputs.version }}
-            ${{ secrets.ACR_REGISTRY }}/smarterp/${{ matrix.name }}:latest
+            ${{ vars.ACR_REGISTRY }}/smarterp/${{ matrix.name }}:${{ inputs.version }}
+            ${{ vars.ACR_REGISTRY }}/smarterp/${{ matrix.name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
