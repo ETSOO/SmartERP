@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Deploy version
+        description: Deploy version, like 1.2.3
         required: true
         type: string
       region:
@@ -25,6 +25,27 @@ jobs:
         run: |
           echo "Deploy version: ${{ inputs.version }}"
           echo "Region: ${{ inputs.region }}"
+
+      - name: Validate version
+        shell: bash
+        run: |
+          VERSION=${{ inputs.version }}
+
+          TAG="release-${VERSION}"
+
+          echo "Checking release: $TAG"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+
+            echo "Release $TAG exists, proceed to deploy"
+
+          else
+
+            echo "Release $TAG does not exist"
+
+            exit 1
+
+          fi
 
   deploy-cn:
     if: inputs.region == 'CN'

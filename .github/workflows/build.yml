@@ -19,3 +19,27 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Create GitHub Release if not exists
+        shell: bash
+        run: |
+
+          VERSION=${{ inputs.version }}
+
+          TAG="release-${VERSION}"
+
+          echo "Checking release: $TAG"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+
+            echo "Release $TAG already exists, skip"
+
+          else
+
+            echo "Creating release $TAG"
+
+            gh release create "$TAG" \
+              --title "Release $VERSION" \
+              --generate-notes
+
+          fi

@@ -86,13 +86,3 @@ jobs:
 
     with:
       version: ${{ needs.parse-version.outputs.version }}
-
-  deploy:
-    needs:
-      - parse-version
-      - build
-
-    uses: ./.github/workflows/deploy.yml
-
-    with:
-      version: ${{ needs.parse-version.outputs.version }}
