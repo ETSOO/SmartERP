@@ -50,6 +50,8 @@ jobs:
           echo "Region: ${{ inputs.region }}"
 
   deploy-cn:
+    needs: show-info
+
     if: inputs.region == 'CN'
 
     uses: ./.github/workflows/deploy-CN.yml
@@ -58,6 +60,8 @@ jobs:
       version: ${{ inputs.version }}
 
   deploy-au:
+    needs: show-info
+
     if: inputs.region == 'AU'
 
     uses: ./.github/workflows/deploy-AU.yml
