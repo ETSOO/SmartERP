@@ -55,27 +55,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Debug ACR secrets
-        run: |
-          if [ -z "${{ secrets.ACR_USERNAME }}" ]; then
-            echo "ACR_USERNAME is empty"
-            exit 1
-          else
-            echo "ACR_USERNAME exists"
-          fi
-
-          if [ -z "${{ secrets.ACR_PASSWORD }}" ]; then
-            echo "ACR_PASSWORD is empty"
-            exit 1
-          else
-            echo "ACR_PASSWORD exists"
-          fi
-
       - name: Login to Aliyun Container Registry (ACR)
         uses: docker/login-action@v4
         with:
           registry: ${{ vars.ACR_REGISTRY }}
-          username: ${{ secrets.ACR_USERNAME }}
+          username: ${{ vars.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build and Push
@@ -89,15 +73,18 @@ jobs:
             ghcr.io/etsoo/${{ matrix.name }}:latest
             ${{ vars.ACR_REGISTRY }}/smarterp/${{ matrix.name }}:${{ inputs.version }}
             ${{ vars.ACR_REGISTRY }}/smarterp/${{ matrix.name }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
-      - name: Create GitHub Release if not exists
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
-
           VERSION=${{ inputs.version }}
 
           TAG="release-${VERSION}"
