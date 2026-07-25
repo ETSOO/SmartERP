@@ -66,7 +66,7 @@ services:
     container_name: localsetup
     volumes:
       - certs:/var/etsoo/certs
-      - ./data/certs:/var/etsoo/hostcerts
+      - ./certs:/var/etsoo/hostcerts
     networks:
       - etsoo
 
@@ -145,11 +145,11 @@ services:
   # volumes: - $USERPROFILE/.aspnet/https:/root/.aspnet/https:ro
   # - Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
   # - Kestrel__Certificates__Default__Password=etsoo
-  etsoo-platform:
+  smarterp-platform:
     depends_on:
       - postgres
       - rabbitmq
-    image: ${DOCKER_REGISTRY-}etsoo-platform
+    image: ${DOCKER_REGISTRY-}smarterp-platform
     build:
       context: .
       dockerfile: Platform/Platform.Server/Dockerfile
@@ -168,11 +168,11 @@ services:
       - etsoo
 
   # Worker Center for background tasks
-  etsoo-workercenter:
+  smarterp-workercenter:
     depends_on:
-      - etsoo-platform
-    image: ${DOCKER_REGISTRY-}etsoo-workercenter
-    container_name: etsoo-workercenter
+      - smarterp-platform
+    image: ${DOCKER_REGISTRY-}smarterp-workercenter
+    container_name: smarterp-workercenter
     build:
       context: .
       dockerfile: WorkerCenter/Dockerfile
@@ -184,11 +184,11 @@ services:
       - etsoo
 
   # CMS worker Center for background tasks
-  etsoo-workercms:
+  smarterp-workercms:
     depends_on:
-      - etsoo-platform
-    image: ${DOCKER_REGISTRY-}etsoo-workercms
-    container_name: etsoo-workercms
+      - smarterp-platform
+    image: ${DOCKER_REGISTRY-}smarterp-workercms
+    container_name: smarterp-workercms
     build:
       context: .
       dockerfile: WorkerCMS/Dockerfile
@@ -200,10 +200,10 @@ services:
       - etsoo
 
   # CoreApp site
-  etsoo-coreapp:
-    image: ${DOCKER_REGISTRY-}etsoo-coreapp
+  smarterp-coreapp:
+    image: ${DOCKER_REGISTRY-}smarterp-coreapp
     depends_on:
-      - etsoo-platform
+      - smarterp-platform
     build:
       context: .
       dockerfile: CoreApp/CoreApp.Server/Dockerfile
@@ -222,10 +222,10 @@ services:
       - etsoo
 
   # Admin site
-  etsoo-admin:
-    image: ${DOCKER_REGISTRY-}etsoo-admin
+  smarterp-admin:
+    image: ${DOCKER_REGISTRY-}smarterp-admin
     depends_on:
-      - etsoo-platform
+      - smarterp-platform
     build:
       context: .
       dockerfile: Admin/Admin.Server/Dockerfile
@@ -244,10 +244,10 @@ services:
       - etsoo
 
   # CRM site
-  etsoo-crm:
-    image: ${DOCKER_REGISTRY-}etsoo-crm
+  smarterp-crm:
+    image: ${DOCKER_REGISTRY-}smarterp-crm
     depends_on:
-      - etsoo-platform
+      - smarterp-platform
     build:
       context: .
       dockerfile: CRM/CRM.Server/Dockerfile
@@ -273,8 +273,9 @@ services:
     image: nginx:1.31.2-alpine
     container_name: nginx
     depends_on:
-      - etsoo-coreapp
-      - etsoo-admin
+      - smarterp-coreapp
+      - smarterp-admin
+      - smarterp-crm
     restart: unless-stopped
     ports:
       - "80:80"
