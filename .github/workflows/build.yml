@@ -55,8 +55,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Debug ACR secrets
+        run: |
+          if [ -z "${{ secrets.ACR_USERNAME }}" ]; then
+            echo "ACR_USERNAME is empty"
+            exit 1
+          else
+            echo "ACR_USERNAME exists"
+          fi
+
+          if [ -z "${{ secrets.ACR_PASSWORD }}" ]; then
+            echo "ACR_PASSWORD is empty"
+            exit 1
+          else
+            echo "ACR_PASSWORD exists"
+          fi
+
       - name: Login to Aliyun Container Registry (ACR)
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ vars.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
