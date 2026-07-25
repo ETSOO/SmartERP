@@ -58,8 +58,8 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ inputs.version }}
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:latest
+            ghcr.io/etsoo/${{ matrix.name }}:${{ inputs.version }}
+            ghcr.io/etsoo/${{ matrix.name }}:latest
 
       - name: Create GitHub Release if not exists
         env:
