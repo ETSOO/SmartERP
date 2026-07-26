@@ -55,6 +55,7 @@ jobs:
     if: inputs.region == 'CN'
 
     uses: ./.github/workflows/deploy-CN.yml
+    secrets: inherit
 
     with:
       version: ${{ inputs.version }}
@@ -65,6 +66,6 @@ jobs:
     if: inputs.region == 'AU'
 
     uses: ./.github/workflows/deploy-AU.yml
-
+    secrets: inherit
     with:
       version: ${{ inputs.version }}

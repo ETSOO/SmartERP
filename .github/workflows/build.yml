@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "Build version: ${{ inputs.version }}"
 
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Setup Docker Buildx
@@ -81,6 +81,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
