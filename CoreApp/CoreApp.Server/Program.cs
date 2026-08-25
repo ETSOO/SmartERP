@@ -167,7 +167,7 @@ if (corsOptions.Required)
 
 // API services
 services.AddScoped<CurrentUserAccessor>();
-services.AddScoped<ISEAuthService, SEAuthService>();
+services.AddScoped<ISEAuthService, SEAuthService<ServiceAppConfiguration>>();
 
 var app = builder.Build();
 
