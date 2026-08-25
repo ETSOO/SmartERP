@@ -2,8 +2,8 @@
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.ProductCategory;
 using CRM.Server.RQ.ProductCategory;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ namespace CRM.Server.Services
     /// Product category service
     /// 产品分类服务
     /// </summary>
-    public class ProductCategoryService : SEUserService, IProductCategoryService
+    public class ProductCategoryService : MyUserService, IProductCategoryService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -29,7 +29,7 @@ namespace CRM.Server.Services
 
         public ProductCategoryService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<ProductCategoryService> logger,
             ICommonService commonService,

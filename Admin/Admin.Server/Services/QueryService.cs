@@ -1,4 +1,5 @@
-﻿using Admin.Server.Dto.Query;
+﻿using Admin.Server.Application;
+using Admin.Server.Dto.Query;
 using Admin.Server.RQ.Query;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
@@ -17,7 +18,7 @@ namespace Admin.Server.Services
     /// Query service
     /// 查询服务
     /// </summary>
-    public class QueryService : SEUserService, IQueryService
+    public class QueryService : SEUserService<MyAppConfiguration>, IQueryService
     {
         readonly MyDbContext _db;
         readonly LogDbContext _logDb;
@@ -25,7 +26,7 @@ namespace Admin.Server.Services
         public QueryService(
             MyDbContext db,
             LogDbContext logDb,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<QueryService> logger
         )

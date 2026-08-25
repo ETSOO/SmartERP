@@ -2,8 +2,8 @@
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.RQ.PersonInfo;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
@@ -20,7 +20,7 @@ namespace CRM.Server.Services
     /// Person info service
     /// 人员信息服务
     /// </summary>
-    public class PersonInfoService : SEUserService, IPersonInfoService
+    public class PersonInfoService : MyUserService, IPersonInfoService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -28,7 +28,7 @@ namespace CRM.Server.Services
 
         public PersonInfoService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonInfoService> logger,
             ICommonService commonService,

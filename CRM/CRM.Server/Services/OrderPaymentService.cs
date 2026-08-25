@@ -2,8 +2,8 @@ using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.OrderPayment;
 using CRM.Server.RQ.OrderPayment;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ namespace CRM.Server.Services
     /// Order Payment Service
     /// 订单支付方式服务
     /// </summary>
-    public class OrderPaymentService : SEUserService, IOrderPaymentService
+    public class OrderPaymentService : MyUserService, IOrderPaymentService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -29,7 +29,7 @@ namespace CRM.Server.Services
 
         public OrderPaymentService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<OrderPaymentService> logger,
             ICommonService commonService,

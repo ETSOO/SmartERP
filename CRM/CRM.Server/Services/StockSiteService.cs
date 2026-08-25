@@ -1,6 +1,6 @@
 ﻿using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
-using com.etsoo.ServiceApp.SmartERP;
+using CRM.Server.Application;
 using CRM.Server.Dto.StockSite;
 using CRM.Server.RQ.StockSite;
 using Microsoft.EntityFrameworkCore;
@@ -12,14 +12,14 @@ namespace CRM.Server.Services
     /// Stock site service
     /// 库存点服务
     /// </summary>
-    public class StockSiteService : SEUserService, IStockSiteService
+    public class StockSiteService : MyUserService, IStockSiteService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
 
         public StockSiteService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<StockSiteService> logger,
             ICommonService commonService

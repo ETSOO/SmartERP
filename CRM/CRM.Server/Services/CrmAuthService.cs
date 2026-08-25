@@ -1,6 +1,8 @@
-﻿using com.etsoo.CoreFramework.User;
+﻿using com.etsoo.CoreFramework.Authentication;
+using com.etsoo.CoreFramework.User;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.Database;
 using System.Text.Json.Serialization.Metadata;
@@ -11,19 +13,20 @@ namespace CRM.Server.Services
     /// CRM authentication service
     /// CRM 认证服务
     /// </summary>
-    public class CrmAuthService : SEAuthService
+    public class CrmAuthService : SEAuthService<MyAppConfiguration>
     {
         protected override JsonTypeInfo<ActionResult> ActionResultTypeInfo => MyJsonSerializerContext.Default.ActionResult;
 
         readonly MyDbContext _db;
 
-        public CrmAuthService(ISEServiceApp app,
+        public CrmAuthService(IMyApp app,
             CurrentUserAccessor userAccessor,
-            ILogger<SEAuthService> logger,
+            ILogger<CrmAuthService> logger,
             IHttpClientFactory clientFactory,
+            IAuthService authService,
             MyDbContext db
         )
-            : base(app, userAccessor, logger, clientFactory)
+            : base(app, userAccessor, logger, clientFactory, authService)
         {
             _db = db;
         }

@@ -4,9 +4,9 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.Customer;
 using CRM.Server.Dto.PersonInfo;
 using CRM.Server.RQ;
@@ -28,7 +28,7 @@ namespace CRM.Server.Services
     /// Customer service
     /// 客户服务
     /// </summary>
-    public class CustomerService : SEUserService, ICustomerService
+    public class CustomerService : MyUserService, ICustomerService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -36,7 +36,7 @@ namespace CRM.Server.Services
 
         public CustomerService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<CustomerService> logger,
             ICommonService commonService,

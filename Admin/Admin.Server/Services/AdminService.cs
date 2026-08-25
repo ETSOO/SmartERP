@@ -1,4 +1,5 @@
-﻿using Admin.Server.RQ.Admin;
+﻿using Admin.Server.Application;
+using Admin.Server.RQ.Admin;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
@@ -16,14 +17,14 @@ namespace Admin.Server.Services
     /// Operation service
     /// 操作服务
     /// </summary>
-    public class AdminService : SEUserService, IAdminService
+    public class AdminService : SEUserService<MyAppConfiguration>, IAdminService
     {
         readonly MyDbContext _db;
         readonly IQueueService _queueService;
 
         public AdminService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<AdminService> logger,
             IQueueService queueService

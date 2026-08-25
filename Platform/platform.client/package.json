@@ -9,32 +9,32 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.72",
-    "@etsoo/materialui": "^1.6.81",
-    "@etsoo/react": "^1.8.96",
-    "@etsoo/shared": "^1.2.89",
-    "@etsoo/smarterp-core": "^1.1.80",
-    "@mui/icons-material": "^9.2.0",
-    "@mui/material": "^9.2.0",
+    "@etsoo/appscript": "^1.6.74",
+    "@etsoo/materialui": "^1.6.84",
+    "@etsoo/react": "^1.9.0",
+    "@etsoo/shared": "^1.2.91",
+    "@etsoo/smarterp-core": "^1.1.83",
+    "@mui/icons-material": "^9.3.1",
+    "@mui/material": "^9.3.1",
     "formik": "^2.4.9",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2",
     "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.0",
     "typescript": "^7.0.2",
-    "vite": "^8.1.4",
+    "vite": "^8.2.2",
     "vite-plugin-svgr": "^5.2.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.62.2"
+    "@rollup/rollup-linux-x64-gnu": "^4.62.5"
   },
   "allowScripts": {
-    "core-js-pure@3.49.0": true
+    "core-js-pure@3.50.0": true
   }
 }

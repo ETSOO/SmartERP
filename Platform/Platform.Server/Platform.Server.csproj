@@ -23,27 +23,27 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageReference Include="com.etsoo.AliAmapApi" Version="1.0.2" />
+    <PackageReference Include="com.etsoo.AliAmapApi" Version="1.0.3" />
     <PackageReference Include="com.etsoo.AlipayApi" Version="1.0.11" />
-    <PackageReference Include="com.etsoo.ApiProxy" Version="1.0.63" />
-    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.26" />
-    <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.3" />
-    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.44" />
-    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.83" />
-    <PackageReference Include="com.etsoo.ImageUtils" Version="1.1.1" />
-    <PackageReference Include="com.etsoo.Localization" Version="1.0.48" />
-    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.12" />
-    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.10" />
-    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.41" />
+    <PackageReference Include="com.etsoo.ApiProxy" Version="1.0.64" />
+    <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.27" />
+    <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.5" />
+    <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.45" />
+    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.84" />
+    <PackageReference Include="com.etsoo.ImageUtils" Version="1.1.2" />
+    <PackageReference Include="com.etsoo.Localization" Version="1.0.49" />
+    <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.13" />
+    <PackageReference Include="com.etsoo.ThirdPartyExtentions" Version="1.0.11" />
+    <PackageReference Include="com.etsoo.WeiXin" Version="1.0.42" />
     <PackageReference Include="EfCore.SchemaCompare" Version="10.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>10.0.10</Version>
+      <Version>10.0.11</Version>
     </PackageReference>
-	<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
+	<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.17.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.18.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
   </ItemGroup>
 

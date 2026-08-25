@@ -3,8 +3,8 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.Asset;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.Dto.Product;
@@ -19,7 +19,6 @@ using PlatformShared.Extentions;
 using System.Buffers;
 using System.Text.Json;
 using System.Web;
-using static Microsoft.Data.SqlClient.Internal.SqlClientEventSource;
 using BusinessProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
@@ -28,7 +27,7 @@ namespace CRM.Server.Services
     /// Asset service
     /// 资产服务
     /// </summary>
-    public class AssetService : SEUserService, IAssetService
+    public class AssetService : MyUserService, IAssetService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -36,7 +35,7 @@ namespace CRM.Server.Services
 
         public AssetService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<AssetService> logger,
             ICommonService commonService,

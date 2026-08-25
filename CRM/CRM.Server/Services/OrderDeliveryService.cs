@@ -2,8 +2,8 @@ using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.OrderDelivery;
 using CRM.Server.RQ.OrderDelivery;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ namespace CRM.Server.Services
     /// Order Delivery Service
     /// 订单配送方式服务
     /// </summary>
-    public class OrderDeliveryService : SEUserService, IOrderDeliveryService
+    public class OrderDeliveryService : MyUserService, IOrderDeliveryService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -29,7 +29,7 @@ namespace CRM.Server.Services
 
         public OrderDeliveryService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<OrderDeliveryService> logger,
             ICommonService commonService,

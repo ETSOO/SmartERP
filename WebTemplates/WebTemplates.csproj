@@ -20,7 +20,7 @@
     </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.40" />
+		<PackageReference Include="Etsoo.RazorEngineCore" Version="1.0.41" />
 	</ItemGroup>
 
 </Project>

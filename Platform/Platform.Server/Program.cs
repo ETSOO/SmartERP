@@ -196,7 +196,11 @@ new JwtBearerEvents
 }
 */
 
-var erp = new MyApp(services, erpSettings, new PostgreDatabase(connectonString), erpJwt, new JwtBearerEvents
+var erp = new MyApp(services, erpSettings, new PostgreDatabase(connectonString));
+services.AddSingleton<IMyApp>(erp);
+
+// Adding Authentication in JwtService
+var jwtService = new com.etsoo.CoreFramework.Authentication.JwtService(services, erpJwt, new JwtBearerEvents
 {
     OnAuthenticationFailed = context =>
     {
@@ -205,7 +209,8 @@ var erp = new MyApp(services, erpSettings, new PostgreDatabase(connectonString),
         return Task.CompletedTask;
     }
 });
-services.AddSingleton<IMyApp>(erp);
+
+services.AddSingleton<com.etsoo.CoreFramework.Authentication.IAuthService>(jwtService);
 
 // Localization cultures
 var Cultures = erp.Configuration.Cultures;
@@ -213,9 +218,6 @@ if (Cultures == null || Cultures.Length == 0)
 {
     throw new Exception("No SmartERP Culture Defined");
 }
-
-// It's done by JwtService of MyApp
-// services.AddAuthentication().AddJwtBearer();
 
 var healthBuilder = services.AddHealthChecks()
     .AddNpgSql(connectonString);

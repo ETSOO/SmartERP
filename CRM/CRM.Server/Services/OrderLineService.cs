@@ -3,8 +3,8 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.OrderLine;
 using CRM.Server.RQ.OrderLine;
 using CRM.Server.RQ.Product;
@@ -25,7 +25,7 @@ namespace CRM.Server.Services
     /// Order line service
     /// 订单行服务
     /// </summary>
-    public class OrderLineService : SEUserService, IOrderLineService
+    public class OrderLineService : MyUserService, IOrderLineService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -35,7 +35,7 @@ namespace CRM.Server.Services
 
         public OrderLineService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<OrderLineService> logger,
             ICommonService commonService,

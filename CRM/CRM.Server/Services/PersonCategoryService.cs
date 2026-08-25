@@ -3,8 +3,8 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.PersonCategory;
 using CRM.Server.RQ.PersonCategory;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +22,7 @@ namespace CRM.Server.Services
     /// Person category service
     /// 人员分类服务
     /// </summary>
-    public class PersonCategoryService : SEUserService, IPersonCategoryService
+    public class PersonCategoryService : MyUserService, IPersonCategoryService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -30,7 +30,7 @@ namespace CRM.Server.Services
 
         public PersonCategoryService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonCategoryService> logger,
             ICommonService commonService,

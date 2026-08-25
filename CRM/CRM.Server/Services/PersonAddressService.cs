@@ -3,8 +3,8 @@ using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.PersonAddress;
 using CRM.Server.RQ;
 using CRM.Server.RQ.PersonAddress;
@@ -24,7 +24,7 @@ namespace CRM.Server.Services
     /// Person Address Service
     /// 人员地址服务
     /// </summary>
-    public class PersonAddressService : SEUserService, IPersonAddressService
+    public class PersonAddressService : MyUserService, IPersonAddressService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -32,7 +32,7 @@ namespace CRM.Server.Services
 
         public PersonAddressService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonAddressService> logger,
             ICommonService commonService,

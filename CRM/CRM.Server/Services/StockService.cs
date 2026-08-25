@@ -3,9 +3,9 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using CRM.Server.Application;
 using CRM.Server.Dto.Stock;
 using CRM.Server.RQ;
 using CRM.Server.RQ.Stock;
@@ -26,7 +26,7 @@ namespace CRM.Server.Services
     /// Stock service
     /// 库存服务
     /// </summary>
-    public class StockService : SEUserService, IStockService
+    public class StockService : MyUserService, IStockService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -34,7 +34,7 @@ namespace CRM.Server.Services
 
         public StockService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<StockService> logger,
             ICommonService commonService,

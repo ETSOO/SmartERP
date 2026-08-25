@@ -5,6 +5,7 @@ using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.Promotion;
 using CRM.Server.RQ.Promotion;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,7 @@ namespace CRM.Server.Services
     /// Promotion Service
     /// 促销服务
     /// </summary>
-    public class PromotionService : SEUserService, IPromotionService
+    public class PromotionService : MyUserService, IPromotionService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -30,7 +31,7 @@ namespace CRM.Server.Services
 
         public PromotionService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PromotionService> logger,
             ICommonService commonService,

@@ -7,6 +7,7 @@ using com.etsoo.Localization;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.WebUtils.Attributes;
+using CRM.Server.Application;
 using CRM.Server.Dto.Product;
 using CRM.Server.Dto.System;
 using CRM.Server.RQ.Product;
@@ -26,7 +27,7 @@ namespace CRM.Server.Services
     /// Product service
     /// 产品服务
     /// </summary>
-    public class ProductService : SEUserService, IProductService
+    public class ProductService : MyUserService, IProductService
     {
         // Sale scope includes both internal and public sale
         const ProductScope SaleScope = ProductScope.InternalSale | ProductScope.PublicSale;
@@ -37,7 +38,7 @@ namespace CRM.Server.Services
 
         public ProductService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<ProductService> logger,
             ICommonService commonService,

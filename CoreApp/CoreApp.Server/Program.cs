@@ -1,4 +1,5 @@
 using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -75,7 +76,7 @@ if (string.IsNullOrEmpty(connectonString))
 // SmartERP Service Application
 var seSection = configuration.GetSection("SmartERPService");
 var seSettings = seSection.GetSection("Configuration").Get<ServiceAppConfiguration>();
-var seJwt = seSection.GetSection("Jwt").Get<com.etsoo.CoreFramework.Authentication.JwtSettings>();
+var seJwt = seSection.GetSection("Jwt").Get<JwtSettings>();
 if (seSettings == null || seJwt == null)
 {
     throw new Exception("SmartERP Service Application configuration not found");
@@ -85,7 +86,11 @@ if (seSettings.Cultures.Length == 0)
     throw new Exception("SmartERP Service Application cultures not found");
 }
 
-var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connectonString), seJwt, new JwtBearerEvents
+var seApp = new SEServiceApp<ServiceAppConfiguration>(services, seSettings, new PostgreDatabase(connectonString), appId: 1);
+services.AddSingleton<ISEServiceApp<ServiceAppConfiguration>>(seApp);
+
+// Adding Authentication in JwtService
+var jwtService = new JwtService(services, seJwt, new JwtBearerEvents
 {
     OnAuthenticationFailed = context =>
     {
@@ -93,8 +98,9 @@ var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connecton
         logger.LogError(context.Exception, "OnAuthenticationFailed");
         return Task.CompletedTask;
     }
-}, appId: 1);
-services.AddSingleton<ISEServiceApp>(seApp);
+});
+
+services.AddSingleton<IAuthService>(jwtService);
 
 // Localization cultures
 var Cultures = seApp.Configuration.Cultures;

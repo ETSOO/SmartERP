@@ -5,8 +5,8 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.Person;
 using CRM.Server.Dto.PersonProfile;
 using CRM.Server.RQ;
@@ -27,7 +27,7 @@ namespace CRM.Server.Services
     /// Person profile service
     /// 人员档案服务
     /// </summary>
-    public class PersonProfileService : SEUserService, IPersonProfileService
+    public class PersonProfileService : MyUserService, IPersonProfileService
     {
         readonly MyDbContext _db;
         readonly IQueueService _queueService;
@@ -36,7 +36,7 @@ namespace CRM.Server.Services
 
         public PersonProfileService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonService> logger,
             IQueueService queueService,

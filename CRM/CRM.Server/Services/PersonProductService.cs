@@ -1,8 +1,8 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.PersonProduct;
 using CRM.Server.RQ.PersonProduct;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +19,7 @@ namespace CRM.Server.Services
     /// Person product service
     /// 人员个性化产品服务
     /// </summary>
-    public class PersonProductService : SEUserService, IPersonProductService
+    public class PersonProductService : MyUserService, IPersonProductService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -27,7 +27,7 @@ namespace CRM.Server.Services
 
         public PersonProductService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonProductService> logger,
             ICommonService commonService,

@@ -1,0 +1,29 @@
+<Solution>
+  <Project Path="Admin/admin.client/admin.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Admin/Admin.Server/Admin.Server.csproj" />
+  <Project Path="CoreApp/coreapp.client/coreapp.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="CoreApp/CoreApp.Server/CoreApp.Server.csproj" />
+  <Project Path="CRM/crm.client/crm.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="CRM/CRM.Server/CRM.Server.csproj" />
+  <Project Path="docker-compose.dcproj" Id="1dbb1a55-5bea-4079-a5e4-874e360250e0">
+    <Build />
+  </Project>
+  <Project Path="Platform/platform.client/platform.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Platform/Platform.Server/Platform.Server.csproj" />
+  <Project Path="PlatformShared/PlatformShared.csproj" />
+  <Project Path="WebTemplates/WebTemplates.csproj" />
+  <Project Path="WorkerCenter/WorkerCenter.csproj" />
+  <Project Path="WorkerCMS/WorkerCMS.csproj" />
+</Solution>

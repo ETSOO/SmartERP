@@ -4,9 +4,9 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
+using CRM.Server.Application;
 using CRM.Server.Dto.Person;
 using CRM.Server.RQ.Person;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +25,7 @@ namespace CRM.Server.Services
     /// Person service
     /// 人员服务
     /// </summary>
-    public class PersonService : SEUserService, IPersonService
+    public class PersonService : MyUserService, IPersonService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -33,7 +33,7 @@ namespace CRM.Server.Services
 
         public PersonService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonService> logger,
             ICommonService commonService,

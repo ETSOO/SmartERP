@@ -1,5 +1,5 @@
 ﻿using com.etsoo.CoreFramework.User;
-using com.etsoo.ServiceApp.SmartERP;
+using CRM.Server.Application;
 using PlatformShared.Database;
 
 namespace CRM.Server.Services
@@ -8,14 +8,14 @@ namespace CRM.Server.Services
     /// Permission group service
     /// 权限组服务
     /// </summary>
-    public class PermissionGroupService : SEUserService
+    public class PermissionGroupService : MyUserService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
 
         public PermissionGroupService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PermissionGroupService> logger,
             ICommonService commonService

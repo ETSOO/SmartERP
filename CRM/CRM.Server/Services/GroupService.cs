@@ -1,7 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
+using CRM.Server.Application;
 using CRM.Server.Dto.Group;
 using CRM.Server.RQ.Group;
 using Microsoft.EntityFrameworkCore;
@@ -16,14 +16,14 @@ namespace CRM.Server.Services
     /// Permission group service
     /// 权限组服务
     /// </summary>
-    public class GroupService : SEUserService, IGroupService
+    public class GroupService : MyUserService, IGroupService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
 
         public GroupService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<GroupService> logger,
             ICommonService commonService

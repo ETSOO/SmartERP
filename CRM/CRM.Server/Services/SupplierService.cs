@@ -4,9 +4,9 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.PersonInfo;
 using CRM.Server.Dto.Supplier;
 using CRM.Server.RQ;
@@ -27,7 +27,7 @@ namespace CRM.Server.Services
     /// Supplier service
     /// 供应商服务
     /// </summary>
-    public class SupplierService : SEUserService, ISupplierService
+    public class SupplierService : MyUserService, ISupplierService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -35,7 +35,7 @@ namespace CRM.Server.Services
 
         public SupplierService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<SupplierService> logger,
             ICommonService commonService,

@@ -3,9 +3,9 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.String;
+using CRM.Server.Application;
 using CRM.Server.Dto;
 using CRM.Server.Dto.PO;
 using CRM.Server.RQ.PO;
@@ -27,7 +27,7 @@ namespace CRM.Server.Services
     /// Purchase order service
     /// 采购订单服务
     /// </summary>
-    public class POService : SEUserService, IPOService
+    public class POService : MyUserService, IPOService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -37,7 +37,7 @@ namespace CRM.Server.Services
 
         public POService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<POService> logger,
             ICommonService commonService,

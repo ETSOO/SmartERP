@@ -2,18 +2,19 @@ using com.etsoo.ApiProxy.Defs;
 using com.etsoo.ApiProxy.Options;
 using com.etsoo.ApiProxy.Proxy;
 using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.DI;
 using com.etsoo.MessageQueue.LocalRabbitMQ;
-using com.etsoo.ServiceApp.Application;
 using com.etsoo.ServiceApp.Services;
 using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Serialization;
 using com.etsoo.Web;
 using com.etsoo.WebUtils;
 using CRM.Server;
+using CRM.Server.Application;
 using CRM.Server.Endpoints;
 using CRM.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -95,7 +96,7 @@ services.AddDbContext<MyDbContext>((provider, options) =>
 
 // SmartERP Service Application
 var seSection = configuration.GetSection("SmartERPService");
-var seSettings = seSection.GetSection("Configuration").Get<ServiceAppConfiguration>();
+var seSettings = seSection.GetSection("Configuration").Get<MyAppConfiguration>();
 var seJwt = seSection.GetSection("Jwt").Get<com.etsoo.CoreFramework.Authentication.JwtSettings>();
 if (seSettings == null || seJwt == null)
 {
@@ -106,7 +107,11 @@ if (seSettings.Cultures.Length == 0)
     throw new Exception("SmartERP Service Application cultures not found");
 }
 
-var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connectonString), seJwt, new JwtBearerEvents
+var seApp = new MyApp(services, seSettings, new PostgreDatabase(connectonString));
+services.AddSingleton<IMyApp>(seApp);
+
+// Adding Authentication in JwtService
+var jwtService = new JwtService(services, seJwt, new JwtBearerEvents
 {
     OnAuthenticationFailed = context =>
     {
@@ -114,8 +119,9 @@ var seApp = new SEServiceApp(services, seSettings, new PostgreDatabase(connecton
         logger.LogError(context.Exception, "OnAuthenticationFailed");
         return Task.CompletedTask;
     }
-}, appId: 3);
-services.AddSingleton<ISEServiceApp>(seApp);
+});
+
+services.AddSingleton<IAuthService>(jwtService);
 
 // Localization cultures
 var Cultures = seApp.Configuration.Cultures;
@@ -232,8 +238,11 @@ services.AddHttpClient<ISmartERPProxy, SmartERPProxy>(client =>
 
 // API services
 services.AddScoped<CurrentUserAccessor>();
-services.AddScoped<ICommonService, CommonService>();
+
+// services.AddSEAuthService<IMyApp, MyAppConfiguration>();
 services.AddScoped<ISEAuthService, CrmAuthService>();
+
+services.AddScoped<ICommonService, CommonService>();
 services.AddScoped<IAssetService, AssetService>();
 services.AddScoped<ICustomerService, CustomerService>();
 services.AddScoped<IDeptService, DeptService>();

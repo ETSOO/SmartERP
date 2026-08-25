@@ -4,8 +4,8 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.PersonContact;
 using CRM.Server.RQ.PersonContact;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ namespace CRM.Server.Services
     /// Person contact service
     /// 人员联系人服务
     /// </summary>
-    public class PersonContactService : SEUserService, IPersonContactService
+    public class PersonContactService : MyUserService, IPersonContactService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -31,7 +31,7 @@ namespace CRM.Server.Services
 
         public PersonContactService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<PersonInfoService> logger,
             ICommonService commonService,

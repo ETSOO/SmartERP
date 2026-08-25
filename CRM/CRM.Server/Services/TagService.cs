@@ -1,7 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
+using CRM.Server.Application;
 using CRM.Server.Dto.Tag;
 using CRM.Server.RQ.Tag;
 using Microsoft.EntityFrameworkCore;
@@ -15,14 +15,14 @@ namespace CRM.Server.Services
     /// Feature tag service
     /// 特征标签服务
     /// </summary>
-    public class TagService : SEUserService, ITagService
+    public class TagService : MyUserService, ITagService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
 
         public TagService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<TagService> logger,
             ICommonService commonService

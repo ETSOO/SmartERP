@@ -4,8 +4,8 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.System;
 using CRM.Server.RQ.System;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ namespace CRM.Server.Services
     /// System service
     /// 系统服务
     /// </summary>
-    public class SystemService : SEUserService, ISystemService
+    public class SystemService : MyUserService, ISystemService
     {
         /// <summary>
         /// Read system settings
@@ -56,7 +56,7 @@ namespace CRM.Server.Services
 
         public SystemService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<SystemService> logger,
             ICommonService commonService,

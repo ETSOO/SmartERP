@@ -3,8 +3,8 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.POLine;
 using CRM.Server.RQ.POLine;
 using CRM.Server.RQ.Product;
@@ -24,7 +24,7 @@ namespace CRM.Server.Services
     /// Purchase order line service
     /// 采购订单行服务
     /// </summary>
-    public class POLineService : SEUserService, IPOLineService
+    public class POLineService : MyUserService, IPOLineService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -34,7 +34,7 @@ namespace CRM.Server.Services
 
         public POLineService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<OrderLineService> logger,
             ICommonService commonService,

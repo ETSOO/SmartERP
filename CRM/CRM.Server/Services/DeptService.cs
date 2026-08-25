@@ -4,8 +4,8 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
+using CRM.Server.Application;
 using CRM.Server.Dto.Dept;
 using CRM.Server.RQ.Dept;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ namespace CRM.Server.Services
     /// Department service
     /// 部门服务
     /// </summary>
-    public class DeptService : SEUserService, IDeptService
+    public class DeptService : MyUserService, IDeptService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -31,7 +31,7 @@ namespace CRM.Server.Services
 
         public DeptService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<DeptService> logger,
             ICommonService commonService,

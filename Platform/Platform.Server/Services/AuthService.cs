@@ -1,7 +1,5 @@
 ﻿using com.etsoo.Address;
 using com.etsoo.ApiModel.Auth;
-using com.etsoo.ApiModel.Dto.SmartERP;
-using com.etsoo.ApiModel.RQ.SmartERP;
 using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
@@ -102,6 +100,7 @@ namespace Platform.Server.Services
         readonly IPAddress _ip;
         readonly MinUserToken? _regUser;
         readonly IPublicService _publicService;
+        readonly com.etsoo.CoreFramework.Authentication.IAuthService _authService;
         readonly IAuthCodeService _authCodeService;
         readonly IQueueService _queueService;
         readonly ISmartERPCoordinator _erp;
@@ -126,6 +125,7 @@ namespace Platform.Server.Services
             IStorage storage,
             IHttpClientFactory httpClientFactory,
             IPublicService publicService,
+            com.etsoo.CoreFramework.Authentication.IAuthService authService,
             IAuthCodeService authCodeService,
             IQueueService queueService,
             ISmartERPCoordinator erp)
@@ -138,13 +138,14 @@ namespace Platform.Server.Services
             _ip = userAccessor.Ip;
 
             string? reason = null;
-            _regUser = userAccessor.User == null ? userAccessor.CreateUserFromAuthorization<MinUserToken>(app.AuthService, out reason, MyAppConstants.RegistrationTokenAudience, MyAppConstants.RegistrationTokenScheme) : null;
+            _regUser = userAccessor.User == null ? userAccessor.CreateUserFromAuthorization<MinUserToken>(authService, out reason, MyAppConstants.RegistrationTokenAudience, MyAppConstants.RegistrationTokenScheme) : null;
             if (reason != null)
             {
                 Logger.LogWarning("Failed to create registration user: {reason}", reason);
             }
 
             _publicService = publicService;
+            _authService = authService;
             _authCodeService = authCodeService;
             _queueService = queueService;
             _erp = erp;
@@ -448,7 +449,7 @@ namespace Platform.Server.Services
 
         private async Task<AppTokenData> CreateAppTokenDataAsync(CurrentUser user, int appId, string? appSecret, bool isOffline, TokenQueryData data, CancellationToken cancellationToken)
         {
-            var accessToken = App.AuthService.CreateAccessToken(user, null, App.AuthService.AccessTokenMinutes);
+            var accessToken = _authService.CreateAccessToken(user, null, _authService.AccessTokenMinutes);
 
             string? refreshToken = null;
             if (isOffline)
@@ -456,13 +457,13 @@ namespace Platform.Server.Services
                 refreshToken = await CreateRefreshTokenAsync(user.IdInt, data.DeviceId, data.Culture, TokenResponseType.Token, data.Data, appId, cancellationToken);
             }
 
-            var idToken = string.IsNullOrEmpty(appSecret) ? null : App.AuthService.CreateIdToken(user.CreateIdentity(), appSecret);
+            var idToken = string.IsNullOrEmpty(appSecret) ? null : _authService.CreateIdToken(user.CreateIdentity(), appSecret);
 
             var token = new AppTokenData
             {
                 AccessToken = accessToken,
                 TokenType = BearerTokenType,
-                ExpiresIn = App.AuthService.AccessTokenMinutes * 60,
+                ExpiresIn = _authService.AccessTokenMinutes * 60,
                 RefreshToken = refreshToken,
                 Scope = string.Join(' ', user.Scopes!),
                 IdToken = idToken
@@ -1132,8 +1133,8 @@ namespace Platform.Server.Services
 
             if (auth == null)
             {
-                var minutes = App.AuthService.AccessTokenMinutes;
-                var accessToken = App.AuthService.CreateAccessToken(tokenUser, null, minutes);
+                var minutes = _authService.AccessTokenMinutes;
+                var accessToken = _authService.CreateAccessToken(tokenUser, null, minutes);
 
                 // Serverside device id
                 // Encrypt DeviceId for client identifier
@@ -2252,7 +2253,7 @@ namespace Platform.Server.Services
                 Scopes = ["core"]
             };
 
-            return App.AuthService.CreateAccessToken(user, MyAppConstants.RegistrationTokenAudience, 60);
+            return _authService.CreateAccessToken(user, MyAppConstants.RegistrationTokenAudience, 60);
         }
 
         /// <summary>

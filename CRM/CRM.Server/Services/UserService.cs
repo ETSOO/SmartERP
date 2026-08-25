@@ -5,9 +5,9 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Serialization;
+using CRM.Server.Application;
 using CRM.Server.Dto.User;
 using CRM.Server.RQ.User;
 using EFCore.BulkExtensions;
@@ -25,7 +25,7 @@ namespace CRM.Server.Services
     /// User service
     /// 用户服务
     /// </summary>
-    public class UserService : SEUserService, IUserService
+    public class UserService : MyUserService, IUserService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -33,7 +33,7 @@ namespace CRM.Server.Services
 
         public UserService(
             MyDbContext db,
-            ISEServiceApp app,
+            IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<UserService> logger,
             ICommonService commonService,
