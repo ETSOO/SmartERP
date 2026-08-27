@@ -8,15 +8,16 @@ EXPOSE 8081
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS with-node
-RUN apt-get update
-RUN apt-get -y install curl
-RUN curl -sL https://deb.nodesource.com/setup_24.x | bash
-RUN apt-get -y install nodejs
+RUN apt-get update \
+	&& apt-get -y install curl \
+	&& curl -sL https://deb.nodesource.com/setup_24.x | bash \
+	&& apt-get -y install nodejs
 
 # This stage is used to build the service project
 FROM with-node AS build
 WORKDIR /src
 COPY ["Platform/Platform.Server/Platform.Server.csproj", "Platform/Platform.Server/"]
+COPY ["WebTemplates/WebTemplates.csproj", "WebTemplates/"]
 COPY ["PlatformShared/PlatformShared.csproj", "PlatformShared/"]
 COPY ["Platform/platform.client/platform.client.esproj", "Platform/platform.client/"]
 RUN dotnet restore "./Platform/Platform.Server/Platform.Server.csproj"

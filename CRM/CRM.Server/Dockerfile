@@ -8,10 +8,10 @@ EXPOSE 8081
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS with-node
-RUN apt-get update
-RUN apt-get -y install curl
-RUN curl -sL https://deb.nodesource.com/setup_24.x | bash
-RUN apt-get -y install nodejs
+RUN apt-get update \
+	&& apt-get -y install curl \
+	&& curl -sL https://deb.nodesource.com/setup_24.x | bash \
+	&& apt-get -y install nodejs
 
 # When no wwwroot is present, always caused by the client project's SDK version
 # <Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.3061438">

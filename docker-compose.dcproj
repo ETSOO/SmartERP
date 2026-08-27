@@ -5,8 +5,6 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <DockerPublishLocally>False</DockerPublishLocally>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
-    <DockerServiceName>platform.server</DockerServiceName>
     <DockerComposeProjectName>etsoo-smarterp</DockerComposeProjectName>
     <ProjectGuid>1dbb1a55-5bea-4079-a5e4-874e360250e0</ProjectGuid>
   </PropertyGroup>
