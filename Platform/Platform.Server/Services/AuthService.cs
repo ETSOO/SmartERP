@@ -95,6 +95,7 @@ namespace Platform.Server.Services
         }
 
         readonly MyDbContext _db;
+        readonly MyAppConfiguration _config;
         readonly IStorage _storage;
         readonly IHttpClientFactory _httpClientFactory;
         readonly IPAddress _ip;
@@ -111,6 +112,7 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="db">Database EF</param>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="storage">Storage</param>
@@ -120,6 +122,7 @@ namespace Platform.Server.Services
         /// <param name="queueService">Queue service</param>
         public AuthService(MyDbContext db,
             IMyApp app,
+            MyAppConfiguration configuration,
             CurrentUserAccessor userAccessor,
             ILogger<AuthService> logger,
             IStorage storage,
@@ -129,9 +132,10 @@ namespace Platform.Server.Services
             IAuthCodeService authCodeService,
             IQueueService queueService,
             ISmartERPCoordinator erp)
-            : base(app, userAccessor.User, "auth", logger)
+            : base(app, configuration, userAccessor.User, "auth", logger)
         {
             _db = db;
+            _config = configuration;
             _storage = storage;
             _httpClientFactory=httpClientFactory;
 
@@ -162,7 +166,7 @@ namespace Platform.Server.Services
         public async Task<IActionResult> AdminSupportAsync(AdminSupportRQ rq, string device, CancellationToken cancellationToken)
         {
             if (User == null
-                || !App.Configuration.SuperAdminOrganizationId.Equals(User.OrganizationInt)
+                || !_config.SuperAdminOrganizationId.Equals(User.OrganizationInt)
                 || User.ChannelOrganizationInt > 0
                 || User.Role < UserRole.Manager
                 || User.Scopes?.Contains(MyAppConstants.AdminApp) is not true)
@@ -245,7 +249,7 @@ namespace Platform.Server.Services
             }
 
             // API
-            var api = App.Configuration.CoreAppAuthApiUrl;
+            var api = _config.CoreAppAuthApiUrl;
 
             // Redirect URL
             var redirectUrl = $"{api}/{AuthExtentions.LogInAction}";
@@ -1045,7 +1049,7 @@ namespace Platform.Server.Services
 
             // Is super admin
             // Make sure it's not a partner organization and the user is manager or above
-            if (App.Configuration.SuperAdminOrganizationId.Equals(data.OrganizationId)
+            if (_config.SuperAdminOrganizationId.Equals(data.OrganizationId)
                 && data.ParentOrganizationId == null && data.ChannelOrganizationId == null
                 && data.UserRole >= UserRole.Manager)
             {
@@ -1138,7 +1142,7 @@ namespace Platform.Server.Services
 
                 // Serverside device id
                 // Encrypt DeviceId for client identifier
-                var deviceId = await HashEncryptAsync(data.DeviceId.ToString(), App.Configuration.InitCallEncryptionIdentifier);
+                var deviceId = await HashEncryptAsync(data.DeviceId.ToString(), _config.InitCallEncryptionIdentifier);
 
                 var publicData = new PublicUserData
                 {
@@ -1228,7 +1232,7 @@ namespace Platform.Server.Services
                 var loginUser = await ReadUserAsync(type, userInfo.OpenId);
                 if (loginUser == null)
                 {
-                    var url = $"{App.Configuration.AuthFailureUrl}?type={type}";
+                    var url = $"{_config.AuthFailureUrl}?type={type}";
                     context.Response.Redirect(url, true);
                 }
                 else
@@ -1332,7 +1336,7 @@ namespace Platform.Server.Services
 
         private void RedirectToFailureUrl(HttpResponse response, CoreUserIdentifierType type, string error, string? errorType = null, string? errorField = null)
         {
-            var url = $"{App.Configuration.AuthFailureUrl}?type={type}&error={HttpUtility.UrlEncode(error)}&errorType={HttpUtility.UrlEncode(errorType)}&errorField={HttpUtility.UrlEncode(errorField)}";
+            var url = $"{_config.AuthFailureUrl}?type={type}&error={HttpUtility.UrlEncode(error)}&errorType={HttpUtility.UrlEncode(errorType)}&errorField={HttpUtility.UrlEncode(errorField)}";
             response.Redirect(url, true);
         }
 
@@ -1374,7 +1378,7 @@ namespace Platform.Server.Services
 
             // Refresh token / code expiry
             var expiry = responseType == TokenResponseType.Token
-                ? DateTime.UtcNow.AddDays(App.Configuration.RefreshTokenDays).ToSqlDateTime()
+                ? DateTime.UtcNow.AddDays(_config.RefreshTokenDays).ToSqlDateTime()
                 : DateTime.UtcNow.AddMinutes(3).ToSqlDateTime();
 
             string token;
@@ -1493,7 +1497,7 @@ namespace Platform.Server.Services
                 if (user.Step > 0)
                 {
                     var token = CreateRegistrationToken(user.Id);
-                    var url = $"{App.Configuration.AuthRegistrationUrl}{user.Step}?token={HttpUtility.UrlEncode(token)}";
+                    var url = $"{_config.AuthRegistrationUrl}{user.Step}?token={HttpUtility.UrlEncode(token)}";
                     context.Response.Redirect(url, true);
                 }
                 else
@@ -1537,7 +1541,7 @@ namespace Platform.Server.Services
 
             var jsonResult = JsonSerializer.Serialize(result, CommonJsonSerializerContext.Default.ActionResult);
 
-            context.Response.Redirect($"{App.Configuration.AuthSuccessUrl}?result={HttpUtility.UrlEncode(jsonResult)}&token={HttpUtility.UrlEncode(refreshToken)}", true);
+            context.Response.Redirect($"{_config.AuthSuccessUrl}?result={HttpUtility.UrlEncode(jsonResult)}&token={HttpUtility.UrlEncode(refreshToken)}", true);
         }
 
         /// <summary>
@@ -2373,7 +2377,7 @@ namespace Platform.Server.Services
 
             if (userId > 0)
             {
-                result.Data["simpleRegistration"] = App.Configuration.SimpleRegistration;
+                result.Data["simpleRegistration"] = _config.SimpleRegistration;
                 result.Data["token"] = CreateRegistrationToken(userId);
             }
 

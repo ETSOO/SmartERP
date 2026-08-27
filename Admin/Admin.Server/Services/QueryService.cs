@@ -18,19 +18,20 @@ namespace Admin.Server.Services
     /// Query service
     /// 查询服务
     /// </summary>
-    public class QueryService : SEUserService<MyAppConfiguration>, IQueryService
+    public class QueryService : SEUserService, IQueryService
     {
         readonly MyDbContext _db;
         readonly LogDbContext _logDb;
 
         public QueryService(
             MyDbContext db,
+            MyAppConfiguration config,
             LogDbContext logDb,
             IMyApp app,
             CurrentUserAccessor userAccessor,
             ILogger<QueryService> logger
         )
-            : base(app, userAccessor.UserSafe, "query", logger)
+            : base(app, config, userAccessor.UserSafe, "query", logger)
         {
             _db = db;
             _logDb = logDb;

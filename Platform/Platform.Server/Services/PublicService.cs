@@ -31,7 +31,6 @@ using PlatformShared.Messages;
 using System.Globalization;
 using System.Text.Json;
 using System.Web;
-using static Google.Cloud.Iam.V1.AuditConfigDelta.Types;
 
 namespace Platform.Server.Services
 {
@@ -49,12 +48,14 @@ namespace Platform.Server.Services
         readonly IBridgeProxy _proxy;
         readonly IAuthCodeService _authCodeService;
         readonly IQueueService _queueService;
+        readonly double _cacheHours;
 
         /// <summary>
         /// Constructor
         /// 构造函数
         /// </summary>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="cache">Cache</param>
@@ -67,6 +68,7 @@ namespace Platform.Server.Services
         public PublicService(
             IDbContextFactory<MyDbContext> dbFactory,
             IMyApp app,
+            MyAppConfiguration configuration,
             CurrentUserAccessor userAccessor,
             ILogger<PublicService> logger,
             IDistributedCache cache,
@@ -76,7 +78,7 @@ namespace Platform.Server.Services
             IBridgeProxy proxy,
             IAuthCodeService authCodeService,
             IQueueService queueService)
-            : base(app, userAccessor.User, "public", logger)
+            : base(app, configuration, userAccessor.User, "public", logger)
         {
             _dbFactory = dbFactory;
             _cache = cache;
@@ -86,6 +88,7 @@ namespace Platform.Server.Services
             _proxy = proxy;
             _authCodeService = authCodeService;
             _queueService = queueService;
+            _cacheHours = configuration.CacheHours;
         }
 
         /// <summary>
@@ -245,7 +248,7 @@ namespace Platform.Server.Services
             var key = $"{nameof(PublicService)}.{nameof(GetCurrenciesAsync)}.{CultureInfo.CurrentCulture.LCID}";
             var currencies = await _cache.GetOrCreateAsync(key, async (options) =>
             {
-                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(_cacheHours);
                 return await Task.Run(() => LocalizationUtils.GetAllRegions().GetCurrencies(), cancellationToken);
             }, CommonJsonSerializerContext.Default.IEnumerableCurrencyItem, cancellationToken);
 
@@ -275,7 +278,7 @@ namespace Platform.Server.Services
             var key = $"{nameof(PublicService)}.{nameof(GetCustomResourcesAsync)}.{culture}";
             return _cache.GetOrCreateAsync(key, async (options) =>
             {
-                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(_cacheHours);
 
                 await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
                 return await db.FeatureCultures.AsNoTracking()
@@ -303,7 +306,7 @@ namespace Platform.Server.Services
 
             var regions = await _cache.GetOrCreateAsync(key, async (options) =>
             {
-                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(_cacheHours);
                 return await Task.Run(() => LocalizationUtils.GetAllRegions().GetRegions(), cancellationToken);
             }, CommonJsonSerializerContext.Default.IEnumerableRegionItem, cancellationToken);
 
@@ -346,7 +349,7 @@ namespace Platform.Server.Services
 
             var timeZones = await _cache.GetOrCreateAsync(key, async (options) =>
             {
-                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(App.Configuration.CacheHours);
+                options.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(_cacheHours);
 
                 if (all)
                 {

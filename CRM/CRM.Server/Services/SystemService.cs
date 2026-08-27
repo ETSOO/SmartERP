@@ -53,20 +53,24 @@ namespace CRM.Server.Services
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
         readonly IQueueService _queueService;
+        readonly string defaultCulture;
 
         public SystemService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<SystemService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "system", logger)
+            : base(app, config, userAccessor.UserSafe, "system", logger)
         {
             _db = db;
             _commonService = commonService;
             _queueService = queueService;
+
+            defaultCulture = config.Cultures[0];
         }
 
         /// <summary>
@@ -266,7 +270,7 @@ namespace CRM.Server.Services
                     PersonId = person.Id,
                     MainCustomerType = rq.MainCustomerType.GetValueOrDefault(CustomerType.Business),
                     Currencies = [.. currencies],
-                    Cultures = rq.Cultures?.ToList() ?? [App.Configuration.Cultures[0]],
+                    Cultures = rq.Cultures?.ToList() ?? [defaultCulture],
                     SupplierCurrencies = rq.SupplierCurrencies?.ToList() ?? [currencies.First()],
                     HasInventory = rq.HasInventory.GetValueOrDefault(),
                     TaxRate = rq.TaxRate,

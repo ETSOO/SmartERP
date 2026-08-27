@@ -196,7 +196,7 @@ new JwtBearerEvents
 }
 */
 
-var erp = new MyApp(services, erpSettings, new PostgreDatabase(connectonString));
+var erp = new MyApp(services, erpSettings.PrivateKey, new PostgreDatabase(connectonString));
 services.AddSingleton<IMyApp>(erp);
 
 // Adding Authentication in JwtService
@@ -213,7 +213,7 @@ var jwtService = new com.etsoo.CoreFramework.Authentication.JwtService(services,
 services.AddSingleton<com.etsoo.CoreFramework.Authentication.IAuthService>(jwtService);
 
 // Localization cultures
-var Cultures = erp.Configuration.Cultures;
+var Cultures = erpSettings.Cultures;
 if (Cultures == null || Cultures.Length == 0)
 {
     throw new Exception("No SmartERP Culture Defined");
@@ -388,33 +388,45 @@ services.AddCors(options =>
 });
 
 // Auth2 clients
-var wechatOptions = configuration.GetSection("WechatAuth");
-if (wechatOptions.Exists())
-{
-    services.AddWechatAuthClient(wechatOptions);
-}
+var authClients = erpSettings.AuthClients;
+int authClientsFlag = 0;
 
-var alipayOptions = configuration.GetSection("AlipayAuth");
-if (alipayOptions.Exists())
+if (authClients.Length > 0)
 {
-    services.AddAlipayClient(alipayOptions);
-}
+    foreach (var client in authClients)
+    {
+        // Options
+        var options = configuration.GetSection($"{client}Auth");
+        if (!options.Exists())
+        {
+            continue;
+        }
 
-var googleOptions = configuration.GetSection("GoogleAuth");
-if (googleOptions != null)
-{
-    services.AddGoogleAuthClient(googleOptions);
-}
-
-var microsoftOptions = configuration.GetSection("MicrosoftAuth");
-if (microsoftOptions != null)
-{
-    services.AddMicrosoftAuthClient(microsoftOptions);
+        switch (client.ToLower())
+        {
+            case "Wechat":
+                services.AddWechatAuthClient(options);
+                authClientsFlag |= 1;
+                break;
+            case "Alipay":
+                services.AddAlipayClient(options);
+                authClientsFlag |= 2;
+                break;
+            case "Google":
+                services.AddGoogleAuthClient(options);
+                authClientsFlag |= 4;
+                break;
+            case "Microsoft":
+                services.AddMicrosoftAuthClient(options);
+                authClientsFlag |= 8;
+                break;
+        }
+    }
 }
 
 services.AddSingleton(Options.Create(new SmartERPCoordinatorOptions
 {
-    PrivateKey = erp.Configuration.PrivateKey
+    PrivateKey = erpSettings.PrivateKey
 }));
 services.AddScoped<ISmartERPCoordinator, SmartERPCoordinator>();
 
@@ -426,6 +438,7 @@ services.AddScoped<IWXClient, WXClient>();
 
 // API services
 services.AddScoped<CurrentUserAccessor>();
+services.AddSingleton(erpSettings);
 services.AddScoped<IAppService, AppService>();
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IAuthCodeService, AuthCodeService>();
@@ -502,29 +515,32 @@ app.MapHealthChecks("/healthz");
 var api = app.MapGroup("/api");
 
 // OAuth2 integration
-var oauth = api.MapGroup("OAuth2").AllowAnonymous();
-
-if (wechatOptions.Exists())
+if (authClientsFlag > 0)
 {
-    oauth.MapWechat();
-}
+    var oauth = api.MapGroup("OAuth2").AllowAnonymous();
 
-// Alipay
-if (alipayOptions.Exists())
-{
-    oauth.MapAlipay();
-}
+    if ((authClientsFlag & 1) != 0)
+    {
+        oauth.MapWechat();
+    }
 
-// Google
-if (googleOptions.Exists())
-{
-    oauth.MapGoogle();
-}
+    // Alipay
+    if ((authClientsFlag & 2) != 0)
+    {
+        oauth.MapAlipay();
+    }
 
-// Microsoft
-if (microsoftOptions.Exists())
-{
-    oauth.MapMicrosoft();
+    // Google
+    if ((authClientsFlag & 4) != 0)
+    {
+        oauth.MapGoogle();
+    }
+
+    // Microsoft
+    if ((authClientsFlag & 8) != 0)
+    {
+        oauth.MapMicrosoft();
+    }
 }
 
 // Endpoints

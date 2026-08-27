@@ -34,6 +34,7 @@ namespace Platform.Server.Services
         readonly IStorageFactory _storageFactory;
         readonly IAuthCodeService _authCodeService;
         readonly IQueueService _queueService;
+        readonly string _webUrl;
 
         /// <summary>
         /// Constructor
@@ -41,21 +42,23 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="db">Database EF</param>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="storageFactory">Storage factory</param>
         /// <param name="authCodeService">Auth code service</param>
         /// <param name="queueService">Queue service</param>
         /// 
-        public MemberService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<MemberService> logger,
+        public MemberService(MyDbContext db, IMyApp app, MyAppConfiguration configuration, CurrentUserAccessor userAccessor, ILogger<MemberService> logger,
             IStorageFactory storageFactory, IAuthCodeService authCodeService,
             IQueueService queueService)
-            : base(app, userAccessor.UserSafe, "member", logger)
+            : base(app, configuration, userAccessor.UserSafe, "member", logger)
         {
             _db = db;
             _storageFactory = storageFactory;
             _authCodeService = authCodeService;
             _queueService = queueService;
+            _webUrl = configuration.WebUrl;
         }
 
         /// <summary>
@@ -264,7 +267,7 @@ namespace Platform.Server.Services
                     Data = new AuthCodeMemberInvitationData
                     {
                         UserData = data,
-                        WebUrl = App.Configuration.WebUrl,
+                        WebUrl = _webUrl,
                         UserRole = userRole,
                         Message = rq.Message
                     }

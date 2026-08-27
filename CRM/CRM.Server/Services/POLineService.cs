@@ -35,14 +35,15 @@ namespace CRM.Server.Services
         public POLineService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
-            ILogger<OrderLineService> logger,
+            ILogger<POLineService> logger,
             ICommonService commonService,
             IProductService productService,
             IPOService poService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "po_line", logger)
+            : base(app, config, userAccessor.UserSafe, "po_line", logger)
         {
             _db = db;
             _commonService = commonService;

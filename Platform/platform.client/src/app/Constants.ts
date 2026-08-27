@@ -3,6 +3,11 @@
  */
 export namespace Constants {
   /**
+   * Auth clients
+   */
+  export const AuthClients = "AuthClients";
+
+  /**
    * Auth request field
    */
   export const AuthRequestField = "AuthRequest";

@@ -44,12 +44,13 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="db">Database EF</param>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="queueService">Queue service</param>
-        public AuthCodeService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AuthCodeService> logger,
+        public AuthCodeService(MyDbContext db, IMyApp app, MyAppConfiguration configuration, CurrentUserAccessor userAccessor, ILogger<AuthCodeService> logger,
             IQueueService queueService)
-            : base(app, userAccessor.User, "auth_code", logger)
+            : base(app, configuration, userAccessor.User, "auth_code", logger)
         {
             _db = db;
             _ip = userAccessor.Ip;

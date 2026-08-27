@@ -294,6 +294,10 @@ export default function App() {
     });
   }, [trySaveLogin, loadAppData]);
 
+  // Auth clients
+  const authClients =
+    app.storage.getPersistedData<string[]>(Constants.AuthClients) ?? [];
+
   // Do auth
   const doAuth = React.useCallback(async (ac: string) => {
     const url = await app.authApi.getAuthLogInUrl(ac);
@@ -437,27 +441,31 @@ export default function App() {
                 }}
               />
             </HBox>
-            <Typography variant="caption">{value.get("signInWith")}</Typography>
-            {app.settings.authClients.length > 0 && (
-              <Grid container spacing={0.5}>
-                {app.settings.authClients.map((ac) => (
-                  <Grid size={{ xs: 6 }} key={ac}>
-                    <LoadingButton
-                      variant="outlined"
-                      fullWidth
-                      startIcon={
-                        <SvgIcon
-                          component={AppUtils.getBrandIcon(ac)}
-                          inheritViewBox
-                        />
-                      }
-                      onClick={() => doAuth(ac)}
-                    >
-                      {value.get(`brand${ac}`)}
-                    </LoadingButton>
-                  </Grid>
-                ))}
-              </Grid>
+            {authClients.length > 0 && (
+              <React.Fragment>
+                <Typography variant="caption">
+                  {value.get("signInWith")}
+                </Typography>
+                <Grid container spacing={0.5}>
+                  {authClients.map((ac) => (
+                    <Grid size={{ xs: 6 }} key={ac}>
+                      <LoadingButton
+                        variant="outlined"
+                        fullWidth
+                        startIcon={
+                          <SvgIcon
+                            component={AppUtils.getBrandIcon(ac)}
+                            inheritViewBox
+                          />
+                        }
+                        onClick={() => doAuth(ac)}
+                      >
+                        {value.get(`brand${ac}`)}
+                      </LoadingButton>
+                    </Grid>
+                  ))}
+                </Grid>
+              </React.Fragment>
             )}
             <div>
               {value.get("noAccountTip")}&nbsp;

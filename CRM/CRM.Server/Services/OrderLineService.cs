@@ -36,6 +36,7 @@ namespace CRM.Server.Services
         public OrderLineService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<OrderLineService> logger,
             ICommonService commonService,
@@ -43,7 +44,7 @@ namespace CRM.Server.Services
             IOrderService orderService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "order_line", logger)
+            : base(app, config, userAccessor.UserSafe, "order_line", logger)
         {
             _db = db;
             _commonService = commonService;

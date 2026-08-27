@@ -35,12 +35,13 @@ namespace CRM.Server.Services
         public StockService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<StockService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "stock", logger)
+            : base(app, config, userAccessor.UserSafe, "stock", logger)
         {
             _db = db;
             _commonService = commonService;

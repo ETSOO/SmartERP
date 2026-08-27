@@ -4,7 +4,6 @@ using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
 using com.etsoo.Localization;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using com.etsoo.WebUtils.Attributes;
 using CRM.Server.Application;
@@ -35,20 +34,24 @@ namespace CRM.Server.Services
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
         readonly IQueueService _queueService;
+        readonly string defaultSysCulture;
 
         public ProductService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<ProductService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "product", logger)
+            : base(app, config, userAccessor.UserSafe, "product", logger)
         {
             _db = db;
             _commonService = commonService;
             _queueService = queueService;
+
+            defaultSysCulture = config.Cultures[0];
         }
 
         private async ValueTask<ActionResult> ValidateAssetQtyAsync(int orgId, int? unitId, int? assetQty, CancellationToken cancellationToken)
@@ -1629,7 +1632,7 @@ namespace CRM.Server.Services
                 return null;
             }
 
-            var defaultCulture = await _commonService.GetDefaultCulture(orgId, cancellationToken) ?? App.Configuration.Cultures.First();
+            var defaultCulture = await _commonService.GetDefaultCulture(orgId, cancellationToken) ?? defaultSysCulture;
             var key = _commonService.GetCultureKey(id, CustomCultureKind.Product);
 
             var cultures = await _db.FeatureCultures.AsNoTracking()

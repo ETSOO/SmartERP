@@ -2,7 +2,7 @@
 
 namespace Admin.Server.Application
 {
-    public interface IMyApp : ISEServiceApp<MyAppConfiguration>
+    public interface IMyApp : ISEServiceApp
     {
     }
 }

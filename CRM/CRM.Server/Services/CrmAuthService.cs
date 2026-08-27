@@ -13,20 +13,21 @@ namespace CRM.Server.Services
     /// CRM authentication service
     /// CRM 认证服务
     /// </summary>
-    public class CrmAuthService : SEAuthService<MyAppConfiguration>
+    public class CrmAuthService : SEAuthService
     {
         protected override JsonTypeInfo<ActionResult> ActionResultTypeInfo => MyJsonSerializerContext.Default.ActionResult;
 
         readonly MyDbContext _db;
 
         public CrmAuthService(IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<CrmAuthService> logger,
             IHttpClientFactory clientFactory,
             IAuthService authService,
             MyDbContext db
         )
-            : base(app, userAccessor, logger, clientFactory, authService)
+            : base(app, config, userAccessor, logger, clientFactory, authService)
         {
             _db = db;
         }

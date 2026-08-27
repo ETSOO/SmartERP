@@ -3,7 +3,7 @@ using Npgsql;
 
 namespace Platform.Server.Application
 {
-    public interface IMyApp : ICoreApplication<MyAppConfiguration, NpgsqlConnection>
+    public interface IMyApp : ICoreApplication<NpgsqlConnection>
     {
     }
 }

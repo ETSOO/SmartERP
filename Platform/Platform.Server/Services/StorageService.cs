@@ -21,17 +21,19 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="db">Database EF</param>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="accessor">HttpContext accessor</param>
         /// <param name="storageFactory">Storage factory</param>
         public StorageService(MyDbContext db,
             IMyApp app,
+            MyAppConfiguration configuration,
             CurrentUserAccessor userAccessor,
             ILogger<StorageService> logger,
             IHttpContextAccessor accessor,
             IStorageFactory storageFactory)
-            : base(app, userAccessor.User, "storage", logger)
+            : base(app, configuration, userAccessor.User, "storage", logger)
         {
             _db = db;
             _accessor = accessor;

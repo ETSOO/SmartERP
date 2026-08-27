@@ -36,12 +36,13 @@ namespace CRM.Server.Services
         public SupplierService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<SupplierService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "supplier", logger)
+            : base(app, config, userAccessor.UserSafe, "supplier", logger)
         {
             _db = db;
             _commonService = commonService;

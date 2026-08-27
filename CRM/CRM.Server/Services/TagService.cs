@@ -23,11 +23,12 @@ namespace CRM.Server.Services
         public TagService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<TagService> logger,
             ICommonService commonService
         )
-            : base(app, userAccessor.UserSafe, "tag", logger)
+            : base(app, config, userAccessor.UserSafe, "tag", logger)
         {
             _db = db;
             _commonService = commonService;

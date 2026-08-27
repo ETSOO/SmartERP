@@ -39,14 +39,15 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="db">Database EF</param>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="orgService">Organization service</param>
         /// <param name="queueService">Queue service</param>
-        public AppService(MyDbContext db, IMyApp app, CurrentUserAccessor userAccessor, ILogger<AppService> logger,
+        public AppService(MyDbContext db, IMyApp app, MyAppConfiguration configuration, CurrentUserAccessor userAccessor, ILogger<AppService> logger,
             IOrgService orgService,
             IQueueService queueService)
-            : base(app, userAccessor.UserSafe, "app", logger)
+            : base(app, configuration, userAccessor.UserSafe, "app", logger)
         {
             _db = db;
             _orgService = orgService;

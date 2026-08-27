@@ -17,7 +17,7 @@ namespace Admin.Server.Services
     /// Operation service
     /// 操作服务
     /// </summary>
-    public class AdminService : SEUserService<MyAppConfiguration>, IAdminService
+    public class AdminService : SEUserService, IAdminService
     {
         readonly MyDbContext _db;
         readonly IQueueService _queueService;
@@ -25,11 +25,12 @@ namespace Admin.Server.Services
         public AdminService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<AdminService> logger,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "admin", logger)
+            : base(app, config, userAccessor.UserSafe, "admin", logger)
         {
             _db = db;
             _queueService = queueService;

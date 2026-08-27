@@ -3,7 +3,6 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.ServiceApp.SmartERP;
 using com.etsoo.Utils.Actions;
 using CRM.Server.Application;
 using CRM.Server.Dto.Promotion;
@@ -32,12 +31,13 @@ namespace CRM.Server.Services
         public PromotionService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<PromotionService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "promotion", logger)
+            : base(app, config, userAccessor.UserSafe, "promotion", logger)
         {
             _db = db;
             _commonService = commonService;

@@ -3,10 +3,10 @@ using com.etsoo.ServiceApp.SmartERP;
 
 namespace CRM.Server.Application
 {
-    public class MyUserService : SEUserService<MyAppConfiguration>
+    public class MyUserService : SEUserService
     {
-        public MyUserService(IMyApp app, CurrentUser user, string flag, ILogger<MyUserService> logger)
-            : base(app, user, flag, logger)
+        public MyUserService(IMyApp app, MyAppConfiguration config, CurrentUser user, string flag, ILogger<MyUserService> logger)
+            : base(app, config, user, flag, logger)
         {
         }
     }

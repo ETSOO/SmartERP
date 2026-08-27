@@ -4,10 +4,10 @@ using Npgsql;
 
 namespace CRM.Server.Application
 {
-    public class MyApp : SEServiceApp<MyAppConfiguration>, IMyApp
+    public class MyApp : SEServiceApp, IMyApp
     {
-        public MyApp(IServiceCollection services, MyAppConfiguration configuration, IDatabase<NpgsqlConnection> db, bool modelValidated = false)
-            : base(services, configuration, db, modelValidated, 3)
+        public MyApp(IServiceCollection services, IDatabase<NpgsqlConnection> db, MyAppConfiguration configuration, bool modelValidated = false)
+            : base(services, db, configuration, modelValidated, 3)
         {
         }
     }

@@ -33,12 +33,13 @@ namespace CRM.Server.Services
         public PersonAddressService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<PersonAddressService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "person_address", logger)
+            : base(app, config, userAccessor.UserSafe, "person_address", logger)
         {
             _db = db;
             _commonService = commonService;

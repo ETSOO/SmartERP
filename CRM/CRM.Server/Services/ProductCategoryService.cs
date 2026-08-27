@@ -30,12 +30,13 @@ namespace CRM.Server.Services
         public ProductCategoryService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<ProductCategoryService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "product_category", logger)
+            : base(app, config, userAccessor.UserSafe, "product_category", logger)
         {
             _db = db;
             _commonService = commonService;

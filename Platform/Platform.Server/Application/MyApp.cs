@@ -8,10 +8,10 @@ namespace Platform.Server.Application
     /// Main application
     /// 主程序
     /// </summary>
-    public class MyApp : CoreApplication<MyAppConfiguration, NpgsqlConnection>, IMyApp
+    public class MyApp : CoreApplication<NpgsqlConnection>, IMyApp
     {
-        public MyApp(IServiceCollection services, MyAppConfiguration configuration, IDatabase<NpgsqlConnection> db, bool modelValidated = false)
-            : base(configuration, db, modelValidated)
+        public MyApp(IServiceCollection services, string privateKey, IDatabase<NpgsqlConnection> db, bool modelValidated = false)
+            : base(db, privateKey, modelValidated)
         {
         }
     }

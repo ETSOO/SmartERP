@@ -36,6 +36,7 @@ namespace Platform.Server.Services
         readonly IOrgService _orgService;
         readonly ISmartERPCoordinator _erp;
         readonly IDistributedCache _cache;
+        readonly string _webUrl;
 
         /// <summary>
         /// Constructor
@@ -43,19 +44,21 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="dbFactory">Database context factory</param>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="orgService">Organization service</param>
         /// <param name="queueService">Queue service</param>
-        public DocumentService(IDbContextFactory<MyDbContext> dbFactory, IMyApp app, CurrentUserAccessor userAccessor, ILogger<DocumentService> logger,
+        public DocumentService(IDbContextFactory<MyDbContext> dbFactory, IMyApp app, MyAppConfiguration configuration, CurrentUserAccessor userAccessor, ILogger<DocumentService> logger,
             IOrgService orgService, IQueueService queueService, ISmartERPCoordinator erp, IDistributedCache cache)
-            : base(app, userAccessor.UserSafe, "document", logger)
+            : base(app, configuration, userAccessor.UserSafe, "document", logger)
         {
             _dbFactory = dbFactory;
             _orgService = orgService;
             _queueService = queueService;
             _erp = erp;
             _cache = cache;
+            _webUrl = configuration.WebUrl;
         }
 
         /// <summary>
@@ -208,7 +211,7 @@ namespace Platform.Server.Services
                 }
 
                 // Set the web URl
-                tData.WebUrl = App.Configuration.WebUrl;
+                tData.WebUrl = _webUrl;
 
                 var formattedPath = TemplateUtils.FormatCulture(template.Template, culture);
 
@@ -255,7 +258,7 @@ namespace Platform.Server.Services
                 }
 
                 // Set the web URl
-                tData.WebUrl = App.Configuration.WebUrl;
+                tData.WebUrl = _webUrl;
 
                 var cacheKey = GetDocumentCacheKey(id);
                 if (rq.NoCache is true)

@@ -24,11 +24,12 @@ namespace CRM.Server.Services
         public GroupService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<GroupService> logger,
             ICommonService commonService
         )
-            : base(app, userAccessor.UserSafe, "group", logger)
+            : base(app, config, userAccessor.UserSafe, "group", logger)
         {
             _db = db;
             _commonService = commonService;

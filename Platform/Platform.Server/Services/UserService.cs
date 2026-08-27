@@ -41,6 +41,7 @@ namespace Platform.Server.Services
         /// 构造函数
         /// </summary>
         /// <param name="db">Database EF</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="logDb">Log DB</param>
         /// <param name="app">Application</param>
         /// <param name="userAccessor">User accessor</param>
@@ -52,13 +53,14 @@ namespace Platform.Server.Services
         public UserService(MyDbContext db,
             LogDbContext logDb,
             IMyApp app,
+            MyAppConfiguration configuration,
             CurrentUserAccessor userAccessor,
             ILogger<UserService> logger,
             IStorage storage,
             IAuthCodeService authCodeService,
             IQueueService queueService,
             IPublicService publicService)
-            : base(app, userAccessor.UserSafe, "user", logger)
+            : base(app, configuration, userAccessor.UserSafe, "user", logger)
         {
             _db = db;
             _logDb = logDb;

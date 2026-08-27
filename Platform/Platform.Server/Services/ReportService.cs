@@ -2,7 +2,6 @@
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Utils;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.EntityFrameworkCore;
 using Platform.Server.Application;
 using Platform.Server.Dto.Report;
@@ -28,12 +27,13 @@ namespace Platform.Server.Services
 
         public ReportService(
             IMyApp app,
+            MyAppConfiguration configuration,
             CurrentUserAccessor userAccessor,
             ILogger<OrgService> logger,
             LogDbContext logDb,
             ISmartERPCoordinator erp,
             IOrgService orgService,
-            IQueueService queueService) : base(app, userAccessor.UserSafe, "report", logger)
+            IQueueService queueService) : base(app, configuration, userAccessor.UserSafe, "report", logger)
         {
             _logDb = logDb;
             _erp = erp;

@@ -36,12 +36,13 @@ namespace CRM.Server.Services
         public AssetService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<AssetService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "asset", logger)
+            : base(app, config, userAccessor.UserSafe, "asset", logger)
         {
             _db = db;
             _commonService = commonService;

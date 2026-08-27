@@ -48,5 +48,12 @@ namespace Platform.Server.Application
         /// 简洁注册（邮箱或者手机号注册）
         /// </summary>
         public bool SimpleRegistration { get; set; }
+
+        /// <summary>
+        /// Authentication clients
+        /// "Wechat", "Alipay", "Google", "Microsoft"
+        /// 授权客户端
+        /// </summary>
+        public string[] AuthClients { get; set; } = [];
     }
 }

@@ -29,12 +29,13 @@ namespace CRM.Server.Services
         public PersonInfoService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<PersonInfoService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "person_info", logger)
+            : base(app, config, userAccessor.UserSafe, "person_info", logger)
         {
             _db = db;
             _commonService = commonService;

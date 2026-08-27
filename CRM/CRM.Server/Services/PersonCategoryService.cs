@@ -31,12 +31,13 @@ namespace CRM.Server.Services
         public PersonCategoryService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<PersonCategoryService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "person_category", logger)
+            : base(app, config, userAccessor.UserSafe, "person_category", logger)
         {
             _db = db;
             _commonService = commonService;

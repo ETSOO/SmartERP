@@ -86,8 +86,10 @@ if (seSettings.Cultures.Length == 0)
     throw new Exception("SmartERP Service Application cultures not found");
 }
 
-var seApp = new SEServiceApp<ServiceAppConfiguration>(services, seSettings, new PostgreDatabase(connectonString), appId: 1);
-services.AddSingleton<ISEServiceApp<ServiceAppConfiguration>>(seApp);
+var seApp = new SEServiceApp(services, new PostgreDatabase(connectonString), seSettings, appId: 1);
+services.AddSingleton<ISEServiceApp>(seApp);
+
+services.AddSingleton(seSettings);
 
 // Adding Authentication in JwtService
 var jwtService = new JwtService(services, seJwt, new JwtBearerEvents
@@ -103,7 +105,7 @@ var jwtService = new JwtService(services, seJwt, new JwtBearerEvents
 services.AddSingleton<IAuthService>(jwtService);
 
 // Localization cultures
-var Cultures = seApp.Configuration.Cultures;
+var Cultures = seSettings.Cultures;
 if (Cultures == null || Cultures.Length == 0)
 {
     throw new Exception("No SmartERP Culture Defined");
@@ -167,7 +169,7 @@ if (corsOptions.Required)
 
 // API services
 services.AddScoped<CurrentUserAccessor>();
-services.AddScoped<ISEAuthService, SEAuthService<ServiceAppConfiguration>>();
+services.AddScoped<ISEAuthService, SEAuthService>();
 
 var app = builder.Build();
 

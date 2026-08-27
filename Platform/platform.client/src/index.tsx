@@ -13,6 +13,7 @@ import { ReactAppContext } from "@etsoo/materialui";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import LinearProgress from "@mui/material/LinearProgress";
+import { Constants } from "./app/Constants";
 
 // Root
 const root = document.getElementById("root")!;
@@ -75,22 +76,26 @@ function MyRouter() {
   // Init state
   const [init, setInit] = React.useState(app.isReady);
 
+  function appInit() {
+    app.initCall<{ authClients: string[] | undefined | null }>((ok, data) => {
+      setInit(ok);
+
+      if (data?.authClients != null) {
+        app.storage.setPersistedData(Constants.AuthClients, data.authClients);
+      }
+    });
+  }
+
   // Ready
   React.useEffect(() => {
     if (app.isReady) {
       if (app.deviceId === "") {
-        app.initCall((result) => {
-          setInit(result);
-        });
+        appInit();
       } else {
         setInit(true);
       }
     } else {
-      app.pendings.push(() => {
-        app.initCall((result) => {
-          setInit(result);
-        });
-      });
+      app.pendings.push(appInit);
     }
   }, [app.isReady]);
 

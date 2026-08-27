@@ -15,8 +15,8 @@ namespace Platform.Server.Services
         /// </summary>
         protected override CurrentUser User { get; }
 
-        protected CommonUserService(IMyApp app, CurrentUser user, string flag, ILogger logger)
-            : base(app, user, flag, logger)
+        protected CommonUserService(IMyApp app, MyAppConfiguration configuration, CurrentUser user, string flag, ILogger logger)
+            : base(app, configuration, user, flag, logger)
         {
             User = user;
         }
@@ -29,27 +29,6 @@ namespace Platform.Server.Services
         protected bool IsAdmin()
         {
             return User.AppId == MyAppConstants.AdminAppId;
-        }
-
-        /// <summary>
-        /// Is valid photo stream
-        /// 是否为有效的照片流
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <param name="small">Is small file</param>
-        /// <returns>Result</returns>
-        protected bool IsValidPhoto(Stream stream, bool small = false)
-        {
-            if(small)
-            {
-                // 4KB - 2MB
-                return stream.Length is (>= 4_096 and <= 2_097_152);
-            }
-            else
-            {
-                // 10KB - 10MB
-                return stream.Length is (>= 10_240 and <= 10_485_760);
-            }
         }
     }
 }

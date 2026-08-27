@@ -81,6 +81,7 @@ namespace Platform.Server.Services
         }
 
         readonly MyDbContext _db;
+        readonly MyAppConfiguration _config;
         readonly IPublicService _publicService;
         readonly IStorageFactory _storageFactory;
         readonly IQueueService _queueService;
@@ -93,12 +94,14 @@ namespace Platform.Server.Services
         /// </summary>
         /// <param name="db">Database EF</param>
         /// <param name="app">Application</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="userAccessor">User accessor</param>
         /// <param name="logger">Logger</param>
         /// <param name="publicService">Public service</param>
         /// <param name="queueService">Queue service</param>
         public OrgService(MyDbContext db,
             IMyApp app,
+            MyAppConfiguration configuration,
             CurrentUserAccessor userAccessor,
             ILogger<OrgService> logger,
             IPublicService publicService,
@@ -106,9 +109,10 @@ namespace Platform.Server.Services
             IQueueService queueService,
             ISmartERPCoordinator erp,
             IDistributedCache cache)
-            : base(app, userAccessor.UserSafe, "org", logger)
+            : base(app, configuration, userAccessor.UserSafe, "org", logger)
         {
             _db = db;
+            _config = configuration;
             _publicService = publicService;
             _storageFactory = storageFactory;
             _queueService = queueService;
@@ -354,7 +358,7 @@ namespace Platform.Server.Services
             if (key == MyAppConstants.TimeZoneResourceKey)
             {
                 var cacheKey = $"{nameof(PublicService)}.{nameof(PublicService.GetTimeZonesAsync)}.";
-                var tzTasks = App.Configuration.Cultures.Select(c => _cache.RemoveAsync(cacheKey + c, cancellationToken));
+                var tzTasks = _config.Cultures.Select(c => _cache.RemoveAsync(cacheKey + c, cancellationToken));
                 tasks.AddRange(tzTasks);
             }
 
@@ -1158,7 +1162,7 @@ namespace Platform.Server.Services
                     var key = await App.HashPasswordAsync(timestamp + attachment.Id);
                     attachments.Append($$"""
                         <li>
-                          <a href="{{App.Configuration.ApiUrl}}/Storage/ProfileAttachment/{{attachment.Id}}?timestamp={{timestamp}}&key={{WebUtility.UrlEncode(key)}}">{{attachment.Description}} ({{attachment.UserName}}, {{attachment.Creation:yyyy-MM-dd}})</a>
+                          <a href="{{_config.ApiUrl}}/Storage/ProfileAttachment/{{attachment.Id}}?timestamp={{timestamp}}&key={{WebUtility.UrlEncode(key)}}">{{attachment.Description}} ({{attachment.UserName}}, {{attachment.Creation:yyyy-MM-dd}})</a>
                         </li>
                         """);
                 }
@@ -1191,7 +1195,7 @@ namespace Platform.Server.Services
                 <head>
                   <meta charset="UTF-8">
                   <title>{{subject}}</title>
-                  <link rel="stylesheet" href="{{App.Configuration.ApiUrl}}/Storage/EditorStyles"/>
+                  <link rel="stylesheet" href="{{_config.ApiUrl}}/Storage/EditorStyles"/>
                   <style>
                     .field-label {
                       width: 100px;

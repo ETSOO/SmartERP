@@ -38,6 +38,7 @@ namespace CRM.Server.Services
         public POService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<POService> logger,
             ICommonService commonService,
@@ -45,7 +46,7 @@ namespace CRM.Server.Services
             IProductService productService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "po", logger)
+            : base(app, config, userAccessor.UserSafe, "po", logger)
         {
             _db = db;
             _commonService = commonService;

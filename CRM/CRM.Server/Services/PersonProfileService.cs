@@ -37,13 +37,14 @@ namespace CRM.Server.Services
         public PersonProfileService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
-            ILogger<PersonService> logger,
+            ILogger<PersonProfileService> logger,
             IQueueService queueService,
             ISmartERPProxy core,
             ICommonService commonService
         )
-            : base(app, userAccessor.UserSafe, "person_profile", logger)
+            : base(app, config, userAccessor.UserSafe, "person_profile", logger)
         {
             _db = db;
             _queueService = queueService;

@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.74",
+    "@etsoo/appscript": "^1.6.75",
     "@etsoo/materialui": "^1.6.84",
     "@etsoo/react": "^1.9.0",
     "@etsoo/shared": "^1.2.91",
@@ -23,7 +23,7 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.3.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^6.1.0",
@@ -32,7 +32,7 @@
     "vite-plugin-svgr": "^5.2.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.62.5"
+    "@rollup/rollup-linux-x64-gnu": "^4.63.0"
   },
   "allowScripts": {
     "core-js-pure@3.50.0": true

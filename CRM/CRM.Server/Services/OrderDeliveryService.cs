@@ -30,12 +30,13 @@ namespace CRM.Server.Services
         public OrderDeliveryService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<OrderDeliveryService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "order_delivery", logger)
+            : base(app, config, userAccessor.UserSafe, "order_delivery", logger)
         {
             _db = db;
             _commonService = commonService;

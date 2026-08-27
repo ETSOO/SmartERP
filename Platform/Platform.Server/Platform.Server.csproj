@@ -29,7 +29,7 @@
     <PackageReference Include="com.etsoo.BaiduApi" Version="1.0.27" />
     <PackageReference Include="com.etsoo.GarnetClient" Version="1.0.5" />
     <PackageReference Include="com.etsoo.GoogleApi" Version="1.0.45" />
-    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.84" />
+    <PackageReference Include="com.etsoo.HtmlIO" Version="1.0.85" />
     <PackageReference Include="com.etsoo.ImageUtils" Version="1.1.2" />
     <PackageReference Include="com.etsoo.Localization" Version="1.0.49" />
     <PackageReference Include="com.etsoo.MicrosoftApi" Version="1.0.13" />

@@ -12,10 +12,5 @@ window.settings = {
   /**
    * Web url of the cloud
    */
-  webUrl: "https://localhost:9002/",
-
-  /**
-   * OAuth2 clients
-   */
-  authClients: ["Wechat", "Alipay", "Google", "Microsoft"]
+  webUrl: "https://localhost:9002/"
 };

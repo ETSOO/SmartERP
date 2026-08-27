@@ -2,6 +2,7 @@
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.Web;
 using com.etsoo.WebUtils;
+using Platform.Server.Application;
 using Platform.Server.Endpoints.Auth.RQ;
 using Platform.Server.Endpoints.AuthCode.RQ;
 using Platform.Server.Services;
@@ -46,7 +47,7 @@ namespace Platform.Server.Endpoints.Auth
                 return result;
             }).WithDescription("Complete registration / 完成注册").WithTags("Auth");
 
-            g.MapPut("WebInitCall", async (IAuthService service, IHttpContextAccessor accessor, InitCallRQ rq) =>
+            g.MapPut("WebInitCall", async (IAuthService service, IHttpContextAccessor accessor, MyAppConfiguration config, InitCallRQ rq) =>
             {
                 // Device check
                 if (!MinimalApiUtils.CheckDevice(accessor.UserAgent, out var checkResult, out var parser))
@@ -55,7 +56,15 @@ namespace Platform.Server.Endpoints.Auth
                 }
 
                 // Result
-                return await service.WebInitCallAsync(rq, parser.ToShortName());
+                var result = await service.WebInitCallAsync(rq, parser.ToShortName());
+
+                // Additional data
+                if (result.Ok)
+                {
+                    result.Data.Add(nameof(config.AuthClients), config.AuthClients);
+                }
+
+                return result;
             }).WithDescription("Init call / 初始化调用").WithTags("Auth");
 
             g.MapPut("ChangePassword", (IAuthService service, IHttpContextAccessor accessor, ChangePasswordRQ rq, CancellationToken cancellationToken) => service.ChangePasswordAsync(rq, accessor.UserAgent, cancellationToken))

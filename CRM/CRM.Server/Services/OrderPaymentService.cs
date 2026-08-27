@@ -30,12 +30,13 @@ namespace CRM.Server.Services
         public OrderPaymentService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<OrderPaymentService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "order_payment", logger)
+            : base(app, config, userAccessor.UserSafe, "order_payment", logger)
         {
             _db = db;
             _commonService = commonService;

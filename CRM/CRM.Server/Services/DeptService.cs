@@ -32,12 +32,13 @@ namespace CRM.Server.Services
         public DeptService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<DeptService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "dept", logger)
+            : base(app, config, userAccessor.UserSafe, "dept", logger)
         {
             _db = db;
             _commonService = commonService;

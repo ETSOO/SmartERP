@@ -28,12 +28,13 @@ namespace CRM.Server.Services
         public PersonProductService(
             MyDbContext db,
             IMyApp app,
+            MyAppConfiguration config,
             CurrentUserAccessor userAccessor,
             ILogger<PersonProductService> logger,
             ICommonService commonService,
             IQueueService queueService
         )
-            : base(app, userAccessor.UserSafe, "person_product", logger)
+            : base(app, config, userAccessor.UserSafe, "person_product", logger)
         {
             _db = db;
             _commonService = commonService;
