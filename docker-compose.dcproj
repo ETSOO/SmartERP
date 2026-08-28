@@ -11,9 +11,6 @@
   <ItemGroup>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
-    <None Include="Resources\LocalEntry.sh" />
-    <None Include="Resources\LocalSetup.sh" />
-    <None Include="Resources\LocalSetupDocker" />
     <None Include="Resources\nginx.conf" />
   </ItemGroup>
 </Project>

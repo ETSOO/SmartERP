@@ -54,22 +54,6 @@ services:
     networks:
       - etsoo
 
-  # Etsoo Local setup
-  # 亿速思维本地设置
-  localsetup:
-    image: localsetup
-    # tty: true # For infinite running
-    # stdin_open: true
-    build:
-      context: .
-      dockerfile: Resources/LocalSetupDocker
-    container_name: localsetup
-    volumes:
-      - certs:/var/etsoo/certs
-      - ./certs:/var/etsoo/hostcerts
-    networks:
-      - etsoo
-
   # Distributed Cache (like Redis)
   garnet:
     image: "ghcr.io/microsoft/garnet"
@@ -163,7 +147,7 @@ services:
       - "9702:8081"
     volumes:
       - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - certs:/etc/etsoo/certs
+      - ./certs:/etc/etsoo/certs
     networks:
       - etsoo
 
@@ -217,7 +201,7 @@ services:
       - "9705:8081"
     volumes:
       - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - certs:/etc/etsoo/certs
+      - ./certs:/etc/etsoo/certs
     networks:
       - etsoo
 
@@ -239,7 +223,7 @@ services:
       - "9708:8081"
     volumes:
       - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - certs:/etc/etsoo/certs
+      - ./certs:/etc/etsoo/certs
     networks:
       - etsoo
 
@@ -261,7 +245,7 @@ services:
       - "9711:8081"
     volumes:
       - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - certs:/etc/etsoo/certs
+      - ./certs:/etc/etsoo/certs
     networks:
       - etsoo
 
@@ -284,13 +268,11 @@ services:
       - ./Resources/nginx.conf:/etc/nginx/nginx.conf
       - ./data/nginx/logs:/etc/nginx/logs
       - ./data/nginx/cache:/var/cache/nginx
-      - certs:/etc/nginx/ssl
+      - ./certs:/etc/nginx/ssl
     networks:
       - etsoo
 
 volumes:
-  certs:
-    name: "dev-certs"
   garnetdata:
     name: "garnet-data"
 

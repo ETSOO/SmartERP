@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import SvgIcon from "@mui/material/SvgIcon";
+import { Constants } from "../app/Constants";
 
 export function Register() {
   // Navigate
@@ -28,6 +29,10 @@ export function Register() {
     "signUpWith",
     "directRegistration"
   );
+
+  // Auth clients
+  const authClients =
+    app.storage.getPersistedData<string[]>(Constants.AuthClients) ?? [];
 
   // Do auth
   const doAuth = React.useCallback(async (ac: string) => {
@@ -54,27 +59,29 @@ export function Register() {
           {labels.directRegistration}
         </Button>
       </HBox>
-      <Typography variant="caption">{labels.signUpWith}</Typography>
-      {app.settings.authClients.length > 0 && (
-        <Grid container spacing={0.5}>
-          {app.settings.authClients.map((ac) => (
-            <Grid size={{ xs: 6 }} key={ac}>
-              <LoadingButton
-                variant="outlined"
-                fullWidth
-                startIcon={
-                  <SvgIcon
-                    component={AppUtils.getBrandIcon(ac)}
-                    inheritViewBox
-                  />
-                }
-                onClick={() => doAuth(ac)}
-              >
-                {app.get(`brand${ac}`)}
-              </LoadingButton>
-            </Grid>
-          ))}
-        </Grid>
+      {authClients.length > 0 && (
+        <React.Fragment>
+          <Typography variant="caption">{labels.signUpWith}</Typography>
+          <Grid container spacing={0.5}>
+            {authClients.map((ac) => (
+              <Grid size={{ xs: 6 }} key={ac}>
+                <LoadingButton
+                  variant="outlined"
+                  fullWidth
+                  startIcon={
+                    <SvgIcon
+                      component={AppUtils.getBrandIcon(ac)}
+                      inheritViewBox
+                    />
+                  }
+                  onClick={() => doAuth(ac)}
+                >
+                  {app.get(`brand${ac}`)}
+                </LoadingButton>
+              </Grid>
+            ))}
+          </Grid>
+        </React.Fragment>
       )}
     </SharedLayout>
   );

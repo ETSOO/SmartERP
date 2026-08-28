@@ -15,7 +15,7 @@
   </Project>
   <Project Path="CRM/CRM.Server/CRM.Server.csproj" />
   <Project Path="docker-compose.dcproj" Id="1dbb1a55-5bea-4079-a5e4-874e360250e0">
-    <Build Solution="Release|*" />
+    <Build />
   </Project>
   <Project Path="Platform/platform.client/platform.client.esproj">
     <Build />
