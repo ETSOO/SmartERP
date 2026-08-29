@@ -107,19 +107,17 @@ services:
     networks:
       - etsoo
 
-  # seq, port 80 for web, 5341 for API, 45341 for ingestion
-  seq:
-    image: datalust/seq:latest
-    container_name: seq.app.local
-    restart: unless-stopped
+  # openobserve for log, metrix, and trace
+  log:
+    image: openobserve/openobserve:latest
+    container_name: log.app.local
     environment:
-      - ACCEPT_EULA=Y
+      - ZO_ROOT_USER_EMAIL=info@etsoo.com
+      - ZO_ROOT_USER_PASSWORD=Etsoo@2004
     ports:
-      - "5330:80"
-      - "5331:5341"
-      - "45341:45341"
+      - "5080:5080"
     volumes:
-      - ./data/seq:/data
+      - ./data/openobserve:/data
     networks:
       - etsoo
 

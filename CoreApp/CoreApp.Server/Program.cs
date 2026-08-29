@@ -14,7 +14,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -44,16 +46,53 @@ if (otlpExportOptions == null)
 }
 
 builder.Logging.ClearProviders();
-services.AddOpenTelemetry()
+var openTelemetryBuilder = services.AddOpenTelemetry()
     .ConfigureResource(r => r.AddService(builder.Environment.ApplicationName))
-    .WithLogging(logging => logging
-        .AddConsoleExporter()
-        .AddOtlpExporter(options =>
-        {
-            options.Protocol = otlpExportOptions.Protocol;
-            options.Endpoint = otlpExportOptions.Endpoint;
-            options.Headers = otlpExportOptions.Headers;
-        }));
+    .WithLogging((logging) =>
+    {
+        logging.AddConsoleExporter()
+            .AddOtlpExporter((options) =>
+            {
+                options.Protocol = otlpExportOptions.Logging.Protocol ?? otlpExportOptions.Protocol;
+                options.Endpoint = otlpExportOptions.Logging.Endpoint;
+                options.Headers = otlpExportOptions.Logging.Headers ?? otlpExportOptions.Headers;
+            });
+    });
+
+if (otlpExportOptions.Metrics != null)
+{
+    openTelemetryBuilder.WithMetrics((builder) =>
+    {
+        builder.AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+
+            .AddOtlpExporter((options) =>
+            {
+                options.Protocol = otlpExportOptions.Metrics.Protocol ?? otlpExportOptions.Protocol;
+                options.Endpoint = otlpExportOptions.Metrics.Endpoint;
+                options.Headers = otlpExportOptions.Metrics.Headers ?? otlpExportOptions.Headers;
+            });
+    });
+}
+
+if (otlpExportOptions.Tracing != null)
+{
+    openTelemetryBuilder.WithTracing((builder) =>
+    {
+        builder.SetSampler(new TraceIdRatioBasedSampler(0.1))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddSource("Npgsql")
+
+            .AddOtlpExporter((options) =>
+            {
+                options.Protocol = otlpExportOptions.Tracing.Protocol ?? otlpExportOptions.Protocol;
+                options.Endpoint = otlpExportOptions.Tracing.Endpoint;
+                options.Headers = otlpExportOptions.Tracing.Headers ?? otlpExportOptions.Headers;
+            });
+    });
+}
 
 // Rate limiter
 // https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-8.0
