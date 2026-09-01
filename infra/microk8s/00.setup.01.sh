@@ -2,15 +2,6 @@
 sudo apt update
 sudo apt upgrade -y
 
-# Install PostgreSQL
-# https://www.postgresql.org/download/linux/ubuntu/
-sudo apt install curl ca-certificates
-sudo install -d /usr/share/postgresql-common/pgdg
-sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc 
-
-sudo apt install postgresql-18
-
-psql --version
 
 # Install Microk8s
 sudo snap install microk8s --classic
@@ -72,3 +63,39 @@ microk8s enable ingress
 # 所有发往宿主机 80 端口的流量，已被自动转发到 Traefik Pod 的 8000 端口
 # 所有发往宿主机 443 端口的流量，已被自动转发到 Traefik Pod 的 8443 端口
 # 外部用户 --> NAT || (Node IP : NodePort) --> Service ClusterIP : Port --> Pod IP : TargetPort --> 容器应用
+
+# Install PostgreSQL
+# https://www.postgresql.org/download/linux/ubuntu/
+sudo apt install curl ca-certificates
+sudo install -d /usr/share/postgresql-common/pgdg
+sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc 
+
+sudo apt install postgresql-18
+
+psql --version
+
+# Edit PostgreSQL configuration
+vi /etc/postgresql/18/main/postgresql.conf
+listen_addresses = 'localhost, 10.1.1.1'
+
+vi /etc/postgresql/18/main/pg_hba.conf
+
+
+# Restart PostgreSQL to apply changes
+sudo systemctl restart postgresql
+
+# Allow any IP in the 10.1.0.0/16 subnet and any user to access all databases
+# 允许 10.1.0.0/16 网段下的任意 IP、任意用户访问所有数据库
+host    all             all             10.1.0.0/16             scram-sha-256
+
+# Change user postgres password
+sudo -u postgres psql
+ALTER USER postgres WITH PASSWORD '***';
+\q
+
+# Create two users & databases, smarterp, smarterp_log
+# Backup from existing PostgreSQL databases with pgAdmin:
+# 1. General, Format: "Plain", Encoding: "UTF8"
+# 2. Data Options, Unselect "Blobs", "Only schemas"
+# 3. Options, Unselect "Verbose messages"
+# Tools -> Storage Manager -> Download

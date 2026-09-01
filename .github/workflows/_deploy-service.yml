@@ -1,0 +1,31 @@
+name: Deploy Service
+
+on:
+  workflow_call:
+    inputs:
+      projects:
+        required: true
+        type: string
+        description: "Project keys (JSON array string)"
+      region:
+        required: true
+        type: string
+        description: "Target deployment region"
+      version:
+        required: true
+        type: string
+        description: "Image version to be deployed"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dry Run (模拟部署输出)
+        run: |
+          echo "=================================================="
+          echo "[DRY-RUN] 开始处理单服务部署任务"
+          echo "=================================================="
+          echo "📦 项目     : ${{ inputs.projects }}"
+          echo "🌏 部署区域  : ${{ inputs.region }}"
+          echo "🔖 镜像版本  : ${{ inputs.version }}"
+          echo "=================================================="

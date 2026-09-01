@@ -1,0 +1,155 @@
+name: Release Pipeline
+
+on:
+  push:
+    branches:
+      - "release/**"
+
+  workflow_dispatch:
+    inputs:
+      force_all:
+        description: "Is a full release of all projects mandatory? (是否强制全量发布所有 6 个项目？)"
+        required: true
+        type: boolean
+        default: false
+      target_region:
+        description: "Select the target deployment region (选择部署目标区域)"
+        required: true
+        type: choice
+        options:
+          - "all"
+          - "cn"
+          - "au"
+        default: "all"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # =================================================================
+  # Job 1: 判定改动项目与区域
+  # =================================================================
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      projects_matrix: ${{ steps.select-matrix.outputs.projects_matrix }}
+      regions_matrix: ${{ steps.select-matrix.outputs.regions_matrix }}
+      has_changes: ${{ steps.select-matrix.outputs.has_changes }}
+      release_version: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Parse version (解析版本号)
+        id: version
+        shell: bash
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          VERSION="${BRANCH_NAME#release/}"
+          [ -z "$VERSION" ] || [ "$VERSION" == "${GITHUB_REF#refs/heads/}" ] && VERSION="latest"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Detect project code changes (检测项目代码变更)
+        id: filter
+        uses: dorny/paths-filter@v4
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            platform:       ['src/Platform/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
+            coreapp:        ['src/CoreApp/**', 'src/PlatformShared/**']
+            admin:          ['src/Admin/**', 'src/PlatformShared/**']
+            crm:            ['src/CRM/**', 'src/PlatformShared/**']
+            workercenter:   ['src/WorkerCenter/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
+            workercms:      ['src/WorkerCMS/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
+
+      - name: Decision matrix (决策矩阵)
+        id: select-matrix
+        run: |
+          IF_FORCE="${{ github.event.inputs.force_all }}"
+          if [ "$IF_FORCE" == "true" ]; then
+            FINAL_PROJECTS='["platform", "coreapp", "admin", "crm", "workercenter", "workercms"]'
+            HAS_CHANGES="true"
+          else
+            DETECTED_CHANGES='${{ steps.filter.outputs.changes }}'
+            if [ "$DETECTED_CHANGES" == "[]" ] || [ -z "$DETECTED_CHANGES" ]; then
+              FINAL_PROJECTS='[]'
+              HAS_CHANGES="false"
+            else
+              FINAL_PROJECTS="$DETECTED_CHANGES"
+              HAS_CHANGES="true"
+            fi
+          fi
+
+          INPUT_REGION="${{ github.event.inputs.target_region }}"
+          [ -z "$INPUT_REGION" ] && INPUT_REGION="all"
+
+          case "$INPUT_REGION" in
+            cn)  FINAL_REGIONS='["cn"]' ;;
+            au)  FINAL_REGIONS='["au"]' ;;
+            all|*) FINAL_REGIONS='["cn", "au"]' ;;
+          esac
+
+          echo "projects_matrix=$FINAL_PROJECTS" >> $GITHUB_OUTPUT
+          echo "regions_matrix=$FINAL_REGIONS" >> $GITHUB_OUTPUT
+          echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+
+  # =================================================================
+  # Job 2: 构建 Docker 镜像
+  # =================================================================
+  build-docker:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      matrix:
+        project: ${{ fromJson(needs.detect-changes.outputs.projects_matrix) }}
+      fail-fast: false
+    uses: ./.github/workflows/_build-docker.yml
+    with:
+      project_key: ${{ matrix.project }}
+      version: ${{ needs.detect-changes.outputs.release_version }}
+    # 自动继承父工作流的所有 GitHub Secrets，避免逐个传递
+    secrets: inherit
+
+  # =================================================================
+  # Job 3: 用户验收确认
+  # =================================================================
+  uat-approval:
+    needs: [detect-changes, build-docker]
+    runs-on: ubuntu-latest
+
+    environment: uat
+
+    steps:
+      - name: UAT Sign-off (用户验收确认)
+        run: |
+          echo "✅ 请批准 UAT测试 已通过！"
+          echo "镜像版本: ${{ needs.detect-changes.outputs.release_version }}"
+          echo "开始向生产环境部署..."
+
+  # Job 4: 生产发布审批
+  production-approval:
+    needs: [detect-changes, uat-approval]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Production Release Approval (生产发布审批)
+        run: echo "🚀 生产发布申请已获得批准，开始分发部署..."
+
+  # =================================================================
+  # Job 5: 部署至生产环境
+  # =================================================================
+  deploy-production:
+    needs: [detect-changes, production-approval]
+    strategy:
+      matrix:
+        region: ${{ fromJson(needs.detect-changes.outputs.regions_matrix) }}
+      fail-fast: false
+    uses: ./.github/workflows/_deploy-service.yml
+    with:
+      projects: ${{ needs.detect-changes.outputs.projects_matrix }}
+      region: ${{ matrix.region }}
+      version: ${{ needs.detect-changes.outputs.release_version }}
+    secrets: inherit
