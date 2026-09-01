@@ -367,3 +367,4 @@ data/
 
 # Templates bin
 /WebTemplates/Templates/**/*.bin
+/minio.license

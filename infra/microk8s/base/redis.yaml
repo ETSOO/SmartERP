@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garnet-pvc
+  namespace: redis-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garnet
+  namespace: redis-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: garnet
+  template:
+    metadata:
+      labels:
+        app: garnet
+    spec:
+      containers:
+        - name: garnet
+          image: ghcr.io/microsoft/garnet:2.1.5
+          # 启动参数：允许通过环境变量指定密码，并开启数据持久化
+          # 链接时删除用户名，设置密码，服务器地址：garnet-service
+          args: ["--auth", "Password", "--password", "$(GARNET_PASSWORD)"]
+          ports:
+            - containerPort: 6379
+              name: redis-port
+          env:
+            - name: GARNET_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: garnet-password
+          volumeMounts:
+            - name: garnet-data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+      volumes:
+        - name: garnet-data
+          persistentVolumeClaim:
+            claimName: garnet-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garnet-service
+  namespace: redis-system
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+  selector:
+    app: garnet
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redisinsight
+  namespace: redis-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redisinsight
+  template:
+    metadata:
+      labels:
+        app: redisinsight
+    spec:
+      containers:
+        - name: redisinsight
+          image: redis/redisinsight:3.8
+          ports:
+            - containerPort: 5540
+              name: http
+          env:
+            # 设置 RedisInsight 第一次打开时的控制台初始密码
+            - name: RIPROTECTEDMODE
+              value: "true"
+            - name: RI_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redisinsight-password
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redisinsight-service
+  namespace: redis-system
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5540
+      targetPort: 5540
+  selector:
+    app: redisinsight
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: redisinsight-route
+  namespace: redis-system
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+  hostnames:
+    - "redis.etsoo.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: redisinsight-service
+          port: 5540

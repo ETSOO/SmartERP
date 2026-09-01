@@ -43,7 +43,7 @@ services:
   # RabbitMQ for message queue
   # 消息队列的 RabbitMQ
   rabbitmq:
-    image: rabbitmq:4.3.1-management-alpine
+    image: rabbitmq:4.2.9-management-alpine
     container_name: rabbitmq.app.local
     restart: unless-stopped
     ports:
@@ -83,9 +83,9 @@ services:
       - etsoo
 
   # minio, API compatible with Amazon S3 cloud storage service
-  # Create the folder instead of using the "MINIO_DEFAULT_BUCKETS" in standalone mode
+  # https://docs.min.io/aistor/installation/container/distributed/
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/aistor/minio:latest
     container_name: minio.app.local
     restart: unless-stopped
     environment:
@@ -98,12 +98,13 @@ services:
       - -euc
       - |
         mkdir -p /data/smarterp && \
-        minio server --address "0.0.0.0:8900" --console-address "0.0.0.0:8901" /data
+        minio server --license /minio.license --address "0.0.0.0:8900" --console-address "0.0.0.0:8901" /data
     ports:
       - "8900:8900"
       - "8901:8901"
     volumes:
       - ./data/minio:/data
+      - ./minio.license:/minio.license:ro
     networks:
       - etsoo
 

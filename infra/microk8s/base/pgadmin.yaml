@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: pgadmin-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:9.17
+          ports:
+            - containerPort: 5501
+          env:
+            - name: PGADMIN_LISTEN_PORT
+              value: "5501"
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: pgadmin-email
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: pgadmin-password
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin-service
+  namespace: pgadmin-system
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 5501
+      targetPort: 5501
+  selector:
+    app: pgadmin
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: pgadmin-route
+  namespace: pgadmin-system
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+  hostnames:
+    - "pgadmin.etsoo.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: pgadmin-service
+          port: 5501

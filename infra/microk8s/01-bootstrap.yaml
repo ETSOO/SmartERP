@@ -1,0 +1,91 @@
+# MicroK8s Bootstrap Configuration
+# Set up namespaces and secrets for various services before deploying them
+__DISABLED_FILE_ERROR_RAISED__: Comment out the next line after the configuration is done
+
+# pgAdmin Initialization
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pgadmin-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin-secret
+  namespace: pgadmin-system
+type: Opaque
+stringData:
+  pgadmin-email: "info@etsoo.com"
+  pgadmin-password: "a"
+---
+# rabbitMQ Initialization
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rabbitmq-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-secret
+  namespace: rabbitmq-system
+type: Opaque
+stringData:
+  rabbitmq-user: ""
+  rabbitmq-pass: ""
+---
+# OpenObserve Initialization
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openobserve-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openobserve-secret
+  namespace: openobserve-system
+type: Opaque
+stringData:
+  zo-root-user-email: "info@etsoo.com"
+  zo-root-user-password: "b"
+---
+# Redis Initialization
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: redis-system
+---
+# 1. 账号与密码 Secret 存储
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: redis-system
+type: Opaque
+stringData:
+  garnet-password: "c"
+  redisinsight-password: "d"
+---
+# MinIO S3 Initialization
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: s3-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-secret
+  namespace: s3-system
+type: Opaque
+stringData:
+  root-user: "admin"
+  root-password: "e"
+  minio-license-key: ""
+---

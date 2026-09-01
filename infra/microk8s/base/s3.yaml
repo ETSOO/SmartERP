@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+  namespace: s3-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: s3-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: quay.io/minio/aistor/minio:RELEASE.2026-08-07T18-34-35Z
+          command: ["sh", "-euc"]
+          args:
+            - |
+              mkdir -p /data/smarterp && \
+              exec minio server --license /etc/minio/minio.license --address "0.0.0.0:8900" --console-address "0.0.0.0:8901" /data
+          ports:
+            - containerPort: 8900
+              name: api
+            - containerPort: 8901
+              name: console
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: root-user
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: root-password
+            - name: MINIO_PROMETHEUS_AUTH_TYPE
+              value: "public"
+            - name: MINIO_UPDATE
+              value: "off"
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+            - name: license-volume
+              mountPath: /etc/minio
+              readOnly: true
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: minio-pvc
+        - name: license-volume
+          secret:
+            secretName: minio-secret
+            items:
+              - key: minio-license-key
+                path: minio.license # 挂载后生成 /etc/minio/minio.license
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-service
+  namespace: s3-system
+spec:
+  type: ClusterIP
+  ports:
+    - name: api
+      port: 8900
+      targetPort: 8900
+    - name: console
+      port: 8901
+      targetPort: 8901
+  selector:
+    app: minio
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: minio-console-route
+  namespace: s3-system
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+  hostnames:
+    - "s3.etsoo.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: minio-service
+          port: 8901

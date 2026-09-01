@@ -1,0 +1,57 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+# 使用 JSON Patch 动态替换 HTTPRoute 的域名
+patches:
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: openobserve-route
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: log.etsoo.cn
+
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: pgadmin-route
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: pgadmin.etsoo.cn
+
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: rabbitmq-route
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: rabbitmq.etsoo.cn
+
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: redisinsight-route
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: redis.etsoo.cn
+
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: minio-console-route
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: s3.etsoo.cn
