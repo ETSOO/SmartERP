@@ -17,7 +17,7 @@ metadata:
 type: Opaque
 stringData:
   pgadmin-email: "info@etsoo.com"
-  pgadmin-password: "a"
+  pgadmin-password: "1"
 ---
 # rabbitMQ Initialization
 
@@ -34,7 +34,7 @@ metadata:
 type: Opaque
 stringData:
   rabbitmq-user: ""
-  rabbitmq-pass: ""
+  rabbitmq-pass: "a"
 ---
 # OpenObserve Initialization
 
@@ -89,7 +89,39 @@ stringData:
   root-password: "e"
   minio-license-key: ""
 ---
+# SmartERP applications
+
 apiVersion: v1
 kind: Namespace
 metadata:
   name: smarterp
+---
+# PostgreSQL Service and Endpoints for SmartERP
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: smarterp
+spec:
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: postgres-slice-1 # EndpointSlice 名称格式通常推荐: <service-name>-<hash/suffix>
+  namespace: smarterp
+  labels:
+    # 核心：必须通过这个 label 关联到对应 Service 的名字
+    kubernetes.io/service-name: postgres
+addressType: IPv4
+ports:
+  - name: postgres
+    port: 5432
+    protocol: TCP
+endpoints:
+  - addresses:
+      - "192.168.1.100" # 👈 替换为你宿主机/外部数据库的真实 IP

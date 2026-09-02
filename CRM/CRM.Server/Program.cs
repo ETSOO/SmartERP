@@ -336,11 +336,6 @@ if (isDevelopment)
         options.SwaggerEndpoint("/openapi/v1.json", "v1");
     });
 }
-else
-{
-    // Production
-    app.UseHttpsRedirection();
-}
 
 // Request localization setup
 // Use Content-Language Header for culture detection
