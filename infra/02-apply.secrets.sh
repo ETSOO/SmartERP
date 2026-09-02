@@ -1,9 +1,12 @@
 # Create necessary directories for base and overlays/cn
-mkdir -p infra/base/platform infra/overlays/cn/platform secrets
+mkdir -p infra/base/shared infra/base/platform infra/overlays/cn/platform secrets
 
-touch secrets/platform.env.secrets
+touch secrets/shared.env.secrets \
+      secrets/platform.env.secrets
 
-touch infra/base/platform/kustomization.yaml \
+touch infra/base/shared/kustomization.yaml \
+      infra/base/platform/kustomization.yaml \
+      infra/base/platform/kustomization.yaml \
       infra/base/platform/deployment.yaml \
       infra/base/platform/service.yaml \
       infra/base/platform/route.yaml
@@ -11,6 +14,7 @@ touch infra/base/platform/kustomization.yaml \
 touch infra/overlays/cn/platform/kustomization.yaml
 
 # Move the secrets file to the appropriate location for the CN platform overlay
+cp -f secrets/shared.env.secrets infra/base/shared/
 cp -f secrets/platform.env.secrets infra/overlays/cn/platform/
 
 # View the rendered Kustomize configuration for the CN platform overlay

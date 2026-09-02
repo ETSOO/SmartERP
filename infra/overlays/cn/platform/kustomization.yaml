@@ -5,6 +5,7 @@ namespace: smarterp
 
 resources:
   - ../../../base/platform
+  - ../../../base/shared
 
 images:
   - name: smarterp/smarterp-platform
