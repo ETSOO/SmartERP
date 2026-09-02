@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smarterp-platform
+  namespace: smarterp
+  labels:
+    app: smarterp-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smarterp-platform
+  template:
+    metadata:
+      labels:
+        app: smarterp-platform
+    spec:
+      containers:
+        - name: smarterp-platform
+          image: smarterp/smarterp-platform:1.0.0
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 8081
+              name: https
+          env:
+            - name: DOTNET_ENVIRONMENT
+              value: "Production"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "8080;80"
+            - name: ASPNETCORE_HTTPS_PORTS
+              value: "8081;443"

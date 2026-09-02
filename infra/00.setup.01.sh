@@ -41,6 +41,15 @@ server = "https://docker.io"
   capabilities = ["pull", "resolve"]
 BLOCK
 
+# docker registry secret
+: << 'BLOCK'
+microk8s kubectl create secret docker-registry aliyun-acr-secret \
+  --namespace=smarterp \
+  --docker-server=etsoo-registry.cn-qingdao.cr.aliyuncs.com \
+  --docker-username="in**@etsoo.com" \
+  --docker-password="你的阿里云访问凭证密码"
+BLOCK
+
 # Simplify access to Microk8s commands
 which microk8s
 sudo snap alias microk8s.kubectl kubectl

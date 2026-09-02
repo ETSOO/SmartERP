@@ -4,25 +4,23 @@ kind: Kustomization
 resources:
   - ../../../base/platform
 
-secretGenerator:
-  # 仅 CN 生成镜像凭据
-  - name: registry-secret
-    type: kubernetes.io/dockerconfigjson
-    envs:
-      - /etc/smarterp/.env.secrets
+images:
+  - name: smarterp/smarterp-platform
+    newName: etsoo-registry.cn-qingdao.cr.aliyuncs.com/smarterp/smarterp-platform
 
+secretGenerator:
   # 生成应用配置环境变量
   - name: smarterp-prod-secrets
     envs:
-      - /etc/smarterp/.env.secrets
+      - ../../../../secrets/platform.env.secrets
 
 patches:
   # 仅 CN 注入 imagePullSecrets
   - target:
       kind: Deployment
-      name: platform
+      name: smarterp-platform
     patch: |-
       - op: add
         path: /spec/template/spec/imagePullSecrets
         value:
-          - name: registry-secret
+          - name: aliyun-acr-secret

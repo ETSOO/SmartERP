@@ -4,6 +4,10 @@ kind: Kustomization
 resources:
   - ../../../base/platform
 
+images:
+  - name: smarterp/smarterp-platform
+    newName: ghcr.io/etsoo/smarterp-platform
+
 secretGenerator:
   # 生成应用配置环境变量
   - name: smarterp-prod-secrets

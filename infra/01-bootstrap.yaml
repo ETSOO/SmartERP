@@ -89,3 +89,7 @@ stringData:
   root-password: "e"
   minio-license-key: ""
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: smarterp
