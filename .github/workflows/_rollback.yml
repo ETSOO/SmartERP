@@ -1,4 +1,4 @@
-name: Deploy Service
+name: Rollback
 
 on:
   workflow_call:
@@ -17,13 +17,13 @@ on:
         description: "Image version to be deployed"
 
 jobs:
-  deploy:
+  rollback:
     runs-on: ubuntu-latest
     steps:
       - name: Dry Run (模拟部署输出)
         run: |
           echo "=================================================="
-          echo "[DRY-RUN] 开始处理单服务部署任务"
+          echo "[DRY-RUN] 回滚任务"
           echo "=================================================="
           echo "📦 项目     : ${{ inputs.projects }}"
           echo "🌏 部署区域  : ${{ inputs.region }}"
@@ -31,14 +31,14 @@ jobs:
           echo "=================================================="
 
   release:
-    needs: deploy
+    needs: rollback
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Create or Update GitHub Release
+      - name: Remove GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -51,20 +51,12 @@ jobs:
 
           if gh release view "$TAG" >/dev/null 2>&1; then
 
-            gh release edit "$TAG" \
-              --title "Release $VERSION" \
-              --generate-notes
+            gh release delete "$TAG" --yes --cleanup-tag
               
-            echo "✅ Release $TAG updated successfully!"
+            echo "✅ Release $TAG deleted successfully!"
 
           else
 
-            echo "Creating release $TAG"
-
-            gh release create "$TAG" \
-              --title "Release $VERSION" \
-              --generate-notes
-              
-            echo "✅ Release $TAG created successfully!"
+            echo "Release $TAG does not exist, nothing to delete"
 
           fi

@@ -160,3 +160,28 @@ jobs:
       region: ${{ matrix.region }}
       version: ${{ needs.detect-changes.outputs.release_version }}
     secrets: inherit
+
+  # Job 6: 回滚审批
+  rollback-approval:
+    needs: [detect-changes, deploy-production]
+    runs-on: ubuntu-latest
+    environment: production-rollback
+    steps:
+      - name: Rollback Approval (回滚审批)
+        run: echo "🚀 回滚申请已获得批准，开始执行回滚..."
+
+  # =================================================================
+  # Job 7: 回滚
+  # =================================================================
+  rollback:
+    needs: [detect-changes, rollback-approval]
+    strategy:
+      matrix:
+        region: ${{ fromJson(needs.detect-changes.outputs.regions_matrix) }}
+      fail-fast: false
+    uses: ./.github/workflows/_rollback.yml
+    with:
+      projects: ${{ needs.detect-changes.outputs.projects_matrix }}
+      region: ${{ matrix.region }}
+      version: ${{ needs.detect-changes.outputs.release_version }}
+    secrets: inherit
