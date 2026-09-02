@@ -62,12 +62,13 @@ jobs:
         with:
           base: ""
           filters: |
-            platform:       ['src/Platform/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
-            coreapp:        ['src/CoreApp/**', 'src/PlatformShared/**']
-            admin:          ['src/Admin/**', 'src/PlatformShared/**']
-            crm:            ['src/CRM/**', 'src/PlatformShared/**']
-            workercenter:   ['src/WorkerCenter/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
-            workercms:      ['src/WorkerCMS/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
+            infra:          ['infra/base/setup/**']
+            platform:       ['Platform/**', 'WebTemplates/**', 'PlatformShared/**']
+            coreapp:        ['CoreApp/**', 'PlatformShared/**']
+            admin:          ['Admin/**', 'PlatformShared/**']
+            crm:            ['CRM/**', 'PlatformShared/**']
+            workercenter:   ['WorkerCenter/**', 'WebTemplates/**', 'PlatformShared/**']
+            workercms:      ['WorkerCMS/**', 'WebTemplates/**', 'PlatformShared/**']
 
       - name: Decision matrix (决策矩阵)
         id: select-matrix

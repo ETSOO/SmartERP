@@ -33,6 +33,7 @@ jobs:
         id: config
         run: |
           case "${{ matrix.project }}" in
+            infra)        echo "skip=true" >> $GITHUB_OUTPUT ;;
             platform)     echo "file=Platform/Platform.Server/Dockerfile" >> $GITHUB_OUTPUT ;;
             coreapp)      echo "file=CoreApp/CoreApp.Server/Dockerfile" >> $GITHUB_OUTPUT ;;
             admin)        echo "file=Admin/Admin.Server/Dockerfile" >> $GITHUB_OUTPUT ;;
@@ -46,6 +47,7 @@ jobs:
           esac
 
       - name: Setup Docker Buildx
+        if: steps.config.outputs.skip != 'true'
         uses: docker/setup-buildx-action@v4
 
       - name: Login GitHub Container Registry (GHCR) (登录GitHub GHCR)
