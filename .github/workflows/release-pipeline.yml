@@ -113,19 +113,12 @@ jobs:
   build-docker:
     needs: detect-changes
     if: needs.detect-changes.outputs.has_changes == 'true'
-    permissions:
-      contents: read
-      packages: write
-    strategy:
-      matrix:
-        project: ${{ fromJson(needs.detect-changes.outputs.projects_matrix) }}
-      fail-fast: false
     uses: ./.github/workflows/_build-docker.yml
-    with:
-      project_key: ${{ matrix.project }}
-      version: ${{ needs.detect-changes.outputs.release_version }}
     # 自动继承父工作流的所有 GitHub Secrets，避免逐个传递
     secrets: inherit
+    with:
+      projects: ${{ needs.detect-changes.outputs.projects_matrix }}
+      version: ${{ needs.detect-changes.outputs.release_version }}
 
   # =================================================================
   # Job 3: 用户验收确认

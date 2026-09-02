@@ -3,18 +3,27 @@ name: Build Docker
 on:
   workflow_call:
     inputs:
-      project_key:
+      projects:
         required: true
         type: string
-        description: "Product key like admin, crm (项目标识)"
+        description: "Project keys (JSON array string)"
       version:
         required: true
         type: string
-        description: "Docker image version to build (构建的镜像版本号)"
+        description: "Docker image version to build"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        project: ${{ fromJson(inputs.projects) }}
+      fail-fast: false
 
     steps:
       - name: Checkout
@@ -23,7 +32,7 @@ jobs:
       - name: Mapping project key to docker file (映射项目标识到容器文件)
         id: config
         run: |
-          case "${{ inputs.project_key }}" in
+          case "${{ matrix.project }}" in
             platform)     echo "file=Platform/Platform.Server/Dockerfile" >> $GITHUB_OUTPUT ;;
             coreapp)      echo "file=CoreApp/CoreApp.Server/Dockerfile" >> $GITHUB_OUTPUT ;;
             admin)        echo "file=Admin/Admin.Server/Dockerfile" >> $GITHUB_OUTPUT ;;
@@ -31,7 +40,7 @@ jobs:
             workercenter) echo "file=WorkerCenter/Dockerfile" >> $GITHUB_OUTPUT ;;
             workercms)    echo "file=WorkerCMS/Dockerfile" >> $GITHUB_OUTPUT ;;
             *)
-              echo "❌ Unknown project (未知项目): ${{ inputs.project_key }}"
+              echo "❌ Unknown project (未知项目): ${{ matrix.project }}"
               exit 1
               ;;
           esac
@@ -57,7 +66,7 @@ jobs:
         uses: docker/build-push-action@v7
         env:
           DCK: ${{ steps.config.outputs.file }}
-          IMG: smarterp-${{ inputs.project_key }}
+          IMG: smarterp-${{ matrix.project }}
           VER: ${{ inputs.version }}
           ACR: ${{ vars.ACR_REGISTRY }}/smarterp
           GHCR: ghcr.io/etsoo
