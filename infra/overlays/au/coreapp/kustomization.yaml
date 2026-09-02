@@ -4,14 +4,14 @@ kind: Kustomization
 namespace: smarterp
 
 resources:
-  - ../../../base/platform
+  - ../../../base/coreapp
 
 images:
-  - name: smarterp/smarterp-platform
-    newName: ghcr.io/etsoo/smarterp-platform
+  - name: smarterp/smarterp-coreapp
+    newName: ghcr.io/etsoo/smarterp-coreapp
 
 secretGenerator:
   # 生成应用配置环境变量
-  - name: platform-secrets
+  - name: coreapp-secrets
     envs:
-      - platform.env.secrets
+      - coreapp.env.secrets
