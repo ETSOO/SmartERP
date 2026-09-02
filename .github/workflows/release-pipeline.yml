@@ -42,6 +42,9 @@ jobs:
       release_version: ${{ steps.version.outputs.VERSION }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # 抓取完整提交记录，以便 paths-filter 进行版本对比
+          fetch-depth: 0
 
       - name: Parse version (解析版本号)
         id: version
@@ -50,13 +53,17 @@ jobs:
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           VERSION="${BRANCH_NAME#release/}"
           [ -z "$VERSION" ] || [ "$VERSION" == "${GITHUB_REF#refs/heads/}" ] && VERSION="latest"
+
+          # 加粗显示解析的版本号
+          echo "::notice title=Version Parsing Result (版本号解析结果)::Current build version (当前构建版本号): $VERSION"
+
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Detect project code changes (检测项目代码变更)
         id: filter
         uses: dorny/paths-filter@v4
         with:
-          base: ${{ github.ref }}
+          base: ""
           filters: |
             platform:       ['src/Platform/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
             coreapp:        ['src/CoreApp/**', 'src/PlatformShared/**']
@@ -91,6 +98,13 @@ jobs:
             au)  FINAL_REGIONS='["au"]' ;;
             all|*) FINAL_REGIONS='["cn", "au"]' ;;
           esac
+
+          # 分组折叠展示矩阵参数
+          echo "::group::🔍 查看构建矩阵决策结果"
+          echo "📦 Projects (构建项目): $FINAL_PROJECTS"
+          echo "🌏 Regions (目标区域) : $FINAL_REGIONS"
+          echo "⚡ Has changes? (是否有更改)     : $HAS_CHANGES"
+          echo "::endgroup::"
 
           echo "projects_matrix=$FINAL_PROJECTS" >> $GITHUB_OUTPUT
           echo "regions_matrix=$FINAL_REGIONS" >> $GITHUB_OUTPUT
