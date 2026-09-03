@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smarterp-crm
+  namespace: smarterp
+  labels:
+    app: smarterp-crm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smarterp-crm
+  template:
+    metadata:
+      labels:
+        app: smarterp-crm
+    spec:
+      containers:
+        - name: smarterp-crm
+          image: smarterp/smarterp-crm:1.0.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: DOTNET_ENVIRONMENT
+              value: "Production"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "8080"
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+            - secretRef:
+                name: crm-secrets

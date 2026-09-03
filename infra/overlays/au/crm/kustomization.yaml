@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: smarterp
+
+resources:
+  - ../../../base/crm
+
+images:
+  - name: smarterp/smarterp-crm
+    newName: ghcr.io/etsoo/smarterp-crm
+
+secretGenerator:
+  # 生成应用配置环境变量
+  - name: crm-secrets
+    envs:
+      - crm.env.secrets
+
+patches:
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: smarterp-crm-route
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: "crm.etsoo.nz"

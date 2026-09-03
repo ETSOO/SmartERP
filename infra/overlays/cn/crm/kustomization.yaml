@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: smarterp
+
+resources:
+  - ../../../base/crm
+  - ../../../base/shared
+
+images:
+  - name: smarterp/smarterp-crm
+    newName: etsoo-registry.cn-qingdao.cr.aliyuncs.com/smarterp/smarterp-crm
+
+secretGenerator:
+  # 生成应用配置环境变量
+  - name: crm-secrets
+    envs:
+      - crm.env.secrets
+
+patches:
+  # 仅 CN 注入 imagePullSecrets
+  - target:
+      kind: Deployment
+      name: smarterp-crm
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value:
+          - name: aliyun-acr-secret
