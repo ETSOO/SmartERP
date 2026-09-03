@@ -15,3 +15,14 @@ secretGenerator:
   - name: platform-secrets
     envs:
       - platform.env.secrets
+
+patches:
+  - target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: smarterp-platform-route
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: "platform.etsoo.nz"
