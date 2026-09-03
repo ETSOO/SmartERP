@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smarterp-workercms
+  namespace: smarterp
+  labels:
+    app: smarterp-workercms
+spec:
+  replicas: 1 # 后台任务服务保持 1 个副本，避免 Cron 任务重复触发
+  selector:
+    matchLabels:
+      app: smarterp-workercms
+  template:
+    metadata:
+      labels:
+        app: smarterp-workercms
+    spec:
+      containers:
+        - name: smarterp-workercms
+          image: smarterp/smarterp-workercms:1.0.0
+          env:
+            - name: DOTNET_ENVIRONMENT
+              value: "Production"
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+            - secretRef:
+                name: workercms-secrets

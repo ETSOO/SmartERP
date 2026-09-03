@@ -42,7 +42,6 @@ curl -k -sSL -o infra/overlays/cn/coreapp/kustomization.yaml https://ghfast.top/
 touch secrets/coreapp.env.secrets
 vi secrets/coreapp.env.secrets
 
-cp -f secrets/shared.env.secrets infra/base/shared/
 cp -f secrets/coreapp.env.secrets infra/overlays/cn/coreapp/
 
 microk8s kubectl kustomize infra/overlays/cn/coreapp
