@@ -26,8 +26,10 @@ microk8s kubectl apply -k infra/overlays/cn/platform
 # View the logs for pod failure
 microk8s kubectl logs -n smarterp smarterp-platform-***
 
+# =================================================================
 # Add other appplications as needed
 # coreapp as an example
+# =================================================================
 mkdir -p infra/base/coreapp infra/overlays/cn/coreapp
 
 # Download the files to the base/coreapp

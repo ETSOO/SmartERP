@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: smarterp
 
 resources:
-  - ../../../base/crm
   - ../../../base/shared
+  - ../../../base/crm
 
 images:
   - name: smarterp/smarterp-crm

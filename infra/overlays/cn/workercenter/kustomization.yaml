@@ -5,23 +5,23 @@ namespace: smarterp
 
 resources:
   - ../../../base/shared
-  - ../../../base/coreapp
+  - ../../../base/workercenter
 
 images:
-  - name: smarterp/smarterp-coreapp
-    newName: etsoo-registry.cn-qingdao.cr.aliyuncs.com/smarterp/smarterp-coreapp
+  - name: smarterp/smarterp-workercenter
+    newName: etsoo-registry.cn-qingdao.cr.aliyuncs.com/smarterp/smarterp-workercenter
 
 secretGenerator:
   # 生成应用配置环境变量
-  - name: coreapp-secrets
+  - name: workercenter-secrets
     envs:
-      - coreapp.env.secrets
+      - workercenter.env.secrets
 
 patches:
   # 仅 CN 注入 imagePullSecrets
   - target:
       kind: Deployment
-      name: smarterp-coreapp
+      name: smarterp-workercenter
     patch: |-
       - op: add
         path: /spec/template/spec/imagePullSecrets

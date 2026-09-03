@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: smarterp
+
+resources:
+  - ../../../base/shared
+  - ../../../base/workercenter
+
+images:
+  - name: smarterp/smarterp-workercenter
+    newName: ghcr.io/etsoo/smarterp-workercenter
+
+secretGenerator:
+  # 生成应用配置环境变量
+  - name: workercenter-secrets
+    envs:
+      - workercenter.env.secrets

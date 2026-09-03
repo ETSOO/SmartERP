@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: smarterp
 
 resources:
-  - ../../../base/platform
   - ../../../base/shared
+  - ../../../base/platform
 
 images:
   - name: smarterp/smarterp-platform

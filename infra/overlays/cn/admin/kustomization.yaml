@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: smarterp
 
 resources:
-  - ../../../base/admin
   - ../../../base/shared
+  - ../../../base/admin
 
 images:
   - name: smarterp/smarterp-admin
