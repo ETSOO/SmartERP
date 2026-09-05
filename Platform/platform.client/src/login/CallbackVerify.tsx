@@ -49,11 +49,12 @@ export default function RegisterVerify() {
 
   // Decode
   const usernameDecoded = decodeURIComponent(username);
-  const id = app.decrypt(usernameDecoded);
 
-  if (!id) {
-    return <NavigateHome />;
-  }
+  // Button ref
+  const countdownRef = React.useRef<HTMLButtonElement | null>(null);
+
+  // Id
+  const [id, setId] = React.useState("");
 
   // Callback way
   const isEmail = id.includes("@");
@@ -110,10 +111,12 @@ export default function RegisterVerify() {
       return;
     }
 
+    const code = await app.encrypt(input.value);
+
     const rq: ValidateRQ = {
       deviceId: app.deviceId,
       id: codeId,
-      code: app.encrypt(input.value)
+      code
     };
 
     const result = isEmail
@@ -130,6 +133,24 @@ export default function RegisterVerify() {
     }
   };
 
+  React.useEffect(() => {
+    app.decrypt(usernameDecoded).then((id) => {
+      if (!id) {
+        navigate(homeUrl);
+        return;
+      }
+
+      setId(id);
+    });
+  }, [usernameDecoded]);
+
+  // Only check the original codeId, no dependency
+  React.useEffect(() => {
+    if (!!id && !codeId) {
+      countdownRef.current?.click();
+    }
+  }, [id]);
+
   return (
     <SharedLayout
       title={labels.verification}
@@ -139,9 +160,7 @@ export default function RegisterVerify() {
         <CountdownButton
           variant="outlined"
           key="resending"
-          ref={(instance: HTMLButtonElement | null) => {
-            if (!codeId) instance?.click();
-          }}
+          ref={countdownRef}
           onAction={resending}
         >
           {labels.resending}

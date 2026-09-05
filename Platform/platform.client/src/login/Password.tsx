@@ -47,17 +47,24 @@ export default function Password() {
   // Button
   const [buttonDisabled, updateButtonDisabled] = React.useState<boolean>(false);
 
-  if (username == null) {
+  if (username == null || username === "") {
     return <NavigateHome />;
   }
 
   // Decode
   const usernameDecoded = decodeURIComponent(username);
-  const id = app.decrypt(usernameDecoded);
 
-  if (id == null || id === "") {
-    return <NavigateHome />;
-  }
+  const [id, setId] = React.useState("");
+
+  React.useEffect(() => {
+    app.decrypt(usernameDecoded).then((id) => {
+      if (id == null) {
+        navigate(homeUrl);
+        return;
+      }
+      setId(id);
+    });
+  }, [usernameDecoded]);
 
   // Hold on cache
   app.storage.setData(CoreConstants.FieldUserIdSaved, usernameDecoded);
@@ -111,7 +118,7 @@ export default function Password() {
 
     const [result, refreshToken] = await app.authApi.login<ISmartERPUser>({
       id: usernameDecoded,
-      pwd: app.encrypt(app.hash(password)),
+      pwd: await app.encrypt(await app.hash(password)),
       org: org?.orgId,
       auth
     });

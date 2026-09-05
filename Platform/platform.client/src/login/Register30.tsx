@@ -89,7 +89,7 @@ export default function RegisterPassword() {
       name: name.value,
       familyName: familyNameRef.current?.value,
       givenName: givenNameRef.current?.value,
-      password: app.encrypt(app.hash(repeat.value)),
+      password: await app.encrypt(await app.hash(repeat.value)),
       auth
     });
     if (result == null) return;

@@ -122,22 +122,7 @@ export default function App() {
     ? { org: params.org }
     : app.storage.getData<PublicOrgRequest>(Constants.OrgRequestField);
 
-  const userIdSaved =
-    userIdEncrypted === "" || userIdEncrypted == null
-      ? ""
-      : (app.decrypt(userIdEncrypted) ?? "");
-
-  let passedLoginId = params.loginid ?? auth?.loginHint ?? null;
-  if (
-    passedLoginId != null &&
-    !Utils.isEmail(passedLoginId) &&
-    !Utils.isDigits(passedLoginId)
-  )
-    passedLoginId =
-      app.decrypt(decodeURIComponent(passedLoginId), app.name) ?? null;
-
-  // Query id or saved
-  const id = passedLoginId ?? userIdSaved;
+  const passedLoginId = params.loginid ?? auth?.loginHint;
 
   // Device validataion
   const deviceValidated = React.useRef(false);
@@ -170,62 +155,17 @@ export default function App() {
   const loginRef = React.useRef<HTMLInputElement>(null);
   const mRef = React.createRef<TextFieldExMethods>();
 
-  // Next button click
-  const nextClick = async () => {
-    // Input check
-    const inputId = loginRef.current?.value.trim();
-    if (inputId == null || inputId === "") {
-      loginRef.current?.focus();
-      return;
-    }
-
-    // Encryption
-    const checkId = id != null && inputId === id.hideEmail() ? id : inputId;
-    const idEncrypted = app.encrypt(checkId);
-
-    // Get the result
-    const result = await app.authApi.loginId(checkId);
-    if (result == null || !isMounted.current) return;
-
-    if (!result.ok) {
-      if (app.checkDeviceResult(result) && !deviceValidated.current) {
-        await app.initCall((result) => {
-          if (result) {
-            nextClick();
-          }
-        }, true);
-        deviceValidated.current = true;
-      } else {
-        mRef.current?.setError(result.title);
-        loginRef.current?.focus();
-      }
-    } else {
-      // Make sure the registration is done
-      if (
-        result.data != null &&
-        "step" in result.data &&
-        NumberUtils.parse(result.data.step, 0) > 0
-      ) {
-        app.notifier.alert(app.get("continueRegistrationDetail"), () =>
-          navigate(`./login/register/`)
-        );
-        return;
-      }
-
-      // Without password verification, no user id returned
-      navigate("./login/password/" + encodeURIComponent(idEncrypted));
-    }
-  };
-
   // Refresh token
   const refreshToken = app.getCacheToken();
 
-  // Save login
-  const trySaveLogin =
+  // Try login check
+  const tryLoginCheck =
     params.tryLogin !== "false" &&
     (app.keepLogin || auth != null) &&
-    (id === "" || id === userIdSaved) &&
-    refreshToken;
+    !!refreshToken;
+
+  // Login id
+  const [id, setId] = React.useState<string | null>();
 
   // Visible
   const [visible, setVisible] = React.useState(false);
@@ -275,7 +215,29 @@ export default function App() {
       });
   }, [org?.org, auth?.appId, auth?.appKey]);
 
-  React.useEffect(() => {
+  const tryLogin = React.useCallback(async () => {
+    const userIdSaved = !!userIdEncrypted
+      ? await app.decrypt(userIdEncrypted)
+      : null;
+
+    let loginId: string | null = null;
+    if (
+      !!passedLoginId &&
+      !Utils.isEmail(passedLoginId) &&
+      !Utils.isDigits(passedLoginId)
+    ) {
+      loginId = await app.decrypt(decodeURIComponent(passedLoginId), app.name);
+    }
+
+    const id = loginId ?? userIdSaved;
+    if (loginRef.current) {
+      loginRef.current.value = id?.hideEmail() ?? "";
+    }
+    setId(id);
+
+    // Save login
+    const trySaveLogin = tryLoginCheck && (id === "" || id === userIdSaved);
+
     if (!trySaveLogin) {
       loadAppData();
       return;
@@ -292,7 +254,7 @@ export default function App() {
         loadAppData();
       }
     });
-  }, [trySaveLogin, loadAppData]);
+  }, [userIdEncrypted, passedLoginId, tryLoginCheck, loadAppData]);
 
   // Auth clients
   const authClients =
@@ -306,12 +268,58 @@ export default function App() {
     }
   }, []);
 
-  React.useEffect(() => {
-    if (!visible) return;
+  // Next button click
+  const nextClick = async () => {
+    // Input check
+    const inputId = loginRef.current?.value.trim();
+    if (inputId == null || inputId === "") {
+      loginRef.current?.focus();
+      return;
+    }
 
-    const idResult = app.encrypt(id, app.name);
+    // Encryption
+    const checkId = id != null && inputId === id.hideEmail() ? id : inputId;
+    const idEncrypted = await app.encrypt(checkId);
+
+    // Get the result
+    const result = await app.authApi.loginId(checkId);
+    if (result == null || !isMounted.current) return;
+
+    if (!result.ok) {
+      if (app.checkDeviceResult(result) && !deviceValidated.current) {
+        await app.initCall((result) => {
+          if (result) {
+            nextClick();
+          }
+        }, true);
+        deviceValidated.current = true;
+      } else {
+        mRef.current?.setError(result.title);
+        loginRef.current?.focus();
+      }
+    } else {
+      // Make sure the registration is done
+      if (
+        result.data != null &&
+        "step" in result.data &&
+        NumberUtils.parse(result.data.step, 0) > 0
+      ) {
+        app.notifier.alert(app.get("continueRegistrationDetail"), () =>
+          navigate(`./login/register/`)
+        );
+        return;
+      }
+
+      // Without password verification, no user id returned
+      navigate("./login/password/" + encodeURIComponent(idEncrypted));
+    }
+  };
+
+  React.useEffect(() => {
+    if (!visible || !id) return;
+
     app.publicApi
-      .mobileQRCode(idResult, location.origin + location.pathname, {
+      .mobileQRCode(id, location.origin + location.pathname, {
         showLoading: false,
         onError: () => false
       })
@@ -322,11 +330,13 @@ export default function App() {
   }, [id, visible]);
 
   React.useEffect(() => {
+    tryLogin();
+
     return () => {
       isMounted.current = false;
       app.notifier.hideLoading();
     };
-  }, []);
+  }, [tryLogin]);
 
   return (
     <Context.Consumer>
@@ -427,7 +437,8 @@ export default function App() {
                 label={value.get("loginId")}
                 mRef={mRef}
                 inputRef={loginRef}
-                defaultValue={id?.hideEmail()}
+                name="username"
+                autoComplete="username"
                 autoFocus
                 autoCorrect="off"
                 autoCapitalize="none"

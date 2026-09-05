@@ -1,5 +1,5 @@
 import { VBox } from "@etsoo/materialui";
-import React from "react";
+import React, { use } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { app } from "../app/SmartApp";
 import { SharedLayout } from "./SharedLayout";
@@ -44,19 +44,21 @@ export default function Invite() {
 
   // Email
   const email =
-    id && data?.email ? app.decrypt(data.email, id.substring(0, 4)) : undefined;
+    id && data?.email
+      ? use(app.decrypt(data.email, id.substring(0, 4)))
+      : undefined;
 
   // Button click handler
   const buttonHandler =
     data == null || isLoading
       ? undefined
-      : () => {
+      : async () => {
           app.storage.setData(Constants.MemberInvitation, [id, code]);
           if (email) {
             if (data.userExists) {
               navigate(
                 `./../../login/password/${encodeURIComponent(
-                  app.encrypt(email)
+                  await app.encrypt(email)
                 )}`
               );
             } else {

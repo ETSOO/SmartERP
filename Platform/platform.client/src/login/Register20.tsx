@@ -54,7 +54,7 @@ export default function Register20() {
     // Send verification code
     const result = await app.authCodeApi.sendSMS({
       action: AuthCodeAction.UserRegistrationSMSCode,
-      mobile: app.encrypt(mobile)
+      mobile: await app.encrypt(mobile)
     });
 
     if (result == null) return 0;
@@ -93,7 +93,7 @@ export default function Register20() {
       const result = await app.authApi.validateMobileRegistration({
         deviceId: app.deviceId,
         id: codeIdRef.current,
-        code: app.encrypt(code)
+        code: await app.encrypt(code)
       });
 
       if (result == null) return;
@@ -110,6 +110,7 @@ export default function Register20() {
 
       if (!input.checkValidity()) {
         input.focus();
+        return;
       }
 
       // Check the mobile number already exists or not

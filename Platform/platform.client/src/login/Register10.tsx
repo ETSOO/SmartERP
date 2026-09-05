@@ -55,7 +55,7 @@ export default function Register20() {
     // Send verification code
     const result = await app.authCodeApi.sendEmail({
       action: AuthCodeAction.UserRegistrationEmailCode,
-      email: app.encrypt(email)
+      email: await app.encrypt(email)
     });
 
     if (result == null) return 0;
@@ -94,7 +94,7 @@ export default function Register20() {
       const result = await app.authApi.validateEmailRegistration({
         deviceId: app.deviceId,
         id: codeIdRef.current,
-        code: app.encrypt(code)
+        code: await app.encrypt(code)
       });
 
       if (result == null) return;

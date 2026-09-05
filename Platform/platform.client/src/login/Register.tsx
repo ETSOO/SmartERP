@@ -1,4 +1,4 @@
-import React from "react";
+import React, { use } from "react";
 import { HBox, LoadingButton } from "@etsoo/materialui";
 import { SharedLayout } from "./SharedLayout";
 import { app } from "../app/SmartApp";
@@ -20,7 +20,8 @@ export function Register() {
   });
 
   let { username } = useParams<{ username: string }>();
-  if (username) username = app.decrypt(decodeURIComponent(username));
+  if (username)
+    username = use(app.decrypt(decodeURIComponent(username))) ?? undefined;
 
   // Labels
   const labels = app.getLabels(

@@ -82,9 +82,11 @@ export default function CallbackComplete() {
       return;
     }
 
+    const newPassword = await app.hash(repeat.value);
+
     const result = await app.authApi.resetPassword({
       id: usernameDecoded,
-      password: app.encrypt(app.hash(repeat.value))
+      password: await app.encrypt(newPassword)
     });
     if (result == null) return;
 

@@ -44,7 +44,7 @@ export default function AddEmail() {
     // Send verification code
     const result = await app.core.authCodeApi.sendEmail({
       action: AuthCodeAction.UserVerificationEmailCode,
-      email: app.encrypt(email)
+      email: await app.encrypt(email)
     });
 
     if (result == null) return 0;
@@ -83,7 +83,7 @@ export default function AddEmail() {
       const result = await app.core.userApi.addEmail({
         deviceId: app.deviceId,
         id: codeIdRef.current,
-        code: app.encrypt(code)
+        code: await app.encrypt(code)
       });
 
       if (result == null) return;
