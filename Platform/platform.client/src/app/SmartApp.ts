@@ -83,7 +83,7 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
   ) {
     if (auth) {
       if (refreshToken && data && "uri" in data) {
-        this.saveCacheToken(refreshToken);
+        await this.saveCacheToken(refreshToken);
         this.authLogin(data.uri);
       } else {
         const url = await this.authApi.authRequest(auth);
@@ -93,7 +93,7 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
     } else {
       if (refreshToken && data && !("uri" in data)) {
         // User login
-        this.userLogin(data, refreshToken, false);
+        await this.userLogin(data, refreshToken, false);
 
         // Accept invitation
         const [id, code] =

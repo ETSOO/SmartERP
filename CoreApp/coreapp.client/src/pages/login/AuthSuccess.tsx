@@ -32,9 +32,10 @@ export default function AuthSuccess() {
             ? JSON.parse(decodeURIComponent(core))
             : undefined;
 
-          app.userLoginEx(userData, coreObj);
+          app.userLoginEx(userData, coreObj).then(() => {
+            navigate("./../../home");
+          });
 
-          navigate("./../../home");
           return;
         } else {
           pageResult = {

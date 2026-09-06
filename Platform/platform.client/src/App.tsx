@@ -410,7 +410,7 @@ export default function App() {
                     size="small"
                     variant="outlined"
                     startIcon={<DownloadIcon />}
-                    href={`${window.location.origin}/apps/SmartERP.zip`}
+                    href="https://etsoo.com/apps/SmartERP.zip"
                     target="_blank"
                   >
                     {value.get("downloadWinApp")}
@@ -479,8 +479,26 @@ export default function App() {
               </React.Fragment>
             )}
             <div>
-              {value.get("noAccountTip")}&nbsp;
-              <Link to="./login/register/">{value.get("noAccountCreate")}</Link>
+              {value.get("noAccountTip")}
+              <Button
+                variant="text"
+                onClick={async () => {
+                  const loginId = loginRef.current?.value;
+                  if (
+                    loginId == null ||
+                    loginId.length < 6 ||
+                    loginId.includes("*")
+                  ) {
+                    navigate("./login/register/");
+                  } else {
+                    navigate(
+                      `./login/register?openid=${encodeURIComponent(loginId)}`
+                    );
+                  }
+                }}
+              >
+                {value.get("noAccountCreate")}
+              </Button>
             </div>
           </SharedLayout>
         </React.Fragment>
