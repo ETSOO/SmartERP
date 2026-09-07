@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SSH_HOST: ${{ secrets[format('{0}_SSH_HOST', inputs.region)] }}
-      SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.region)] }}
+      SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.region)] || '22' }}
       SSH_USER: ${{ secrets[format('{0}_SSH_USER', inputs.region)] }}
       SSH_KEY: ${{ secrets[format('{0}_SSH_KEY', inputs.region)] }}
       RELEASE: "deploy/releases/${{ inputs.version }}"
@@ -25,45 +25,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: SSH Deploy
+      - name: SSH & Helm Deploy
         shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets[format('{0}_SSH_HOST', inputs.region)] }}
+          SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.region)] || '22' }}
+          SSH_USER: smarterp
+          TARGET_DIR: /home/smarterp/deploy
         run: |
           set -euo pipefail
 
-          echo "Preparing remote release: ~/${RELEASE}"
+          # 1. 启动 SSH Agent 并加载私钥
+          eval $(ssh-agent -s)
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
 
-          ssh \
-            -p "${SSH_PORT}" \
-            "${SSH_USER}@${SSH_HOST}" \
-            "rm -rf \"~/${RELEASE}\" && mkdir -p \"~/${RELEASE}\""
+          # 2. 配置 StrictHostKeyChecking，忽略首次连接的 Host Key 检查
+          SSH_CMD="ssh -o StrictHostKeyChecking=no -p ${SSH_PORT} ${SSH_USER}@${SSH_HOST}"
 
-          echo "Copying ./helm to ~/${RELEASE}..."
+          echo "==> 1. 准备远端部署目录: ${TARGET_DIR}"
+          $SSH_CMD "rm -rf \"${TARGET_DIR}\" && mkdir -p \"${TARGET_DIR}\""
 
-          tar czf - -C . helm | \
-            ssh \
-              -p "${SSH_PORT}" \
-              "${SSH_USER}@${SSH_HOST}" \
-              "tar xzf - -C \"~/${RELEASE}\""
+          echo "==> 2. 打包传输 ./helm 目录至 ${TARGET_DIR}..."
+          tar czf - -C . helm | $SSH_CMD "tar xzf - -C \"${TARGET_DIR}\""
 
-          echo "Helm files copied successfully."
+          echo "==> 3. 校验传输后的文件结构..."
+          $SSH_CMD "ls -la \"${TARGET_DIR}/helm\""
 
-          ssh \
-            -p "${SSH_PORT}" \
-            "${SSH_USER}@${SSH_HOST}" \
-            "ls -la \"~/${RELEASE}/helm\""
+          echo "==> 4. 从复制 secrets 文件至部署目录..."
+          # /home/smarterp/secrets => ${TARGET_DIR}/config/secrets
+          $SSH_CMD "mkdir -p \"${TARGET_DIR}/config/secrets\""
+          $SSH_CMD "cp -r /home/smarterp/secrets/* \"${TARGET_DIR}/config/secrets/\""
 
-      - name: Helm deploy
-        shell: bash
-        run: |
-          ssh \
-            -p "${SSH_PORT}" \
-            "${SSH_USER}@${SSH_HOST}" \
-            "microk8s helm3 upgrade smarterp ~/${RELEASE}/helm \
-              --install \
-              --post-renderer ./scripts/post-render.sh \
-              --atomic \
-              --wait \
-              --timeout 10m"
+          echo "==> 5. 在远程服务器执行 Helm 3 Upgrade/Install..."
+          $SSH_CMD "cd \"${TARGET_DIR}/helm\" && microk8s helm3 upgrade smarterp . \
+            --install \
+            --post-renderer ./scripts/post-render.sh \
+            --atomic \
+            --wait \
+            --timeout 10m"
+
+          echo "==> 部署成功完成！"
 
   release:
     needs: deploy
