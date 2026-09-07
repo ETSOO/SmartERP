@@ -1,0 +1,15 @@
+apiVersion: v2
+name: smarterp
+description: SmartERP Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+# Chart dependencies for the SmartERP platform
+# List of all sub-charts required by the SmartERP platform
+# Or automatically mapping the sub-charts from the charts directory
+# dependencies:
+#  - name: admin
+#    version: 1.0.0
+#    repository: "charts/admin"
+#    enabled: true

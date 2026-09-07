@@ -189,7 +189,7 @@ export default function ViewApp() {
                     }
 
                     const key = result.data;
-                    const appSecret = app.decrypt(key.appSecret);
+                    const appSecret = await app.decrypt(key.appSecret);
                     if (appSecret == null) {
                       app.warning("Failed to decrypt the app secret.");
                       return;

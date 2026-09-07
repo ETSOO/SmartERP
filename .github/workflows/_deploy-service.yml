@@ -3,10 +3,6 @@ name: Deploy Service
 on:
   workflow_call:
     inputs:
-      projects:
-        required: true
-        type: string
-        description: "Project keys (JSON array string)"
       region:
         required: true
         type: string
@@ -19,13 +15,94 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets[format('{0}_SSH_HOST', inputs.region)] }}
+      SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.region)] || '22' }}
+      SSH_USER: ${{ secrets[format('{0}_SSH_USER', inputs.region)] }}
+      SSH_KEY: ${{ secrets[format('{0}_SSH_KEY', inputs.region)] }}
+      RELEASE: "deploy/releases/${{ inputs.version }}"
     steps:
-      - name: Dry Run (模拟部署输出)
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: SSH & Helm Deploy
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets[format('{0}_SSH_HOST', inputs.region)] }}
+          SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.region)] || '22' }}
+          SSH_USER: smarterp
+          TARGET_DIR: /home/smarterp/deploy
         run: |
-          echo "=================================================="
-          echo "[DRY-RUN] 开始处理单服务部署任务"
-          echo "=================================================="
-          echo "📦 项目     : ${{ inputs.projects }}"
-          echo "🌏 部署区域  : ${{ inputs.region }}"
-          echo "🔖 镜像版本  : ${{ inputs.version }}"
-          echo "=================================================="
+          set -euo pipefail
+
+          # 1. 启动 SSH Agent 并加载私钥
+          eval $(ssh-agent -s)
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+
+          # 2. 配置 StrictHostKeyChecking，忽略首次连接的 Host Key 检查
+          SSH_CMD="ssh -o StrictHostKeyChecking=no -p ${SSH_PORT} ${SSH_USER}@${SSH_HOST}"
+
+          echo "==> 1. 准备远端部署目录: ${TARGET_DIR}"
+          $SSH_CMD "rm -rf \"${TARGET_DIR}\" && mkdir -p \"${TARGET_DIR}\""
+
+          echo "==> 2. 打包传输 ./helm 目录至 ${TARGET_DIR}..."
+          tar czf - -C . helm | $SSH_CMD "tar xzf - -C \"${TARGET_DIR}\""
+
+          echo "==> 3. 校验传输后的文件结构..."
+          $SSH_CMD "ls -la \"${TARGET_DIR}/helm\""
+
+          echo "==> 4. 从复制 secrets 文件至部署目录..."
+          # /home/smarterp/secrets => ${TARGET_DIR}/config/secrets
+          $SSH_CMD "mkdir -p \"${TARGET_DIR}/config/secrets\""
+          $SSH_CMD "cp -r /home/smarterp/secrets/* \"${TARGET_DIR}/config/secrets/\""
+
+          echo "==> 5. 在远程服务器执行 Helm 3 Upgrade/Install..."
+          $SSH_CMD "cd \"${TARGET_DIR}/helm\" && microk8s helm3 upgrade smarterp . \
+            --install \
+            --post-renderer ./scripts/post-render.sh \
+            --atomic \
+            --wait \
+            --timeout 10m"
+
+          echo "==> 部署成功完成！"
+
+  release:
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Create or Update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          TAG="release-${VERSION}"
+
+          echo "=========================================="
+          echo "🔍 Checking release: $TAG"
+          echo "=========================================="
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+
+            gh release edit "$TAG" \
+              --title "Release $VERSION" \
+              --generate-notes
+              
+            echo "✅ Release $TAG updated successfully!"
+
+          else
+
+            echo "Creating release $TAG"
+
+            gh release create "$TAG" \
+              --title "Release $VERSION" \
+              --generate-notes
+              
+            echo "✅ Release $TAG created successfully!"
+
+          fi

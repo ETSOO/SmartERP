@@ -6,20 +6,22 @@ import fs from "fs";
 import { visualizer } from "rollup-plugin-visualizer";
 
 const keyFilePath = process.env.HTTPS_KEY_FILE || "./../../certs/dev.key";
-const certFilePath =
-  process.env.HTTPS_CERT_FILE || "./../../certs/dev.pem";
+const certFilePath = process.env.HTTPS_CERT_FILE || "./../../certs/dev.pem";
+
+const isAnalyze = process.env.vite_build_analyze === "true";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     plugin(),
-    visualizer({
-      open: true,
-      filename: "dist/stats.html",
-      gzipSize: true,
-      brotliSize: true,
-      template: "treemap" // 也可以是 sunburst 或 network
-    })
+    isAnalyze &&
+      visualizer({
+        open: true,
+        filename: "dist/stats.html",
+        gzipSize: true,
+        brotliSize: true,
+        template: "treemap" // 也可以是 sunburst 或 network
+      })
   ],
   define: {
     "process.env.DRAGGABLE_DEBUG": false

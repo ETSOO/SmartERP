@@ -1,0 +1,57 @@
+name: Rollback
+
+on:
+  workflow_call:
+    inputs:
+      region:
+        required: true
+        type: string
+        description: "Target deployment region"
+      version:
+        required: true
+        type: string
+        description: "Image version to be deployed"
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dry Run (模拟部署输出)
+        run: |
+          echo "=================================================="
+          echo "[DRY-RUN] 回滚任务"
+          echo "=================================================="
+          echo "🌏 部署区域  : ${{ inputs.region }}"
+          echo "🔖 镜像版本  : ${{ inputs.version }}"
+          echo "=================================================="
+
+  release:
+    needs: rollback
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Remove GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          TAG="release-${VERSION}"
+
+          echo "=========================================="
+          echo "🔍 Checking release: $TAG"
+          echo "=========================================="
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+
+            gh release delete "$TAG" --yes --cleanup-tag
+              
+            echo "✅ Release $TAG deleted successfully!"
+
+          else
+
+            echo "Release $TAG does not exist, nothing to delete"
+
+          fi

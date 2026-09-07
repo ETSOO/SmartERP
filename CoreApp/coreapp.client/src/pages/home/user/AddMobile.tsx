@@ -42,7 +42,7 @@ export default function AddMobile() {
     // Send verification code
     const result = await app.core.authCodeApi.sendSMS({
       action: AuthCodeAction.UserVerificationSMSCode,
-      mobile: app.encrypt(mobile)
+      mobile: await app.encrypt(mobile)
     });
 
     if (result == null) return 0;
@@ -81,7 +81,7 @@ export default function AddMobile() {
       const result = await app.core.userApi.addMobile({
         deviceId: app.deviceId,
         id: codeIdRef.current,
-        code: app.encrypt(code)
+        code: await app.encrypt(code)
       });
 
       if (result == null) return;

@@ -17,10 +17,10 @@ on:
         required: true
         type: choice
         options:
-          - "all"
-          - "cn"
-          - "au"
-        default: "all"
+          - "ALL"
+          - "CN"
+          - "AU"
+        default: "ALL"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -62,12 +62,13 @@ jobs:
         with:
           base: ""
           filters: |
-            platform:       ['src/Platform/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
-            coreapp:        ['src/CoreApp/**', 'src/PlatformShared/**']
-            admin:          ['src/Admin/**', 'src/PlatformShared/**']
-            crm:            ['src/CRM/**', 'src/PlatformShared/**']
-            workercenter:   ['src/WorkerCenter/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
-            workercms:      ['src/WorkerCMS/**', 'src/WebTemplates/**', 'src/PlatformShared/**']
+            infra:          ['infra/base/setup/**']
+            platform:       ['Platform/**', 'WebTemplates/**', 'PlatformShared/**']
+            coreapp:        ['CoreApp/**', 'PlatformShared/**']
+            admin:          ['Admin/**', 'PlatformShared/**']
+            crm:            ['CRM/**', 'PlatformShared/**']
+            workercenter:   ['WorkerCenter/**', 'WebTemplates/**', 'PlatformShared/**']
+            workercms:      ['WorkerCMS/**', 'WebTemplates/**', 'PlatformShared/**']
 
       - name: Decision matrix (决策矩阵)
         id: select-matrix
@@ -88,12 +89,12 @@ jobs:
           fi
 
           INPUT_REGION="${{ github.event.inputs.target_region }}"
-          [ -z "$INPUT_REGION" ] && INPUT_REGION="all"
+          [ -z "$INPUT_REGION" ] && INPUT_REGION="ALL"
 
           case "$INPUT_REGION" in
-            cn)  FINAL_REGIONS='["cn"]' ;;
-            au)  FINAL_REGIONS='["au"]' ;;
-            all|*) FINAL_REGIONS='["cn", "au"]' ;;
+            CN)  FINAL_REGIONS='["CN"]' ;;
+            AU)  FINAL_REGIONS='["AU"]' ;;
+            ALL|*) FINAL_REGIONS='["CN", "AU"]' ;;
           esac
 
           # 分组折叠展示矩阵参数
@@ -156,7 +157,30 @@ jobs:
       fail-fast: false
     uses: ./.github/workflows/_deploy-service.yml
     with:
-      projects: ${{ needs.detect-changes.outputs.projects_matrix }}
+      region: ${{ matrix.region }}
+      version: ${{ needs.detect-changes.outputs.release_version }}
+    secrets: inherit
+
+  # Job 6: 回滚审批
+  rollback-approval:
+    needs: [detect-changes, deploy-production]
+    runs-on: ubuntu-latest
+    environment: production-rollback
+    steps:
+      - name: Rollback Approval (回滚审批)
+        run: echo "🚀 回滚申请已获得批准，开始执行回滚..."
+
+  # =================================================================
+  # Job 7: 回滚
+  # =================================================================
+  rollback:
+    needs: [detect-changes, rollback-approval]
+    strategy:
+      matrix:
+        region: ${{ fromJson(needs.detect-changes.outputs.regions_matrix) }}
+      fail-fast: false
+    uses: ./.github/workflows/_rollback.yml
+    with:
       region: ${{ matrix.region }}
       version: ${{ needs.detect-changes.outputs.release_version }}
     secrets: inherit
