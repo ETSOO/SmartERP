@@ -22,6 +22,13 @@ jobs:
       SSH_KEY: ${{ secrets[format('{0}_SSH_KEY', inputs.region)] }}
       RELEASE: "/home/smarterp/deploy/releases/${{ inputs.version }}"
     steps:
+      - name: SSH info
+        run: |
+          echo "SSH_HOST: ${{ env.SSH_HOST }}"
+          echo "SSH_PORT: ${{ env.SSH_PORT }}"
+          echo "SSH_USER: ${{ env.SSH_USER }}"
+          echo "RELEASE: ${{ env.RELEASE }}"
+
       - name: Checkout
         uses: actions/checkout@v5
 
@@ -31,7 +38,7 @@ jobs:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
-          port: ${{ env.SSH_PORT || 22 }}
+          port: ${{ env.SSH_PORT }}
           source: "helm/*"
           target: "${{ env.RELEASE }}" # Update this to your target directory on the server
           rm: true # Set to true if you want to clear target folder before copying
