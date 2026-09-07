@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smarterp-workercenter
+  namespace: smarterp
+  labels:
+    app: smarterp-workercenter
+spec:
+  replicas: 1 # 后台任务服务保持 1 个副本，避免 Cron 任务重复触发
+  selector:
+    matchLabels:
+      app: smarterp-workercenter
+  template:
+    metadata:
+      labels:
+        app: smarterp-workercenter
+    spec:
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: smarterp-workercenter
+          image: "{{ .Values.global.imageRegistry }}/smarterp-workercenter:{{ .Values.imageTag | default .Values.global.imageTag }}"
+          env:
+            - name: DOTNET_ENVIRONMENT
+              value: "Production"
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+            - secretRef:
+                name: workercenter-secrets

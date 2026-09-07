@@ -1,0 +1,6 @@
+global:
+  region: "cn"
+  domain: "etsoo.cn"
+  imagePullSecrets:
+    - name: aliyun-acr-secret
+  imageRegistry: "registry.cn-hangzhou.aliyuncs.com/smarterp"

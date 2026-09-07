@@ -1,0 +1,4 @@
+global:
+  region: "au"
+  domain: "etsoo.nz"
+  imageRegistry: "smarterp"

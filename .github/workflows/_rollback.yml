@@ -3,10 +3,6 @@ name: Rollback
 on:
   workflow_call:
     inputs:
-      projects:
-        required: true
-        type: string
-        description: "Project keys (JSON array string)"
       region:
         required: true
         type: string
@@ -25,7 +21,6 @@ jobs:
           echo "=================================================="
           echo "[DRY-RUN] 回滚任务"
           echo "=================================================="
-          echo "📦 项目     : ${{ inputs.projects }}"
           echo "🌏 部署区域  : ${{ inputs.region }}"
           echo "🔖 镜像版本  : ${{ inputs.version }}"
           echo "=================================================="

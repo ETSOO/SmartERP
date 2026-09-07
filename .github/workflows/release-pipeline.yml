@@ -17,10 +17,10 @@ on:
         required: true
         type: choice
         options:
-          - "all"
-          - "cn"
-          - "au"
-        default: "all"
+          - "ALL"
+          - "CN"
+          - "AU"
+        default: "ALL"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -89,12 +89,12 @@ jobs:
           fi
 
           INPUT_REGION="${{ github.event.inputs.target_region }}"
-          [ -z "$INPUT_REGION" ] && INPUT_REGION="all"
+          [ -z "$INPUT_REGION" ] && INPUT_REGION="ALL"
 
           case "$INPUT_REGION" in
-            cn)  FINAL_REGIONS='["cn"]' ;;
-            au)  FINAL_REGIONS='["au"]' ;;
-            all|*) FINAL_REGIONS='["cn", "au"]' ;;
+            CN)  FINAL_REGIONS='["CN"]' ;;
+            AU)  FINAL_REGIONS='["AU"]' ;;
+            ALL|*) FINAL_REGIONS='["CN", "AU"]' ;;
           esac
 
           # 分组折叠展示矩阵参数
@@ -157,7 +157,6 @@ jobs:
       fail-fast: false
     uses: ./.github/workflows/_deploy-service.yml
     with:
-      projects: ${{ needs.detect-changes.outputs.projects_matrix }}
       region: ${{ matrix.region }}
       version: ${{ needs.detect-changes.outputs.release_version }}
     secrets: inherit
@@ -182,7 +181,6 @@ jobs:
       fail-fast: false
     uses: ./.github/workflows/_rollback.yml
     with:
-      projects: ${{ needs.detect-changes.outputs.projects_matrix }}
       region: ${{ matrix.region }}
       version: ${{ needs.detect-changes.outputs.release_version }}
     secrets: inherit
