@@ -20,52 +20,21 @@ jobs:
       SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.region)] || '22' }}
       SSH_USER: ${{ secrets[format('{0}_SSH_USER', inputs.region)] }}
       SSH_KEY: ${{ secrets[format('{0}_SSH_KEY', inputs.region)] }}
-      RELEASE: "deploy/releases/${{ inputs.version }}"
+      RELEASE: "/home/smarterp/deploy/releases/${{ inputs.version }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: SSH & Helm Deploy
-        shell: bash
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets[format('{0}_SSH_HOST', inputs.region)] }}
-          SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.region)] || '22' }}
-          SSH_USER: smarterp
-          TARGET_DIR: /home/smarterp/deploy
-        run: |
-          set -euo pipefail
-
-          # 1. 启动 SSH Agent 并加载私钥
-          eval $(ssh-agent -s)
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-
-          # 2. 配置 StrictHostKeyChecking，忽略首次连接的 Host Key 检查
-          SSH_CMD="ssh -o StrictHostKeyChecking=no -p ${SSH_PORT} ${SSH_USER}@${SSH_HOST}"
-
-          echo "==> 1. 准备远端部署目录: ${TARGET_DIR}"
-          $SSH_CMD "rm -rf \"${TARGET_DIR}\" && mkdir -p \"${TARGET_DIR}\""
-
-          echo "==> 2. 打包传输 ./helm 目录至 ${TARGET_DIR}..."
-          tar czf - -C . helm | $SSH_CMD "tar xzf - -C \"${TARGET_DIR}\""
-
-          echo "==> 3. 校验传输后的文件结构..."
-          $SSH_CMD "ls -la \"${TARGET_DIR}/helm\""
-
-          echo "==> 4. 从复制 secrets 文件至部署目录..."
-          # /home/smarterp/secrets => ${TARGET_DIR}/config/secrets
-          $SSH_CMD "mkdir -p \"${TARGET_DIR}/config/secrets\""
-          $SSH_CMD "cp -r /home/smarterp/secrets/* \"${TARGET_DIR}/config/secrets/\""
-
-          echo "==> 5. 在远程服务器执行 Helm 3 Upgrade/Install..."
-          $SSH_CMD "cd \"${TARGET_DIR}/helm\" && microk8s helm3 upgrade smarterp . \
-            --install \
-            --post-renderer ./scripts/post-render.sh \
-            --atomic \
-            --wait \
-            --timeout 10m"
-
-          echo "==> 部署成功完成！"
+      - name: Copy files to server
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_KEY }}
+          port: ${{ env.SSH_PORT || 22 }}
+          source: "helm/*"
+          target: "${{ env.RELEASE }}" # Update this to your target directory on the server
+          rm: true # Set to true if you want to clear target folder before copying
 
   release:
     needs: deploy

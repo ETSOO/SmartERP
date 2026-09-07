@@ -18,3 +18,10 @@ sudo chown -R smarterp:smarterp /home/smarterp/deploy
 # 打印 SSH 私钥内容并存入 GitHub Secrets 或其他安全存储
 # CN_SSH_HOST, CN_SSH_PORT, CN_SSH_USER, CN_SSH_KEY
 sudo cat /home/smarterp/.ssh/id_ed25519
+
+# Add the public key to the authorized_keys file for passwordless SSH login
+sudo ssh-keygen -y -f /home/smarterp/.ssh/id_ed25519 \
+  | sudo tee -a /home/smarterp/.ssh/authorized_keys > /dev/null
+
+# to verify the added public key
+sudo cat /home/smarterp/.ssh/authorized_keys
