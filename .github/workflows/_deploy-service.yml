@@ -47,8 +47,18 @@ jobs:
           port: ${{ env.SSH_PORT }}
           envs: REGION
           script: |
-            echo "Copy latest secrets"
-            cp -r /home/smarterp/secrets/. "${{ env.RELEASE }}/helm/config/secrets/"
+            echo "Concatenate all secret files"
+            SET_FILE_ARGS=()
+            for file in /home/smarterp/secrets/*.env.secrets; do
+              if [ -f "$file" ]; then
+                # 自动提取文件名去掉扩展名作为 Values 键名，如 shared.env.secrets -> shared
+                filename=$(basename "$file")
+                app_key="${filename%%.*}" 
+
+                # 将每个 secret 文件添加到 Helm 的 --set-file 参数中，名称为 secrets.<app_key>
+                SET_FILE_ARGS+=(--set-file "secrets.${app_key}=${file}")
+              fi
+            done
 
             echo "Change directory to helm"
             cd "${{ env.RELEASE }}/helm"
@@ -57,6 +67,7 @@ jobs:
             microk8s helm3 upgrade smarterp . \
               --install \
               -f "./config/values-${REGION,,}.yaml" \
+              "${SET_FILE_ARGS[@]}" \
               --atomic \
               --wait \
               --timeout 30m
