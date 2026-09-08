@@ -1,0 +1,6 @@
+{
+  // 针对 helm 模板禁用普通的 yaml 格式化
+  "[helm]": {
+    "editor.formatOnSave": false
+  }
+}

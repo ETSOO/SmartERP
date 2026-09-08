@@ -22,13 +22,6 @@ jobs:
       SSH_KEY: ${{ secrets[format('{0}_SSH_KEY', inputs.region)] }}
       RELEASE: "/home/smarterp/deploy/releases/${{ inputs.version }}"
     steps:
-      - name: SSH info
-        run: |
-          echo "SSH_HOST: ${{ env.SSH_HOST }}"
-          echo "SSH_PORT: ${{ env.SSH_PORT }}"
-          echo "SSH_USER: ${{ env.SSH_USER }}"
-          echo "RELEASE: ${{ env.RELEASE }}"
-
       - name: Checkout
         uses: actions/checkout@v5
 
@@ -42,6 +35,31 @@ jobs:
           source: "helm/*"
           target: "${{ env.RELEASE }}" # Update this to your target directory on the server
           rm: true # Set to true if you want to clear target folder before copying
+
+      - name: Execute remote SSH commands
+        uses: appleboy/ssh-action@v1.2.5
+        env:
+          REGION: ${{ inputs.region }}
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          envs: REGION
+          script: |
+            echo "Copy latest secrets"
+            cp -r /home/smarterp/secrets/. "${{ env.RELEASE }}/helm/config/secrets/"
+
+            echo "Change directory to helm"
+            cd "${{ env.RELEASE }}/helm"
+
+            echo "Helm upgrade"
+            microk8s helm3 upgrade smarterp . \
+              --install \
+              -f "./config/values-${REGION,,}.yaml" \
+              --atomic \
+              --wait \
+              --timeout 30m
 
   release:
     needs: deploy
@@ -65,9 +83,7 @@ jobs:
 
           if gh release view "$TAG" >/dev/null 2>&1; then
 
-            gh release edit "$TAG" \
-              --title "Release $VERSION" \
-              --generate-notes
+            gh release edit "$TAG"
               
             echo "✅ Release $TAG updated successfully!"
 

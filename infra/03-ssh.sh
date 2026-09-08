@@ -25,3 +25,14 @@ sudo ssh-keygen -y -f /home/smarterp/.ssh/id_ed25519 \
 
 # to verify the added public key
 sudo cat /home/smarterp/.ssh/authorized_keys
+
+# 阿里云创建服务器密匙对，核心作用就是为你的Linux云服务器（ECS）提供一种比常规密码更安全、更便捷的登录认证方式
+# 在文件中找到 #Port 22 这一行，去掉开头的 # 注释，并将数字改为你想要的新端口，比如 31382，并修改防火墙规则
+# 在测试新端口成功前，建议保留 Port 22 这一行，即同时监听2个端口，然后重启服务器
+sudo vim /etc/ssh/sshd_config
+
+# 仅限证书登录
+# PubkeyAuthentication yes
+# PasswordAuthentication no
+
+sudo reboot
