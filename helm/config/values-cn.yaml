@@ -3,4 +3,4 @@ global:
   domain: "etsoo.cn"
   imagePullSecrets:
     - name: aliyun-acr-secret
-  imageRegistry: "registry.cn-hangzhou.aliyuncs.com/smarterp"
+  imageRegistry: "etsoo-registry.cn-qingdao.cr.aliyuncs.com/smarterp"
