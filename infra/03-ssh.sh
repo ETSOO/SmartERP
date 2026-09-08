@@ -11,6 +11,12 @@ sudo mkdir -p /home/smarterp/secrets /home/smarterp/deploy
 # Copy all secrets to the smarterp user's secrets directory
 sudo cp -r secrets/* /home/smarterp/secrets/
 
+# 将 deploy 目录及其子文件的属主改为 smarterp:smarterp
+sudo chown -R smarterp:smarterp /home/smarterp/deploy
+
+# 确保 smarterp 拥有可读可写可执行权限 (755)
+sudo chmod -R 755 /home/smarterp/deploy
+
 # Create SSH key pair for authentication, user(-u), -C "comment", -f "file", -N "passphrase"
 # 创建 SSH 密钥对用于认证
 sudo -u smarterp ssh-keygen -t ed25519 -C "smarterp-deploy-key" -f /home/smarterp/.ssh/id_ed25519 -N ""
