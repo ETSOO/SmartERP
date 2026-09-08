@@ -66,11 +66,13 @@ jobs:
             echo "Helm upgrade"
             microk8s helm3 upgrade smarterp . \
               --install \
+              -n smarterp \
+              --create-namespace \
               -f "./config/values-${REGION,,}.yaml" \
               "${SET_FILE_ARGS[@]}" \
               --atomic \
               --wait \
-              --timeout 30m
+              --timeout 20m
 
   release:
     needs: deploy
