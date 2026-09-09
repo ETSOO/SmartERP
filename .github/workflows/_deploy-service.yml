@@ -96,18 +96,16 @@ jobs:
 
           if gh release view "$TAG" >/dev/null 2>&1; then
 
-            gh release edit "$TAG"
+            gh release delete "$TAG" --yes --cleanup-tag
               
-            echo "✅ Release $TAG updated successfully!"
-
-          else
-
-            echo "Creating release $TAG"
-
-            gh release create "$TAG" \
-              --title "Release $VERSION" \
-              --generate-notes
-              
-            echo "✅ Release $TAG created successfully!"
+            echo "🗑️ Old release $TAG cleaned up."
 
           fi
+
+          echo "Creating release $TAG"
+
+          gh release create "$TAG" \
+            --title "Release $VERSION" \
+            --generate-notes
+            
+          echo "✅ Release $TAG created successfully!"

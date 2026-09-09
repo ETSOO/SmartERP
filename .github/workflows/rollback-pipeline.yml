@@ -1,0 +1,101 @@
+name: Rollback Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_region:
+        description: "Select the target region (选择目标区域)"
+        required: true
+        type: choice
+        options:
+          - "CN"
+          - "AU"
+      dry_run:
+        description: "Only view the history, do not trigger rollback or restart (仅查看历史版本列表，不触发回滚和重启)"
+        required: false
+        type: boolean
+        default: false
+      target_revision:
+        description: "Roll back Helm Revision (要回滚到的序号，留空默认刷新最新版本)"
+        required: false
+        type: string
+
+env:
+  SSH_HOST: ${{ secrets[format('{0}_SSH_HOST', inputs.target_region)] }}
+  SSH_PORT: ${{ secrets[format('{0}_SSH_PORT', inputs.target_region)] || '22' }}
+  SSH_USER: ${{ secrets[format('{0}_SSH_USER', inputs.target_region)] }}
+  SSH_KEY: ${{ secrets[format('{0}_SSH_KEY', inputs.target_region)] }}
+
+jobs:
+  # 历史版本
+  fetch-helm-history:
+    name: Fetch Helm History (${{ inputs.target_region }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH & Fetch History
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.SSH_HOST }}
+          port: ${{ env.SSH_PORT }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            echo "=== 获取 Helm 历史版本 ==="
+            # 1. 格式化输出供人类阅读
+            HISTORY_TEXT=$(microk8s helm3 history smarterp -n smarterp --max 5)
+            echo "$HISTORY_TEXT"
+
+            # 2. 提取 JSON 格式的合法 revision 列表（逗号分隔，如 1,2,3）
+            REVS=$(microk8s helm3 history smarterp -n smarterp --max 5 -o json | jq -r '.[].revision' | paste -sd "," -)
+            echo "valid_revisions=$REVS" >> $GITHUB_OUTPUT
+
+            # 3. 将历史记录导出（文件交互）
+            echo "$HISTORY_TEXT" > /tmp/helm_history.txt
+
+      - name: Render GITHUB_STEP_SUMMARY
+        run: |
+          echo "### 📜 可用 Helm 历史版本列表 (${{ inputs.target_region }})" >> $GITHUB_STEP_SUMMARY
+          echo "如果在下方的 **target_revision** 填入版本号，请参考以下可用的 Revision 列表：" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/helm_history.txt || echo "未能拉取到历史记录" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "> 💡 **提示**：本次运行为 **Dry Run 仅查看模式**，未执行任何集群修改操作。" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # 回滚审批
+  rollback-approval:
+    runs-on: ubuntu-latest
+    needs: [fetch-helm-history]
+    if: inputs.dry_run == false
+    environment: production-rollback
+    steps:
+      - name: Rollback Approval (回滚审批)
+        run: echo "🚀 回滚申请已获得批准，开始执行回滚..."
+
+  # =================================================================
+  # 回滚
+  # =================================================================
+  rollback:
+    needs: [rollback-approval]
+    name: Rollback Helm Release (${{ inputs.target_revision }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH & Rollback
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.SSH_HOST }}
+          port: ${{ env.SSH_PORT }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            TARGET_REV="${{ inputs.target_revision }}"
+
+            if [ -n "$TARGET_REV" ]; then
+              echo "Rolling back to Helm revision $TARGET_REV..."
+              microk8s helm3 rollback smarterp $TARGET_REV -n smarterp
+            else
+              echo "No specific Helm revision provided. Restarting deployment..."
+              microk8s kubectl rollout restart deployment -n smarterp -l app.kubernetes.io/instance=smarterp
+            fi

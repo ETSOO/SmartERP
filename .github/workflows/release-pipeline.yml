@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       force_all:
-        description: "Is a full release of all projects mandatory? (是否强制全量发布所有 6 个项目？)"
+        description: "Is a full release of all projects mandatory? (是否强制全量发布所有项目？)"
         required: true
         type: boolean
         default: false
@@ -156,30 +156,6 @@ jobs:
         region: ${{ fromJson(needs.detect-changes.outputs.regions_matrix) }}
       fail-fast: false
     uses: ./.github/workflows/_deploy-service.yml
-    with:
-      region: ${{ matrix.region }}
-      version: ${{ needs.detect-changes.outputs.release_version }}
-    secrets: inherit
-
-  # Job 6: 回滚审批
-  rollback-approval:
-    needs: [detect-changes, deploy-production]
-    runs-on: ubuntu-latest
-    environment: production-rollback
-    steps:
-      - name: Rollback Approval (回滚审批)
-        run: echo "🚀 回滚申请已获得批准，开始执行回滚..."
-
-  # =================================================================
-  # Job 7: 回滚
-  # =================================================================
-  rollback:
-    needs: [detect-changes, rollback-approval]
-    strategy:
-      matrix:
-        region: ${{ fromJson(needs.detect-changes.outputs.regions_matrix) }}
-      fail-fast: false
-    uses: ./.github/workflows/_rollback.yml
     with:
       region: ${{ matrix.region }}
       version: ${{ needs.detect-changes.outputs.release_version }}
