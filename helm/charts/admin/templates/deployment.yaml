@@ -6,7 +6,7 @@ metadata:
   labels:
     app: smarterp-admin
 spec:
-  replicas: { { .Values.replicaCount | default 1 } }
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: smarterp-admin
