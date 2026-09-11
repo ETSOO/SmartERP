@@ -38,16 +38,17 @@ jobs:
     steps:
       - name: SSH & Fetch History
         id: parse-history
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ env.SSH_HOST }}
           port: ${{ env.SSH_PORT }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
+          capture_stdout: true
           script: |
             set -e
 
-            HISTORY=$(microk8s helm3 history smarterp \
+            microk8s helm3 history smarterp \
               -n smarterp \
               --max 5 \
               -o json \
@@ -65,19 +66,13 @@ jobs:
                   )
                 )
                 | @tsv
-              ')
-
-            {
-              echo 'history<<EOF'
-              echo "$HISTORY"
-              echo 'EOF'
-            } >> "$GITHUB_OUTPUT"
+              '
 
       - name: Parse Revisions & Render Summary
         id: extract-revisions
         run: |
           # 1. 提取 ssh-action 输出的原生 stdout
-          RAW_STDOUT="${{ steps.parse-history.outputs.history }}"
+          RAW_STDOUT="${{ steps.parse-history.outputs.stdout }}"
 
           # 2. 从文本中提取所有 Revision 数字（跳过表头，提取第一列数字，格式化为逗号分隔：如 1,2,3）
           VALID_REVS=$(
@@ -121,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: SSH & Rollback
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         env:
           VALID_REVISIONS: ${{ needs.fetch-helm-history.outputs.valid_revisions }}
           TARGET_REV: ${{ inputs.target_revision }}
