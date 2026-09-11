@@ -44,18 +44,47 @@ jobs:
           port: ${{ env.SSH_PORT }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
-          capture_stdout: true
           script: |
-            microk8s helm3 history smarterp -n smarterp --max 5
+            set -e
+
+            HISTORY=$(microk8s helm3 history smarterp \
+              -n smarterp \
+              --max 5 \
+              -o json \
+              | jq -r '
+                (
+                  ["REVISION", "UPDATED", "APP VERSION"],
+                  (
+                    [
+                      .[]
+                      | select(.status == "superseded")
+                    ]
+                    | sort_by(-.revision)
+                    | .[]
+                    | [.revision, .updated, .app_version]
+                  )
+                )
+                | @tsv
+              ')
+
+            {
+              echo 'history<<EOF'
+              echo "$HISTORY"
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
 
       - name: Parse Revisions & Render Summary
         id: extract-revisions
         run: |
           # 1. 提取 ssh-action 输出的原生 stdout
-          RAW_STDOUT="${{ steps.parse-history.outputs.stdout }}"
+          RAW_STDOUT="${{ steps.parse-history.outputs.history }}"
 
           # 2. 从文本中提取所有 Revision 数字（跳过表头，提取第一列数字，格式化为逗号分隔：如 1,2,3）
-          VALID_REVS=$(echo "$RAW_STDOUT" | awk 'NR>1 {print $1}' | tr '\n' ',' | sed 's/,$//')
+          VALID_REVS=$(
+            echo "$RAW_STDOUT" |
+              awk 'NR > 1 && $1 ~ /^[0-9]+$/ { print $1 }' |
+              paste -sd ',' -
+          )
 
           echo "valid_revisions=$VALID_REVS" >> $GITHUB_OUTPUT
           echo "Parsed valid revisions: $VALID_REVS"
