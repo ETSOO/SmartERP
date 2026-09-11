@@ -12,6 +12,11 @@ on:
         required: true
         type: boolean
         default: false
+      skip_docker_build:
+        description: "Skip Docker image build? (是否跳过 Docker 镜像构建？)"
+        required: true
+        type: boolean
+        default: false
       target_region:
         description: "Select the target deployment region (选择部署目标区域)"
         required: true
@@ -113,7 +118,9 @@ jobs:
   # =================================================================
   build-docker:
     needs: detect-changes
-    if: needs.detect-changes.outputs.has_changes == 'true'
+    if: |
+      needs.detect-changes.outputs.has_changes == 'true' &&
+      inputs.skip_docker_build == false
     uses: ./.github/workflows/_build-docker.yml
     # 自动继承父工作流的所有 GitHub Secrets，避免逐个传递
     secrets: inherit
@@ -126,8 +133,14 @@ jobs:
   # =================================================================
   uat-approval:
     needs: [detect-changes, build-docker]
+    if: |
+      always() &&
+      (needs.build-docker.result == 'success' ||
+      (
+        needs.build-docker.result == 'skipped' &&
+        inputs.skip_docker_build == true
+      ))
     runs-on: ubuntu-latest
-
     environment: uat
 
     steps:
