@@ -152,6 +152,9 @@ jobs:
   # Job 4: 生产发布审批
   production-approval:
     needs: [uat-approval]
+    if: |
+      always() &&
+      needs.uat-approval.result == 'success'
     runs-on: ubuntu-latest
     environment: production
     steps:
