@@ -44,6 +44,7 @@ jobs:
           port: ${{ env.SSH_PORT }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
+          capture_stdout: true
           script: |
             microk8s helm3 history smarterp -n smarterp --max 5
 
