@@ -27,12 +27,14 @@ env:
   SSH_KEY: ${{ secrets[format('{0}_SSH_KEY', inputs.target_region)] }}
 
 jobs:
-  # 历史版本
+  # =================================================================
+  # 历史版本获取
+  # =================================================================
   fetch-helm-history:
     name: Fetch Helm History (${{ inputs.target_region }})
     runs-on: ubuntu-latest
     outputs:
-      valid_revisions: ${{ steps.parse-history.outputs.valid_revisions }}
+      valid_revisions: ${{ steps.extract-revisions.outputs.valid_revisions }}
     steps:
       - name: SSH & Fetch History
         id: parse-history
@@ -45,19 +47,32 @@ jobs:
           script: |
             microk8s helm3 history smarterp -n smarterp --max 5
 
-      - name: Render GITHUB_STEP_SUMMARY
+      - name: Parse Revisions & Render Summary
+        id: extract-revisions
         run: |
+          # 1. 提取 ssh-action 输出的原生 stdout
+          RAW_STDOUT="${{ steps.parse-history.outputs.stdout }}"
+
+          # 2. 从文本中提取所有 Revision 数字（跳过表头，提取第一列数字，格式化为逗号分隔：如 1,2,3）
+          VALID_REVS=$(echo "$RAW_STDOUT" | awk 'NR>1 {print $1}' \vert{} tr '\n' ',' \vert{} sed 's/,$//')
+
+          echo "valid_revisions=$VALID_REVS" >> $GITHUB_OUTPUT
+          echo "Parsed valid revisions: $VALID_REVS"
+
+          # 3. 渲染到 GITHUB_STEP_SUMMARY 界面
           echo "### 📜 可用 Helm 历史版本列表 (${{ inputs.target_region }})" >> $GITHUB_STEP_SUMMARY
           echo "填写的回滚序号，请参考以下可用的 Revision 列表：" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.parse-history.outputs.stdout }}" >> $GITHUB_STEP_SUMMARY
+          echo "$RAW_STDOUT" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             echo "> 💡 **提示**：本次运行仅查看历史，未执行任何集群修改操作。" >> $GITHUB_STEP_SUMMARY
           fi
 
+  # =================================================================
   # 回滚审批
+  # =================================================================
   rollback-approval:
     runs-on: ubuntu-latest
     needs: [fetch-helm-history]
@@ -68,7 +83,7 @@ jobs:
         run: echo "🚀 回滚申请已获得批准，开始执行回滚..."
 
   # =================================================================
-  # 回滚
+  # 执行回滚
   # =================================================================
   rollback:
     needs: [fetch-helm-history, rollback-approval]
@@ -79,17 +94,16 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           VALID_REVISIONS: ${{ needs.fetch-helm-history.outputs.valid_revisions }}
+          TARGET_REV: ${{ inputs.target_revision }}
         with:
           host: ${{ env.SSH_HOST }}
           port: ${{ env.SSH_PORT }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
-          envs: VALID_REVISIONS
+          envs: VALID_REVISIONS,TARGET_REV
           script: |
-            TARGET_REV="${{ inputs.target_revision }}"
-
             if [ -n "$TARGET_REV" ]; then
-              # 将逗号分隔的列表转换为数组校验
+              # 将逗号分隔的版本号转换为 Bash 数组进行存在性校验
               IFS=',' read -ra ALLOWED_ARRAY <<< "$VALID_REVISIONS"
               IS_VALID=false
 
@@ -100,8 +114,8 @@ jobs:
                 fi
               done
 
-              if [ "$IS_VALID" = false ]; then
-                echo "Error: Invalid Helm revision specified: $TARGET_REV"
+              if [ "$IS_VALID" = "false" ]; then
+                echo "Error: Specified revision '$TARGET_REV' is not in available history [$VALID_REVISIONS]."
                 exit 1
               fi
 
