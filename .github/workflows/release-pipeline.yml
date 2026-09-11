@@ -25,7 +25,6 @@ on:
           - "ALL"
           - "CN"
           - "AU"
-        default: "ALL"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -152,7 +151,7 @@ jobs:
 
   # Job 4: 生产发布审批
   production-approval:
-    needs: [detect-changes, uat-approval]
+    needs: [uat-approval]
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -164,6 +163,9 @@ jobs:
   # =================================================================
   deploy-production:
     needs: [detect-changes, production-approval]
+    if: |
+      always() &&
+      needs.production-approval.result == 'success'
     strategy:
       matrix:
         region: ${{ fromJson(needs.detect-changes.outputs.regions_matrix) }}
