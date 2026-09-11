@@ -54,7 +54,7 @@ jobs:
           RAW_STDOUT="${{ steps.parse-history.outputs.stdout }}"
 
           # 2. 从文本中提取所有 Revision 数字（跳过表头，提取第一列数字，格式化为逗号分隔：如 1,2,3）
-          VALID_REVS=$(echo "$RAW_STDOUT" | awk 'NR>1 {print $1}' \vert{} tr '\n' ',' \vert{} sed 's/,$//')
+          VALID_REVS=$(echo "$RAW_STDOUT" | awk 'NR>1 {print $1}' | tr '\n' ',' | sed 's/,$//')
 
           echo "valid_revisions=$VALID_REVS" >> $GITHUB_OUTPUT
           echo "Parsed valid revisions: $VALID_REVS"
