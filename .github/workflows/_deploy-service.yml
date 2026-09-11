@@ -74,6 +74,10 @@ jobs:
               --wait \
               --timeout 20m
 
+            # Restart all SmartERP deployments to apply the new configuration
+            echo "Restart"
+            microk8s kubectl rollout restart deployment -n smarterp
+
   release:
     needs: deploy
     runs-on: ubuntu-latest

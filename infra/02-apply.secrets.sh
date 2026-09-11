@@ -39,6 +39,7 @@ curl -k -sSL -o infra/base/coreapp/service.yaml https://ghfast.top/https://raw.g
 curl -k -sSL -o infra/base/coreapp/route.yaml https://ghfast.top/https://raw.githubusercontent.com/etsoo/SmartERP/main/infra/base/coreapp/route.yaml
 curl -k -sSL -o infra/overlays/cn/coreapp/kustomization.yaml https://ghfast.top/https://raw.githubusercontent.com/etsoo/SmartERP/main/infra/overlays/cn/coreapp/kustomization.yaml
 
+# Make sure the coreapp's PrivateKey must be the same with the platform's PrivateKey
 touch secrets/coreapp.env.secrets
 vi secrets/coreapp.env.secrets
 

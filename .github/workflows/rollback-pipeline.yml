@@ -147,6 +147,6 @@ jobs:
               echo "Rolling back to Helm revision $TARGET_REV..."
               microk8s helm3 rollback smarterp $TARGET_REV -n smarterp
             else
-              echo "No specific Helm revision provided. Restarting deployment..."
-              microk8s kubectl rollout restart deployment -n smarterp -l app.kubernetes.io/instance=smarterp
+              echo "No specific Helm revision provided. Restarting all SmartERP deployments..."
+              microk8s kubectl rollout restart deployment -n smarterp
             fi
