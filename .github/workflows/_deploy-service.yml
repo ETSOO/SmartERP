@@ -45,7 +45,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
           port: ${{ env.SSH_PORT }}
-          command_timeout: 30m
+          command_timeout: 20m
           envs: REGION
           script: |
             # 遇到任何错误立即停止脚本执行
@@ -76,7 +76,7 @@ jobs:
               "${SET_FILE_ARGS[@]}" \
               --atomic \
               --wait \
-              --timeout 25m
+              --timeout 15m
 
             # Restart all SmartERP deployments to apply the new configuration
             echo "Restart"

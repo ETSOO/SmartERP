@@ -117,3 +117,6 @@ ls -l /etc/localtime
 rm -rf /var/lib/apt/lists/*
 
 exit
+
+# Resources
+microk8s kubectl describe node | grep -A 8 -E "Allocatable|Allocated resources"
