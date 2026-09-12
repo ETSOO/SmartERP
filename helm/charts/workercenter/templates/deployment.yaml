@@ -24,9 +24,18 @@ spec:
           image: "{{ .Values.global.imageRegistry }}/smarterp-workercenter:{{ .Values.imageTag | default .Values.global.imageTag }}"
           env:
             - name: DOTNET_ENVIRONMENT
-              value: "Production"
+              value: "{{ .Values.global.DOTNET_ENVIRONMENT }}"
+            - name: TZ
+              value: "{{ .Values.global.TZ }}"
           envFrom:
             - secretRef:
                 name: shared-secrets
             - secretRef:
                 name: workercenter-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1024Mi"

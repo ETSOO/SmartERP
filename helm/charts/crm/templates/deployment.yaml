@@ -25,13 +25,34 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
           env:
-            - name: DOTNET_ENVIRONMENT
-              value: "Production"
             - name: ASPNETCORE_HTTP_PORTS
               value: "8080"
+            - name: DOTNET_ENVIRONMENT
+              value: "{{ .Values.global.DOTNET_ENVIRONMENT }}"
+            - name: TZ
+              value: "{{ .Values.global.TZ }}"
           envFrom:
             - secretRef:
                 name: shared-secrets
             - secretRef:
                 name: crm-secrets
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1024Mi"

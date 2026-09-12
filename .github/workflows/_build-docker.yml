@@ -48,3 +48,40 @@ jobs:
               exit 1
               ;;
           esac
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login GitHub Container Registry (GHCR) (登录GitHub GHCR)
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Login to Aliyun Container Registry (ACR) (登录阿里云 ACR)
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ vars.ACR_REGISTRY }}
+          username: ${{ vars.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and Push (构建并推送 Docker 镜像)
+        uses: docker/build-push-action@v7
+        env:
+          DCK: ${{ steps.config.outputs.file }}
+          IMG: smarterp-${{ matrix.project }}
+          VER: ${{ inputs.version }}
+          ACR: ${{ vars.ACR_REGISTRY }}/smarterp
+          GHCR: ghcr.io/etsoo
+        with:
+          context: .
+          file: ${{ steps.config.outputs.file }}
+          push: true
+          tags: |
+            ${{ env.GHCR }}/${{ env.IMG }}:${{ env.VER }}
+            ${{ env.GHCR }}/${{ env.IMG }}:latest
+            ${{ env.ACR }}/${{ env.IMG }}:${{ env.VER }}
+            ${{ env.ACR }}/${{ env.IMG }}:latest
+          cache-from: type=gha,scope=${{ env.IMG }}
+          cache-to: type=gha,mode=max,scope=${{ env.IMG }}

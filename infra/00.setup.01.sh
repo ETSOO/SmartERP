@@ -108,3 +108,12 @@ ALTER USER postgres WITH PASSWORD '***';
 # 2. Data Options, Unselect "Blobs", "Only schemas"
 # 3. Options, Unselect "Verbose messages"
 # Tools -> Storage Manager -> Download
+
+# Debug a pod
+microk8s kubectl exec -it smarterp-platform-7879f758b7-2gjhx -n smarterp -- /bin/bash
+ls -l /etc/localtime
+
+# Remove all cached APT packages
+rm -rf /var/lib/apt/lists/*
+
+exit

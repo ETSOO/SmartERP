@@ -22,3 +22,6 @@ rm -rf /home/***/deploy/releases/1.0.0
 
 # Remove previous release done by Helm
 microk8s helm3 uninstall smarterp -n smarterp
+
+# Query last 5 history
+microk8s helm3 history smarterp -n smarterp --max=5

@@ -18,9 +18,6 @@ spec:
       containers:
         - name: smarterp-workercenter
           image: smarterp/smarterp-workercenter:1.0.0
-          env:
-            - name: DOTNET_ENVIRONMENT
-              value: "Production"
           envFrom:
             - secretRef:
                 name: shared-secrets
