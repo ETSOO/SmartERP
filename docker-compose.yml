@@ -142,6 +142,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080;80
       - ASPNETCORE_HTTPS_PORTS=8081;443
       - ETSOO_ENVIRONMENT=Docker
+      - TZ=Asia/Shanghai
     ports:
       - "9702:8081"
     volumes:
@@ -175,6 +176,7 @@ services:
       dockerfile: WorkerCenter/Dockerfile
     environment:
       - DOTNET_ENVIRONMENT=Development
+      - TZ=Asia/Shanghai
     volumes:
       - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
     networks:
@@ -191,6 +193,7 @@ services:
       dockerfile: WorkerCMS/Dockerfile
     environment:
       - DOTNET_ENVIRONMENT=Development
+      - TZ=Asia/Shanghai
     volumes:
       - $APPDATA/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
     networks:
@@ -210,6 +213,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080;80
       - ASPNETCORE_HTTPS_PORTS=8081;443
       - ETSOO_ENVIRONMENT=Docker
+      - TZ=Asia/Shanghai
     ports:
       - "9705:8081"
     volumes:
@@ -246,6 +250,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080;80
       - ASPNETCORE_HTTPS_PORTS=8081;443
       - ETSOO_ENVIRONMENT=Docker
+      - TZ=Asia/Shanghai
     ports:
       - "9708:8081"
     volumes:
@@ -282,6 +287,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080;80
       - ASPNETCORE_HTTPS_PORTS=8081;443
       - ETSOO_ENVIRONMENT=Docker
+      - TZ=Asia/Shanghai
     ports:
       - "9711:8081"
     volumes:
