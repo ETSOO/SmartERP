@@ -49,4 +49,4 @@ spec:
               memory: "64Mi"
             limits:
               cpu: "1"
-              memory: "512Mi"
+              memory: "2Gi"
