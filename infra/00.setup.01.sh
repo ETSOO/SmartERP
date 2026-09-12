@@ -119,9 +119,12 @@ rm -rf /var/lib/apt/lists/*
 exit
 
 # Resources
+# CPU 是可压缩资源：设小了（如 10m 或 20m），顶多是竞争时计算变慢一点，绝不会导致容器崩溃。
+# Memory 是不可压缩资源：设小了可能导致容器 OOM（Out Of Memory） 崩溃，因此需要根据实际需求合理设置。
 microk8s kubectl describe node | grep -A 8 -E "Allocatable|Allocated resources"
 microk8s kubectl describe node | grep -A 50 "Non-terminated Pods:"
 
 # Enable metrics server for resource monitoring
 microk8s enable metrics-server
-
+microk8s kubectl top pods -A --sort-by=memory
+microk8s kubectl top pods -A --sort-by=cpu

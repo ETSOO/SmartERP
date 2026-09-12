@@ -45,8 +45,8 @@ spec:
                 name: coreapp-secrets
           resources:
             requests:
-              cpu: "50m"
-              memory: "128Mi"
+              cpu: "10m"
+              memory: "64Mi"
             limits:
-              cpu: "500m"
+              cpu: "1"
               memory: "512Mi"
