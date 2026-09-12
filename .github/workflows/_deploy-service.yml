@@ -45,8 +45,12 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
           port: ${{ env.SSH_PORT }}
+          command_timeout: 30m
           envs: REGION
           script: |
+            # 遇到任何错误立即停止脚本执行
+            set -e
+
             echo "Concatenate all secret files"
             SET_FILE_ARGS=()
             for file in /home/smarterp/secrets/*.env.secrets; do
@@ -72,7 +76,7 @@ jobs:
               "${SET_FILE_ARGS[@]}" \
               --atomic \
               --wait \
-              --timeout 20m
+              --timeout 25m
 
             # Restart all SmartERP deployments to apply the new configuration
             echo "Restart"
