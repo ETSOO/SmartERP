@@ -20,7 +20,7 @@ namespace Platform.Server.Endpoints.App
             g.MapPost("Buy", [Roles(Constants.FinanceRoles)] (IAppService service, AppBuyRQ rq, CancellationToken cancellationToken) => service.BuyAsync(rq, cancellationToken))
                 .WithDescription("Buy application / 购买应用").WithTags("App");
 
-            g.MapPost("BuyNew", [Roles(Constants.FinanceRoles)] (IAppService service, AppBuyNewRQ rq, CancellationToken cancellationToken) => service.BuyNewAsync(rq, cancellationToken))
+            g.MapPost("BuyNew", (IAppService service, AppBuyNewRQ rq, CancellationToken cancellationToken) => service.BuyNewAsync(rq, cancellationToken))
                 .WithDescription("Buy application with creating organization / 购买应用并创建机构").WithTags("App");
 
             g.MapPut("CreateApiKey", [Roles(Constants.AdminRoles)] async (IAppService service, IHttpContextAccessor accessor, AppCreateApiKeyRQ rq, CancellationToken cancellationToken) =>

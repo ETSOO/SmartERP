@@ -18,8 +18,10 @@ using CRM.Server.Application;
 using CRM.Server.Endpoints;
 using CRM.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -175,7 +177,16 @@ if (Cultures == null || Cultures.Length == 0)
 // Authorization is the process of determining whether a user has access to a resource.
 services.AddAuthorization();
 
-services.AddHealthChecks();
+services.AddHealthChecks()
+    // Self/Live check (Process is alive)
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+
+    // EF Core Health Check (Verifies database connectivity via DbContext)
+    .AddDbContextCheck<MyDbContext>(
+        name: "efcore_db_check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["ready"])
+;
 
 // Add services to the container.
 // services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
@@ -358,7 +369,15 @@ app.UseRequestLocalization(localizationOptions);
 // Rate limiter must be called after UseRouting, at least before UseAuthentication
 app.UseRateLimiter();
 
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/healthz/live", new HealthCheckOptions
+{
+    Predicate = (check) => check.Tags.Contains("live")
+});
+
+app.MapHealthChecks("/healthz/ready", new HealthCheckOptions
+{
+    Predicate = (check) => check.Tags.Contains("ready")
+});
 
 // APIs
 var api = app.MapGroup("/api");

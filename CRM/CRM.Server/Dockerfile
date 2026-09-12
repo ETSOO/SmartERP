@@ -11,7 +11,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS with-node
 RUN apt-get update \
 	&& apt-get install -y tzdata locales language-pack-zh-hans curl \
 	&& curl -sL https://deb.nodesource.com/setup_24.x | bash \
-	&& apt-get -y install nodejs
+	&& apt-get -y install nodejs \
+	&& rm -rf /var/lib/apt/lists/*
 
 # When no wwwroot is present, always caused by the client project's SDK version
 # <Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.3061438">

@@ -17,8 +17,10 @@ using com.etsoo.Web;
 using com.etsoo.WebUtils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -219,7 +221,16 @@ services.AddAuthorizationBuilder()
         .Build()
     );
 
-services.AddHealthChecks();
+services.AddHealthChecks()
+    // Self/Live check (Process is alive)
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+
+    // EF Core Health Check (Verifies database connectivity via DbContext)
+    .AddDbContextCheck<MyDbContext>(
+        name: "efcore_db_check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["ready"])
+;
 
 // Add services to the container.
 // services.AddAntiforgery(); // Only for cookie-based, but not needed for Token-based authentication
@@ -333,7 +344,15 @@ app.UseRequestLocalization(localizationOptions);
 // Rate limiter must be called after UseRouting, at least before UseAuthentication
 app.UseRateLimiter();
 
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/healthz/live", new HealthCheckOptions
+{
+    Predicate = (check) => check.Tags.Contains("live")
+});
+
+app.MapHealthChecks("/healthz/ready", new HealthCheckOptions
+{
+    Predicate = (check) => check.Tags.Contains("ready")
+});
 
 // APIs
 var api = app.MapGroup("/api");

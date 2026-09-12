@@ -150,6 +150,20 @@ services:
     networks:
       - etsoo
 
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "http://localhost:8080/healthz/live"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   # Worker Center for background tasks
   smarterp-workercenter:
     depends_on:
@@ -204,6 +218,20 @@ services:
     networks:
       - etsoo
 
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "http://localhost:8080/healthz"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   # Admin site
   smarterp-admin:
     image: ${DOCKER_REGISTRY-}smarterp-admin
@@ -226,6 +254,20 @@ services:
     networks:
       - etsoo
 
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "http://localhost:8080/healthz/live"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   # CRM site
   smarterp-crm:
     image: ${DOCKER_REGISTRY-}smarterp-crm
@@ -247,6 +289,20 @@ services:
       - ./certs:/etc/etsoo/certs
     networks:
       - etsoo
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "http://localhost:8080/healthz/live"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   # Nginx for reverse proxy
   # Change the nginx.conf under root for your needs, make sure the ports (80, 443) are not used by other services (like IIS)
