@@ -16,6 +16,7 @@
   "editDocument": "Edit template",
   "existingOrg": "Existing organization",
   "homeGuide": "Click the icon in the upper right corner to switch between organizations you have joined; click the application name in the upper left corner to switch between purchased applications.",
+  "homeNoOrgGuide": "No organization created yet. Please start your journey by purchasing an app.",
   "homeOrgGuide": "You can create a new organization by selecting \"New organization\" when purchasing an app from \"All apps\" on the left; you can also join a new organization by accepting an invitation from others.",
   "homeUserGuide": "Click \"All members\" on the left, then click \"Invite member\" in the lower right corner, you can invite other colleagues to join via email.",
   "inviteMemberMessage": "Invitation message",

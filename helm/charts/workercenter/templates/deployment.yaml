@@ -22,6 +22,7 @@ spec:
       containers:
         - name: smarterp-workercenter
           image: "{{ .Values.global.imageRegistry }}/smarterp-workercenter:{{ .Values.imageTag | default .Values.global.imageTag }}"
+          imagePullPolicy: Always
           env:
             - name: DOTNET_ENVIRONMENT
               value: "{{ .Values.global.DOTNET_ENVIRONMENT }}"
