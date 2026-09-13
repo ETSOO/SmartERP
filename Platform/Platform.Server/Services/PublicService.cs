@@ -152,7 +152,7 @@ namespace Platform.Server.Services
                     IdentityType = IdentityTypeFlags.User,
                     QueryKeyword = ChineseUtils.GetPinyin(User.Name, true).ToInitials(),
                     InviterId = inviterId,
-                    UserId = inviterPersonId.Value // User.Oid is a user's person id in a specific organization
+                    UserId = 0 // Trigger to replace 0
                 });
 
                 var user = await db.CoreUsers.Where(u => u.Id == userId)

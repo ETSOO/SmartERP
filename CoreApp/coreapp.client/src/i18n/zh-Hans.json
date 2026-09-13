@@ -30,6 +30,7 @@
   "localUrlsHelp": "JSON字符串，格式为：[{\"web\":\"https://web\",\"api\":\"https://api\",\"help\":\"https://help\"}]，请不要随意设置或改动",
   "me": "个人",
   "newOrg": "新机构",
+  "newOrgTip": "请确保机构名称与证件号码真实有效，且已授权当前用户管控",
   "renewLength": "续费时长",
   "personalData": "个人信息",
   "purchasedApps": "购买的应用",

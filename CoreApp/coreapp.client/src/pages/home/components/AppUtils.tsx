@@ -45,8 +45,11 @@ export namespace AppUtils {
         });
 
         let result: IActionResult | undefined;
+        let orgId: number | undefined;
 
-        if (formData.kind === 1) {
+        const kind = formData.kind;
+
+        if (kind === 1) {
           // Check organization
           if (formData.organizationId == null) {
             DomUtils.setFocus("organizationIdInput", form);
@@ -66,7 +69,7 @@ export namespace AppUtils {
             return false;
           }
 
-          result = await app.core.appApi.buyNew(
+          const buyNewResult = await app.core.appApi.buyNew(
             {
               id: data.id,
               orgName: formData.name,
@@ -76,6 +79,10 @@ export namespace AppUtils {
             },
             { showLoading: false }
           );
+
+          orgId = buyNewResult?.data?.id;
+
+          result = buyNewResult;
         }
 
         if (result == null) return false;
@@ -85,11 +92,25 @@ export namespace AppUtils {
           // app.refreshToken({ showLoading: false });
 
           // Succeed
-          app.notifier.succeed(labels.operationSucceeded, undefined, () => {
-            // New organization created
-            const url = formData.kind === 1 ? "./../myapp" : "./../org";
-            navigate(url);
-          });
+          app.notifier.succeed(
+            labels.operationSucceeded,
+            undefined,
+            async () => {
+              // New organization created
+              if (kind === 1 || orgId == null) {
+                navigate("./../myapp");
+              } else {
+                const sr = await app.switchOrg(orgId);
+                if (sr == null) return;
+
+                if (!sr.ok) {
+                  console.log("Switch organization failed", sr);
+                }
+
+                navigate("./../org");
+              }
+            }
+          );
 
           return;
         } else if (result.type === "ItemExists") {
@@ -259,7 +280,7 @@ export namespace AppUtils {
    */
   export function switchOrg(data: OrgQueryDto) {
     // Labels
-    const labels = app.getLabels("confirmAction", "switchOrg", "unknownError");
+    const labels = app.getLabels("confirmAction", "switchOrg");
 
     // Message
     const message =

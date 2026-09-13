@@ -102,6 +102,22 @@ sudo -u postgres psql
 ALTER USER postgres WITH PASSWORD '***';
 \q
 
+# 查询所有的 Sequence
+SELECT 
+    schemaname,
+    sequencename,
+    data_type,
+    last_value,        -- 序列最后一次生成的值
+    start_value,
+    increment_by
+FROM pg_sequences
+WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+ORDER BY schemaname, sequencename;
+
+# 将序列重新设为从 1 开始
+ALTER SEQUENCE person_id_seq RESTART;
+ALTER SEQUENCE core_organization_id_seq RESTART;
+
 # Create two users & databases, smarterp, smarterp_log
 # Backup from existing PostgreSQL databases with pgAdmin:
 # 1. General, Format: "Plain", Encoding: "UTF8"

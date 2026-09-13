@@ -30,6 +30,7 @@
   "localUrlsHelp": "JSON字符串，格式為：[{\"web\":\"https://web\",\"api\":\"https://api\",\"help\":\"https://help\"}]，請不要隨意設置或改動",
   "me": "個人",
   "newOrg": "新機構",
+  "newOrgTip": "請確保機構名稱與證件號碼真實有效，且已授權當前用戶管控",
   "renewLength": "續費時長",
   "personalData": "個人資料",
   "purchasedApps": "購買的應用",

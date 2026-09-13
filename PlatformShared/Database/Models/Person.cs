@@ -528,7 +528,7 @@ namespace PlatformShared.Database.Models
         /// Registrant's User id
         /// 登记人的用户编号
         /// </summary>
-        public long UserId { get; set; }
+        public long? UserId { get; set; }
 
         /// <summary>
         /// Permission groups

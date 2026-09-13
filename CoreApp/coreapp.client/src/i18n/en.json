@@ -30,6 +30,7 @@
   "localUrlsHelp": "JSON string, format: [{\"web\":\"https://web\",\"api\":\"https://api\",\"help\":\"https://help\"}]. Do not set or modify it at will.",
   "me": "Me",
   "newOrg": "New organization",
+  "newOrgTip": "Please ensure that the organization name and ID number are authentic and that the current user has been authorized to manage it.",
   "renewLength": "Renew length",
   "personalData": "Personal data",
   "purchasedApps": "Purchased apps",
