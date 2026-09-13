@@ -82,7 +82,6 @@ export default function Home() {
     "personalData",
     "purchasedApps",
     "signoutSuccess",
-    "switchOrg",
     "updateAvator",
     "usageReport",
     "view"

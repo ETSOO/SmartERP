@@ -422,7 +422,7 @@ namespace Platform.Server.Services
                         CoreUserId = userId,
                         IdentityType = IdentityTypeFlags.User,
                         UserRole = UserRole.Founder,
-                        UserId = userId
+                        UserId = 0  // Trigger to replace 0
                     }
                 ]
             };

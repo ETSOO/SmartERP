@@ -59,7 +59,6 @@ export default function AllOrgs() {
     "parentOrg",
     "startDate",
     "statusNormal",
-    "switchOrg",
     "view"
   );
 

@@ -4,6 +4,7 @@ import React from "react";
 import { InputField, MaskInput, OptionGroup, VBox } from "@etsoo/materialui";
 import { BusinessTax } from "@etsoo/appscript";
 import { OrgTiplist, TimeZoneTiplist } from "@etsoo/smarterp-core/components";
+import Alert from "@mui/material/Alert";
 
 /**
  * Buy kind
@@ -36,7 +37,13 @@ export function BuyApp(props: BuyAppProps) {
   const tax = region == null ? undefined : BusinessTax.getById(region.id);
 
   // Labels
-  const labels = app.getLabels("existingOrg", "newOrg", "org", "orgName");
+  const labels = app.getLabels(
+    "existingOrg",
+    "newOrg",
+    "newOrgTip",
+    "org",
+    "orgName"
+  );
 
   // Options
   const options: ListType[] = [
@@ -93,6 +100,7 @@ export function BuyApp(props: BuyAppProps) {
             inputRequired
             idValue={app.getTimeZone()}
           />
+          <Alert severity="warning">{labels.newOrgTip}</Alert>
         </React.Fragment>
       )}
     </VBox>
