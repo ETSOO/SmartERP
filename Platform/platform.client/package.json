@@ -10,29 +10,29 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.78",
-    "@etsoo/materialui": "^1.6.87",
-    "@etsoo/react": "^1.9.3",
+    "@etsoo/materialui": "^1.6.88",
+    "@etsoo/react": "^1.9.4",
     "@etsoo/shared": "^1.2.91",
-    "@etsoo/smarterp-core": "^1.1.85",
+    "@etsoo/smarterp-core": "^1.1.86",
     "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.4.0",
     "formik": "^2.4.9",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.3",
     "yup": "^1.7.1"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "typescript": "^7.0.2",
-    "vite": "^8.2.2",
+    "vite": "^8.3.0",
     "vite-plugin-svgr": "^5.2.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.63.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.63.2"
   },
   "allowScripts": {
     "core-js-pure@3.50.0": true

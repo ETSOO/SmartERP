@@ -22,6 +22,7 @@ spec:
       containers:
         - name: smarterp-platform
           image: "{{ .Values.global.imageRegistry }}/smarterp-platform:{{ .Values.imageTag | default .Values.global.imageTag }}"
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               name: http
@@ -55,4 +56,4 @@ spec:
               memory: "64Mi"
             limits:
               cpu: "1"
-              memory: "1Gi"
+              memory: "2Gi"
