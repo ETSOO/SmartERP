@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@etsoo/appscript": "^1.6.78",
-    "@etsoo/materialui": "^1.6.88",
+    "@etsoo/materialui": "^1.6.90",
     "@etsoo/react": "^1.9.4",
     "@etsoo/shared": "^1.2.91",
-    "@etsoo/smarterp-core": "^1.1.87",
+    "@etsoo/smarterp-core": "^1.1.89",
     "@etsoo/toolpad": "^1.0.58",
     "@mui/material": "^9.4.0",
     "formik": "^2.4.9",

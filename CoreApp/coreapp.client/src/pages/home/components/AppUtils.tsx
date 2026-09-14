@@ -35,6 +35,11 @@ export namespace AppUtils {
           return;
         }
 
+        // Validate form
+        if (!form.reportValidity()) {
+          return false;
+        }
+
         // Form data
         const formData = DomUtils.dataAs(new FormData(form), {
           kind: "number",
@@ -69,11 +74,13 @@ export namespace AppUtils {
             return false;
           }
 
+          const orgPin = formData.pin?.replaceAll("-", "");
+
           const buyNewResult = await app.core.appApi.buyNew(
             {
               id: data.id,
               orgName: formData.name,
-              orgPin: formData.pin,
+              orgPin,
               region: app.region,
               timeZone: formData.timeZone
             },
