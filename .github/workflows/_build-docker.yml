@@ -83,5 +83,3 @@ jobs:
             ${{ env.GHCR }}/${{ env.IMG }}:latest
             ${{ env.ACR }}/${{ env.IMG }}:${{ env.VER }}
             ${{ env.ACR }}/${{ env.IMG }}:latest
-          cache-from: type=gha,scope=${{ env.IMG }}
-          cache-to: type=gha,mode=max,scope=${{ env.IMG }}
