@@ -396,7 +396,7 @@ namespace Platform.Server.Services
             // Default QueryKeyword
             var queryKeyword = string.IsNullOrEmpty(rq.QueryKeyword)
                 ? _publicService.GetPinyin(new PinyinRQ { Input = rq.Name, Format = PinyinFormatType.Initial })
-                : rq.QueryKeyword
+                : rq.QueryKeyword.ToUpper()
             ;
 
             var timezone = TimeZoneUtils.CreateFrom(TimeZoneUtils.GetTimeZone(rq.TimeZone)).Id;
@@ -409,7 +409,7 @@ namespace Platform.Server.Services
                 Name = rq.Name,
                 Brand = rq.Brand,
                 Slogan = rq.Slogan,
-                Pin = rq.Pin,
+                Pin = rq.Pin?.ToUpper(),
                 ParentId = rq.ParentId,
                 Status = rq.Status.GetValueOrDefault(),
                 QueryKeyword = queryKeyword,
@@ -1346,7 +1346,7 @@ namespace Platform.Server.Services
 
             if (rq.IsModified(nameof(rq.Pin)))
             {
-                org.Pin = rq.Pin;
+                org.Pin = rq.Pin?.ToUpper();
             }
 
             if (rq.IsModified(nameof(rq.ParentId)))
@@ -1361,7 +1361,7 @@ namespace Platform.Server.Services
 
             if (isQueryKeywordModified)
             {
-                org.QueryKeyword = rq.QueryKeyword;
+                org.QueryKeyword = rq.QueryKeyword?.ToUpper();
             }
 
             if (rq.IsModified(nameof(rq.TimeZone)) && rq.TimeZone != null)

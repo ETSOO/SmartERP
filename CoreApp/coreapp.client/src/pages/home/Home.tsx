@@ -1,4 +1,4 @@
-import { ButtonLink, CommonPage, HBox } from "@etsoo/materialui";
+import { ButtonLink, CommonPage, HBox, SVGUtils } from "@etsoo/materialui";
 import Paper from "@mui/material/Paper";
 import React from "react";
 import { app } from "../../app/MyApp";
@@ -69,8 +69,9 @@ export default function Home() {
                 variant="outlined"
                 disabled={a.id === currentApp}
                 sx={{ flex: "0 0 auto" }}
+                startIcon={SVGUtils.createIcon(a.logo)}
               >
-                {a.name}
+                {app.core.getAppName(a)}
               </Button>
             ))}
           </Stack>
