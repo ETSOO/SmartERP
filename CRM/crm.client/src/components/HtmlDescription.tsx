@@ -14,6 +14,7 @@ export function HtmlDescription(
 
   return (
     <HtmlDescriptionBase
+      label={app.get("description")}
       onEdit={(input) => {
         app.showInputDialog({
           title: app.get("edit"),
