@@ -64,7 +64,11 @@ export default function Home() {
                 onClick={async (e) => {
                   e.currentTarget.disabled = true;
                   await AppSwitchCall(app, a);
-                  e.currentTarget.disabled = false;
+
+                  if (e.currentTarget != null) {
+                    // When not redirected
+                    e.currentTarget.disabled = false;
+                  }
                 }}
                 variant="outlined"
                 disabled={a.id === currentApp}
