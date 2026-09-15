@@ -99,4 +99,4 @@ spec:
       - group: ""
         kind: Secret
         name: wildcard-etsoo-cn-tls
-      mode: Terminate                                                                                           2         37,9          24%
+      mode: Terminate

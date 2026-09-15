@@ -16,7 +16,7 @@
     "@etsoo/reacteditor": "^1.0.48",
     "@etsoo/shared": "^1.2.91",
     "@etsoo/smarterp-core": "^1.1.90",
-    "@etsoo/smarterp-crm": "^1.0.8",
+    "@etsoo/smarterp-crm": "^1.0.9",
     "@etsoo/toolpad": "^1.0.58",
     "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.4.0",
@@ -41,7 +41,7 @@
     "vite": "^8.3.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.63.2"
+    "@rollup/rollup-linux-x64-gnu": "^4.63.3"
   },
   "allowScripts": {
     "canvas@3.2.3": true,

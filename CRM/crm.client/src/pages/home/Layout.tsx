@@ -142,7 +142,8 @@ export default function Home() {
   // Navigation
   const NAVIGATION = React.useMemo(() => {
     // Permissions
-    const queryUser = app.owns(Permissions.User.Query);
+    const isAdmin = app.isAdminUser();
+    const queryUser = isAdmin || app.owns(Permissions.User.Query);
     const queryOrg = app.owns(Permissions.Org.Manage);
 
     const items: (NavigationItem | false)[] = [

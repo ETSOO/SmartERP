@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
@@ -155,7 +156,7 @@ namespace CRM.Server.Services
         public async Task ListAsync(DeptListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.Dept.List, cancellationToken))
+            if (User.Role < UserRole.Admin && !await _commonService.HasPermissionAsync((short)Permissions.Dept.List, cancellationToken))
             {
                 return;
             }

@@ -154,10 +154,13 @@ namespace CRM.Server.Services
         public async Task<IActionResult> UpdateAsync(UserUpdateRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.User.Edit, cancellationToken)
-                || (rq.Id == User.Oid && User.Role < UserRole.Admin))
+            if (User.Role < UserRole.Admin)
             {
-                return ApplicationErrors.AccessDenied.AsResult();
+                if (!await _commonService.HasPermissionAsync((short)Permissions.User.Edit, cancellationToken)
+                    || rq.Id == User.Oid)
+                {
+                    return ApplicationErrors.AccessDenied.AsResult();
+                }
             }
 
             // Organization id
@@ -348,7 +351,7 @@ namespace CRM.Server.Services
         public async Task<UserUpdateReadData?> UpdateReadAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.User.Edit, cancellationToken))
+            if (User.Role < UserRole.Admin && !await _commonService.HasPermissionAsync((short)Permissions.User.Edit, cancellationToken))
             {
                 return null;
             }

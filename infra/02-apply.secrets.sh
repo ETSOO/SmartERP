@@ -51,7 +51,8 @@ microk8s kubectl apply -k infra/overlays/cn/coreapp
 # =================================================================
 # Initialize program data
 # 初始化程序数据
-# 这里的app_secret，从项目配置文件中的 AppSecret，“Token” + AppId + (中心平台Platform.Server的)PrivateKey 作为密匙加密而来。
+# 这里的app_secret，从项目配置文件中的 AppSecret，“Token” + AppId（当前项目的 AppId） + (中心平台Platform.Server的)PrivateKey 作为密匙加密而来。
+# 如 CRM 项目，AppSecret 为 “Token3” + (中心平台Platform.Server的)PrivateKey 作为密匙加密而来。
 # =================================================================
 INSERT INTO public.core_app (id, name, identity_type, app_secret, is_public, enabled, urls)
 VALUES (1,'司友云ERP管理中心', 1,
