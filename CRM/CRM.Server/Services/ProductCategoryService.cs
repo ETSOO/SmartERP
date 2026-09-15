@@ -256,9 +256,10 @@ namespace CRM.Server.Services
             }
 
             // Order by the occurrence of category IDs in the input list
+            var idsA = ids.ToArray();
             return [.. categories
                 .Where(c => c.Attributes != null)
-                .OrderBy(c => ids.ToList().IndexOf(c.Id))
+                .OrderBy(c => idsA.IndexOf(c.Id))
                 .Select(c => c.Attributes!)];
         }
 

@@ -54,6 +54,11 @@ export function ViewPerson(props: ViewPersonProps) {
   // Page data hook
   usePageDataEmpty(app);
 
+  // Identity type
+  let identityType = data?.identityType ?? 0;
+  if (identityType === 0 && data?.owner != null)
+    identityType = data.owner.identityType;
+
   // Layout
   return (
     <CommonPage paddings={0} onRefresh={loadData}>
@@ -93,7 +98,7 @@ export function ViewPerson(props: ViewPersonProps) {
                 visible && (
                   <ContactInfos
                     personId={personId}
-                    editable={app.ownsIdentity(data.identityType, "Edit")}
+                    editable={app.ownsIdentity(identityType, "Edit")}
                     index={index}
                   />
                 ),

@@ -759,7 +759,7 @@ namespace CRM.Server.Services
                      UserId = p.UserId,
                      Creation = p.Creation,
                      Status = p.Status,
-                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray(),
                  }).FirstOrDefaultAsync(cancellationToken);
 
             if (order != null)

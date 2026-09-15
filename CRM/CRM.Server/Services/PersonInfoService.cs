@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
@@ -42,6 +43,25 @@ namespace CRM.Server.Services
             _queueService = queueService;
         }
 
+        private async Task<IActionResult?> CheckIdentityPermissionAsync(long personId, IdentityTypeFlags identityType, string permission = nameof(Permissions.Customer.AddContact), CancellationToken cancellationToken = default)
+        {
+            if (identityType == IdentityTypeFlags.None)
+            {
+                identityType = await _db.Persons
+                    .Where(p => p.Id == personId)
+                    .SelectMany(p => p.ContactOwners)
+                    .Select(co => co.Person.IdentityType)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
+            if (!await _commonService.HasIdentityPermissionAsync(identityType, permission, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Create
         /// 创建
@@ -69,9 +89,10 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.PersonId));
             }
 
-            if (!await _commonService.HasIdentityPermissionAsync(person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            var pResult = await CheckIdentityPermissionAsync(person.Id, person.IdentityType, cancellationToken: cancellationToken);
+            if (pResult != null)
             {
-                return ApplicationErrors.AccessDenied.AsResult();
+                return pResult;
             }
 
             _db.Persons.Attach(person);
@@ -137,7 +158,7 @@ namespace CRM.Server.Services
 
             var info = await _db.PersonInfos
                .Where(i => i.Id == id && i.Person.OrgId == orgId)
-               .Select(i => new { i.Identifier, i.Person.IdentityType })
+               .Select(i => new { i.Identifier, i.PersonId, i.Person.IdentityType })
                .FirstOrDefaultAsync(cancellationToken);
 
             if (info == null)
@@ -145,9 +166,10 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            if (!await _commonService.HasIdentityPermissionAsync(info.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            var pResult = await CheckIdentityPermissionAsync(info.PersonId, info.IdentityType, cancellationToken: cancellationToken);
+            if (pResult != null)
             {
-                return ApplicationErrors.AccessDenied.AsResult();
+                return pResult;
             }
 
             var task1 = _db.PersonInfos.AsNoTracking()
@@ -252,7 +274,7 @@ namespace CRM.Server.Services
 
             var info = await _db.PersonInfos
                .Where(i => i.Id == id && i.Person.OrgId == orgId)
-               .Select(i => new { i.Identifier, i.Person.IdentityType })
+               .Select(i => new { i.Identifier, i.PersonId, i.Person.IdentityType })
                .FirstOrDefaultAsync(cancellationToken);
 
             if (info == null)
@@ -260,7 +282,8 @@ namespace CRM.Server.Services
                 return null;
             }
 
-            if (!await _commonService.HasIdentityPermissionAsync(info.IdentityType, nameof(Permissions.Customer.View), cancellationToken))
+            var pResult = await CheckIdentityPermissionAsync(info.PersonId, info.IdentityType, cancellationToken: cancellationToken);
+            if (pResult != null)
             {
                 return null;
             }
@@ -304,9 +327,10 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult();
             }
 
-            if (!await _commonService.HasIdentityPermissionAsync(info.Person.IdentityType, nameof(Permissions.Customer.Edit), cancellationToken))
+            var pResult = await CheckIdentityPermissionAsync(info.Person.Id, info.Person.IdentityType, cancellationToken: cancellationToken);
+            if (pResult != null)
             {
-                return ApplicationErrors.AccessDenied.AsResult();
+                return pResult;
             }
 
             _db.PersonInfos.Attach(info);

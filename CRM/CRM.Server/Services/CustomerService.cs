@@ -357,7 +357,7 @@ namespace CRM.Server.Services
                 Id = p.Id,
                 Name = p.Name,
                 AssignedId = p.AssignedId,
-                Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
+                Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToArray(),
                 PreferredName = p.PreferredName,
                 Description = p.Description,
                 Creation = p.Creation
@@ -636,7 +636,7 @@ namespace CRM.Server.Services
                     Status = p.Status,
                     Data = p.Data,
                     Categories = p.CategoryIds,
-                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray(),
                     Infos = p.Infos
                         .Where(i => i.PersonId == p.Id && (i.Kind == PersonInfoKind.Pin || i.Kind == PersonInfoKind.TaxId))
                         .Select(i => new PersonInfoUpdateItem
@@ -645,7 +645,7 @@ namespace CRM.Server.Services
                             Identifier = MyDbFunctions.HideData(i.Identifier, default),
                             IsDefault = i.IsDefault
                         })
-                        .ToList()
+                        .ToArray()
                 }).FirstOrDefaultAsync(cancellationToken);
         }
     }

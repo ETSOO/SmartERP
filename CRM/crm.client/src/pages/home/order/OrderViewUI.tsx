@@ -261,7 +261,7 @@ export function OrderViewUI(props: OrderViewUIProps) {
         {
           data: (item) =>
             item.description ? (
-              <HtmlDiv>{item.description}</HtmlDiv>
+              <HtmlDiv style={{ fontSize: "14px" }}>{item.description}</HtmlDiv>
             ) : undefined,
           singleRow: true,
           horizontal: true
