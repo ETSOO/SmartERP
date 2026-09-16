@@ -144,7 +144,7 @@ namespace PlatformShared.Dto.Document
                         UserId = o.UserId,
                         Creation = o.Creation,
                         Status = o.Status,
-                        Tags = o.Tags == null ? null : orderDb.FeatureTags.Where(k => k.CoreOrganizationId == orgId && o.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+                        Tags = o.Tags == null ? null : orderDb.FeatureTags.Where(k => k.CoreOrganizationId == orgId && o.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray(),
 
                         Customer = new OrderCustomerData
                         {
@@ -164,7 +164,7 @@ namespace PlatformShared.Dto.Document
                                     IsDefault = i.IsDefault,
                                     IsVerified = i.IsVerified ?? false
                                 })
-                                .ToList()
+                                .ToArray()
                         },
 
                         OrderLines = o.OrderLines.Select(l => new OrderLineViewData
@@ -359,7 +359,7 @@ namespace PlatformShared.Dto.Document
                         Identifier = i.Identifier,
                         IsDefault = i.IsDefault,
                         IsVerified = i.IsVerified ?? false
-                    }).ToList()
+                    }).ToArray()
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }

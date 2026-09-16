@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Business;
+using System.Text.Json;
 
 namespace CRM.Server.Dto.POLine
 {
@@ -19,6 +20,12 @@ namespace CRM.Server.Dto.POLine
         /// 标题
         /// </summary>
         public required string Title { get; init; }
+
+        /// <summary>
+        /// Description
+        /// 描述
+        /// </summary>
+        public string? Description { get; init; }
 
         /// <summary>
         /// Price
@@ -79,5 +86,11 @@ namespace CRM.Server.Dto.POLine
         /// BOM行编号
         /// </summary>
         public long? BomId { get; init; }
+
+        /// <summary>
+        /// JSON data
+        /// JSON 数据
+        /// </summary>
+        public JsonDocument? Data { get; init; }
     }
 }

@@ -33,6 +33,7 @@ import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import { AssetList, SupplierList } from "@etsoo/smarterp-crm/components";
 import { EntityStatus } from "@etsoo/appscript";
+import FormHelperText from "@mui/material/FormHelperText";
 
 function CompleteUI({
   data,
@@ -51,6 +52,9 @@ function CompleteUI({
     "sn",
     "supplier"
   );
+
+  // SN
+  const modifierSN = app.order.getModifierSn(data.data);
 
   const addAsset = async (data: OrderLineViewData) => {
     app.showInputDialog({
@@ -103,6 +107,7 @@ function CompleteUI({
             name="sn"
             slotProps={{ htmlInput: { maxLength: 256 } }}
             label={labels.sn}
+            defaultValue={modifierSN ?? ""}
           />
           <InputField
             fullWidth
@@ -133,16 +138,19 @@ function CompleteUI({
   return (
     <VBox spacing={2} sx={{ paddingTop: 1 }}>
       {requiresAsset && (
-        <HBox spacing={1}>
-          <AssetList
-            fullWidth
-            inputRequired
-            rq={{ personId: data.customerId, productId: data.productId }}
-          />
-          <Button onClick={() => addAsset(data)} variant="outlined">
-            {labels.add}
-          </Button>
-        </HBox>
+        <VBox>
+          <HBox spacing={1}>
+            <AssetList
+              fullWidth
+              inputRequired
+              rq={{ personId: data.customerId, productId: data.productId }}
+            />
+            <Button onClick={() => addAsset(data)} variant="outlined">
+              {labels.add}
+            </Button>
+          </HBox>
+          <FormHelperText sx={{ paddingLeft: 2 }}>{modifierSN}</FormHelperText>
+        </VBox>
       )}
       <SupplierList
         fullWidth

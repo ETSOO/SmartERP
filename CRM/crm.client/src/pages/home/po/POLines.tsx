@@ -7,7 +7,6 @@ import {
 } from "@etsoo/materialui";
 import {
   GridCellRendererProps,
-  GridDataType,
   GridDeletedCellBoxStyle,
   ScrollerListForwardRef
 } from "@etsoo/react";
@@ -59,6 +58,7 @@ export function POLines(props: AllPOLinesProps) {
     "amount",
     "discount",
     "edit",
+    "endTime",
     "keywords",
     "orderLineStartTime",
     "price",
@@ -135,54 +135,127 @@ export function POLines(props: AllPOLinesProps) {
       }
       columns={[
         {
-          field: "title",
           header: labels.title,
-          sortable: true,
           cellBoxStyle: (data) => ({
             ...GridDeletedCellBoxStyle(data),
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important",
             paddingLeft: data?.bomId ? "32px!important" : undefined
-          })
+          }),
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<OrderLineQueryData, BoxProps>) => {
+            if (data == null) return undefined;
+
+            return (
+              <React.Fragment>
+                <Typography variant="body2" sx={GridDeletedCellBoxStyle(data)}>
+                  {data.title}
+                  {data.description ? (
+                    <Typography variant="caption">
+                      {" "}
+                      ({data.description})
+                    </Typography>
+                  ) : undefined}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {app.order.getModifiers(data.data)}
+                </Typography>
+              </React.Fragment>
+            );
+          }
         },
         {
-          field: "price",
+          width: 120,
           header: labels.price,
-          type: GridDataType.Money,
-          width: 116
+          align: "right",
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<OrderLineQueryData, BoxProps>) => {
+            if (data == null) return undefined;
+
+            return (
+              <React.Fragment>
+                <Typography variant="body2">
+                  {app.formatNumber(data.price)}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {data.qtyDelivered ? (
+                    <span title={labels.qtyDelivered}>
+                      ({app.formatNumber(data.qtyDelivered)}){" "}
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                  x {app.formatNumber(data.qty)}
+                </Typography>
+              </React.Fragment>
+            );
+          }
         },
         {
-          field: "qty",
-          header: labels.qty,
-          type: GridDataType.Number,
-          width: 88
-        },
-        {
-          field: "qtyDelivered",
-          header: labels.qtyDelivered,
-          type: GridDataType.Number,
-          width: 88
-        },
-        {
-          field: "discount",
-          header: labels.discount,
-          type: GridDataType.Money,
-          valueFormatter: ({ data }) =>
-            data?.discount === 0 ? undefined : data?.discount,
-          width: 116
-        },
-        {
-          field: "amount",
-          header: labels.amount,
-          type: GridDataType.Money,
-          renderProps: { currency },
-          width: 116
-        },
-        {
-          field: "startTime",
-          type: GridDataType.DateTime,
           width: 128,
+          header: labels.amount,
+          align: "right",
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<OrderLineQueryData, BoxProps>) => {
+            if (data == null) return undefined;
+
+            return (
+              <React.Fragment>
+                <Typography variant="body2">
+                  {app.formatMoney(data.amount, undefined, {
+                    currency
+                  })}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  title={labels.discount}
+                >
+                  {data.discount === 0 ? "" : app.formatNumber(-data.discount)}
+                </Typography>
+              </React.Fragment>
+            );
+          }
+        },
+        {
+          width: 132,
           header: labels.orderLineStartTime,
-          sortable: true,
-          sortAsc: false
+          cellBoxStyle: {
+            paddingTop: "10px!important",
+            paddingBottom: "10px!important"
+          },
+          cellRenderer: ({
+            data
+          }: GridCellRendererProps<OrderLineQueryData, BoxProps>) => {
+            if (data == null) return undefined;
+
+            return (
+              <React.Fragment>
+                <Typography variant="body2">
+                  {app.formatDate(data.startTime, "dm") ??
+                    (data.endTime ? " - " : "")}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  title={labels.endTime}
+                >
+                  {app.formatDate(data.endTime, "dm")}
+                </Typography>
+              </React.Fragment>
+            );
+          }
         },
         {
           width: DefaultUI.Widths.icon2,
@@ -218,6 +291,7 @@ export function POLines(props: AllPOLinesProps) {
           }
         }
       ]}
+      rowHeight={[64, 220]}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [

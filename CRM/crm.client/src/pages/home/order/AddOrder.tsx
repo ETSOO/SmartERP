@@ -311,7 +311,7 @@ function AddItem({
           )}
         </Grid>
         {data.modifiers != null && data.modifiers.length > 0 && (
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{ paddingBottom: 1 }}>
             <Grid size={{ xs: 12, sm: 12 }}>
               <Divider />
             </Grid>

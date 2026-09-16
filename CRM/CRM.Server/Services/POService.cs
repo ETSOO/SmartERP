@@ -545,6 +545,7 @@ namespace CRM.Server.Services
                 Id = o.Id,
                 Source = o.Source,
                 Title = o.Title,
+                Description = o.Description != null && o.Description.Length > 64 ? o.Description.Substring(0, 64) + "..." : o.Description,
                 SupplierId = o.SellerId,
                 SupplierName = o.Seller.Name,
                 Lines = o.Lines,
@@ -614,7 +615,7 @@ namespace CRM.Server.Services
                      UserId = p.UserId,
                      Creation = p.Creation,
                      Status = p.Status,
-                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+                     Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray(),
                  }).FirstOrDefaultAsync(cancellationToken);
 
             if (po != null)
@@ -1003,7 +1004,7 @@ namespace CRM.Server.Services
                     UserId = p.UserId,
                     Status = p.Status,
                     Data = p.Data,
-                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList()
+                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray()
                 }).FirstOrDefaultAsync(cancellationToken);
         }
     }

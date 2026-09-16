@@ -120,7 +120,7 @@ export function PersonContacts(props: PersonContactsProps) {
       })}
       mRef={ref}
       defaultOrderBy={[{ field: "creation", desc: true }]}
-      quickAction={(data) => navigate(`./../../view/${data.id}?index=0`)}
+      quickAction={(data) => navigate(`./../../view/${data.contactId}?index=0`)}
       fieldTemplate={template}
       fields={(data) => [
         <ContactRelationList search isLegalPerson={isLegalPerson} />,

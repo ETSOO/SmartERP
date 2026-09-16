@@ -80,6 +80,13 @@ export default function AllOrders() {
   // Page data hook
   usePageDataEmpty(app);
 
+  function formatDiscount(discount: number, approvedDiscount: number) {
+    if (approvedDiscount === 0 && discount === 0) return "";
+    else if (approvedDiscount === 0) return `${app.formatNumber(-discount)}`;
+    else
+      return `${app.formatNumber(-discount)} / ${app.formatNumber(-approvedDiscount)}`;
+  }
+
   return (
     <ResponsivePage<OrderQueryData, typeof template>
       {...DefaultUI.pageProps({
@@ -194,6 +201,12 @@ export default function AllOrders() {
               <React.Fragment>
                 <Typography variant="body2" sx={GridDeletedCellBoxStyle(data)}>
                   {data.title}
+                  {data.description ? (
+                    <Typography variant="caption">
+                      {" "}
+                      ({data.description})
+                    </Typography>
+                  ) : undefined}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {data.customerName}
@@ -232,7 +245,7 @@ export default function AllOrders() {
           }
         },
         {
-          width: 116,
+          width: 128,
           header: labels.amount,
           align: "right",
           cellBoxStyle: {
@@ -258,36 +271,7 @@ export default function AllOrders() {
                   color="text.secondary"
                   title={labels.discount}
                 >
-                  {app.formatNumber(discount)}
-                </Typography>
-              </React.Fragment>
-            );
-          }
-        },
-        {
-          width: 116,
-          header: labels.taxAmount,
-          align: "right",
-          cellBoxStyle: {
-            paddingTop: "10px!important",
-            paddingBottom: "10px!important"
-          },
-          cellRenderer: ({
-            data
-          }: GridCellRendererProps<OrderQueryData, BoxProps>) => {
-            if (data == null) return undefined;
-
-            return (
-              <React.Fragment>
-                <Typography variant="body2">
-                  {app.formatMoney(data.taxAmount, undefined, {
-                    currency: data.currency
-                  })}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {data.approvedDiscount == 0
-                    ? ""
-                    : `(${app.formatNumber(-data.approvedDiscount)})`}
+                  {formatDiscount(discount, data.approvedDiscount)}
                 </Typography>
               </React.Fragment>
             );

@@ -124,7 +124,7 @@ namespace CRM.Server.Services
         public async Task<UserQueryData[]> QueryAsync(UserQueryRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
-            if (!await _commonService.HasPermissionAsync((short)Permissions.User.Query, cancellationToken))
+            if (User.Role < UserRole.Admin && !await _commonService.HasPermissionAsync((short)Permissions.User.Query, cancellationToken))
             {
                 return [];
             }

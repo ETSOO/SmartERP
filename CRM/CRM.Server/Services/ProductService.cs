@@ -1455,7 +1455,7 @@ namespace CRM.Server.Services
                     TaxRate = p.TaxRate,
                     IntroductionUrl = p.IntroductionUrl,
                     Categories = p.CategoryIds,
-                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray(),
                     Status = p.Status,
                     Data = p.Data,
                     Modifiers = p.Modifiers
@@ -1573,7 +1573,7 @@ namespace CRM.Server.Services
                         ProductId = b.ProductId,
                         Qty = b.Qty,
                         Name = b.Product.Name
-                    }).ToList(),
+                    }).ToArray(),
                     Categories = _db.ProductCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds != null && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds!.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
                     Prices = p.Prices.Select(pp => new ProductPriceItem
                     {
@@ -1582,8 +1582,8 @@ namespace CRM.Server.Services
                         PromotionPrice = pp.PromotionPrice,
                         ChannelPrice = pp.ChannelPrice,
                         CostPrice = pp.CostPrice
-                    }).ToList(),
-                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
+                    }).ToArray(),
+                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray(),
                     Cultures = _db.FeatureCultures.Where(c => c.CoreOrganizationId == orgId && c.Key == key)
                                 .Select(c => new CustomCultureItem
                                 {
@@ -1592,7 +1592,7 @@ namespace CRM.Server.Services
                                     Title = c.Title,
                                     Description = c.Description,
                                     JsonData = c.JsonData
-                                }).ToList()
+                                }).ToArray()
                 }).FirstOrDefaultAsync(cancellationToken);
         }
 

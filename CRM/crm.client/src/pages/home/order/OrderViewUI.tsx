@@ -39,6 +39,7 @@ export function OrderViewUI(props: OrderViewUIProps) {
   const labels = app.getLabels(
     "addOrderLine",
     "confirmAction",
+    "description",
     "edit",
     "promotions",
     "recalculate"
@@ -261,7 +262,9 @@ export function OrderViewUI(props: OrderViewUIProps) {
         {
           data: (item) =>
             item.description ? (
-              <HtmlDiv>{item.description}</HtmlDiv>
+              <HtmlDiv style={{ fontSize: "14px" }} title={labels.description}>
+                {item.description}
+              </HtmlDiv>
             ) : undefined,
           singleRow: true,
           horizontal: true

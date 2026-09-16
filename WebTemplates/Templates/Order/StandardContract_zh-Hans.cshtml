@@ -31,12 +31,12 @@
     <table style="width: 100%; margin-top: 1.5em; " border="0">
         <tr>
             <td style="width: 9%" valign="top">甲方：</td>
-            <td style="width: 41%">
+            <td style="width: 41%" valign="top">
                 <div class="party">@Model.Order.Customer.Name</div>
                 <div>@(Model.Order.Customer.GetTaxId() ?? Model.Order.Customer.GetPin() ?? "&nbsp;")</div>
             </td>
             <td style="width: 9%" valign="top">乙方：</td>
-            <td style="width: 41%">
+            <td style="width: 41%" valign="top">
                 <div class="party">@Model.Org.Name</div>
                 <div>@(Model.Org.TaxId ?? Model.Org.Pin ?? "&nbsp;")</div>
             </td>

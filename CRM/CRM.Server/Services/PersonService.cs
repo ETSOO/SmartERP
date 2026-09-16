@@ -533,9 +533,9 @@ namespace CRM.Server.Services
                     Avatar = p.Avatar ?? (p.CoreUser == null ? (p.CoreOrganization == null ? null : p.CoreOrganization.Logo) : p.CoreUser.Avatar),
                     JobTitle = p.JobTitle,
                     AssignedId = p.AssignedId,
-                    Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToList(),
-                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToList(),
-                    Addresses = p.Addresses.Where(a => a.ParentId == null).Select(a => new AddressItem { Id = a.Id, Kind = a.Kind, Name = a.Name, FormattedAddress = a.FormattedAddress }).Take(3),
+                    Categories = p.CategoryIds == null ? null : _db.PersonCategories.Where(c => c.CoreOrganizationId == orgId && p.CategoryIds.Contains(c.Id)).OrderBy(t => p.CategoryIds.IndexOf(t.Id)).Select(c => new CategoryItem { Id = c.Id, Names = c.Names }).ToArray(),
+                    Tags = p.Tags == null ? null : _db.FeatureTags.Where(k => k.CoreOrganizationId == orgId && p.Tags.Contains(k.Id)).OrderByDescending(t => t.Total).ThenBy(t => t.Tag).Select(k => k.Tag).ToArray(),
+                    Addresses = p.Addresses.Where(a => a.ParentId == null).Select(a => new AddressItem { Id = a.Id, Kind = a.Kind, Name = a.Name, FormattedAddress = a.FormattedAddress }).Take(3).ToArray(),
                     ReportTo = p.ReportTo,
                     ReportToName = p.ReportToUser == null ? null : p.ReportToUser.Name,
                     Creation = p.Creation,
@@ -575,7 +575,12 @@ namespace CRM.Server.Services
                     InviterName = p.Inviter == null ? null : p.Inviter.Name,
                     RefreshTime = p.RefreshTime
 
-                }).FirstAsync(cancellationToken);
+                }).FirstOrDefaultAsync(cancellationToken);
+
+            if(data == null)
+            {
+                return null;
+            }
 
             // Push message
             var message = new ReadPersonMessage
