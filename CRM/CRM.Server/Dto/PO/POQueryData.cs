@@ -27,6 +27,12 @@ namespace CRM.Server.Dto.PO
         public required string Title { get; init; }
 
         /// <summary>
+        /// Description
+        /// 描述
+        /// </summary>
+        public string? Description { get; init; }
+
+        /// <summary>
         /// Supplier id
         /// 供应商编号
         /// </summary>

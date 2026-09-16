@@ -690,6 +690,7 @@ namespace CRM.Server.Services
                 Id = o.Id,
                 Source = o.Source,
                 Title = o.Title,
+                Description = o.Description != null && o.Description.Length > 64 ? o.Description.Substring(0, 64) + "..." : o.Description,
                 CustomerId = o.BuyerId,
                 CustomerName = o.Buyer.Name,
                 Lines = o.Lines,

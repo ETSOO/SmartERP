@@ -1,6 +1,7 @@
 import {
   ButtonLink,
   HBox,
+  HtmlDiv,
   IconButtonLink,
   LinkEx,
   MenuButton,
@@ -36,6 +37,7 @@ export function POViewUI(props: POViewUIProps) {
   const labels = app.getLabels(
     "addPOLine",
     "confirmAction",
+    "description",
     "edit",
     "promotions",
     "recalculate"
@@ -245,7 +247,12 @@ export function POViewUI(props: POViewUIProps) {
           singleRow: true
         },
         {
-          data: "description",
+          data: (item) =>
+            item.description ? (
+              <HtmlDiv style={{ fontSize: "14px" }} title={labels.description}>
+                {item.description}
+              </HtmlDiv>
+            ) : undefined,
           singleRow: true,
           horizontal: true
         },

@@ -597,6 +597,7 @@ namespace CRM.Server.Services
             {
                 Id = p.Id,
                 Title = p.Title,
+                Description = p.Description,
                 Price = p.Price,
                 Qty = p.Qty,
                 QtyDelivered = p.QtyDelivered,
@@ -606,7 +607,8 @@ namespace CRM.Server.Services
                 EndTime = p.EndTime,
                 Status = p.Status,
                 Creation = p.Creation,
-                BomId = p.BomId
+                BomId = p.BomId,
+                Data = p.Data
             })
             .ToArrayAsync(cancellationToken);
         }

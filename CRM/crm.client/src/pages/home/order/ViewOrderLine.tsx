@@ -54,21 +54,7 @@ function CompleteUI({
   );
 
   // SN
-  let modifierSN: string | undefined;
-  if (data.data?.modifiers) {
-    const exData = data.data?.modifiers as DataTypes.StringRecord;
-    const snItem = [
-      exData.sn,
-      exData.Sn,
-      exData.SN,
-      exData.domain,
-      exData.Domain
-    ].find((d) => !!d);
-
-    if (snItem) {
-      modifierSN = `${snItem}`;
-    }
-  }
+  const modifierSN = app.order.getModifierSn(data.data);
 
   const addAsset = async (data: OrderLineViewData) => {
     app.showInputDialog({
