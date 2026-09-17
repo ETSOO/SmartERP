@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { TabBox } from "@etsoo/materialui";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { LatestTasks } from "../../components/profile/LatestTasks";
+import { useEffect } from "react";
 
 export default function Home() {
   // Route
@@ -20,10 +21,29 @@ export default function Home() {
     "allProfiles",
     "flowchart",
     "latestTasks",
+    "permissionRequiredAlert",
+    "settingsRequiredAlert",
     "stakeholders"
   );
 
   usePageDataEmpty(app);
+
+  useEffect(() => {
+    const isAdmin = app.isAdminUser();
+
+    if (
+      app.userData?.permissionItems == null ||
+      app.userData.permissionItems.length === 0
+    ) {
+      app.notifier.alert(labels.permissionRequiredAlert, () => {
+        if (isAdmin) navigate(`./user/edit/${app.userData?.userPersonId}`);
+      });
+    } else if (app.userData?.system?.mainCustomerType == null) {
+      app.notifier.alert(labels.settingsRequiredAlert, () => {
+        if (isAdmin) navigate("./system/updateSettings");
+      });
+    }
+  }, []);
 
   return (
     <TabBox
