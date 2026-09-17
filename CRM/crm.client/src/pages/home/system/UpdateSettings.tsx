@@ -117,7 +117,9 @@ export default function UpdateSettings() {
         <ButtonCurrencies
           fullWidth
           required
-          value={formik.values.currencies}
+          value={
+            formik.values.currencies ?? (app.region === "CN" ? ["CNY"] : [])
+          }
           onValueChange={(ids) => formik.setFieldValue("currencies", ids)}
         />
       </Grid>
@@ -125,7 +127,7 @@ export default function UpdateSettings() {
         <ButtonCurrencies
           label={labels.supplierCurrencies}
           fullWidth
-          value={formik.values.supplierCurrencies}
+          value={formik.values.supplierCurrencies ?? []}
           onValueChange={(ids) =>
             formik.setFieldValue("supplierCurrencies", ids)
           }
@@ -135,7 +137,7 @@ export default function UpdateSettings() {
         <ButtonCultures
           fullWidth
           required
-          value={formik.values.cultures}
+          value={formik.values.cultures ?? [app.culture]}
           onValueChange={(ids) => formik.setFieldValue("cultures", ids)}
         />
       </Grid>

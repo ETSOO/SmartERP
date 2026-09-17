@@ -36,6 +36,7 @@ export default function EditUser() {
     "fullName",
     "name",
     "noChanges",
+    "permissionChangedReload",
     "reportTo",
     "role",
     "status"
@@ -89,7 +90,21 @@ export default function EditUser() {
       if (result == null) return;
 
       if (result.ok) {
-        navigate("./../..");
+        if (fields.includes("groups") && id === app.userData?.userPersonId) {
+          app.notifier.confirm(
+            labels.permissionChangedReload,
+            undefined,
+            (result) => {
+              if (result) {
+                globalThis.location.reload();
+              } else {
+                navigate("./../..");
+              }
+            }
+          );
+        } else {
+          navigate("./../..");
+        }
         return;
       }
 

@@ -7,9 +7,12 @@
   "dropFilesLabel": "Drop files here, or",
   "flowchart": "Flowchart",
   "latestTasks": "Latest tasks",
+  "permissionChangedReload": "Permissions have changed, please reload the page",
+  "permissionRequiredAlert": "Please set the user permission group before using the system",
   "productOrCategoryRequired": "Product or product category is required",
   "productUnitTip": "If no products are using this product unit, clearing the base unit will delete this item",
   "productDisappeared": "Product(s) has disappeared: {0}",
+  "settingsRequiredAlert": "Please initialize the system settings before using the system!",
   "smarterpCRM": "SmartERP Business Management",
   "tooManyItemsToDisplay": "Too many items to display",
   "updateSystemSettings": "Update system settings"

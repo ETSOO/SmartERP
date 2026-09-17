@@ -7,9 +7,12 @@
   "dropFilesLabel": "拖放文件到這裡，或者",
   "flowchart": "流程圖",
   "latestTasks": "最近的任務",
+  "permissionChangedReload": "權限已更改，請重新加載頁面",
+  "permissionRequiredAlert": "使用系統前請先設置用戶權限組",
   "productOrCategoryRequired": "產品或產品分類必填",
   "productUnitTip": "如果沒有產品使用該產品單位，清除基礎單位可刪除該項目",
   "productDisappeared": "產品已不存在: {0}",
+  "settingsRequiredAlert": "使用系統前請先初始化設置！",
   "smarterpCRM": "司友雲ERP業務管理",
   "tooManyItemsToDisplay": "項目過多，無法展示",
   "updateSystemSettings": "更新系統設置"
