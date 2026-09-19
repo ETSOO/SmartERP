@@ -103,6 +103,12 @@ public partial class Person
 
     public virtual CoreUser? CoreUser { get; set; }
 
+    public virtual ICollection<FinanceAccount> FinanceAccounts { get; set; } = new List<FinanceAccount>();
+
+    public virtual ICollection<FinanceTransaction> FinanceTransactionAuthors { get; set; } = new List<FinanceTransaction>();
+
+    public virtual ICollection<FinanceTransaction> FinanceTransactionTargetPeople { get; set; } = new List<FinanceTransaction>();
+
     public virtual ICollection<Person> InverseReportToNavigation { get; set; } = new List<Person>();
 
     public virtual ICollection<Person> InverseUser { get; set; } = new List<Person>();

@@ -31,6 +31,12 @@ public partial class CoreOrganization
 
     public string Region { get; set; } = null!;
 
+    public string? Slogan { get; set; }
+
+    public string TimeZone { get; set; } = null!;
+
+    public string? CompanySeal { get; set; }
+
     public virtual ICollection<CoreApi> CoreApis { get; set; } = new List<CoreApi>();
 
     public virtual ICollection<CoreDocument> CoreDocuments { get; set; } = new List<CoreDocument>();

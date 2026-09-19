@@ -41,6 +41,8 @@ public partial class PersonAsset
 
     public int OrgId { get; set; }
 
+    public bool? ExpiryCheck { get; set; }
+
     public virtual CoreUser CoreUser { get; set; } = null!;
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();

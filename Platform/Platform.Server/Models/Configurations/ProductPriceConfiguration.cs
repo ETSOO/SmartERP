@@ -23,19 +23,19 @@ namespace Platform.Server.Models.Configurations
                 .IsFixedLength()
                 .HasColumnName("currency");
             entity.Property(e => e.ChannelPrice)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("channel_price");
             entity.Property(e => e.CostPrice)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("cost_price");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
             entity.Property(e => e.PromotionPrice)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("promotion_price");
             entity.Property(e => e.RetailPrice)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("retail_price");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductPrices)

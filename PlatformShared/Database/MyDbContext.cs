@@ -87,6 +87,18 @@ namespace PlatformShared.Database
         public required DbSet<FeatureTag> FeatureTags { get; set; }
 
         /// <summary>
+        /// Finance accounts
+        /// 财务账户
+        /// </summary>
+        public required DbSet<FinanceAccount> FinanceAccounts { get; set; }
+
+        /// <summary>
+        /// Finance transactions
+        /// 财务交易
+        /// </summary>
+        public required DbSet<FinanceTransaction> FinanceTransactions { get; set; }
+
+        /// <summary>
         /// Order deliveries
         /// 订单配送方式
         /// </summary>
@@ -277,6 +289,8 @@ namespace PlatformShared.Database
             modelBuilder.ApplyConfiguration(new CoreUserIdentifierConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureCultureConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureTagConfiguration());
+            modelBuilder.ApplyConfiguration(new FinanceAccountConfiguration());
+            modelBuilder.ApplyConfiguration(new FinanceTransactionConfiguration());
             modelBuilder.ApplyConfiguration(new OrderDeliveryConfiguration());
             modelBuilder.ApplyConfiguration(new OrderPaymentConfiguration());
             modelBuilder.ApplyConfiguration(new OrderHeaderConfiguration());

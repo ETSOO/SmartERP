@@ -34,7 +34,7 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("currency");
             entity.Property(e => e.Discount).HasColumnName("discount");
             entity.Property(e => e.MinAmount)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("min_amount");
             entity.Property(e => e.OrderIndex).HasColumnName("order_index");
             entity.Property(e => e.PersonCategoryIds).HasColumnName("person_category_ids");

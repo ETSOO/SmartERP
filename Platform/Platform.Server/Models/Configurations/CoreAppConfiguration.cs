@@ -30,7 +30,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.IdentityType).HasColumnName("identity_type");
             entity.Property(e => e.IsPublic).HasColumnName("is_public");
             entity.Property(e => e.Logo)
-                .HasMaxLength(256)
+                .HasMaxLength(512)
                 .HasColumnName("logo");
             entity.Property(e => e.Name)
                 .HasMaxLength(128)

@@ -21,6 +21,9 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+            entity.Property(e => e.Description)
+                .HasMaxLength(1280)
+                .HasColumnName("description");
             entity.Property(e => e.IsOrder)
                 .HasDefaultValue(true)
                 .HasColumnName("is_order");
@@ -30,7 +33,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.OrderIndex).HasColumnName("order_index");
             entity.Property(e => e.Title)
-                .HasMaxLength(256)
+                .HasMaxLength(128)
                 .HasColumnName("title");
 
             OnConfigurePartial(entity);

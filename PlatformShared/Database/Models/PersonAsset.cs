@@ -88,18 +88,6 @@ namespace PlatformShared.Database.Models
         public bool? ExpiryCheck { get; set; }
 
         /// <summary>
-        /// Remaining times
-        /// 剩余次数
-        /// </summary>
-        public int? Times { get; set; }
-
-        /// <summary>
-        /// Remaining amount
-        /// 剩余金额
-        /// </summary>
-        public decimal? Amount { get; set; }
-
-        /// <summary>
         /// Sensitive data
         /// 敏感数据
         /// </summary>

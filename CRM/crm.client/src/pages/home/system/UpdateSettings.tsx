@@ -83,7 +83,11 @@ export default function UpdateSettings() {
   // Load data
   const loadData = React.useCallback(async () => {
     const data = await app.systemApi.readSettings();
-    if (data == null) return;
+    if (data == null) {
+      if (app.region === "CN") formik.setFieldValue("currencies", ["CNY"]);
+      formik.setFieldValue("cultures", [app.culture]);
+      return;
+    }
     setSettings(data);
   }, []);
 
@@ -117,9 +121,7 @@ export default function UpdateSettings() {
         <ButtonCurrencies
           fullWidth
           required
-          value={
-            formik.values.currencies ?? (app.region === "CN" ? ["CNY"] : [])
-          }
+          value={formik.values.currencies ?? []}
           onValueChange={(ids) => formik.setFieldValue("currencies", ids)}
         />
       </Grid>
@@ -137,7 +139,7 @@ export default function UpdateSettings() {
         <ButtonCultures
           fullWidth
           required
-          value={formik.values.cultures ?? [app.culture]}
+          value={formik.values.cultures}
           onValueChange={(ids) => formik.setFieldValue("cultures", ids)}
         />
       </Grid>

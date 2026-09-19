@@ -21,5 +21,7 @@ public partial class OrderDelivery
 
     public bool IsOrder { get; set; }
 
+    public string? Description { get; set; }
+
     public virtual ICollection<OrderHeader> OrderHeaders { get; set; } = new List<OrderHeader>();
 }

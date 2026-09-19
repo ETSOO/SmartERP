@@ -418,20 +418,24 @@ namespace CRM.Server.Services
             {
                 if (unit == ProductUnit.TIME)
                 {
+                    /*
                     // 次卡有效期自动延长1年
                     var days = asset.Validity.GetValueOrDefault(366);
                     var totalTimes = Convert.ToInt32(assetQty * qty);
 
                     await _db.PersonAssets.Where(a => a.Id == assetId)
                         .ExecuteUpdateAsync(a => a.SetProperty(p => p.Times, p => p.Times.GetValueOrDefault() + totalTimes).SetProperty(p => p.Expiry, p => p.Expiry.AddDays(days)), cancellationToken);
+                    */
                 }
                 else if (unit == ProductUnit.MONEY)
                 {
+                    /*
                     // 储值卡有效期自动延长3年
                     var days = asset.Validity.GetValueOrDefault(732);
                     var totalAmount = assetQty * qty;
                     await _db.PersonAssets.Where(a => a.Id == assetId)
                         .ExecuteUpdateAsync(a => a.SetProperty(p => p.Amount, p => p.Amount.GetValueOrDefault() + totalAmount).SetProperty(p => p.Expiry, p => p.Expiry.AddDays(days)), cancellationToken);
+                    */
                 }
                 else
                 {

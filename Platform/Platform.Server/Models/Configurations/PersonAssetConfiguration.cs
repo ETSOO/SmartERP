@@ -21,7 +21,7 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.Amount)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("amount");
             entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)
@@ -34,6 +34,7 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
+            entity.Property(e => e.ExpiryCheck).HasColumnName("expiry_check");
             entity.Property(e => e.HealthCheckSchedule).HasColumnName("health_check_schedule");
             entity.Property(e => e.HealthCheckUrl)
                 .HasMaxLength(1280)

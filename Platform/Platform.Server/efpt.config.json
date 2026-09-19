@@ -5,7 +5,7 @@
    "FilterSchemas": false,
    "IncludeConnectionString": false,
    "IrregularWords": null,
-   "MinimumProductVersion": "2.6.1248",
+   "MinimumProductVersion": "2.6.1706",
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Models",
@@ -60,6 +60,14 @@
       },
       {
          "Name": "public.feature_culture",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.finance_account",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.finance_transaction",
          "ObjectType": 0
       },
       {
@@ -197,5 +205,6 @@
    "UseSchemaNamespaces": false,
    "UseSpatial": false,
    "UseT4": false,
-   "UseT4Split": false
+   "UseT4Split": false,
+   "UseTypedTvpParameters": true
 }

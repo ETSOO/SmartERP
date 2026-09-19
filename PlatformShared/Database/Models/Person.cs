@@ -633,6 +633,18 @@ namespace PlatformShared.Database.Models
         public ICollection<OrderHeader> ContactOrders { get; set; } = default!;
 
         /// <summary>
+        /// Finance accounts
+        /// 财务账户
+        /// </summary>
+        public ICollection<FinanceAccount> FinanceAccounts { get; set; } = default!;
+
+        /// <summary>
+        /// Finance transactions
+        /// 财务交易
+        /// </summary>
+        public ICollection<FinanceTransaction> FinanceTransactions { get; set; } = default!;
+
+        /// <summary>
         /// Owned users
         /// 拥有的用户
         /// </summary>
@@ -715,6 +727,12 @@ namespace PlatformShared.Database.Models
         /// 拥有的库存记录
         /// </summary>
         public ICollection<StockHeader> Stocks { get; set; } = default!;
+
+        /// <summary>
+        /// Target transactions
+        /// 目标交易
+        /// </summary>
+        public ICollection<FinanceTransaction> TargetTransactions { get; set; } = default!;
 
         /// <summary>
         /// User orders

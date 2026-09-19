@@ -288,6 +288,12 @@ namespace PlatformShared.Database.Models
         public Person User { get; set; } = null!;
 
         /// <summary>
+        /// Finance transactions
+        /// 财务交易
+        /// </summary>
+        public ICollection<FinanceTransaction> FinanceTransactions { get; set; } = default!;
+
+        /// <summary>
         /// Order lines
         /// 订单项目
         /// </summary>

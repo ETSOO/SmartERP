@@ -36,6 +36,10 @@ public partial class MyDbContext : DbContext
 
     public virtual DbSet<FeatureCulture> FeatureCultures { get; set; }
 
+    public virtual DbSet<FinanceAccount> FinanceAccounts { get; set; }
+
+    public virtual DbSet<FinanceTransaction> FinanceTransactions { get; set; }
+
     public virtual DbSet<OrderDelivery> OrderDeliveries { get; set; }
 
     public virtual DbSet<OrderHeader> OrderHeaders { get; set; }
@@ -103,6 +107,8 @@ public partial class MyDbContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserDeviceTokenConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.CoreUserIdentifierConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.FeatureCultureConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.FinanceAccountConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.FinanceTransactionConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderDeliveryConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.OrderLineConfiguration());

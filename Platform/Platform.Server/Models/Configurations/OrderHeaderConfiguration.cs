@@ -26,9 +26,10 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("address_formatted");
             entity.Property(e => e.AddressId).HasColumnName("address_id");
             entity.Property(e => e.Amount)
+                .HasPrecision(18, 2)
                 .HasColumnName("amount");
             entity.Property(e => e.ApprovedDiscount)
-                .HasDefaultValueSql("0")
+                .HasPrecision(18, 2)
                 .HasColumnName("approved_discount");
             entity.Property(e => e.AssignedId)
                 .HasMaxLength(20)
@@ -57,8 +58,7 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.Discount)
-                .HasDefaultValueSql("0")
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("discount");
             entity.Property(e => e.EndDate).HasColumnName("end_date");
             entity.Property(e => e.Items)
@@ -66,13 +66,11 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("items");
             entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.LineDiscount)
-                .HasDefaultValueSql("0")
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("line_discount");
             entity.Property(e => e.Lines).HasColumnName("lines");
             entity.Property(e => e.PaidAmount)
-                .HasDefaultValueSql("0")
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("paid_amount");
             entity.Property(e => e.PaymentId).HasColumnName("payment_id");
             entity.Property(e => e.PaymentInstruction)
@@ -92,8 +90,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Tags).HasColumnName("tags");
             entity.Property(e => e.TaxAmount)
-                .HasDefaultValueSql("0")
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("tax_amount");
             entity.Property(e => e.Title)
                 .HasMaxLength(128)

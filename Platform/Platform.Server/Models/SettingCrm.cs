@@ -23,6 +23,10 @@ public partial class SettingCrm
 
     public decimal? TaxRate { get; set; }
 
+    public short? OrderDailyReportHour { get; set; }
+
+    public bool? OrderMonthlyReportEnabled { get; set; }
+
     public virtual CoreOrganization IdNavigation { get; set; } = null!;
 
     public virtual Person Person { get; set; } = null!;

@@ -43,6 +43,8 @@ public partial class CoreUser
 
     public List<int>? LatestAppIds { get; set; }
 
+    public string? Signature { get; set; }
+
     public virtual ICollection<CoreAuthCode> CoreAuthCodes { get; set; } = new List<CoreAuthCode>();
 
     public virtual ICollection<CoreOrganization> CoreOrganizations { get; set; } = new List<CoreOrganization>();

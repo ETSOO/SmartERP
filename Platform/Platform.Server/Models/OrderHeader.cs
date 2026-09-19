@@ -87,6 +87,8 @@ public partial class OrderHeader
 
     public virtual OrderDelivery? Delivery { get; set; }
 
+    public virtual ICollection<FinanceTransaction> FinanceTransactions { get; set; } = new List<FinanceTransaction>();
+
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 
     public virtual OrderPayment? Payment { get; set; }
