@@ -1,11 +1,6 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
-import {
-  EditPage,
-  InputField,
-  IntInputField,
-  MoneyInputField
-} from "@etsoo/materialui";
+import { EditPage, InputField, IntInputField } from "@etsoo/materialui";
 import {
   ReactUtils,
   useParamsEx,
@@ -15,8 +10,8 @@ import {
 import { useFormik } from "formik";
 import React from "react";
 import Grid from "@mui/material/Grid";
-import { IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
-import { AssetCreateRQ, AssetUpdateRQ } from "@etsoo/smarterp-crm";
+import { IdActionResult, Utils } from "@etsoo/shared";
+import { AssetCreateRQ, AssetUpdateRQ, Permissions } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
 import { StatusList } from "@etsoo/smarterp-core/components";
 import { EntityStatus, ProductUnit } from "@etsoo/appscript";
@@ -43,7 +38,9 @@ export default function AddAsset() {
 
   // Labels
   const labels = app.getLabels(
+    "asset",
     "balance",
+    "deleteConfirm",
     "description",
     "expiry",
     "expiryCheck",
@@ -74,13 +71,19 @@ export default function AddAsset() {
   // Type
   type DataType = AssetCreateRQ;
 
+  // Setting
+  const { expiryCheck, noticeOwner } = app.system.getAssetExpirationNotice();
+
   // State
   const [data, setData] = React.useState<DataType>({
     personId,
     productId: 0,
     sn: "",
     expiry: "",
-    expiryCheck: true
+    expiryCheck,
+    data: {
+      noticeOwner
+    }
   });
 
   // Formik
@@ -151,6 +154,31 @@ export default function AddAsset() {
   return (
     <EditPage
       isEditing={isEditing}
+      onDelete={
+        app.owns(Permissions.Org.Manage) &&
+        id &&
+        data.status === EntityStatus.Deleted
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.asset),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
+
+                  const result = await app.assetApi.delete(id);
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate(`./../../`);
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
       onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       paddings={0}
@@ -211,29 +239,6 @@ export default function AddAsset() {
           inputRef={refs.description}
           multiline
           rows={2}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <MoneyInputField
-          fullWidth
-          name="amount"
-          slotProps={{
-            htmlInput: { disabled: true }
-          }}
-          symbol={NumberUtils.getCurrencySymbol(app.currency)}
-          label={labels.balance}
-          inputRef={refs.amount}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <IntInputField
-          fullWidth
-          name="times"
-          slotProps={{
-            htmlInput: { disabled: true }
-          }}
-          label={labels.times}
-          inputRef={refs.times}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>

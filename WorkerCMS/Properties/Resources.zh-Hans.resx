@@ -120,6 +120,9 @@
   <data name="AddContactRelation" xml:space="preserve">
     <value>添加联系人关系</value>
   </data>
+  <data name="BulkCreateFinanceAccount" xml:space="preserve">
+    <value>批量创建财务账号</value>
+  </data>
   <data name="CompleteOrderLine" xml:space="preserve">
     <value>完成订单行</value>
   </data>
@@ -137,6 +140,9 @@
   </data>
   <data name="CreateDept" xml:space="preserve">
     <value>创建部门</value>
+  </data>
+  <data name="CreateFinanceAccount" xml:space="preserve">
+    <value>创建财务账号</value>
   </data>
   <data name="CreateOrder" xml:space="preserve">
     <value>创建订单</value>
@@ -186,8 +192,14 @@
   <data name="CreateSupplier" xml:space="preserve">
     <value>创建供应商</value>
   </data>
+  <data name="DeleteAsset" xml:space="preserve">
+    <value>移除资产</value>
+  </data>
   <data name="DeleteContactRelation" xml:space="preserve">
     <value>移除联系人关系</value>
+  </data>
+  <data name="DeleteOrder" xml:space="preserve">
+    <value>移除订单</value>
   </data>
   <data name="DeleteOrderLine" xml:space="preserve">
     <value>移除订单行</value>
@@ -204,6 +216,9 @@
   <data name="DeletePersonProfileLink" xml:space="preserve">
     <value>移除档案链接</value>
   </data>
+  <data name="DeletePO" xml:space="preserve">
+    <value>移除采购订单</value>
+  </data>
   <data name="DeletePOLine" xml:space="preserve">
     <value>移除采购行</value>
   </data>
@@ -215,6 +230,9 @@
   </data>
   <data name="MergeProductCategory" xml:space="preserve">
     <value>合并产品类目</value>
+  </data>
+  <data name="ProcessFinanceTransaction" xml:space="preserve">
+    <value>处理财务交易信息</value>
   </data>
   <data name="ProductEditBoms" xml:space="preserve">
     <value>编辑产品物流清单</value>
@@ -317,6 +335,9 @@
   </data>
   <data name="UpdateDept" xml:space="preserve">
     <value>更新部门</value>
+  </data>
+  <data name="UpdateFinanceAccount" xml:space="preserve">
+    <value>更新财务账号</value>
   </data>
   <data name="UpdateOrder" xml:space="preserve">
     <value>更新订单</value>

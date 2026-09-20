@@ -120,7 +120,13 @@
   <data name="AssetUpdate" xml:space="preserve">
     <value>Update asset</value>
   </data>
+  <data name="Initialization" xml:space="preserve">
+    <value>Initialization</value>
+  </data>
   <data name="InsufficientStock" xml:space="preserve">
     <value>Insufficient Stock</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>Offset</value>
   </data>
 </root>

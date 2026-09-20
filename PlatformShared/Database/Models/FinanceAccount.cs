@@ -127,13 +127,25 @@ namespace PlatformShared.Database.Models
         /// Times
         /// 次数
         /// </summary>
-        public short? Times { get; set; }
+        public int? Times { get; set; }
+
+        /// <summary>
+        /// Product id
+        /// 产品编号
+        /// </summary>
+        public int? ProductId { get; set; }
 
         /// <summary>
         /// Owner
         /// 所有者
         /// </summary>
         public Person Person { get; set; } = default!;
+
+        /// <summary>
+        /// Product
+        /// 产品
+        /// </summary>
+        public Product? Product { get; set; }
 
         /// <summary>
         /// Transactions

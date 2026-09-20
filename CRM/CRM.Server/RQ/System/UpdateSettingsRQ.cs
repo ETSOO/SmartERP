@@ -64,6 +64,12 @@ namespace CRM.Server.RQ.System
         public byte? OrderDailyReportHour { get; init; }
 
         /// <summary>
+        /// Asset expiration notice
+        /// 资产到期通知
+        /// </summary>
+        public short? AssetExpirationNotice { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>

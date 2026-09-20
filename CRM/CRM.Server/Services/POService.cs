@@ -13,6 +13,7 @@ using CRM.Server.RQ.Product;
 using CRM.Server.RQ.Supplier;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
+using PlatformShared.CrmMessages.Order;
 using PlatformShared.CrmMessages.PO;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
@@ -436,6 +437,78 @@ namespace CRM.Server.Services
                 });
 
             return query;
+        }
+
+        /// <summary>
+        /// Delete
+        /// 删除
+        /// </summary>
+        /// <param name="id">Account id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.PO.Delete, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var po = await _db.POs(orgId).AsNoTracking()
+                .Where(o => o.Id == id)
+                .Select(o => new
+                {
+                    o.Title,
+                    HasAsset = o.OrderLines.Any(ol => ol.AssetId != null),
+                    HasProfile = o.Profiles.Any(),
+                    HasPayment = o.FinanceTransactions.Any()
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (po == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            if (po.HasAsset || po.HasProfile || po.HasPayment)
+            {
+                return ApplicationErrors.DeleteReferencedData.AsResult();
+            }
+
+            using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // Remove order lines
+                await _db.OrderLines.AsNoTracking()
+                    .Where(ol => ol.OrderId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                // Remove order
+                await _db.OrderHeaders.AsNoTracking()
+                    .Where(o => o.Id == id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
+
+            // Push message
+            var message = new DeletePOMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, po.Title)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeletePOMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>

@@ -68,8 +68,6 @@ export default function Assets() {
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
 
-  const defaultCurrency = app.system.getDefaultCurrency();
-
   const hasEdit = app.owns(Permissions.Org.Manage);
 
   // Page data hook
@@ -135,19 +133,6 @@ export default function Assets() {
           cellBoxStyle: GridDeletedCellBoxStyle
         },
         {
-          field: "amount",
-          type: GridDataType.IntMoney,
-          width: 120,
-          header: labels.balance,
-          renderProps: (_) => app.getMoneyFormatProps(defaultCurrency)
-        },
-        {
-          field: "times",
-          type: GridDataType.Int,
-          width: 100,
-          header: labels.times
-        },
-        {
           field: "expiry",
           type: GridDataType.Date,
           width: 116,
@@ -210,21 +195,6 @@ export default function Assets() {
               <Typography component="div" variant="caption">
                 {data.sn} - {data.product}
               </Typography>
-              {data.amount != null && (
-                <Typography variant="body2">
-                  {labels.balance}:{" "}
-                  {app.formatMoney(
-                    data.amount,
-                    undefined,
-                    app.getMoneyFormatProps(defaultCurrency)
-                  )}
-                </Typography>
-              )}
-              {data.times != null && (
-                <Typography variant="body2">
-                  {labels.times}: {app.formatNumber(data.times)}
-                </Typography>
-              )}
               <Typography variant="body2">
                 {labels.expiry}: {app.formatDate(data.expiry, "d")}
               </Typography>

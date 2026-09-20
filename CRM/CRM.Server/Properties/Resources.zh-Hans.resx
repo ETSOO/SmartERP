@@ -120,7 +120,13 @@
   <data name="AssetUpdate" xml:space="preserve">
     <value>更新资产</value>
   </data>
+  <data name="Initialization" xml:space="preserve">
+    <value>初始化</value>
+  </data>
   <data name="InsufficientStock" xml:space="preserve">
     <value>库存不足</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>冲减</value>
   </data>
 </root>

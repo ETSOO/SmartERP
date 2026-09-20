@@ -271,6 +271,12 @@ namespace PlatformShared.Database.Models
         public ICollection<ProductBom> BomParents { get; set; } = default!;
 
         /// <summary>
+        /// Finance accounts
+        /// 财务账号
+        /// </summary>
+        public ICollection<FinanceAccount> FinanceAccounts { get; set; } = default!;
+
+        /// <summary>
         /// Order lines
         /// 订单项目
         /// </summary>

@@ -70,11 +70,29 @@ namespace CRM.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Initialization.
+        /// </summary>
+        public static string Initialization {
+            get {
+                return ResourceManager.GetString("Initialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Insufficient Stock.
         /// </summary>
         public static string InsufficientStock {
             get {
                 return ResourceManager.GetString("InsufficientStock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Offset.
+        /// </summary>
+        public static string Offset {
+            get {
+                return ResourceManager.GetString("Offset", resourceCulture);
             }
         }
     }

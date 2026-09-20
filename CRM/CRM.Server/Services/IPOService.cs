@@ -9,6 +9,7 @@ namespace CRM.Server.Services
     {
         Task<(bool IsEdit, bool IsManage)> CheckEditPermissionsAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> CreateAsync(POCreateRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
         Task ListAsync(POListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<POQueryData[]> QueryAsync(POQueryRQ rq, CancellationToken cancellationToken = default);
         Task<POViewData?> ReadAsync(long id, CancellationToken cancellationToken = default);

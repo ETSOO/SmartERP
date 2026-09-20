@@ -7,6 +7,8 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using PlatformShared.Database;
+using WorkerCMS.Processors.FinanceAccount;
+using WorkerCMS.Processors.FinanceTransaction;
 using WorkerCMS.Processors.Order;
 using WorkerCMS.Processors.Org;
 using WorkerCMS.Processors.Person;
@@ -114,8 +116,17 @@ services.AddPooledDbContextFactory<LogDbContext>((provider, options) =>
 
 var consumerOptions = configuration.GetSection("RabbitMQConsumer").Get<LocalRabbitMQConsumerOptions>() ?? throw new Exception("RabbitMQ Consumer Options Not Found");
 
+// Finance account
+services.AddSingleton<IMessageQueueProcessor, BulkCreateFinanceAccountProcessor>();
+services.AddSingleton<IMessageQueueProcessor, CreateFinanceAccountProcessor>();
+services.AddSingleton<IMessageQueueProcessor, UpdateFinanceAccountProcessor>();
+
+// Finance transaction
+services.AddSingleton<IMessageQueueProcessor, ProcessFinanceTransactionProcessor>();
+
 // Order
 services.AddSingleton<IMessageQueueProcessor, CreateOrderProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeleteOrderProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadOrderProcessor>();
 services.AddSingleton<IMessageQueueProcessor, RecalculateOrderProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateOrderProcessor>();
@@ -138,6 +149,7 @@ services.AddSingleton<IMessageQueueProcessor, UpdateOrderPaymentProcessor>();
 
 // PO
 services.AddSingleton<IMessageQueueProcessor, CreatePOProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeletePOProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadPOProcessor>();
 services.AddSingleton<IMessageQueueProcessor, RecalculatePOProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdatePOProcessor>();
@@ -152,6 +164,7 @@ services.AddSingleton<IMessageQueueProcessor, UpdatePOLineProcessor>();
 
 // Org
 services.AddSingleton<IMessageQueueProcessor, CreateAssetProcessor>();
+services.AddSingleton<IMessageQueueProcessor, DeleteAssetProcessor>();
 services.AddSingleton<IMessageQueueProcessor, ReadAssetSensitiveDataProcessor>();
 services.AddSingleton<IMessageQueueProcessor, UpdateAssetProcessor>();
 

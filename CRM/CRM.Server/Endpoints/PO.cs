@@ -17,6 +17,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Create", (IPOService service, POCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create PO / 创建订单").WithTags("PO");
 
+            g.MapDelete("Delete/{id:long}", (IPOService service, long id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
+                .WithDescription("Delete PO / 删除采购").WithTags("PO");
+
             g.MapPost("List", (IPOService service, POListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get PO list / 获取订单列表").WithTags("PO");
 

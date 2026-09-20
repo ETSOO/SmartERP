@@ -65,10 +65,18 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Times)
                 .HasColumnName("times");
 
+            entity.Property(e => e.ProductId)
+                .HasColumnName("product_id");
+
             entity.HasOne(d => d.Person).WithMany(p => p.FinanceAccounts)
                 .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("finance_account_person_id_fkey");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.FinanceAccounts)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("finance_account_product_id_fkey");
         }
     }
 }

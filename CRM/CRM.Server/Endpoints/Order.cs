@@ -18,6 +18,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Create", (IOrderService service, OrderCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create order / 创建订单").WithTags("Order");
 
+            g.MapDelete("Delete/{id:long}", (IOrderService service, long id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
+                .WithDescription("Delete order / 删除订单").WithTags("Order");
+
             g.MapPost("DocumentAction", (IOrderService service, DocumentActionRQ rq, CancellationToken cancellationToken) => service.DocumentActionAsync(rq, cancellationToken))
                 .WithDescription("Get document action data / 获取文档操作签名数据").WithTags("Order");
 

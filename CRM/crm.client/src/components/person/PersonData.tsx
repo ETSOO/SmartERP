@@ -15,6 +15,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import ImageIcon from "@mui/icons-material/Image";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 import { Permissions, PersonViewData } from "@etsoo/smarterp-crm";
 import { app } from "../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
@@ -51,6 +52,7 @@ export function PersonData(props: PersonDataProps) {
 
   // Labels
   const labels = app.getLabels(
+    "accounts",
     "add",
     "addresses",
     "all",
@@ -314,6 +316,14 @@ export function PersonData(props: PersonDataProps) {
                     {labels.assets}
                   </ButtonLink>
                 )}
+                <ButtonLink
+                  href={`./../../../finance/accounts?personId=${item.id}`}
+                  size="small"
+                  variant="outlined"
+                  startIcon={<CreditCardIcon />}
+                >
+                  {labels.accounts}
+                </ButtonLink>
                 {editable && (
                   <ButtonLink
                     startIcon={<EditIcon />}

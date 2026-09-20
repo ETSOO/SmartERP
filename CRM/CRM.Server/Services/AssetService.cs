@@ -13,13 +13,13 @@ using CRM.Server.RQ.Asset;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Org;
+using PlatformShared.CrmMessages.Product;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
 using System.Text.Json;
 using System.Web;
-using BusinessProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
 {
@@ -229,6 +229,57 @@ namespace CRM.Server.Services
                     Sn = a.Sn,
                     Expiry = a.Expiry
                 }).ToJsonAsync(writer, cancellationToken: cancellationToken);
+        }
+
+        /// <summary>
+        /// Delete
+        /// 删除
+        /// </summary>
+        /// <param name="id">Account id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var hasOrderLine = await _db.OrderLines.AsNoTracking()
+                .Where(t => t.Order.CoreOrganizationId == orgId && t.AssetId == id)
+                .AnyAsync(cancellationToken);
+
+            if (hasOrderLine)
+            {
+                return ApplicationErrors.DeleteReferencedData.AsResult();
+            }
+
+            var asset = await _db.Assets(orgId).AsNoTracking()
+                .Where(a => a.Id == id)
+                .Select(a => new { a.Sn })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (asset == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Delete
+            await _db.Assets(orgId).AsNoTracking()
+                .Where(a => a.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeleteAssetMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, asset.Sn)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeleteAssetMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
         }
 
         /// <summary>

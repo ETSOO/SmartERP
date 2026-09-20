@@ -17,6 +17,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Create", (IAssetService service, AssetCreateRQ rq, CancellationToken cancellationToken) => service.CreateAsync(rq, cancellationToken))
                 .WithDescription("Create asset / 创建资产").WithTags("Asset");
 
+            g.MapDelete("Delete/{id:int}", (IAssetService service, int id, CancellationToken cancellationToken) => service.DeleteAsync(id, cancellationToken))
+                .WithDescription("Delete asset / 删除资产").WithTags("Asset");
+
             g.MapPost("List", (IAssetService service, AssetListRQ rq, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.ListAsync(rq, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Get asset list / 获取资产列表").WithTags("Asset");
 

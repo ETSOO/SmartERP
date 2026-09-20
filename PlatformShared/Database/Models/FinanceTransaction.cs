@@ -28,7 +28,13 @@
         /// Settlement
         /// 月结
         /// </summary>
-        Settlement = 9
+        Settlement = 9,
+
+        /// <summary>
+        /// Init
+        /// 初始化
+        /// </summary>
+        Init = 99
     }
 
     /// <summary>
@@ -102,6 +108,24 @@
         /// 创建时间
         /// </summary>
         public DateTimeOffset Creation { get; set; }
+
+        /// <summary>
+        /// Times
+        /// 次数
+        /// </summary>
+        public int? Times { get; set; }
+
+        /// <summary>
+        /// Inner reference id
+        /// 内部参考编号
+        /// </summary>
+        public Guid? InnerRef { get; set; }
+
+        /// <summary>
+        /// Offset id
+        /// 冲减编号
+        /// </summary>
+        public long? OffsetId { get; set; }
 
         /// <summary>
         /// Account

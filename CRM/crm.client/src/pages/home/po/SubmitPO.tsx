@@ -16,6 +16,7 @@ import { DateUtils, IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   FeatureTagKind,
   OrderKind,
+  Permissions,
   POCreateRQ,
   POLineRQ,
   POUpdateRQ,
@@ -66,6 +67,7 @@ export default function SubmitPO() {
   // Labels
   const labels = app.getLabels(
     "amount",
+    "deleteConfirm",
     "deliveryAddress",
     "deliveryInstruction",
     "description",
@@ -73,6 +75,7 @@ export default function SubmitPO() {
     "endDate",
     "items",
     "noChanges",
+    "po",
     "poLines",
     "poSource",
     "paymentInstruction",
@@ -286,6 +289,31 @@ export default function SubmitPO() {
   return (
     <EditPage
       isEditing={isEditing}
+      onDelete={
+        app.owns(Permissions.PO.Delete) &&
+        id &&
+        data.status === EntityStatus.Deleted
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.po),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
+
+                  const result = await app.poApi.delete(id);
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate(`./../../`);
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
       onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       paddings={0}

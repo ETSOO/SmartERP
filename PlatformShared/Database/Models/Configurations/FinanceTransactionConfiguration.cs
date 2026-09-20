@@ -45,6 +45,8 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+
+            entity.Property(e => e.Times).HasColumnName("times");
             
 
             entity.HasOne(d => d.Account).WithMany(p => p.Transactions)

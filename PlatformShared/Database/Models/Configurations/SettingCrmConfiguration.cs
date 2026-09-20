@@ -31,6 +31,7 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.TaxRate).HasColumnName("tax_rate");
             entity.Property(e => e.OrderMonthlyReportEnabled).HasColumnName("order_monthly_report_enabled");
             entity.Property(e => e.OrderDailyReportHour).HasColumnName("order_daily_report_hour");
+            entity.Property(e => e.AssetExpirationNotice).HasColumnName("asset_expiration_notice");
 
             entity.HasOne(d => d.Organization).WithOne(p => p.SettingCrm)
                 .HasForeignKey<SettingCrm>(d => d.Id)

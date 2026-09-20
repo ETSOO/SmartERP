@@ -27,8 +27,6 @@ export function AssetViewUI(props: AssetViewUIProps) {
     "view"
   );
 
-  const defaultCurrency = app.system.getDefaultCurrency();
-
   return (
     <ViewContainer
       data={data}
@@ -88,12 +86,6 @@ export function AssetViewUI(props: AssetViewUIProps) {
           label: "product",
           singleRow: "large"
         },
-        [
-          "amount",
-          GridDataType.Money,
-          app.getMoneyFormatProps(defaultCurrency)
-        ],
-        ["times", GridDataType.Number],
         ["expiry", GridDataType.DateTime],
         "expiryCheck",
         {

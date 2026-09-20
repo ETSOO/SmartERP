@@ -8,6 +8,7 @@ namespace CRM.Server.Services
     public interface IAssetService
     {
         Task<IActionResult> CreateAsync(AssetCreateRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task ListAsync(AssetListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
         Task<AssetQueryData[]> QueryAsync(AssetQueryRQ rq, CancellationToken cancellationToken = default);
         Task<AssetViewData?> ReadAsync(int id, CancellationToken cancellationToken = default);
