@@ -14,7 +14,7 @@ import { IdActionResult, Utils } from "@etsoo/shared";
 import { AssetCreateRQ, AssetUpdateRQ, Permissions } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
 import { StatusList } from "@etsoo/smarterp-core/components";
-import { EntityStatus, ProductUnit } from "@etsoo/appscript";
+import { EntityStatus } from "@etsoo/appscript";
 import {
   PersonList,
   ProductList,
@@ -39,7 +39,6 @@ export default function AddAsset() {
   // Labels
   const labels = app.getLabels(
     "asset",
-    "balance",
     "deleteConfirm",
     "description",
     "expiry",
@@ -48,23 +47,20 @@ export default function AddAsset() {
     "intervalMinutes",
     "noChanges",
     "noticeOwner",
-    "relatedTarget",
+    "owner",
     "sensitiveData",
-    "sn",
-    "times"
+    "sn"
   );
 
   // Input refs
   const refFields = [
-    "amount",
     "description",
     "expiry",
     "expiryCheck",
     "healthCheckUrl",
     "intervalMinutes",
     "sensitiveData",
-    "sn",
-    "times"
+    "sn"
   ] as const;
   const refs = useRefs(refFields);
 
@@ -185,7 +181,7 @@ export default function AddAsset() {
     >
       <Grid size={{ xs: 12, sm: 6 }}>
         <PersonList
-          label={labels.relatedTarget}
+          label={labels.owner}
           inputRequired
           idValue={formik.values.personId}
           inputOnChange={formik.handleChange}
@@ -196,20 +192,6 @@ export default function AddAsset() {
           inputRequired
           idValue={formik.values.productId}
           inputOnChange={formik.handleChange}
-          onValueChange={(value) => {
-            const amountInput = refs.amount.current;
-            const timesInput = refs.times.current;
-            if (amountInput == null || timesInput == null) return;
-
-            amountInput.disabled = true;
-            timesInput.disabled = true;
-
-            if (value?.baseUnit === ProductUnit.MONEY) {
-              amountInput.disabled = false;
-            } else if (value?.baseUnit === ProductUnit.TIME) {
-              timesInput.disabled = false;
-            }
-          }}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>

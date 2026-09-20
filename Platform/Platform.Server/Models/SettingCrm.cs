@@ -27,6 +27,8 @@ public partial class SettingCrm
 
     public bool? OrderMonthlyReportEnabled { get; set; }
 
+    public short? AssetExpirationNotice { get; set; }
+
     public virtual CoreOrganization IdNavigation { get; set; } = null!;
 
     public virtual Person Person { get; set; } = null!;

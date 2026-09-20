@@ -27,10 +27,10 @@ namespace PlatformShared.Database.Models
         Transfer = 2,
 
         /// <summary>
-        /// Cash and transfer account
-        /// 现金和转账账户
+        /// Super account
+        /// 超级账户
         /// </summary>
-        CashAndTransfer = 3,
+        Super = 3,
 
         /// <summary>
         /// Prepaid
@@ -134,6 +134,12 @@ namespace PlatformShared.Database.Models
         /// 产品编号
         /// </summary>
         public int? ProductId { get; set; }
+
+        /// <summary>
+        /// Refresh time
+        /// 刷新时间
+        /// </summary>
+        public DateTimeOffset? RefreshTime { get; set; }
 
         /// <summary>
         /// Owner

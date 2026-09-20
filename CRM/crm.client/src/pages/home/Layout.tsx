@@ -59,7 +59,9 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "accounts",
     "add",
+    "addAccount",
     "addContact",
     "addContactInfo",
     "addProfile",
@@ -80,6 +82,7 @@ export default function Home() {
     "editAvatar",
     "editLogo",
     "editProfile",
+    "finance",
     "history",
     "info",
     "inventory",
@@ -734,6 +737,29 @@ export default function Home() {
               },
               {
                 segment: "edit",
+                pattern: "edit/:id",
+                title: labels.edit,
+                hidden: true
+              }
+            ]
+          },
+          {
+            segment: "finance",
+            title: labels.finance,
+            hidden: true,
+            children: [
+              {
+                segment: "accounts",
+                title: labels.accounts,
+                hidden: true
+              },
+              {
+                segment: "addaccount",
+                title: labels.addAccount,
+                hidden: true
+              },
+              {
+                segment: "editaccount",
                 pattern: "edit/:id",
                 title: labels.edit,
                 hidden: true

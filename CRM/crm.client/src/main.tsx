@@ -858,6 +858,22 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/system/finance",
+            lazy: async () => {
+              const FinanceConsole =
+                await import("./pages/home/finance/FinanceConsole");
+              return { Component: FinanceConsole.default };
+            }
+          },
+          {
+            path: "/home/system/finance/addaccount",
+            lazy: async () => {
+              const AddAccount =
+                await import("./pages/home/finance/AddAccount");
+              return { Component: AddAccount.default };
+            }
+          },
+          {
             path: "/home/system/group",
             lazy: async () => {
               const AllGroups = await import("./pages/home/group/AllGroups");

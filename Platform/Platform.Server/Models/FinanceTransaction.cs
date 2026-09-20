@@ -9,6 +9,8 @@ public partial class FinanceTransaction
 {
     public long Id { get; set; }
 
+    public int CoreOrganizationId { get; set; }
+
     public short Kind { get; set; }
 
     public int AccountId { get; set; }
@@ -29,9 +31,17 @@ public partial class FinanceTransaction
 
     public DateTime Creation { get; set; }
 
+    public int? Times { get; set; }
+
+    public Guid? InnerRef { get; set; }
+
+    public long? OffsetId { get; set; }
+
     public virtual FinanceAccount Account { get; set; } = null!;
 
     public virtual Person Author { get; set; } = null!;
+
+    public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual OrderHeader? Order { get; set; }
 

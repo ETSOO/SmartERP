@@ -25,16 +25,20 @@ namespace Platform.Server.Models.Configurations
                 .HasPrecision(18, 2)
                 .HasColumnName("amount");
             entity.Property(e => e.AuthorId).HasColumnName("author_id");
+            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+            entity.Property(e => e.InnerRef).HasColumnName("inner_ref");
             entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.OffsetId).HasColumnName("offset_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.ReferenceId)
                 .HasMaxLength(30)
                 .HasColumnName("reference_id");
             entity.Property(e => e.TargetAccountId).HasColumnName("target_account_id");
             entity.Property(e => e.TargetPersonId).HasColumnName("target_person_id");
+            entity.Property(e => e.Times).HasColumnName("times");
             entity.Property(e => e.Title)
                 .HasMaxLength(256)
                 .HasColumnName("title");
@@ -48,6 +52,11 @@ namespace Platform.Server.Models.Configurations
                 .HasForeignKey(d => d.AuthorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("finance_transaction_author_id_fkey");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.FinanceTransactions)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("finance_transaction_core_organization_id_fkey");
 
             entity.HasOne(d => d.Order).WithMany(p => p.FinanceTransactions)
                 .HasForeignKey(d => d.OrderId)

@@ -276,7 +276,7 @@ namespace CRM.Server.Services
             {
                 PersonId = personId,
                 Kind = FinanceAccountKind.Cash,
-                Bank = "Cash",
+                Bank = "CASH",
                 Currency = currency,
                 AccountNumber = currency
             };
@@ -294,7 +294,10 @@ namespace CRM.Server.Services
                 {
                     if (rq.PersonId.HasValue)
                     {
-                        q = q.Where(a => a.PersonId == rq.PersonId);
+                        var personId = rq.PersonId.Value;
+                        if (personId == 0) personId = User.Pid;
+
+                        q = q.Where(a => a.PersonId == personId);
                     }
 
                     if (rq.Kind.HasValue)

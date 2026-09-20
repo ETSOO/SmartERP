@@ -15,6 +15,8 @@ namespace PlatformShared.Database.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
 
+            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+
             entity.Property(e => e.Kind)
                 .HasConversion<short>()
                 .HasColumnName("kind");

@@ -140,6 +140,18 @@ namespace PlatformShared.Extentions
         }
 
         /// <summary>
+        /// Query finance transactions
+        /// 查询财务交易
+        /// </summary>
+        /// <param name="db">Database context</param>
+        /// <param name="orgId">Organization id</param>
+        /// <returns>Result</returns>
+        public static IQueryable<FinanceTransaction> FinanceTransactions(this MyDbContext db, int orgId)
+        {
+            return db.FinanceTransactions.Where(p => p.CoreOrganizationId == orgId);
+        }
+
+        /// <summary>
         /// Query persons
         /// 查询人员
         /// </summary>

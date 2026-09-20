@@ -299,6 +299,7 @@ services.AddScoped<IAssetService, AssetService>();
 services.AddScoped<ICustomerService, CustomerService>();
 services.AddScoped<IDeptService, DeptService>();
 services.AddScoped<IFinanceAccountService, FinanceAccountService>();
+services.AddScoped<IFinanceTransactionService, FinanceTransactionService>();
 services.AddScoped<IGroupService, GroupService>();
 services.AddScoped<IOrderDeliveryService, OrderDeliveryService>();
 services.AddScoped<IOrderPaymentService, OrderPaymentService>();
@@ -389,6 +390,7 @@ api.MapAuth()
     .MapCustomer()
     .MapDept()
     .MapFinanceAccount()
+    .MapFinanceTransaction()
     .MapGroup()
     .MapOrderDelivery()
     .MapOrderPayment()

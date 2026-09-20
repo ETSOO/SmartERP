@@ -20,6 +20,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
+            entity.Property(e => e.AssetExpirationNotice).HasColumnName("asset_expiration_notice");
             entity.Property(e => e.Cultures)
                 .HasColumnType("character varying(10)[]")
                 .HasColumnName("cultures");

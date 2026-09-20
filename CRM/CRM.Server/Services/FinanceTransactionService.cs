@@ -18,7 +18,7 @@ namespace CRM.Server.Services
     /// Finance transaction service
     /// 财务交易服务
     /// </summary>
-    public class FinanceTransactionService : MyUserService
+    public class FinanceTransactionService : MyUserService, IFinanceTransactionService
     {
         readonly MyDbContext _db;
         readonly ICommonService _commonService;
@@ -41,13 +41,13 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Init
-        /// 初始化
+        /// Adjust account
+        /// 调整账户
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        public async Task<IActionResult> InitAsync(FinanceTransactionInitRQ rq, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> AdjustAsync(FinanceTransactionAdjustRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Manage, cancellationToken))
@@ -61,7 +61,7 @@ namespace CRM.Server.Services
             var accountId = rq.AccountId;
             var account = await _db.FinanceAccounts.AsNoTracking()
                 .Where(a => a.Id == accountId && a.Person.OrgId == orgId && a.Status < EntityStatus.Inactivated)
-                .Select(a => new { a.PersonId, a.Kind, a.Balance })
+                .Select(a => new { a.PersonId, a.Kind, a.Balance, a.RefreshTime })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (account == null)
@@ -77,21 +77,20 @@ namespace CRM.Server.Services
 
             var amount = rq.Amount;
 
-            var title = Properties.Resources.Initialization;
-            if (!string.IsNullOrEmpty(rq.Description))
-            {
-                title += $" - {rq.Description}";
-            }
+            var transKind = account.RefreshTime.HasValue ? FinanceTransactionKind.Adjustment : FinanceTransactionKind.Init;
+
+            var action = transKind == FinanceTransactionKind.Init ? Properties.Resources.Initialization : Properties.Resources.Adjustment;
+            var title = $"{action} - {rq.Description}";
 
             var item = new FinanceTransaction
             {
-                Kind = FinanceTransactionKind.Init,
+                Kind = transKind,
                 AccountId = accountId,
                 Title = title,
                 Amount = amount
             };
 
-            var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionInitRQ);
+            var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionAdjustRQ);
 
             return await ProcessAsync(account.PersonId, item, jsonData, cancellationToken);
         }
@@ -115,10 +114,11 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             // Item
-            var item = await _db.FinanceTransactions.AsNoTracking()
-                .Where(t => t.Id == id && t.OffsetId == null && t.Account.Person.OrgId == orgId)
+            var item = await _db.FinanceTransactions(orgId).AsNoTracking()
+                .Where(t => t.Id == id && t.OffsetId == null)
                 .Select(t => new
                 {
+                    t.CoreOrganizationId,
                     t.Account.PersonId,
                     t.Kind,
                     t.AccountId,
@@ -141,6 +141,7 @@ namespace CRM.Server.Services
 
             var newItem = new FinanceTransaction
             {
+                CoreOrganizationId = item.CoreOrganizationId,
                 Kind = item.Kind,
                 AccountId = item.AccountId,
                 Title = title,
@@ -206,6 +207,11 @@ namespace CRM.Server.Services
                 item.AuthorId = User.Oid;
             }
 
+            if (item.CoreOrganizationId == 0)
+            {
+                item.CoreOrganizationId = User.OrganizationInt;
+            }
+
             if (item.TargetAccountId.HasValue && item.InnerRef == null)
             {
                 item.InnerRef = Guid.NewGuid();
@@ -227,6 +233,7 @@ namespace CRM.Server.Services
                     .Where(a => a.Id == accountId)
                     .ExecuteUpdateAsync(
                         a => a.SetProperty(a => a.Balance, a => a.Balance + amount)
+                            .SetProperty(a => a.RefreshTime, a => DateTimeOffset.UtcNow)
                             .SetProperty(
                                 a => a.Times,
                                 a => times == 0 ? a.Times : a.Times.GetValueOrDefault() + times
@@ -271,6 +278,7 @@ namespace CRM.Server.Services
                         .Where(a => a.Id == targetAccountId)
                         .ExecuteUpdateAsync(
                             a => a.SetProperty(a => a.Balance, a => a.Balance - amount)
+                                 .SetProperty(a => a.RefreshTime, a => DateTimeOffset.UtcNow)
                                  .SetProperty(
                                     a => a.Times,
                                     a => times == 0 ? a.Times : a.Times.GetValueOrDefault() - times

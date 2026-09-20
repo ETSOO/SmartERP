@@ -69,7 +69,7 @@ export function AssetViewUI(props: AssetViewUIProps) {
               {item.personName}
             </LinkEx>
           ),
-          label: "relatedTarget",
+          label: "owner",
           singleRow: "large"
         },
         {

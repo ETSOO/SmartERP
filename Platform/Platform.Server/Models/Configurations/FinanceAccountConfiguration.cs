@@ -40,16 +40,24 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Description)
                 .HasMaxLength(128)
                 .HasColumnName("description");
+            entity.Property(e => e.Expiry).HasColumnName("expiry");
+            entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Swift)
                 .HasMaxLength(256)
                 .HasColumnName("swift");
+            entity.Property(e => e.Times).HasColumnName("times");
 
             entity.HasOne(d => d.Person).WithMany(p => p.FinanceAccounts)
                 .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("finance_account_person_id_fkey");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.FinanceAccounts)
+                .HasForeignKey(d => d.ProductId)
+                .HasConstraintName("finance_account_product_id_fkey");
 
             OnConfigurePartial(entity);
         }

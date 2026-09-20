@@ -61,6 +61,15 @@ namespace CRM.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Adjustment.
+        /// </summary>
+        public static string Adjustment {
+            get {
+                return ResourceManager.GetString("Adjustment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update asset.
         /// </summary>
         public static string AssetUpdate {

@@ -68,6 +68,9 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id");
 
+            entity.Property(e => e.RefreshTime)
+                .HasColumnName("refresh_time");
+
             entity.HasOne(d => d.Person).WithMany(p => p.FinanceAccounts)
                 .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

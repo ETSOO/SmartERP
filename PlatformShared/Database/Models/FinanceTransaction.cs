@@ -31,6 +31,12 @@
         Settlement = 9,
 
         /// <summary>
+        /// Adjustment
+        /// 手工调整
+        /// </summary>
+        Adjustment = 77,
+
+        /// <summary>
         /// Init
         /// 初始化
         /// </summary>
@@ -48,6 +54,12 @@
         /// 编号
         /// </summary>
         public long Id { get; set; }
+
+        /// <summary>
+        /// Core organization id
+        /// 核心机构编号
+        /// </summary>
+        public int CoreOrganizationId { get; set; }
 
         /// <summary>
         /// Kind

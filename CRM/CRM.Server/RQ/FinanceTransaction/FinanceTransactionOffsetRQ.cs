@@ -1,5 +1,9 @@
 ﻿namespace CRM.Server.RQ.FinanceTransaction
 {
+    /// <summary>
+    /// Finance transaction offset request data
+    /// 财务交易冲销请求数据
+    /// </summary>
     public record FinanceTransactionOffsetRQ
     {
         /// <summary>

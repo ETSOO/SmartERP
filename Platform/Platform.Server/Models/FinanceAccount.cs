@@ -11,6 +11,8 @@ public partial class FinanceAccount
 
     public long PersonId { get; set; }
 
+    public short Kind { get; set; }
+
     public string Bank { get; set; } = null!;
 
     public string Currency { get; set; } = null!;
@@ -27,9 +29,17 @@ public partial class FinanceAccount
 
     public DateTime Creation { get; set; }
 
+    public DateTime? Expiry { get; set; }
+
+    public int? Times { get; set; }
+
+    public int? ProductId { get; set; }
+
     public virtual ICollection<FinanceTransaction> FinanceTransactionAccounts { get; set; } = new List<FinanceTransaction>();
 
     public virtual ICollection<FinanceTransaction> FinanceTransactionTargetAccounts { get; set; } = new List<FinanceTransaction>();
 
     public virtual Person Person { get; set; } = null!;
+
+    public virtual Product? Product { get; set; }
 }

@@ -53,8 +53,8 @@ export default function Assets() {
     "edit",
     "expiry",
     "keywords",
+    "owner",
     "product",
-    "relatedTarget",
     "sn",
     "supplier",
     "times",
@@ -104,7 +104,7 @@ export default function Assets() {
         />,
         <ProductList search idValue={data.productId} />,
         <PersonList
-          label={labels.relatedTarget}
+          label={labels.owner}
           name="personId"
           search
           idValue={data.personId ?? personId}
@@ -121,7 +121,7 @@ export default function Assets() {
       columns={[
         {
           field: "owner",
-          header: labels.relatedTarget
+          header: labels.owner
         },
         {
           field: "product",
