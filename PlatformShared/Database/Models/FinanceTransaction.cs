@@ -122,12 +122,6 @@
         public DateTimeOffset Creation { get; set; }
 
         /// <summary>
-        /// Times
-        /// 次数
-        /// </summary>
-        public int? Times { get; set; }
-
-        /// <summary>
         /// Inner reference id
         /// 内部参考编号
         /// </summary>

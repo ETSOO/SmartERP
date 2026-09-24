@@ -48,8 +48,6 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
 
-            entity.Property(e => e.Times).HasColumnName("times");
-            
 
             entity.HasOne(d => d.Account).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.AccountId)

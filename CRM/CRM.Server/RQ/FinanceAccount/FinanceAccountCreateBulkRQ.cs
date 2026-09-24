@@ -61,16 +61,10 @@ namespace CRM.Server.RQ.FinanceAccount
         public required int Count { get; init; }
 
         /// <summary>
-        /// Amount, ignore when equal to 0
-        /// 金额，等于 0 时忽略
+        /// Balance, ignore when equal to 0
+        /// 余额，等于 0 时忽略
         /// </summary>
-        public required decimal Amount { get; init; }
-
-        /// <summary>
-        /// Times
-        /// 次数
-        /// </summary>
-        public int? Times { get; init; }
+        public required decimal Balance { get; init; }
 
         /// <summary>
         /// Product id
@@ -107,10 +101,6 @@ namespace CRM.Server.RQ.FinanceAccount
                 {
                     return ApplicationErrors.NoValidData.AsResult(nameof(ProductId));
                 }
-                else if (!Times.HasValue)
-                {
-                    return ApplicationErrors.NoValidData.AsResult(nameof(Times));
-                }
             }
 
             if (Length < 4)
@@ -131,11 +121,6 @@ namespace CRM.Server.RQ.FinanceAccount
             if (Count < 2 || Count > 5000)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Count));
-            }
-
-            if (Times.HasValue && (Times.Value < 0 || Amount <= 0))
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Times));
             }
 
             if (Description != null && Description.Length is not (>= 1 and <= 128))

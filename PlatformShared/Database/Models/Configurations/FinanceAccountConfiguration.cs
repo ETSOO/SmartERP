@@ -62,9 +62,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.Property(e => e.Expiry)
                 .HasColumnName("expiry");
 
-            entity.Property(e => e.Times)
-                .HasColumnName("times");
-
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id");
 

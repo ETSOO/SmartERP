@@ -5,7 +5,11 @@ import {
   IconButtonLink,
   ResponsibleContainer
 } from "@etsoo/materialui";
-import { FinanceAccountQueryData, Permissions } from "@etsoo/smarterp-crm";
+import {
+  FinanceAccountKind,
+  FinanceAccountQueryData,
+  Permissions
+} from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
@@ -13,10 +17,12 @@ import AddIcon from "@mui/icons-material/Add";
 import MoneyIcon from "@mui/icons-material/Money";
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
-import { GridCellRendererProps } from "@etsoo/react";
+import { GridCellRendererProps, NotificationMessageType } from "@etsoo/react";
 import React from "react";
+import IconButton from "@mui/material/IconButton";
 
 export default function FinanceConsole() {
   // Labels
@@ -28,6 +34,8 @@ export default function FinanceConsole() {
     "allAccounts",
     "bank",
     "bulkCreateAccounts",
+    "completeTip",
+    "copyPaymentInfo",
     "currency",
     "edit",
     "type",
@@ -68,7 +76,7 @@ export default function FinanceConsole() {
             width: 200
           },
           {
-            width: DefaultUI.Widths.icon2,
+            width: DefaultUI.Widths.icon3,
             header: labels.actions,
             cellBoxStyle: {
               paddingTop: "6px!important",
@@ -81,10 +89,27 @@ export default function FinanceConsole() {
 
               return (
                 <React.Fragment>
+                  {(data.kind === FinanceAccountKind.Super ||
+                    data.kind === FinanceAccountKind.Transfer) && (
+                    <IconButton
+                      title={labels.copyPaymentInfo}
+                      onClick={() => {
+                        navigator.clipboard?.writeText(
+                          `${app.userData?.organizationName}\n${data.bank}\n${data.accountNumber}`
+                        );
+                        app.notifier.message(
+                          NotificationMessageType.Success,
+                          labels.completeTip.format(labels.copyPaymentInfo)
+                        );
+                      }}
+                    >
+                      <ContentCopyIcon />
+                    </IconButton>
+                  )}
                   {app.owns(Permissions.Finance.Edit) && (
                     <IconButtonLink
                       title={labels.edit}
-                      href={`./edit/${data.id}`}
+                      href={`./editaccount/${data.id}`}
                     >
                       <EditIcon />
                     </IconButtonLink>
@@ -92,7 +117,7 @@ export default function FinanceConsole() {
                   {app.owns(Permissions.Finance.View) && (
                     <IconButtonLink
                       title={labels.view}
-                      href={`./../../contact/view/${data.id}`}
+                      href={`./viewaccount/${data.id}`}
                     >
                       <ArticleIcon />
                     </IconButtonLink>

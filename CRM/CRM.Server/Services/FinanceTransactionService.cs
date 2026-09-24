@@ -127,8 +127,7 @@ namespace CRM.Server.Services
                     t.OrderId,
                     t.ReferenceId,
                     t.TargetPersonId,
-                    t.TargetAccountId,
-                    t.Times
+                    t.TargetAccountId
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -150,8 +149,7 @@ namespace CRM.Server.Services
                 ReferenceId = item.ReferenceId,
                 TargetPersonId = item.TargetPersonId,
                 TargetAccountId = item.TargetAccountId,
-                AuthorId = User.Oid,
-                Times = -item.Times,
+                AuthorId = User.Oid
             };
 
             var personId = item.PersonId;
@@ -227,18 +225,13 @@ namespace CRM.Server.Services
                 // Account
                 var accountId = item.AccountId;
                 var amount = item.Amount;
-                var times = item.Times.GetValueOrDefault();
 
                 await _db.FinanceAccounts
                     .Where(a => a.Id == accountId)
                     .ExecuteUpdateAsync(
                         a => a.SetProperty(a => a.Balance, a => a.Balance + amount)
                             .SetProperty(a => a.RefreshTime, a => DateTimeOffset.UtcNow)
-                            .SetProperty(
-                                a => a.Times,
-                                a => times == 0 ? a.Times : a.Times.GetValueOrDefault() + times
-                            ),
-                        cancellationToken
+                        , cancellationToken
                     );
 
                 // Order
@@ -279,11 +272,7 @@ namespace CRM.Server.Services
                         .ExecuteUpdateAsync(
                             a => a.SetProperty(a => a.Balance, a => a.Balance - amount)
                                  .SetProperty(a => a.RefreshTime, a => DateTimeOffset.UtcNow)
-                                 .SetProperty(
-                                    a => a.Times,
-                                    a => times == 0 ? a.Times : a.Times.GetValueOrDefault() - times
-                                 ),
-                            cancellationToken
+                            , cancellationToken
                         );
                 }
 

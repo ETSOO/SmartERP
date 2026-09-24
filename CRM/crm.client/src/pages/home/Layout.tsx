@@ -760,7 +760,7 @@ export default function Home() {
               },
               {
                 segment: "editaccount",
-                pattern: "edit/:id",
+                pattern: "editaccount/:id",
                 title: labels.edit,
                 hidden: true
               }

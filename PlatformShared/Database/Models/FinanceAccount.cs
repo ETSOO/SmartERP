@@ -124,12 +124,6 @@ namespace PlatformShared.Database.Models
         public DateTimeOffset? Expiry { get; set; }
 
         /// <summary>
-        /// Times
-        /// 次数
-        /// </summary>
-        public int? Times { get; set; }
-
-        /// <summary>
         /// Product id
         /// 产品编号
         /// </summary>

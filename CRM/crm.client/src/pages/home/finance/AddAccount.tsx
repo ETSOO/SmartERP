@@ -36,6 +36,9 @@ export default function AddAccount() {
 
   const { personId = 0 } = useSearchParamsEx({ personId: "number" });
 
+  // Org person id
+  const orgPersonId = app.userData?.system?.personId;
+
   const isEditing = id > 0;
 
   // Labels
@@ -78,14 +81,18 @@ export default function AddAccount() {
     enableReinitialize: true,
     validateOnChange: false,
     onSubmit: async (v) => {
-      ReactUtils.updateRefValues(refs, v);
+      const c = { ...v };
+      ReactUtils.updateRefValues(refs, c);
+
+      // Is own
+      const isOwn = v.personId === orgPersonId;
 
       // Submit
       let result: IdActionResult | undefined;
       let redirectUrl: string;
       if (id > 0) {
         const rq: FinanceAccountUpdateRQ = {
-          ...v,
+          ...c,
           id
         };
 
@@ -102,7 +109,7 @@ export default function AddAccount() {
         result = await app.financeAccountApi.update(rq);
       } else {
         const rq: FinanceAccountCreateRQ = {
-          ...v
+          ...c
         };
 
         Utils.removeEmptyValues(rq);
@@ -115,6 +122,8 @@ export default function AddAccount() {
       if (result == null) return;
 
       if (result.ok) {
+        if (!isOwn) redirectUrl += "/accounts";
+
         navigate(redirectUrl);
         return;
       }
@@ -143,10 +152,20 @@ export default function AddAccount() {
       paddings={0}
     >
       <Grid size={{ xs: 6, sm: 3 }}>
-        <AccountKindList value={formik.values.kind} fullWidth required />
+        <AccountKindList
+          value={formik.values.kind}
+          fullWidth
+          required
+          onChange={formik.handleChange}
+        />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
-        <CurrencyList value={formik.values.currency} fullWidth required />
+        <CurrencyList
+          value={formik.values.currency}
+          fullWidth
+          required
+          onChange={formik.handleChange}
+        />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
         <PersonList

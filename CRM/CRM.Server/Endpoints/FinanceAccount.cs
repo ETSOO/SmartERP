@@ -1,4 +1,5 @@
-﻿using CRM.Server.RQ.FinanceAccount;
+﻿using com.etsoo.WebUtils;
+using CRM.Server.RQ.FinanceAccount;
 using CRM.Server.Services;
 
 namespace CRM.Server.Endpoints
@@ -33,6 +34,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPut("Update", (IFinanceAccountService service, FinanceAccountUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update finance account / 更新财务账户").WithTags("FinanceAccount");
+
+            g.MapGet("UpdateRead/{id:int}", (IFinanceAccountService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
+                .WithDescription("Read finance account data for update / 读取用于更新的财务账户数据").WithTags("FinanceAccount");
 
             return builder;
         }

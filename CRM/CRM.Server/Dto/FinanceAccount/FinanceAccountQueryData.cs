@@ -58,12 +58,6 @@ namespace CRM.Server.Dto.FinanceAccount
         public string? Description { get; init; }
 
         /// <summary>
-        /// Times
-        /// 次数
-        /// </summary>
-        public int? Times { get; init; }
-
-        /// <summary>
         /// Status
         /// 状态
         /// </summary>

@@ -874,6 +874,14 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/system/finance/editaccount/:id",
+            lazy: async () => {
+              const AddAccount =
+                await import("./pages/home/finance/AddAccount");
+              return { Component: AddAccount.default };
+            }
+          },
+          {
             path: "/home/system/group",
             lazy: async () => {
               const AllGroups = await import("./pages/home/group/AllGroups");

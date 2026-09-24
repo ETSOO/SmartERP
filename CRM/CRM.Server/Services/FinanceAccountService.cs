@@ -165,6 +165,9 @@ namespace CRM.Server.Services
                 personId = orgPersonId;
             }
 
+            var balance = rq.Balance;
+            var hasBalance = balance != 0;
+
             var productId = rq.ProductId;
             if (productId.HasValue)
             {
@@ -179,11 +182,6 @@ namespace CRM.Server.Services
             var currency = rq.Currency;
             var bank = rq.Bank;
             var description = rq.Description;
-
-            var amount = rq.Amount;
-            var hasAmount = amount != 0;
-
-            var times = rq.Times;
 
             var title = Properties.Resources.Initialization;
 
@@ -203,8 +201,7 @@ namespace CRM.Server.Services
                         Currency = currency,
                         AccountNumber = accountNo,
                         Description = description,
-                        Balance = amount,
-                        Times = times,
+                        Balance = balance,
                         ProductId = productId
                     };
                 })
@@ -216,12 +213,12 @@ namespace CRM.Server.Services
                 var bulkConfig = new BulkConfig
                 {
                     PropertiesToIncludeOnUpdate = [],
-                    SetOutputIdentity = hasAmount
+                    SetOutputIdentity = hasBalance
                 };
 
                 await _db.BulkInsertOrUpdateAsync(accounts, bulkConfig, cancellationToken: cancellationToken);
 
-                if (hasAmount)
+                if (hasBalance)
                 {
                     var transactions = accounts.Where(a => a.Id > 0).Select(a => new FinanceTransaction
                     {
@@ -229,8 +226,7 @@ namespace CRM.Server.Services
                         AccountId = a.Id,
                         Title = title,
                         Amount = a.Balance,
-                        AuthorId = User.Oid,
-                        Times = a.Times
+                        AuthorId = User.Oid
                     }).ToList();
 
                     await _db.BulkInsertAsync(transactions, cancellationToken: cancellationToken);
@@ -422,12 +418,12 @@ namespace CRM.Server.Services
             {
                 if (rq.TimesStart.HasValue)
                 {
-                    q = q.Where(a => a.Times >= rq.TimesStart.Value);
+                    q = q.Where(a => a.Kind == FinanceAccountKind.Pass && a.Balance >= rq.TimesStart.Value);
                 }
 
                 if (rq.TimesEnd.HasValue)
                 {
-                    q = q.Where(a => a.Times < rq.TimesEnd.Value);
+                    q = q.Where(a => a.Kind == FinanceAccountKind.Pass && a.Balance < rq.TimesEnd.Value);
                 }
 
                 return q;
@@ -442,7 +438,6 @@ namespace CRM.Server.Services
                 Currency = a.Currency,
                 AccountNumber = a.AccountNumber,
                 Description = a.Description,
-                Times = a.Times,
                 Status = a.Status,
                 Expiry = a.Expiry
             }).ToArrayAsync(cancellationToken);
@@ -534,7 +529,7 @@ namespace CRM.Server.Services
                 account.Expiry = rq.Expiry;
             }
 
-            if (rq.IsModified(nameof(rq.ProductId)) && account.Times == null)
+            if (rq.IsModified(nameof(rq.ProductId)))
             {
                 var productId = rq.ProductId;
 
