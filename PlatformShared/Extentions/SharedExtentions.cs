@@ -148,7 +148,7 @@ namespace PlatformShared.Extentions
         /// <returns>Result</returns>
         public static IQueryable<FinanceTransaction> FinanceTransactions(this MyDbContext db, int orgId)
         {
-            return db.FinanceTransactions.Where(p => p.CoreOrganizationId == orgId);
+            return db.FinanceTransactions.Where(p => p.Account.CoreOrganizationId == orgId);
         }
 
         /// <summary>

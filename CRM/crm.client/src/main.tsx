@@ -874,11 +874,35 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/system/finance/bulkcreateaccounts",
+            lazy: async () => {
+              const BulkCreateAccounts =
+                await import("./pages/home/finance/BulkCreateAccounts");
+              return { Component: BulkCreateAccounts.default };
+            }
+          },
+          {
             path: "/home/system/finance/editaccount/:id",
             lazy: async () => {
               const AddAccount =
                 await import("./pages/home/finance/AddAccount");
               return { Component: AddAccount.default };
+            }
+          },
+          {
+            path: "/home/system/finance/accounts",
+            lazy: async () => {
+              const AllAccounts =
+                await import("./pages/home/finance/AllAccounts");
+              return { Component: AllAccounts.default };
+            }
+          },
+          {
+            path: "/home/system/finance/viewaccount/:id",
+            lazy: async () => {
+              const ViewAccount =
+                await import("./pages/home/finance/ViewAccount");
+              return { Component: ViewAccount.default };
             }
           },
           {

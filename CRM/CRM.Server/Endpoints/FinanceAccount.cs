@@ -32,6 +32,9 @@ namespace CRM.Server.Endpoints
             g.MapPost("Query", (IFinanceAccountService service, FinanceAccountQueryRQ rq, CancellationToken cancellationToken) => service.QueryAsync(rq, cancellationToken))
                 .WithDescription("Query finance accounts / 查询财务账户").WithTags("FinanceAccount");
 
+            g.MapGet("Read/{id:int}", (IFinanceAccountService service, int id, CancellationToken cancellationToken) => service.ReadAsync(id, cancellationToken))
+                .WithDescription("Read finance account / 读取财务账户").WithTags("FinanceAccount");
+
             g.MapPut("Update", (IFinanceAccountService service, FinanceAccountUpdateRQ rq, CancellationToken cancellationToken) => service.UpdateAsync(rq, cancellationToken))
                 .WithDescription("Update finance account / 更新财务账户").WithTags("FinanceAccount");
 

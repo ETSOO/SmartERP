@@ -17,6 +17,8 @@ namespace Platform.Server.Models.Configurations
 
             entity.ToTable("finance_account");
 
+            entity.HasIndex(e => new { e.CoreOrganizationId, e.Kind, e.Currency, e.AccountNumber }, "finance_account_core_organization_id_kind_currency_account__key").IsUnique();
+
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(1001L, null, null, null, null, null)
@@ -30,6 +32,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Bank)
                 .HasMaxLength(128)
                 .HasColumnName("bank");
+            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -44,11 +47,16 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.RefreshTime).HasColumnName("refresh_time");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Swift)
                 .HasMaxLength(256)
                 .HasColumnName("swift");
-            entity.Property(e => e.Times).HasColumnName("times");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.FinanceAccounts)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("finance_account_core_organization_id_fkey");
 
             entity.HasOne(d => d.Person).WithMany(p => p.FinanceAccounts)
                 .HasForeignKey(d => d.PersonId)

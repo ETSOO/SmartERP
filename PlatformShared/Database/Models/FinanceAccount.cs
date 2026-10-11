@@ -64,6 +64,12 @@ namespace PlatformShared.Database.Models
         public long PersonId { get; set; }
 
         /// <summary>
+        /// Core organization id
+        /// 核心机构编号
+        /// </summary>
+        public int CoreOrganizationId { get; set; }
+
+        /// <summary>
         /// Kind
         /// 类型
         /// </summary>
@@ -134,6 +140,12 @@ namespace PlatformShared.Database.Models
         /// 刷新时间
         /// </summary>
         public DateTimeOffset? RefreshTime { get; set; }
+
+        /// <summary>
+        /// Core organization
+        /// 核心机构
+        /// </summary>
+        public CoreOrganization CoreOrganization { get; set; } = default!;
 
         /// <summary>
         /// Owner

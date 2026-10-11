@@ -9,6 +9,8 @@ public partial class FinanceAccount
 {
     public int Id { get; set; }
 
+    public int CoreOrganizationId { get; set; }
+
     public long PersonId { get; set; }
 
     public short Kind { get; set; }
@@ -31,9 +33,11 @@ public partial class FinanceAccount
 
     public DateTime? Expiry { get; set; }
 
-    public int? Times { get; set; }
-
     public int? ProductId { get; set; }
+
+    public DateTime? RefreshTime { get; set; }
+
+    public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual ICollection<FinanceTransaction> FinanceTransactionAccounts { get; set; } = new List<FinanceTransaction>();
 

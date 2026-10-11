@@ -135,6 +135,12 @@ namespace PlatformShared.Database.Models
         public ICollection<CoreDocument> Documents { get; } = default!;
 
         /// <summary>
+        /// Finance accounts
+        /// 财务账号
+        /// </summary>
+        public ICollection<FinanceAccount> FinanceAccounts { get; } = default!;
+
+        /// <summary>
         /// Core organization orders
         /// 核心机构订单
         /// </summary>

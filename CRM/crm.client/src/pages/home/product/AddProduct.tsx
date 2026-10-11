@@ -228,7 +228,9 @@ export default function AddProduct() {
     <EditPage
       isEditing={isEditing}
       onDelete={
-        app.owns(Permissions.Product.Delete) && id
+        app.owns(Permissions.Product.Delete) &&
+        id &&
+        data.status === EntityStatus.Deleted
           ? () => {
               app.notifier.confirm(
                 labels.deleteConfirm.format(labels.product),

@@ -1,4 +1,5 @@
 ﻿using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Business;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
 using com.etsoo.WebUtils.Attributes;
@@ -79,6 +80,18 @@ namespace CRM.Server.RQ.FinanceAccount
         public string? Description { get; init; }
 
         /// <summary>
+        /// Status
+        /// 状态
+        /// </summary>
+        public EntityStatus? Status { get; init; }
+
+        /// <summary>
+        /// Expiry
+        /// 过期时间
+        /// </summary>
+        public DateTimeOffset? Expiry { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -103,24 +116,23 @@ namespace CRM.Server.RQ.FinanceAccount
                 }
             }
 
-            if (Length < 4)
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Length));
-            }
-
-            if (Prefix.Length + 1 >= Length)
-            {
-                return ApplicationErrors.NoValidData.AsResult(nameof(Prefix));
-            }
-
-            if (StartNumber < 1)
+            if (StartNumber < 0)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(StartNumber));
+            }
+            else if (StartNumber == 0 && Prefix.Length > 8)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Prefix));
             }
 
             if (Count < 2 || Count > 5000)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Count));
+            }
+
+            if (Length < 4 || Length > 40 || Length < Prefix.Length + StartNumber.ToString().Length + Math.Floor(Math.Log10(Count)))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Length));
             }
 
             if (Description != null && Description.Length is not (>= 1 and <= 128))

@@ -23,6 +23,12 @@ namespace CRM.Server.RQ.FinanceAccount
         public FinanceAccountKind? Kind { get; init; }
 
         /// <summary>
+        /// Kinds
+        /// 类型列表
+        /// </summary>
+        public IEnumerable<FinanceAccountKind>? Kinds { get; init; }
+
+        /// <summary>
         /// Currency
         /// 币种
         /// </summary>

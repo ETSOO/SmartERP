@@ -13,6 +13,7 @@ namespace CRM.Server.Services
         Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task<FinanceAccountListData[]?> ListAsync(FinanceAccountListRQ rq, CancellationToken cancellationToken = default);
         Task<FinanceAccountQueryData[]?> QueryAsync(FinanceAccountQueryRQ rq, CancellationToken cancellationToken = default);
+        Task<FinanceAccountViewData?> ReadAsync(int id, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(FinanceAccountUpdateRQ rq, CancellationToken cancellationToken = default);
         Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
     }

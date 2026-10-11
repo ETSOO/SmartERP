@@ -152,8 +152,8 @@ export default function AddAsset() {
       isEditing={isEditing}
       onDelete={
         app.owns(Permissions.Org.Manage) &&
-        id &&
-        data.status === EntityStatus.Deleted
+        data.status === EntityStatus.Deleted &&
+        id
           ? () => {
               app.notifier.confirm(
                 labels.deleteConfirm.format(labels.asset),
@@ -205,7 +205,9 @@ export default function AddAsset() {
           fullWidth
           required
           name="sn"
-          slotProps={{ htmlInput: { maxLength: 256 } }}
+          slotProps={{
+            htmlInput: { maxLength: 256, style: { textTransform: "uppercase" } }
+          }}
           label={labels.sn}
           inputRef={refs.sn}
         />

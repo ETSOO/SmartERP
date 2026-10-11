@@ -3,7 +3,8 @@ import {
   CommonPage,
   HBox,
   IconButtonLink,
-  ResponsibleContainer
+  ResponsibleContainer,
+  VBox
 } from "@etsoo/materialui";
 import {
   FinanceAccountKind,
@@ -20,11 +21,17 @@ import ArticleIcon from "@mui/icons-material/Article";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { DefaultUI } from "@etsoo/smarterp-core/components";
 import { BoxProps } from "@mui/material/Box";
-import { GridCellRendererProps, NotificationMessageType } from "@etsoo/react";
+import { GridCellRendererProps, GridMethodRef } from "@etsoo/react";
 import React from "react";
 import IconButton from "@mui/material/IconButton";
+import { useNavigate } from "react-router-dom";
+import { CurrencyList } from "../../../components/CurrencyList";
+import { DomUtils } from "@etsoo/shared";
 
 export default function FinanceConsole() {
+  // Route
+  const navigate = useNavigate();
+
   // Labels
   const labels = app.getLabels(
     "accountNumber",
@@ -34,7 +41,6 @@ export default function FinanceConsole() {
     "allAccounts",
     "bank",
     "bulkCreateAccounts",
-    "completeTip",
     "copyPaymentInfo",
     "currency",
     "edit",
@@ -42,8 +48,56 @@ export default function FinanceConsole() {
     "view"
   );
 
+  // Refs
+  const ref = React.useRef<GridMethodRef<FinanceAccountQueryData>>(undefined);
+
   // Org person id
   const orgPersonId = app.userData?.system?.personId;
+
+  const hasAdd = app.owns(Permissions.Finance.Add);
+
+  const addCashAccount = () => {
+    app.showInputDialog({
+      title: labels.addCashAccount,
+      message: "",
+      callback: async (form) => {
+        // Cancelled
+        if (form == null) {
+          return;
+        }
+
+        if (!form.reportValidity()) {
+          return false;
+        }
+
+        // Form data
+        const { currency } = DomUtils.dataAs(new FormData(form), {
+          currency: "string"
+        });
+
+        if (!currency) {
+          DomUtils.setFocus("currency", form);
+          return false;
+        }
+
+        const result = await app.financeAccountApi.createCash({ currency });
+        if (result == null) return;
+
+        if (result.ok) {
+          ref.current?.reset();
+          return true;
+        }
+
+        app.alertResult(result);
+        return false;
+      },
+      inputs: (
+        <VBox spacing={2} sx={{ marginTop: 1 }}>
+          <CurrencyList required fullWidth />
+        </VBox>
+      )
+    });
+  };
 
   // Layout
   return (
@@ -93,15 +147,7 @@ export default function FinanceConsole() {
                     data.kind === FinanceAccountKind.Transfer) && (
                     <IconButton
                       title={labels.copyPaymentInfo}
-                      onClick={() => {
-                        navigator.clipboard?.writeText(
-                          `${app.userData?.organizationName}\n${data.bank}\n${data.accountNumber}`
-                        );
-                        app.notifier.message(
-                          NotificationMessageType.Success,
-                          labels.completeTip.format(labels.copyPaymentInfo)
-                        );
-                      }}
+                      onClick={() => app.formatPaymentInfo(data)}
                     >
                       <ContentCopyIcon />
                     </IconButton>
@@ -109,7 +155,7 @@ export default function FinanceConsole() {
                   {app.owns(Permissions.Finance.Edit) && (
                     <IconButtonLink
                       title={labels.edit}
-                      href={`./editaccount/${data.id}`}
+                      href={`./editaccount/${data.id}?from=console`}
                     >
                       <EditIcon />
                     </IconButtonLink>
@@ -130,26 +176,47 @@ export default function FinanceConsole() {
         hideFooter
         loadData={async (data) => {
           return await app.financeAccountApi.query(
-            { ...data, personId: orgPersonId, enabled: true },
+            {
+              ...data,
+              personId: orgPersonId,
+              enabled: true,
+              kinds: [
+                FinanceAccountKind.Cash,
+                FinanceAccountKind.Transfer,
+                FinanceAccountKind.Super
+              ]
+            },
             {
               defaultValue: [],
               showLoading: false
             }
           );
         }}
+        mRef={ref}
+        quickAction={(data) => navigate(`./viewaccount/${data.id}`)}
       />
       <HBox sx={{ paddingY: 2, flexWrap: "wrap", gap: 2 }}>
-        <ButtonLink
-          variant="contained"
-          startIcon={<AddIcon />}
-          href={`./addaccount?personId=${orgPersonId}`}
-        >
-          {labels.addAccount}
-        </ButtonLink>
-        <Button variant="outlined" startIcon={<MoneyIcon />}>
-          {labels.addCashAccount}
-        </Button>
-        <Button variant="outlined">{labels.bulkCreateAccounts}</Button>
+        {hasAdd && (
+          <React.Fragment>
+            <ButtonLink
+              variant="contained"
+              startIcon={<AddIcon />}
+              href={`./addaccount?personId=${orgPersonId}&from=console`}
+            >
+              {labels.addAccount}
+            </ButtonLink>
+            <Button
+              variant="outlined"
+              startIcon={<MoneyIcon />}
+              onClick={() => addCashAccount()}
+            >
+              {labels.addCashAccount}
+            </Button>
+            <ButtonLink variant="outlined" href="./bulkcreateaccounts">
+              {labels.bulkCreateAccounts}
+            </ButtonLink>
+          </React.Fragment>
+        )}
         <Divider orientation="vertical" flexItem />
         <ButtonLink variant="outlined" href="./accounts">
           {labels.allAccounts}

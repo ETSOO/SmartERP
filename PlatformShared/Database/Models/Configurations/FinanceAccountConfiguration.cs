@@ -12,15 +12,19 @@ namespace PlatformShared.Database.Models.Configurations
 
             entity.ToTable("finance_account");
 
+            entity.HasIndex(e => new { e.CoreOrganizationId, e.Kind, e.Currency, e.AccountNumber }, "finance_account_core_organization_id_kind_currency_account__key").IsUnique();
+
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasIdentityOptions(1001L, null, null, null, null, null)
                 .HasColumnName("id");
 
+            entity.Property(e => e.CoreOrganizationId).HasColumnName("core_organization_id");
+
             entity.Property(e => e.PersonId).HasColumnName("person_id");
 
             entity.Property(e => e.Kind)
-                .HasConversion<short>()
+                .HasConversion<byte>()
                 .HasColumnName("kind");
 
             entity.Property(e => e.Bank)
@@ -51,7 +55,7 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("balance");
 
             entity.Property(e => e.Status)
-                .HasConversion<short>()
+                .HasConversion<byte>()
                 .HasDefaultValue(EntityStatus.Normal)
                 .HasColumnName("status");
 
@@ -67,6 +71,11 @@ namespace PlatformShared.Database.Models.Configurations
 
             entity.Property(e => e.RefreshTime)
                 .HasColumnName("refresh_time");
+
+            entity.HasOne(d => d.CoreOrganization).WithMany(p => p.FinanceAccounts)
+                .HasForeignKey(d => d.CoreOrganizationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("finance_account_core_organization_id_fkey");
 
             entity.HasOne(d => d.Person).WithMany(p => p.FinanceAccounts)
                 .HasForeignKey(d => d.PersonId)

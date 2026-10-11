@@ -3,9 +3,12 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
+using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.String;
 using CRM.Server.Application;
 using CRM.Server.Dto.FinanceAccount;
+using CRM.Server.Dto.FinanceTransaction;
 using CRM.Server.RQ.FinanceAccount;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -77,7 +80,7 @@ namespace CRM.Server.Services
             // Account exists
             var accountNumber = rq.AccountNumber.ToUpper();
             var currency = rq.Currency.ToUpper();
-            var hasAccount = await _db.FinanceAccounts.Where(a => a.Person.OrgId == orgId
+            var hasAccount = await _db.FinanceAccounts.Where(a => a.CoreOrganizationId == orgId
                 && a.Kind == kind
                 && a.Currency == currency
                 && a.AccountNumber == accountNumber).AnyAsync(cancellationToken);
@@ -105,6 +108,7 @@ namespace CRM.Server.Services
 
             var account = new FinanceAccount
             {
+                CoreOrganizationId = orgId,
                 PersonId = personId,
                 Kind = kind,
                 Bank = rq.Bank,
@@ -146,6 +150,12 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> CreateBulkAsync(FinanceAccountCreateBulkRQ rq, CancellationToken cancellationToken = default)
         {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Add, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
             var orgId = User.OrganizationInt;
             var orgPersonId = User.Pid;
 
@@ -182,6 +192,10 @@ namespace CRM.Server.Services
             var currency = rq.Currency;
             var bank = rq.Bank;
             var description = rq.Description;
+            var status = rq.Status.GetValueOrDefault(EntityStatus.Normal);
+            var expiry = rq.Expiry;
+            var prefix = rq.Prefix.ToUpper();
+            var startNumber = rq.StartNumber;
 
             var title = Properties.Resources.Initialization;
 
@@ -189,12 +203,13 @@ namespace CRM.Server.Services
             var accounts = Enumerable.Range(0, rq.Count)
                 .Select(i =>
                 {
-                    var currentNumber = rq.StartNumber + i;
+                    var currentNumber = startNumber == 0 ? Guid.NewGuid().ToString("N").ToUpper() : (startNumber + i).ToString().PadLeft(len, '0');
 
-                    var accountNo = $"{rq.Prefix}{currentNumber.ToString().PadLeft(len, '0')}";
+                    var accountNo = $"{prefix}{currentNumber}";
 
                     return new FinanceAccount
                     {
+                        CoreOrganizationId = orgId,
                         PersonId = personId,
                         Kind = kind,
                         Bank = bank,
@@ -202,7 +217,10 @@ namespace CRM.Server.Services
                         AccountNumber = accountNo,
                         Description = description,
                         Balance = balance,
-                        ProductId = productId
+                        ProductId = productId,
+                        Status = status,
+                        Expiry = expiry,
+                        RefreshTime = hasBalance ? DateTimeOffset.UtcNow : null
                     };
                 })
                 .ToList();
@@ -212,15 +230,28 @@ namespace CRM.Server.Services
             {
                 var bulkConfig = new BulkConfig
                 {
-                    PropertiesToIncludeOnUpdate = [],
+                    PropertiesToInclude = [
+                        nameof(FinanceAccount.CoreOrganizationId),
+                        nameof(FinanceAccount.PersonId),
+                        nameof(FinanceAccount.Kind),
+                        nameof(FinanceAccount.Bank),
+                        nameof(FinanceAccount.Currency),
+                        nameof(FinanceAccount.AccountNumber),
+                        nameof(FinanceAccount.Description),
+                        nameof(FinanceAccount.Balance),
+                        nameof(FinanceAccount.ProductId),
+                        nameof(FinanceAccount.Status),
+                        nameof(FinanceAccount.Expiry),
+                        nameof(FinanceAccount.RefreshTime)
+                    ],
                     SetOutputIdentity = hasBalance
                 };
 
-                await _db.BulkInsertOrUpdateAsync(accounts, bulkConfig, cancellationToken: cancellationToken);
+                await _db.BulkInsertAsync(accounts, bulkConfig, cancellationToken: cancellationToken);
 
                 if (hasBalance)
                 {
-                    var transactions = accounts.Where(a => a.Id > 0).Select(a => new FinanceTransaction
+                    var transactions = accounts.Select(a => new FinanceTransaction
                     {
                         Kind = FinanceTransactionKind.Init,
                         AccountId = a.Id,
@@ -229,7 +260,20 @@ namespace CRM.Server.Services
                         AuthorId = User.Oid
                     }).ToList();
 
-                    await _db.BulkInsertAsync(transactions, cancellationToken: cancellationToken);
+                    var transBulkConfig = new BulkConfig
+                    {
+                        PropertiesToInclude = [
+                            nameof(FinanceTransaction.Kind),
+                            nameof(FinanceTransaction.AccountId),
+                            nameof(FinanceTransaction.Title),
+                            nameof(FinanceTransaction.Amount),
+                            nameof(FinanceTransaction.AuthorId)
+                        ],
+                        PropertiesToIncludeOnUpdate = [],
+                        SetOutputIdentity = hasBalance
+                    };
+
+                    await _db.BulkInsertAsync(transactions, transBulkConfig, cancellationToken: cancellationToken);
                 }
 
                 await transaction.CommitAsync(cancellationToken);
@@ -285,7 +329,7 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var query = _db.FinanceAccounts.AsNoTracking()
-                .Where(a => a.Person.OrgId == orgId)
+                .Where(a => a.CoreOrganizationId == orgId)
                 .QueryEtsoo(rq, (a) => a.Id, (a) => a.Status, (q) =>
                 {
                     if (rq.PersonId.HasValue)
@@ -299,6 +343,10 @@ namespace CRM.Server.Services
                     if (rq.Kind.HasValue)
                     {
                         q = q.Where(a => a.Kind == rq.Kind.Value);
+                    }
+                    else if (rq.Kinds != null)
+                    {
+                        q = q.Where(a => rq.Kinds.Contains(a.Kind));
                     }
 
                     if (!string.IsNullOrEmpty(rq.Currency))
@@ -414,6 +462,8 @@ namespace CRM.Server.Services
                 return null;
             }
 
+            var hasPersonId = rq.PersonId.HasValue;
+
             return await CreateQuery(rq, (q) =>
             {
                 if (rq.TimesStart.HasValue)
@@ -431,8 +481,8 @@ namespace CRM.Server.Services
             .Select(a => new FinanceAccountQueryData
             {
                 Id = a.Id,
-                PersonId = a.PersonId,
-                PersonName = a.Person.Name,
+                PersonId = hasPersonId ? null : a.PersonId,
+                PersonName = hasPersonId ? null : a.Person.Name,
                 Kind = a.Kind,
                 Bank = a.Bank,
                 Currency = a.Currency,
@@ -441,6 +491,54 @@ namespace CRM.Server.Services
                 Status = a.Status,
                 Expiry = a.Expiry
             }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Read data for view
+        /// 读取用于浏览的数据
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<FinanceAccountViewData?> ReadAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.View, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            return await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.Id == id && a.Person.OrgId == orgId)
+                .Select(a => new FinanceAccountViewData
+                {
+                    Id = a.Id,
+                    PersonId = a.PersonId,
+                    PersonName = a.Person.Name,
+                    Kind = a.Kind,
+                    Bank = a.Bank,
+                    Currency = a.Currency,
+                    AccountNumber = a.AccountNumber,
+                    Swift = a.Swift,
+                    Description = a.Description,
+                    Balance = a.Balance,
+                    Status = a.Status,
+                    Expiry = a.Expiry,
+                    Creation = a.Creation,
+                    ProductId = a.ProductId,
+                    ProductName = a.Product == null ? null : a.Product.Name,
+                    RefreshTime = a.RefreshTime,
+                    Transactions = a.Transactions.OrderByDescending(t => t.Id).Take(8).Select(t => new FinanceTransactionItem
+                    {
+                        Id = t.Id,
+                        Kind = t.Kind,
+                        Title = t.Title,
+                        Amount = t.Amount,
+                        Creation = t.Creation
+                    }).ToArray()
+                }).FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>

@@ -19,13 +19,13 @@ namespace CRM.Server.Dto.FinanceAccount
         /// Owern person Id
         /// 所有人人员编号
         /// </summary>
-        public long PersonId { get; init; }
+        public long? PersonId { get; init; }
 
         /// <summary>
         /// Owner person name
         /// 所有者名称
         /// </summary>
-        public required string PersonName { get; init; }
+        public string? PersonName { get; init; }
 
         /// <summary>
         /// Kind

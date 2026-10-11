@@ -45,7 +45,7 @@ public partial class CoreOrganization
 
     public virtual ICollection<FeatureCulture> FeatureCultures { get; set; } = new List<FeatureCulture>();
 
-    public virtual ICollection<FinanceTransaction> FinanceTransactions { get; set; } = new List<FinanceTransaction>();
+    public virtual ICollection<FinanceAccount> FinanceAccounts { get; set; } = new List<FinanceAccount>();
 
     public virtual ICollection<CoreOrganization> InverseParent { get; set; } = new List<CoreOrganization>();
 

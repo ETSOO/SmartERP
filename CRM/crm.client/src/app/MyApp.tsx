@@ -7,6 +7,7 @@ import {
 } from "@etsoo/appscript";
 import { CoreApp, CoreCulture, ICoreServiceApp } from "@etsoo/smarterp-core";
 import { CrmApp, ICrmApp, CrmCulture, CrmAppBase } from "@etsoo/smarterp-crm";
+import { NotificationMessageType } from "@etsoo/react";
 
 // Mixin, merge them together with the same name
 interface MyApp extends ICrmApp {}
@@ -16,6 +17,19 @@ class MyApp extends CrmAppBase implements ICoreServiceApp {
    */
   get app() {
     return this;
+  }
+
+  formatPaymentInfo(data: { bank: string; accountNumber: string }) {
+    navigator.clipboard?.writeText(
+      `${app.userData?.organizationName}\n${data.bank}\n${data.accountNumber}`
+    );
+
+    const labels = app.getLabels("completeTip", "copyPaymentInfo");
+
+    app.notifier.message(
+      NotificationMessageType.Success,
+      labels.completeTip.format(labels.copyPaymentInfo)
+    );
   }
 
   /**

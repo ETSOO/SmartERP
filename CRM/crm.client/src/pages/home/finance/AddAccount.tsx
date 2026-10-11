@@ -15,7 +15,8 @@ import { IdActionResult, Utils } from "@etsoo/shared";
 import {
   FinanceAccountCreateRQ,
   FinanceAccountKind,
-  FinanceAccountUpdateRQ
+  FinanceAccountUpdateRQ,
+  Permissions
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
 import { EntityStatus } from "@etsoo/appscript";
@@ -34,17 +35,19 @@ export default function AddAccount() {
     id: "number"
   });
 
-  const { personId = 0 } = useSearchParamsEx({ personId: "number" });
-
-  // Org person id
-  const orgPersonId = app.userData?.system?.personId;
+  const { personId = 0, from } = useSearchParamsEx({
+    personId: "number",
+    from: "string"
+  });
 
   const isEditing = id > 0;
 
   // Labels
   const labels = app.getLabels(
+    "account",
     "accountNumber",
     "bank",
+    "deleteConfirm",
     "description",
     "expiry",
     "noChanges",
@@ -84,9 +87,6 @@ export default function AddAccount() {
       const c = { ...v };
       ReactUtils.updateRefValues(refs, c);
 
-      // Is own
-      const isOwn = v.personId === orgPersonId;
-
       // Submit
       let result: IdActionResult | undefined;
       let redirectUrl: string;
@@ -122,7 +122,8 @@ export default function AddAccount() {
       if (result == null) return;
 
       if (result.ok) {
-        if (!isOwn) redirectUrl += "/accounts";
+        if (from !== "console")
+          redirectUrl += "/viewaccount/" + result.data?.id;
 
         navigate(redirectUrl);
         return;
@@ -131,6 +132,8 @@ export default function AddAccount() {
       app.alertResult(result);
     }
   });
+
+  const isCash = isEditing && data.kind === FinanceAccountKind.Cash;
 
   // Load data
   const reloadData = React.useCallback(async () => {
@@ -149,6 +152,31 @@ export default function AddAccount() {
       isEditing={isEditing}
       onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
+      onDelete={
+        app.owns(Permissions.Finance.Delete) &&
+        id &&
+        data.status === EntityStatus.Deleted
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.account),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
+
+                  const result = await app.financeAccountApi.delete(id);
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate(`./../../`);
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
       paddings={0}
     >
       <Grid size={{ xs: 6, sm: 3 }}>
@@ -157,6 +185,7 @@ export default function AddAccount() {
           fullWidth
           required
           onChange={formik.handleChange}
+          disabled={isCash}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>
@@ -165,6 +194,7 @@ export default function AddAccount() {
           fullWidth
           required
           onChange={formik.handleChange}
+          disabled={isCash}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
@@ -173,6 +203,7 @@ export default function AddAccount() {
           inputRequired
           idValue={formik.values.personId}
           inputOnChange={formik.handleChange}
+          disabled={isCash}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
@@ -183,6 +214,7 @@ export default function AddAccount() {
           slotProps={{ htmlInput: { maxLength: 128 } }}
           label={labels.bank}
           inputRef={refs.bank}
+          disabled={isCash}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
@@ -190,9 +222,12 @@ export default function AddAccount() {
           fullWidth
           required
           name="accountNumber"
-          slotProps={{ htmlInput: { maxLength: 20 } }}
+          slotProps={{
+            htmlInput: { maxLength: 20, style: { textTransform: "uppercase" } }
+          }}
           label={labels.accountNumber}
           inputRef={refs.accountNumber}
+          disabled={isCash}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>
@@ -208,19 +243,21 @@ export default function AddAccount() {
           rows={2}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 12 }}>
-        <InputField
-          fullWidth
-          name="swift"
-          slotProps={{
-            htmlInput: { maxLength: 256 }
-          }}
-          label={labels.swift}
-          inputRef={refs.swift}
-          multiline
-          rows={2}
-        />
-      </Grid>
+      {!isCash && (
+        <Grid size={{ xs: 12, sm: 12 }}>
+          <InputField
+            fullWidth
+            name="swift"
+            slotProps={{
+              htmlInput: { maxLength: 256 }
+            }}
+            label={labels.swift}
+            inputRef={refs.swift}
+            multiline
+            rows={2}
+          />
+        </Grid>
+      )}
       <Grid size={{ xs: 12, sm: 6 }}>
         <ProductList
           idValue={formik.values.productId}

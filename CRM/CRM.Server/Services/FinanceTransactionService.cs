@@ -118,7 +118,6 @@ namespace CRM.Server.Services
                 .Where(t => t.Id == id && t.OffsetId == null)
                 .Select(t => new
                 {
-                    t.CoreOrganizationId,
                     t.Account.PersonId,
                     t.Kind,
                     t.AccountId,
@@ -140,7 +139,6 @@ namespace CRM.Server.Services
 
             var newItem = new FinanceTransaction
             {
-                CoreOrganizationId = item.CoreOrganizationId,
                 Kind = item.Kind,
                 AccountId = item.AccountId,
                 Title = title,
@@ -203,11 +201,6 @@ namespace CRM.Server.Services
             if (item.AuthorId == 0)
             {
                 item.AuthorId = User.Oid;
-            }
-
-            if (item.CoreOrganizationId == 0)
-            {
-                item.CoreOrganizationId = User.OrganizationInt;
             }
 
             if (item.TargetAccountId.HasValue && item.InnerRef == null)
@@ -303,5 +296,7 @@ namespace CRM.Server.Services
 
             return ActionResult.Succeed(id);
         }
+
+
     }
 }

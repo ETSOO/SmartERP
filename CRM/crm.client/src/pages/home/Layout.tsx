@@ -72,6 +72,7 @@ export default function Home() {
     "allProfiles",
     "app3",
     "assets",
+    "bulkCreateAccounts",
     "contacts",
     "categories",
     "confirmOrder",
@@ -121,6 +122,7 @@ export default function Home() {
     "updateSystemSettings",
     "users",
     "view",
+    "viewAccount",
     "viewOrder",
     "viewProfile"
   );
@@ -759,9 +761,20 @@ export default function Home() {
                 hidden: true
               },
               {
+                segment: "bulkcreateaccounts",
+                title: labels.bulkCreateAccounts,
+                hidden: true
+              },
+              {
                 segment: "editaccount",
                 pattern: "editaccount/:id",
                 title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "viewaccount",
+                pattern: "viewaccount/:id",
+                title: labels.viewAccount,
                 hidden: true
               }
             ]
