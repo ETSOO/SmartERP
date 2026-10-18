@@ -123,6 +123,9 @@
   <data name="AssetUpdate" xml:space="preserve">
     <value>Update asset</value>
   </data>
+  <data name="Collect" xml:space="preserve">
+    <value>Collect</value>
+  </data>
   <data name="Initialization" xml:space="preserve">
     <value>Initialization</value>
   </data>
@@ -131,5 +134,11 @@
   </data>
   <data name="Offset" xml:space="preserve">
     <value>Offset</value>
+  </data>
+  <data name="Payment" xml:space="preserve">
+    <value>Payment</value>
+  </data>
+  <data name="Transfer" xml:space="preserve">
+    <value>Transfer</value>
   </data>
 </root>

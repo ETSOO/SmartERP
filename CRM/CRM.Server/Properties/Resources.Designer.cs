@@ -79,6 +79,15 @@ namespace CRM.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Collect.
+        /// </summary>
+        public static string Collect {
+            get {
+                return ResourceManager.GetString("Collect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Initialization.
         /// </summary>
         public static string Initialization {
@@ -102,6 +111,24 @@ namespace CRM.Server.Properties {
         public static string Offset {
             get {
                 return ResourceManager.GetString("Offset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Payment.
+        /// </summary>
+        public static string Payment {
+            get {
+                return ResourceManager.GetString("Payment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transfer.
+        /// </summary>
+        public static string Transfer {
+            get {
+                return ResourceManager.GetString("Transfer", resourceCulture);
             }
         }
     }

@@ -25,6 +25,12 @@
         Transfer = 3,
 
         /// <summary>
+        /// Reimbursement
+        /// 报销
+        /// </summary>
+        Reimbursement = 6,
+
+        /// <summary>
         /// Settlement
         /// 月结
         /// </summary>

@@ -2,6 +2,7 @@
 using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Utils.Actions;
+using com.etsoo.Utils.String;
 using CRM.Server.Application;
 using CRM.Server.RQ.FinanceTransaction;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,7 @@ namespace CRM.Server.Services
             // Account
             var accountId = rq.AccountId;
             var account = await _db.FinanceAccounts.AsNoTracking()
-                .Where(a => a.Id == accountId && a.Person.OrgId == orgId && a.Status < EntityStatus.Inactivated)
+                .Where(a => a.Id == accountId && a.CoreOrganizationId == orgId && a.Status < EntityStatus.Inactivated)
                 .Select(a => new { a.PersonId, a.Kind, a.Balance, a.RefreshTime })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -172,6 +173,13 @@ namespace CRM.Server.Services
             return result;
         }
 
+        /// <summary>
+        /// Pay order
+        /// 订单付款
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
         public async Task<IActionResult> PayOrderAsync(FinanceTransactionPayOrderRQ rq, CancellationToken cancellationToken = default)
         {
             // Permission check
@@ -184,8 +192,8 @@ namespace CRM.Server.Services
             var orgId = User.OrganizationInt;
 
             var order = await _db.Orders(orgId).AsNoTracking()
-                .Where(o => o.Id == orderId)
-                .Select(o => new { o.Amount, o.PaidAmount })
+                .Where(o => o.Id == orderId && o.Status < EntityStatus.Inactivated)
+                .Select(o => new { o.BuyerId, o.Title, o.Currency, o.Amount, o.PaidAmount })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (order == null)
@@ -193,9 +201,218 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.OrderId));
             }
 
+            var amount = rq.Amount;
+
+            var balance = order.Amount - order.PaidAmount;
+            if (balance <= 0 || amount > balance)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(order.PaidAmount));
+            }
+
+            // Check accounts
+            var orgPersonId = User.Pid;
+            var buyerId = order.BuyerId;
+            var currency = order.Currency;
+            var accountIds = rq.Items.Select(i => i.AccountId).Distinct().ToArray();
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId && a.Currency == currency && accountIds.Contains(a.Id) && a.Status < EntityStatus.Inactivated)
+                .Select(a => new { a.Id, a.PersonId, a.Kind, a.AccountNumber, a.Balance })
+                .ToArrayAsync(cancellationToken);
+
+            if (accounts.Length != accountIds.Length)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Items));
+            }
+
+            foreach (var account in accounts)
+            {
+                var kind = account.Kind;
+                var isKindValid = true;
+                if (kind == FinanceAccountKind.Pass || kind == FinanceAccountKind.Prepaid)
+                {
+                    if (account.PersonId != buyerId)
+                    {
+                        isKindValid = false;
+                    }
+                    else
+                    {
+                        var amountTotal = rq.Items.Where(i => i.AccountId == account.Id).Sum(i => i.Amount);
+                        if (amountTotal > account.Balance)
+                        {
+                            var amountCheckResult = ApplicationErrors.InsufficientBalance.AsResult();
+                            amountCheckResult.Detail = $"{account.Id} ({StringUtils.HideData(account.AccountNumber)})";
+                            return amountCheckResult;
+                        }
+                    }
+                }
+                else if (kind == FinanceAccountKind.Cash || kind == FinanceAccountKind.Transfer || kind == FinanceAccountKind.Super)
+                {
+                    if (account.PersonId != orgPersonId)
+                    {
+                        isKindValid = false;
+                    }
+                }
+                else
+                {
+                    isKindValid = false;
+                }
+
+                if (!isKindValid)
+                {
+                    var kindResult = ApplicationErrors.NoValidData.AsResult(nameof(account.Kind));
+                    kindResult.Detail = $"{account.Id} ({StringUtils.HideData(account.AccountNumber)})";
+                    return kindResult;
+                }
+            }
+
+            var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionPayOrderRQ);
+
+            foreach (var item in rq.Items)
+            {
+                var account = accounts.First(a => a.Id == item.AccountId);
+
+                var title = $"{Properties.Resources.Collect}, {order.Title}";
+
+                if (!string.IsNullOrEmpty(rq.Description))
+                {
+                    title += $" - {rq.Description}";
+                }
+
+                var trans = new FinanceTransaction
+                {
+                    Kind = FinanceTransactionKind.Collect,
+                    AccountId = item.AccountId,
+                    Title = title,
+                    OrderId = orderId,
+                    Amount = item.Amount,
+                    AuthorId = User.Oid
+                };
+
+                var result = await ProcessAsync(account.PersonId, trans, jsonData, cancellationToken);
+            }
+
             return ActionResult.Success;
         }
 
+        /// <summary>
+        /// Pay purchase order
+        /// 采购付款
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> PayPOAsync(FinanceTransactionPayPORQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orderId = rq.OrderId;
+            var orgId = User.OrganizationInt;
+
+            var po = await _db.POs(orgId).AsNoTracking()
+                .Where(o => o.Id == orderId && o.Status < EntityStatus.Inactivated)
+                .Select(o => new { o.SellerId, o.Title, o.Currency, o.Amount, o.PaidAmount })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (po == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.OrderId));
+            }
+
+            var amount = rq.Amount;
+
+            var balance = po.Amount - po.PaidAmount;
+            if (balance <= 0 || amount > balance)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(po.PaidAmount));
+            }
+
+            // Check accounts
+            var orgPersonId = User.Pid;
+            var sellerId = po.SellerId;
+            var currency = po.Currency;
+            var accountIds = rq.Items.Select(i => i.AccountId).Distinct().ToArray();
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId && a.PersonId == orgPersonId && a.Currency == currency && accountIds.Contains(a.Id) && a.Status < EntityStatus.Inactivated)
+                .Select(a => new { a.Id, a.Kind, a.AccountNumber, a.Balance })
+                .ToArrayAsync(cancellationToken);
+
+            if (accounts.Length != accountIds.Length)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Items));
+            }
+
+            foreach (var account in accounts)
+            {
+                var kind = account.Kind;
+                var isKindValid = true;
+                if (kind == FinanceAccountKind.Pass
+                    || kind == FinanceAccountKind.Prepaid
+                    || kind == FinanceAccountKind.Cash
+                    || kind == FinanceAccountKind.Transfer
+                    || kind == FinanceAccountKind.Super)
+                {
+                    var amountTotal = rq.Items.Where(i => i.AccountId == account.Id).Sum(i => i.Amount);
+                    if (amountTotal > account.Balance)
+                    {
+                        var amountCheckResult = ApplicationErrors.InsufficientBalance.AsResult();
+                        amountCheckResult.Detail = $"{account.Id} ({StringUtils.HideData(account.AccountNumber)})";
+                        return amountCheckResult;
+                    }
+                }
+                else
+                {
+                    isKindValid = false;
+                }
+
+                if (!isKindValid)
+                {
+                    var kindResult = ApplicationErrors.NoValidData.AsResult(nameof(account.Kind));
+                    kindResult.Detail = $"{account.Id} ({StringUtils.HideData(account.AccountNumber)})";
+                    return kindResult;
+                }
+            }
+
+            var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionPayPORQ);
+
+            foreach (var item in rq.Items)
+            {
+                var account = accounts.First(a => a.Id == item.AccountId);
+
+                var title = $"{Properties.Resources.Payment}, {po.Title}";
+
+                if (!string.IsNullOrEmpty(rq.Description))
+                {
+                    title += $" - {rq.Description}";
+                }
+
+                var trans = new FinanceTransaction
+                {
+                    Kind = FinanceTransactionKind.Payment,
+                    AccountId = item.AccountId,
+                    Title = title,
+                    OrderId = orderId,
+                    Amount = item.Amount,
+                    AuthorId = User.Oid
+                };
+
+                var result = await ProcessAsync(orgPersonId, trans, jsonData, cancellationToken);
+            }
+
+            return ActionResult.Success;
+        }
+
+        /// <summary>
+        /// Process the transaction
+        /// </summary>
+        /// <param name="personId">Source account person id</param>
+        /// <param name="item">Transaction item</param>
+        /// <param name="jsonData">Request JSON data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
         private async Task<IActionResult> ProcessAsync(long personId, FinanceTransaction item, string jsonData, CancellationToken cancellationToken)
         {
             if (item.AuthorId == 0)
@@ -297,6 +514,102 @@ namespace CRM.Server.Services
             return ActionResult.Succeed(id);
         }
 
+        /// <summary>
+        /// Reimburse
+        /// 报销
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> ReimburseAsync(FinanceTransactionReimburseRQ rq, CancellationToken cancellationToken = default)
+        {
+            return ActionResult.Success;
+        }
 
+        /// <summary>
+        /// Transfer
+        /// 转账
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> TransferAsync(FinanceTransactionTransferRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var sourceAccountId = rq.SourceAccountId;
+            var destinationAccountId = rq.DestinationAccountId;
+
+            var orgId = User.OrganizationInt;
+
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId && (a.Id == sourceAccountId || a.Id == destinationAccountId) && a.Status < EntityStatus.Inactivated)
+                .Select(a => new { a.Id, a.PersonId, a.Kind, a.Currency, a.Balance, a.AccountNumber })
+                .ToArrayAsync(cancellationToken);
+
+            var sourceAccount = accounts.FirstOrDefault(a => a.Id == sourceAccountId);
+            if (sourceAccount == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.SourceAccountId));
+            }
+
+            var amount = rq.Amount;
+            if (sourceAccount.Balance < amount)
+            {
+                return ApplicationErrors.InsufficientBalance.AsResult();
+            }
+
+            var destinationAccount = accounts.FirstOrDefault(a => a.Id == destinationAccountId);
+            if (destinationAccount == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.DestinationAccountId));
+            }
+
+            // Same currency
+            if (sourceAccount.Currency != destinationAccount.Currency)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Currency));
+            }
+
+            var sKind = sourceAccount.Kind;
+            var dKind = destinationAccount.Kind;
+            if (sKind != dKind)
+            {
+                if (sKind == FinanceAccountKind.Cash && dKind != FinanceAccountKind.Transfer && dKind != FinanceAccountKind.Super)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Kind));
+                }
+                else if (sKind == FinanceAccountKind.Transfer && dKind != FinanceAccountKind.Super)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Kind));
+                }
+                else if (sKind == FinanceAccountKind.Super && dKind != FinanceAccountKind.Cash && dKind != FinanceAccountKind.Transfer)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Kind));
+                }
+            }
+
+            var title = $"{Properties.Resources.Transfer} ({StringUtils.HideData(sourceAccount.AccountNumber)} -> {StringUtils.HideData(destinationAccount.AccountNumber)}) - {rq.Description}";
+
+            var item = new FinanceTransaction
+            {
+                Kind = FinanceTransactionKind.Transfer,
+                AccountId = sourceAccountId,
+                Title = title,
+                Amount = -amount,
+                ReferenceId = rq.ReferenceId,
+                TargetPersonId = destinationAccount.PersonId,
+                TargetAccountId = destinationAccountId,
+                AuthorId = User.Oid
+            };
+
+            var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionTransferRQ);
+
+            return await ProcessAsync(sourceAccount.PersonId, item, jsonData, cancellationToken);
+        }
     }
 }

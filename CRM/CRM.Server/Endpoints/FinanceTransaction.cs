@@ -22,6 +22,15 @@ namespace CRM.Server.Endpoints
             g.MapPost("PayOrder", (IFinanceTransactionService service, FinanceTransactionPayOrderRQ rq, CancellationToken cancellationToken) => service.PayOrderAsync(rq, cancellationToken))
                 .WithDescription("Pay order / 支付订单").WithTags("FinanceTransaction");
 
+            g.MapPost("PayPO", (IFinanceTransactionService service, FinanceTransactionPayPORQ rq, CancellationToken cancellationToken) => service.PayPOAsync(rq, cancellationToken))
+                .WithDescription("Pay purchase order / 支付采购订单").WithTags("FinanceTransaction");
+
+            g.MapPost("Reimburse", (IFinanceTransactionService service, FinanceTransactionReimburseRQ rq, CancellationToken cancellationToken) => service.ReimburseAsync(rq, cancellationToken))
+                .WithDescription("Reimburse / 报销").WithTags("FinanceTransaction");
+
+            g.MapPost("Transfer", (IFinanceTransactionService service, FinanceTransactionTransferRQ rq, CancellationToken cancellationToken) => service.TransferAsync(rq, cancellationToken))
+                .WithDescription("Transfer / 转账").WithTags("FinanceTransaction");
+
             return builder;
         }
     }

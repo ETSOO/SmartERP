@@ -123,6 +123,9 @@
   <data name="AssetUpdate" xml:space="preserve">
     <value>更新資產</value>
   </data>
+  <data name="Collect" xml:space="preserve">
+    <value>收款</value>
+  </data>
   <data name="Initialization" xml:space="preserve">
     <value>初始化</value>
   </data>
@@ -131,5 +134,11 @@
   </data>
   <data name="Offset" xml:space="preserve">
     <value>沖減</value>
+  </data>
+  <data name="Payment" xml:space="preserve">
+    <value>付款</value>
+  </data>
+  <data name="Transfer" xml:space="preserve">
+    <value>轉帳</value>
   </data>
 </root>
