@@ -1,9 +1,13 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.CoreFramework.Business;
+using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.String;
 using CRM.Server.Application;
+using CRM.Server.Dto.FinanceAccount;
+using CRM.Server.Dto.FinanceTransaction;
+using CRM.Server.Dto.Product;
 using CRM.Server.RQ.FinanceTransaction;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
@@ -94,6 +98,98 @@ namespace CRM.Server.Services
             var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionAdjustRQ);
 
             return await ProcessAsync(account.PersonId, item, jsonData, cancellationToken);
+        }
+
+        private IQueryable<FinanceTransaction> CreateQuery(FinanceTransactionListRQ rq, Func<IQueryable<FinanceTransaction>, IQueryable<FinanceTransaction>>? filters = null)
+        {
+            var orgId = User.OrganizationInt;
+
+            var query = _db.FinanceTransactions.AsNoTracking()
+                .Where(t => t.Account.CoreOrganizationId == orgId)
+                .QueryEtsoo(rq, (t) => t.Id, null, (q) =>
+                {
+                    if (rq.PersonId.HasValue)
+                    {
+                        var personId = rq.PersonId.Value;
+                        if (personId == 0) personId = User.Pid;
+
+                        q = q.Where(t => t.Account.PersonId == personId);
+                    }
+
+                    if (!string.IsNullOrEmpty(rq.Currency))
+                    {
+                        q = q.Where(t => t.Account.Currency == rq.Currency.ToUpper());
+                    }
+
+                    if (rq.AccountId.HasValue)
+                    {
+                        q = q.Where(t => t.AccountId == rq.AccountId.Value);
+                    }
+
+                    if (rq.Kind.HasValue)
+                    {
+                        q = q.Where(t => t.Kind == rq.Kind.Value);
+                    }
+                    else if (rq.Kinds != null)
+                    {
+                        q = q.Where(t => rq.Kinds.Contains(t.Kind));
+                    }
+
+                    if (rq.OrderId.HasValue)
+                    {
+                        q = q.Where(t => t.OrderId == rq.OrderId.Value);
+                    }
+
+                    if (rq.InnerRef.HasValue)
+                    {
+                        q = q.Where(t => t.InnerRef == rq.InnerRef.Value);
+                    }
+
+                    if (rq.Keyword?.Length > 1)
+                    {
+                        var keyword = rq.Keyword;
+
+                        q = q.Where(t => EF.Functions.ILike(t.Title, $"%{keyword}%")
+                            || (t.ReferenceId != null && EF.Functions.ILike(t.ReferenceId, $"%{keyword}%"))
+                        );
+                    }
+
+                    if (filters != null)
+                    {
+                        q = filters(q);
+                    }
+
+                    return q;
+                });
+
+            return query;
+        }
+
+        /// <summary>
+        /// List finance transaction JSON data
+        /// 财务交易列表JSON数据
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<FinanceTransactionListData[]?> ListAsync(FinanceTransactionListRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.List, cancellationToken))
+            {
+                return null;
+            }
+
+            return await CreateQuery(rq)
+                .Select(t => new FinanceTransactionListData
+                {
+                    Id = t.Id,
+                    Kind = t.Kind,
+                    Title = t.Title,
+                    Amount = t.Amount,
+                    Creation = t.Creation,
+                    HappenDate = t.HappenDate
+                }).ToArrayAsync(cancellationToken);
         }
 
         /// <summary>
@@ -193,7 +289,7 @@ namespace CRM.Server.Services
 
             var order = await _db.Orders(orgId).AsNoTracking()
                 .Where(o => o.Id == orderId && o.Status < EntityStatus.Inactivated)
-                .Select(o => new { o.BuyerId, o.Title, o.Currency, o.Amount, o.PaidAmount })
+                .Select(o => new { o.BuyerId, o.Title, o.Currency, o.TotalPayable, o.PaidAmount })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (order == null)
@@ -203,7 +299,7 @@ namespace CRM.Server.Services
 
             var amount = rq.Amount;
 
-            var balance = order.Amount - order.PaidAmount;
+            var balance = order.TotalPayable - order.PaidAmount;
             if (balance <= 0 || amount > balance)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(order.PaidAmount));
@@ -278,13 +374,20 @@ namespace CRM.Server.Services
                     title += $" - {rq.Description}";
                 }
 
+                var oneAmount = item.Amount;
+                if (account.Kind == FinanceAccountKind.Pass || account.Kind == FinanceAccountKind.Prepaid)
+                {
+                    oneAmount = -oneAmount;
+                }
+
                 var trans = new FinanceTransaction
                 {
                     Kind = FinanceTransactionKind.Collect,
                     AccountId = item.AccountId,
                     Title = title,
                     OrderId = orderId,
-                    Amount = item.Amount,
+                    Amount = oneAmount,
+                    HappenDate = rq.HappenDate,
                     AuthorId = User.Oid
                 };
 
@@ -314,7 +417,7 @@ namespace CRM.Server.Services
 
             var po = await _db.POs(orgId).AsNoTracking()
                 .Where(o => o.Id == orderId && o.Status < EntityStatus.Inactivated)
-                .Select(o => new { o.SellerId, o.Title, o.Currency, o.Amount, o.PaidAmount })
+                .Select(o => new { o.SellerId, o.Title, o.Currency, o.TotalPayable, o.PaidAmount })
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (po == null)
@@ -324,7 +427,7 @@ namespace CRM.Server.Services
 
             var amount = rq.Amount;
 
-            var balance = po.Amount - po.PaidAmount;
+            var balance = po.TotalPayable - po.PaidAmount;
             if (balance <= 0 || amount > balance)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(po.PaidAmount));
@@ -395,7 +498,8 @@ namespace CRM.Server.Services
                     AccountId = item.AccountId,
                     Title = title,
                     OrderId = orderId,
-                    Amount = item.Amount,
+                    Amount = -item.Amount,
+                    HappenDate = rq.HappenDate,
                     AuthorId = User.Oid
                 };
 
@@ -515,6 +619,60 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Query finance transactions
+        /// 查询财务交易
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<FinanceTransactionQueryData[]?> QueryAsync(FinanceTransactionQueryRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Query, cancellationToken))
+            {
+                return null;
+            }
+
+            return await CreateQuery(rq, (q) =>
+            {
+                if (rq.CreationStart.HasValue)
+                {
+                    q = q.Where(t => t.Creation >= rq.CreationStart.Value);
+                }
+
+                if (rq.CreationEnd.HasValue)
+                {
+                    q = q.Where(t => t.Creation <= rq.CreationEnd.Value);
+                }
+
+                if (rq.HappenDateStart.HasValue)
+                {
+                    q = q.Where(t => t.HappenDate >= rq.HappenDateStart.Value);
+                }
+
+                if (rq.HappenDateEnd.HasValue)
+                {
+                    q = q.Where(t => t.HappenDate <= rq.HappenDateEnd.Value);
+                }
+
+                return q;
+            })
+            .Select(t => new FinanceTransactionQueryData
+            {
+                Id = t.Id,
+                Kind = t.Kind,
+                Title = t.Title,
+                Amount = t.Amount,
+                ReferenceId = t.ReferenceId,
+                OrderId = t.OrderId,
+                TargetAccountId = t.TargetAccountId,
+                Creation = t.Creation,
+                HappenDate = t.HappenDate,
+                AuthorName = t.Author.Name
+            }).ToArrayAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Reimburse
         /// 报销
         /// </summary>
@@ -610,6 +768,199 @@ namespace CRM.Server.Services
             var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionTransferRQ);
 
             return await ProcessAsync(sourceAccount.PersonId, item, jsonData, cancellationToken);
+        }
+
+        /// <summary>
+        /// View order data for collection
+        /// 浏览订单数据用于收款
+        /// </summary>
+        /// <param name="id">Order id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Data</returns>
+        public async Task<FinanceTransactionViewOrderData?> ViewOrderAsync(long id, CancellationToken cancellationToken)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var order = await _db.Orders(orgId).AsNoTracking()
+                .Where(o => o.Id == id && o.Status < EntityStatus.Inactivated)
+                .Select(o => new FinanceTransactionOrderViewMainData
+                {
+                    Id = o.Id,
+                    CustomerId = o.BuyerId,
+                    CustomerName = o.Buyer.Name,
+                    Title = o.Title,
+                    Payment = o.Payment == null ? null : o.Payment.Title,
+                    PaymentInstruction = o.PaymentInstruction,
+                    Currency = o.Currency,
+                    TotalPayable = o.TotalPayable,
+                    PaidAmount = o.PaidAmount,
+                    Creation = o.Creation,
+
+                    Products = o.OrderLines.GroupBy(ol => ol.ProductId).Select(g => new ProductBomItem
+                    {
+                        ProductId = g.Key,
+                        Qty = g.Sum(ol => ol.Qty)
+                    })
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (order == null)
+            {
+                return null;
+            }
+
+            var currency = order.Currency;
+            var productIds = order.Products.Select(p => p.ProductId).ToArray();
+
+            var orgPersonId = User.Pid;
+            var orgAccounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId
+                        && a.PersonId == orgPersonId
+                        && a.Currency == currency
+                        && a.Status < EntityStatus.Inactivated
+                        && (a.Kind == FinanceAccountKind.Cash || a.Kind == FinanceAccountKind.Transfer || a.Kind == FinanceAccountKind.Super)
+                        && (a.ProductId == null || productIds.Contains(a.ProductId.Value))
+                )
+                .Select(a => new FinanceAccountItem
+                {
+                    Id = a.Id,
+                    Kind = a.Kind,
+                    Bank = a.Bank,
+                    AccountNumber = a.AccountNumber,
+                    ProductId = a.ProductId
+                })
+                .ToArrayAsync(cancellationToken);
+
+            var personId = order.CustomerId;
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId
+                        && a.PersonId == personId
+                        && a.Currency == currency
+                        && a.Status < EntityStatus.Inactivated
+                        && (a.Kind == FinanceAccountKind.Prepaid || a.Kind == FinanceAccountKind.Pass)
+                        && a.Balance > 0
+                        && (a.ProductId == null || productIds.Contains(a.ProductId.Value))
+                )
+                .Select(a => new FinanceAccountItemWithBalance
+                {
+                    Id = a.Id,
+                    Kind = a.Kind,
+                    Bank = a.Bank,
+                    AccountNumber = a.AccountNumber,
+                    ProductId = a.ProductId,
+                    Balance = a.Balance
+                })
+                .ToArrayAsync(cancellationToken);
+
+            return new FinanceTransactionViewOrderData
+            {
+                Order = order,
+                OrgAccounts = orgAccounts,
+                Accounts = accounts
+            };
+        }
+
+        /// <summary>
+        /// View purchase order data for payment
+        /// 浏览采购订单数据用于付款
+        /// </summary>
+        /// <param name="id">Purchase order id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Data</returns>
+        public async Task<FinanceTransactionViewPOData?> ViewPOAsync(long id, CancellationToken cancellationToken)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))
+            {
+                return null;
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var po = await _db.POs(orgId).AsNoTracking()
+                .Where(o => o.Id == id && o.Status < EntityStatus.Inactivated)
+                .Select(o => new FinanceTransactionPOViewMainData
+                {
+                    Id = o.Id,
+                    SupplierId = o.SellerId,
+                    SupplierName = o.Seller.Name,
+                    Title = o.Title,
+                    Payment = o.Payment == null ? null : o.Payment.Title,
+                    PaymentInstruction = o.PaymentInstruction,
+                    Currency = o.Currency,
+                    TotalPayable = o.TotalPayable,
+                    PaidAmount = o.PaidAmount,
+                    Creation = o.Creation,
+
+                    Products = o.OrderLines.GroupBy(ol => ol.ProductId).Select(g => new ProductBomItem
+                    {
+                        ProductId = g.Key,
+                        Qty = g.Sum(ol => ol.Qty)
+                    })
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (po == null)
+            {
+                return null;
+            }
+
+            var currency = po.Currency;
+            var productIds = po.Products.Select(p => p.ProductId).ToArray();
+
+            var orgPersonId = User.Pid;
+            var orgAccounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId
+                        && a.PersonId == orgPersonId
+                        && a.Currency == currency
+                        && a.Status < EntityStatus.Inactivated
+                        && (a.Kind == FinanceAccountKind.Cash || a.Kind == FinanceAccountKind.Transfer || a.Kind == FinanceAccountKind.Super)
+                        && a.Balance > 0
+                        && (a.ProductId == null || productIds.Contains(a.ProductId.Value))
+                )
+                .Select(a => new FinanceAccountItem
+                {
+                    Id = a.Id,
+                    Kind = a.Kind,
+                    Bank = a.Bank,
+                    AccountNumber = a.AccountNumber,
+                    ProductId = a.ProductId
+                })
+                .ToArrayAsync(cancellationToken);
+
+            var personId = po.SupplierId;
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId
+                        && a.PersonId == personId
+                        && a.Currency == currency
+                        && a.Status < EntityStatus.Inactivated
+                        && (a.Kind == FinanceAccountKind.Prepaid || a.Kind == FinanceAccountKind.Pass)
+                        && a.Balance > 0
+                        && (a.ProductId == null || productIds.Contains(a.ProductId.Value))
+                )
+                .Select(a => new FinanceAccountItemWithBalance
+                {
+                    Id = a.Id,
+                    Kind = a.Kind,
+                    Bank = a.Bank,
+                    AccountNumber = a.AccountNumber,
+                    ProductId = a.ProductId,
+                    Balance = a.Balance
+                })
+                .ToArrayAsync(cancellationToken);
+
+            return new FinanceTransactionViewPOData
+            {
+                Order = po,
+                OrgAccounts = orgAccounts,
+                Accounts = accounts
+            };
         }
     }
 }

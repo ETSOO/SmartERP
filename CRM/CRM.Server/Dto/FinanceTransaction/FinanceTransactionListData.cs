@@ -3,10 +3,10 @@
 namespace CRM.Server.Dto.FinanceTransaction
 {
     /// <summary>
-    /// Finance transaction item
-    /// 财务交易项
+    /// Finance transaction list data
+    /// 财务交易列表数据
     /// </summary>
-    public record FinanceTransactionItem
+    public record FinanceTransactionListData
     {
         /// <summary>
         /// Id
@@ -36,6 +36,12 @@ namespace CRM.Server.Dto.FinanceTransaction
         /// Creation
         /// 登记时间
         /// </summary>
-        public DateTimeOffset Creation { get; set; }
+        public DateTimeOffset Creation { get; init; }
+
+        /// <summary>
+        /// Happen date
+        /// 发生日期
+        /// </summary>
+        public DateTimeOffset? HappenDate { get; init; }
     }
 }

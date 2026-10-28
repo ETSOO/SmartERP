@@ -812,6 +812,7 @@ namespace CRM.Server.Services
                      EndDate = p.EndDate,
                      Currency = p.Currency,
                      Amount = p.Amount,
+                     TotalPayable = p.TotalPayable,
                      PaidAmount = p.PaidAmount,
                      Discount = p.Discount,
                      LineDiscount = p.LineDiscount,

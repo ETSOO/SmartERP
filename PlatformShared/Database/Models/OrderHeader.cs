@@ -132,10 +132,16 @@ namespace PlatformShared.Database.Models
         public string Currency { get; set; } = default!;
 
         /// <summary>
-        /// Amount without discount
-        /// 总金额（不含折扣）
+        /// Amount excluding discount
+        /// 总金额（扣除折扣）
         /// </summary>
         public decimal Amount { get; set; }
+
+        /// <summary>
+        /// Total payable
+        /// 应付总额
+        /// </summary>
+        public decimal TotalPayable { get; set; }
 
         /// <summary>
         /// Paid amount

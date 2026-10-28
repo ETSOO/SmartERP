@@ -95,6 +95,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Title)
                 .HasMaxLength(128)
                 .HasColumnName("title");
+            entity.Property(e => e.TotalPayable)
+                .HasComputedColumnSql("((amount + tax_amount) - approved_discount)", true)
+                .HasColumnName("total_payable");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Address).WithMany(p => p.OrderHeaders)

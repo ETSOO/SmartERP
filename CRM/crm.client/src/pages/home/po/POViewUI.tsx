@@ -20,6 +20,7 @@ import CelebrationIcon from "@mui/icons-material/Celebration";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CalculateIcon from "@mui/icons-material/Calculate";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { EntityStatus } from "@etsoo/appscript";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -39,6 +40,7 @@ export function POViewUI(props: POViewUIProps) {
     "confirmAction",
     "description",
     "edit",
+    "financeTransactionKindPayment",
     "promotions",
     "recalculate"
   );
@@ -242,6 +244,16 @@ export function POViewUI(props: POViewUIProps) {
                   {labels.addPOLine}
                 </Button>
               )}
+              {app.owns(Permissions.Finance.Transaction) &&
+                data.paidAmount < data.totalPayable && (
+                  <ButtonLink
+                    startIcon={<PointOfSaleIcon />}
+                    variant="outlined"
+                    href={`./../../collect/${data.id}`}
+                  >
+                    {labels.financeTransactionKindPayment}
+                  </ButtonLink>
+                )}
             </HBox>
           ),
           singleRow: true

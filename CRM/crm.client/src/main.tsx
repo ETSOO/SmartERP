@@ -278,6 +278,14 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/order/collect/:id",
+            lazy: async () => {
+              const OrderCollect =
+                await import("./pages/home/order/OrderCollect");
+              return { Component: OrderCollect.default };
+            }
+          },
+          {
             path: "/home/order/edit/:id",
             lazy: async () => {
               const EditOrder = await import("./pages/home/order/SubmitOrder");
@@ -450,6 +458,13 @@ const router = createDynamicRouter([
             lazy: async () => {
               const ViewPO = await import("./pages/home/po/ViewPO");
               return { Component: ViewPO.default };
+            }
+          },
+          {
+            path: "/home/po/pay/:id",
+            lazy: async () => {
+              const POPay = await import("./pages/home/po/POPay");
+              return { Component: POPay.default };
             }
           },
           {

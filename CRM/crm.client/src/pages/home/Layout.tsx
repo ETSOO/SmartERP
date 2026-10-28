@@ -84,6 +84,8 @@ export default function Home() {
     "editLogo",
     "editProfile",
     "finance",
+    "financeTransactionKindCollect",
+    "financeTransactionKindPayment",
     "history",
     "info",
     "inventory",
@@ -446,6 +448,12 @@ export default function Home() {
             hidden: true
           },
           {
+            segment: "collect",
+            pattern: "collect/:id",
+            title: labels.financeTransactionKindCollect,
+            hidden: true
+          },
+          {
             segment: "payment",
             title: labels.orderPayments,
             hidden: true,
@@ -536,6 +544,12 @@ export default function Home() {
             segment: "view",
             pattern: "view/:id",
             title: labels.view,
+            hidden: true
+          },
+          {
+            segment: "pay",
+            pattern: "pay/:id",
+            title: labels.financeTransactionKindPayment,
             hidden: true
           },
           {

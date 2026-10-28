@@ -20,6 +20,7 @@ import CelebrationIcon from "@mui/icons-material/Celebration";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CalculateIcon from "@mui/icons-material/Calculate";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { EntityStatus } from "@etsoo/appscript";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -41,6 +42,7 @@ export function OrderViewUI(props: OrderViewUIProps) {
     "confirmAction",
     "description",
     "edit",
+    "financeTransactionKindCollect",
     "promotions",
     "recalculate"
   );
@@ -246,6 +248,16 @@ export function OrderViewUI(props: OrderViewUIProps) {
                   {labels.addOrderLine}
                 </Button>
               )}
+              {app.owns(Permissions.Finance.Transaction) &&
+                data.paidAmount < data.totalPayable && (
+                  <ButtonLink
+                    startIcon={<PointOfSaleIcon />}
+                    variant="outlined"
+                    href={`./../../collect/${data.id}`}
+                  >
+                    {labels.financeTransactionKindCollect}
+                  </ButtonLink>
+                )}
               {app.owns(Permissions.Order.Document) && (
                 <DocumentGeneratorButton
                   action={(id, targetId) =>

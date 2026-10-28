@@ -24,7 +24,7 @@ namespace Platform.Server.Models.Configurations
                 .HasIdentityOptions(1001L, null, null, null, null, null)
                 .HasColumnName("id");
             entity.Property(e => e.AccountNumber)
-                .HasMaxLength(20)
+                .HasMaxLength(40)
                 .HasColumnName("account_number");
             entity.Property(e => e.Balance)
                 .HasPrecision(18, 2)

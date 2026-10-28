@@ -49,6 +49,11 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("currency");
             entity.Property(e => e.Amount)
                 .HasColumnName("amount");
+            entity.Property(e => e.TotalPayable)
+                .HasComputedColumnSql(
+                    "((amount + tax_amount) - approved_discount)",
+                    stored: true)
+                .HasColumnName("total_payable");
             entity.Property(e => e.PaidAmount)
                 .HasColumnName("paid_amount");
             entity.Property(e => e.Discount)

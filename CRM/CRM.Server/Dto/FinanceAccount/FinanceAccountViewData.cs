@@ -105,11 +105,5 @@ namespace CRM.Server.Dto.FinanceAccount
         /// 刷新时间
         /// </summary>
         public DateTimeOffset? RefreshTime { get; init; }
-
-        /// <summary>
-        /// Transactions
-        /// 交易项
-        /// </summary>
-        public required IEnumerable<FinanceTransactionItem> Transactions { get; init; }
     }
 }

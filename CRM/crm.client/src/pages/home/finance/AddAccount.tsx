@@ -11,7 +11,7 @@ import { useFormik } from "formik";
 import React from "react";
 import Grid from "@mui/material/Grid";
 import { StatusList } from "@etsoo/smarterp-core/components";
-import { IdActionResult, Utils } from "@etsoo/shared";
+import { DataTypes, IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
 import {
   FinanceAccountCreateRQ,
   FinanceAccountKind,
@@ -184,7 +184,23 @@ export default function AddAccount() {
           value={formik.values.kind}
           fullWidth
           required
-          onChange={formik.handleChange}
+          onChange={(event) => {
+            const kind = NumberUtils.parse(
+              event.target.value
+            ) as FinanceAccountKind;
+            if (!isEditing) {
+              refs.bank.current!.value =
+                kind === FinanceAccountKind.Cash ||
+                kind === FinanceAccountKind.Pass ||
+                kind === FinanceAccountKind.Prepaid
+                  ? (DataTypes.getEnumKey(
+                      FinanceAccountKind,
+                      kind
+                    )?.toUpperCase() ?? "")
+                  : "";
+            }
+            formik.handleChange(event);
+          }}
           disabled={isCash}
         />
       </Grid>

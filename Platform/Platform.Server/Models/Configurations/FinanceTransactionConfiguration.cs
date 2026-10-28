@@ -28,6 +28,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
+            entity.Property(e => e.HappenDate).HasColumnName("happen_date");
             entity.Property(e => e.InnerRef).HasColumnName("inner_ref");
             entity.Property(e => e.Kind).HasColumnName("kind");
             entity.Property(e => e.OffsetId).HasColumnName("offset_id");

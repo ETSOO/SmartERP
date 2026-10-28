@@ -36,6 +36,12 @@ namespace CRM.Server.RQ.FinanceTransaction
         public string? Description { get; init; }
 
         /// <summary>
+        /// Happen date
+        /// 发生日期
+        /// </summary>
+        public DateTimeOffset? HappenDate { get; init; }
+
+        /// <summary>
         /// Validate the model
         /// 验证模块
         /// </summary>
@@ -45,6 +51,11 @@ namespace CRM.Server.RQ.FinanceTransaction
             if (Amount <= 0)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Amount));
+            }
+
+            if (HappenDate.HasValue && HappenDate >= DateTimeOffset.Now)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(HappenDate));
             }
 
             var calculatedAmount = 0M;

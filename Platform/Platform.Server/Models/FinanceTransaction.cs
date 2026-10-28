@@ -33,6 +33,8 @@ public partial class FinanceTransaction
 
     public long? OffsetId { get; set; }
 
+    public DateTime? HappenDate { get; set; }
+
     public virtual FinanceAccount Account { get; set; } = null!;
 
     public virtual Person Author { get; set; } = null!;

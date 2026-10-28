@@ -77,9 +77,15 @@ namespace CRM.Server.Dto.Order
 
         /// <summary>
         /// Amount
-        /// 总金额
+        /// 金额
         /// </summary>
         public decimal Amount { get; init; }
+
+        /// <summary>
+        /// Total payable
+        /// 应付总额
+        /// </summary>
+        public decimal TotalPayable { get; init; }
 
         /// <summary>
         /// Tax amount

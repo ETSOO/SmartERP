@@ -134,6 +134,12 @@
         public long? OffsetId { get; set; }
 
         /// <summary>
+        /// Happen date
+        /// 发生日期
+        /// </summary>
+        public DateTimeOffset? HappenDate { get; set; }
+
+        /// <summary>
         /// Account
         /// 账户
         /// </summary>

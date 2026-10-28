@@ -2,6 +2,7 @@
 using CRM.Server.Dto.Customer;
 using CRM.Server.Dto.Dept;
 using CRM.Server.Dto.FinanceAccount;
+using CRM.Server.Dto.FinanceTransaction;
 using CRM.Server.Dto.Group;
 using CRM.Server.Dto.Order;
 using CRM.Server.Dto.OrderDelivery;
@@ -118,7 +119,13 @@ namespace CRM.Server
     [JsonSerializable(typeof(FinanceAccountUpdateRQ))]
 
     // Finance transaction
+    [JsonSerializable(typeof(FinanceTransactionListData[]))]
+    [JsonSerializable(typeof(FinanceTransactionQueryData[]))]
+    [JsonSerializable(typeof(FinanceTransactionViewOrderData))]
+    [JsonSerializable(typeof(FinanceTransactionViewPOData))]
+
     [JsonSerializable(typeof(FinanceTransactionAdjustRQ))]
+    [JsonSerializable(typeof(FinanceTransactionListRQ))]
     [JsonSerializable(typeof(FinanceTransactionOffsetRQ))]
     [JsonSerializable(typeof(FinanceTransactionPayOrderRQ))]
     [JsonSerializable(typeof(FinanceTransactionPayPORQ))]

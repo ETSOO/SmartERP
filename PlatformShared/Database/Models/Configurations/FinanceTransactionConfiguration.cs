@@ -50,6 +50,7 @@ namespace PlatformShared.Database.Models.Configurations
 
             entity.Property(e => e.OffsetId).HasColumnName("offset_id");
 
+            entity.Property(e => e.HappenDate).HasColumnName("happen_date");
 
             entity.HasOne(d => d.Account).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.AccountId)

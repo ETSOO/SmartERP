@@ -31,6 +31,12 @@ namespace CRM.Server.Endpoints
             g.MapPost("Transfer", (IFinanceTransactionService service, FinanceTransactionTransferRQ rq, CancellationToken cancellationToken) => service.TransferAsync(rq, cancellationToken))
                 .WithDescription("Transfer / 转账").WithTags("FinanceTransaction");
 
+            g.MapGet("ViewOrder/{id:long}", (IFinanceTransactionService service, long id, CancellationToken cancellationToken) => service.ViewOrderAsync(id, cancellationToken))
+                .WithDescription("View order for collection / 浏览订单用于收款").WithTags("FinanceTransaction");
+
+            g.MapGet("ViewPO/{id:long}", (IFinanceTransactionService service, long id, CancellationToken cancellationToken) => service.ViewPOAsync(id, cancellationToken))
+                .WithDescription("View purchase order for payment / 浏览采购订单用于付款").WithTags("FinanceTransaction");
+
             return builder;
         }
     }

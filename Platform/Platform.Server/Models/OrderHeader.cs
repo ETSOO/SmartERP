@@ -77,6 +77,8 @@ public partial class OrderHeader
 
     public short Kind { get; set; }
 
+    public decimal TotalPayable { get; set; }
+
     public virtual PersonAddress? Address { get; set; }
 
     public virtual Person Buyer { get; set; } = null!;

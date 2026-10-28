@@ -3,12 +3,9 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Database;
-using com.etsoo.Utils;
 using com.etsoo.Utils.Actions;
-using com.etsoo.Utils.String;
 using CRM.Server.Application;
 using CRM.Server.Dto.FinanceAccount;
-using CRM.Server.Dto.FinanceTransaction;
 using CRM.Server.RQ.FinanceAccount;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -529,15 +526,7 @@ namespace CRM.Server.Services
                     Creation = a.Creation,
                     ProductId = a.ProductId,
                     ProductName = a.Product == null ? null : a.Product.Name,
-                    RefreshTime = a.RefreshTime,
-                    Transactions = a.Transactions.OrderByDescending(t => t.Id).Take(8).Select(t => new FinanceTransactionItem
-                    {
-                        Id = t.Id,
-                        Kind = t.Kind,
-                        Title = t.Title,
-                        Amount = t.Amount,
-                        Creation = t.Creation
-                    }).ToArray()
+                    RefreshTime = a.RefreshTime
                 }).FirstOrDefaultAsync(cancellationToken);
         }
 
