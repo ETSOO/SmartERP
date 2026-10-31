@@ -631,6 +631,7 @@ namespace CRM.Server.Services
                 TaxAmount = o.TaxAmount,
                 Status = o.Status,
                 StartDate = o.StartDate,
+                EndDate = o.EndDate,
                 Creation = o.Creation
             }).ToArrayAsync(cancellationToken);
         }

@@ -29,5 +29,17 @@
         /// 发生日期结束
         /// </summary>
         public DateTimeOffset? HappenDateEnd { get; init; }
+
+        /// <summary>
+        /// Amount start
+        /// 开始金额
+        /// </summary>
+        public decimal? AmountStart { get; init; }
+
+        /// <summary>
+        /// Amount end
+        /// 结束金额
+        /// </summary>
+        public decimal? AmountEnd { get; init; }
     }
 }

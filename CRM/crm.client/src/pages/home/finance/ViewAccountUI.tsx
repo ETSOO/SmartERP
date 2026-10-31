@@ -7,8 +7,10 @@ import {
 import { app } from "../../../app/MyApp";
 import { GridDataType } from "@etsoo/react";
 import EditIcon from "@mui/icons-material/Edit";
+import BuildIcon from "@mui/icons-material/Build";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Button from "@mui/material/Button";
+import React from "react";
 
 export function ViewAccountUI({
   data,
@@ -18,7 +20,12 @@ export function ViewAccountUI({
   refresh: () => Promise<void>;
 }) {
   // Labels
-  const labels = app.getLabels("copyPaymentInfo", "edit");
+  const labels = app.getLabels(
+    "copyPaymentInfo",
+    "edit",
+    "financeTransactionKindAdjustment",
+    "financeTransactionKindInit"
+  );
 
   // Layout
   return (
@@ -69,13 +76,24 @@ export function ViewAccountUI({
                 </Button>
               )}
               {app.owns(Permissions.Finance.Edit) && (
-                <ButtonLink
-                  startIcon={<EditIcon />}
-                  variant="outlined"
-                  href={`./../../editaccount/${data.id}`}
-                >
-                  {labels.edit}
-                </ButtonLink>
+                <React.Fragment>
+                  <ButtonLink
+                    startIcon={<BuildIcon />}
+                    variant="outlined"
+                    href={`./../../editaccount/${data.id}`}
+                  >
+                    {item.refreshTime == null
+                      ? labels.financeTransactionKindInit
+                      : labels.financeTransactionKindAdjustment}
+                  </ButtonLink>
+                  <ButtonLink
+                    startIcon={<EditIcon />}
+                    variant="outlined"
+                    href={`./../../editaccount/${data.id}`}
+                  >
+                    {labels.edit}
+                  </ButtonLink>
+                </React.Fragment>
               )}
             </HBox>
           ),

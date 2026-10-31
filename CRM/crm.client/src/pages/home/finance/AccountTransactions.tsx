@@ -7,8 +7,8 @@ import {
   SearchField
 } from "@etsoo/materialui";
 import { GridCellRendererProps, ScrollerListForwardRef } from "@etsoo/react";
-import { DataTypes } from "@etsoo/shared";
-import { DefaultUI } from "@etsoo/smarterp-core/components";
+import { DataTypes, DateUtils } from "@etsoo/shared";
+import { DefaultUI, UserTiplist } from "@etsoo/smarterp-core/components";
 import { FinanceTransactionQueryData, OrderKind } from "@etsoo/smarterp-crm";
 import { app } from "../../../app/MyApp";
 import { BoxProps } from "@mui/material/Box";
@@ -18,7 +18,12 @@ import ArticleIcon from "@mui/icons-material/Article";
 import Typography from "@mui/material/Typography";
 
 const template = {
-  keyword: "string"
+  keyword: "string",
+  authorId: "number",
+  amountStart: "number",
+  amountEnd: "number",
+  happenDateStart: "date",
+  happenDateEnd: "date"
 } as const satisfies DataTypes.BasicTemplate;
 
 export type AllOrderLinesProps = {
@@ -68,6 +73,31 @@ export function AccountTransactions(props: AllOrderLinesProps) {
           name="keyword"
           defaultValue={data.keyword}
           minChars={2}
+        />,
+        <UserTiplist search name="authorId" idValue={data.authorId} />,
+        <SearchField
+          label={labels.amount}
+          name="amountStart"
+          type="number"
+          defaultValue={data.amountStart}
+        />,
+        <SearchField
+          label=""
+          name="amountEnd"
+          type="number"
+          defaultValue={data.amountEnd}
+        />,
+        <SearchField
+          label={labels.happenDate}
+          name="happenDateStart"
+          type="date"
+          defaultValue={DateUtils.formatForInput(data.happenDateStart)}
+        />,
+        <SearchField
+          label=""
+          name="happenDateEnd"
+          type="date"
+          defaultValue={DateUtils.formatForInput(data.happenDateEnd)}
         />
       ]}
       loadData={(data) =>

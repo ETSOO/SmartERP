@@ -146,6 +146,11 @@ namespace CRM.Server.Services
                         q = q.Where(t => t.InnerRef == rq.InnerRef.Value);
                     }
 
+                    if (rq.AuthorId.HasValue)
+                    {
+                        q = q.Where(t => t.AuthorId == rq.AuthorId.Value);
+                    }
+
                     if (rq.Keyword?.Length > 1)
                     {
                         var keyword = rq.Keyword;
@@ -728,6 +733,21 @@ namespace CRM.Server.Services
                     q = q.Where(t => t.HappenDate <= rq.HappenDateEnd.Value);
                 }
 
+                if (rq.AmountStart.HasValue)
+                {
+                    q = q.Where(t => t.Amount >= rq.AmountStart.Value);
+                }
+
+                if (rq.AmountStart.HasValue)
+                {
+                    q = q.Where(t => t.Amount >= rq.AmountStart.Value);
+                }
+
+                if (rq.AmountEnd.HasValue)
+                {
+                    q = q.Where(t => t.Amount < rq.AmountEnd.Value);
+                }
+
                 return q;
             })
             .Select(t => new FinanceTransactionQueryData
@@ -784,8 +804,8 @@ namespace CRM.Server.Services
                     AuthorName = t.Author.Name,
                     OffsetId = t.OffsetId,
                     OffsetSourceId = t.Kind == FinanceTransactionKind.Offset ? _db.FinanceTransactions.Where(ft => ft.Account.CoreOrganizationId == orgId && ft.OffsetId == t.Id).Select(ft => ft.Id).FirstOrDefault() : null,
-                    InnerRefs = t.InnerRef == null ? null : _db.FinanceTransactions.Where(ft => ft.Account.CoreOrganizationId == orgId && ft.InnerRef == t.InnerRef && ft.Id != t.Id)
-                        .Select(i => new IdLabelLongItem { Id = i.Id, Label = i.Title }).ToArray()
+                    InnerRefs = t.InnerRef == null ? null : _db.FinanceTransactions.Where(ft => ft.Account.CoreOrganizationId == orgId && ft.InnerRef == t.InnerRef)
+                        .Select(i => new FinanceTransactionViewDataRefItem { Id = i.Id, AccountKind = i.Account.Kind, Bank = i.Account.Bank, Amount = i.Amount }).ToArray()
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }

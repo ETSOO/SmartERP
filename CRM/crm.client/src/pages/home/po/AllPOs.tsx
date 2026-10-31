@@ -286,7 +286,7 @@ export default function AllPOs() {
                   {app.formatDate(data.startDate) ?? "-"}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {app.formatDate(data.creation)}
+                  {app.formatDate(data.endDate)}
                 </Typography>
               </React.Fragment>
             );
@@ -367,7 +367,7 @@ export default function AllPOs() {
               </Typography>
               <Typography variant="body2">
                 {labels.startDate}: {app.formatDate(data.startDate) ?? "-"} /{" "}
-                {app.formatDate(data.creation)}
+                {app.formatDate(data.endDate)}
               </Typography>
             </React.Fragment>
           ];

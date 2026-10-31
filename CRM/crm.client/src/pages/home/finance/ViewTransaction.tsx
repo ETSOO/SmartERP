@@ -9,6 +9,7 @@ import {
   OrderKind,
   Permissions
 } from "@etsoo/smarterp-crm";
+import Grid from "@mui/material/Grid";
 
 export default function ViewTransaction() {
   // Route
@@ -110,6 +111,27 @@ export default function ViewTransaction() {
       ]}
       loadData={loadData}
       actions={(data, refresh) => <React.Fragment></React.Fragment>}
-    ></ViewPage>
+    >
+      {(data) =>
+        data.innerRefs != null && (
+          <Grid container>
+            {data.innerRefs.map((i) => {
+              const content = `[${app.finance.getAccountKind(i.accountKind)}] ${app.formatNumber(i.amount)}, ${i.bank}`;
+              return (
+                <Grid size={{ xs: 12, sm: 6, md: 4, xl: 2 }} key={i.id}>
+                  {i.id === id ? (
+                    <Typography variant="body2">{content}</Typography>
+                  ) : (
+                    <LinkEx variant="body2" to={`./../${i.id}`}>
+                      {content}
+                    </LinkEx>
+                  )}
+                </Grid>
+              );
+            })}
+          </Grid>
+        )
+      }
+    </ViewPage>
   );
 }

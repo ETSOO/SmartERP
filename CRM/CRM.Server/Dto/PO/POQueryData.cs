@@ -105,6 +105,12 @@ namespace CRM.Server.Dto.PO
         public DateTimeOffset? StartDate { get; init; }
 
         /// <summary>
+        /// End date
+        /// 结束日期
+        /// </summary>
+        public DateTimeOffset? EndDate { get; init; }
+
+        /// <summary>
         /// Creation
         /// 登记时间
         /// </summary>

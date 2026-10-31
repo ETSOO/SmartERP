@@ -381,7 +381,7 @@ export default function AllOrders() {
               </Typography>
               <Typography variant="body2">
                 {labels.startDate}: {app.formatDate(data.startDate) ?? "-"} /{" "}
-                {app.formatDate(data.creation)}
+                {app.formatDate(data.endDate)}
               </Typography>
             </React.Fragment>
           ];

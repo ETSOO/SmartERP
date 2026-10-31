@@ -51,5 +51,11 @@ namespace CRM.Server.RQ.FinanceTransaction
         /// 内部引用编号
         /// </summary>
         public Guid? InnerRef { get; init; }
+
+        /// <summary>
+        /// Author id
+        /// 作者编号
+        /// </summary>
+        public long? AuthorId { get; init; }
     }
 }

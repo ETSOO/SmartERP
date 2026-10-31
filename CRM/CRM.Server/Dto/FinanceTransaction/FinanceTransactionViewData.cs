@@ -1,8 +1,38 @@
-﻿using com.etsoo.Utils.Models;
-using PlatformShared.Database.Models;
+﻿using PlatformShared.Database.Models;
 
 namespace CRM.Server.Dto.FinanceTransaction
 {
+    /// <summary>
+    /// Finance transaction view reference item data
+    /// 财务交易浏览引用项目数据
+    /// </summary>
+    public record FinanceTransactionViewDataRefItem
+    {
+        /// <summary>
+        /// Id
+        /// 编号
+        /// </summary>
+        public long Id { get; init; }
+
+        /// <summary>
+        /// Account kind
+        /// 账户类型
+        /// </summary>
+        public FinanceAccountKind AccountKind { get; init; }
+
+        /// <summary>
+        /// Bank
+        /// 开户银行
+        /// </summary>
+        public required string Bank { get; init; }
+
+        /// <summary>
+        /// Amount
+        /// 金额
+        /// </summary>
+        public decimal Amount { get; init; }
+    }
+
     /// <summary>
     /// Finance transaction view data
     /// 财务交易浏览数据
@@ -115,6 +145,6 @@ namespace CRM.Server.Dto.FinanceTransaction
         /// Inner referred items
         /// 内部引用的项目
         /// </summary>
-        public IdLabelLongItem[]? InnerRefs { get; init; }
+        public FinanceTransactionViewDataRefItem[]? InnerRefs { get; init; }
     }
 }
