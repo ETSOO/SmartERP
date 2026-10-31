@@ -43,6 +43,12 @@
         Adjustment = 77,
 
         /// <summary>
+        /// Offset
+        /// 冲减
+        /// </summary>
+        Offset = 89,
+
+        /// <summary>
         /// Init
         /// 初始化
         /// </summary>
@@ -98,18 +104,6 @@
         public string? ReferenceId { get; set; }
 
         /// <summary>
-        /// Target person id
-        /// 目标人员编号
-        /// </summary>
-        public long? TargetPersonId { get; set; }
-
-        /// <summary>
-        /// Target account id
-        /// 目标账户编号
-        /// </summary>
-        public int? TargetAccountId { get; set; }
-
-        /// <summary>
         /// Author id
         /// 作者编号
         /// </summary>
@@ -156,17 +150,5 @@
         /// 订单
         /// </summary>
         public OrderHeader? Order { get; set; }
-
-        /// <summary>
-        /// Target account
-        /// 目标账户
-        /// </summary>
-        public FinanceAccount? TargetAccount { get; set; }
-
-        /// <summary>
-        /// Target person
-        /// 目标人员
-        /// </summary>
-        public Person? TargetPerson { get; set; }
     }
 }

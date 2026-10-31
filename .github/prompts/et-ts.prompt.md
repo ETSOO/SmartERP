@@ -14,5 +14,5 @@ Convert to TypeScript type (not interface) with 'export'.
 - No necessary to add 'null' type in TS for nullable types.
 - Keep the exact name of reference type, no necessary to generate it.
 - Change type name 'QueryIntRQ', 'QueryLongRQ' to 'QueryRQ'.
-- Keep all current comments, don't add your comments.
+- Keep all comment content but using TS style, don't add your comments.
 - For DateTime and DateTimeOffset, convert to 'Date | string'.

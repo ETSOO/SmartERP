@@ -921,6 +921,14 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/system/finance/viewtransaction/:id",
+            lazy: async () => {
+              const ViewTransaction =
+                await import("./pages/home/finance/ViewTransaction");
+              return { Component: ViewTransaction.default };
+            }
+          },
+          {
             path: "/home/system/group",
             lazy: async () => {
               const AllGroups = await import("./pages/home/group/AllGroups");

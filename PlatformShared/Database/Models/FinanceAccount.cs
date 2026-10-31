@@ -164,11 +164,5 @@ namespace PlatformShared.Database.Models
         /// 交易
         /// </summary>
         public ICollection<FinanceTransaction> Transactions { get; set; } = default!;
-
-        /// <summary>
-        /// Target transactions
-        /// 目标交易
-        /// </summary>
-        public ICollection<FinanceTransaction> TargetTransactions { get; set; } = default!;
     }
 }

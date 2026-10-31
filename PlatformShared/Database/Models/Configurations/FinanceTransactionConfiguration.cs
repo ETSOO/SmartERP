@@ -36,10 +36,6 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasMaxLength(30)
                 .HasColumnName("reference_id");
 
-            entity.Property(e => e.TargetPersonId).HasColumnName("target_person_id");
-
-            entity.Property(e => e.TargetAccountId).HasColumnName("target_account_id");
-
             entity.Property(e => e.AuthorId).HasColumnName("author_id");
 
             entity.Property(e => e.Creation)
@@ -65,14 +61,6 @@ namespace PlatformShared.Database.Models.Configurations
             entity.HasOne(d => d.Order).WithMany(p => p.FinanceTransactions)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("finance_transaction_order_id_fkey");
-
-            entity.HasOne(d => d.TargetAccount).WithMany(p => p.TargetTransactions)
-                .HasForeignKey(d => d.TargetAccountId)
-                .HasConstraintName("finance_transaction_target_account_id_fkey");
-
-            entity.HasOne(d => d.TargetPerson).WithMany(p => p.TargetTransactions)
-                .HasForeignKey(d => d.TargetPersonId)
-                .HasConstraintName("finance_transaction_target_person_id_fkey");
         }
     }
 }

@@ -1,4 +1,5 @@
 import { CommonPage, TabBox } from "@etsoo/materialui";
+import { AccountTransactions } from "./AccountTransactions";
 import ArticleIcon from "@mui/icons-material/Article";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import React from "react";
@@ -47,7 +48,10 @@ export default function ViewAccount() {
               iconPosition: "start"
             },
             {
-              children: (visible) => visible && <div>Stock Lines Content</div>,
+              children: (visible) =>
+                visible && (
+                  <AccountTransactions accountId={id} refresh={loadData} />
+                ),
               label: labels.transactions,
               icon: <ListAltIcon />,
               iconPosition: "start"

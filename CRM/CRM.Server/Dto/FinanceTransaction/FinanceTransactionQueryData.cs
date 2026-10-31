@@ -27,6 +27,12 @@ namespace CRM.Server.Dto.FinanceTransaction
         public required string Title { get; init; }
 
         /// <summary>
+        /// Currency
+        /// 币种
+        /// </summary>
+        public required string Currency { get; init; }
+
+        /// <summary>
         /// Amount
         /// 金额
         /// </summary>
@@ -45,10 +51,10 @@ namespace CRM.Server.Dto.FinanceTransaction
         public long? OrderId { get; init; }
 
         /// <summary>
-        /// Target account id
-        /// 目标账户编号
+        /// Order kind
+        /// 订单类型
         /// </summary>
-        public int? TargetAccountId { get; init; }
+        public OrderKind? OrderKind { get; set; }
 
         /// <summary>
         /// Creation

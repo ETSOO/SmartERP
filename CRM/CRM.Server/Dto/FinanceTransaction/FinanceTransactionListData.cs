@@ -27,6 +27,12 @@ namespace CRM.Server.Dto.FinanceTransaction
         public required string Title { get; init; }
 
         /// <summary>
+        /// Currency
+        /// 币种
+        /// </summary>
+        public required string Currency { get; init; }
+
+        /// <summary>
         /// Amount
         /// 金额
         /// </summary>

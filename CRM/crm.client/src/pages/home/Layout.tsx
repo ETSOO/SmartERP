@@ -126,7 +126,8 @@ export default function Home() {
     "view",
     "viewAccount",
     "viewOrder",
-    "viewProfile"
+    "viewProfile",
+    "viewTransaction"
   );
 
   // User context / state
@@ -789,6 +790,12 @@ export default function Home() {
                 segment: "viewaccount",
                 pattern: "viewaccount/:id",
                 title: labels.viewAccount,
+                hidden: true
+              },
+              {
+                segment: "viewtransaction",
+                pattern: "viewtransaction/:id",
+                title: labels.viewTransaction,
                 hidden: true
               }
             ]

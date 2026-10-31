@@ -729,12 +729,6 @@ namespace PlatformShared.Database.Models
         public ICollection<StockHeader> Stocks { get; set; } = default!;
 
         /// <summary>
-        /// Target transactions
-        /// 目标交易
-        /// </summary>
-        public ICollection<FinanceTransaction> TargetTransactions { get; set; } = default!;
-
-        /// <summary>
         /// User orders
         /// 用户订单
         /// </summary>

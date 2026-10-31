@@ -121,6 +121,7 @@ namespace CRM.Server
     // Finance transaction
     [JsonSerializable(typeof(FinanceTransactionListData[]))]
     [JsonSerializable(typeof(FinanceTransactionQueryData[]))]
+    [JsonSerializable(typeof(FinanceTransactionViewData))]
     [JsonSerializable(typeof(FinanceTransactionViewOrderData))]
     [JsonSerializable(typeof(FinanceTransactionViewPOData))]
 
