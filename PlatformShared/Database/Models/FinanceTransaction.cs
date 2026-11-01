@@ -43,6 +43,12 @@
         Adjustment = 77,
 
         /// <summary>
+        /// Currency exchange
+        /// 货币兑换
+        /// </summary>
+        CurrencyExchange = 80,
+
+        /// <summary>
         /// Offset
         /// 冲减
         /// </summary>

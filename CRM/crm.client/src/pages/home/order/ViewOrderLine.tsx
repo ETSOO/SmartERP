@@ -125,7 +125,6 @@ function CompleteUI({
             defaultValue={DateUtils.formatForInput(new Date())}
             label={labels.expiry}
           />
-
           <InputField
             fullWidth
             name="description"

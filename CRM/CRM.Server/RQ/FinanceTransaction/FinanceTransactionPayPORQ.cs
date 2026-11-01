@@ -27,7 +27,7 @@ namespace CRM.Server.RQ.FinanceTransaction
         /// Pay items
         /// 付款项目
         /// </summary>
-        public required IEnumerable<FinanceTransactionPayItem> Items { get; init; }
+        public required FinanceTransactionPayItem[] Items { get; init; }
 
         /// <summary>
         /// Description

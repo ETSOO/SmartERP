@@ -17,5 +17,11 @@
         /// 描述
         /// </summary>
         public required string Description { get; init; }
+
+        /// <summary>
+        /// All items at the same time
+        /// 所有项目同时处理
+        /// </summary>
+        public bool? All { get; init; }
     }
 }

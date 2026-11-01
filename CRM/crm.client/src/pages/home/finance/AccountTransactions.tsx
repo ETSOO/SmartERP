@@ -107,7 +107,7 @@ export function AccountTransactions(props: AllOrderLinesProps) {
             ...data,
             queryPaging: {
               batchSize: 20,
-              orderBy: [{ field: "id", desc: false, unique: true }]
+              orderBy: [{ field: "id", desc: true, unique: true }]
             }
           },
           {

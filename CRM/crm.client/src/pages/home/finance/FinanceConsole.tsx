@@ -184,7 +184,14 @@ export default function FinanceConsole() {
                 FinanceAccountKind.Cash,
                 FinanceAccountKind.Transfer,
                 FinanceAccountKind.Super
-              ]
+              ],
+              queryPaging: {
+                batchSize: 20,
+                orderBy: [
+                  { field: "kind", desc: false, unique: false },
+                  { field: "id", desc: false, unique: true }
+                ]
+              }
             },
             {
               defaultValue: [],

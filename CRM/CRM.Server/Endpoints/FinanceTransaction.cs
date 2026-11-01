@@ -1,5 +1,4 @@
-﻿using CRM.Server.RQ.FinanceAccount;
-using CRM.Server.RQ.FinanceTransaction;
+﻿using CRM.Server.RQ.FinanceTransaction;
 using CRM.Server.Services;
 
 namespace CRM.Server.Endpoints
@@ -16,6 +15,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("Adjust", (IFinanceTransactionService service, FinanceTransactionAdjustRQ rq, CancellationToken cancellationToken) => service.AdjustAsync(rq, cancellationToken))
                 .WithDescription("Adjust finance transaction / 调整财务交易").WithTags("FinanceTransaction");
+
+            g.MapPost("CurrencyExchange", (IFinanceTransactionService service, FinanceTransactionCurrencyExchangeRQ rq, CancellationToken cancellationToken) => service.CurrencyExchangeAsync(rq, cancellationToken))
+                .WithDescription("Currency exchange / 货币兑换").WithTags("FinanceTransaction");
 
             g.MapPost("List", (IFinanceTransactionService service, FinanceTransactionListRQ rq, CancellationToken cancellationToken) => service.ListAsync(rq, cancellationToken))
                 .WithDescription("List finance transactions / 列出财务交易").WithTags("FinanceTransaction");
@@ -40,6 +42,9 @@ namespace CRM.Server.Endpoints
 
             g.MapPost("Transfer", (IFinanceTransactionService service, FinanceTransactionTransferRQ rq, CancellationToken cancellationToken) => service.TransferAsync(rq, cancellationToken))
                 .WithDescription("Transfer / 转账").WithTags("FinanceTransaction");
+
+            g.MapPost("Settle", (IFinanceTransactionService service, CancellationToken cancellationToken) => service.SettleAsync(cancellationToken))
+                .WithDescription("Settle / 月结").WithTags("FinanceTransaction");
 
             g.MapGet("ViewOrder/{id:long}", (IFinanceTransactionService service, long id, CancellationToken cancellationToken) => service.ViewOrderAsync(id, cancellationToken))
                 .WithDescription("View order for collection / 浏览订单用于收款").WithTags("FinanceTransaction");

@@ -1,6 +1,7 @@
 ﻿using com.etsoo.CoreFramework.Application;
 using com.etsoo.Utils.Actions;
 using com.etsoo.Utils.Models;
+using com.etsoo.WebUtils.Attributes;
 using CRM.Server.Dto.FinanceTransaction;
 
 namespace CRM.Server.RQ.FinanceTransaction
@@ -24,6 +25,12 @@ namespace CRM.Server.RQ.FinanceTransaction
         public int? TargetAccountId { get; init; }
 
         /// <summary>
+        /// Currency
+        /// 币种
+        /// </summary>
+        public required string Currency { get; init; }
+
+        /// <summary>
         /// Amount
         /// 金额
         /// </summary>
@@ -33,7 +40,7 @@ namespace CRM.Server.RQ.FinanceTransaction
         /// Pay items
         /// 付款项目
         /// </summary>
-        public required IEnumerable<FinanceTransactionPayItem> Items { get; init; }
+        public required FinanceTransactionPayItem[] Items { get; init; }
 
         /// <summary>
         /// Reference id
@@ -45,7 +52,7 @@ namespace CRM.Server.RQ.FinanceTransaction
         /// Description
         /// 描述
         /// </summary>
-        public string? Description { get; init; }
+        public required string Description { get; init; }
 
         /// <summary>
         /// Order / PO id
@@ -60,6 +67,11 @@ namespace CRM.Server.RQ.FinanceTransaction
         /// <returns>Result</returns>
         public IActionResult? Validate()
         {
+            if (!new CurrencyAttribute().IsValid(Currency))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Currency));
+            }
+
             if (Amount <= 0)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(Amount));

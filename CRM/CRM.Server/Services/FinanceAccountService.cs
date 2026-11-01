@@ -266,7 +266,6 @@ namespace CRM.Server.Services
                             nameof(FinanceTransaction.Amount),
                             nameof(FinanceTransaction.AuthorId)
                         ],
-                        PropertiesToIncludeOnUpdate = [],
                         SetOutputIdentity = hasBalance
                     };
 

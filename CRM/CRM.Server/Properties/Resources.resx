@@ -126,6 +126,9 @@
   <data name="Collect" xml:space="preserve">
     <value>Collect</value>
   </data>
+  <data name="CurrencyExchange" xml:space="preserve">
+    <value>Currency Exchange</value>
+  </data>
   <data name="Initialization" xml:space="preserve">
     <value>Initialization</value>
   </data>
@@ -137,6 +140,12 @@
   </data>
   <data name="Payment" xml:space="preserve">
     <value>Payment</value>
+  </data>
+  <data name="Reimbursement" xml:space="preserve">
+    <value>Reimbursement</value>
+  </data>
+  <data name="Settlement" xml:space="preserve">
+    <value>Settlement</value>
   </data>
   <data name="Transfer" xml:space="preserve">
     <value>Transfer</value>

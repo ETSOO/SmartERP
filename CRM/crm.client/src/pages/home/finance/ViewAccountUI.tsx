@@ -9,8 +9,12 @@ import { GridDataType } from "@etsoo/react";
 import EditIcon from "@mui/icons-material/Edit";
 import BuildIcon from "@mui/icons-material/Build";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import PaidIcon from "@mui/icons-material/Paid";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import Button from "@mui/material/Button";
 import React from "react";
+import { AccountTransfer } from "./AccountTransferUI";
+import { AccountAdjust } from "./AccountAdjustUI";
 
 export function ViewAccountUI({
   data,
@@ -24,7 +28,8 @@ export function ViewAccountUI({
     "copyPaymentInfo",
     "edit",
     "financeTransactionKindAdjustment",
-    "financeTransactionKindInit"
+    "financeTransactionKindInit",
+    "financeTransactionKindTransfer"
   );
 
   // Layout
@@ -77,15 +82,34 @@ export function ViewAccountUI({
               )}
               {app.owns(Permissions.Finance.Edit) && (
                 <React.Fragment>
-                  <ButtonLink
+                  <Button
                     startIcon={<BuildIcon />}
                     variant="outlined"
-                    href={`./../../editaccount/${data.id}`}
+                    onClick={(e) =>
+                      AccountAdjust(
+                        data.id,
+                        e.currentTarget.textContent,
+                        refresh
+                      )
+                    }
                   >
                     {item.refreshTime == null
                       ? labels.financeTransactionKindInit
                       : labels.financeTransactionKindAdjustment}
-                  </ButtonLink>
+                  </Button>
+                  <Button
+                    startIcon={<PaidIcon />}
+                    variant="outlined"
+                    onClick={(e) =>
+                      AccountTransfer(
+                        data,
+                        e.currentTarget.textContent,
+                        refresh
+                      )
+                    }
+                  >
+                    {labels.financeTransactionKindTransfer}
+                  </Button>
                   <ButtonLink
                     startIcon={<EditIcon />}
                     variant="outlined"

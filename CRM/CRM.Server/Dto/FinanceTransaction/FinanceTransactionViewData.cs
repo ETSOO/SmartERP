@@ -136,12 +136,6 @@ namespace CRM.Server.Dto.FinanceTransaction
         public long? OffsetId { get; init; }
 
         /// <summary>
-        /// Offset source id
-        /// 冲减源编号
-        /// </summary>
-        public long? OffsetSourceId { get; init; }
-
-        /// <summary>
         /// Inner referred items
         /// 内部引用的项目
         /// </summary>

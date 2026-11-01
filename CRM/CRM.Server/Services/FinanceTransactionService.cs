@@ -3,13 +3,13 @@ using com.etsoo.CoreFramework.Business;
 using com.etsoo.CoreFramework.Models;
 using com.etsoo.CoreFramework.User;
 using com.etsoo.Utils.Actions;
-using com.etsoo.Utils.Models;
 using com.etsoo.Utils.String;
 using CRM.Server.Application;
 using CRM.Server.Dto.FinanceAccount;
 using CRM.Server.Dto.FinanceTransaction;
 using CRM.Server.Dto.Product;
 using CRM.Server.RQ.FinanceTransaction;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.FinanceTransaction;
@@ -98,7 +98,146 @@ namespace CRM.Server.Services
 
             var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionAdjustRQ);
 
-            return await ProcessAsync(item, jsonData, cancellationToken);
+            var (result, _) = await ProcessAsync(item, jsonData, cancellationToken);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Currency exchange
+        /// 货币兑换
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> CurrencyExchangeAsync(FinanceTransactionCurrencyExchangeRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var sourceAccountId = rq.SourceAccountId;
+            var destinationAccountId = rq.DestinationAccountId;
+
+            var orgId = User.OrganizationInt;
+
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId && (a.Id == sourceAccountId || a.Id == destinationAccountId) && a.Status < EntityStatus.Inactivated)
+                .Select(a => new { a.Id, a.PersonId, a.Kind, a.Currency, a.Balance, a.AccountNumber })
+                .ToArrayAsync(cancellationToken);
+
+            var sourceAccount = accounts.FirstOrDefault(a => a.Id == sourceAccountId);
+            if (sourceAccount == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.SourceAccountId));
+            }
+
+            var amount = rq.Amount;
+            var exchangeAmount = rq.ExchangeAmount;
+            if (sourceAccount.Balance < amount)
+            {
+                return ApplicationErrors.InsufficientBalance.AsResult();
+            }
+
+            var destinationAccount = accounts.FirstOrDefault(a => a.Id == destinationAccountId);
+            if (destinationAccount == null)
+            {
+                return ApplicationErrors.NoId.AsResult(nameof(rq.DestinationAccountId));
+            }
+
+            // Same currency
+            if (sourceAccount.Currency != destinationAccount.Currency)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Currency));
+            }
+
+            // Same owner
+            if (sourceAccount.PersonId != destinationAccount.PersonId)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.PersonId));
+            }
+
+            var sKind = sourceAccount.Kind;
+            var dKind = destinationAccount.Kind;
+            if (sKind != dKind)
+            {
+                if (sKind == FinanceAccountKind.Cash && dKind != FinanceAccountKind.Transfer && dKind != FinanceAccountKind.Super)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Kind));
+                }
+                else if (sKind == FinanceAccountKind.Transfer && dKind != FinanceAccountKind.Super)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Kind));
+                }
+                else if (sKind == FinanceAccountKind.Super && dKind != FinanceAccountKind.Cash && dKind != FinanceAccountKind.Transfer)
+                {
+                    return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Kind));
+                }
+            }
+
+            var title = $"{Properties.Resources.CurrencyExchange} {rq.ExchangeRate} ({StringUtils.HideData(sourceAccount.AccountNumber)} -> {StringUtils.HideData(destinationAccount.AccountNumber)}) - {rq.Description}";
+            var innerRef = Guid.NewGuid();
+
+            var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionCurrencyExchangeRQ);
+
+            var referenceId = rq.ReferenceId?.ToUpper();
+
+            var sourceItem = new FinanceTransaction
+            {
+                Kind = FinanceTransactionKind.CurrencyExchange,
+                AccountId = sourceAccountId,
+                Title = title,
+                Amount = -amount,
+                ReferenceId = referenceId,
+                InnerRef = innerRef,
+                AuthorId = User.Oid
+            };
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var (result, id) = await ProcessBaseAsync(sourceItem, jsonData, false, cancellationToken);
+
+                if (result.Ok)
+                {
+                    var targetItem = new FinanceTransaction
+                    {
+                        Kind = FinanceTransactionKind.Transfer,
+                        AccountId = destinationAccountId,
+                        Title = title,
+                        Amount = exchangeAmount,
+                        ReferenceId = referenceId,
+                        InnerRef = innerRef,
+                        AuthorId = User.Oid
+                    };
+
+                    (result, id) = await ProcessBaseAsync(targetItem, jsonData, true, cancellationToken);
+                }
+
+                if (result.Ok)
+                {
+                    // Commit
+                    await transaction.CommitAsync(cancellationToken);
+                }
+                else
+                {
+                    // Rollback
+                    await transaction.RollbackAsync(cancellationToken);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
         }
 
         private IQueryable<FinanceTransaction> CreateQuery(FinanceTransactionListRQ rq, Func<IQueryable<FinanceTransaction>, IQueryable<FinanceTransaction>>? filters = null)
@@ -200,8 +339,8 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
-        /// Offset
-        /// 冲减
+        /// Offset / Refund
+        /// 冲减 / 退款
         /// </summary>
         /// <param name="rq">Request data</param>
         /// <param name="cancellationToken">Cancellation token</param>
@@ -219,16 +358,17 @@ namespace CRM.Server.Services
 
             // Item
             var item = await _db.FinanceTransactions(orgId).AsNoTracking()
-                .Where(t => t.Id == id && t.OffsetId == null && t.Kind != FinanceTransactionKind.Offset)
-                .Select(t => new
+                .Where(t => t.Id == id && t.OffsetId == null && t.Kind != FinanceTransactionKind.Offset && t.Kind != FinanceTransactionKind.Settlement)
+                .Select(t => new FinanceTransactionOffsetItem
                 {
-                    t.Account.PersonId,
-                    t.Kind,
-                    t.AccountId,
-                    t.Title,
-                    t.Amount,
-                    t.OrderId,
-                    t.ReferenceId
+                    Id = t.Id,
+                    Kind = t.Kind,
+                    AccountId = t.AccountId,
+                    Title = t.Title,
+                    Amount = t.Amount,
+                    OrderId = t.OrderId,
+                    ReferenceId = t.ReferenceId,
+                    InnerRef = t.InnerRef
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -237,18 +377,29 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.Id));
             }
 
-            var title = item.Title + $" ({Properties.Resources.Offset})";
+            var items = new List<FinanceTransactionOffsetItem> { item };
 
-            var newItem = new FinanceTransaction
+            var innerRef = item.InnerRef;
+
+            if (innerRef.HasValue && rq.All is true)
             {
-                Kind = FinanceTransactionKind.Offset,
-                AccountId = item.AccountId,
-                Title = title,
-                Amount = -item.Amount,
-                OrderId = item.OrderId,
-                ReferenceId = item.ReferenceId,
-                AuthorId = User.Oid
-            };
+                var innerItems = await _db.FinanceTransactions(orgId).AsNoTracking()
+                    .Where(t => t.InnerRef == innerRef && t.Id != id && t.OffsetId == null)
+                    .Select(t => new FinanceTransactionOffsetItem
+                    {
+                        Id = t.Id,
+                        Kind = t.Kind,
+                        AccountId = t.AccountId,
+                        Title = t.Title,
+                        Amount = t.Amount,
+                        OrderId = t.OrderId,
+                        ReferenceId = t.ReferenceId,
+                        InnerRef = t.InnerRef
+                    })
+                    .ToArrayAsync(cancellationToken);
+
+                items.AddRange(innerItems);
+            }
 
             var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionOffsetRQ);
 
@@ -256,35 +407,51 @@ namespace CRM.Server.Services
 
             try
             {
-                var result = await ProcessBaseAsync(newItem, jsonData, cancellationToken);
+                var len = items.Count;
 
-                if (result.Ok)
+                for (var i = 0; i < len; i++)
                 {
-                    var offsetId = result.Data.Get<long>("id");
-                    if (offsetId.HasValue)
+                    var oneItem = items[i];
+                    var oneTitle = oneItem.Title + $" ({Properties.Resources.Offset})";
+                    var oneAmount = -oneItem.Amount;
+                    var oneId = oneItem.Id;
+
+                    var oneTrans = new FinanceTransaction
                     {
-                        await _db.FinanceTransactions.AsNoTracking()
-                            .Where(t => t.Id == id)
-                            .ExecuteUpdateAsync(
-                                t => t.SetProperty(t => t.OffsetId, offsetId.Value),
-                                cancellationToken
-                            );
-                    }
-                    else
+                        Kind = FinanceTransactionKind.Offset,
+                        AccountId = oneItem.AccountId,
+                        Title = oneTitle,
+                        Amount = oneAmount,
+                        OrderId = oneItem.OrderId,
+                        ReferenceId = oneItem.ReferenceId,
+                        AuthorId = User.Oid,
+                        InnerRef = oneItem.InnerRef,
+                        OffsetId = oneId
+                    };
+
+                    var isLast = (i + 1) == len;
+
+                    var (result, offsetId) = await ProcessBaseAsync(oneTrans, jsonData, isLast, cancellationToken);
+                    if (!result.Ok)
                     {
-                        throw new Exception("Offset id is null");
+                        // Rollback
+                        await transaction.RollbackAsync(cancellationToken);
+                        return result;
                     }
 
-                    // Commit
-                    await transaction.CommitAsync(cancellationToken);
-                }
-                else
-                {
-                    // Rollback
-                    await transaction.RollbackAsync(cancellationToken);
+                    // Point to the new offset transaction id
+                    await _db.FinanceTransactions
+                        .Where(t => t.Id == oneId)
+                        .ExecuteUpdateAsync(
+                            t => t.SetProperty(t => t.OffsetId, offsetId),
+                            cancellationToken
+                        );
                 }
 
-                return result;
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+
+                return ActionResult.Success;
             }
             catch (Exception ex)
             {
@@ -396,8 +563,11 @@ namespace CRM.Server.Services
             {
                 var innerRef = Guid.NewGuid();
 
-                foreach (var item in rq.Items)
+                var len = rq.Items.Length;
+                for(var i = 0; i < len; i++)
                 {
+                    var item = rq.Items[i];
+
                     var account = accounts.First(a => a.Id == item.AccountId);
 
                     var title = $"{Properties.Resources.Collect}, {order.Title}";
@@ -427,7 +597,9 @@ namespace CRM.Server.Services
                         InnerRef = innerRef
                     };
 
-                    var result = await ProcessBaseAsync(trans, jsonData, cancellationToken);
+                    var isLast = (i + 1) == len;
+
+                    var (result, _) = await ProcessBaseAsync(trans, jsonData, isLast, cancellationToken);
 
                     if (!result.Ok)
                     {
@@ -543,8 +715,11 @@ namespace CRM.Server.Services
             {
                 var innerRef = Guid.NewGuid();
 
-                foreach (var item in rq.Items)
+                var len = rq.Items.Length;
+                for (var i = 0; i < len; i++)
                 {
+                    var item = rq.Items[i];
+
                     var account = accounts.First(a => a.Id == item.AccountId);
 
                     var title = $"{Properties.Resources.Payment}, {po.Title}";
@@ -566,7 +741,8 @@ namespace CRM.Server.Services
                         InnerRef = innerRef
                     };
 
-                    var result = await ProcessBaseAsync(trans, jsonData, cancellationToken);
+                    var isLast = (i + 1) == len;
+                    var (result, _) = await ProcessBaseAsync(trans, jsonData, isLast, cancellationToken);
 
                     if (!result.Ok)
                     {
@@ -597,9 +773,10 @@ namespace CRM.Server.Services
         /// </summary>
         /// <param name="item">Transaction item</param>
         /// <param name="jsonData">Request JSON data</param>
+        /// <param name="isLast">Is last transaction</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result</returns>
-        private async Task<IActionResult> ProcessBaseAsync(FinanceTransaction item, string jsonData, CancellationToken cancellationToken)
+        private async Task<(ActionResult, long)> ProcessBaseAsync(FinanceTransaction item, string jsonData, bool isLast, CancellationToken cancellationToken)
         {
             if (item.AuthorId == 0)
             {
@@ -658,20 +835,22 @@ namespace CRM.Server.Services
             var message = new ProcessFinanceTransactionMessage
             {
                 Data = User.CreateMessageData(App.AppId, id, item.Title),
+                Kind = item.Kind,
+                IsLast = isLast,
                 JsonData = jsonData
             };
             await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.ProcessFinanceTransactionMessage, cancellationToken);
 
-            return ActionResult.Succeed(id);
+            return (ActionResult.Succeed(id), id);
         }
 
-        private async Task<IActionResult> ProcessAsync(FinanceTransaction item, string jsonData, CancellationToken cancellationToken)
+        private async Task<(ActionResult, long)> ProcessAsync(FinanceTransaction item, string jsonData, CancellationToken cancellationToken)
         {
             await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                var result = await ProcessBaseAsync(item, jsonData, cancellationToken);
+                var (result, id) = await ProcessBaseAsync(item, jsonData, true, cancellationToken);
 
                 if (result.Ok)
                 {
@@ -684,7 +863,7 @@ namespace CRM.Server.Services
                     await transaction.RollbackAsync(cancellationToken);
                 }
 
-                return result;
+                return (result, id);
             }
             catch (Exception ex)
             {
@@ -692,7 +871,7 @@ namespace CRM.Server.Services
                 await transaction.RollbackAsync(cancellationToken);
 
                 // Log
-                return LogException(ex);
+                return (LogException(ex), 0);
             }
         }
 
@@ -803,7 +982,6 @@ namespace CRM.Server.Services
                     AuthorId = t.AuthorId,
                     AuthorName = t.Author.Name,
                     OffsetId = t.OffsetId,
-                    OffsetSourceId = t.Kind == FinanceTransactionKind.Offset ? _db.FinanceTransactions.Where(ft => ft.Account.CoreOrganizationId == orgId && ft.OffsetId == t.Id).Select(ft => ft.Id).FirstOrDefault() : null,
                     InnerRefs = t.InnerRef == null ? null : _db.FinanceTransactions.Where(ft => ft.Account.CoreOrganizationId == orgId && ft.InnerRef == t.InnerRef)
                         .Select(i => new FinanceTransactionViewDataRefItem { Id = i.Id, AccountKind = i.Account.Kind, Bank = i.Account.Bank, Amount = i.Amount }).ToArray()
                 })
@@ -819,7 +997,231 @@ namespace CRM.Server.Services
         /// <returns>Result</returns>
         public async Task<IActionResult> ReimburseAsync(FinanceTransactionReimburseRQ rq, CancellationToken cancellationToken = default)
         {
-            return ActionResult.Success;
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+            var currency = rq.Currency;
+            var accountIds = rq.Items.Select(i => i.AccountId).Distinct().ToArray();
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId
+                    && a.PersonId == orgPersonId
+                    && a.Currency == currency
+                    && accountIds.Contains(a.Id)
+                    && (a.Kind == FinanceAccountKind.Cash || a.Kind == FinanceAccountKind.Transfer || a.Kind == FinanceAccountKind.Super)
+                    && a.Status < EntityStatus.Inactivated)
+                .Select(a => new { a.Id, a.Kind, a.AccountNumber, a.Balance })
+                .ToArrayAsync(cancellationToken);
+
+            if (accounts.Length != accountIds.Length)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Items));
+            }
+
+            // Validate target person
+            var targetPersonId = rq.TargetPersonId;
+            var targetAccountId = rq.TargetAccountId;
+            var orderId = rq.OrderId;
+
+            var person = await _db.Users(orgId).AsNoTracking()
+                .Where(u => u.Id == targetPersonId)
+                .Select(u => new { u.Id, u.Name })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.TargetPersonId));
+            }
+
+            if (targetAccountId.HasValue)
+            {
+                var hasAccount = await _db.FinanceAccounts.AsNoTracking()
+                    .Where(a => a.CoreOrganizationId == orgId
+                        && a.PersonId == targetPersonId
+                        && a.Id == targetAccountId
+                        && a.Currency == currency
+                        && a.Status < EntityStatus.Inactivated)
+                    .AnyAsync(cancellationToken);
+
+                if (!hasAccount)
+                {
+                    return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.TargetAccountId));
+                }
+            }
+
+            if (orderId.HasValue)
+            {
+                var hasOrder = await _db.OrderAndPOs(orgId).AsNoTracking()
+                    .Where(o => o.Id == orderId)
+                    .AnyAsync(cancellationToken);
+
+                if (!hasOrder)
+                {
+                    return ApplicationErrors.ItemNotExists.AsResult(nameof(rq.OrderId));
+                }
+            }
+
+            var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionReimburseRQ);
+
+            var description = rq.Description;
+            var referenceId = rq.ReferenceId?.ToUpper();
+
+            var title = $"{Properties.Resources.Reimbursement}, {person.Name}({person.Id}) - {description}";
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var innerRef = Guid.NewGuid();
+
+                if (targetAccountId.HasValue)
+                {
+                    var personTrans = new FinanceTransaction
+                    {
+                        Kind = FinanceTransactionKind.Reimbursement,
+                        AccountId = targetAccountId.Value,
+                        Title = title,
+                        OrderId = orderId,
+                        Amount = rq.Amount,
+                        ReferenceId = referenceId,
+                        AuthorId = User.Oid,
+                        InnerRef = innerRef
+                    };
+
+                    var (result, _) = await ProcessBaseAsync(personTrans, jsonData, false, cancellationToken);
+
+                    if (!result.Ok)
+                    {
+                        // Rollback
+                        await transaction.RollbackAsync(cancellationToken);
+
+                        return result;
+                    }
+                }
+
+                var len = rq.Items.Length;
+                for (var i = 0; i < len; i++)
+                {
+                    var item = rq.Items[i];
+
+                    var account = accounts.First(a => a.Id == item.AccountId);
+
+                    var trans = new FinanceTransaction
+                    {
+                        Kind = FinanceTransactionKind.Reimbursement,
+                        AccountId = item.AccountId,
+                        Title = title,
+                        OrderId = orderId,
+                        Amount = item.Amount,
+                        ReferenceId = referenceId,
+                        AuthorId = User.Oid,
+                        InnerRef = innerRef
+                    };
+
+                    var isLast = (i + 1) == len;
+
+                    var (result, _) = await ProcessBaseAsync(trans, jsonData, isLast, cancellationToken);
+
+                    if (!result.Ok)
+                    {
+                        // Rollback
+                        await transaction.RollbackAsync(cancellationToken);
+
+                        return result;
+                    }
+                }
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+
+                return ActionResult.Success;
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
+        }
+
+        /// <summary>
+        /// Settle
+        /// 月结
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> SettleAsync(CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            // An interval of more than 7 days between the two occasions
+            var latestItem = await _db.FinanceTransactions(orgId).AsNoTracking()
+                .Where(t => t.Kind == FinanceTransactionKind.Settlement)
+                .Select(t => new { t.Id, t.Creation })
+                .OrderByDescending(t => t.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (latestItem != null && (DateTime.UtcNow - latestItem.Creation).TotalDays < 7)
+            {
+                return ApplicationErrors.ItemExists.AsResult();
+            }
+
+            // Create settlements
+            var orgPersonId = User.Pid;
+            var accounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId && a.PersonId == orgPersonId && (a.Kind == FinanceAccountKind.Cash || a.Kind == FinanceAccountKind.Transfer || a.Kind == FinanceAccountKind.Super))
+                .Select(a => new { a.Id, a.Balance })
+                .ToArrayAsync(cancellationToken);
+
+            var transactions = accounts.Select(a => new FinanceTransaction
+            {
+                Kind = FinanceTransactionKind.Settlement,
+                AccountId = a.Id,
+                Title = $"{Properties.Resources.Settlement} - {DateTime.UtcNow:yyyy-MM-dd}",
+                Amount = a.Balance,
+                AuthorId = User.Oid
+            }).ToList();
+
+            using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                var bulkConfig = new BulkConfig
+                {
+                    PropertiesToInclude = [
+                        nameof(FinanceTransaction.Kind),
+                        nameof(FinanceTransaction.AccountId),
+                        nameof(FinanceTransaction.Title),
+                        nameof(FinanceTransaction.Amount),
+                        nameof(FinanceTransaction.AuthorId)
+                    ],
+                    SetOutputIdentity = false
+                };
+
+                await _db.BulkInsertAsync(transactions, bulkConfig, cancellationToken: cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+
+                return ActionResult.Success;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
         }
 
         /// <summary>
@@ -871,6 +1273,12 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Currency));
             }
 
+            // Same owner
+            if (sourceAccount.PersonId != destinationAccount.PersonId)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.PersonId));
+            }
+
             var sKind = sourceAccount.Kind;
             var dKind = destinationAccount.Kind;
             if (sKind != dKind)
@@ -894,13 +1302,15 @@ namespace CRM.Server.Services
 
             var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionTransferRQ);
 
+            var referenceId = rq.ReferenceId?.ToUpper();
+
             var sourceItem = new FinanceTransaction
             {
                 Kind = FinanceTransactionKind.Transfer,
                 AccountId = sourceAccountId,
                 Title = title,
                 Amount = -amount,
-                ReferenceId = rq.ReferenceId,
+                ReferenceId = referenceId,
                 InnerRef = innerRef,
                 AuthorId = User.Oid
             };
@@ -909,7 +1319,7 @@ namespace CRM.Server.Services
 
             try
             {
-                var result = await ProcessBaseAsync(sourceItem, jsonData, cancellationToken);
+                var (result, id) = await ProcessBaseAsync(sourceItem, jsonData, false, cancellationToken);
 
                 if (result.Ok)
                 {
@@ -919,12 +1329,12 @@ namespace CRM.Server.Services
                         AccountId = destinationAccountId,
                         Title = title,
                         Amount = amount,
-                        ReferenceId = rq.ReferenceId,
+                        ReferenceId = referenceId,
                         InnerRef = innerRef,
                         AuthorId = User.Oid
                     };
 
-                    result = await ProcessBaseAsync(targetItem, jsonData, cancellationToken);
+                    (result, id) = await ProcessBaseAsync(targetItem, jsonData, true, cancellationToken);
                 }
 
                 if (result.Ok)

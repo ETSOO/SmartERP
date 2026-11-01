@@ -88,6 +88,15 @@ namespace CRM.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Currency Exchange.
+        /// </summary>
+        public static string CurrencyExchange {
+            get {
+                return ResourceManager.GetString("CurrencyExchange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Initialization.
         /// </summary>
         public static string Initialization {
@@ -120,6 +129,24 @@ namespace CRM.Server.Properties {
         public static string Payment {
             get {
                 return ResourceManager.GetString("Payment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reimbursement.
+        /// </summary>
+        public static string Reimbursement {
+            get {
+                return ResourceManager.GetString("Reimbursement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settlement.
+        /// </summary>
+        public static string Settlement {
+            get {
+                return ResourceManager.GetString("Settlement", resourceCulture);
             }
         }
         
