@@ -41,6 +41,12 @@ namespace CRM.Server.RQ.FinanceTransaction
         public decimal ExchangeAmount { get; init; }
 
         /// <summary>
+        /// Exchange fee
+        /// 兑换手续费
+        /// </summary>
+        public decimal ExchangeFee { get; init; } = 0;
+
+        /// <summary>
         /// Description
         /// 描述
         /// </summary>
@@ -74,9 +80,19 @@ namespace CRM.Server.RQ.FinanceTransaction
                 return ApplicationErrors.NoValidData.AsResult(nameof(ExchangeRate));
             }
 
-            if (ExchangeAmount <= 0 || Math.Abs(ExchangeAmount - Amount * ExchangeRate) > 1)
+            if (ExchangeFee < 0)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(ExchangeFee));
+            }
+
+            if (ExchangeAmount <= 0 || Math.Abs(ExchangeAmount * ExchangeRate + ExchangeFee - Amount) > 10)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(ExchangeAmount));
+            }
+
+            if (Description != null && Description.Length is not (>= 1 and <= 128))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
             if (ReferenceId != null && ReferenceId.Length is not (>= 1 and <= 30))

@@ -17,7 +17,7 @@ namespace CRM.Server.Services
         Task<FinanceTransactionQueryData[]?> QueryAsync(FinanceTransactionQueryRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> SettleAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> TransferAsync(FinanceTransactionTransferRQ rq, CancellationToken cancellationToken = default);
-        Task<FinanceTransactionViewOrderData?> ViewOrderAsync(long id, CancellationToken cancellationToken);
-        Task<FinanceTransactionViewPOData?> ViewPOAsync(long id, CancellationToken cancellationToken);
+        Task<FinanceTransactionViewOrderData?> ViewOrderAsync(long id, CancellationToken cancellationToken = default);
+        Task<FinanceTransactionViewPOData?> ViewPOAsync(long id, CancellationToken cancellationToken = default);
     }
 }

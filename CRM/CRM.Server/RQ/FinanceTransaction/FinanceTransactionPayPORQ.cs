@@ -74,6 +74,11 @@ namespace CRM.Server.RQ.FinanceTransaction
                 return ApplicationErrors.NoValidData.AsResult(nameof(Amount));
             }
 
+            if (Description != null && Description.Length is not (>= 1 and <= 128))
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(Description));
+            }
+
             return null;
         }
     }

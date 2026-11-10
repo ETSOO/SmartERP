@@ -136,6 +136,8 @@ namespace CRM.Server.Services
 
             var amount = rq.Amount;
             var exchangeAmount = rq.ExchangeAmount;
+            var exchangeFee = rq.ExchangeFee;
+
             if (sourceAccount.Balance < amount)
             {
                 return ApplicationErrors.InsufficientBalance.AsResult();
@@ -147,8 +149,8 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.DestinationAccountId));
             }
 
-            // Same currency
-            if (sourceAccount.Currency != destinationAccount.Currency)
+            // Should not be the same currency
+            if (sourceAccount.Currency == destinationAccount.Currency)
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(destinationAccount.Currency));
             }
@@ -177,7 +179,13 @@ namespace CRM.Server.Services
                 }
             }
 
-            var title = $"{Properties.Resources.CurrencyExchange} {rq.ExchangeRate} ({StringUtils.HideData(sourceAccount.AccountNumber)} -> {StringUtils.HideData(destinationAccount.AccountNumber)}) - {rq.Description}";
+            var title = $"{Properties.Resources.CurrencyExchange} {rq.ExchangeRate}{(exchangeFee > 0 ? $" ({exchangeFee})" : "")}, {sourceAccount.Currency} -> {destinationAccount.Currency}";
+
+            if (!string.IsNullOrEmpty(rq.Description))
+            {
+                title += $" - {rq.Description}";
+            }
+
             var innerRef = Guid.NewGuid();
 
             var jsonData = JsonSerializer.Serialize(rq, MyJsonSerializerContext.Default.FinanceTransactionCurrencyExchangeRQ);
@@ -1116,7 +1124,7 @@ namespace CRM.Server.Services
                         AccountId = item.AccountId,
                         Title = title,
                         OrderId = orderId,
-                        Amount = item.Amount,
+                        Amount = -item.Amount,
                         ReferenceId = referenceId,
                         AuthorId = User.Oid,
                         InnerRef = innerRef
@@ -1206,7 +1214,7 @@ namespace CRM.Server.Services
                         nameof(FinanceTransaction.Amount),
                         nameof(FinanceTransaction.AuthorId)
                     ],
-                    SetOutputIdentity = false
+                    SetOutputIdentity = true
                 };
 
                 await _db.BulkInsertAsync(transactions, bulkConfig, cancellationToken: cancellationToken);
@@ -1367,7 +1375,7 @@ namespace CRM.Server.Services
         /// <param name="id">Order id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Data</returns>
-        public async Task<FinanceTransactionViewOrderData?> ViewOrderAsync(long id, CancellationToken cancellationToken)
+        public async Task<FinanceTransactionViewOrderData?> ViewOrderAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))
@@ -1463,7 +1471,7 @@ namespace CRM.Server.Services
         /// <param name="id">Purchase order id</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Data</returns>
-        public async Task<FinanceTransactionViewPOData?> ViewPOAsync(long id, CancellationToken cancellationToken)
+        public async Task<FinanceTransactionViewPOData?> ViewPOAsync(long id, CancellationToken cancellationToken = default)
         {
             // Permission check
             if (!await _commonService.HasPermissionAsync((short)Permissions.Finance.Transaction, cancellationToken))

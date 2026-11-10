@@ -8,10 +8,13 @@ import { CurrencyItem } from "@etsoo/smarterp-core";
  * @returns Component
  */
 export function CurrencyList(
-  props: Omit<SelectExProps<CurrencyItem>, "options" | "loadData">
+  props: Omit<SelectExProps<CurrencyItem>, "options" | "loadData"> & {
+    filterCurrencies?: (currencies: string[]) => string[];
+  }
 ) {
   // Destruct
   const {
+    filterCurrencies = (currencies) => currencies,
     label = app.get("currency"),
     labelField = "name",
     name = "currency",
@@ -19,7 +22,7 @@ export function CurrencyList(
   } = props;
 
   // Currencies
-  const currencies = app.userData?.system?.currencies || [];
+  const currencies = filterCurrencies(app.userData?.system?.currencies || []);
 
   // Layout
   return (

@@ -15,6 +15,7 @@ import Button from "@mui/material/Button";
 import React from "react";
 import { AccountTransfer } from "./AccountTransferUI";
 import { AccountAdjust } from "./AccountAdjustUI";
+import { AccountExchange } from "./AccountExchangeUI";
 
 export function ViewAccountUI({
   data,
@@ -28,9 +29,13 @@ export function ViewAccountUI({
     "copyPaymentInfo",
     "edit",
     "financeTransactionKindAdjustment",
+    "financeTransactionKindCurrencyExchange",
     "financeTransactionKindInit",
     "financeTransactionKindTransfer"
   );
+
+  const multipleCurrencies =
+    (app.userData?.system?.currencies ?? []).length > 1;
 
   // Layout
   return (
@@ -97,6 +102,21 @@ export function ViewAccountUI({
                       ? labels.financeTransactionKindInit
                       : labels.financeTransactionKindAdjustment}
                   </Button>
+                  {multipleCurrencies && (
+                    <Button
+                      startIcon={<CurrencyExchangeIcon />}
+                      variant="outlined"
+                      onClick={(e) =>
+                        AccountExchange(
+                          data,
+                          e.currentTarget.textContent,
+                          refresh
+                        )
+                      }
+                    >
+                      {labels.financeTransactionKindCurrencyExchange}
+                    </Button>
+                  )}
                   <Button
                     startIcon={<PaidIcon />}
                     variant="outlined"

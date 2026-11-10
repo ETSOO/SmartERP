@@ -913,6 +913,14 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/system/finance/reimbursement",
+            lazy: async () => {
+              const Reimbursement =
+                await import("./pages/home/finance/Reimbursement");
+              return { Component: Reimbursement.default };
+            }
+          },
+          {
             path: "/home/system/finance/viewaccount/:id",
             lazy: async () => {
               const ViewAccount =

@@ -27,6 +27,7 @@ import IconButton from "@mui/material/IconButton";
 import { useNavigate } from "react-router-dom";
 import { CurrencyList } from "../../../components/CurrencyList";
 import { DomUtils } from "@etsoo/shared";
+import { AccountSettle } from "./AccountSettleUI";
 
 export default function FinanceConsole() {
   // Route
@@ -44,6 +45,9 @@ export default function FinanceConsole() {
     "copyPaymentInfo",
     "currency",
     "edit",
+    "financeTransactionKindReimbursement",
+    "financeTransactionKindSettlement",
+    "operationSucceeded",
     "type",
     "view"
   );
@@ -222,10 +226,24 @@ export default function FinanceConsole() {
             <ButtonLink variant="outlined" href="./bulkcreateaccounts">
               {labels.bulkCreateAccounts}
             </ButtonLink>
+            <Button
+              variant="outlined"
+              onClick={(e) =>
+                AccountSettle(e.currentTarget.textContent, () => {
+                  app.notifier.succeed(labels.operationSucceeded);
+                  ref.current?.refresh();
+                })
+              }
+            >
+              {labels.financeTransactionKindSettlement}
+            </Button>
+            <ButtonLink variant="outlined" href="./reimbursement">
+              {labels.financeTransactionKindReimbursement}
+            </ButtonLink>
           </React.Fragment>
         )}
         <Divider orientation="vertical" flexItem />
-        <ButtonLink variant="outlined" href="./accounts">
+        <ButtonLink variant="contained" href="./accounts">
           {labels.allAccounts}
         </ButtonLink>
       </HBox>

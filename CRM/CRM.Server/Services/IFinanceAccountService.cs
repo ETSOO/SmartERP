@@ -16,5 +16,6 @@ namespace CRM.Server.Services
         Task<FinanceAccountViewData?> ReadAsync(int id, CancellationToken cancellationToken = default);
         Task<IActionResult> UpdateAsync(FinanceAccountUpdateRQ rq, CancellationToken cancellationToken = default);
         Task UpdateReadAsync(int id, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);
+        Task<FinanceAccountItem[]> ViewOrgAccountsAsync(string currency, CancellationToken cancellationToken = default);
     }
 }

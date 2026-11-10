@@ -41,6 +41,9 @@ namespace CRM.Server.Endpoints
             g.MapGet("UpdateRead/{id:int}", (IFinanceAccountService service, int id, IHttpContextAccessor accessor, CancellationToken cancellationToken) => service.UpdateReadAsync(id, accessor.GetJsonWriter(), cancellationToken))
                 .WithDescription("Read finance account data for update / 读取用于更新的财务账户数据").WithTags("FinanceAccount");
 
+            g.MapGet("ViewOrgAccounts/{currency}", (IFinanceAccountService service, string currency, CancellationToken cancellationToken) => service.ViewOrgAccountsAsync(currency, cancellationToken))
+                .WithDescription("View org accounts for payment / 浏览机构账户用于付款").WithTags("FinanceAccount");
+
             return builder;
         }
     }

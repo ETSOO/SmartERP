@@ -10,21 +10,22 @@ import {
   Permissions
 } from "@etsoo/smarterp-crm";
 import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import UndoIcon from "@mui/icons-material/Undo";
+import { TransactionOffset } from "./TransactionOffsetUI";
 
 export default function ViewTransaction() {
   // Route
   const { id = 0 } = useParamsEx({ id: "number" });
 
   // Labels
-  const labels = app.getLabels("view");
+  const labels = app.getLabels("financeTransactionKindOffset", "view");
 
   // Load data
   const loadData = React.useCallback(
     async () => app.financeTransactionApi.read(id),
     [id]
   );
-
-  const editable = app.owns(Permissions.PO.Edit);
 
   // Page data hook
   usePageDataEmpty(app);
@@ -54,8 +55,7 @@ export default function ViewTransaction() {
           label: "type"
         },
         {
-          data: (item) =>
-            app.formatMoney(item.amount, false, { currency: item.currency }),
+          data: (item) => `${item.currency} ${app.formatNumber(item.amount)}`,
           label: "amount"
         },
         {
@@ -98,11 +98,8 @@ export default function ViewTransaction() {
         ["creation", GridDataType.DateTime],
         {
           data: (item) =>
-            item.offsetId || item.offsetSourceId ? (
-              <LinkEx
-                variant="body2"
-                to={`./../${item.offsetId || item.offsetSourceId}`}
-              >
+            item.offsetId ? (
+              <LinkEx variant="body2" to={`./../${item.offsetId}`}>
                 {labels.view}
               </LinkEx>
             ) : undefined,
@@ -110,7 +107,21 @@ export default function ViewTransaction() {
         }
       ]}
       loadData={loadData}
-      actions={(data, refresh) => <React.Fragment></React.Fragment>}
+      actions={(_data, refresh) => (
+        <React.Fragment>
+          {app.owns(Permissions.Finance.Edit) && (
+            <Button
+              variant="contained"
+              startIcon={<UndoIcon />}
+              onClick={(e) =>
+                TransactionOffset(id, e.currentTarget.textContent, refresh)
+              }
+            >
+              {labels.financeTransactionKindOffset}
+            </Button>
+          )}
+        </React.Fragment>
+      )}
     >
       {(data) =>
         data.innerRefs != null && (

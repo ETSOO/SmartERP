@@ -20,6 +20,7 @@ import Grid from "@mui/material/Grid";
 import PaymentIcon from "@mui/icons-material/Payment";
 import { DateUtils, NumberUtils } from "@etsoo/shared";
 import { AccountPaymentInput } from "../../../components/AccountPaymentInput";
+import Divider from "@mui/material/Divider";
 
 export default function OrderCollect() {
   // Route
@@ -223,6 +224,11 @@ export default function OrderCollect() {
                             />
                           </Grid>
                         ))}
+                        {accounts.length > 0 && (
+                          <Grid size={{ xs: 12 }}>
+                            <Divider />
+                          </Grid>
+                        )}
                         {accounts.map((a) => (
                           <Grid size={{ xs: 12, sm: 6, xl: 3 }} key={a.id}>
                             <AccountPaymentInput
@@ -239,6 +245,9 @@ export default function OrderCollect() {
                             />
                           </Grid>
                         ))}
+                        <Grid size={{ xs: 12 }}>
+                          <Divider />
+                        </Grid>
                         <Grid size={{ xs: 6, sm: 3, xl: 1 }}>
                           <InputField
                             fullWidth

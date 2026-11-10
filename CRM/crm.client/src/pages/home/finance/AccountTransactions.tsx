@@ -157,9 +157,7 @@ export function AccountTransactions(props: AllOrderLinesProps) {
             return (
               <React.Fragment>
                 <Typography variant="body2">
-                  {app.formatMoney(data.amount, undefined, {
-                    currency: data.currency
-                  })}
+                  {app.formatNumber(data.amount)}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {app.finance.getTransactionKind(data.kind)}

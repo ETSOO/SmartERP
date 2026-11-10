@@ -109,6 +109,7 @@ namespace CRM.Server
 
     // Finance account
     [JsonSerializable(typeof(FinanceAccountListData[]))]
+    [JsonSerializable(typeof(FinanceAccountItem[]))]
     [JsonSerializable(typeof(FinanceAccountQueryData[]))]
     [JsonSerializable(typeof(FinanceAccountViewData))]
 

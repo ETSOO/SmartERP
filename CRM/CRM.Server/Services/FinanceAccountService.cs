@@ -698,5 +698,37 @@ namespace CRM.Server.Services
                     a.Expiry
                 }).ToJsonObjectAsync(writer, cancellationToken: cancellationToken);
         }
+
+        /// <summary>
+        /// View org accounts for payment
+        /// 浏览机构账户用于付款
+        /// </summary>
+        /// <param name="currency">Currency</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Data</returns>
+        public async Task<FinanceAccountItem[]> ViewOrgAccountsAsync(string currency, CancellationToken cancellationToken = default)
+        {
+            var orgId = User.OrganizationInt;
+            var orgPersonId = User.Pid;
+            var orgAccounts = await _db.FinanceAccounts.AsNoTracking()
+                .Where(a => a.CoreOrganizationId == orgId
+                        && a.PersonId == orgPersonId
+                        && a.Currency == currency
+                        && a.Status < EntityStatus.Inactivated
+                        && (a.Kind == FinanceAccountKind.Cash || a.Kind == FinanceAccountKind.Transfer || a.Kind == FinanceAccountKind.Super)
+                        && a.ProductId == null
+                )
+                .Select(a => new FinanceAccountItem
+                {
+                    Id = a.Id,
+                    Kind = a.Kind,
+                    Bank = a.Bank,
+                    AccountNumber = a.AccountNumber,
+                    ProductId = a.ProductId
+                })
+                .ToArrayAsync(cancellationToken);
+
+            return orgAccounts;
+        }
     }
 }

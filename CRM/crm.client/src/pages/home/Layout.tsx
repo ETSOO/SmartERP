@@ -86,6 +86,7 @@ export default function Home() {
     "finance",
     "financeTransactionKindCollect",
     "financeTransactionKindPayment",
+    "financeTransactionKindReimbursement",
     "history",
     "info",
     "inventory",
@@ -768,6 +769,11 @@ export default function Home() {
               {
                 segment: "accounts",
                 title: labels.accounts,
+                hidden: true
+              },
+              {
+                segment: "reimbursement",
+                title: labels.financeTransactionKindReimbursement,
                 hidden: true
               },
               {
