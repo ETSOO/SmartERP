@@ -44,7 +44,7 @@
     "@rollup/rollup-linux-x64-gnu": "^4.68.2"
   },
   "allowScripts": {
-    "canvas@3.2.3": true,
-    "core-js-pure@3.50.0": true
+    "core-js-pure": true,
+    "canvas": true
   }
 }
