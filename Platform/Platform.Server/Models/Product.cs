@@ -59,6 +59,8 @@ public partial class Product
 
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
+    public virtual ICollection<FinanceAccount> FinanceAccounts { get; set; } = new List<FinanceAccount>();
+
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 
     public virtual ICollection<PersonAsset> PersonAssets { get; set; } = new List<PersonAsset>();

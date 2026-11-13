@@ -120,6 +120,9 @@
   <data name="AddContactRelation" xml:space="preserve">
     <value>Add Contact Relation</value>
   </data>
+  <data name="BulkCreateFinanceAccount" xml:space="preserve">
+    <value>Bulk Create Finance Account</value>
+  </data>
   <data name="CompleteOrderLine" xml:space="preserve">
     <value>Complete Order Line</value>
   </data>
@@ -137,6 +140,9 @@
   </data>
   <data name="CreateDept" xml:space="preserve">
     <value>Create Dept</value>
+  </data>
+  <data name="CreateFinanceAccount" xml:space="preserve">
+    <value>Create Finance Account</value>
   </data>
   <data name="CreateOrder" xml:space="preserve">
     <value>Create Order</value>
@@ -186,8 +192,14 @@
   <data name="CreateSupplier" xml:space="preserve">
     <value>Create Supplier</value>
   </data>
+  <data name="DeleteAsset" xml:space="preserve">
+    <value>Delete Asset</value>
+  </data>
   <data name="DeleteContactRelation" xml:space="preserve">
     <value>Delete Contact Relation</value>
+  </data>
+  <data name="DeleteOrder" xml:space="preserve">
+    <value>Delete Order</value>
   </data>
   <data name="DeleteOrderLine" xml:space="preserve">
     <value>Delete Order Line</value>
@@ -204,6 +216,9 @@
   <data name="DeletePersonProfileLink" xml:space="preserve">
     <value>Delete Profile Link</value>
   </data>
+  <data name="DeletePO" xml:space="preserve">
+    <value>Delete Purchase Order</value>
+  </data>
   <data name="DeletePOLine" xml:space="preserve">
     <value>Delete PO Line</value>
   </data>
@@ -215,6 +230,9 @@
   </data>
   <data name="MergeProductCategory" xml:space="preserve">
     <value>Merge Product Category</value>
+  </data>
+  <data name="ProcessFinanceTransaction" xml:space="preserve">
+    <value>Process Finance Transaction</value>
   </data>
   <data name="ProductEditBoms" xml:space="preserve">
     <value>Product Edit BOMs</value>
@@ -317,6 +335,9 @@
   </data>
   <data name="UpdateDept" xml:space="preserve">
     <value>Update Dept</value>
+  </data>
+  <data name="UpdateFinanceAccount" xml:space="preserve">
+    <value>Update Finance Account</value>
   </data>
   <data name="UpdateOrder" xml:space="preserve">
     <value>Update Order</value>

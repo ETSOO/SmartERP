@@ -67,8 +67,6 @@ namespace WorkerCenter.Periods
 
                     ProductName = a.Product.Name,
                     Sn = a.Sn,
-                    Times = a.Times ?? 0,
-                    Amount = a.Amount ?? 0,
                     Expiry = a.Expiry,
                     OrgId = a.OrgId,
 

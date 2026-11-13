@@ -98,6 +98,12 @@
         public byte? OrderDailyReportHour { get; set; }
 
         /// <summary>
+        /// Asset expiration notice
+        /// 资产到期通知
+        /// </summary>
+        public short? AssetExpirationNotice { get; set; }
+
+        /// <summary>
         /// Organization
         /// 机构
         /// </summary>

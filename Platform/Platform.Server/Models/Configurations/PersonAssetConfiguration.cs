@@ -20,9 +20,6 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.Amount)
-                .HasColumnType("money")
-                .HasColumnName("amount");
             entity.Property(e => e.CoreUserId).HasColumnName("core_user_id");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
@@ -34,6 +31,7 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
+            entity.Property(e => e.ExpiryCheck).HasColumnName("expiry_check");
             entity.Property(e => e.HealthCheckSchedule).HasColumnName("health_check_schedule");
             entity.Property(e => e.HealthCheckUrl)
                 .HasMaxLength(1280)
@@ -49,7 +47,6 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("sn");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
-            entity.Property(e => e.Times).HasColumnName("times");
 
             entity.HasOne(d => d.CoreUser).WithMany(p => p.PersonAssets)
                 .HasForeignKey(d => d.CoreUserId)

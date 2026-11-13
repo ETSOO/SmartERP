@@ -57,6 +57,7 @@ export default function AllOrders() {
     "confirmAction",
     "creation",
     "discount",
+    "endDate",
     "keywords",
     "edit",
     "orderDeliveries",
@@ -297,9 +298,9 @@ export default function AllOrders() {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  title={labels.creation}
+                  title={labels.endDate}
                 >
-                  {app.formatDate(data.creation)}
+                  {app.formatDate(data.endDate)}
                 </Typography>
               </React.Fragment>
             );
@@ -380,7 +381,7 @@ export default function AllOrders() {
               </Typography>
               <Typography variant="body2">
                 {labels.startDate}: {app.formatDate(data.startDate) ?? "-"} /{" "}
-                {app.formatDate(data.creation)}
+                {app.formatDate(data.endDate)}
               </Typography>
             </React.Fragment>
           ];

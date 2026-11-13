@@ -39,3 +39,6 @@ INSERT INTO public.permission_item VALUES (9000, 9, 'All');
 INSERT INTO public.permission_item VALUES (10000, 10, 'All');
 INSERT INTO public.permission_item VALUES (11000, 11, 'All');
 INSERT INTO public.permission_item VALUES (18000, 18, 'All');
+
+# Reverse engineering and model visualization tools for EF Core in Visual Studio
+# https://github.com/ErikEJ/EFCorePowerTools, Install it and EF Core Power Pack with Extension Manager

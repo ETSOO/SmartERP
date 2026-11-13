@@ -77,6 +77,8 @@ public partial class OrderHeader
 
     public short Kind { get; set; }
 
+    public decimal TotalPayable { get; set; }
+
     public virtual PersonAddress? Address { get; set; }
 
     public virtual Person Buyer { get; set; } = null!;
@@ -86,6 +88,8 @@ public partial class OrderHeader
     public virtual CoreOrganization CoreOrganization { get; set; } = null!;
 
     public virtual OrderDelivery? Delivery { get; set; }
+
+    public virtual ICollection<FinanceTransaction> FinanceTransactions { get; set; } = new List<FinanceTransaction>();
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 

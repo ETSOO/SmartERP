@@ -117,10 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Adjustment" xml:space="preserve">
+    <value>Adjustment</value>
+  </data>
   <data name="AssetUpdate" xml:space="preserve">
     <value>Update asset</value>
   </data>
+  <data name="Collect" xml:space="preserve">
+    <value>Collect</value>
+  </data>
+  <data name="CurrencyExchange" xml:space="preserve">
+    <value>Currency Exchange</value>
+  </data>
+  <data name="Initialization" xml:space="preserve">
+    <value>Initialization</value>
+  </data>
   <data name="InsufficientStock" xml:space="preserve">
     <value>Insufficient Stock</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>Offset</value>
+  </data>
+  <data name="Payment" xml:space="preserve">
+    <value>Payment</value>
+  </data>
+  <data name="Reimbursement" xml:space="preserve">
+    <value>Reimbursement</value>
+  </data>
+  <data name="Settlement" xml:space="preserve">
+    <value>Settlement</value>
+  </data>
+  <data name="Transfer" xml:space="preserve">
+    <value>Transfer</value>
   </data>
 </root>

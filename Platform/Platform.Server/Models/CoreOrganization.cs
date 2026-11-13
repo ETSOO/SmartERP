@@ -31,6 +31,12 @@ public partial class CoreOrganization
 
     public string Region { get; set; } = null!;
 
+    public string? Slogan { get; set; }
+
+    public string TimeZone { get; set; } = null!;
+
+    public string? CompanySeal { get; set; }
+
     public virtual ICollection<CoreApi> CoreApis { get; set; } = new List<CoreApi>();
 
     public virtual ICollection<CoreDocument> CoreDocuments { get; set; } = new List<CoreDocument>();
@@ -38,6 +44,8 @@ public partial class CoreOrganization
     public virtual ICollection<CoreOrganizationApp> CoreOrganizationApps { get; set; } = new List<CoreOrganizationApp>();
 
     public virtual ICollection<FeatureCulture> FeatureCultures { get; set; } = new List<FeatureCulture>();
+
+    public virtual ICollection<FinanceAccount> FinanceAccounts { get; set; } = new List<FinanceAccount>();
 
     public virtual ICollection<CoreOrganization> InverseParent { get; set; } = new List<CoreOrganization>();
 

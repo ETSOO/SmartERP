@@ -28,9 +28,6 @@ namespace PlatformShared.Database.Models.Configurations
                 .HasColumnName("description");
             entity.Property(e => e.Expiry).HasColumnName("expiry");
             entity.Property(e => e.ExpiryCheck).HasColumnName("expiry_check");
-            entity.Property(e => e.Times).HasColumnName("times");
-            entity.Property(e => e.Amount)
-                .HasColumnName("amount");
             entity.Property(e => e.SensitiveData)
                 .HasMaxLength(1280)
                 .HasColumnName("sensitive_data");

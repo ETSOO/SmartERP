@@ -117,10 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Adjustment" xml:space="preserve">
+    <value>调整</value>
+  </data>
   <data name="AssetUpdate" xml:space="preserve">
     <value>更新资产</value>
   </data>
+  <data name="Collect" xml:space="preserve">
+    <value>收款</value>
+  </data>
+  <data name="CurrencyExchange" xml:space="preserve">
+    <value>货币兑换</value>
+  </data>
+  <data name="Initialization" xml:space="preserve">
+    <value>初始化</value>
+  </data>
   <data name="InsufficientStock" xml:space="preserve">
     <value>库存不足</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>冲减</value>
+  </data>
+  <data name="Payment" xml:space="preserve">
+    <value>付款</value>
+  </data>
+  <data name="Reimbursement" xml:space="preserve">
+    <value>报销</value>
+  </data>
+  <data name="Settlement" xml:space="preserve">
+    <value>月结</value>
+  </data>
+  <data name="Transfer" xml:space="preserve">
+    <value>转账</value>
   </data>
 </root>

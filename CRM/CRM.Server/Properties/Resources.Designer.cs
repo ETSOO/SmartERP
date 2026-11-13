@@ -61,6 +61,15 @@ namespace CRM.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Adjustment.
+        /// </summary>
+        public static string Adjustment {
+            get {
+                return ResourceManager.GetString("Adjustment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update asset.
         /// </summary>
         public static string AssetUpdate {
@@ -70,11 +79,83 @@ namespace CRM.Server.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Collect.
+        /// </summary>
+        public static string Collect {
+            get {
+                return ResourceManager.GetString("Collect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currency Exchange.
+        /// </summary>
+        public static string CurrencyExchange {
+            get {
+                return ResourceManager.GetString("CurrencyExchange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Initialization.
+        /// </summary>
+        public static string Initialization {
+            get {
+                return ResourceManager.GetString("Initialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Insufficient Stock.
         /// </summary>
         public static string InsufficientStock {
             get {
                 return ResourceManager.GetString("InsufficientStock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Offset.
+        /// </summary>
+        public static string Offset {
+            get {
+                return ResourceManager.GetString("Offset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Payment.
+        /// </summary>
+        public static string Payment {
+            get {
+                return ResourceManager.GetString("Payment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reimbursement.
+        /// </summary>
+        public static string Reimbursement {
+            get {
+                return ResourceManager.GetString("Reimbursement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settlement.
+        /// </summary>
+        public static string Settlement {
+            get {
+                return ResourceManager.GetString("Settlement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transfer.
+        /// </summary>
+        public static string Transfer {
+            get {
+                return ResourceManager.GetString("Transfer", resourceCulture);
             }
         }
     }

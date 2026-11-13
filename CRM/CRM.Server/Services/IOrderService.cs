@@ -11,6 +11,7 @@ namespace CRM.Server.Services
     {
         Task<(bool IsEdit, bool IsManage)> CheckEditPermissionsAsync(CancellationToken cancellationToken = default);
         Task<IActionResult> CreateAsync(OrderCreateRQ rq, CancellationToken cancellationToken = default);
+        Task<IActionResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
         Task<AppActionData?> DocumentActionAsync(DocumentActionRQ rq, CancellationToken cancellationToken = default);
         ValueTask<OrderDuplicateTestData[]?> DuplicateTestAsync(OrderDuplicateTestRQ rq, CancellationToken cancellationToken = default);
         Task ListAsync(OrderListRQ rq, IBufferWriter<byte> writer, CancellationToken cancellationToken = default);

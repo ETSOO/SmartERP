@@ -59,7 +59,9 @@ export default function Home() {
 
   // Labels
   const labels = app.getLabels(
+    "accounts",
     "add",
+    "addAccount",
     "addContact",
     "addContactInfo",
     "addProfile",
@@ -70,6 +72,7 @@ export default function Home() {
     "allProfiles",
     "app3",
     "assets",
+    "bulkCreateAccounts",
     "contacts",
     "categories",
     "confirmOrder",
@@ -80,6 +83,10 @@ export default function Home() {
     "editAvatar",
     "editLogo",
     "editProfile",
+    "finance",
+    "financeTransactionKindCollect",
+    "financeTransactionKindPayment",
+    "financeTransactionKindReimbursement",
     "history",
     "info",
     "inventory",
@@ -118,8 +125,10 @@ export default function Home() {
     "updateSystemSettings",
     "users",
     "view",
+    "viewAccount",
     "viewOrder",
-    "viewProfile"
+    "viewProfile",
+    "viewTransaction"
   );
 
   // User context / state
@@ -441,6 +450,12 @@ export default function Home() {
             hidden: true
           },
           {
+            segment: "collect",
+            pattern: "collect/:id",
+            title: labels.financeTransactionKindCollect,
+            hidden: true
+          },
+          {
             segment: "payment",
             title: labels.orderPayments,
             hidden: true,
@@ -531,6 +546,12 @@ export default function Home() {
             segment: "view",
             pattern: "view/:id",
             title: labels.view,
+            hidden: true
+          },
+          {
+            segment: "pay",
+            pattern: "pay/:id",
+            title: labels.financeTransactionKindPayment,
             hidden: true
           },
           {
@@ -736,6 +757,51 @@ export default function Home() {
                 segment: "edit",
                 pattern: "edit/:id",
                 title: labels.edit,
+                hidden: true
+              }
+            ]
+          },
+          {
+            segment: "finance",
+            title: labels.finance,
+            hidden: true,
+            children: [
+              {
+                segment: "accounts",
+                title: labels.accounts,
+                hidden: true
+              },
+              {
+                segment: "reimbursement",
+                title: labels.financeTransactionKindReimbursement,
+                hidden: true
+              },
+              {
+                segment: "addaccount",
+                title: labels.addAccount,
+                hidden: true
+              },
+              {
+                segment: "bulkcreateaccounts",
+                title: labels.bulkCreateAccounts,
+                hidden: true
+              },
+              {
+                segment: "editaccount",
+                pattern: "editaccount/:id",
+                title: labels.edit,
+                hidden: true
+              },
+              {
+                segment: "viewaccount",
+                pattern: "viewaccount/:id",
+                title: labels.viewAccount,
+                hidden: true
+              },
+              {
+                segment: "viewtransaction",
+                pattern: "viewtransaction/:id",
+                title: labels.viewTransaction,
                 hidden: true
               }
             ]

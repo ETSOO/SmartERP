@@ -13,13 +13,13 @@ using CRM.Server.RQ.Asset;
 using Microsoft.EntityFrameworkCore;
 using PlatformShared.CrmMessages;
 using PlatformShared.CrmMessages.Org;
+using PlatformShared.CrmMessages.Product;
 using PlatformShared.Database;
 using PlatformShared.Database.Models;
 using PlatformShared.Extentions;
 using System.Buffers;
 using System.Text.Json;
 using System.Web;
-using BusinessProductUnit = com.etsoo.CoreFramework.Business.ProductUnit;
 
 namespace CRM.Server.Services
 {
@@ -59,36 +59,6 @@ namespace CRM.Server.Services
             return App.EncriptData(sensitiveData, GetEncryptionKey(productId));
         }
 
-        private ActionResult CheckProductUnit(BusinessProductUnit unit, decimal? amount, int? times, bool isUpdating = false)
-        {
-            if (unit == BusinessProductUnit.TIME)
-            {
-                if (amount.HasValue)
-                {
-                    return ApplicationErrors.NoValidData.AsResult(nameof(amount));
-                }
-
-                return ActionResult.Success;
-            }
-
-            if (unit == BusinessProductUnit.MONEY)
-            {
-                if (times.HasValue)
-                {
-                    return ApplicationErrors.NoValidData.AsResult(nameof(times));
-                }
-
-                return ActionResult.Success;
-            }
-
-            if (amount.HasValue || times.HasValue)
-            {
-                return ApplicationErrors.NoValidData.AsResult("NoAsset");
-            }
-
-            return ActionResult.Success;
-        }
-
         /// <summary>
         /// Create
         /// 创建
@@ -114,22 +84,9 @@ namespace CRM.Server.Services
 
             // Check product
             var productId = rq.ProductId;
-            var product = await _db.Products(orgId)
-                .Where(p => p.Id == productId)
-                .Select(p => new
-                {
-                    p.Unit.BaseUnit
-                })
-                .FirstOrDefaultAsync(cancellationToken);
-            if (product == null)
+            if (!await _db.Products(orgId).Where(p => p.Id == productId).AnyAsync(cancellationToken))
             {
                 return ApplicationErrors.NoId.AsResult(nameof(rq.ProductId));
-            }
-
-            var unitResult = CheckProductUnit(product.BaseUnit, rq.Amount, rq.Times);
-            if (!unitResult.Ok)
-            {
-                return unitResult;
             }
 
             // Check supplier
@@ -163,8 +120,6 @@ namespace CRM.Server.Services
                 Description = rq.Description,
                 Expiry = rq.Expiry,
                 ExpiryCheck = rq.ExpiryCheck,
-                Times = rq.Times,
-                Amount = rq.Amount,
                 SensitiveData = sensitiveData,
                 Data = rq.Data,
                 HealthCheckUrl = rq.HealthCheckUrl,
@@ -277,6 +232,57 @@ namespace CRM.Server.Services
         }
 
         /// <summary>
+        /// Delete
+        /// 删除
+        /// </summary>
+        /// <param name="id">Account id</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+        {
+            // Permission check
+            if (!await _commonService.HasPermissionAsync((short)Permissions.Org.Manage, cancellationToken))
+            {
+                return ApplicationErrors.AccessDenied.AsResult();
+            }
+
+            var orgId = User.OrganizationInt;
+
+            var hasOrderLine = await _db.OrderLines.AsNoTracking()
+                .Where(t => t.Order.CoreOrganizationId == orgId && t.AssetId == id)
+                .AnyAsync(cancellationToken);
+
+            if (hasOrderLine)
+            {
+                return ApplicationErrors.DeleteReferencedData.AsResult();
+            }
+
+            var asset = await _db.Assets(orgId).AsNoTracking()
+                .Where(a => a.Id == id)
+                .Select(a => new { a.Sn })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (asset == null)
+            {
+                return ApplicationErrors.NoId.AsResult();
+            }
+
+            // Delete
+            await _db.Assets(orgId).AsNoTracking()
+                .Where(a => a.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            // Push message
+            var message = new DeleteAssetMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, asset.Sn)
+            };
+            await _queueService.PushAsync(message, CrmJsonSerializerContext.Default.DeleteAssetMessage, cancellationToken);
+
+            return ActionResult.Succeed(id);
+        }
+
+        /// <summary>
         /// Query asset JSON data
         /// 查询资产JSON数据
         /// </summary>
@@ -302,8 +308,6 @@ namespace CRM.Server.Services
                 Sn = a.Sn,
                 Description = a.Description,
                 Expiry = a.Expiry,
-                Times = a.Times,
-                Amount = a.Amount,
                 Status = a.Status,
                 Creation = a.Creation
             }).ToArrayAsync(cancellationToken);
@@ -343,8 +347,6 @@ namespace CRM.Server.Services
                     Description = a.Description,
                     Expiry = a.Expiry,
                     ExpiryCheck = a.ExpiryCheck,
-                    Times = a.Times,
-                    Amount = a.Amount,
                     SensitiveData = a.SensitiveData == null ? null : "***",
                     HealthCheckUrl = a.HealthCheckUrl,
                     HealthCheckSchedule = a.HealthCheckSchedule,
@@ -448,15 +450,6 @@ namespace CRM.Server.Services
                 return ApplicationErrors.NoId.AsResult(nameof(rq.ProductId));
             }
 
-            if (productId.HasValue)
-            {
-                var unitResult = CheckProductUnit(product.BaseUnit, rq.Amount, rq.Times, true);
-                if (!unitResult.Ok)
-                {
-                    return unitResult;
-                }
-            }
-
             // Check supplier
             var supplierId = rq.SupplierId;
             if (supplierId.HasValue && !await _db.Suppliers(orgId).Where(p => p.Id == supplierId.Value).AnyAsync(cancellationToken))
@@ -509,18 +502,6 @@ namespace CRM.Server.Services
             if (rq.IsModified(nameof(rq.ExpiryCheck)))
             {
                 asset.ExpiryCheck = rq.ExpiryCheck;
-            }
-
-            if (rq.IsModified(nameof(rq.Times)))
-            {
-                asset.Times = rq.Times;
-                hasFinanceChange = true;
-            }
-
-            if (rq.IsModified(nameof(rq.Amount)))
-            {
-                asset.Amount = rq.Amount;
-                hasFinanceChange = true;
             }
 
             if (rq.IsModified(nameof(rq.SensitiveData)))
@@ -619,8 +600,6 @@ namespace CRM.Server.Services
                     Description = a.Description,
                     Expiry = a.Expiry,
                     ExpiryCheck = a.ExpiryCheck,
-                    Times = a.Times,
-                    Amount = a.Amount,
                     SensitiveData = a.SensitiveData == null ? null : "***",
                     HealthCheckUrl = a.HealthCheckUrl,
                     Data = a.Data,

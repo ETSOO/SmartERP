@@ -21,13 +21,13 @@ namespace Platform.Server.Models.Configurations
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.Amount)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("amount");
             entity.Property(e => e.AssetId).HasColumnName("asset_id");
             entity.Property(e => e.AssetQty).HasColumnName("asset_qty");
             entity.Property(e => e.BomId).HasColumnName("bom_id");
             entity.Property(e => e.CostPrice)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("cost_price");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
@@ -39,16 +39,15 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(1280)
                 .HasColumnName("description");
             entity.Property(e => e.Discount)
-                .HasDefaultValueSql("0")
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("discount");
             entity.Property(e => e.EndTime).HasColumnName("end_time");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.OriginalPrice)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("original_price");
             entity.Property(e => e.Price)
-                .HasColumnType("money")
+                .HasPrecision(18, 2)
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Promotions)

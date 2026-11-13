@@ -1,4 +1,10 @@
-import { ButtonLink, CommonPage, VBox, ViewContainer } from "@etsoo/materialui";
+import {
+  ButtonLink,
+  CommonPage,
+  HBox,
+  VBox,
+  ViewContainer
+} from "@etsoo/materialui";
 import { app } from "../../../app/MyApp";
 import React from "react";
 import { SystemSettings } from "@etsoo/smarterp-crm";
@@ -10,6 +16,11 @@ import CardActions from "@mui/material/CardActions";
 import CardHeader from "@mui/material/CardHeader";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import Paper from "@mui/material/Paper";
+import ArticleIcon from "@mui/icons-material/Article";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 
 export default function AllSystem() {
   // Route
@@ -45,6 +56,7 @@ export default function AllSystem() {
   // Labels
   const labels = app.getLabels(
     "depts",
+    "finance",
     "org",
     "permissionGroups",
     "reports",
@@ -60,15 +72,47 @@ export default function AllSystem() {
         <LinearProgress />
       ) : (
         <VBox spacing={2}>
-          <Paper sx={{ paddingY: 1 }}>
-            {orgPersonId && (
-              <ButtonLink href={`./../contact/view/${orgPersonId}`}>
-                {labels.org}
+          <Paper sx={{ padding: 2 }}>
+            <HBox sx={{ flexWrap: "wrap", gap: "8px" }}>
+              {orgPersonId && (
+                <ButtonLink
+                  startIcon={<ArticleIcon />}
+                  variant="outlined"
+                  href={`./../contact/view/${orgPersonId}`}
+                >
+                  {labels.org}
+                </ButtonLink>
+              )}
+              <ButtonLink
+                startIcon={<CalculateIcon />}
+                variant="outlined"
+                href="./finance"
+                color="success"
+              >
+                {labels.finance}
               </ButtonLink>
-            )}
-            <ButtonLink href="./../report">{labels.reports}</ButtonLink>
-            <ButtonLink href="./dept">{labels.depts}</ButtonLink>
-            <ButtonLink href="./group">{labels.permissionGroups}</ButtonLink>
+              <ButtonLink
+                startIcon={<BarChartIcon />}
+                variant="outlined"
+                href="./../report"
+              >
+                {labels.reports}
+              </ButtonLink>
+              <ButtonLink
+                startIcon={<Diversity3Icon />}
+                variant="outlined"
+                href="./dept"
+              >
+                {labels.depts}
+              </ButtonLink>
+              <ButtonLink
+                startIcon={<SupervisorAccountIcon />}
+                variant="outlined"
+                href="./group"
+              >
+                {labels.permissionGroups}
+              </ButtonLink>
+            </HBox>
           </Paper>
           <Card>
             <CardHeader title={labels.settings} />

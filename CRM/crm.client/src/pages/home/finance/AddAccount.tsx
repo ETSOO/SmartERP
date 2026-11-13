@@ -1,0 +1,301 @@
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import { app } from "../../../app/MyApp";
+import { EditPage, InputField } from "@etsoo/materialui";
+import {
+  ReactUtils,
+  useParamsEx,
+  useRefs,
+  useSearchParamsEx
+} from "@etsoo/react";
+import { useFormik } from "formik";
+import React from "react";
+import Grid from "@mui/material/Grid";
+import { StatusList } from "@etsoo/smarterp-core/components";
+import { DataTypes, IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
+import {
+  FinanceAccountCreateRQ,
+  FinanceAccountKind,
+  FinanceAccountUpdateRQ,
+  Permissions
+} from "@etsoo/smarterp-crm";
+import { useNavigate } from "react-router-dom";
+import { EntityStatus } from "@etsoo/appscript";
+import { CurrencyList } from "../../../components/CurrencyList";
+import {
+  AccountKindList,
+  PersonList,
+  ProductList
+} from "@etsoo/smarterp-crm/components";
+
+export default function AddAccount() {
+  // Route
+  const navigate = useNavigate();
+
+  const { id = 0 } = useParamsEx({
+    id: "number"
+  });
+
+  const { personId = 0, from } = useSearchParamsEx({
+    personId: "number",
+    from: "string"
+  });
+
+  const isEditing = id > 0;
+
+  // Labels
+  const labels = app.getLabels(
+    "account",
+    "accountNumber",
+    "bank",
+    "deleteConfirm",
+    "description",
+    "expiry",
+    "noChanges",
+    "owner",
+    "status",
+    "swift"
+  );
+
+  // Input refs
+  const refFields = [
+    "accountNumber",
+    "bank",
+    "description",
+    "expiry",
+    "swift"
+  ] as const;
+  const refs = useRefs(refFields);
+
+  // Type
+  type DataType = FinanceAccountCreateRQ;
+
+  // State
+  const [data, setData] = React.useState<DataType>({
+    personId,
+    currency: app.currency,
+    kind: FinanceAccountKind.None,
+    bank: "",
+    accountNumber: ""
+  });
+
+  // Formik
+  const formik = useFormik<DataType>({
+    initialValues: data,
+    enableReinitialize: true,
+    validateOnChange: false,
+    onSubmit: async (v) => {
+      const c = { ...v };
+      ReactUtils.updateRefValues(refs, c);
+
+      // Submit
+      let result: IdActionResult | undefined;
+      let redirectUrl: string;
+      if (id > 0) {
+        const rq: FinanceAccountUpdateRQ = {
+          ...c,
+          id
+        };
+
+        // Changed fields
+        const fields = Utils.getDataChanges(rq, data);
+        if (fields.length === 0) {
+          app.warning(labels.noChanges);
+          return;
+        }
+        rq.changedFields = fields;
+
+        redirectUrl = "./../..";
+
+        result = await app.financeAccountApi.update(rq);
+      } else {
+        const rq: FinanceAccountCreateRQ = {
+          ...c
+        };
+
+        Utils.removeEmptyValues(rq);
+
+        redirectUrl = "./..";
+
+        result = await app.financeAccountApi.create(rq);
+      }
+
+      if (result == null) return;
+
+      if (result.ok) {
+        if (from !== "console")
+          redirectUrl += "/viewaccount/" + result.data?.id;
+
+        navigate(redirectUrl);
+        return;
+      }
+
+      app.alertResult(result);
+    }
+  });
+
+  const isCash = isEditing && data.kind === FinanceAccountKind.Cash;
+
+  // Load data
+  const reloadData = React.useCallback(async () => {
+    if (id < 1) return;
+    const result = await app.financeAccountApi.updateRead(id);
+    if (result == null) return;
+    ReactUtils.updateRefs(refs, result);
+    setData(result);
+  }, [id]);
+
+  // Page data hook
+  usePageDataEmpty(app);
+
+  return (
+    <EditPage
+      isEditing={isEditing}
+      onSubmit={formik.handleSubmit}
+      onUpdate={reloadData}
+      onDelete={
+        app.owns(Permissions.Finance.Delete) &&
+        id &&
+        data.status === EntityStatus.Deleted
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.account),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
+
+                  const result = await app.financeAccountApi.delete(id);
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate(`./../../`);
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
+      paddings={0}
+    >
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <AccountKindList
+          value={formik.values.kind}
+          fullWidth
+          required
+          onChange={(event) => {
+            const kind = NumberUtils.parse(
+              event.target.value
+            ) as FinanceAccountKind;
+            if (!isEditing) {
+              refs.bank.current!.value =
+                kind === FinanceAccountKind.Cash ||
+                kind === FinanceAccountKind.Pass ||
+                kind === FinanceAccountKind.Prepaid
+                  ? (DataTypes.getEnumKey(
+                      FinanceAccountKind,
+                      kind
+                    )?.toUpperCase() ?? "")
+                  : "";
+            }
+            formik.handleChange(event);
+          }}
+          disabled={isCash}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <CurrencyList
+          value={formik.values.currency}
+          fullWidth
+          required
+          onChange={formik.handleChange}
+          disabled={isCash}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <PersonList
+          label={labels.owner}
+          inputRequired
+          idValue={formik.values.personId}
+          inputOnChange={formik.handleChange}
+          disabled={isCash}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <InputField
+          fullWidth
+          required
+          name="bank"
+          slotProps={{ htmlInput: { maxLength: 128 } }}
+          label={labels.bank}
+          inputRef={refs.bank}
+          disabled={isCash}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <InputField
+          fullWidth
+          required
+          name="accountNumber"
+          slotProps={{
+            htmlInput: { maxLength: 20, style: { textTransform: "uppercase" } }
+          }}
+          label={labels.accountNumber}
+          inputRef={refs.accountNumber}
+          disabled={isCash}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12 }}>
+        <InputField
+          fullWidth
+          name="description"
+          slotProps={{
+            htmlInput: { maxLength: 128 }
+          }}
+          label={labels.description}
+          inputRef={refs.description}
+          multiline
+          rows={2}
+        />
+      </Grid>
+      {!isCash && (
+        <Grid size={{ xs: 12, sm: 12 }}>
+          <InputField
+            fullWidth
+            name="swift"
+            slotProps={{
+              htmlInput: { maxLength: 256 }
+            }}
+            label={labels.swift}
+            inputRef={refs.swift}
+            multiline
+            rows={2}
+          />
+        </Grid>
+      )}
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <ProductList
+          idValue={formik.values.productId}
+          inputOnChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <StatusList
+          inputRequired
+          idValue={formik.values.status ?? EntityStatus.Normal}
+          inputOnChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 3 }}>
+        <InputField
+          fullWidth
+          name="expiry"
+          type="datetime-local"
+          label={labels.expiry}
+          inputRef={refs.expiry}
+        />
+      </Grid>
+    </EditPage>
+  );
+}

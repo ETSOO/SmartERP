@@ -53,8 +53,8 @@ export default function Assets() {
     "edit",
     "expiry",
     "keywords",
+    "owner",
     "product",
-    "relatedTarget",
     "sn",
     "supplier",
     "times",
@@ -67,8 +67,6 @@ export default function Assets() {
 
   // Load data
   const reloadData = React.useCallback(() => ref.current?.reset(), []);
-
-  const defaultCurrency = app.system.getDefaultCurrency();
 
   const hasEdit = app.owns(Permissions.Org.Manage);
 
@@ -106,7 +104,7 @@ export default function Assets() {
         />,
         <ProductList search idValue={data.productId} />,
         <PersonList
-          label={labels.relatedTarget}
+          label={labels.owner}
           name="personId"
           search
           idValue={data.personId ?? personId}
@@ -123,7 +121,7 @@ export default function Assets() {
       columns={[
         {
           field: "owner",
-          header: labels.relatedTarget
+          header: labels.owner
         },
         {
           field: "product",
@@ -133,19 +131,6 @@ export default function Assets() {
           field: "sn",
           header: labels.sn,
           cellBoxStyle: GridDeletedCellBoxStyle
-        },
-        {
-          field: "amount",
-          type: GridDataType.IntMoney,
-          width: 120,
-          header: labels.balance,
-          renderProps: (_) => app.getMoneyFormatProps(defaultCurrency)
-        },
-        {
-          field: "times",
-          type: GridDataType.Int,
-          width: 100,
-          header: labels.times
         },
         {
           field: "expiry",
@@ -210,21 +195,6 @@ export default function Assets() {
               <Typography component="div" variant="caption">
                 {data.sn} - {data.product}
               </Typography>
-              {data.amount != null && (
-                <Typography variant="body2">
-                  {labels.balance}:{" "}
-                  {app.formatMoney(
-                    data.amount,
-                    undefined,
-                    app.getMoneyFormatProps(defaultCurrency)
-                  )}
-                </Typography>
-              )}
-              {data.times != null && (
-                <Typography variant="body2">
-                  {labels.times}: {app.formatNumber(data.times)}
-                </Typography>
-              )}
               <Typography variant="body2">
                 {labels.expiry}: {app.formatDate(data.expiry, "d")}
               </Typography>

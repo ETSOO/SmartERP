@@ -24,6 +24,9 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Brand)
                 .HasMaxLength(30)
                 .HasColumnName("brand");
+            entity.Property(e => e.CompanySeal)
+                .HasMaxLength(256)
+                .HasColumnName("company_seal");
             entity.Property(e => e.Creation)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("creation");
@@ -45,7 +48,13 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(2)
                 .IsFixedLength()
                 .HasColumnName("region");
+            entity.Property(e => e.Slogan)
+                .HasMaxLength(128)
+                .HasColumnName("slogan");
             entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.TimeZone)
+                .HasMaxLength(64)
+                .HasColumnName("time_zone");
             entity.Property(e => e.Uid).HasColumnName("uid");
 
             entity.HasOne(d => d.Owner).WithMany(p => p.CoreOrganizations)

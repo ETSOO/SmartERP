@@ -1,0 +1,148 @@
+import { GridDataType, useParamsEx } from "@etsoo/react";
+import { HBox, LinkEx, ViewPage } from "@etsoo/materialui";
+import { app } from "../../../app/MyApp";
+import { usePageDataEmpty } from "@etsoo/smarterp-core";
+import React from "react";
+import Typography from "@mui/material/Typography";
+import {
+  FinanceTransactionViewData,
+  OrderKind,
+  Permissions
+} from "@etsoo/smarterp-crm";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import UndoIcon from "@mui/icons-material/Undo";
+import { TransactionOffset } from "./TransactionOffsetUI";
+
+export default function ViewTransaction() {
+  // Route
+  const { id = 0 } = useParamsEx({ id: "number" });
+
+  // Labels
+  const labels = app.getLabels("financeTransactionKindOffset", "view");
+
+  // Load data
+  const loadData = React.useCallback(
+    async () => app.financeTransactionApi.read(id),
+    [id]
+  );
+
+  // Page data hook
+  usePageDataEmpty(app);
+
+  return (
+    <ViewPage<FinanceTransactionViewData>
+      paddings={0}
+      titleBar={(item) => (
+        <HBox
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 2
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{ textAlign: "center", paddingRight: 2 }}
+          >
+            {item.title}
+          </Typography>
+        </HBox>
+      )}
+      fields={[
+        {
+          data: (item) => app.finance.getTransactionKind(item.kind),
+          label: "type"
+        },
+        {
+          data: (item) => `${item.currency} ${app.formatNumber(item.amount)}`,
+          label: "amount"
+        },
+        {
+          data: (item) =>
+            item.orderId ? (
+              <LinkEx
+                variant="body2"
+                to={`./../../../../${item.orderKind == OrderKind.Order ? "order" : "po"}/view/${item.orderId}`}
+              >
+                {item.orderTitle}
+              </LinkEx>
+            ) : undefined,
+          label: "order",
+          singleRow: "large"
+        },
+        "referenceId",
+        {
+          data: (item) => (
+            <LinkEx
+              variant="body2"
+              to={`./../../viewaccount/${item.accountId}`}
+            >
+              {item.account}
+            </LinkEx>
+          ),
+          label: "account"
+        },
+        {
+          data: (item) => (
+            <LinkEx
+              variant="body2"
+              to={`./../../../../contact/view/${item.authorId}`}
+            >
+              {item.authorName}
+            </LinkEx>
+          ),
+          label: "author"
+        },
+        ["happenDate", GridDataType.DateTime],
+        ["creation", GridDataType.DateTime],
+        {
+          data: (item) =>
+            item.offsetId ? (
+              <LinkEx variant="body2" to={`./../${item.offsetId}`}>
+                {labels.view}
+              </LinkEx>
+            ) : undefined,
+          label: "financeTransactionKindOffset"
+        }
+      ]}
+      loadData={loadData}
+      actions={(_data, refresh) => (
+        <React.Fragment>
+          {app.owns(Permissions.Finance.Edit) && (
+            <Button
+              variant="contained"
+              startIcon={<UndoIcon />}
+              onClick={(e) =>
+                TransactionOffset(id, e.currentTarget.textContent, refresh)
+              }
+            >
+              {labels.financeTransactionKindOffset}
+            </Button>
+          )}
+        </React.Fragment>
+      )}
+    >
+      {(data) =>
+        data.innerRefs != null && (
+          <Grid container>
+            {data.innerRefs.map((i) => {
+              const content = `[${app.finance.getAccountKind(i.accountKind)}] ${app.formatNumber(i.amount)}, ${i.bank}`;
+              return (
+                <Grid size={{ xs: 12, sm: 6, md: 4, xl: 2 }} key={i.id}>
+                  {i.id === id ? (
+                    <Typography variant="body2">{content}</Typography>
+                  ) : (
+                    <LinkEx variant="body2" to={`./../${i.id}`}>
+                      {content}
+                    </LinkEx>
+                  )}
+                </Grid>
+              );
+            })}
+          </Grid>
+        )
+      }
+    </ViewPage>
+  );
+}

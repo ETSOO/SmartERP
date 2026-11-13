@@ -82,6 +82,12 @@ namespace CRM.Server.Dto.PO
         public decimal Amount { get; init; }
 
         /// <summary>
+        /// Total payable
+        /// 应付总额
+        /// </summary>
+        public decimal TotalPayable { get; init; }
+
+        /// <summary>
         /// Tax amount
         /// 纳税金额
         /// </summary>

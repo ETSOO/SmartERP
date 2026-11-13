@@ -4,7 +4,10 @@ import React from "react";
 import { SystemSettings, UpdateSettingsRQ } from "@etsoo/smarterp-crm";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import Grid from "@mui/material/Grid";
-import { CustomerTypeList } from "@etsoo/smarterp-crm/components";
+import {
+  AssetExpirationNoticeList,
+  CustomerTypeList
+} from "@etsoo/smarterp-crm/components";
 import { useFormik } from "formik";
 import {
   ButtonCultures,
@@ -19,6 +22,7 @@ export default function UpdateSettings() {
 
   // Labels
   const labels = app.getLabels(
+    "assetExpirationNotice",
     "currencies",
     "cultures",
     "defaultTaxRate",
@@ -83,7 +87,11 @@ export default function UpdateSettings() {
   // Load data
   const loadData = React.useCallback(async () => {
     const data = await app.systemApi.readSettings();
-    if (data == null) return;
+    if (data == null) {
+      if (app.region === "CN") formik.setFieldValue("currencies", ["CNY"]);
+      formik.setFieldValue("cultures", [app.culture]);
+      return;
+    }
     setSettings(data);
   }, []);
 
@@ -117,9 +125,7 @@ export default function UpdateSettings() {
         <ButtonCurrencies
           fullWidth
           required
-          value={
-            formik.values.currencies ?? (app.region === "CN" ? ["CNY"] : [])
-          }
+          value={formik.values.currencies ?? []}
           onValueChange={(ids) => formik.setFieldValue("currencies", ids)}
         />
       </Grid>
@@ -137,7 +143,7 @@ export default function UpdateSettings() {
         <ButtonCultures
           fullWidth
           required
-          value={formik.values.cultures ?? [app.culture]}
+          value={formik.values.cultures}
           onValueChange={(ids) => formik.setFieldValue("cultures", ids)}
         />
       </Grid>
@@ -173,6 +179,14 @@ export default function UpdateSettings() {
             !orderMonthlyReportEnabled ||
             (orderMonthlyReportEnabled as unknown) == "false"
           }
+          onChange={formik.handleChange}
+        />
+      </Grid>
+      <Grid size={{ xs: 6, sm: 4 }}>
+        <AssetExpirationNoticeList
+          label={labels.assetExpirationNotice}
+          fullWidth
+          value={formik.values.assetExpirationNotice}
           onChange={formik.handleChange}
         />
       </Grid>

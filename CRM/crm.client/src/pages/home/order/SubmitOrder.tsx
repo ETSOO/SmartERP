@@ -19,6 +19,7 @@ import {
   OrderKind,
   OrderLineRQ,
   OrderUpdateRQ,
+  Permissions,
   PromotionSaleItemBase
 } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
@@ -66,12 +67,14 @@ export default function SubmitOrder() {
   // Labels
   const labels = app.getLabels(
     "amount",
+    "deleteConfirm",
     "deliveryAddress",
     "deliveryInstruction",
     "discount",
     "endDate",
     "items",
     "noChanges",
+    "order",
     "orderLines",
     "orderSource",
     "paymentInstruction",
@@ -288,6 +291,31 @@ export default function SubmitOrder() {
   return (
     <EditPage
       isEditing={isEditing}
+      onDelete={
+        app.owns(Permissions.Order.Delete) &&
+        id &&
+        data.status === EntityStatus.Deleted
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.order),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
+
+                  const result = await app.orderApi.delete(id);
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate(`./../../`);
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
       onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       paddings={0}

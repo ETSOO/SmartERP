@@ -1,11 +1,6 @@
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
 import { app } from "../../../app/MyApp";
-import {
-  EditPage,
-  InputField,
-  IntInputField,
-  MoneyInputField
-} from "@etsoo/materialui";
+import { EditPage, InputField, IntInputField } from "@etsoo/materialui";
 import {
   ReactUtils,
   useParamsEx,
@@ -15,11 +10,11 @@ import {
 import { useFormik } from "formik";
 import React from "react";
 import Grid from "@mui/material/Grid";
-import { IdActionResult, NumberUtils, Utils } from "@etsoo/shared";
-import { AssetCreateRQ, AssetUpdateRQ } from "@etsoo/smarterp-crm";
+import { IdActionResult, Utils } from "@etsoo/shared";
+import { AssetCreateRQ, AssetUpdateRQ, Permissions } from "@etsoo/smarterp-crm";
 import { useNavigate } from "react-router-dom";
 import { StatusList } from "@etsoo/smarterp-core/components";
-import { EntityStatus, ProductUnit } from "@etsoo/appscript";
+import { EntityStatus } from "@etsoo/appscript";
 import {
   PersonList,
   ProductList,
@@ -43,7 +38,8 @@ export default function AddAsset() {
 
   // Labels
   const labels = app.getLabels(
-    "balance",
+    "asset",
+    "deleteConfirm",
     "description",
     "expiry",
     "expiryCheck",
@@ -51,28 +47,28 @@ export default function AddAsset() {
     "intervalMinutes",
     "noChanges",
     "noticeOwner",
-    "relatedTarget",
+    "owner",
     "sensitiveData",
-    "sn",
-    "times"
+    "sn"
   );
 
   // Input refs
   const refFields = [
-    "amount",
     "description",
     "expiry",
     "expiryCheck",
     "healthCheckUrl",
     "intervalMinutes",
     "sensitiveData",
-    "sn",
-    "times"
+    "sn"
   ] as const;
   const refs = useRefs(refFields);
 
   // Type
   type DataType = AssetCreateRQ;
+
+  // Setting
+  const { expiryCheck, noticeOwner } = app.system.getAssetExpirationNotice();
 
   // State
   const [data, setData] = React.useState<DataType>({
@@ -80,7 +76,10 @@ export default function AddAsset() {
     productId: 0,
     sn: "",
     expiry: "",
-    expiryCheck: true
+    expiryCheck,
+    data: {
+      noticeOwner
+    }
   });
 
   // Formik
@@ -151,13 +150,38 @@ export default function AddAsset() {
   return (
     <EditPage
       isEditing={isEditing}
+      onDelete={
+        app.owns(Permissions.Org.Manage) &&
+        data.status === EntityStatus.Deleted &&
+        id
+          ? () => {
+              app.notifier.confirm(
+                labels.deleteConfirm.format(labels.asset),
+                undefined,
+                async (ok) => {
+                  if (!ok) return;
+
+                  const result = await app.assetApi.delete(id);
+                  if (result == null) return;
+
+                  if (result.ok) {
+                    navigate(`./../../`);
+                    return;
+                  }
+
+                  app.alertResult(result);
+                }
+              );
+            }
+          : undefined
+      }
       onSubmit={formik.handleSubmit}
       onUpdate={reloadData}
       paddings={0}
     >
       <Grid size={{ xs: 12, sm: 6 }}>
         <PersonList
-          label={labels.relatedTarget}
+          label={labels.owner}
           inputRequired
           idValue={formik.values.personId}
           inputOnChange={formik.handleChange}
@@ -168,20 +192,6 @@ export default function AddAsset() {
           inputRequired
           idValue={formik.values.productId}
           inputOnChange={formik.handleChange}
-          onValueChange={(value) => {
-            const amountInput = refs.amount.current;
-            const timesInput = refs.times.current;
-            if (amountInput == null || timesInput == null) return;
-
-            amountInput.disabled = true;
-            timesInput.disabled = true;
-
-            if (value?.baseUnit === ProductUnit.MONEY) {
-              amountInput.disabled = false;
-            } else if (value?.baseUnit === ProductUnit.TIME) {
-              timesInput.disabled = false;
-            }
-          }}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
@@ -195,7 +205,9 @@ export default function AddAsset() {
           fullWidth
           required
           name="sn"
-          slotProps={{ htmlInput: { maxLength: 256 } }}
+          slotProps={{
+            htmlInput: { maxLength: 256, style: { textTransform: "uppercase" } }
+          }}
           label={labels.sn}
           inputRef={refs.sn}
         />
@@ -211,29 +223,6 @@ export default function AddAsset() {
           inputRef={refs.description}
           multiline
           rows={2}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <MoneyInputField
-          fullWidth
-          name="amount"
-          slotProps={{
-            htmlInput: { disabled: true }
-          }}
-          symbol={NumberUtils.getCurrencySymbol(app.currency)}
-          label={labels.balance}
-          inputRef={refs.amount}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <IntInputField
-          fullWidth
-          name="times"
-          slotProps={{
-            htmlInput: { disabled: true }
-          }}
-          label={labels.times}
-          inputRef={refs.times}
         />
       </Grid>
       <Grid size={{ xs: 6, sm: 3 }}>

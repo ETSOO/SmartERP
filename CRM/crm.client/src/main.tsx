@@ -278,6 +278,14 @@ const router = createDynamicRouter([
             }
           },
           {
+            path: "/home/order/collect/:id",
+            lazy: async () => {
+              const OrderCollect =
+                await import("./pages/home/order/OrderCollect");
+              return { Component: OrderCollect.default };
+            }
+          },
+          {
             path: "/home/order/edit/:id",
             lazy: async () => {
               const EditOrder = await import("./pages/home/order/SubmitOrder");
@@ -450,6 +458,13 @@ const router = createDynamicRouter([
             lazy: async () => {
               const ViewPO = await import("./pages/home/po/ViewPO");
               return { Component: ViewPO.default };
+            }
+          },
+          {
+            path: "/home/po/pay/:id",
+            lazy: async () => {
+              const POPay = await import("./pages/home/po/POPay");
+              return { Component: POPay.default };
             }
           },
           {
@@ -855,6 +870,70 @@ const router = createDynamicRouter([
             lazy: async () => {
               const AddDept = await import("./pages/home/dept/AddDept");
               return { Component: AddDept.default };
+            }
+          },
+          {
+            path: "/home/system/finance",
+            lazy: async () => {
+              const FinanceConsole =
+                await import("./pages/home/finance/FinanceConsole");
+              return { Component: FinanceConsole.default };
+            }
+          },
+          {
+            path: "/home/system/finance/addaccount",
+            lazy: async () => {
+              const AddAccount =
+                await import("./pages/home/finance/AddAccount");
+              return { Component: AddAccount.default };
+            }
+          },
+          {
+            path: "/home/system/finance/bulkcreateaccounts",
+            lazy: async () => {
+              const BulkCreateAccounts =
+                await import("./pages/home/finance/BulkCreateAccounts");
+              return { Component: BulkCreateAccounts.default };
+            }
+          },
+          {
+            path: "/home/system/finance/editaccount/:id",
+            lazy: async () => {
+              const AddAccount =
+                await import("./pages/home/finance/AddAccount");
+              return { Component: AddAccount.default };
+            }
+          },
+          {
+            path: "/home/system/finance/accounts",
+            lazy: async () => {
+              const AllAccounts =
+                await import("./pages/home/finance/AllAccounts");
+              return { Component: AllAccounts.default };
+            }
+          },
+          {
+            path: "/home/system/finance/reimbursement",
+            lazy: async () => {
+              const Reimbursement =
+                await import("./pages/home/finance/Reimbursement");
+              return { Component: Reimbursement.default };
+            }
+          },
+          {
+            path: "/home/system/finance/viewaccount/:id",
+            lazy: async () => {
+              const ViewAccount =
+                await import("./pages/home/finance/ViewAccount");
+              return { Component: ViewAccount.default };
+            }
+          },
+          {
+            path: "/home/system/finance/viewtransaction/:id",
+            lazy: async () => {
+              const ViewTransaction =
+                await import("./pages/home/finance/ViewTransaction");
+              return { Component: ViewTransaction.default };
             }
           },
           {

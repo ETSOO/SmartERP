@@ -84,11 +84,19 @@ function CompleteUI({
           return false;
         }
 
+        // Setting
+        const { expiryCheck, noticeOwner } =
+          app.system.getAssetExpirationNotice();
+
         const result = await app.assetApi.create({
           personId: data.buyerId,
           productId: data.productId,
           sn,
           expiry,
+          expiryCheck,
+          data: {
+            noticeOwner
+          },
           description
         });
 

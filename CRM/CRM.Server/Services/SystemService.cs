@@ -45,7 +45,8 @@ namespace CRM.Server.Services
                     HasInventory = s.HasInventory,
                     TaxRate = s.TaxRate,
                     OrderMonthlyReportEnabled = s.OrderMonthlyReportEnabled,
-                    OrderDailyReportHour = s.OrderDailyReportHour
+                    OrderDailyReportHour = s.OrderDailyReportHour,
+                    AssetExpirationNotice = s.AssetExpirationNotice
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -275,7 +276,8 @@ namespace CRM.Server.Services
                     HasInventory = rq.HasInventory.GetValueOrDefault(),
                     TaxRate = rq.TaxRate,
                     OrderMonthlyReportEnabled = rq.OrderMonthlyReportEnabled,
-                    OrderDailyReportHour = rq.OrderDailyReportHour
+                    OrderDailyReportHour = rq.OrderDailyReportHour,
+                    AssetExpirationNotice = rq.AssetExpirationNotice
                 };
 
                 _db.SettingCrms.Add(settings);
@@ -320,6 +322,11 @@ namespace CRM.Server.Services
                 if (rq.IsModified(nameof(rq.OrderDailyReportHour)))
                 {
                     settings.OrderDailyReportHour = rq.OrderDailyReportHour;
+                }
+
+                if (rq.IsModified(nameof(rq.AssetExpirationNotice)))
+                {
+                    settings.AssetExpirationNotice = rq.AssetExpirationNotice;
                 }
             }
 

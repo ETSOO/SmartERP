@@ -59,18 +59,6 @@ namespace CRM.Server.Dto.Asset
         public bool? ExpiryCheck { get; init; }
 
         /// <summary>
-        /// Remaining times
-        /// 剩余次数
-        /// </summary>
-        public int? Times { get; init; }
-
-        /// <summary>
-        /// Remaining amount
-        /// 剩余金额
-        /// </summary>
-        public decimal? Amount { get; init; }
-
-        /// <summary>
         /// Sensitive data
         /// 敏感数据
         /// </summary>

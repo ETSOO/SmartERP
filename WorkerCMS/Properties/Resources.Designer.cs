@@ -70,6 +70,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bulk Create Finance Account.
+        /// </summary>
+        internal static string BulkCreateFinanceAccount {
+            get {
+                return ResourceManager.GetString("BulkCreateFinanceAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Complete Order Line.
         /// </summary>
         internal static string CompleteOrderLine {
@@ -120,6 +129,15 @@ namespace WorkerCMS.Properties {
         internal static string CreateDept {
             get {
                 return ResourceManager.GetString("CreateDept", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Finance Account.
+        /// </summary>
+        internal static string CreateFinanceAccount {
+            get {
+                return ResourceManager.GetString("CreateFinanceAccount", resourceCulture);
             }
         }
         
@@ -268,11 +286,29 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete Asset.
+        /// </summary>
+        internal static string DeleteAsset {
+            get {
+                return ResourceManager.GetString("DeleteAsset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete Contact Relation.
         /// </summary>
         internal static string DeleteContactRelation {
             get {
                 return ResourceManager.GetString("DeleteContactRelation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Order.
+        /// </summary>
+        internal static string DeleteOrder {
+            get {
+                return ResourceManager.GetString("DeleteOrder", resourceCulture);
             }
         }
         
@@ -322,6 +358,15 @@ namespace WorkerCMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete Purchase Order.
+        /// </summary>
+        internal static string DeletePO {
+            get {
+                return ResourceManager.GetString("DeletePO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete PO Line.
         /// </summary>
         internal static string DeletePOLine {
@@ -354,6 +399,15 @@ namespace WorkerCMS.Properties {
         internal static string MergeProductCategory {
             get {
                 return ResourceManager.GetString("MergeProductCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process Finance Transaction.
+        /// </summary>
+        internal static string ProcessFinanceTransaction {
+            get {
+                return ResourceManager.GetString("ProcessFinanceTransaction", resourceCulture);
             }
         }
         
@@ -660,6 +714,15 @@ namespace WorkerCMS.Properties {
         internal static string UpdateDept {
             get {
                 return ResourceManager.GetString("UpdateDept", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Finance Account.
+        /// </summary>
+        internal static string UpdateFinanceAccount {
+            get {
+                return ResourceManager.GetString("UpdateFinanceAccount", resourceCulture);
             }
         }
         

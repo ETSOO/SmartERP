@@ -1,6 +1,8 @@
 ﻿using CRM.Server.Dto.Asset;
 using CRM.Server.Dto.Customer;
 using CRM.Server.Dto.Dept;
+using CRM.Server.Dto.FinanceAccount;
+using CRM.Server.Dto.FinanceTransaction;
 using CRM.Server.Dto.Group;
 using CRM.Server.Dto.Order;
 using CRM.Server.Dto.OrderDelivery;
@@ -27,6 +29,8 @@ using CRM.Server.RQ;
 using CRM.Server.RQ.Asset;
 using CRM.Server.RQ.Customer;
 using CRM.Server.RQ.Dept;
+using CRM.Server.RQ.FinanceAccount;
+using CRM.Server.RQ.FinanceTransaction;
 using CRM.Server.RQ.Group;
 using CRM.Server.RQ.Order;
 using CRM.Server.RQ.OrderDelivery;
@@ -102,6 +106,34 @@ namespace CRM.Server
     [JsonSerializable(typeof(GroupViewData))]
 
     [JsonSerializable(typeof(GroupListRQ))]
+
+    // Finance account
+    [JsonSerializable(typeof(FinanceAccountListData[]))]
+    [JsonSerializable(typeof(FinanceAccountItem[]))]
+    [JsonSerializable(typeof(FinanceAccountQueryData[]))]
+    [JsonSerializable(typeof(FinanceAccountViewData))]
+
+    [JsonSerializable(typeof(FinanceAccountCreateBulkRQ))]
+    [JsonSerializable(typeof(FinanceAccountCreateCashRQ))]
+    [JsonSerializable(typeof(FinanceAccountCreateRQ))]
+    [JsonSerializable(typeof(FinanceAccountListRQ))]
+    [JsonSerializable(typeof(FinanceAccountUpdateRQ))]
+
+    // Finance transaction
+    [JsonSerializable(typeof(FinanceTransactionListData[]))]
+    [JsonSerializable(typeof(FinanceTransactionQueryData[]))]
+    [JsonSerializable(typeof(FinanceTransactionViewData))]
+    [JsonSerializable(typeof(FinanceTransactionViewOrderData))]
+    [JsonSerializable(typeof(FinanceTransactionViewPOData))]
+
+    [JsonSerializable(typeof(FinanceTransactionAdjustRQ))]
+    [JsonSerializable(typeof(FinanceTransactionCurrencyExchangeRQ))]
+    [JsonSerializable(typeof(FinanceTransactionListRQ))]
+    [JsonSerializable(typeof(FinanceTransactionOffsetRQ))]
+    [JsonSerializable(typeof(FinanceTransactionPayOrderRQ))]
+    [JsonSerializable(typeof(FinanceTransactionPayPORQ))]
+    [JsonSerializable(typeof(FinanceTransactionReimburseRQ))]
+    [JsonSerializable(typeof(FinanceTransactionTransferRQ))]
 
     // Order delivery
     [JsonSerializable(typeof(OrderDeliveryListData[]))]

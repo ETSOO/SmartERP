@@ -60,6 +60,9 @@ namespace Platform.Server.Models.Configurations
                 .HasMaxLength(2)
                 .IsFixedLength()
                 .HasColumnName("region");
+            entity.Property(e => e.Signature)
+                .HasMaxLength(256)
+                .HasColumnName("signature");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Step).HasColumnName("step");
 

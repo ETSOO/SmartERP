@@ -21,10 +21,6 @@ public partial class PersonAsset
 
     public DateTime Expiry { get; set; }
 
-    public int? Times { get; set; }
-
-    public decimal? Amount { get; set; }
-
     public string? SensitiveData { get; set; }
 
     public int CoreUserId { get; set; }
@@ -40,6 +36,8 @@ public partial class PersonAsset
     public string? Data { get; set; }
 
     public int OrgId { get; set; }
+
+    public bool? ExpiryCheck { get; set; }
 
     public virtual CoreUser CoreUser { get; set; } = null!;
 

@@ -1,4 +1,6 @@
-﻿using PlatformShared.CrmMessages.Order;
+﻿using PlatformShared.CrmMessages.FinanceAccount;
+using PlatformShared.CrmMessages.FinanceTransaction;
+using PlatformShared.CrmMessages.Order;
 using PlatformShared.CrmMessages.Org;
 using PlatformShared.CrmMessages.Person;
 using PlatformShared.CrmMessages.PO;
@@ -20,8 +22,17 @@ namespace PlatformShared.CrmMessages
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     )]
 
+    // Finance account
+    [JsonSerializable(typeof(BulkCreateFinanceAccountMessage))]
+    [JsonSerializable(typeof(CreateFinanceAccountMessage))]
+    [JsonSerializable(typeof(UpdateFinanceAccountMessage))]
+
+    // Finance transaction
+    [JsonSerializable(typeof(ProcessFinanceTransactionMessage))]
+
     // Order
     [JsonSerializable(typeof(CreateOrderMessage))]
+    [JsonSerializable(typeof(DeleteOrderMessage))]
     [JsonSerializable(typeof(ReadOrderMessage))]
     [JsonSerializable(typeof(RecalculateOrderMessage))]
     [JsonSerializable(typeof(UpdateOrderMessage))]
@@ -44,6 +55,7 @@ namespace PlatformShared.CrmMessages
 
     // Org
     [JsonSerializable(typeof(CreateAssetMessage))]
+    [JsonSerializable(typeof(DeleteAssetMessage))]
     [JsonSerializable(typeof(ReadAssetSensitiveDataMessage))]
     [JsonSerializable(typeof(UpdateAssetMessage))]
 
@@ -115,6 +127,7 @@ namespace PlatformShared.CrmMessages
 
     // PO
     [JsonSerializable(typeof(CreatePOMessage))]
+    [JsonSerializable(typeof(DeletePOMessage))]
     [JsonSerializable(typeof(ReadPOMessage))]
     [JsonSerializable(typeof(RecalculatePOMessage))]
     [JsonSerializable(typeof(UpdatePOMessage))]

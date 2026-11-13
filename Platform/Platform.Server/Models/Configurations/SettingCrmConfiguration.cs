@@ -20,6 +20,7 @@ namespace Platform.Server.Models.Configurations
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
+            entity.Property(e => e.AssetExpirationNotice).HasColumnName("asset_expiration_notice");
             entity.Property(e => e.Cultures)
                 .HasColumnType("character varying(10)[]")
                 .HasColumnName("cultures");
@@ -28,6 +29,8 @@ namespace Platform.Server.Models.Configurations
                 .HasColumnName("currencies");
             entity.Property(e => e.HasInventory).HasColumnName("has_inventory");
             entity.Property(e => e.MainCustomerType).HasColumnName("main_customer_type");
+            entity.Property(e => e.OrderDailyReportHour).HasColumnName("order_daily_report_hour");
+            entity.Property(e => e.OrderMonthlyReportEnabled).HasColumnName("order_monthly_report_enabled");
             entity.Property(e => e.PersonId).HasColumnName("person_id");
             entity.Property(e => e.SupplierCurrencies)
                 .HasColumnType("character(3)[]")
