@@ -272,7 +272,7 @@ export function PersonData(props: PersonDataProps) {
             (editable || deletable) && (
               <HBox
                 spacing={1}
-                sx={{ justifyContent: "center", flexWrap: "wrap" }}
+                sx={{ justifyContent: "center", flexWrap: "wrap", gap: 1 }}
               >
                 {deletable && (
                   <Button

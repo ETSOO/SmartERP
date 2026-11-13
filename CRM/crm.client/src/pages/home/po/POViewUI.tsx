@@ -187,7 +187,7 @@ export function POViewUI(props: POViewUIProps) {
           data: (item) => (
             <HBox
               spacing={1}
-              sx={{ justifyContent: "center", flexWrap: "wrap" }}
+              sx={{ justifyContent: "center", flexWrap: "wrap", gap: 1 }}
             >
               {app.owns(Permissions.PO.Manage) &&
                 item.status < EntityStatus.Inactivated && (

@@ -3,6 +3,7 @@ import {
   CommonPage,
   HBox,
   IconButtonLink,
+  MobileListItemRenderer,
   ResponsibleContainer,
   VBox
 } from "@etsoo/materialui";
@@ -205,6 +206,34 @@ export default function FinanceConsole() {
         }}
         mRef={ref}
         quickAction={(data) => navigate(`./viewaccount/${data.id}`)}
+        rowHeight={116}
+        itemRenderer={(props) =>
+          MobileListItemRenderer(props, (data) => {
+            return [
+              `[${app.finance.getAccountKind(data?.kind)}] ${data.accountNumber}`,
+              `${data.bank}, ${data.currency}`,
+              [
+                (data.kind === FinanceAccountKind.Super ||
+                  data.kind === FinanceAccountKind.Transfer) && {
+                  label: labels.copyPaymentInfo,
+                  icon: <ContentCopyIcon />,
+                  action: () => app.formatPaymentInfo(data)
+                },
+                app.owns(Permissions.Finance.Edit) && {
+                  label: labels.edit,
+                  icon: <EditIcon />,
+                  action: `./editaccount/${data.id}?from=console`
+                },
+                app.owns(Permissions.Finance.View) && {
+                  label: labels.view,
+                  icon: <ArticleIcon />,
+                  action: `./viewaccount/${data.id}`
+                }
+              ],
+              <React.Fragment></React.Fragment>
+            ];
+          })
+        }
       />
       <HBox sx={{ paddingY: 2, flexWrap: "wrap", gap: 2 }}>
         {hasAdd && (
