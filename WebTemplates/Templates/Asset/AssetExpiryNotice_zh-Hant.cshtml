@@ -24,14 +24,6 @@
     }
     <p>
         名下資產 - @Model.Asset.ProductName (@Model.Asset.Sn) 即將於 <b>@Model.Asset.Expiry.ToString("f")</b> 到期。我們將盡快與您聯繫，協助續訂或處理相關事宜，以免影響您的使用體驗。
-        @if (Model.Asset.Amount != 0)
-        {
-            <br /><span>餘額：</span><b>@Model.Asset.Amount.ToString("N2")</b>
-        }
-        @if (Model.Asset.Times != 0)
-        {
-            <br /><span>剩餘次數：</span><b>@Model.Asset.Times.ToString("N0")</b>
-        }
     </p>
     <hr style="width: 100%; background: none; border: none; border-top: 1px solid #666; height: 1px; margin: 6px 0px;" />
     <table border="0" width="100%">
