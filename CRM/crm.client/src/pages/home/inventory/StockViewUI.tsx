@@ -36,8 +36,8 @@ export function StockViewUI({
   // Labels
   const labels = app.getLabels(
     "confirmAction",
-    "delete",
     "deleteConfirm1",
+    "deleteItem",
     "description",
     "edit",
     "noChanges",
@@ -278,7 +278,7 @@ export function StockViewUI({
                   variant="outlined"
                   onClick={doDelete}
                 >
-                  {labels.delete}
+                  {labels.deleteItem}
                 </Button>
               )}
               {hasManage && data.receiptTime == null && (

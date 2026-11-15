@@ -22,8 +22,8 @@ export function useEditContactRelation(
   // Labels
   const labels = app.getLabels(
     "contact",
-    "delete",
     "deleteConfirm",
+    "deleteItem",
     "description",
     "edit",
     "noChanges",
@@ -65,7 +65,7 @@ export function useEditContactRelation(
             })
           }
         >
-          {labels.delete}
+          {labels.deleteItem}
         </Button>
       ),
       callback: async (form) => {

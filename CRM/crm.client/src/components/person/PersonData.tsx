@@ -57,8 +57,8 @@ export function PersonData(props: PersonDataProps) {
     "addresses",
     "all",
     "assets",
-    "delete",
     "deleteConfirm",
+    "deleteItem",
     "edit",
     "editAvatar",
     "familyName",
@@ -293,7 +293,7 @@ export function PersonData(props: PersonDataProps) {
                       );
                     }}
                   >
-                    {labels.delete}
+                    {labels.deleteItem}
                   </Button>
                 )}
                 {editable && (

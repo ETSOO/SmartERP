@@ -106,7 +106,7 @@ export function AssetViewUI(props: AssetViewUIProps) {
                   const result = await app.assetApi.readSensitiveData(item.id);
                   if (result == null) return;
 
-                  const data = app.decrypt(result, item.id.toString());
+                  const data = await app.decrypt(result, item.id.toString());
                   if (data == null) {
                     app.warning("Failed to decrypt the app secret.");
                     return;
@@ -114,8 +114,8 @@ export function AssetViewUI(props: AssetViewUIProps) {
 
                   app.notifier
                     .alert(
-                      <Typography>
-                        {labels.sensitiveData}: {data}
+                      <Typography sx={{ whiteSpace: "pre-line" }}>
+                        {data}
                       </Typography>,
                       undefined,
                       NotificationMessageType.Success

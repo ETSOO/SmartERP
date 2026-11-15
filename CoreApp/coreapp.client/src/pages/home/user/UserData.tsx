@@ -22,7 +22,7 @@ export default function UserData() {
     "addEmail",
     "addMobile",
     "confirmAction",
-    "delete",
+    "deleteItem",
     "edit"
   );
 
@@ -105,10 +105,10 @@ export default function UserData() {
                     <IconButton
                       edge="end"
                       size="small"
-                      title={labels.delete}
+                      title={labels.deleteItem}
                       onClick={() => {
                         app.notifier.confirm(
-                          labels.confirmAction.format(labels.delete),
+                          labels.confirmAction.format(labels.deleteItem),
                           item.value,
                           async (confirmed) => {
                             if (!confirmed) return;

@@ -462,7 +462,8 @@ namespace Platform.Server.Services
                 rq.Host = uriReferer.AbsoluteUri;
             }
 
-            var baseUrl = $"{rq.Host}?loginid={HttpUtility.UrlEncode(rq.Id)}";
+            var separator = rq.Host.Contains('?') ? "&" : "?";
+            var baseUrl = $"{rq.Host}{separator}loginid={HttpUtility.UrlEncode(rq.Id)}";
 
             var options = new BarcodeOptions
             {

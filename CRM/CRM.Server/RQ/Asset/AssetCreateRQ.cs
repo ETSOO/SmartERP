@@ -95,7 +95,7 @@ namespace CRM.Server.RQ.Asset
                 return ApplicationErrors.NoValidData.AsResult(nameof(Description));
             }
 
-            if (SensitiveData != null && SensitiveData.Length is not (>= 1 and <= 128))
+            if (SensitiveData != null && SensitiveData.Length is not (>= 1 and <= 512))
             {
                 return ApplicationErrors.NoValidData.AsResult(nameof(SensitiveData));
             }

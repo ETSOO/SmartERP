@@ -318,8 +318,10 @@ export default function App() {
   React.useEffect(() => {
     if (!visible || !id) return;
 
+    const url = app.addCultureParam(location.origin + location.pathname);
+
     app.publicApi
-      .mobileQRCode(id, location.origin + location.pathname, {
+      .mobileQRCode(id, url, {
         showLoading: false,
         onError: () => false
       })

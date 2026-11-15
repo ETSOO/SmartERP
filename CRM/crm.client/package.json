@@ -10,13 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@etsoo/appscript": "^1.6.80",
-    "@etsoo/materialui": "^1.6.93",
-    "@etsoo/react": "^1.9.7",
+    "@etsoo/appscript": "^1.6.83",
+    "@etsoo/materialui": "^1.6.95",
+    "@etsoo/react": "^1.9.10",
     "@etsoo/reacteditor": "^1.0.48",
     "@etsoo/shared": "^1.2.92",
-    "@etsoo/smarterp-core": "^1.1.93",
-    "@etsoo/smarterp-crm": "^1.0.13",
+    "@etsoo/smarterp-core": "^1.1.95",
+    "@etsoo/smarterp-crm": "^1.0.15",
     "@etsoo/toolpad": "^1.0.60",
     "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.5.0",
@@ -41,7 +41,7 @@
     "vite": "^8.3.8"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.68.2"
+    "@rollup/rollup-linux-x64-gnu": "^4.68.3"
   },
   "allowScripts": {
     "core-js-pure": true,
