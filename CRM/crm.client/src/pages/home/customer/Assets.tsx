@@ -173,6 +173,7 @@ export default function Assets() {
           }
         }
       ]}
+      rowHeight={180}
       itemRenderer={(props) =>
         MobileListItemRenderer(props, (data) => {
           return [

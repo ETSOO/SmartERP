@@ -279,4 +279,10 @@
   <data name="Report" xml:space="preserve">
     <value>View Report</value>
   </data>
+  <data name="AdminMergeAccounts" xml:space="preserve">
+    <value>Admin Merge Accounts</value>
+  </data>
+  <data name="AdminMergeAccountsDetail" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; has been merged into user &lt;b&gt;{1}&lt;/b&gt;:&lt;blockquote&gt;{2}&lt;/blockquote&gt;</value>
+  </data>
 </root>

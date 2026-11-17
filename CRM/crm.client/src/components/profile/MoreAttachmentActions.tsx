@@ -12,7 +12,7 @@ export function MoreAttachmentActions({
   file,
   callback
 }: AttachmentActionsProps) {
-  const labels = app.getLabels("actions", "delete", "edit", "fileName");
+  const labels = app.getLabels("actions", "deleteItem", "edit", "fileName");
   return (
     <MoreFab
       color="inherit"
@@ -73,7 +73,7 @@ export function MoreAttachmentActions({
         },
         { label: "-" },
         {
-          label: labels.delete,
+          label: labels.deleteItem,
           action: async () => {
             const result = await app.profileApi.deleteAttachment(file.id);
             if (result == null) return;

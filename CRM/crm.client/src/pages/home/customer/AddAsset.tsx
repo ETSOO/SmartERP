@@ -272,10 +272,12 @@ export default function AddAsset() {
         <InputField
           fullWidth
           name="sensitiveData"
-          slotProps={{ htmlInput: { maxLength: 128 } }}
+          slotProps={{ htmlInput: { maxLength: 512 } }}
           type="password"
           label={labels.sensitiveData}
           inputRef={refs.sensitiveData}
+          multiline
+          rows={2}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 12 }}>

@@ -2,6 +2,7 @@ import {
   HBox,
   InputField,
   LinkEx,
+  MUGlobal,
   VBox,
   ViewContainer,
   ViewPageFieldType
@@ -36,8 +37,8 @@ export function StockViewUI({
   // Labels
   const labels = app.getLabels(
     "confirmAction",
-    "delete",
     "deleteConfirm1",
+    "deleteItem",
     "description",
     "edit",
     "noChanges",
@@ -269,8 +270,11 @@ export function StockViewUI({
         {
           data: (item) => (
             <HBox
-              spacing={1}
-              sx={{ justifyContent: "center", flexWrap: "wrap" }}
+              sx={{
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: MUGlobal.pagePaddings
+              }}
             >
               {item.isDeletable && (
                 <Button
@@ -278,7 +282,7 @@ export function StockViewUI({
                   variant="outlined"
                   onClick={doDelete}
                 >
-                  {labels.delete}
+                  {labels.deleteItem}
                 </Button>
               )}
               {hasManage && data.receiptTime == null && (

@@ -1,5 +1,5 @@
 import { VBox } from "@etsoo/materialui";
-import React, { use } from "react";
+import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { app } from "../app/SmartApp";
 import { SharedLayout } from "./SharedLayout";
@@ -43,10 +43,7 @@ export default function Invite() {
   const buttonLabel = isLoading ? labels.loading : labels.ok;
 
   // Email
-  const email =
-    id && data?.email
-      ? use(app.decrypt(data.email, id.substring(0, 4)))
-      : undefined;
+  const [email, setEmail] = React.useState<string>();
 
   // Button click handler
   const buttonHandler =
@@ -91,8 +88,12 @@ export default function Invite() {
         return;
       }
 
-      // Update data
-      setData(result);
+      app.decrypt(result.email, id.substring(0, 4)).then((email) => {
+        if (email) setEmail(email);
+
+        // Update data
+        setData(result);
+      });
 
       // Validate
       if (result.isExpired) {

@@ -117,7 +117,7 @@ function BomUI({
   // Labels
   const labels = app.getLabels(
     "add",
-    "delete",
+    "deleteItem",
     "edit",
     "noRows",
     "product",
@@ -215,7 +215,7 @@ function BomUI({
       <Toolbar>
         <ToolbarButton
           disabled={selectedId == null}
-          title={labels.delete}
+          title={labels.deleteItem}
           onClick={() => {
             if (selectedId == null) return;
             setRows((prev) => prev.filter((r) => r.productId !== selectedId));

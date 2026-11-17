@@ -125,5 +125,102 @@ namespace Admin.Server.Services
 
             return ActionResult.Succeed(userId);
         }
+
+        /// <summary>
+        /// Merge accounts
+        /// 合并账户
+        /// </summary>
+        /// <param name="rq">Request data</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result</returns>
+        public async Task<IActionResult> MergeAccountsAsync(MergeAccountsRQ rq, CancellationToken cancellationToken = default)
+        {
+            // Validate user
+            var userId = User.IdInt;
+            var id = rq.Id;
+            var mergedUserId = rq.MergedUserId;
+
+            var users = await _db.CoreUsers
+                .AsNoTracking()
+                .Where(u => u.Id != userId && (u.Id == id || u.Id == mergedUserId))
+                .Select(u => new { u.Id, u.Name })
+                .ToArrayAsync(cancellationToken);
+
+            if (users.Length != 2)
+            {
+                return ApplicationErrors.NoValidData.AsResult(nameof(rq.Id));
+            }
+
+            // Only one person
+            // Merge persons before merging accounts
+            var persons = await _db.Persons.AsNoTracking()
+                .Where(p => p.CoreUserId == id || p.CoreUserId == mergedUserId)
+                .Select(p => p.Id)
+                .ToArrayAsync(cancellationToken);
+
+            if (persons.Length > 1)
+            {
+                return ApplicationErrors.TooManyItems.AsResult();
+            }
+
+            var sourceUser = users.First(u => u.Id == id);
+            var mergedUser = users.First(u => u.Id == mergedUserId);
+
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // Remove auth code
+                await _db.CoreAuthCodes.AsNoTracking()
+                    .Where(a => a.CoreUserId == mergedUserId)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                // Update user
+                await _db.CoreUserDevices.AsNoTracking()
+                    .Where(d => d.CoreUserId == mergedUserId)
+                    .ExecuteUpdateAsync(d => d.SetProperty(t => t.CoreUserId, id), cancellationToken);
+
+                // Update identities
+                await _db.CoreUserIdentifiers.AsNoTracking()
+                    .Where(i => i.CoreUserId == mergedUserId)
+                    .ExecuteUpdateAsync(i => i.SetProperty(t => t.CoreUserId, id), cancellationToken);
+
+                // Update person
+                await _db.Persons.AsNoTracking()
+                    .Where(p => p.CoreUserId == mergedUserId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(t => t.CoreUserId, id), cancellationToken);
+
+                // Remove the user
+                await _db.CoreUsers.AsNoTracking()
+                    .Where(u => u.Id == mergedUserId)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                // Commit
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Rollback
+                await transaction.RollbackAsync(cancellationToken);
+
+                // Log
+                return LogException(ex);
+            }
+
+            // Push message
+            var title = $"{mergedUser.Name} -> {sourceUser.Name}";
+            var message = new AdminMergeAccountsMessage
+            {
+                Data = User.CreateMessageData(App.AppId, id, title),
+                SourceUserId = id,
+                SourceUserName = sourceUser.Name,
+                MergedUserId = mergedUserId,
+                MergedUserName = mergedUser.Name,
+                Description = rq.Description
+            };
+            await _queueService.PushAsync(message, PlatformSharedContext.Default.AdminMergeAccountsMessage, cancellationToken);
+
+            return ActionResult.Success;
+        }
     }
 }

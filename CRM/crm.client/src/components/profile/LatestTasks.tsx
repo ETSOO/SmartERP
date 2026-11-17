@@ -111,7 +111,7 @@ export function LatestTasks() {
   // Layout
   return (
     <Stack spacing={1}>
-      <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
+      <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 1 }}>
         <Button
           startIcon={<TodayIcon />}
           disabled={today.valueOf() === date.valueOf()}
@@ -119,20 +119,27 @@ export function LatestTasks() {
         >
           {labels.today}
         </Button>
-        <IconButton title={labels.previousWeek} onClick={() => setWeek(-1)}>
-          <NavigateBeforeIcon />
-        </IconButton>
-        <TextField
-          type="date"
-          size="small"
-          value={DateUtils.formatForInput(date)}
-          onChange={(e) =>
-            setDate(removeHours(DateUtils.parse(e.target.value) ?? today))
-          }
-        />
-        <IconButton title={labels.nextWeek} onClick={() => setWeek(1)}>
-          <NavigateNextIcon />
-        </IconButton>
+        <Stack direction="row">
+          <IconButton
+            size="small"
+            title={labels.previousWeek}
+            onClick={() => setWeek(-1)}
+          >
+            <NavigateBeforeIcon />
+          </IconButton>
+          <TextField
+            type="date"
+            size="small"
+            value={DateUtils.formatForInput(date)}
+            onChange={(e) =>
+              setDate(removeHours(DateUtils.parse(e.target.value) ?? today))
+            }
+            sx={{ width: 148 }}
+          />
+          <IconButton title={labels.nextWeek} onClick={() => setWeek(1)}>
+            <NavigateNextIcon />
+          </IconButton>
+        </Stack>
         <UserTiplist search onValueChange={(value) => setUserId(value?.id)} />
         <ButtonLink
           variant="outlined"

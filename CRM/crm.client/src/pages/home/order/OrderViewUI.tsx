@@ -5,6 +5,7 @@ import {
   IconButtonLink,
   LinkEx,
   MenuButton,
+  MUGlobal,
   ViewContainer
 } from "@etsoo/materialui";
 import { GridDataType } from "@etsoo/react";
@@ -188,8 +189,11 @@ export function OrderViewUI(props: OrderViewUIProps) {
         {
           data: (item) => (
             <HBox
-              spacing={1}
-              sx={{ justifyContent: "center", flexWrap: "wrap", gap: 1 }}
+              sx={{
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: MUGlobal.pagePaddings
+              }}
             >
               {app.owns(Permissions.Order.Manage) &&
                 item.status < EntityStatus.Inactivated && (

@@ -141,7 +141,11 @@ class SmartApp extends CommonApp<ISmartERPUser, ISmartSettings> {
     }
   }
 
-  private addCultureParam(url: string) {
+  /**
+   * Add culture parameter to URL
+   * @param url URL
+   */
+  addCultureParam(url: string) {
     return url.addUrlParam(DomUtils.CultureField, this.culture);
   }
 

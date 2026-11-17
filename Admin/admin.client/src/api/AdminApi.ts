@@ -1,5 +1,6 @@
 import { BaseApi, ResultPayload } from "@etsoo/appscript";
 import { AppRenewRQ } from "./rq/admin/AppRenewRQ";
+import { MergeAccountsRQ } from "./rq/admin/MergeAccountsRQ";
 
 /**
  * Admin API
@@ -24,5 +25,16 @@ export class AdminApi extends BaseApi {
    */
   clearUserFrozen(userId: number, payload?: ResultPayload) {
     return this.api.post(`Admin/ClearUserFrozen/${userId}`, undefined, payload);
+  }
+
+  /**
+   * Merge accounts
+   * 合并账户
+   * @param rq Request data
+   * @param payload Payload
+   * @returns Result
+   */
+  mergeAccounts(rq: MergeAccountsRQ, payload?: ResultPayload) {
+    return this.api.post("Admin/MergeAccounts", rq, payload);
   }
 }

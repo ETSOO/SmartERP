@@ -5,6 +5,7 @@ import {
   IconButtonLink,
   ImagePreviewButton,
   LinkEx,
+  MUGlobal,
   VBox,
   ViewContainer,
   ViewPageFieldType
@@ -57,8 +58,8 @@ export function PersonData(props: PersonDataProps) {
     "addresses",
     "all",
     "assets",
-    "delete",
     "deleteConfirm",
+    "deleteItem",
     "edit",
     "editAvatar",
     "familyName",
@@ -271,8 +272,11 @@ export function PersonData(props: PersonDataProps) {
           data: (item) =>
             (editable || deletable) && (
               <HBox
-                spacing={1}
-                sx={{ justifyContent: "center", flexWrap: "wrap", gap: 1 }}
+                sx={{
+                  justifyContent: "center",
+                  flexWrap: "wrap",
+                  gap: MUGlobal.pagePaddings
+                }}
               >
                 {deletable && (
                   <Button
@@ -293,7 +297,7 @@ export function PersonData(props: PersonDataProps) {
                       );
                     }}
                   >
-                    {labels.delete}
+                    {labels.deleteItem}
                   </Button>
                 )}
                 {editable && (

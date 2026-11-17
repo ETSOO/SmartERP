@@ -13,7 +13,7 @@ export function MoreLinkActions({
   callback,
   onEdit
 }: MoreLinkActionsProps) {
-  const labels = app.getLabels("actions", "delete", "edit");
+  const labels = app.getLabels("actions", "deleteItem", "edit");
   return (
     <MoreFab
       color="inherit"
@@ -35,7 +35,7 @@ export function MoreLinkActions({
         },
         { label: "-" },
         {
-          label: labels.delete,
+          label: labels.deleteItem,
           action: async () => {
             const result = await app.profileApi.deleteLink(link.id);
             if (result == null) return;

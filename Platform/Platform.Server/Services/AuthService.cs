@@ -1301,6 +1301,9 @@ namespace Platform.Server.Services
                 return (result, null);
             }
 
+            // Lowercase
+            id = id.ToLower();
+
             // Login with id check
             var data = await _db.CoreUserIdentifiers
                 .AsNoTracking()

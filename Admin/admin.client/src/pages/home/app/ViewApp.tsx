@@ -64,7 +64,7 @@ export default function ViewApp() {
           data: (item) => {
             const urls = (item.localUrls ?? item.urls).map((u) => u.web);
             return urls.length < 1 ? undefined : (
-              <Stack spacing={1} direction="row">
+              <Stack direction="row" sx={{ gap: 1, flexWrap: "wrap" }}>
                 {urls.map((a) => (
                   <a href={a} key={a} target="_blank" rel="noreferrer">
                     {a}

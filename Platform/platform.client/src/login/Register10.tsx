@@ -208,11 +208,11 @@ export default function Register20() {
           </CountdownButton>
         </HBox>
       )}
-      <HBox sx={{ justifyContent: "center", width: "100%", paddingTop: 2 }}>
+      {/*       <HBox sx={{ justifyContent: "center", width: "100%", paddingTop: 2 }}>
         <Button onClick={() => navigate("./../register20")}>
           {labels.useMobile}
         </Button>
-      </HBox>
+      </HBox> */}
     </SharedLayout>
   );
 }

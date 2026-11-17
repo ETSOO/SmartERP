@@ -10,8 +10,11 @@
   "customize": "自定義",
   "deviceList": "設備",
   "frozenTime": "凍結時間",
+  "mergeAccounts": "合併帳戶",
   "orders": "訂單數",
   "persons": "人員數",
+  "removedUser": "移除的用戶",
+  "retainedUser": "保留的用戶",
   "revoke": "撤銷",
   "smarterpAdmin": "司友雲ERP運維中心"
 }
