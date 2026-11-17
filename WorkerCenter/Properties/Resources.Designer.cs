@@ -133,6 +133,24 @@ namespace WorkerCenter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Admin Merge Accounts.
+        /// </summary>
+        internal static string AdminMergeAccounts {
+            get {
+                return ResourceManager.GetString("AdminMergeAccounts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; has been merged into user &lt;b&gt;{1}&lt;/b&gt;:&lt;blockquote&gt;{2}&lt;/blockquote&gt;.
+        /// </summary>
+        internal static string AdminMergeAccountsDetail {
+            get {
+                return ResourceManager.GetString("AdminMergeAccountsDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admin Renew Application.
         /// </summary>
         internal static string AdminRenewApp {

@@ -33,7 +33,8 @@ export function OrgTiplist(props: OrgTiplistProps) {
     fullWidth = true,
     label = app.get("org")!,
     maxItems = 10,
-    getOptionLabel = (data) => data.name + "(" + data.pin + ")",
+    getOptionLabel = (data) =>
+      data.pin ? data.name + "(" + data.pin + ")" : data.name,
     name = "orgId",
     search = true,
     ...rest

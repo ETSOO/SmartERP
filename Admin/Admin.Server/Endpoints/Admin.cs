@@ -1,5 +1,7 @@
 ﻿using Admin.Server.RQ.Admin;
 using Admin.Server.Services;
+using com.etsoo.CoreFramework.Application;
+using com.etsoo.CoreFramework.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Admin.Server.Endpoints
@@ -19,6 +21,9 @@ namespace Admin.Server.Endpoints
 
             g.MapPost("ClearUserFrozen/{userId:int}", (IAdminService service, [FromRoute] int userId, CancellationToken cancellationToken) => service.ClearUserFrozenAsync(userId, cancellationToken))
                 .WithDescription("Clear User Frozen / 清除用户冻结").WithTags("Operation");
+
+            g.MapPost("MergeAccounts", [Roles(Constants.AdminRoles)] (IAdminService service, MergeAccountsRQ rq, CancellationToken cancellationToken) => service.MergeAccountsAsync(rq, cancellationToken))
+                .WithDescription("Merge Accounts / 合并账户").WithTags("Operation");
 
             return builder;
         }

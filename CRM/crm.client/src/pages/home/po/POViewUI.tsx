@@ -5,6 +5,7 @@ import {
   IconButtonLink,
   LinkEx,
   MenuButton,
+  MUGlobal,
   ViewContainer
 } from "@etsoo/materialui";
 import { GridDataType } from "@etsoo/react";
@@ -186,8 +187,11 @@ export function POViewUI(props: POViewUIProps) {
         {
           data: (item) => (
             <HBox
-              spacing={1}
-              sx={{ justifyContent: "center", flexWrap: "wrap", gap: 1 }}
+              sx={{
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: MUGlobal.pagePaddings
+              }}
             >
               {app.owns(Permissions.PO.Manage) &&
                 item.status < EntityStatus.Inactivated && (

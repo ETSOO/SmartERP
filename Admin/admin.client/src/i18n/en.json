@@ -10,8 +10,11 @@
   "customize": "Customize",
   "deviceList": "Devices",
   "frozenTime": "Frozen time",
+  "mergeAccounts": "Merge accounts",
   "orders": "Orders",
   "persons": "Persons",
+  "removedUser": "Removed user",
+  "retainedUser": "Retained user",
   "revoke": "Revoke",
   "smarterpAdmin": "SmartERP Admin"
 }

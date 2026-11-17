@@ -7,6 +7,7 @@ import {
   ViewPage
 } from "@etsoo/materialui";
 import HistoryIcon from "@mui/icons-material/History";
+import MergeIcon from "@mui/icons-material/Merge";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import { app } from "../../../app/MyApp";
 import { usePageDataEmpty } from "@etsoo/smarterp-core";
@@ -16,6 +17,7 @@ import { DateUtils } from "@etsoo/shared";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
+import { MergeAccounts } from "./MergeAccountsUI";
 
 export default function ViewUser() {
   // Route
@@ -31,7 +33,8 @@ export default function ViewUser() {
     "avatar",
     "auditHistory",
     "clearUserFrozen",
-    "confirmAction"
+    "confirmAction",
+    "mergeAccounts"
   );
 
   // Page data hook
@@ -136,6 +139,15 @@ export default function ViewUser() {
           >
             {labels.auditHistory}
           </ButtonLink>
+          {app.isAdminUser() && (
+            <Button
+              variant="outlined"
+              startIcon={<MergeIcon />}
+              onClick={(e) => MergeAccounts(data, e.currentTarget.textContent)}
+            >
+              {labels.mergeAccounts}
+            </Button>
+          )}
           {data.frozenTime &&
             DateUtils.parse(data.frozenTime)! >= new Date() && (
               <Button

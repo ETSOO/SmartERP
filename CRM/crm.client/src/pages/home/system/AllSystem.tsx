@@ -73,7 +73,7 @@ export default function AllSystem() {
       ) : (
         <VBox spacing={2}>
           <Paper sx={{ padding: 2 }}>
-            <HBox sx={{ flexWrap: "wrap", gap: "8px" }}>
+            <HBox sx={{ flexWrap: "wrap", gap: 2 }}>
               {orgPersonId && (
                 <ButtonLink
                   startIcon={<ArticleIcon />}

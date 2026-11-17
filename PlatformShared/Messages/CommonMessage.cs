@@ -83,6 +83,7 @@ namespace PlatformShared.Messages
     [JsonDerivedType(typeof(AddUserIdentifierMessage))]
     [JsonDerivedType(typeof(AdjustReportToMessage))]
     [JsonDerivedType(typeof(AdminClearUserFrozenMessage))]
+    [JsonDerivedType(typeof(AdminMergeAccountsMessage))]
     [JsonDerivedType(typeof(AdminSupportMessage))]
     [JsonDerivedType(typeof(AdminRenewAppMessage))]
     [JsonDerivedType(typeof(BuyAppMessage))]

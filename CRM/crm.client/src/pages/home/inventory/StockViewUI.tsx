@@ -2,6 +2,7 @@ import {
   HBox,
   InputField,
   LinkEx,
+  MUGlobal,
   VBox,
   ViewContainer,
   ViewPageFieldType
@@ -269,8 +270,11 @@ export function StockViewUI({
         {
           data: (item) => (
             <HBox
-              spacing={1}
-              sx={{ justifyContent: "center", flexWrap: "wrap" }}
+              sx={{
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: MUGlobal.pagePaddings
+              }}
             >
               {item.isDeletable && (
                 <Button

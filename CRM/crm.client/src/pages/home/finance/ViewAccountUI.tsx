@@ -71,10 +71,7 @@ export function ViewAccountUI({
         },
         {
           data: (item) => (
-            <HBox
-              spacing={1}
-              sx={{ justifyContent: "center", flexWrap: "wrap", gap: 1 }}
-            >
+            <HBox sx={{ justifyContent: "center", flexWrap: "wrap", gap: 2 }}>
               {(data.kind === FinanceAccountKind.Super ||
                 data.kind === FinanceAccountKind.Transfer) && (
                 <Button

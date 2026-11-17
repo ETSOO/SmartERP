@@ -7,5 +7,6 @@ namespace Admin.Server.Services
     {
         Task<IActionResult> AppRenewAsync(AppRenewRQ rq, CancellationToken cancellationToken = default);
         Task<IActionResult> ClearUserFrozenAsync(int userId, CancellationToken cancellationToken = default);
+        Task<IActionResult> MergeAccountsAsync(MergeAccountsRQ rq, CancellationToken cancellationToken = default);
     }
 }

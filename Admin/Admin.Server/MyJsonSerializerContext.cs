@@ -16,6 +16,7 @@ namespace Admin.Server
 
     // Admin
     [JsonSerializable(typeof(RQ.Admin.AppRenewRQ))]
+    [JsonSerializable(typeof(RQ.Admin.MergeAccountsRQ))]
 
     // Query
     [JsonSerializable(typeof(Dto.Query.ReadUserDto))]
